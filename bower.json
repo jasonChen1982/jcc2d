@@ -1,7 +1,7 @@
 {
-  "name": "jc",
+  "name": "jcc2d",
   "description": "一个轻量级的canvas渲染引擎",
-  "main": "src/jc2d.js",
+  "main": "src/jcc2d.js",
   "authors": [
     "jasonChen"
   ],
