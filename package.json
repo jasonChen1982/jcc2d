@@ -14,5 +14,10 @@
     "url": "git@git.ucweb.local:Star/JC-canvas.git"
   },
   "author": "jasonChen",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-uglify": "^1.5.3"
+  }
 }
