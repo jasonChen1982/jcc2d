@@ -24,7 +24,7 @@
 			this.sprite[img].src = opts[img];
 		}
 	};
-	ImagesLoad.prototype.imagesLoaded = noop;
+	ImagesLoad.prototype.imagesLoaded = null;
 	ImagesLoad.prototype.getResult = function (id){
 		return this.sprite[id];
 	};
