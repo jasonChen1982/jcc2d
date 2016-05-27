@@ -285,11 +285,12 @@
         if(l > 1){
             for (var i=0; i<l; i++) { this.addChilds(arguments[i]); }
             return arguments[l-1];
+        }else{
+            if(cd.parent){ cd.parent.removeChilds(cd); }
+            cd.parent = this;
+            this.cds.push(cd);
+            return cd;
         }
-        if(cd.parent){ cd.parent.removeChilds(cd); }
-        cd.parent = this;
-        this.cds.push(cd);
-        return cd;
     };
     Container.prototype.removeChilds = function (){
         var l = arguments.length;
