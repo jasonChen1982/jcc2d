@@ -42,12 +42,17 @@ images.imagesLoaded = function(){
         width: 220,
         height: 220
     });
+    pic2 = new JC.Sprite({
+        image: images.getResult('pic'),
+        width: 220,
+        height: 220
+    });
     pic.moveTween({
         attr: {x: 100,y: 200},
         infinity: true,
         alternate: true
     });
-    DOC.addChilds(pic);
+    DOC.addChilds(pic,pic2);
     stage.addChilds(DOC);
 
 
