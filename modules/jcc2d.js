@@ -356,18 +356,24 @@
     JC.Sprite = Sprite;
     Sprite.prototype = Object.create( JC.Container.prototype );
     Sprite.prototype.constructor = JC.Sprite;
-    Sprite.prototype.getFrameInfor = function(){
+    Sprite.prototype.getFramePos = function(){
         var obj = {
                 x: this.sW,
                 y: this.sH
             };
         if(this._cF>0){
-            obj.x = this.sW + this._cF*this.width;
+            var row = this._imageW/this.width >> 0;
+            var lintRow = this.sW/this.width >> 0;
+            var lintCol = this.sH/this.height >> 0;
+            var mCol = lintCol+(lintRow+this._cF)/row >> 0;
+            var mRow = (lintRow+this._cF)%row;
+            obj.x = mRow*this.width;
+            obj.y = mCol*this.height;
         }
         return obj;
     };
     Sprite.prototype.renderMe = function (ctx){
-        var obj = this.getFrameInfor();
+        var obj = this.getFramePos();
         ctx.drawImage(this.image, obj.x, obj.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
         this.upFS();
     };
@@ -380,7 +386,7 @@
             this.preTime = time;
         }
         if(this._cF>=this.count){
-            if(this.repeatF<0){
+            if(this.repeatF<=0&&!this.loop){
                 this.canFrames = false;
                 this.onEnd();
             }

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+
+<script type="text/javascript" src="../../src/jcc2d.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+
+var w = window.innerWidth,
+    h = window.innerHeight,
+    runMan,
+    jumpMan,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+    DOC.x = w/2;
+    DOC.y = h/2;
+
+
+var images = new JC.ImagesLoad({
+    frames: './images/frames.png'
+});
+
+images.imagesLoaded = function(){
+    resize();
+    runMan = new JC.Sprite({
+        image: images.getResult('frames'),
+        width: 165,
+        height: 292,
+        count: 26
+    });
+    runMan.interval = 1000/60; // 帧率 60FPS
+    runMan.goFrames({ // you can config repeatF (repeat some times) or loop (play infinite times)
+        // repeatF: 1,
+        loop: true
+    });
+    runMan.x = -165 >> 1;
+    jumpMan = new JC.Sprite({
+        image: images.getResult('frames'),
+        width: 165,
+        height: 292,
+        count: 38,
+        sH: 292*2,
+        sW: 165*2
+    });
+    jumpMan.goFrames({
+        loop: true
+    });
+    jumpMan.x = 165 >> 1;
+    DOC.addChilds(runMan,jumpMan);
+    stage.addChilds(DOC);
+
+
+    render();
+};
+
+function render(){
+    RAF(render);
+
+    stage.render();
+}
+function resize(){
+	w = window.innerWidth;
+	h = window.innerHeight;
+	stage.resize(w,h);
+}
+</script>
+</body>
+</html>
