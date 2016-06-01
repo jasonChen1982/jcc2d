@@ -50,11 +50,12 @@ var stats = new Stats();
             ctx.fillRect( 100-i, 100-i, i, i );
             ctx.fill();
         }
-        document.title = Math.random();
     },{
         cache: true,
         session: {width:200,height:200}
     });
+    cacheMap.x = -100;
+    cacheMap.y = -200;
     cacheMap.moveTween({
         attr: {x: 100,y: 200},
         infinity: true,

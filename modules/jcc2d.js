@@ -474,7 +474,15 @@
         this.autoClear = true;
         this.width = this.canvas.width;
         this.height = this.canvas.height;
-
+        
+        if("imageSmoothingEnabled" in this.ctx)
+            this.ctx.imageSmoothingEnabled = true;
+        else if("webkitImageSmoothingEnabled" in this.ctx)
+            this.ctx.webkitImageSmoothingEnabled = true;
+        else if("mozImageSmoothingEnabled" in this.ctx)
+            this.ctx.mozImageSmoothingEnabled = true;
+        else if("oImageSmoothingEnabled" in this.ctx)
+            this.ctx.oImageSmoothingEnabled = true;
 
     }
     JC.Stage = Stage;
@@ -485,12 +493,8 @@
         this.height = this.canvas.height = h;
     };
     Stage.prototype.render = function (){
-        console.time('transform');
         this.updateChilds();
-        console.timeEnd('transform');
-        console.time('render');
         this.renderChilds();
-        console.timeEnd('render');
     };
     Stage.prototype.renderChilds = function (){
     	this.ctx.setTransform(1,0,0,1,0,0);
