@@ -427,12 +427,15 @@
     			this.width = this.cacheCanvas.width = this.session.width;
     			this.height = this.cacheCanvas.height = this.session.height;
     			this._ctx = this.cacheCanvas.getContext("2d");
-    			this._ctx.clearRect(0,0,this.width,this.height);
+                this._ctx.clearRect(0,0,this.width,this.height);
+                this._ctx.save();
+                this._ctx.setTransform(1,0,0,1,this.session.center.x,this.session.center.y);
 	        	this.draw(this._ctx);
+                this._ctx.restore();
 	        	this.cached = true;
 	        	this.cache = false;
     		}
-    		this.cacheCanvas&&ctx.drawImage(this.cacheCanvas, 0, 0, this.width, this.height, 0, 0, this.width, this.height);
+    		this.cacheCanvas&&ctx.drawImage(this.cacheCanvas, 0, 0, this.width, this.height, -this.session.center.x, -this.session.center.x, this.width, this.height);
     	}else{
 	        this.draw(ctx);
     	}
@@ -442,7 +445,7 @@
         opts = opts||{};
 		this.cache = opts.cache||false;
 		this.cached = false;
-		this.session = opts.session||{width:100,height:100};
+		this.session = opts.session||{center: {x: 0,y: 0},width:100,height:100};
 		this.draw = fn||noop;
 	};
 
@@ -453,14 +456,35 @@
 		this.text = text;
 		this.font = font;
 		this.color = color;
+
+        this.textAlign = "center"; // start left center end right
+        this.textBaseline = "middle"; // top bottom middle alphabetic hanging
+
+
+        this.outline = 0;
+        this.lineWidth = 1;
+
+        this.US = false; // use stroke
+        this.UF = true; // use fill
+
+        // ctx.measureText(str) 返回指定文本的宽度
 	}
 	JC.Text = Text;
 	Text.prototype = Object.create( JC.Container.prototype );
 	Text.prototype.constructor = JC.Text;
 	Text.prototype.renderMe = function(ctx){
-		ctx.fillStyle = this.color;
-		ctx.font=this.font;
-		ctx.fillText(this.text,0,0);
+        ctx.font = this.font;
+        ctx.textAlign = this.textAlign;
+        ctx.textBaseline = this.textBaseline;
+        if(this.UF){
+            ctx.fillStyle = this.color;
+            ctx.fillText(this.text,0,0);
+        }
+        if(this.US){
+            ctx.lineWidth = this.lineWidth;
+            ctx.strokeStyle = this.color;
+            ctx.strokeText(this.text,0,0);
+        }
 	};
 
 
@@ -474,7 +498,7 @@
         this.autoClear = true;
         this.width = this.canvas.width;
         this.height = this.canvas.height;
-        
+
         if("imageSmoothingEnabled" in this.ctx)
             this.ctx.imageSmoothingEnabled = true;
         else if("webkitImageSmoothingEnabled" in this.ctx)

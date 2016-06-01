@@ -7,7 +7,7 @@
 	<title>JC_demo</title>
 	<style type="text/css">
     * {padding:0;margin:0;}
-    body {overflow: hidden;background-color: #000;}
+    body {overflow: hidden;}
     </style>
 </head>
 <body>
@@ -25,14 +25,13 @@ window.onresize = function(){
 
 var w = window.innerWidth,
     h = window.innerHeight,
-    cacheMap,
-    cacheMap2,
-    COLOURS = [ '#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423' ],
+    text,
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container();
-    resize();
     DOC.x = w/2;
     DOC.y = h/2;
+
+
 
 
 var stats = new Stats();
@@ -41,55 +40,20 @@ var stats = new Stats();
     document.body.appendChild(stats.domElement);
 
 
+    resize();
+    text = new JC.Text('JC jcc2d canvas renderer','bold 36px Arial','#f00');
 
-    cacheMap = new JC.Graphics();  // 创建形状绘制对象
-    cacheMap2 = new JC.Graphics();  // 创建形状绘制对象
-
-    cacheMap.drawCall(function(ctx){
-        for(var i = 50;i>0;i--){
-            ctx.strokeStyle = COLOURS[i%COLOURS.length];
-            ctx.beginPath();
-            ctx.arc( 0, 0, i, 0, Math.PI*2 );
-            ctx.stroke();
-        }
-    },{
-        cache: true,
-        session: {center: {x: 50,y: 50},width:100,height:100}
-    });
-    cacheMap.x = -100;
-    cacheMap.y = -200;
-    cacheMap.moveTween({
-        attr: {x: 100,y: 200},
-        infinity: true,
-        alternate: true
-    });
-
-    cacheMap2.drawCall(function(ctx){
-        for(var i = 50;i>0;i--){
-            ctx.strokeStyle = COLOURS[i%COLOURS.length];
-            ctx.beginPath();
-            ctx.strokeRect( 50-i-50, 50-i-50, i*2, i*2 );
-            // ctx.arc( 0, 0, i, 0, Math.PI*2 );
-            ctx.stroke();
-        }
-    },{
-        cache: false,
-        session: {center: {x: 50,y: 50},width:100,height:100}
-    });
-    cacheMap2.y = -h>>1;
-
-    DOC.addChilds(cacheMap,cacheMap2);
+    text.textAlign = "center"; // start left center end right
+    text.textBaseline = "middle"; // top bottom middle alphabetic hanging
+        
+    DOC.addChilds(text);
     stage.addChilds(DOC);
+
     render();
-
-
-
-
-
-
 
 function render(){
     RAF(render);
+
     stage.render();
 
     stats.update();
