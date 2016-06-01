@@ -342,8 +342,8 @@
         this._imageH = this.image.height;
         this.width = opts.width||this._imageW;
         this.height = opts.height||this._imageH;
-        this.regX = .5*this.width;
-        this.regY = .5*this.height;
+        this.regX = this.width>>1;
+        this.regY = this.height>>1;
         this._cF = 0;
         this.count = opts.count||1;
         this.sH = opts.sH||0;

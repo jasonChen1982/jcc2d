@@ -102,7 +102,7 @@ OBJ.prototype = Object.create( Animate.prototype );
 OBJ.prototype.constructor = OBJ;
 OBJ.prototype.draw = function(ctx){
     this.manager();
-    ctx.setTransform(this.scaleX,0,0,this.scaleY,this.x,this.y);
+    ctx.transform(this.scaleX,0,0,this.scaleY,this.x,this.y);
     ctx.drawImage(this.image, 0, 0, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
 };
 OBJ.prototype.setVal = function(vals){
