@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;background-color: #000;}
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+
+<script type="text/javascript" src="../../src/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+function range(min,max){
+    return (max-min)*Math.random()+min;
+}
+
+
+function Particle( x, y, radius ) {
+    this.init( x, y, radius );
+}
+
+Particle.prototype = {
+    init: function( x, y, radius ) {
+
+        this.alive = true;
+
+        this.radius = radius || 10;
+        this.wander = 0.15;
+        this.theta = Math.random()*TWO_PI;
+        this.drag = 0.92;
+        this.color = COLOURS[Math.random()*COLOURS.length >> 0];
+
+        this.x = x || 0.0;
+        this.y = y || 0.0;
+
+        this.vx = 0.0;
+        this.vy = 0.0;
+    },
+    move: function() {
+
+        this.x += this.vx;
+        this.y += this.vy;
+
+        this.vx *= this.drag;
+        this.vy *= this.drag;
+
+        this.theta += range( -0.5, 0.5 ) * this.wander;
+        this.vx += Math.sin( this.theta ) * 0.1;
+        this.vy += Math.cos( this.theta ) * 0.1;
+
+        this.radius *= 0.96;
+        this.alive = this.radius > 0.5;
+    },
+    draw: function( ctx ) {
+
+        ctx.beginPath();
+        ctx.arc( this.x, this.y, this.radius, 0, TWO_PI );
+        ctx.fillStyle = this.color;
+        ctx.fill();
+    }
+};
+function init() {
+
+    var i, now = Date.now(), interval = 30;
+
+    function loop(){
+        var pNow = Date.now(),
+            cur = pNow-now>interval;
+        if(cur){
+            spawn( range( -20, 20 ), range( -20, 20 ) );
+            now = pNow;
+        }
+        RAF(loop);
+    }
+    RAF(loop);
+}
+function spawn( x, y ) {
+    if ( particles.length >= MAX_PARTICLES )
+        pool.push( particles.shift() );
+
+    particle = pool.length ? pool.pop() : new Particle();
+    particle.init( x, y, range( 5, 24 ) );
+
+    particle.wander = range( 0.5, 2.0 );
+    particle.color = COLOURS[Math.random()*COLOURS.length >> 0];
+    particle.drag = range( 0.9, 0.99 );
+
+    theta = range(TWO_PI/8,TWO_PI*3/8);
+    force = range( 2, 8 );
+
+    particle.vx = Math.cos( theta ) * force;
+    particle.vy = -Math.sin( theta ) * force;
+
+    particles.push( particle );
+}
+function update() {
+    var i, particle;
+
+    for ( i = particles.length - 1; i >= 0; i-- ) {
+
+        particle = particles[i];
+
+        if ( particle.alive ) particle.move();
+        else pool.push( particles.splice( i, 1 )[0] );
+    }
+}
+
+var w = window.innerWidth,
+    h = window.innerHeight,
+    MAX_PARTICLES = 200,
+    TWO_PI = Math.PI*2,
+    particles = [],
+    pool = [],
+    theta,
+    force,
+    COLOURS = [ '#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423' ],
+    particle,
+    JCparticle,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+    resize();
+    DOC.x = w/2;
+    DOC.y = h-30;
+
+
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+
+    init();  // 创建粒子更新循环
+
+    JCparticle = new JC.Graphics();  // 创建形状绘制对象
+
+    JCparticle.drawCall(function(ctx){
+        update();
+        ctx.globalCompositeOperation  = 'lighter';
+        for ( var i = particles.length - 1; i >= 0; i-- ) {
+            particles[i].draw( ctx );
+        }
+    });
+
+    DOC.addChilds(JCparticle);
+    stage.addChilds(DOC);
+    render();
+
+
+
+
+
+
+
+function render(){
+    RAF(render);
+    stage.render();
+
+    
+    stats.update();
+}
+function resize(){
+	w = window.innerWidth;
+	h = window.innerHeight;
+	stage.resize(w,h);
+}
+</script>
+</body>
+</html>

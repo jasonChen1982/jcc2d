@@ -14,6 +14,7 @@
 <canvas id="demo_canvas" width="320" height="410"></canvas>
 
 <script type="text/javascript" src="../../src/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
 	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
@@ -29,6 +30,15 @@ var w = window.innerWidth,
     DOC = new JC.Container();
     DOC.x = w/2;
     DOC.y = h/2;
+
+
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
 
 
 var images = new JC.ImagesLoad({
@@ -52,7 +62,7 @@ images.imagesLoaded = function(){
         infinity: true,
         alternate: true
     });
-    DOC.addChilds(pic,pic2);
+    DOC.addChilds(pic2,pic);
     stage.addChilds(DOC);
 
 
@@ -63,6 +73,8 @@ function render(){
     RAF(render);
 
     stage.render();
+
+    stats.update();
 }
 function resize(){
 	w = window.innerWidth;

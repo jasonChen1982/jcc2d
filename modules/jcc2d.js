@@ -421,7 +421,7 @@
 	Graphics.prototype = Object.create( JC.Container.prototype );
 	Graphics.prototype.constructor = JC.Graphics;
     Graphics.prototype.renderMe = function (ctx){
-    	if(this.cached&&!!this.cacheCanvas){
+    	if(this.cached||this.cache){
     		if(this.cache){
     			this.cacheCanvas = this.cacheCanvas||document.createElement('canvas');
     			this.width = this.cacheCanvas.width = this.session.width;
@@ -439,6 +439,7 @@
     };
 	Graphics.prototype.drawCall = function(fn,opts){
 		if(typeof fn !=='function')return;
+        opts = opts||{};
 		this.cache = opts.cache||false;
 		this.cached = false;
 		this.session = opts.session||{width:100,height:100};
@@ -475,14 +476,6 @@
         this.height = this.canvas.height;
 
 
-	    if("imageSmoothingEnabled" in this.ctx)
-	        this.ctx.imageSmoothingEnabled = true;
-	    else if("webkitImageSmoothingEnabled" in this.ctx)
-	        this.ctx.webkitImageSmoothingEnabled = true;
-	    else if("mozImageSmoothingEnabled" in this.ctx)
-	        this.ctx.mozImageSmoothingEnabled = true;
-	    else if("oImageSmoothingEnabled" in this.ctx)
-	        this.ctx.oImageSmoothingEnabled = true;
     }
     JC.Stage = Stage;
     Stage.prototype = Object.create( JC.Container.prototype );
@@ -492,8 +485,12 @@
         this.height = this.canvas.height = h;
     };
     Stage.prototype.render = function (){
+        console.time('transform');
         this.updateChilds();
+        console.timeEnd('transform');
+        console.time('render');
         this.renderChilds();
+        console.timeEnd('render');
     };
     Stage.prototype.renderChilds = function (){
     	this.ctx.setTransform(1,0,0,1,0,0);

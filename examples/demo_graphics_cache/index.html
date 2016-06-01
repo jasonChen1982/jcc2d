@@ -7,7 +7,7 @@
 	<title>JC_demo</title>
 	<style type="text/css">
     * {padding:0;margin:0;}
-    body {overflow: hidden;}
+    body {overflow: hidden;background-color: #000;}
     </style>
 </head>
 <body>
@@ -25,14 +25,13 @@ window.onresize = function(){
 
 var w = window.innerWidth,
     h = window.innerHeight,
-    runMan,
-    jumpMan,
+    cacheMap,
+    COLOURS = [ '#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423' ],
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container();
+    resize();
     DOC.x = w/2;
     DOC.y = h/2;
-
-
 
 
 var stats = new Stats();
@@ -41,49 +40,40 @@ var stats = new Stats();
     document.body.appendChild(stats.domElement);
 
 
-var images = new JC.ImagesLoad({
-    frames: './images/frames.png'
-});
 
-images.imagesLoaded = function(){
-    resize();
-    runMan = new JC.Sprite({
-        image: images.getResult('frames'),
-        width: 165,
-        height: 292,
-        count: 26
+    cacheMap = new JC.Graphics();  // 创建形状绘制对象
+
+    cacheMap.drawCall(function(ctx){
+        for(var i = 100;i>0;i--){
+            ctx.fillStyle = COLOURS[i%COLOURS.length];
+            ctx.beginPath();
+            ctx.fillRect( 100-i, 100-i, i, i );
+            ctx.fill();
+        }
+        document.title = Math.random();
+    },{
+        cache: true,
+        session: {width:200,height:200}
     });
-    runMan.interval = 1000/60; // 帧率 60FPS
-    runMan.goFrames({ // you can config repeatF (repeat some times) or loop (play infinite times)
-        // repeatF: 1,
-        loop: true
+    cacheMap.moveTween({
+        attr: {x: 100,y: 200},
+        infinity: true,
+        alternate: true
     });
-    runMan.x = -165 >> 1;
-    jumpMan = new JC.Sprite({
-        image: images.getResult('frames'),
-        width: 165,
-        height: 292,
-        count: 38,
-        sH: 292*2,
-        sW: 165*2
-    });
-    jumpMan.goFrames({
-        loop: true
-    });
-    jumpMan.x = 165 >> 1;
-    DOC.addChilds(runMan,jumpMan);
+    DOC.addChilds(cacheMap);
     stage.addChilds(DOC);
-
-
     render();
-};
+
+
+
+
+
+
 
 function render(){
     RAF(render);
-
     stage.render();
 
-    
     stats.update();
 }
 function resize(){

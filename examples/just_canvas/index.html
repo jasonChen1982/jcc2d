@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+
+<script type="text/javascript" src="../../src/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+function noop(){}
+
+function Animate(){
+    this.MST = 0;
+    this.MAT = 300;
+    this.fx = 'easeBoth';
+    this.complete = noop;
+    this.moving = false;
+    this.infinity = false;
+    this.alternate = false;
+    this.repeats = 0;
+}
+Animate.prototype.moveTween = function(opts){
+    this.MST = Date.now();
+    this.MATR = opts.attr||this.MATR;
+    this.MAT = opts.time||this.MAT;
+    this.fx = opts.fx||this.fx;
+    this.complete = opts.complete||this.complete;
+    this.infinity = opts.infinity||this.infinity;
+    this.alternate = opts.alternate||this.alternate;
+    this.repeats = opts.repeats||this.repeats;
+    this.moving = true;
+    this.MATRC = {};
+    for(var i in this.MATR){
+        this.MATRC[i] = this[i];
+    }
+};
+Animate.prototype.manager = function(){
+    if(!this.moving)return;
+    var now = Date.now();
+    if(now < this.MST+this.MAT){
+        this.nextPose();
+    }else{
+        this.setVal(this.MATR);
+        if(this.repeats>0||this.infinity){
+            this.repeats>0&&--this.repeats;
+            if(this.alternate){
+                this.moveTween({attr: this.MATRC});
+            }else{
+                this.setVal(this.MATRC);
+                this.moveTween({attr: this.MATR});
+            }
+        }else{
+            this.moving = false;
+            this.complete();
+            if(now>this.MST)this.complete = noop;
+        }
+    }
+};
+Animate.prototype.nextPose = function(){
+    var now=Date.now()-this.MST;
+    for(var i in this.MATR){
+        this[i] = JC.TWEEN[this.fx]( now , this.MATRC[i] , this.MATR[i] - this.MATRC[i] , this.MAT );
+    }
+};
+function OBJ(img){
+    Animate.call( this );
+    this.visible = true;
+    this.worldAlpha = 1;
+    this.alpha = 1;
+
+    this.scaleX = 1;
+    this.scaleY = 1;
+
+    this.x = 0;
+    this.y = 0;
+
+    this.image = img;
+
+    this.width = img.width;
+    this.height = img.height;
+
+    this.regX = this.width >> 1;
+    this.regY = this.height >> 1;
+    
+}
+OBJ.prototype = Object.create( Animate.prototype );
+OBJ.prototype.constructor = OBJ;
+OBJ.prototype.draw = function(ctx){
+    this.manager();
+    ctx.setTransform(this.scaleX,0,0,this.scaleY,this.x,this.y);
+    ctx.drawImage(this.image, 0, 0, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+};
+OBJ.prototype.setVal = function(vals){
+    if(vals===undefined)return;
+    for(var key in vals){
+        if(this[key]===undefined){
+            continue;
+        }else{
+            this[key] = vals[key];
+        }
+    }
+};
+
+var w = window.innerWidth,
+    h = window.innerHeight,
+    pic,
+    canvas = document.getElementById('demo_canvas'),
+    ctx = canvas.getContext('2d');
+
+
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+
+
+
+var images = new JC.ImagesLoad({
+    pic: './images/card01.png'
+});
+
+images.imagesLoaded = function(){
+    resize();
+    pic = new OBJ(images.getResult('pic'));
+
+    pic.x = -100;
+    pic.y = -100;
+
+    pic.moveTween({
+        attr: {x: 100,y: 100},
+        infinity: true,
+        alternate: true
+    });
+
+    render();
+};
+
+function render(){
+    RAF(render);
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,w,h);
+    ctx.setTransform(1,0,0,1,w>>1,h>>1);
+    pic.draw(ctx);
+
+    stats.update();
+}
+function resize(){
+	w = window.innerWidth;
+	h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+}
+</script>
+</body>
+</html>
