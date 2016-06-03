@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: Animate</title>
+	<title>Documentation Class: Stage</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -63,13 +63,13 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: Animate</h1>
+	<h1 class="page-title">Class: Stage</h1>
 <section>
 
 <header>
     
         <h2>
-        Animate
+        Stage
         </h2>
         
     
@@ -82,7 +82,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="Animate"><span class="type-signature"></span>new Animate()</h4>
+    <h4 class="name" id="Stage"><span class="type-signature"></span>new Stage()</h4>
     
     
 </dt>
@@ -90,7 +90,8 @@
 
     
     <div class="description">
-        <p>动画引擎</p>
+        <p>舞台对象，继承至Container</p>
+<pre class="prettyprint source lang-js"><code>var stage = new JC.Stage('demo_canvas','#fff');</code></pre>
     </div>
     
 
@@ -160,6 +161,17 @@
     </div>
 
     
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li><a href="JC.Container.html">JC.Container</a></li>
+    </ul>
+
+
+    
 
     
 
@@ -178,7 +190,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="moveTween"><span class="type-signature"></span>moveTween(opts)</h4>
+    <h4 class="name" id="addChilds"><span class="type-signature"></span>addChilds(child)</h4>
     
     
 </dt>
@@ -186,7 +198,8 @@
 
     
     <div class="description">
-        <p>开启动画</p>
+        <p>向容器添加一个物体</p>
+<pre class="prettyprint source lang-js"><code>container.addChilds(sprite,sprite2,text3,graphice);</code></pre>
     </div>
     
 
@@ -221,13 +234,13 @@
 
         <tr>
             
-                <td class="name"><code>opts</code></td>
+                <td class="name"><code>child</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="JC.DisplayObject.html">JC.DisplayObject</a></span>
 
 
 
@@ -238,7 +251,433 @@
 
             
 
-            <td class="description last"><p>配置</p></td>
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="JC.Container.html#addChilds">JC.Container#addChilds</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="JC.DisplayObject.html">JC.DisplayObject</a></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="removeChilds"><span class="type-signature"></span>removeChilds(child)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>从容器移除一个物体</p>
+<pre class="prettyprint source lang-js"><code>container.removeChilds(sprite,sprite2,text3,graphice);</code></pre>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>child</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.DisplayObject.html">JC.DisplayObject</a></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="JC.Container.html#removeChilds">JC.Container#removeChilds</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="JC.DisplayObject.html">JC.DisplayObject</a></span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="removeMask"><span class="type-signature"></span>removeMask()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>移除遮罩</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+	<dt class="inherited-from method-doc-label method-doc-details-label">Inherited From:</dt>
+	<dd class="inherited-from">
+		<ul class="dummy">
+			<li>
+				<a href="JC.DisplayObject.html#removeMask">JC.DisplayObject#removeMask</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="resize"><span class="type-signature"></span>resize(w, h)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>舞台尺寸设置</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>w</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>可以是屏幕的宽度</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>h</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>可以是屏幕的高度</p></td>
         </tr>
 
     

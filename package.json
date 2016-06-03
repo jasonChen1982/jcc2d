@@ -2,7 +2,7 @@
   "name": "jcc2d",
   "version": "0.0.6",
   "description": "一个轻量级的canvas渲染引擎",
-  "main": "src/jcc2d.js",
+  "main": "build/jcc2d.js",
   "directories": {
     "example": "examples"
   },
@@ -19,7 +19,7 @@
   "author": "jasonChen",
   "license": "ISC",
   "devDependencies": {
-    "gulp-concat": "^2.6.0",
+    "gulp-include": "^2.2.1",
     "gulp-jsdoc3": "^0.3.0",
     "gulp-sourcemaps": "^2.0.0-alpha",
     "gulp-uglify": "^1.5.3"

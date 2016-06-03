@@ -1,5 +1,3 @@
-window.JC = window.JC||{};
-
 JC.TWEEN = {
 	easeBoth: function(t, b, c, d){  //加速减速曲线
 		if ((t/=d/2) < 1) {

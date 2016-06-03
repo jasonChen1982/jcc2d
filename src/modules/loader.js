@@ -1,4 +1,3 @@
-window.JC = window.JC||{};
 function ImagesLoad(opts){
 	this.sprite = {};
 	this.OKNum = 0;

@@ -1,4 +1,3 @@
-window.JC = window.JC||{};
 
 /**
  * 将角度转化成弧度
@@ -609,6 +608,28 @@ Graphics.prototype.renderMe = function (ctx){
         this.draw(ctx);
 	}
 };
+/**
+ * 图形绘制挂载函数
+ *
+ *```js
+ *  var cacheMap = new JC.Graphics();  // 创建形状绘制对象
+ *
+ *  cacheMap.drawCall(function(ctx){
+ *      for(var i = 50;i>0;i--){
+ *          ctx.strokeStyle = COLOURS[i%COLOURS.length];
+ *          ctx.beginPath();
+ *          ctx.arc( 0, 0, i, 0, Math.PI*2 );
+ *          ctx.stroke();
+ *      }
+ *  },{
+ *      cache: true,
+ *      session: {center: {x: 50,y: 50},width:100,height:100}
+ *  });
+ * ```
+ *
+ * @param fn {function}
+ * @param opts {object}
+ */
 Graphics.prototype.drawCall = function(fn,opts){
 	if(typeof fn !=='function')return;
     opts = opts||{};
@@ -670,6 +691,18 @@ Text.prototype.renderMe = function(ctx){
 
 
 
+/**
+ * 舞台对象，继承至Container
+ * 
+ * 
+ * ```js
+ * var stage = new JC.Stage('demo_canvas','#fff');
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
 function Stage(id,bgColor){
 	JC.Container.call( this );
     this.canvas = document.getElementById(id);
@@ -693,6 +726,13 @@ function Stage(id,bgColor){
 JC.Stage = Stage;
 Stage.prototype = Object.create( JC.Container.prototype );
 Stage.prototype.constructor = JC.Stage;
+/**
+ * 舞台尺寸设置
+ *
+ *
+ * @param w {number} 可以是屏幕的宽度
+ * @param h {number} 可以是屏幕的高度
+ */
 Stage.prototype.resize = function (w,h){
     this.width = this.canvas.width = w;
     this.height = this.canvas.height = h;
@@ -712,12 +752,3 @@ Stage.prototype.renderChilds = function (){
     }
 };
 
-
-if (typeof exports !== 'undefined') {
-    if (typeof module !== 'undefined' && module.exports) {
-        exports = module.exports = JC;
-    }
-    exports.JC = JC;
-} else if (typeof define !== 'undefined' && define.amd) {
-    define(JC);
-}
