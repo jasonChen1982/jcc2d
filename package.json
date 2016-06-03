@@ -7,9 +7,9 @@
     "example": "examples"
   },
   "scripts": {
-    "patch": "npm version patch && bower version patch",
-    "minor": "npm version minor && bower version minor",
-    "major": "npm version major && bower version major",
+    "patch": "bower version patch & npm version patch",
+    "minor": "bower version minor & npm version minor",
+    "major": "bower version major & npm version major",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
