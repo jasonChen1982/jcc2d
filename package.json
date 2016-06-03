@@ -1,6 +1,6 @@
 {
   "name": "jcc2d",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "一个轻量级的canvas渲染引擎",
   "main": "build/jcc2d.js",
   "directories": {
