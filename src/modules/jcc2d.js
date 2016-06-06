@@ -277,7 +277,7 @@ function DisplayObject(){
 	this.pivotX = 0;
 	this.pivotY = 0;
 
-	this.mask = noop;
+	this.mask = null;
 
 	this.parent = null;
 	this.worldTransform = new Matrix();
@@ -294,7 +294,7 @@ DisplayObject.prototype.isVisible = function(){
  *
  */
 DisplayObject.prototype.removeMask = function(){
-	this.mask = noop;
+	this.mask = null;
 };
 DisplayObject.prototype.setVal = function(vals){
 	if(vals===undefined)return;
@@ -443,7 +443,7 @@ Container.prototype.updateChilds = function (){
 Container.prototype.render = function (ctx){
 	ctx.save();
 	this.setTransform(ctx);
-	this.mask(ctx);
+	this.mask&&this.mask.render(ctx);
 	this.renderMe(ctx);
 	this.cds.length>0&&this.renderChilds(ctx);
 	ctx.restore();
@@ -552,6 +552,7 @@ Sprite.prototype.upFS = function (){
  */
 Sprite.prototype.goFrames = function (opts){
     if(this.count<=1)return;
+    opts = opts||{};
     this.canFrames = true;
     this.loop = opts.loop||false;
     this.repeatF = opts.repeatF||0;
