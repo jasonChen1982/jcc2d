@@ -529,11 +529,12 @@ Sprite.prototype.upFS = function (){
         this.preTime = time;
     }
     if(this._cF>=this.count){
+        this._cF = 0;
         if(this.repeatF<=0&&!this.loop){
             this.canFrames = false;
+            if(this.fillMode==='backwards')this._cF = this.count-1;
             this.onEnd();
         }
-        this._cF = 0;
         if(!this.loop)this.repeatF--;
     }
 };
@@ -544,6 +545,7 @@ Sprite.prototype.upFS = function (){
  * sprite.goFrames({
  *      repeatF: 1,
  *      loop: true,
+ *      fillMode: 'forwards'  // backwards  forwards
  *      end: function(){console.log('over');}
  * });
  * ```
@@ -557,6 +559,7 @@ Sprite.prototype.goFrames = function (opts){
     this.loop = opts.loop||false;
     this.repeatF = opts.repeatF||0;
     this.onEnd = opts.end||noop;
+    this.fillMode = opts.fillMode||'forwards';
     this.preTime = Date.now();
     this._cF = 0;
 };

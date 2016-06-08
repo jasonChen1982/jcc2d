@@ -68,7 +68,9 @@ images.imagesLoaded = function(){
         sW: 165*2
     });
     jumpMan.goFrames({
-        loop: true
+        // loop: true
+        repeatF: 1,
+        fillMode: 'backwards'
     });
     jumpMan.x = 165 >> 1;
     DOC.addChilds(runMan,jumpMan);
