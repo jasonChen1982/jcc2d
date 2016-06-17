@@ -545,7 +545,7 @@ Sprite.prototype.upFS = function (){
  * sprite.goFrames({
  *      repeatF: 1,
  *      loop: true,
- *      fillMode: 'forwards'  // backwards  forwards
+ *      fillMode: 'forwards',  // backwards  forwards
  *      end: function(){console.log('over');}
  * });
  * ```
