@@ -714,6 +714,7 @@ function Stage(id,bgColor){
     this.cds = [];
     this.canvas.style.backgroundColor = bgColor || "transparent";
     this.autoClear = true;
+    this.setStyle = false;
     this.width = this.canvas.width;
     this.height = this.canvas.height;
 
@@ -737,9 +738,13 @@ Stage.prototype.constructor = JC.Stage;
  * @param w {number} 可以是屏幕的宽度
  * @param h {number} 可以是屏幕的高度
  */
-Stage.prototype.resize = function (w,h){
+Stage.prototype.resize = function (w,h,sw,sh){
     this.width = this.canvas.width = w;
     this.height = this.canvas.height = h;
+    if(this.setStyle&&sw&&sh){
+        this.canvas.style.width = sw+'px';
+        this.canvas.style.height = sh+'px';
+    }
 };
 Stage.prototype.render = function (){
     this.updateChilds();
