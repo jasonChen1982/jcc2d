@@ -22,8 +22,20 @@ window.onerror = function(msg,url,line){
 window.onresize = function(){
     resize();
 };
-function range(min,max){
-    return (max-min)*Math.random()+min;
+function isArray(object) {
+    return Object.prototype.toString.call(object) === '[object Array]';
+}
+
+function isNumber(object) {
+    return typeof object === 'number';
+}
+
+function random(min, max) {
+    if (isArray(min))
+        return min[~~(Math.random() * min.length)];
+    if (!isNumber(max))
+        max = min || 1, min = 0;
+    return min + Math.random() * (max - min);
 }
 
 
@@ -38,9 +50,9 @@ Particle.prototype = {
 
         this.radius = radius || 10;
         this.wander = 0.15;
-        this.theta = Math.random()*TWO_PI;
+        this.theta = random(0,TWO_PI);
         this.drag = 0.92;
-        this.color = COLOURS[Math.random()*COLOURS.length >> 0];
+        this.color = random(COLOURS);
 
         this.x = x || 0.0;
         this.y = y || 0.0;
@@ -56,7 +68,7 @@ Particle.prototype = {
         this.vx *= this.drag;
         this.vy *= this.drag;
 
-        this.theta += range( -0.5, 0.5 ) * this.wander;
+        this.theta += random( -0.5, 0.5 ) * this.wander;
         this.vx += Math.sin( this.theta ) * 0.1;
         this.vy += Math.cos( this.theta ) * 0.1;
 
@@ -79,7 +91,7 @@ function init() {
         var pNow = Date.now(),
             cur = pNow-now>interval;
         if(cur){
-            spawn( range( -20, 20 ), range( -20, 20 ) );
+            spawn( random( -20, 20 ), random( -20, 20 ) );
             now = pNow;
         }
         RAF(loop);
@@ -91,14 +103,14 @@ function spawn( x, y ) {
         pool.push( particles.shift() );
 
     particle = pool.length ? pool.pop() : new Particle();
-    particle.init( x, y, range( 5, 24 ) );
+    particle.init( x, y, random( 5, 24 ) );
 
-    particle.wander = range( 0.5, 2.0 );
+    particle.wander = random( 0.5, 2.0 );
     particle.color = COLOURS[Math.random()*COLOURS.length >> 0];
-    particle.drag = range( 0.9, 0.99 );
+    particle.drag = random( 0.9, 0.99 );
 
-    theta = range(TWO_PI/8,TWO_PI*3/8);
-    force = range( 2, 8 );
+    theta = random(TWO_PI/8,TWO_PI*3/8);
+    force = random( 2, 8 );
 
     particle.vx = Math.cos( theta ) * force;
     particle.vy = -Math.sin( theta ) * force;

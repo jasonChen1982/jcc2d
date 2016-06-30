@@ -36,8 +36,7 @@ var w = window.innerWidth*window.devicePixelRatio,
     hand,
     wheel1,
     wheel2,
-    ground,
-    wheels;
+    ground;
     stage.setStyle = true;
 
 
@@ -55,34 +54,6 @@ var images = new JC.ImagesLoad({
 images.imagesLoaded = function(){
 
     resize();
-
-    // bodyDoc = new JC.Container();
-    // wheels = new JC.Container();
-    // wheels.y = 54;
-    // wheel1 = new JC.Graphics();
-    // wheel1.x = -76;
-    // wheel2 = new JC.Graphics();
-    // wheel2.x = 48;
-    // wheels.addChilds(wheel1,wheel2);
-    // arm1 = new JC.Graphics();
-    // arm1.x = -50;
-    // arm1.y = 22;
-    // arm1.regX = 140;
-    // arm1.regY = 102;
-    // arm1.rotation = 30;
-    // arm2 = new JC.Graphics();
-    // arm2.x = -135;
-    // arm2.y = -94;
-    // arm2.regX = 14;
-    // arm2.regY = 20;
-    // arm1.addChilds(arm2);
-    // hand = new JC.Graphics();
-    // hand.x = 12;
-    // hand.y = 88;
-    // hand.regX = 4;
-    // hand.regY = 41;
-    // arm2.addChilds(hand);
-    // bodyDoc.addChilds(arm1,body,wheels);
 
     arm1 = new JC.Graphics();
     arm1.drawCall(function(ctx){
