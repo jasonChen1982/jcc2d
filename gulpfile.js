@@ -13,7 +13,7 @@ gulp.task('build', function() {
     .pipe(uglify())
     .pipe(sourcemaps.write('../maps'))
     .pipe(gulp.dest(path.dirname(pkg.main)))
-    .pipe(gulp.dest('examples/libs'));
+    .pipe(gulp.dest(pkg.upto));
 });
 
 var jsdoc = require('gulp-jsdoc3');
