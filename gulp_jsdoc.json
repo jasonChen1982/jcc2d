@@ -6,7 +6,7 @@
     "excludePattern": "(^|\\/|\\\\)_"
   },
   "opts": {
-    "destination": "./docs"
+    "destination": "../jcc2d-site/docs"
   },
   "plugins": [
     "plugins/markdown"

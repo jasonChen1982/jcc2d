@@ -17,8 +17,9 @@ gulp.task('build', function() {
 });
 
 var jsdoc = require('gulp-jsdoc3');
+var jsdocConf = require('./gulp_jsdoc.json');
 
 gulp.task('doc', function (cb) {
     gulp.src(['README.md', 'src/modules/*.js'], {read: false})
-        .pipe(jsdoc(cb));
+        .pipe(jsdoc(jsdocConf,cb));
 });
