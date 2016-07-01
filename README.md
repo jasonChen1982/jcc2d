@@ -1,5 +1,5 @@
 # jcc2d
-一个轻量级的canvas渲染引擎 ![demo&documention](https://jasonchen1982.github.io/jcc2d/)
+一个轻量级的canvas渲染引擎 [demo&documention](https://jasonchen1982.github.io/jcc2d/)
 
 ### 引擎功能 ###
 
