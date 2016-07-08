@@ -8,9 +8,7 @@
     "example": "examples"
   },
   "scripts": {
-    "patch": "npm --no-git-tag-version version patch && git add -A && git commit -m 'patch new version' && bower version patch",
-    "minor": "npm --no-git-tag-version version minor && git add -A && git commit -m 'minor new version' && bower version minor",
-    "major": "npm --no-git-tag-version version major && git add -A && git commit -m 'major new version' && bower version major",
+    "postversion": "git push origin v$npm_package_version",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
