@@ -200,6 +200,41 @@ function Animate(){
 /**
  * 开启动画
  *
+ *```js
+ *
+ * // 扩展缓动函数，缓动函数库详见目录下的util/tween.js
+ *
+ * JC.TWEEN.extend({    
+ *    bounceOut: function(t, b, c, d){
+ *        if ((t/=d) < (1/2.75)) {
+ *            return c*(7.5625*t*t) + b;
+ *        } else if (t < (2/2.75)) {
+ *            return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b;
+ *        } else if (t < (2.5/2.75)) {
+ *            return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b;
+ *        }
+ *        return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
+ *    }
+ * });
+ * var dispayObj = new JC.Sprite();
+ * dispayObj.moveTween({
+ *   attr: {
+ *      x: 200, // x轴移动到200的位置
+ *      y: 100, // y轴移动到100的位置
+ *      rotation: 360, // 旋转360
+ *      scaleX: 2, // x轴缩放到2
+ *      scaleY: .5, // y轴缩放到0.5
+ *      alpha: 0, // 透明度变化到0
+ *   },
+ *   fx: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinity: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   time: 1000, // 动画时长 ms单位 默认 300ms
+ *   complete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
  * @param opts {object} 配置
  */
 Animate.prototype.moveTween = function(opts){
