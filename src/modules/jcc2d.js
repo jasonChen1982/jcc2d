@@ -287,6 +287,7 @@ Animate.prototype.nextPose = function(){
  * 显示对象的基类
  *
  * @class
+ * @extends JC.Animate
  * @memberof JC
  */
 function DisplayObject(){
