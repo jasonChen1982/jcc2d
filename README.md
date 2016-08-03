@@ -2,7 +2,7 @@
 一个轻量级的canvas渲染引擎 [demo&documention](https://jasonchen1982.github.io/jcc2d/)
 
 ### 优势 ###
-  体积小、功能强大、低门槛、精简的[API](https://jasonchen1982.github.io/jcc2d/docs/)、优异的性能、成熟的框架设计、高度可扩展性，该框架足以实现绝大部分canvas动画，为你提供快速的canvas动画开发。
+  体积小、功能强大、低门槛、精简的[API](https://jasonchen1982.github.io/jcc2d/docs/)、优异的性能、成熟的引擎结构设计、高度可扩展性，该引擎足以实现绝大部分canvas动画，为你提供快速的canvas动画开发。
 
 ### 引擎功能 ###
 
