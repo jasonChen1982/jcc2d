@@ -332,7 +332,7 @@ function DisplayObject(){
 
     this.event = new JC.Eventer();
     // this.interactive = false;
-    this._interactive = false;
+    // this._interactive = false;
     this.passEvent = false;
     this.bound = [];
 }
@@ -430,7 +430,7 @@ DisplayObject.prototype.setTransform = function(ctx){
  */
 DisplayObject.prototype.on = function(type,fn){
     this.event.on(type,fn);
-    if(!this.interactive)this.interactive = true;
+    // if(!this.interactive)this.interactive = true;
 };
 /**
  * 显示对象的事件解绑函数
@@ -440,14 +440,14 @@ DisplayObject.prototype.on = function(type,fn){
  */
 DisplayObject.prototype.off = function(type,fn){
     this.event.off(type,fn);
-    var re = false;
-    for (var lis in this.event.listeners) {
-        if(this.event.listeners[lis].length>0){
-            re = true;
-            break;
-        }
-    }
-    if(!re)this.interactive = false;
+    // var re = false;
+    // for (var lis in this.event.listeners) {
+    //     if(this.event.listeners[lis].length>0){
+    //         re = true;
+    //         break;
+    //     }
+    // }
+    // if(!re)this.interactive = false;
 };
 /**
  * 显示对象的一次性事件绑定函数
@@ -536,19 +536,19 @@ DisplayObject.prototype.ContainsPoint = function (p,px,py){
  * @type Boolean
  * @default false
  */
-Object.defineProperty(JC.DisplayObject.prototype, 'interactive', {
-    get: function() {
-        return this._interactive;
-    },
-    set: function(value) {
-        this._interactive = !!value;
+// Object.defineProperty(JC.DisplayObject.prototype, 'interactive', {
+//     get: function() {
+//         return this._interactive;
+//     },
+//     set: function(value) {
+//         this._interactive = !!value;
 
-        if(this.parent&&this.parent.type!=='stage'){
-            var paI = this.parent._checkInteractive();
-            if(this.parent.interactive!==paI)this.parent.interactive = paI;
-        }
-    }
-});
+//         if(this.parent&&this.parent.type!=='stage'){
+//             var paI = this.parent._checkInteractive();
+//             if(this.parent.interactive!==paI)this.parent.interactive = paI;
+//         }
+//     }
+// });
 
 
 
@@ -574,12 +574,12 @@ Container.prototype = Object.create( JC.DisplayObject.prototype );
 Container.prototype.constructor = JC.Container;
 
 
-Container.prototype._checkInteractive = function(){
-    for (var i = 0,l=this.cds.length; i<l; i++) {
-        if(this.cds[i].interactive)return true;
-    }
-    return false;
-};
+// Container.prototype._checkInteractive = function(){
+//     for (var i = 0,l=this.cds.length; i<l; i++) {
+//         if(this.cds[i].interactive)return true;
+//     }
+//     return false;
+// };
 
 /**
  * 向容器添加一个物体
@@ -601,7 +601,7 @@ Container.prototype.addChilds = function (cd){
     if(cd.parent){ cd.parent.removeChilds(cd); }
     cd.parent = this;
     this.cds.push(cd);
-    cd.interactive = cd.interactive;
+    // cd.interactive = cd.interactive;
     return cd;
 };
 /**
@@ -622,7 +622,7 @@ Container.prototype.removeChilds = function (){
         for(var a=0;a<this.cds.length;a++){
             if(this.cds[a]===arguments[0]){
                 this.cds.splice(a,1);
-                this.cds[a].interactive = this.cds[a].interactive;
+                // this.cds[a].interactive = this.cds[a].interactive;
                 this.cds[a].parent = null;
                 a--;
             }
@@ -978,7 +978,7 @@ function Stage(id,bgColor){
     else if("oImageSmoothingEnabled" in this.ctx)
         this.ctx.oImageSmoothingEnabled = true;
 
-    this._interactive = true;
+    // this._interactive = true;
     this.initEvent();
 
 }
@@ -1040,7 +1040,7 @@ Stage.prototype.eventProxy = function (ev){
     while(i>=0){
         var child = this.cds[i];
         // console.log(child);
-        if(child.interactive&&child.visible){
+        if(child.visible){
             child.noticeEvent(evd);
             if(evd.target)break;
         }
