@@ -25,4 +25,5 @@
     }
 
     window.RAF = window.requestAnimFrame = window.requestAnimationFrame;
+    window.CAF = window.cancelAnimationFrame;
 })();

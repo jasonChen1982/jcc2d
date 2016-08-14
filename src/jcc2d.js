@@ -7,6 +7,8 @@
 
 	//=include modules/loader.js
 
+	//=include modules/event.js
+
 	//=include modules/jcc2d.js
 
 	if (typeof exports !== 'undefined') {
