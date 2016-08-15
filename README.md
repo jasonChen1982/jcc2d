@@ -1,4 +1,5 @@
 # jcc2d
+[![Build Status](https://travis-ci.org/jasonChen1982/jcc2d.svg?branch=master)](https://travis-ci.org/jasonChen1982/jcc2d)
 一个高性能的轻量级canvas渲染引擎、动画引擎 [demo&documention](https://jasonchen1982.github.io/jcc2d/)
 
 ### 优势 ###
