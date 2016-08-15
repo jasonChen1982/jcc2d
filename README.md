@@ -2,7 +2,7 @@
 一个轻量级的canvas渲染引擎 [demo&documention](https://jasonchen1982.github.io/jcc2d/)
 
 ### 优势 ###
-  体积小、功能强大、低门槛、精简的[API](https://jasonchen1982.github.io/jcc2d/docs/)、优异的性能、成熟的引擎结构设计、高度可扩展性、强大的事件机制及事件系统，该引擎足以实现绝大部分canvas动画，为你提供快速的canvas动画开发。
+  体积小、功能强大、低门槛、精简的[API](https://jasonchen1982.github.io/jcc2d/docs/)、优异的性能、成熟的引擎结构设计、高度可扩展性、强大的事件机制及事件系统，该引擎足以实现绝大部分canvas动画，为你提供快速的canvas动画开发。 
 
 ### 引擎功能 ###
 
@@ -40,4 +40,4 @@ jcc2d有几大主要类型，动画器（Animate）、显示对象（DisplayObje
 
 
 ### 说明 ###
-由于选择轻量级，所以不是非常实用的canvas滤镜并没有包含在该库里面。
+由于选择轻量级，所以不是非常实用的canvas滤镜并没有包含在该库里面。 
