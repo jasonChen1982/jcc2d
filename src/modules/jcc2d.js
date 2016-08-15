@@ -252,6 +252,12 @@ Animate.prototype.moveTween = function(opts){
 		this.MATRC[i] = this[i];
 	}
 };
+/**
+ * 对外接口
+ *
+ * @method manager
+ * @private
+ */
 Animate.prototype.manager = function(){
 	if(!this.moving)return;
 	var now = Date.now();
@@ -274,6 +280,12 @@ Animate.prototype.manager = function(){
 		}
 	}
 };
+/**
+ * 动画下一个位置
+ *
+ * @method nextPose
+ * @private
+ */
 Animate.prototype.nextPose = function(){
 	var now=Date.now()-this.MST;
 	for(var i in this.MATR){
@@ -317,10 +329,23 @@ function DisplayObject(){
 
 	this.parent = null;
 	this.worldTransform = new Matrix();
+
+    this.event = new JC.Eventer();
+    // this.interactive = false;
+    // this._interactive = false;
+    this.passEvent = false;
+    this.bound = [];
 }
 JC.DisplayObject = DisplayObject;
 DisplayObject.prototype = Object.create( Animate.prototype );
 DisplayObject.prototype.constructor = JC.DisplayObject;
+
+/**
+ * 检测是否可见
+ *
+ * @method isVisible
+ * @private
+ */
 DisplayObject.prototype.isVisible = function(){
 	return !!(this.visible && this.alpha>0 && this.scaleX*this.scaleY>0);
 };
@@ -397,6 +422,135 @@ DisplayObject.prototype.setTransform = function(ctx){
 	ctx.globalAlpha = this.worldAlpha;
 	ctx.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.tx,matrix.ty);
 };
+/**
+ * 显示对象的事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+DisplayObject.prototype.on = function(type,fn){
+    this.event.on(type,fn);
+    // if(!this.interactive)this.interactive = true;
+};
+/**
+ * 显示对象的事件解绑函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 注册时回调函数的引用
+ */
+DisplayObject.prototype.off = function(type,fn){
+    this.event.off(type,fn);
+    // var re = false;
+    // for (var lis in this.event.listeners) {
+    //     if(this.event.listeners[lis].length>0){
+    //         re = true;
+    //         break;
+    //     }
+    // }
+    // if(!re)this.interactive = false;
+};
+/**
+ * 显示对象的一次性事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+DisplayObject.prototype.once = function(type,fn){
+    var This = this,
+        cb = function(ev){
+            fn&&fn(ev);
+            This.event.off(type,cb);
+        };
+    this.event.on(type,cb);
+};
+/**
+ * 获取当前坐标系下的监测区域
+ *
+ * @method getBound
+ * @private
+ */
+DisplayObject.prototype.getBound = function (){
+    var bound = [],
+        l = this.bound.length>>1;
+
+    for (var i = 0; i < l; i++) {
+        var p = this.worldTransform.apply({x: this.bound[i*2],y: this.bound[i*2+1]});
+        bound[i*2  ] = p.x;
+        bound[i*2+1] = p.y;
+    }
+    return bound;
+};
+/**
+ * 设置显示对象的监测区域
+ *
+ * @param points {Array} 区域的坐标点 [x0,y0 ..... xn,yn]
+ * @return {Array}
+ */
+DisplayObject.prototype.setBound = function (points){
+    points = points||[
+        -this.regX,this.regY,
+        -this.regX,this.regY-this.height,
+        -this.regX+this.width,this.regY-this.height,
+        -this.regX+this.width,this.regY
+    ];
+    this.bound = points;
+};
+DisplayObject.prototype.ContainsPoint = function (p,px,py){
+    var n = p.length>>1;
+    var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
+    
+    //var lup = by > ay;
+    for(var i=0; i<n; i++){
+        ax = bx;  ay = by;
+        bx = p[2*i  ] - px;
+        by = p[2*i+1] - py;
+        if(ay==by) continue;
+        lup = by>ay;
+    }
+    
+    var depth = 0;
+    for(i=0; i<n; i++){
+        ax = bx;  ay = by;
+        bx = p[2*i  ] - px;
+        by = p[2*i+1] - py;
+        if(ay< 0 && by< 0) continue;
+        if(ay> 0 && by> 0) continue;
+        if(ax< 0 && bx< 0) continue;
+        
+        if(ay==by && Math.min(ax,bx)<=0) return true;
+        if(ay==by) continue;
+        
+        var lx = ax + (bx-ax)*(-ay)/(by-ay);
+        if(lx===0) return true;
+        if(lx> 0) depth++;
+        if(ay===0 &&  lup && by>ay) depth--;
+        if(ay===0 && !lup && by<ay) depth--;
+        lup = by>ay;
+    }
+    return (depth & 1) == 1;
+};
+/**
+ * 被观察到数据，会根据是否有绑定事件而更新
+ *
+ * @property interactive
+ * @type Boolean
+ * @default false
+ */
+// Object.defineProperty(JC.DisplayObject.prototype, 'interactive', {
+//     get: function() {
+//         return this._interactive;
+//     },
+//     set: function(value) {
+//         this._interactive = !!value;
+
+//         if(this.parent&&this.parent.type!=='stage'){
+//             var paI = this.parent._checkInteractive();
+//             if(this.parent.interactive!==paI)this.parent.interactive = paI;
+//         }
+//     }
+// });
+
+
 
 
 /**
@@ -419,6 +573,14 @@ JC.Container = Container;
 Container.prototype = Object.create( JC.DisplayObject.prototype );
 Container.prototype.constructor = JC.Container;
 
+
+// Container.prototype._checkInteractive = function(){
+//     for (var i = 0,l=this.cds.length; i<l; i++) {
+//         if(this.cds[i].interactive)return true;
+//     }
+//     return false;
+// };
+
 /**
  * 向容器添加一个物体
  * 
@@ -439,6 +601,7 @@ Container.prototype.addChilds = function (cd){
     if(cd.parent){ cd.parent.removeChilds(cd); }
     cd.parent = this;
     this.cds.push(cd);
+    // cd.interactive = cd.interactive;
     return cd;
 };
 /**
@@ -458,8 +621,9 @@ Container.prototype.removeChilds = function (){
     }else if(l===1){
         for(var a=0;a<this.cds.length;a++){
             if(this.cds[a]===arguments[0]){
-                this.cds[a].parent = null;
                 this.cds.splice(a,1);
+                // this.cds[a].interactive = this.cds[a].interactive;
+                this.cds[a].parent = null;
                 a--;
             }
         }
@@ -494,12 +658,61 @@ Container.prototype.renderChilds = function (ctx){
         cd.render(ctx);
     }
 };
+Container.prototype.noticeEvent = function (ev){
+    var i = this.cds.length-1;
+    while(i>=0){
+        var child = this.cds[i];
+        // console.log(child);
+        if(child.visible){
+            child.noticeEvent(ev);
+            // console.log(ev);
+            if(ev.target)break;
+        }
+        i--;
+    }
+    this.upEvent(ev);
+};
+Container.prototype.upEvent = function(ev){
+    // this.interactive
+    // console.log(ev);
+    if(!this.passEvent&&this.hitTest(ev)){
+        if(!ev.cancleBubble||ev.target===this){
+            // console.log(this.name);
+            // console.log(ev);
+            if(!(this.event.listeners[ev.type]&&this.event.listeners[ev.type].length>0))return;
+            this.event.emit(ev);
+        }
+    }
+};
+Container.prototype.hitTest = function(ev){
+    // 
+    if (ev.type==='touchmove'||ev.type==='touchend'){
+        var re = this.event.touchstarted;
+        if(ev.type==='touchend')this.event.touchstarted = false;
+        return re;
+    }
+    for (var i = 0,l=this.cds.length; i<l; i++) {
+        if(this.cds[i].hitTest(ev)){
+            if(ev.type==='touchstart')this.event.touchstarted = true;
+            return true;
+        }
+    }
+    if(this.hitTestMe(ev)){
+        ev.target = this;
+        if(ev.type==='touchstart')this.event.touchstarted = true;
+        return true;
+    }
+    return false;
+};
+Container.prototype.hitTestMe = function(ev){
+    return this.ContainsPoint(this.getBound(),ev.global.x,ev.global.y);
+};
 
 
 /**
  * 位图精灵图，继承至Container
  *
- *```js
+ * ```js
  * var sprite = new JC.Sprite({
  *      image: images.getResult('frames'),
  *      width: 165,
@@ -531,6 +744,7 @@ function Sprite(opts){
     this.repeatF = 0;
     this.preTime = Date.now();
     this.interval = 60;
+    this.setBound();
 }
 JC.Sprite = Sprite;
 Sprite.prototype = Object.create( JC.Container.prototype );
@@ -745,6 +959,7 @@ Text.prototype.renderMe = function(ctx){
  */
 function Stage(id,bgColor){
 	JC.Container.call( this );
+    this.type = 'stage';
     this.canvas = document.getElementById(id);
     this.ctx = this.canvas.getContext('2d');
     this.cds = [];
@@ -762,6 +977,9 @@ function Stage(id,bgColor){
         this.ctx.mozImageSmoothingEnabled = true;
     else if("oImageSmoothingEnabled" in this.ctx)
         this.ctx.oImageSmoothingEnabled = true;
+
+    // this._interactive = true;
+    this.initEvent();
 
 }
 JC.Stage = Stage;
@@ -795,5 +1013,74 @@ Stage.prototype.renderChilds = function (){
         if (!cd.isVisible())continue;
         cd.render(this.ctx);
     }
+};
+Stage.prototype.initEvent = function (){
+    var This = this;
+    this.canvas.addEventListener('click',function(ev){
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('touchstart',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('touchmove',function(ev){
+        ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('touchend',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+};
+Stage.prototype.eventProxy = function (ev){
+    // ev = ev;
+
+    var evd = this.fixCoord(ev);
+    var i = this.cds.length-1;
+    while(i>=0){
+        var child = this.cds[i];
+        // console.log(child);
+        if(child.visible){
+            child.noticeEvent(evd);
+            if(evd.target)break;
+        }
+        i--;
+    }
+};
+Stage.prototype.fixCoord = function (ev){
+    var evd = new JC.InteractionData(),
+        offset = this.getPos(this.canvas);
+    evd.originalEvent = ev;
+    evd.type = ev.type;
+
+    evd.ratio = this.width/this.canvas.offsetWidth;
+    if(ev.touches){
+        evd.touches = [];
+        if(ev.touches.length>0){
+            for(var i=0;i<ev.touches.length;i++){
+                evd.touches[i] = {};
+                evd.touches[i].global = {};
+                evd.touches[i].global.x = (ev.touches[i].pageX-offset.x)*evd.ratio;
+                evd.touches[i].global.y = (ev.touches[i].pageY-offset.y)*evd.ratio;
+            }
+            evd.global = evd.touches[0].global;
+        }
+    }else{
+        evd.global.x = (ev.pageX-offset.x)*evd.ratio;
+        evd.global.y = (ev.pageY-offset.y)*evd.ratio;
+    }
+    return evd;
+};
+Stage.prototype.getPos = function (obj){
+    var pos={};
+    if(obj.offsetParent){
+        var p = this.getPos(obj.offsetParent);
+        pos.x = obj.offsetLeft+p.x;
+        pos.y = obj.offsetTop+p.y;
+    }else{
+        pos.x = obj.offsetLeft;
+        pos.y = obj.offsetTop;
+    }
+    return pos;
 };
 
