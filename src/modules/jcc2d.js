@@ -686,14 +686,14 @@ Container.prototype.upEvent = function(ev){
 };
 Container.prototype.hitTest = function(ev){
     // 
-    if (ev.type==='touchmove'||ev.type==='touchend'){
+    if (ev.type==='touchmove'||ev.type==='touchend'||ev.type==='mousemove'||ev.type==='mouseup'){
         var re = this.event.touchstarted;
-        if(ev.type==='touchend')this.event.touchstarted = false;
+        if(ev.type==='touchend'||ev.type==='mousedown')this.event.touchstarted = false;
         return re;
     }
     for (var i = 0,l=this.cds.length; i<l; i++) {
         if(this.cds[i].hitTest(ev)){
-            if(ev.type==='touchstart')this.event.touchstarted = true;
+            if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
             return true;
         }
     }
@@ -1028,6 +1028,18 @@ Stage.prototype.initEvent = function (){
         This.eventProxy(ev);
     },false);
     this.canvas.addEventListener('touchend',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('mousedown',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('mousemove',function(ev){
+        ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('mouseup',function(ev){
         // ev.preventDefault();
         This.eventProxy(ev);
     },false);
