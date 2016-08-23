@@ -9,7 +9,7 @@
   },
   "scripts": {
     "postversion": "git push origin v$npm_package_version",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "testem ci"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,9 @@
     "gulp-include": "^2.2.1",
     "gulp-jsdoc3": "^0.3.0",
     "gulp-sourcemaps": "^2.0.0-alpha",
+    "testem": "^0.9.4",
+    "chai": "^3.2.0",
+    "mocha": "^2.3.2",
     "gulp-uglify": "^1.5.3"
   },
   "dependencies": {
