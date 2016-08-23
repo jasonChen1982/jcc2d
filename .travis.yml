@@ -1,0 +1,21 @@
+sudo: false
+language: node_js
+node_js:
+    - "4.4.0"
+
+branches:
+    only:
+        - master
+        - dev
+
+install:
+    - npm install
+
+cache:
+    directories:
+        - node_modules
+
+before_script:
+
+script:
+    - npm test
