@@ -17,6 +17,9 @@ jcc2d有几大主要类型，动画器（Animate）、显示对象（DisplayObje
 
 ![继承关系图](http://img.ucweb.com/s/uae/g/01/jason_chen/jcc2d/extend.jpg)
 
+### 快速入门 ###
+[quick Start](http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010)
+
 ### 常用的类 ###
 
 容器（Container）：
