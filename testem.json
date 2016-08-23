@@ -1,7 +1,7 @@
 {
     "framework" : "mocha+chai",
-    "launch_in_dev" : [""],
-    "launch_in_ci" : [""],
+    "launch_in_dev" : ["phantomjs"],
+    "launch_in_ci" : ["phantomjs"],
     "src_files" : [
         "build/jcc2d.js",
 
