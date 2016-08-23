@@ -1,7 +1,5 @@
 {
     "framework" : "mocha+chai",
-    "launch_in_dev" : ["Chrome", "Firefox"],
-    "launch_in_ci" : ["Firefox"],
     "src_files" : [
         "build/jcc2d.js",
 
