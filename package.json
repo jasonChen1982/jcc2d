@@ -21,6 +21,8 @@
     "gulp-include": "^2.2.1",
     "gulp-jsdoc3": "^0.3.0",
     "gulp-sourcemaps": "^2.0.0-alpha",
+    "require-dir": "^0.3.0",
+    "run-sequence": "^1.1.2",
     "testem": "^0.9.4",
     "chai": "^3.2.0",
     "mocha": "^2.3.2",
