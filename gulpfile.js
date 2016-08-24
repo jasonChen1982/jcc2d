@@ -12,6 +12,15 @@ gulp.task('build', function() {
     .pipe(include())
     .pipe(uglify())
     .pipe(sourcemaps.write('../maps'))
+    .pipe(gulp.dest(path.dirname(pkg.main)));
+});
+
+gulp.task('release', function() {
+  return gulp.src('src/jcc2d.js')
+    .pipe(sourcemaps.init())
+    .pipe(include())
+    .pipe(uglify())
+    .pipe(sourcemaps.write('../maps'))
     .pipe(gulp.dest(path.dirname(pkg.main)))
     .pipe(gulp.dest(pkg.upto));
 });
