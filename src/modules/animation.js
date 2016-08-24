@@ -28,7 +28,7 @@ JC.Transition = Transition;
 Transition.prototype.nextPose = function(){
     var cache = {};
     for(var i in this.ATRE){
-        cache[i] = JC.TWEEN[this.fx]( this.progress , this.ATRS[i] , this.ATRE[i] - this.ATRS[i] , this.MAT );
+        cache[i] = JC.TWEEN[this.fx]( this.progress , this.ATRS[i] , this.ATRE[i] - this.ATRS[i] , this.duration );
         if(this.element[i]!==undefined)this.element[i] = cache[i];
     }
     return cache;//this.onUpdate
@@ -85,8 +85,11 @@ JC.Animator = Animator;
 Animator.prototype.update = function(snippet){
     // var snippet = Date.now()-this.pt;
     for(var i=0;i<this.animates.length;i++){
-        if(this.animates[i].living)this.animates.splice(i,1);
-        this.animates[i].update(snippet);
+        if(!this.animates[i].living){
+            this.animates.splice(i,1);
+        }else{
+            this.animates[i].update(snippet);
+        }
     }
     // this.pt += snippet;
 };
