@@ -9,9 +9,6 @@
 
 JC.DTR = Math.PI/180;
 
-function noop(){}
-
-
 /**
  * 矩阵对象，用来描述和记录对象的tansform 状态信息
  *
@@ -187,20 +184,20 @@ JC.identityMatrix = new Matrix();
  * @class
  * @memberof JC
  */
-function Animate(){
-	this.MST = 0;
-	this.MAT = 300;
-	this.fx = 'easeBoth';
-	this.complete = noop;
-	this.moving = false;
-	this.infinity = false;
-	this.alternate = false;
-	this.repeats = 0;
-}
+// function Animate(){
+// 	this.MST = 0;
+// 	this.MAT = 300;
+// 	this.fx = 'easeBoth';
+// 	this.complete = null;
+// 	this.moving = false;
+// 	this.infinity = false;
+// 	this.alternate = false;
+// 	this.repeats = 0;
+// }
 /**
  * 开启动画
  *
- *```js
+ * ```js
  *
  * // 扩展缓动函数，缓动函数库详见目录下的util/tween.js
  *
@@ -237,61 +234,62 @@ function Animate(){
  *
  * @param opts {object} 配置
  */
-Animate.prototype.moveTween = function(opts){
-	this.MST = Date.now();
-	this.MATR = opts.attr||this.MATR;
-	this.MAT = opts.time||this.MAT;
-	this.fx = opts.fx||this.fx;
-	this.complete = opts.complete||this.complete;
-	this.infinity = opts.infinity||this.infinity;
-	this.alternate = opts.alternate||this.alternate;
-	this.repeats = opts.repeats||this.repeats;
-	this.moving = true;
-	this.MATRC = {};
-	for(var i in this.MATR){
-		this.MATRC[i] = this[i];
-	}
-};
+// Animate.prototype.moveTween = function(opts){
+// 	this.MST = Date.now();
+// 	this.MATR = opts.attr||this.MATR;
+// 	this.MAT = opts.time||this.MAT;
+// 	this.fx = opts.fx||this.fx;
+// 	this.complete = opts.complete||this.complete;
+// 	this.infinity = opts.infinity||this.infinity;
+// 	this.alternate = opts.alternate||this.alternate;
+// 	this.repeats = opts.repeats||this.repeats;
+// 	this.moving = true;
+// 	this.MATRC = {};
+// 	for(var i in this.MATR){
+// 		this.MATRC[i] = this[i];
+// 	}
+// };
 /**
  * 对外调度接口
  *
  * @method manager
  * @private
  */
-Animate.prototype.manager = function(){
-	if(!this.moving)return;
-	var now = Date.now();
-	if(now < this.MST+this.MAT){
-		this.nextPose();
-	}else{
-		this.setVal(this.MATR);
-		if(this.repeats>0||this.infinity){
-			this.repeats>0&&--this.repeats;
-			if(this.alternate){
-				this.moveTween({attr: this.MATRC});
-			}else{
-				this.setVal(this.MATRC);
-				this.moveTween({attr: this.MATR});
-			}
-		}else{
-			this.moving = false;
-			this.complete();
-			if(now>this.MST)this.complete = noop;
-		}
-	}
-};
+// Animate.prototype.manager = function(){
+// 	if(!this.moving)return;
+// 	var now = Date.now();
+// 	if(now < this.MST+this.MAT){
+// 		this.nextPose();
+// 	}else{
+// 		this.setVal(this.MATR);
+// 		if(this.repeats>0||this.infinity){
+// 			this.repeats>0&&--this.repeats;
+// 			if(this.alternate){
+// 				this.moveTween({attr: this.MATRC});
+// 			}else{
+// 				this.setVal(this.MATRC);
+// 				this.moveTween({attr: this.MATR});
+// 			}
+// 		}else{
+// 			this.moving = false;
+// 			this.complete && this.complete();
+// 			if(now>this.MST)this.complete = null;
+// 		}
+// 	}
+// };
 /**
  * 动画下一个位置
  *
  * @method nextPose
  * @private
  */
-Animate.prototype.nextPose = function(){
-	var now=Date.now()-this.MST;
-	for(var i in this.MATR){
-		this[i] = JC.TWEEN[this.fx]( now , this.MATRC[i] , this.MATR[i] - this.MATRC[i] , this.MAT );
-	}
-};
+// Animate.prototype.nextPose = function(){
+// 	var now=Date.now()-this.MST;
+// 	for(var i in this.MATR){
+// 		this[i] = JC.TWEEN[this.fx]( now , this.MATRC[i] , this.MATR[i] - this.MATRC[i] , this.MAT );
+// 	}
+// };
+// JC.Animate = Animate;
 
 
 
@@ -303,7 +301,7 @@ Animate.prototype.nextPose = function(){
  * @memberof JC
  */
 function DisplayObject(){
-	Animate.call( this );
+	// Animate.call( this );
     this._ready = true;
 
 	this.visible = true;
@@ -337,10 +335,27 @@ function DisplayObject(){
     // this._interactive = false;
     this.passEvent = false;
     this.bound = [];
+
+
+    this.Animator = new JC.Animator();
 }
 JC.DisplayObject = DisplayObject;
-DisplayObject.prototype = Object.create( Animate.prototype );
 DisplayObject.prototype.constructor = JC.DisplayObject;
+
+DisplayObject.prototype.fromTo = function(opts){
+    opts.element = this;
+    this.setVal(opts.from);
+    return this.Animator.fromTo(opts);
+};
+
+DisplayObject.prototype.to = function(opts){
+    opts.element = this;
+    opts.from = {};
+    for(var i in opts.to){
+        opts.from[i] = this[i];
+    }
+    return this.Animator.fromTo(opts);
+};
 
 /**
  * 检测是否可见
@@ -415,10 +430,13 @@ DisplayObject.prototype.updateMe = function(){
     }
     this.worldAlpha = this.alpha * this.parent.worldAlpha;
 };
-DisplayObject.prototype.updateTransform = function(){
+DisplayObject.prototype.updateTransform = function(snippet){
     if(!this._ready)return;
-	this.manager();
+	this.upAnimation(snippet);
 	this.updateMe();
+};
+DisplayObject.prototype.upAnimation = function(snippet){
+    this.Animator.update(snippet);
 };
 DisplayObject.prototype.setTransform = function(ctx){
 	var matrix = this.worldTransform;
@@ -605,16 +623,16 @@ Container.prototype.removeChilds = function (){
         }
     }
 };
-Container.prototype.updateTransform = function (){
+Container.prototype.updateTransform = function (snippet){
     if(!this._ready)return;
-	this.manager();
+	this.upAnimation(snippet);
 	this.updateMe();
-	this.cds.length>0&&this.updateChilds();
+	this.cds.length>0&&this.updateChilds(snippet);
 };
-Container.prototype.updateChilds = function (){
+Container.prototype.updateChilds = function (snippet){
     for (var i=0,l=this.cds.length; i<l; i++) {
         var cd = this.cds[i];
-        cd.updateTransform();
+        cd.updateTransform(snippet);
     }
 };
 Container.prototype.render = function (ctx){
@@ -782,7 +800,7 @@ Sprite.prototype.upFS = function (){
         if(this.repeatF<=0&&!this.loop){
             this.canFrames = false;
             if(this.fillMode==='backwards')this._cF = this.count-1;
-            this.onEnd();
+            this.onEnd&&this.onEnd();
         }
         if(!this.loop)this.repeatF--;
     }
@@ -813,7 +831,7 @@ Sprite.prototype.goFrames = function (opts){
     this.canFrames = true;
     this.loop = opts.loop||false;
     this.repeatF = opts.repeatF||0;
-    this.onEnd = opts.end||noop;
+    this.onEnd = opts.end||null;
     this.fillMode = opts.fillMode||'forwards';
     this.fps = opts.fps||this.fps;
     this.preTime = Date.now();
@@ -849,6 +867,7 @@ JC.Graphics = Graphics;
 Graphics.prototype = Object.create( JC.Container.prototype );
 Graphics.prototype.constructor = JC.Graphics;
 Graphics.prototype.renderMe = function (ctx){
+    if(!this.draw)return;
 	if(this.cached||this.cache){
 		if(this.cache){
 			this.cacheCanvas = this.cacheCanvas||document.createElement('canvas');
@@ -896,7 +915,7 @@ Graphics.prototype.drawCall = function(fn,opts){
 	this.cache = opts.cache||false;
 	this.cached = false;
 	this.session = opts.session||{center: {x: 0,y: 0},width:100,height:100};
-	this.draw = fn||noop;
+	this.draw = fn||null;
 };
 
 
@@ -987,6 +1006,9 @@ function Stage(id,bgColor){
     // this._interactive = true;
     this.initEvent();
 
+
+    this.pt = Date.now();
+
 }
 JC.Stage = Stage;
 Stage.prototype = Object.create( JC.Container.prototype );
@@ -1007,7 +1029,9 @@ Stage.prototype.resize = function (w,h,sw,sh){
     }
 };
 Stage.prototype.render = function (){
-    this.updateChilds();
+    var snippet = Date.now()-this.pt;
+    this.pt += snippet;
+    this.updateChilds(snippet);
     this.renderChilds();
 };
 Stage.prototype.renderChilds = function (){
