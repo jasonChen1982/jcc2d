@@ -216,7 +216,7 @@ function Animate(){
  *        return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
  *    }
  * });
- * var dispayObj = new JC.Sprite();
+ * var dispayObj = new JC.Text('Hello JC','bold 36px Arial','#c32361');
  * dispayObj.moveTween({
  *   attr: {
  *      x: 200, // x轴移动到200的位置
@@ -253,7 +253,7 @@ Animate.prototype.moveTween = function(opts){
 	}
 };
 /**
- * 对外接口
+ * 对外调度接口
  *
  * @method manager
  * @private
@@ -304,6 +304,8 @@ Animate.prototype.nextPose = function(){
  */
 function DisplayObject(){
 	Animate.call( this );
+    this._ready = true;
+
 	this.visible = true;
 	this.worldAlpha = 1;
 	this.alpha = 1;
@@ -414,6 +416,7 @@ DisplayObject.prototype.updateMe = function(){
     this.worldAlpha = this.alpha * this.parent.worldAlpha;
 };
 DisplayObject.prototype.updateTransform = function(){
+    if(!this._ready)return;
 	this.manager();
 	this.updateMe();
 };
@@ -484,9 +487,12 @@ DisplayObject.prototype.getBound = function (){
  * 设置显示对象的监测区域
  *
  * @param points {Array} 区域的坐标点 [x0,y0 ..... xn,yn]
+ * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function (points){
+DisplayObject.prototype.setBound = function (points,needless){
+    var l = this.bound.length;
+    if(l>4&&needless)return;
     points = points||[
         -this.regX,this.regY,
         -this.regX,this.regY-this.height,
@@ -529,34 +535,12 @@ DisplayObject.prototype.ContainsPoint = function (p,px,py){
     }
     return (depth & 1) == 1;
 };
-/**
- * 被观察到数据，会根据是否有绑定事件而更新
- *
- * @property interactive
- * @type Boolean
- * @default false
- */
-// Object.defineProperty(JC.DisplayObject.prototype, 'interactive', {
-//     get: function() {
-//         return this._interactive;
-//     },
-//     set: function(value) {
-//         this._interactive = !!value;
-
-//         if(this.parent&&this.parent.type!=='stage'){
-//             var paI = this.parent._checkInteractive();
-//             if(this.parent.interactive!==paI)this.parent.interactive = paI;
-//         }
-//     }
-// });
-
-
 
 
 /**
  * 显示对象容器，继承至DisplayObject
  *
- *```js
+ * ```js
  * var container = new JC.Container();
  * container.addChilds(sprite);
  * ```
@@ -573,23 +557,15 @@ JC.Container = Container;
 Container.prototype = Object.create( JC.DisplayObject.prototype );
 Container.prototype.constructor = JC.Container;
 
-
-// Container.prototype._checkInteractive = function(){
-//     for (var i = 0,l=this.cds.length; i<l; i++) {
-//         if(this.cds[i].interactive)return true;
-//     }
-//     return false;
-// };
-
 /**
  * 向容器添加一个物体
  * 
- *```js
+ * ```js
  * container.addChilds(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param child {JC.DisplayObject}
- * @return {JC.DisplayObject}
+ * @param child {JC.Container}
+ * @return {JC.Container}
  */
 Container.prototype.addChilds = function (cd){
     if(cd === undefined)return cd;
@@ -607,12 +583,12 @@ Container.prototype.addChilds = function (cd){
 /**
  * 从容器移除一个物体
  * 
- *```js
+ * ```js
  * container.removeChilds(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param child {JC.DisplayObject}
- * @return {JC.DisplayObject}
+ * @param child {JC.Container}
+ * @return {JC.Container}
  */
 Container.prototype.removeChilds = function (){
     var l = arguments.length;
@@ -630,6 +606,7 @@ Container.prototype.removeChilds = function (){
     }
 };
 Container.prototype.updateTransform = function (){
+    if(!this._ready)return;
 	this.manager();
 	this.updateMe();
 	this.cds.length>0&&this.updateChilds();
@@ -673,6 +650,7 @@ Container.prototype.noticeEvent = function (ev){
     this.upEvent(ev);
 };
 Container.prototype.upEvent = function(ev){
+    if(!this._ready)return;
     // this.interactive
     // console.log(ev);
     if(!this.passEvent&&this.hitTest(ev)){
@@ -713,8 +691,11 @@ Container.prototype.hitTestMe = function(ev){
  * 位图精灵图，继承至Container
  *
  * ```js
+ * var loadBox = JC.loaderUtil({
+ *    frames: './images/frames.png'
+ * });
  * var sprite = new JC.Sprite({
- *      image: images.getResult('frames'),
+ *      texture: loadBox.getById('frames'),
  *      width: 165,
  *      height: 292,
  *      count: 38,
@@ -729,13 +710,6 @@ Container.prototype.hitTestMe = function(ev){
  */
 function Sprite(opts){
 	JC.Container.call( this );
-    this.image = opts.image;
-    this._imageW = this.image.width;
-    this._imageH = this.image.height;
-    this.width = opts.width||this._imageW;
-    this.height = opts.height||this._imageH;
-    this.regX = this.width>>1;
-    this.regY = this.height>>1;
     this._cF = 0;
     this.count = opts.count||1;
     this.sH = opts.sH||0;
@@ -743,19 +717,43 @@ function Sprite(opts){
     this.loop = false;
     this.repeatF = 0;
     this.preTime = Date.now();
-    this.interval = 60;
-    this.setBound();
+    this.fps = 20;
+
+    this.texture = opts.texture;
+    if(this.texture.loaded){
+        this.upTexture(opts);
+    }else{
+        var This = this;
+        this._ready = false;
+        this.texture.on('load',function(){
+            This.upTexture(opts);
+            This._ready = true;
+            if(this.moving){
+                this.MST = Date.now();
+            }
+        });
+    }
+    
 }
 JC.Sprite = Sprite;
 Sprite.prototype = Object.create( JC.Container.prototype );
 Sprite.prototype.constructor = JC.Sprite;
+Sprite.prototype.upTexture = function(opts){
+    this._textureW = opts.texture.width;
+    this._textureH = opts.texture.height;
+    this.width = opts.width||this._textureW;
+    this.height = opts.height||this._textureH;
+    this.regX = this.width>>1;
+    this.regY = this.height>>1;
+    this.setBound(null,true);
+};
 Sprite.prototype.getFramePos = function(){
     var obj = {
             x: this.sW,
             y: this.sH
         };
     if(this._cF>0){
-        var row = this._imageW/this.width >> 0;
+        var row = this._textureW/this.width >> 0;
         var lintRow = this.sW/this.width >> 0;
         var lintCol = this.sH/this.height >> 0;
         var mCol = lintCol+(lintRow+this._cF)/row >> 0;
@@ -766,8 +764,9 @@ Sprite.prototype.getFramePos = function(){
     return obj;
 };
 Sprite.prototype.renderMe = function (ctx){
+    if(!this._ready)return;
     var obj = this.getFramePos();
-    ctx.drawImage(this.image, obj.x, obj.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+    ctx.drawImage(this.texture.texture, obj.x, obj.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
     this.upFS();
 };
 Sprite.prototype.upFS = function (){
@@ -788,11 +787,17 @@ Sprite.prototype.upFS = function (){
         if(!this.loop)this.repeatF--;
     }
 };
+Object.defineProperty(Sprite.prototype, 'interval', {
+    get: function() {
+        return this.fps>0?1000/this.fps>>0:20;
+    }
+});
 /**
  * 播放逐祯动画
  *
  *```js
  * sprite.goFrames({
+ *      fps: 60, // 逐帧帧率 默认20
  *      repeatF: 1,
  *      loop: true,
  *      fillMode: 'forwards',  // backwards  forwards
@@ -810,6 +815,7 @@ Sprite.prototype.goFrames = function (opts){
     this.repeatF = opts.repeatF||0;
     this.onEnd = opts.end||noop;
     this.fillMode = opts.fillMode||'forwards';
+    this.fps = opts.fps||this.fps;
     this.preTime = Date.now();
     this._cF = 0;
 };

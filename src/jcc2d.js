@@ -19,9 +19,9 @@
 
 	//=include modules/tween.js
 
-	//=include modules/loader.js
+  //=include modules/event.js
 
-	//=include modules/event.js
+	//=include modules/loader.js
 
 	//=include modules/jcc2d.js
 
