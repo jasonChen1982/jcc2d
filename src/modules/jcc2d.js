@@ -222,6 +222,15 @@ function DisplayObject(){
 JC.DisplayObject = DisplayObject;
 DisplayObject.prototype.constructor = JC.DisplayObject;
 
+Object.defineProperty(Texture.prototype, 'scale', {
+    get: function() {
+        return this.scaleX;
+    },
+    set: function(scale) {
+        this.scaleX = this.scaleY = scale;
+    }
+});
+
 /**
  * fromTo动画，指定动画的启始位置和结束位置
  *
