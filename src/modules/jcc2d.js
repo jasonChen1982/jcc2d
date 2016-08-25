@@ -264,7 +264,7 @@ DisplayObject.prototype.fromTo = function(opts){
 /**
  * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
  *
- * @method opts {object} 配置
+ * @param opts {object} 配置
  */
 DisplayObject.prototype.to = function(opts){
     opts.element = this;

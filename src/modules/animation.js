@@ -85,7 +85,7 @@ JC.Animator = Animator;
 Animator.prototype.update = function(snippet){
     for(var i=0;i<this.animates.length;i++){
         if(!this.animates[i].living)this.animates.splice(i,1);
-            this.animates[i].update(snippet);
+        this.animates[i]&&this.animates[i].update(snippet);
     }
 };
 Animator.prototype.fromTo = function(opts){
