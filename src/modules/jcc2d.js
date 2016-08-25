@@ -254,10 +254,12 @@ DisplayObject.prototype.constructor = JC.DisplayObject;
  * ```
  *
  * @param opts {object} 配置
+ * @param clear {boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.fromTo = function(opts){
+DisplayObject.prototype.fromTo = function(opts,clear){
     opts.element = this;
     this.setVal(opts.from);
+    if(clear)this.Animator.animates.length = 0;
     return this.Animator.fromTo(opts);
 };
 
@@ -265,13 +267,15 @@ DisplayObject.prototype.fromTo = function(opts){
  * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
  *
  * @param opts {object} 配置
+ * @param clear {boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.to = function(opts){
+DisplayObject.prototype.to = function(opts,clear){
     opts.element = this;
     opts.from = {};
     for(var i in opts.to){
         opts.from[i] = this[i];
     }
+    if(clear)this.Animator.animates.length = 0;
     return this.Animator.fromTo(opts);
 };
 
@@ -360,6 +364,14 @@ DisplayObject.prototype.setTransform = function(ctx){
 	var matrix = this.worldTransform;
 	ctx.globalAlpha = this.worldAlpha;
 	ctx.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.tx,matrix.ty);
+};
+/**
+ * 获取物体相对于canvas世界坐标系的坐标位置
+ *
+ * @return {object}
+ */
+DisplayObject.prototype.getGlobalPos = function(){
+    return {x: this.worldTransform.x,y: this.worldTransform.y};
 };
 /**
  * 显示对象的事件绑定函数
