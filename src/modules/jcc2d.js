@@ -922,7 +922,7 @@ function Stage(id,bgColor){
     this.initEvent();
 
 
-    this.pt = Date.now();
+    this.pt = -1;
 
 }
 JC.Stage = Stage;
@@ -944,6 +944,7 @@ Stage.prototype.resize = function (w,h,sw,sh){
     }
 };
 Stage.prototype.render = function (){
+    if(this.pt<=0||Date.now()-this.pt>200)this.pt = Date.now();
     var snippet = Date.now()-this.pt;
     this.pt += snippet;
     this.updateChilds(snippet);
