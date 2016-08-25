@@ -222,7 +222,7 @@ function DisplayObject(){
 JC.DisplayObject = DisplayObject;
 DisplayObject.prototype.constructor = JC.DisplayObject;
 
-Object.defineProperty(Texture.prototype, 'scale', {
+Object.defineProperty(DisplayObject.prototype, 'scale', {
     get: function() {
         return this.scaleX;
     },
