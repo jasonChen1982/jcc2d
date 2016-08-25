@@ -11,7 +11,7 @@ function Transition(opts){
 
     this.infinity = opts.infinity||false;
     this.alternate = opts.alternate||false;
-    this.fx = opts.fx||'easeBoth';
+    this.ease = opts.ease||'easeBoth';
     this.repeats = opts.repeats||0;
     this.delay = opts.delay||0;
     this.progress = 0-this.delay;
@@ -28,7 +28,7 @@ JC.Transition = Transition;
 Transition.prototype.nextPose = function(){
     var cache = {};
     for(var i in this.ATRE){
-        cache[i] = JC.TWEEN[this.fx]( this.progress , this.ATRS[i] , this.ATRE[i] - this.ATRS[i] , this.duration );
+        cache[i] = JC.TWEEN[this.ease]( this.progress , this.ATRS[i] , this.ATRE[i] - this.ATRS[i] , this.duration );
         if(this.element[i]!==undefined)this.element[i] = cache[i];
     }
     return cache;//this.onUpdate
@@ -40,10 +40,10 @@ Transition.prototype.update = function(snippet){
     if(this.progress < this.duration){
         if(this.progress<0)return;
         var pose = this.nextPose();
-        this.onUpdate&&this.onUpdate(pose,this.progress);
+        this.onUpdate&&this.onUpdate(pose,this.progress/this.duration);
     }else{
         this.element.setVal(this.ATRE);
-        this.onUpdate&&this.onUpdate(this.ATRE,this.duration);
+        this.onUpdate&&this.onUpdate(this.ATRE,1);
         if(this.repeats>0||this.infinity){
             this.repeats>0&&--this.repeats;
             this.progress = 0;
@@ -83,15 +83,10 @@ function Animator(){
 }
 JC.Animator = Animator;
 Animator.prototype.update = function(snippet){
-    // var snippet = Date.now()-this.pt;
     for(var i=0;i<this.animates.length;i++){
-        if(!this.animates[i].living){
-            this.animates.splice(i,1);
-        }else{
+        if(!this.animates[i].living)this.animates.splice(i,1);
             this.animates[i].update(snippet);
-        }
     }
-    // this.pt += snippet;
 };
 Animator.prototype.fromTo = function(opts){
     var animate = new JC.Transition(opts);

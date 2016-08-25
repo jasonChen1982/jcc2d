@@ -177,131 +177,13 @@ Matrix.prototype.identity = function(){
 JC.identityMatrix = new Matrix();
 
 
-
-/**
- * 动画引擎
- *
- * @class
- * @memberof JC
- */
-// function Animate(){
-// 	this.MST = 0;
-// 	this.MAT = 300;
-// 	this.fx = 'easeBoth';
-// 	this.complete = null;
-// 	this.moving = false;
-// 	this.infinity = false;
-// 	this.alternate = false;
-// 	this.repeats = 0;
-// }
-/**
- * 开启动画
- *
- * ```js
- *
- * // 扩展缓动函数，缓动函数库详见目录下的util/tween.js
- *
- * JC.TWEEN.extend({    
- *    bounceOut: function(t, b, c, d){
- *        if ((t/=d) < (1/2.75)) {
- *            return c*(7.5625*t*t) + b;
- *        } else if (t < (2/2.75)) {
- *            return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b;
- *        } else if (t < (2.5/2.75)) {
- *            return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b;
- *        }
- *        return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
- *    }
- * });
- * var dispayObj = new JC.Text('Hello JC','bold 36px Arial','#c32361');
- * dispayObj.moveTween({
- *   attr: {
- *      x: 200, // x轴移动到200的位置
- *      y: 100, // y轴移动到100的位置
- *      rotation: 360, // 旋转360
- *      scaleX: 2, // x轴缩放到2
- *      scaleY: .5, // y轴缩放到0.5
- *      alpha: 0, // 透明度变化到0
- *   },
- *   fx: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   time: 1000, // 动画时长 ms单位 默认 300ms
- *   complete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param opts {object} 配置
- */
-// Animate.prototype.moveTween = function(opts){
-// 	this.MST = Date.now();
-// 	this.MATR = opts.attr||this.MATR;
-// 	this.MAT = opts.time||this.MAT;
-// 	this.fx = opts.fx||this.fx;
-// 	this.complete = opts.complete||this.complete;
-// 	this.infinity = opts.infinity||this.infinity;
-// 	this.alternate = opts.alternate||this.alternate;
-// 	this.repeats = opts.repeats||this.repeats;
-// 	this.moving = true;
-// 	this.MATRC = {};
-// 	for(var i in this.MATR){
-// 		this.MATRC[i] = this[i];
-// 	}
-// };
-/**
- * 对外调度接口
- *
- * @method manager
- * @private
- */
-// Animate.prototype.manager = function(){
-// 	if(!this.moving)return;
-// 	var now = Date.now();
-// 	if(now < this.MST+this.MAT){
-// 		this.nextPose();
-// 	}else{
-// 		this.setVal(this.MATR);
-// 		if(this.repeats>0||this.infinity){
-// 			this.repeats>0&&--this.repeats;
-// 			if(this.alternate){
-// 				this.moveTween({attr: this.MATRC});
-// 			}else{
-// 				this.setVal(this.MATRC);
-// 				this.moveTween({attr: this.MATR});
-// 			}
-// 		}else{
-// 			this.moving = false;
-// 			this.complete && this.complete();
-// 			if(now>this.MST)this.complete = null;
-// 		}
-// 	}
-// };
-/**
- * 动画下一个位置
- *
- * @method nextPose
- * @private
- */
-// Animate.prototype.nextPose = function(){
-// 	var now=Date.now()-this.MST;
-// 	for(var i in this.MATR){
-// 		this[i] = JC.TWEEN[this.fx]( now , this.MATRC[i] , this.MATR[i] - this.MATRC[i] , this.MAT );
-// 	}
-// };
-// JC.Animate = Animate;
-
-
-
 /**
  * 显示对象的基类
  *
  * @class
- * @extends JC.Animate
  * @memberof JC
  */
 function DisplayObject(){
-	// Animate.call( this );
     this._ready = true;
 
 	this.visible = true;
@@ -331,8 +213,6 @@ function DisplayObject(){
 	this.worldTransform = new Matrix();
 
     this.event = new JC.Eventer();
-    // this.interactive = false;
-    // this._interactive = false;
     this.passEvent = false;
     this.bound = [];
 
@@ -342,12 +222,50 @@ function DisplayObject(){
 JC.DisplayObject = DisplayObject;
 DisplayObject.prototype.constructor = JC.DisplayObject;
 
+/**
+ * fromTo动画，指定动画的启始位置和结束位置
+ *
+ * ```js
+ * // 扩展缓动函数，缓动函数库详见目录下的util/tween.js
+ * JC.TWEEN.extend({    
+ *    bounceOut: function(t, b, c, d){
+ *        if ((t/=d) < (1/2.75)) {
+ *            return c*(7.5625*t*t) + b;
+ *        } else if (t < (2/2.75)) {
+ *            return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b;
+ *        } else if (t < (2.5/2.75)) {
+ *            return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b;
+ *        }
+ *        return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
+ *    }
+ * });
+ * var dispayObj = new JC.Text('Hello JC','bold 36px Arial','#c32361');
+ * dispayObj.fromTo({
+ *   from: {x: 100},
+ *   to: {x: 200},
+ *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinity: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param opts {object} 配置
+ */
 DisplayObject.prototype.fromTo = function(opts){
     opts.element = this;
     this.setVal(opts.from);
     return this.Animator.fromTo(opts);
 };
 
+/**
+ * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
+ *
+ * @method opts {object} 配置
+ */
 DisplayObject.prototype.to = function(opts){
     opts.element = this;
     opts.from = {};
@@ -451,7 +369,6 @@ DisplayObject.prototype.setTransform = function(ctx){
  */
 DisplayObject.prototype.on = function(type,fn){
     this.event.on(type,fn);
-    // if(!this.interactive)this.interactive = true;
 };
 /**
  * 显示对象的事件解绑函数
@@ -461,14 +378,6 @@ DisplayObject.prototype.on = function(type,fn){
  */
 DisplayObject.prototype.off = function(type,fn){
     this.event.off(type,fn);
-    // var re = false;
-    // for (var lis in this.event.listeners) {
-    //     if(this.event.listeners[lis].length>0){
-    //         re = true;
-    //         break;
-    //     }
-    // }
-    // if(!re)this.interactive = false;
 };
 /**
  * 显示对象的一次性事件绑定函数
@@ -657,10 +566,8 @@ Container.prototype.noticeEvent = function (ev){
     var i = this.cds.length-1;
     while(i>=0){
         var child = this.cds[i];
-        // console.log(child);
         if(child.visible){
             child.noticeEvent(ev);
-            // console.log(ev);
             if(ev.target)break;
         }
         i--;
@@ -669,12 +576,8 @@ Container.prototype.noticeEvent = function (ev){
 };
 Container.prototype.upEvent = function(ev){
     if(!this._ready)return;
-    // this.interactive
-    // console.log(ev);
     if(!this.passEvent&&this.hitTest(ev)){
         if(!ev.cancleBubble||ev.target===this){
-            // console.log(this.name);
-            // console.log(ev);
             if(!(this.event.listeners[ev.type]&&this.event.listeners[ev.type].length>0))return;
             this.event.emit(ev);
         }
@@ -733,7 +636,7 @@ function Sprite(opts){
     this.sH = opts.sH||0;
     this.sW = opts.sW||0;
     this.loop = false;
-    this.repeatF = 0;
+    this.repeats = 0;
     this.preTime = Date.now();
     this.fps = 20;
 
@@ -797,12 +700,12 @@ Sprite.prototype.upFS = function (){
     }
     if(this._cF>=this.count){
         this._cF = 0;
-        if(this.repeatF<=0&&!this.loop){
+        if(this.repeats<=0&&!this.loop){
             this.canFrames = false;
             if(this.fillMode==='backwards')this._cF = this.count-1;
-            this.onEnd&&this.onEnd();
+            this.onCompelete&&this.onCompelete();
         }
-        if(!this.loop)this.repeatF--;
+        if(!this.loop)this.repeats--;
     }
 };
 Object.defineProperty(Sprite.prototype, 'interval', {
@@ -816,7 +719,7 @@ Object.defineProperty(Sprite.prototype, 'interval', {
  *```js
  * sprite.goFrames({
  *      fps: 60, // 逐帧帧率 默认20
- *      repeatF: 1,
+ *      repeats: 1,
  *      loop: true,
  *      fillMode: 'forwards',  // backwards  forwards
  *      end: function(){console.log('over');}
@@ -830,8 +733,8 @@ Sprite.prototype.goFrames = function (opts){
     opts = opts||{};
     this.canFrames = true;
     this.loop = opts.loop||false;
-    this.repeatF = opts.repeatF||0;
-    this.onEnd = opts.end||null;
+    this.repeats = opts.repeats||0;
+    this.onCompelete = opts.onCompelete||null;
     this.fillMode = opts.fillMode||'forwards';
     this.fps = opts.fps||this.fps;
     this.preTime = Date.now();
