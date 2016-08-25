@@ -525,7 +525,6 @@ Container.prototype.addChilds = function (cd){
     if(cd.parent){ cd.parent.removeChilds(cd); }
     cd.parent = this;
     this.cds.push(cd);
-    // cd.interactive = cd.interactive;
     return cd;
 };
 /**
@@ -546,7 +545,6 @@ Container.prototype.removeChilds = function (){
         for(var a=0;a<this.cds.length;a++){
             if(this.cds[a]===arguments[0]){
                 this.cds.splice(a,1);
-                // this.cds[a].interactive = this.cds[a].interactive;
                 this.cds[a].parent = null;
                 a--;
             }
@@ -597,7 +595,7 @@ Container.prototype.noticeEvent = function (ev){
 };
 Container.prototype.upEvent = function(ev){
     if(!this._ready)return;
-    if(!this.passEvent&&this.hitTest(ev)){
+    if(ev.target||(!this.passEvent&&this.hitTest(ev))){
         if(!ev.cancleBubble||ev.target===this){
             if(!(this.event.listeners[ev.type]&&this.event.listeners[ev.type].length>0))return;
             this.event.emit(ev);
@@ -605,21 +603,21 @@ Container.prototype.upEvent = function(ev){
     }
 };
 Container.prototype.hitTest = function(ev){
-    // 
     if (ev.type==='touchmove'||ev.type==='touchend'||ev.type==='mousemove'||ev.type==='mouseup'){
         var re = this.event.touchstarted;
-        if(ev.type==='touchend'||ev.type==='mousedown')this.event.touchstarted = false;
+        if(re)ev.target = this;
+        if(ev.type==='touchend'||ev.type==='mouseup')this.event.touchstarted = false;
         return re;
     }
-    for (var i = 0,l=this.cds.length; i<l; i++) {
-        if(this.cds[i].hitTest(ev)){
-            if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
-            return true;
-        }
-    }
+    // for (var i = 0,l=this.cds.length; i<l; i++) {
+    //     if(this.cds[i].hitTest(ev)){
+    //         if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
+    //         return true;
+    //     }
+    // }
     if(this.hitTestMe(ev)){
         ev.target = this;
-        if(ev.type==='touchstart')this.event.touchstarted = true;
+        if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
         return true;
     }
     return false;
