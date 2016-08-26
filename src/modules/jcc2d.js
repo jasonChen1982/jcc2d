@@ -799,15 +799,22 @@ Graphics.prototype.renderMe = function (ctx){
             this._ctx.clearRect(0,0,this.width,this.height);
             this._ctx.save();
             this._ctx.setTransform(1,0,0,1,this.session.center.x,this.session.center.y);
-        	this.draw(this._ctx);
+        	this._drawBack(this._ctx);
             this._ctx.restore();
         	this.cached = true;
         	this.cache = false;
 		}
 		this.cacheCanvas&&ctx.drawImage(this.cacheCanvas, 0, 0, this.width, this.height, -this.session.center.x, -this.session.center.x, this.width, this.height);
 	}else{
-        this.draw(ctx);
+        this._drawBack(ctx);
 	}
+};
+Graphics.prototype._drawBack = function (ctx){
+    if(typeof this.draw === 'function'){
+        this.draw(ctx);
+    }else if(typeof this.draw === 'object' && typeof this.draw.render === 'function'){
+        this.draw.render(ctx);
+    }
 };
 /**
  * 图形绘制挂载函数

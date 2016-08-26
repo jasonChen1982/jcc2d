@@ -74,11 +74,69 @@ Transition.prototype.cancle = function(){
 };
 
 
+function Animation(opts){
+    JC.Transition.call(this);
+
+    this.keyframes = [];
+    this.keyIndex = 0;
+    this.keyFrames(opts);
+}
+JC.Animation = Animation;
+Animation.prototype = Object.create( JC.Transition.prototype );
+Animation.prototype.constructor = JC.Animation;
+Animation.prototype.update = function(){
+    if(this.paused||!this.living)return;
+    var duration = this.keyframes[this.keyIndex].duration;
+    if(this.progress < duration){
+        if(this.progress<0)return;
+        var pose = this.nextPose();
+        this.onUpdate&&this.onUpdate(pose,this.progress/this.duration);
+    }else{
+        this.element.setVal(this.ATRE);
+        this.onUpdate&&this.onUpdate(this.ATRE,1);
+        if(this.repeats>0||this.infinity){
+            this.repeats>0&&--this.repeats;
+            this.progress = 0;
+            if(this.alternate){
+                var sc = JC.copyJSON(this.ATRS);
+                this.ATRS = JC.copyJSON(this.ATRE);
+                this.ATRE = sc;
+            }else{
+                this.element.setVal(this.ATRS);
+            }
+        }else{
+            this.living = false;
+            this.onCompelete&&this.onCompelete();
+        }
+    }
+    
+};
+Transition.prototype.nextPose = function(){
+    var cache = {};
+    for(var i in this.ATRE){
+        cache[i] = JC.TWEEN[this.ease]( this.progress , this.ATRS[i] , this.ATRE[i] - this.ATRS[i] , this.duration );
+        if(this.element[i]!==undefined)this.element[i] = cache[i];
+    }
+    return cache;
+};
+Animation.prototype.keyFrames = function(opts){
+    for (var i = 0; i < opts.keys.length; i++) {
+        this.keyframes.push(this.peel(opts.keys[i]));
+    }
+};
+Animation.prototype.peel = function(opts){
+    var prue = {};
+    prue.to = JC.copyJSON(opts.to);
+    prue.ease = opts.ease;
+    prue.duration = opts.duration||300;
+    return prue;
+};
+
+
 
 
 function Animator(){
     this.start = false;
-    // this.pt = Date.now();
     this.animates = [];
 }
 JC.Animator = Animator;
@@ -94,4 +152,10 @@ Animator.prototype.fromTo = function(opts){
     return animate;
 };
 Animator.prototype.keyFrames = function(opts){
+    var animate = new JC.Animation(opts);
+    this.animates.push(animate);
+    return animate;
 };
+
+
+
