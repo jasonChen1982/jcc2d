@@ -83,6 +83,7 @@ function Animation(opts){
     this.keyframes = [];
     this.keyIndex = 1;
     this.direction = 1;
+    this.keyConfig = [];
     this.keyFrames(opts);
     this.element.setVal(this.ATRS);
 }
