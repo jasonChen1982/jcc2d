@@ -80,10 +80,10 @@ function Animation(opts){
 
     JC.Transition.call(this,opts);
 
-    this.keyframes = [];
-    this.keyIndex = 1;
-    this.direction = 1;
-    this.keyConfig = [];
+    this._keyframes = [];
+    this._keyIndex = 1;
+    this._direction = 1;
+    this._keyConfig = [];
     this.keyFrames(opts);
     this.element.setVal(this.ATRS);
 }
@@ -97,15 +97,15 @@ Animation.prototype.update = function(snippet){
     if(this.progress < this.duration){
         if(this.progress<0)return;
         var pose = this.nextPose();
-        this.onUpdate&&this.onUpdate(pose,this.progress/this.duration,this.keyIndex);
+        this.onUpdate&&this.onUpdate(pose,this.progress/this.duration,this._keyIndex);
     }else{
         this.element.setVal(this.ATRE);
-        this.onUpdate&&this.onUpdate(this.ATRE,1,this.keyIndex);
-        if(this.keyIndex<this.keyframes.length-1&&this.keyIndex>0){
-            this.keyIndex += this.direction;
-            this.ATRS = this.keyframes[this.keyIndex].to;
-            this.duration = this.keyframes[this.keyIndex].duration||this.duration;
-            this.ease = this.keyframes[this.keyIndex].ease||this.ease;
+        this.onUpdate&&this.onUpdate(this.ATRE,1,this._keyIndex);
+        if(this._keyIndex<this._keyframes.length-1&&this._keyIndex>0){
+            this._keyIndex += this._direction;
+            this.ATRS = this._keyframes[this._keyIndex].to;
+            this.duration = this._keyframes[this._keyIndex].duration||this.duration;
+            this.ease = this._keyframes[this._keyIndex].ease||this.ease;
         }else{
             if(this.repeats>0||this.infinity){
                 this.repeats>0&&--this.repeats;
@@ -126,12 +126,12 @@ Animation.prototype.update = function(snippet){
 };
 Animation.prototype.keyFrames = function(opts){
     for (var i = 0; i < opts.keys.length; i++) {
-        this.keyframes.push(this.peel(opts.keys[i]));
+        this.keyframes.push(JC.copyJSON(opts.keys[i].to));
+        this._keyConfig.push(this.peel(opts.keys[i]));
     }
 };
 Animation.prototype.peel = function(opts){
     var prue = {};
-    prue.to = JC.copyJSON(opts.to);
     prue.ease = opts.ease;
     prue.duration = opts.duration||300;
     return prue;
