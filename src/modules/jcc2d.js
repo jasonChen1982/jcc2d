@@ -1,15 +1,5 @@
 
 /**
- * 将角度转化成弧度
- *
- * @name DTR
- * @memberof JC
- * @property {JC.DTR}
- */
-
-JC.DTR = Math.PI/180;
-
-/**
  * 矩阵对象，用来描述和记录对象的tansform 状态信息
  *
  * @class
@@ -286,6 +276,18 @@ DisplayObject.prototype.to = function(opts,clear){
     }
     if(clear)this.Animator.animates.length = 0;
     return this.Animator.fromTo(opts);
+};
+
+/**
+ * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
+ *
+ * @param opts {object} 配置
+ * @param clear {boolean} 是否去掉之前的动画
+ */
+DisplayObject.prototype.keyFrames = function(opts,clear){
+    opts.element = this;
+    if(clear)this.Animator.animates.length = 0;
+    return this.Animator.keyFrames(opts);
 };
 
 /**
@@ -839,7 +841,7 @@ Graphics.prototype._drawBack = function (ctx){
  * @param opts {object}
  */
 Graphics.prototype.drawCall = function(fn,opts){
-	if(typeof fn !=='function')return;
+	if(fn===undefined)return;
     opts = opts||{};
 	this.cache = opts.cache||false;
 	this.cached = false;

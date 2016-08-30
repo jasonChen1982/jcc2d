@@ -17,6 +17,8 @@
 
 	//=include modules/RAF.js
 
+  //=include modules/util.js
+
 	//=include modules/tween.js
 
   //=include modules/event.js
