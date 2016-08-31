@@ -579,7 +579,7 @@ Container.prototype.renderMe = function (){
 Container.prototype.renderChilds = function (ctx){
     for (var i=0,l=this.cds.length; i<l; i++) {
         var cd = this.cds[i];
-        if (!cd.isVisible())continue;
+        if (!cd.isVisible()||!cd._ready)continue;
         cd.render(ctx);
     }
 };
@@ -611,12 +611,6 @@ Container.prototype.hitTest = function(ev){
         if(ev.type==='touchend'||ev.type==='mouseup')this.event.touchstarted = false;
         return re;
     }
-    // for (var i = 0,l=this.cds.length; i<l; i++) {
-    //     if(this.cds[i].hitTest(ev)){
-    //         if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
-    //         return true;
-    //     }
-    // }
     if(this.hitTestMe(ev)){
         ev.target = this;
         if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
@@ -709,7 +703,7 @@ Sprite.prototype.renderMe = function (ctx){
     if(!this._ready)return;
     var obj = this.getFramePos();
     ctx.drawImage(this.texture.texture, obj.x, obj.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
-    this.upFS();
+    // this.upFS();
 };
 Sprite.prototype.upFS = function (){
     if(!this.canFrames)return;
@@ -723,7 +717,7 @@ Sprite.prototype.upFS = function (){
         this._cF = 0;
         if(this.repeats<=0&&!this.loop){
             this.canFrames = false;
-            if(this.fillMode==='backwards')this._cF = this.count-1;
+            this._cF = this.fillMode;
             this.onCompelete&&this.onCompelete();
         }
         if(!this.loop)this.repeats--;
@@ -741,8 +735,9 @@ Object.defineProperty(Sprite.prototype, 'interval', {
  * sprite.goFrames({
  *      fps: 60, // 逐帧帧率 默认20
  *      repeats: 1,
- *      loop: true,
- *      fillMode: 'forwards',  // backwards  forwards
+ *      infinity: true,
+ *      alternate: true,
+ *      fillMode: 2,  // 逐帧结束后元素停留在哪一帧，帧序号为从0开始的索引
  *      onCompelete: function(){console.log('over');}
  * });
  * ```
@@ -753,10 +748,11 @@ Sprite.prototype.goFrames = function (opts){
     if(this.count<=1)return;
     opts = opts||{};
     this.canFrames = true;
-    this.loop = opts.loop||false;
+    this.infinity = opts.infinity||false;
+    this.alternate = opts.alternate||false;
     this.repeats = opts.repeats||0;
     this.onCompelete = opts.onCompelete||null;
-    this.fillMode = opts.fillMode||'forwards';
+    this.fillMode = opts.fillMode||0;
     this.fps = opts.fps||this.fps;
     this.preTime = Date.now();
     this._cF = 0;
@@ -934,9 +930,7 @@ function Stage(id,bgColor){
     else if("oImageSmoothingEnabled" in this.ctx)
         this.ctx.oImageSmoothingEnabled = true;
 
-    // this._interactive = true;
     this.initEvent();
-
 
     this.pt = -1;
 
@@ -964,17 +958,10 @@ Stage.prototype.render = function (){
     var snippet = Date.now()-this.pt;
     this.pt += snippet;
     this.updateChilds(snippet);
-    this.renderChilds();
-};
-Stage.prototype.renderChilds = function (){
-	this.ctx.setTransform(1,0,0,1,0,0);
+
+    this.ctx.setTransform(1,0,0,1,0,0);
     if(this.autoClear)this.ctx.clearRect(0,0,this.width,this.height);
-    
-    for (var i=0,l=this.cds.length; i<l; i++) {
-        var cd = this.cds[i];
-        if (!cd.isVisible())continue;
-        cd.render(this.ctx);
-    }
+    this.renderChilds(this.ctx);
 };
 Stage.prototype.initEvent = function (){
     var This = this;
@@ -1007,13 +994,10 @@ Stage.prototype.initEvent = function (){
     },false);
 };
 Stage.prototype.eventProxy = function (ev){
-    // ev = ev;
-
     var evd = this.fixCoord(ev);
     var i = this.cds.length-1;
     while(i>=0){
         var child = this.cds[i];
-        // console.log(child);
         if(child.visible){
             child.noticeEvent(evd);
             if(evd.target)break;
