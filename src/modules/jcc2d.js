@@ -743,7 +743,7 @@ Object.defineProperty(Sprite.prototype, 'interval', {
  *      repeats: 1,
  *      loop: true,
  *      fillMode: 'forwards',  // backwards  forwards
- *      end: function(){console.log('over');}
+ *      onCompelete: function(){console.log('over');}
  * });
  * ```
  *
