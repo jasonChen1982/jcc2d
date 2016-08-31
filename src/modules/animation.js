@@ -131,8 +131,8 @@ Animation.prototype.update = function(snippet){
     }
 };
 
-function MovieClip(){
-    this.element = opts.element||{};
+function MovieClip(element){
+    this.element = element;
     this.living = true;
 
     this.onCompelete = opts.onCompelete||null;
@@ -141,8 +141,10 @@ function MovieClip(){
     this.infinity = opts.infinity||false;
     this.alternate = opts.alternate||false;
     this.repeats = opts.repeats||0;
-    
+
     this.timeScale = opts.timeScale||1;
+
+    this.animations = opts.animations;
 
 }
 

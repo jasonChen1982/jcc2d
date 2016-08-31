@@ -417,11 +417,11 @@ DisplayObject.prototype.updateMe = function(){
     }
     this.worldAlpha = this.alpha * this.parent.worldAlpha;
 };
-DisplayObject.prototype.updateTransform = function(snippet){
-    if(!this._ready)return;
-	this.upAnimation(snippet);
-	this.updateMe();
-};
+// DisplayObject.prototype.updateTransform = function(snippet){
+//     if(!this._ready)return;
+// 	this.upAnimation(snippet);
+// 	this.updateMe();
+// };
 DisplayObject.prototype.upAnimation = function(snippet){
     this.Animator.update(snippet);
 };
@@ -718,11 +718,10 @@ function Sprite(opts){
         this.texture.on('load',function(){
             This.upTexture(opts);
             This._ready = true;
-            if(this.moving){
-                this.MST = Date.now();
-            }
         });
     }
+
+    this.MovieClip = new JC.MovieClip(this);
     
 }
 JC.Sprite = Sprite;
@@ -736,6 +735,10 @@ Sprite.prototype.upTexture = function(opts){
     this.regX = this.width>>1;
     this.regY = this.height>>1;
     this.setBound(null,true);
+};
+Sprite.prototype.upAnimation = function(snippet){
+    this.Animator.update(snippet);
+    this.MovieClip.update(snippet);
 };
 Sprite.prototype.getFramePos = function(){
     var obj = {
