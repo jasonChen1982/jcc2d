@@ -147,6 +147,7 @@ function MovieClip(element){
     this.animations = opts.animations;
 
 }
+JC.MovieClip = MovieClip;
 
 
 function Animator(){
