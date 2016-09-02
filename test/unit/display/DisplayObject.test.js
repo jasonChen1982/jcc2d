@@ -4,6 +4,6 @@ describe('JC.DisplayObject', function () {
 
         displayObject.scale = 2;
         expect(displayObject.scaleX).to.be.equals(2);
-        expect(displayObject.scaleY).to.be.equals(3);
+        expect(displayObject.scaleY).to.be.equals(2);
     });
 });
