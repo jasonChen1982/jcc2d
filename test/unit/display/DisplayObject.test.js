@@ -3,9 +3,9 @@ describe('JC.DisplayObject', function () {
         var child = new JC.DisplayObject(),
             container = new JC.Container();
 
-        expect(container.children.length).to.equal(0);
+        expect(container.cds.length).to.equal(0);
         child.setParent(container);
-        expect(container.children.length).to.equal(1);
+        expect(container.cds.length).to.equal(1);
         expect(child.parent).to.equal(container);
     });
 });

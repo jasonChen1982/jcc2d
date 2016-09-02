@@ -1,11 +1,11 @@
 describe('JC.Sprite', function () {
     describe('playMovie', function () {
         it('playMovie is return correct value', function () {
-            var img = new Image();
-                img.width = 100;
-                img.height = 100;
+            var loadBox = JC.loaderUtil({
+                        frames: 'https://jasonchen1982.github.io/jcc2d/examples/demo_skeleton_graphics/images/body.png'
+                    });
             var sprite = new JC.Sprite({
-                    texture: img,
+                    texture: loadBox.getById('frames'),
                     width: 10,
                     height: 10,
                     animations: {
