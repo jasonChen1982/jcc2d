@@ -33,7 +33,7 @@ function _rt(val){
  * @property {JC.isArray}
  */
 JC.isArray = (function(){
-    var ks = _rt('s');
+    var ks = _rt([]);
     return function(object){
         return Object.prototype.toString.call(object) === ks;
     };
@@ -48,6 +48,20 @@ JC.isArray = (function(){
  */
 JC.isObject = (function(){
     var ks = _rt({});
+    return function(object){
+        return Object.prototype.toString.call(object) === ks;
+    };
+})();
+
+/**
+ * 是否为字符串
+ *
+ * @name isObject
+ * @memberof JC
+ * @property {JC.isObject}
+ */
+JC.isString = (function(){
+    var ks = _rt('s');
     return function(object){
         return Object.prototype.toString.call(object) === ks;
     };

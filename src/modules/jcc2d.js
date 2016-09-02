@@ -700,14 +700,6 @@ Container.prototype.hitTestMe = function(ev){
  */
 function Sprite(opts){
 	JC.Container.call( this );
-    this._cF = 0;
-    this.count = opts.count||1;
-    this.sH = opts.sH||0;
-    this.sW = opts.sW||0;
-    this.loop = false;
-    this.repeats = 0;
-    this.preTime = Date.now();
-    this.fps = 20;
 
     this.texture = opts.texture;
     if(this.texture.loaded){
@@ -721,7 +713,7 @@ function Sprite(opts){
         });
     }
 
-    this.MovieClip = new JC.MovieClip(this);
+    this.MovieClip = new JC.MovieClip(this,opts);
     
 }
 JC.Sprite = Sprite;
@@ -740,51 +732,54 @@ Sprite.prototype.upAnimation = function(snippet){
     this.Animator.update(snippet);
     this.MovieClip.update(snippet);
 };
-Sprite.prototype.getFramePos = function(){
-    var obj = {
-            x: this.sW,
-            y: this.sH
-        };
-    if(this._cF>0){
-        var row = this._textureW/this.width >> 0;
-        var lintRow = this.sW/this.width >> 0;
-        var lintCol = this.sH/this.height >> 0;
-        var mCol = lintCol+(lintRow+this._cF)/row >> 0;
-        var mRow = (lintRow+this._cF)%row;
-        obj.x = mRow*this.width;
-        obj.y = mCol*this.height;
-    }
-    return obj;
+Sprite.prototype.playMovie = function(opts){
+    this.MovieClip.playMovie(opts);
 };
+// Sprite.prototype.getFramePos = function(){
+//     var obj = {
+//             x: this.sW,
+//             y: this.sH
+//         };
+//     if(this._cF>0){
+//         var row = this._textureW/this.width >> 0;
+//         var lintRow = this.sW/this.width >> 0;
+//         var lintCol = this.sH/this.height >> 0;
+//         var mCol = lintCol+(lintRow+this._cF)/row >> 0;
+//         var mRow = (lintRow+this._cF)%row;
+//         obj.x = mRow*this.width;
+//         obj.y = mCol*this.height;
+//     }
+//     return obj;
+// };
 Sprite.prototype.renderMe = function (ctx){
     if(!this._ready)return;
-    var obj = this.getFramePos();
-    ctx.drawImage(this.texture.texture, obj.x, obj.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+    var pos = this.MovieClip.getFramePos();
+    ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
     // this.upFS();
 };
-Sprite.prototype.upFS = function (){
-    if(!this.canFrames)return;
-    var time = Date.now(),
-        ok = time-this.preTime>this.interval;
-    if(ok){
-        this._cF++;
-        this.preTime = time;
-    }
-    if(this._cF>=this.count){
-        this._cF = 0;
-        if(this.repeats<=0&&!this.loop){
-            this.canFrames = false;
-            this._cF = this.fillMode;
-            this.onCompelete&&this.onCompelete();
-        }
-        if(!this.loop)this.repeats--;
-    }
-};
-Object.defineProperty(Sprite.prototype, 'interval', {
-    get: function() {
-        return this.fps>0?1000/this.fps>>0:20;
-    }
-});
+// Sprite.prototype.upFS = function (){
+//     if(!this.canFrames)return;
+//     var time = Date.now(),
+//         ok = time-this.preTime>this.interval;
+//     if(ok){
+//         this._cF++;
+//         this.preTime = time;
+//     }
+//     if(this._cF>=this.count){
+//         this._cF = 0;
+//         if(this.repeats<=0&&!this.loop){
+//             this.canFrames = false;
+//             this._cF = this.fillMode;
+//             this.onCompelete&&this.onCompelete();
+//         }
+//         if(!this.loop)this.repeats--;
+//     }
+// };
+// Object.defineProperty(Sprite.prototype, 'interval', {
+//     get: function() {
+//         return this.fps>0?1000/this.fps>>0:20;
+//     }
+// });
 /**
  * 播放逐祯动画
  *
@@ -801,19 +796,19 @@ Object.defineProperty(Sprite.prototype, 'interval', {
  *
  * @param opts {object}
  */
-Sprite.prototype.goFrames = function (opts){
-    if(this.count<=1)return;
-    opts = opts||{};
-    this.canFrames = true;
-    this.infinity = opts.infinity||false;
-    this.alternate = opts.alternate||false;
-    this.repeats = opts.repeats||0;
-    this.onCompelete = opts.onCompelete||null;
-    this.fillMode = opts.fillMode||0;
-    this.fps = opts.fps||this.fps;
-    this.preTime = Date.now();
-    this._cF = 0;
-};
+// Sprite.prototype.goFrames = function (opts){
+//     if(this.count<=1)return;
+//     opts = opts||{};
+//     this.canFrames = true;
+//     this.infinity = opts.infinity||false;
+//     this.alternate = opts.alternate||false;
+//     this.repeats = opts.repeats||0;
+//     this.onCompelete = opts.onCompelete||null;
+//     this.fillMode = opts.fillMode||0;
+//     this.fps = opts.fps||this.fps;
+//     this.preTime = Date.now();
+//     this._cF = 0;
+// };
 
 /*  TODO: drawTriangles a mesh frame 
  *  can have perspective effect
