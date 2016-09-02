@@ -5,7 +5,7 @@ describe('JC.Container', function () {
                 child = new JC.DisplayObject();
 
             expect(container.cds.length).to.be.equals(0);
-            container.addChild(child);
+            container.addChilds(child);
             expect(container.cds.length).to.be.equals(1);
             expect(child.parent).to.be.equals(container);
         });

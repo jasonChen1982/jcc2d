@@ -1,11 +1,9 @@
 describe('JC.DisplayObject', function () {
-    it('should be able to add itself to a Container', function() {
-        var child = new JC.DisplayObject(),
-            container = new JC.Container();
+    it('set scale can sync scaleX and scaleY', function() {
+        var displayObject = new JC.DisplayObject();
 
-        expect(container.cds.length).to.equal(0);
-        child.setParent(container);
-        expect(container.cds.length).to.equal(1);
-        expect(child.parent).to.equal(container);
+        displayObject.scale = 2;
+        expect(displayObject.scaleX).to.be.equals(2);
+        expect(displayObject.scaleY).to.be.equals(3);
     });
 });
