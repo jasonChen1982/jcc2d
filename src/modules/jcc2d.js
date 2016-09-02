@@ -689,8 +689,14 @@ Container.prototype.hitTestMe = function(ev){
  *      width: 165,
  *      height: 292,
  *      count: 38,
- *      sH: 292*2,
- *      sW: 165*2
+ *      sx: 0,
+ *      sy: 0,
+ *      animations: {
+ *          fall: {start: 0,end: 4,next: 'stand'},
+ *          fly: {start: 5,end: 9,next: 'stand'},
+ *          stand: {start: 10,end: 39},
+ *          walk: {start: 40,end: 59,next: 'stand'}
+ *      }
  * });
  * ```
  *
@@ -732,6 +738,34 @@ Sprite.prototype.upAnimation = function(snippet){
     this.Animator.update(snippet);
     this.MovieClip.update(snippet);
 };
+/**
+ * 播放逐祯动画
+ *
+ *```js
+ * var sprite = new JC.Sprite({
+ *      texture: loadBox.getById('dragon'),
+ *      width: 210,
+ *      height: 231,
+ *      animations: {
+ *          fall: {start: 0,end: 4,next: 'stand'},
+ *          fly: {start: 5,end: 9,next: 'stand'},
+ *          stand: {start: 10,end: 39},
+ *          walk: {start: 40,end: 59,next: 'stand'}
+ *      }
+ * })
+ * sprite.playMovie({
+ *      movie: 'walk',
+ *      fps: 60, // 逐帧帧率 默认20
+ *      repeats: 1,
+ *      infinity: true,
+ *      alternate: true,
+ *      fillMode: 2,  // 逐帧结束后元素停留在哪一帧，帧序号为从0开始的索引
+ *      onCompelete: function(){console.log('over');}
+ * });
+ * ```
+ *
+ * @param opts {object}
+ */
 Sprite.prototype.playMovie = function(opts){
     this.MovieClip.playMovie(opts);
 };
