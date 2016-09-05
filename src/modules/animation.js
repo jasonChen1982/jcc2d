@@ -131,13 +131,7 @@ Animation.prototype.update = function(snippet){
     }
 };
 
-/**
- * {
- *   run: [0,1,2,3],
- *   stand: {start: 4,end: 7,next: 'run'},
- *   jump: [8,10,2]
- * }
- */
+
 function MovieClip(element, opts){
     this.element = element;
     this.living = false;

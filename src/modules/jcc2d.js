@@ -814,22 +814,6 @@ Sprite.prototype.renderMe = function (ctx){
 //         return this.fps>0?1000/this.fps>>0:20;
 //     }
 // });
-/**
- * 播放逐祯动画
- *
- *```js
- * sprite.goFrames({
- *      fps: 60, // 逐帧帧率 默认20
- *      repeats: 1,
- *      infinity: true,
- *      alternate: true,
- *      fillMode: 2,  // 逐帧结束后元素停留在哪一帧，帧序号为从0开始的索引
- *      onCompelete: function(){console.log('over');}
- * });
- * ```
- *
- * @param opts {object}
- */
 // Sprite.prototype.goFrames = function (opts){
 //     if(this.count<=1)return;
 //     opts = opts||{};
