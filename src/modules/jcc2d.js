@@ -1039,7 +1039,7 @@ Stage.prototype.render = function (){
     if(this.pt<=0||Date.now()-this.pt>200)this.pt = Date.now();
     var snippet = Date.now()-this.pt;
     this.pt += snippet;
-    this.updateChilds(snippet);
+    this.updateChilds(this.timeScale*snippet);
 
     this.ctx.setTransform(1,0,0,1,0,0);
     if(this.autoClear)this.ctx.clearRect(0,0,this.width,this.height);
