@@ -556,6 +556,8 @@ DisplayObject.prototype.ContainsPoint = function (p,px,py){
 function Container(){
 	JC.DisplayObject.call( this );
     this.cds = [];
+    this.timeScale = 1;
+    this.paused = false;
 }
 JC.Container = Container;
 Container.prototype = Object.create( JC.DisplayObject.prototype );
@@ -609,7 +611,8 @@ Container.prototype.removeChilds = function (){
 };
 Container.prototype.updateTransform = function (snippet){
     if(!this._ready)return;
-	this.upAnimation(snippet);
+    snippet = this.timeScale*snippet;
+	!this.paused&&this.upAnimation(snippet);
 	this.updateMe();
 	this.cds.length>0&&this.updateChilds(snippet);
 };
@@ -674,6 +677,15 @@ Container.prototype.hitTest = function(ev){
 };
 Container.prototype.hitTestMe = function(ev){
     return this.ContainsPoint(this.getBound(),ev.global.x,ev.global.y);
+};
+Container.prototype.pause = function(){
+    this.paused = true;
+};
+Container.prototype.start = function(){
+    this.paused = false;
+};
+Container.prototype.cancle = function(){
+    this.living = false;
 };
 
 
