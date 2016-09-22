@@ -284,7 +284,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param opts {object} 配置
+ * @param opts {object} 过渡动画的配置
  * @param clear {boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.fromTo = function(opts,clear){
@@ -297,7 +297,7 @@ DisplayObject.prototype.fromTo = function(opts,clear){
 /**
  * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
  *
- * @param opts {object} 配置
+ * @param opts {object} 过渡动画的配置
  * @param clear {boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.to = function(opts,clear){
@@ -313,8 +313,8 @@ DisplayObject.prototype.to = function(opts,clear){
 /**
  * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
  *
- * @param opts {object} 配置
- * @param clear {boolean} 是否去掉之前的动画
+ * @param [opts] {object} 关键帧动画的配置
+ * @param clear {boolean} 是否去掉该对象身上的动画
  */
 DisplayObject.prototype.keyFrames = function(opts,clear){
     opts.element = this;
@@ -436,7 +436,7 @@ DisplayObject.prototype.setTransform = function(ctx){
  * @return {object}
  */
 DisplayObject.prototype.getGlobalPos = function(){
-    return {x: this.worldTransform.x,y: this.worldTransform.y};
+    return {x: this.worldTransform.tx,y: this.worldTransform.ty};
 };
 /**
  * 显示对象的事件绑定函数

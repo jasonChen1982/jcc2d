@@ -1,3 +1,12 @@
+
+/**
+ * 动画对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
+
 function Animate(opts){
     this.element = opts.element||{};
     this.duration = opts.duration||300;
@@ -40,6 +49,13 @@ Animate.prototype.cancle = function(){
 };
 
 
+/**
+ * Transition类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画所具备的特性
+ */
 
 function Transition(opts){
     JC.Animate.call(this,opts);
@@ -79,6 +95,13 @@ Transition.prototype.update = function(snippet){
 };
 
 
+/**
+ * Animation类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
 function Animation(opts){
     JC.Animate.call(this,opts);
 
@@ -132,6 +155,14 @@ Animation.prototype.update = function(snippet){
 };
 
 
+/**
+ * MovieClip类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [element] {object} 动画对象 内部传入
+ * @param [opts] {object} 动画配置信息 内部传入
+ */
 function MovieClip(element, opts){
     this.element = element;
     this.living = false;
@@ -271,6 +302,102 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
 });
 
 
+/**
+ * Transition类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画所具备的特性
+ * @param [opts] {object} 动画配置信息
+ */
+
+function PathMotion(opts){
+    JC.Animate.call(this,opts);
+
+    this.points = opts.points;
+    this.attachNormal = opts.attachNormal||false;
+    this.sDeg = false;
+    this.tDeg = 0;
+    this.pDeg = 0;
+}
+JC.PathMotion = PathMotion;
+PathMotion.prototype = Object.create( JC.Animate.prototype );
+PathMotion.prototype.constructor = JC.PathMotion;
+PathMotion.prototype.update = function(snippet){
+    if(this.paused||!this.living)return;
+    this.progress += this.timeScale*snippet;
+
+    if(this.progress < this.duration){
+        if(this.progress<0)return;
+        var pose = this.nextPose();
+        this.onUpdate&&this.onUpdate(pose,this.progress/this.duration);
+    }else{
+        this.element.setVal(this.ATRE);
+        this.onUpdate&&this.onUpdate(this.ATRE,1);
+        if(this.repeats>0||this.infinity){
+            this.repeats>0&&--this.repeats;
+            this.progress = 0;
+            if(this.alternate){
+                var sc = JC.copyJSON(this.ATRS);
+                this.ATRS = JC.copyJSON(this.ATRE);
+                this.ATRE = sc;
+            }else{
+                this.element.setVal(this.ATRS);
+            }
+        }else{
+            this.living = false;
+            this.onCompelete&&this.onCompelete();
+        }
+    }
+};
+PathMotion.prototype.nextPose = function(){
+    var cache = {};
+    // for(var i in this.ATRE){
+    //     cache[i] = JC.TWEEN[this.ease]( this.progress , this.ATRS[i] , this.ATRE[i] - this.ATRS[i] , this.duration );
+    //     if(this.element[i]!==undefined)this.element[i] = cache[i];
+    // }
+    var t = JC.TWEEN[this.ease]( this.progress , 0 , 1 , this.duration );
+    var pos = this.getPoint(t,this.points);
+    cache.x = pos.x;
+    cache.y = pos.y;
+    // cache.y = pos.y;
+    if(this.attachNormal){
+        cache.rotate = this.decomposeRotate(t);
+    }
+    return cache;//this.onUpdate
+};
+PathMotion.prototype.getPoint = function(t, points) {
+    var a = points,
+        len = a.length,
+        rT = 1 - t,
+        l = a.slice(0, len - 1),
+        r = a.slice(1),
+        oP = {};
+    if (len > 3) {
+        var oL = this.getPoint(t, l),
+            oR = this.getPoint(t, r);
+        oP.x = rT * oL.x + t * oR.x;
+        oP.y = rT * oL.y + t * oR.y;
+        // oP.z = rT * oL.z + t * oR.z;
+        return oP;
+    } else {
+        oP.x = rT * rT * points[0].x + 2 * t * rT * points[1].x + t * t * points[2].x;
+        oP.y = rT * rT * points[0].y + 2 * t * rT * points[1].y + t * t * points[2].y;
+        // oP.z = rT * rT * points[0].z + 2 * t * rT * points[1].z + t * t * points[2].z;
+        return oP;
+    }
+};
+PathMotion.prototype.decomposeRotate = function(t) {
+    var p1 = this.getPoint(t,this.points);
+    var p2 = this.getPoint(t+0.01,this.points);
+};
+
+/**
+ * Animator类型动画对象
+ *
+ * @class
+ * @memberof JC
+ */
 function Animator(){
     this.start = false;
     this.animates = [];
