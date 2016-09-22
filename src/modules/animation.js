@@ -390,6 +390,7 @@ PathMotion.prototype.getPoint = function(t, points) {
 PathMotion.prototype.decomposeRotate = function(t) {
     var p1 = this.getPoint(t,this.points);
     var p2 = this.getPoint(t+0.01,this.points);
+    var deg = p1.xxxxx+p2.x;
 };
 
 /**
