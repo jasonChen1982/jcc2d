@@ -89,8 +89,10 @@ Eventer.prototype.on = function(type,fn){
  * @private
  */
 Eventer.prototype.off = function(type,fn){
-    if (this.listeners[type]) {
-        var i = this.listeners[type].length;
+    var ears = this.listeners;
+    var cbs = ears[ type ];
+    var i = ears[type].length;
+    if (cbs&&i>0) {
         if(fn){
             while (i--) {
                 if (cbs[type][i] === fn) {
