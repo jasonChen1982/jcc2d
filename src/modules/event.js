@@ -95,12 +95,12 @@ Eventer.prototype.off = function(type,fn){
     if (cbs&&i>0) {
         if(fn){
             while (i--) {
-                if (cbs[type][i] === fn) {
-                    cbs[type].splice(i, 1);
+                if (cbs[i] === fn) {
+                    cbs.splice(i, 1);
                 }
             }
         }else{
-            cbs[type].length = 0;
+            cbs.length = 0;
         }
     }
 };
