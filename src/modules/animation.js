@@ -137,8 +137,7 @@ Animation.prototype.configKey = function() {
     this.progress = 0;
 };
 Animation.prototype.update = function(snippet) {
-    this.delayCut -= Math.abs(snippet);
-    if (this.paused || !this.living || this.delayCut>0) return;
+    if (this.paused || !this.living) return;
     this.progress += this.timeScale * snippet;
 
     if (this.progress < this.duration) {
