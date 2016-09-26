@@ -239,7 +239,7 @@ function DisplayObject(){
     this.bound = [];
 
 
-    this.Animator = new JC.Animator();
+    this.Animator = new JC.Animator(this);
 }
 JC.DisplayObject = DisplayObject;
 DisplayObject.prototype.constructor = JC.DisplayObject;
@@ -288,10 +288,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param clear {boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.fromTo = function(opts,clear){
-    opts.element = this;
-    this.setVal(opts.from);
-    if(clear)this.Animator.animates.length = 0;
-    return this.Animator.fromTo(opts);
+    return this.Animator.fromTo(opts,clear);
 };
 
 /**
@@ -301,13 +298,17 @@ DisplayObject.prototype.fromTo = function(opts,clear){
  * @param clear {boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.to = function(opts,clear){
-    opts.element = this;
-    opts.from = {};
-    for(var i in opts.to){
-        opts.from[i] = this[i];
-    }
-    if(clear)this.Animator.animates.length = 0;
-    return this.Animator.fromTo(opts);
+    return this.Animator.to(opts,clear);
+};
+
+/**
+ * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
+ *
+ * @param opts {object} 过渡动画的配置
+ * @param clear {boolean} 是否去掉之前的动画
+ */
+DisplayObject.prototype.motion = function(opts,clear){
+    return this.Animator.motion(opts,clear);
 };
 
 /**
@@ -317,8 +318,6 @@ DisplayObject.prototype.to = function(opts,clear){
  * @param clear {boolean} 是否去掉该对象身上的动画
  */
 DisplayObject.prototype.keyFrames = function(opts,clear){
-    opts.element = this;
-    if(clear)this.Animator.animates.length = 0;
     return this.Animator.keyFrames(opts);
 };
 
@@ -417,11 +416,6 @@ DisplayObject.prototype.updateMe = function(){
     }
     this.worldAlpha = this.alpha * this.parent.worldAlpha;
 };
-// DisplayObject.prototype.updateTransform = function(snippet){
-//     if(!this._ready)return;
-// 	this.upAnimation(snippet);
-// 	this.updateMe();
-// };
 DisplayObject.prototype.upAnimation = function(snippet){
     this.Animator.update(snippet);
 };
@@ -685,7 +679,7 @@ Container.prototype.start = function(){
     this.paused = false;
 };
 Container.prototype.cancle = function(){
-    this.Animator.animates.length = 0;
+    this.Animator.clear();
 };
 
 
@@ -943,9 +937,9 @@ Graphics.prototype.drawCall = function(fn,opts){
  */
 function Text(text,font,color){
 	JC.Container.call( this );
-	this.text = text;
-	this.font = font;
-	this.color = color;
+	this.text = text.toString();
+	this.font = font || 'bold 12px Arial';
+	this.color = color || '#000000';
 
     this.textAlign = "center"; // start left center end right
     this.textBaseline = "middle"; // top bottom middle alphabetic hanging
@@ -1014,7 +1008,7 @@ function Stage(id,bgColor){
 
     this.initEvent();
 
-    this.pt = -1;
+    this.pt = null;
 
 }
 JC.Stage = Stage;
@@ -1036,8 +1030,9 @@ Stage.prototype.resize = function (w,h,sw,sh){
     }
 };
 Stage.prototype.render = function (){
-    if(this.pt<=0||Date.now()-this.pt>200)this.pt = Date.now();
+    if(this.pt===null||Date.now()-this.pt>200)this.pt = Date.now();
     var snippet = Date.now()-this.pt;
+    snippet = snippet <= 0 ? 10: snippet;
     this.pt += snippet;
     this.updateChilds(this.timeScale*snippet);
 

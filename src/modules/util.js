@@ -21,6 +21,16 @@ JC.copyJSON = function(json){
 
 JC.DTR = Math.PI/180;
 
+/**
+ * 将弧度转化成角度
+ *
+ * @name RTD
+ * @memberof JC
+ * @property {JC.RTD}
+ */
+
+JC.RTD = 180/Math.PI;
+
 function _rt(val){
     return Object.prototype.toString.call(val);
 }
