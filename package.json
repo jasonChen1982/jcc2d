@@ -1,6 +1,6 @@
 {
   "name": "jcc2d",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "一个轻量级的canvas渲染引擎",
   "upto": "../jcc2d-site/examples/libs",
   "main": "build/jcc2d.js",
@@ -30,6 +30,5 @@
     "mocha": "^2.3.2",
     "gulp-uglify": "^1.5.3"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
