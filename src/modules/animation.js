@@ -79,7 +79,7 @@ Transition.prototype = Object.create(JC.Animate.prototype);
 Transition.prototype.constructor = JC.Transition;
 Transition.prototype.update = function(snippet) {
     if (this.paused || !this.living || this.delayCut>0){
-        this.delayCut -= Math.abs(snippet);
+        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
         return;
     }
 
@@ -87,11 +87,11 @@ Transition.prototype.update = function(snippet) {
 
     var pose = this.nextPose();
     
-    this.onUpdate && this.onUpdate(pose, this.progress / this.duration);
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
     if ((this.direction === -1 && this.progress <= 0) || (this.direction === 1 && this.progress >= this.duration)) {
         if (this.repeats > 0 || this.infinity) {
-            this.repeats > 0 && --this.repeats;
+            if (this.repeats > 0) --this.repeats;
             this.delayCut = this.delay;
             if (this.alternate) {
                 this.direction *= -1;
@@ -101,7 +101,7 @@ Transition.prototype.update = function(snippet) {
             }
         } else {
             this.living = false;
-            this.onCompelete && this.onCompelete(pose);
+            if(this.onCompelete) this.onCompelete(pose);
         }
     }
 };
@@ -143,15 +143,15 @@ Animation.prototype.update = function(snippet) {
     if (this.progress < this.duration) {
         if (this.progress < 0) return;
         var pose = this.nextPose();
-        this.onUpdate && this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+        if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
     } else {
         this.element.setVal(this.ATRE);
-        this.onUpdate && this.onUpdate(this.ATRE, 1, this._keyIndex);
+        if (this.onUpdate) this.onUpdate(this.ATRE, 1, this._keyIndex);
         if (this._keyIndex < this._keyframes.length - 1 && this._keyIndex > 0) {
             this.configKey();
         } else {
             if (this.repeats > 0 || this.infinity) {
-                this.repeats > 0 && --this.repeats;
+                if (this.repeats > 0) --this.repeats;
                 if (this.alternate) {
                     this._direction *= -1;
                 } else {
@@ -160,7 +160,7 @@ Animation.prototype.update = function(snippet) {
                 this.configKey();
             } else {
                 this.living = false;
-                this.onCompelete && this.onCompelete();
+                if (this.onCompelete) this.onCompelete();
             }
         }
     }
@@ -188,17 +188,19 @@ JC.PathMotion = PathMotion;
 PathMotion.prototype = Object.create(JC.Animate.prototype);
 PathMotion.prototype.constructor = JC.PathMotion;
 PathMotion.prototype.update = function(snippet) {
-    this.delayCut -= Math.abs(snippet);
-    if (this.paused || !this.living || this.delayCut>0) return;
+    if (this.paused || !this.living || this.delayCut>0){
+        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
+        return;
+    }
 
     this.progress += this.direction * this.timeScale * snippet;
 
     var pose = this.nextPose();
-    this.onUpdate && this.onUpdate(pose, this.progress / this.duration);
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
     if ((this.direction === -1 && this.progress <= 0) || (this.direction === 1 && this.progress >= this.duration)) {
         if (this.repeats > 0 || this.infinity) {
-            this.repeats > 0 && --this.repeats;
+            if (this.repeats > 0) --this.repeats;
             this.delayCut = this.delay;
             if (this.alternate) {
                 this.direction *= -1;
@@ -208,7 +210,7 @@ PathMotion.prototype.update = function(snippet) {
             }
         } else {
             this.living = false;
-            this.onCompelete && this.onCompelete();
+            if (this.onCompelete) this.onCompelete();
         }
     }
 };
@@ -272,14 +274,14 @@ PathMotion.prototype.decomposeRotate = function(t, pos) {
  */
 function Animator(element) {
     this.element = element;
-    this.start = false;
+    // this.start = false;
     this.animates = [];
 }
 JC.Animator = Animator;
 Animator.prototype.update = function(snippet) {
     for (var i = 0; i < this.animates.length; i++) {
         if (!this.animates[i].living) this.animates.splice(i, 1);
-        this.animates[i] && this.animates[i].update(snippet);
+        if (this.animates[i]) this.animates[i].update(snippet);
     }
 };
 Animator.prototype.fromTo = function(opts, clear) {
@@ -363,7 +365,7 @@ MovieClip.prototype.update = function(snippet) {
         // this.onUpdate&&this.onUpdate(this.index);
     } else {
         if (this.repeats > 0 || this.infinity) {
-            this.repeats > 0 && --this.repeats;
+            if (this.repeats > 0) --this.repeats;
             if (this.alternate) {
                 this.direction *= -1;
                 this.index += this.direction;
@@ -376,8 +378,8 @@ MovieClip.prototype.update = function(snippet) {
         } else {
             this.living = false;
             this.index = this.fillMode;
-            this.onCompelete && this.onCompelete();
-            this.next && this.next();
+            if (this.onCompelete) this.onCompelete();
+            if (this.next) this.next();
         }
     }
 };

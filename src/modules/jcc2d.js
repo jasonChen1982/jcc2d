@@ -459,7 +459,7 @@ DisplayObject.prototype.off = function(type,fn){
 DisplayObject.prototype.once = function(type,fn){
     var This = this,
         cb = function(ev){
-            fn&&fn(ev);
+            if (fn) fn(ev);
             This.event.off(type,cb);
         };
     this.event.on(type,cb);
@@ -604,11 +604,11 @@ Container.prototype.removeChilds = function (){
     }
 };
 Container.prototype.updateTransform = function (snippet){
-    if(!this._ready)return;
+    if (!this._ready) return;
     snippet = this.timeScale*snippet;
-	!this.paused&&this.upAnimation(snippet);
+	if (!this.paused) this.upAnimation(snippet);
 	this.updateMe();
-	this.cds.length>0&&this.updateChilds(snippet);
+	if (this.cds.length>0) this.updateChilds(snippet);
 };
 Container.prototype.updateChilds = function (snippet){
     for (var i=0,l=this.cds.length; i<l; i++) {
@@ -619,9 +619,9 @@ Container.prototype.updateChilds = function (snippet){
 Container.prototype.render = function (ctx){
 	ctx.save();
 	this.setTransform(ctx);
-	this.mask&&this.mask.render(ctx);
+	if (this.mask) this.mask.render(ctx);
 	this.renderMe(ctx);
-	this.cds.length>0&&this.renderChilds(ctx);
+	if (this.cds.length>0) this.renderChilds(ctx);
 	ctx.restore();
 };
 Container.prototype.renderMe = function (){
@@ -792,7 +792,7 @@ Sprite.prototype.playMovie = function(opts){
 //     return obj;
 // };
 Sprite.prototype.renderMe = function (ctx){
-    if(!this._ready)return;
+    if (!this._ready) return;
     var pos = this.MovieClip.getFramePos();
     ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
     // this.upFS();
