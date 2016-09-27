@@ -19,6 +19,7 @@
   "author": "jasonChen",
   "license": "ISC",
   "devDependencies": {
+    "gulp": "^3.9.1",
     "gulp-include": "^2.2.1",
     "gulp-jsdoc3": "^0.3.0",
     "gulp-sourcemaps": "^2.0.0-alpha",
@@ -30,6 +31,5 @@
     "gulp-uglify": "^1.5.3"
   },
   "dependencies": {
-    "gulp": "^3.9.1"
   }
 }
