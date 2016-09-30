@@ -328,7 +328,7 @@ DisplayObject.prototype.keyFrames = function(opts,clear){
  * @private
  */
 DisplayObject.prototype.isVisible = function(){
-	return !!(this.visible && this.alpha>0 && this.scaleX*this.scaleY>0);
+	return !!(this.visible && this.alpha>0 && this.scaleX*this.scaleY!==0);
 };
 
 /**
