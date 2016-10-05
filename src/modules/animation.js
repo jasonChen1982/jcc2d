@@ -83,13 +83,14 @@ Transition.prototype.update = function(snippet) {
         return;
     }
 
-    this.progress += this.direction * this.timeScale * snippet;
+    var progress = this.progress += this.direction * this.timeScale * snippet;
+    this.progress = JC.clamp(progress,0,this.duration);
 
     var pose = this.nextPose();
     
     if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
-    if ((this.direction === -1 && this.progress <= 0) || (this.direction === 1 && this.progress >= this.duration)) {
+    if ((this.direction === -1 && progress <= 0) || (this.direction === 1 && progress >= this.duration)) {
         if (this.repeats > 0 || this.infinity) {
             if (this.repeats > 0) --this.repeats;
             this.delayCut = this.delay;

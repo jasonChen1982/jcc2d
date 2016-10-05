@@ -135,4 +135,7 @@ JC.euclideanModulo = function(n, m){
 };
 
 
+JC.clamp = function(x, a, b) {
+    return (x < a) ? a : ((x > b) ? b : x);
+}
 

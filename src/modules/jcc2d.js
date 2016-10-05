@@ -363,9 +363,9 @@ DisplayObject.prototype.updateMe = function(){
             this.pivotY,
             this.scaleX,
             this.scaleY,
-            this.rotation,
-            this.skewX,
-            this.skewY
+            this.rotation*JC.DTR,
+            this.skewX*JC.DTR,
+            this.skewY*JC.DTR
         );
 
         wt.a  = JC.TEMP_MATRIX.a  * pt.a + JC.TEMP_MATRIX.b  * pt.c;
