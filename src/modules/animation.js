@@ -19,6 +19,7 @@ function Animate(opts) {
     this.ease = opts.ease || 'easeBoth';
     this.repeats = opts.repeats || 0;
     this.delay = opts.delay || 0;
+    this.wait = opts.wait || 0;
     this.delayCut = this.delay;
     this.progress = 0;
     this.direction = 1;
@@ -78,6 +79,10 @@ JC.Transition = Transition;
 Transition.prototype = Object.create(JC.Animate.prototype);
 Transition.prototype.constructor = JC.Transition;
 Transition.prototype.update = function(snippet) {
+    if(this.wait>0){
+        this.wait -= Math.abs(snippet);
+        return;
+    }
     if (this.paused || !this.living || this.delayCut>0){
         if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
         return;
@@ -189,6 +194,10 @@ JC.PathMotion = PathMotion;
 PathMotion.prototype = Object.create(JC.Animate.prototype);
 PathMotion.prototype.constructor = JC.PathMotion;
 PathMotion.prototype.update = function(snippet) {
+    if(this.wait>0){
+        this.wait -= Math.abs(snippet);
+        return;
+    }
     if (this.paused || !this.living || this.delayCut>0){
         if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
         return;
