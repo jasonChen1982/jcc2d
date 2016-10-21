@@ -1,34 +1,20 @@
-(function (root, factory) {
-  if (typeof exports === 'object') {
-    // CommonJS
-    module.exports = factory();
-  } else if (typeof define === 'function' && define.amd) {
-    // AMD
-    define(function () {
-      return (root.JC = factory());
-    });
-  } else {
-    // Global Variables
-    root.JC = factory();
-  }
-}(this, function () {
 
-	var JC = window.JC||{};
+import './modules/util/RAF';
+import './modules/eventer/InteractionData';
+import './modules/eventer/Eventer';
 
-	//=include modules/RAF.js
+import './modules/animation/Animation';
+// import './modules/util/TWEEN';
+export { UTILS } from './modules/util/UTILS';
+export { Texture, Loader, loaderUtil } from './modules/util/Loader';
 
-  //=include modules/util.js
+export { Point } from './modules/core/math/Point';
+export { Matrix, IDENTITY, TEMP_MATRIX } from './modules/core/math/Matrix';
 
-	//=include modules/tween.js
+export { DisplayObject } from './modules/core/display/DisplayObject';
+export { Container } from './modules/core/display/Container';
+export { Sprite } from './modules/core/display/Sprite';
+export { Graphics } from './modules/core/display/Graphics';
+export { Text } from './modules/core/display/Text';
 
-  //=include modules/event.js
-
-	//=include modules/loader.js
-
-  //=include modules/animation.js
-
-	//=include modules/jcc2d.js
-
-	return JC;
-
-}));
+export { Stage } from './modules/core/Stage';

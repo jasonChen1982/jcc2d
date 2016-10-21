@@ -1,2 +1,2317 @@
-!function(t,i){"object"==typeof exports?module.exports=i():"function"==typeof define&&define.amd?define(function(){return t.JC=i()}):t.JC=i()}(this,function(){function t(t){return Object.prototype.toString.call(t)}function i(){this.global={x:-1e5,y:-1e5},this.target=null,this.originalEvent=null,this.cancleBubble=!1,this.ratio=1,this.type=""}function e(){this.touchstarted=!1,this.mouseDowned=!1,this.listeners={}}function s(t){g.Eventer.call(this),this.texture=null,this.width=0,this.height=0,this.loaded=!1,this.dispose(t);var i=this;this.on("load",function(){i.width=i.texture.width,i.height=i.texture.height})}function n(){g.Eventer.call(this),this.textures={},this._total=0,this._failed=0,this._received=0}function o(t){this.element=t.element||{},this.duration=t.duration||300,this.living=!0,this.onCompelete=t.onCompelete||null,this.onUpdate=t.onUpdate||null,this.infinity=t.infinity||!1,this.alternate=t.alternate||!1,this.ease=t.ease||"easeBoth",this.repeats=t.repeats||0,this.delay=t.delay||0,this.wait=t.wait||0,this.delayCut=this.delay,this.progress=0,this.direction=1,this.timeScale=t.timeScale||1,this.paused=!1}function h(t){g.Animate.call(this,t),this.ATRS=t.from,this.ATRE=t.to}function r(t){g.Animate.call(this,t),this._keyframes=t.keys,this._keyIndex=0,this._direction=1,this._keyConfig=t.keyConfig,this.configKey()}function a(t){g.Animate.call(this,t),this.points=t.points,this.attachNormal=t.attachNormal||!1,this._cacheRotate=this.element.rotation;var i=this._cacheRotate*g.DTR;this._cacheVector={x:10*Math.cos(i),y:10*Math.sin(i)}}function c(t){this.element=t,this.animates=[]}function p(t,i){this.element=t,this.living=!1,this.onCompelete=null,this.infinity=!1,this.alternate=!1,this.repeats=0,this.animations=i.animations||{},this.index=0,this.direction=1,this.frames=[],this.sy=i.sy||0,this.sx=i.sx||0,this.fillMode=0,this.fps=16,this.paused=!1,this.pt=0,this.nt=0}function u(){this.a=1,this.b=0,this.c=0,this.d=1,this.tx=0,this.ty=0}function l(){this._ready=!0,this.visible=!0,this.worldAlpha=1,this.alpha=1,this.scaleX=1,this.scaleY=1,this.skewX=0,this.skewY=0,this.rotation=0,this.rotationCache=0,this._sr=0,this._cr=1,this.x=0,this.y=0,this.pivotX=0,this.pivotY=0,this.mask=null,this.parent=null,this.worldTransform=new u,this.event=new g.Eventer,this.passEvent=!1,this.bound=[],this.Animator=new g.Animator(this)}function d(){g.DisplayObject.call(this),this.cds=[],this.timeScale=1,this.paused=!1}function y(t){if(g.Container.call(this),this.texture=t.texture,this.texture.loaded)this.upTexture(t);else{var i=this;this._ready=!1,this.texture.on("load",function(){i.upTexture(t),i._ready=!0})}this.MovieClip=new g.MovieClip(this,t)}function f(){g.Container.call(this),this.cacheCanvas=null}function m(t,i,e){g.Container.call(this),this.text=t.toString(),this.font=i||"bold 12px Arial",this.color=e||"#000000",this.textAlign="center",this.textBaseline="middle",this.outline=0,this.lineWidth=1,this.US=!1,this.UF=!0}function v(t,i){g.Container.call(this),this.type="stage",this.canvas=document.getElementById(t),this.ctx=this.canvas.getContext("2d"),this.cds=[],this.canvas.style.backgroundColor=i||"transparent",this.autoClear=!0,this.setStyle=!1,this.width=this.canvas.width,this.height=this.canvas.height,"imageSmoothingEnabled"in this.ctx?this.ctx.imageSmoothingEnabled=!0:"webkitImageSmoothingEnabled"in this.ctx?this.ctx.webkitImageSmoothingEnabled=!0:"mozImageSmoothingEnabled"in this.ctx?this.ctx.mozImageSmoothingEnabled=!0:"oImageSmoothingEnabled"in this.ctx&&(this.ctx.oImageSmoothingEnabled=!0),this.initEvent(),this.pt=null}var g=window.JC||{};return function(){for(var t=0,i=["ms","moz","webkit","o"],e=0;e<i.length&&!window.requestAnimationFrame;++e)window.requestAnimationFrame=window[i[e]+"RequestAnimationFrame"],window.cancelAnimationFrame=window[i[e]+"CancelAnimationFrame"]||window[i[e]+"CancelRequestAnimationFrame"];window.requestAnimationFrame||(window.requestAnimationFrame=function(i){var e=(new Date).getTime(),s=Math.max(0,16-(e-t)),n=window.setTimeout(function(){i(e+s)},s);return t=e+s,n}),window.cancelAnimationFrame||(window.cancelAnimationFrame=function(t){clearTimeout(t)}),window.RAF=window.requestAnimFrame=window.requestAnimationFrame,window.CAF=window.cancelAnimationFrame}(),g.copyJSON=function(t){return JSON.parse(JSON.stringify(t))},g.DTR=Math.PI/180,g.RTD=180/Math.PI,g.isArray=function(){var i=t([]);return function(t){return Object.prototype.toString.call(t)===i}}(),g.isObject=function(){var i=t({});return function(t){return Object.prototype.toString.call(t)===i}}(),g.isString=function(){var i=t("s");return function(t){return Object.prototype.toString.call(t)===i}}(),g.isNumber=function(){var i=t(1);return function(t){return Object.prototype.toString.call(t)===i}}(),g.isFunction=function(){var i=t(function(){});return function(t){return Object.prototype.toString.call(t)===i}}(),g.random=function(t,i){return g.isArray(t)?t[~~(Math.random()*t.length)]:(g.isNumber(i)||(i=t||1,t=0),t+Math.random()*(i-t))},g.euclideanModulo=function(t,i){return(t%i+i)%i},g.clamp=function(t,i,e){return t<i?i:t>e?e:t},g.TWEEN={easeBoth:function(t,i,e,s){return(t/=s/2)<1?e/2*t*t+i:-e/2*(--t*(t-2)-1)+i},extend:function(t){if(t)for(var i in t)"extend"!==i&&t[i]&&(this[i]=t[i])}},g.InteractionData=i,e.prototype.on=function(t,i){this.listeners[t]=this.listeners[t]||[],this.listeners[t].push(i)},e.prototype.off=function(t,i){var e=this.listeners,s=e[t],n=e[t].length;if(s&&n>0)if(i)for(;n--;)s[n]===i&&s.splice(n,1);else s.length=0},e.prototype.emit=function(t){if(void 0!==this.listeners){var i=this.listeners,e=i[t.type];if(void 0!==e){var s,n=e.length;for(s=0;s<n;s++)e[s].call(this,t)}}},g.Eventer=e,g.Texture=s,s.prototype=Object.create(g.Eventer.prototype),s.prototype.dispose=function(t){var i=this;"string"==typeof t&&(this.texture=new Image,this.texture.crossOrigin="",this.texture.src=t,this.texture.onload=function(){i.loaded=!0,i.emit({type:"load"})},this.texture.onerror=function(){i.emit({type:"error"})}),t instanceof Image&&t.width*t.height>0&&(this.texture=t,this.width=t.width,this.height=t.height)},g.Loader=n,n.prototype=Object.create(g.Eventer.prototype),n.prototype.load=function(t){function i(t){t.on("load",function(){e._received++,e.emit({type:"update"}),e._received+e._failed>=e._total&&e.emit({type:"compelete"})}),t.on("error",function(){e._failed++,e.emit({type:"update"}),e._received+e._failed>=e._total&&e.emit({type:"compelete"})})}var e=this;this._total=0,this._failed=0,this._received=0;for(var n in t)this._total++,this.textures[n]=new s(t[n]),i(this.textures[n]);return this},n.prototype.getById=function(t){return this.textures[t]},Object.defineProperty(s.prototype,"progress",{get:function(){return 0===this._total?1:(this._received+this._failed)/this._total}}),g.loaderUtil=function(t){return(new g.Loader).load(t)},g.Animate=o,o.prototype._swapEase=function(){var t=this.ease;t.indexOf("In")>0?t=t.replace("In","Out"):t.indexOf("Out")>0&&(t=t.replace("Out","In")),this.ease=t},o.prototype.nextPose=function(){var t={};for(var i in this.ATRE)t[i]=g.TWEEN[this.ease](this.progress,this.ATRS[i],this.ATRE[i]-this.ATRS[i],this.duration),void 0!==this.element[i]&&(this.element[i]=t[i]);return t},o.prototype.pause=function(){this.paused=!0},o.prototype.start=function(){this.paused=!1},o.prototype.stop=function(){this.progress=this.duration},o.prototype.cancle=function(){this.living=!1},g.Transition=h,h.prototype=Object.create(g.Animate.prototype),h.prototype.constructor=g.Transition,h.prototype.update=function(t){if(this.wait>0)return void(this.wait-=Math.abs(t));if(this.paused||!this.living||this.delayCut>0)return void(this.delayCut>0&&(this.delayCut-=Math.abs(t)));var i=this.progress+=this.direction*this.timeScale*t;this.progress=g.clamp(i,0,this.duration);var e=this.nextPose();this.onUpdate&&this.onUpdate(e,this.progress/this.duration),(this.direction===-1&&i<=0||1===this.direction&&i>=this.duration)&&(this.repeats>0||this.infinity?(this.repeats>0&&--this.repeats,this.delayCut=this.delay,this.alternate?(this.direction*=-1,this._swapEase()):this.progress=0):(this.living=!1,this.onCompelete&&this.onCompelete(e)))},g.Animation=r,r.prototype=Object.create(g.Animate.prototype),r.prototype.constructor=g.Animation,r.prototype.configKey=function(){this.ATRS=this._keyframes[this._keyIndex],this._keyIndex+=this._direction,this.ATRE=this._keyframes[this._keyIndex];var t=this._keyConfig[Math.min(this._keyIndex,this._keyIndex-this._direction)]||{};this.ease=t.ease||this.ease,this.duration=t.duration||this.duration,this.progress=0},r.prototype.update=function(t){if(!this.paused&&this.living)if(this.progress+=this.timeScale*t,this.progress<this.duration){if(this.progress<0)return;var i=this.nextPose();this.onUpdate&&this.onUpdate(i,this.progress/this.duration,this._keyIndex)}else this.element.setVal(this.ATRE),this.onUpdate&&this.onUpdate(this.ATRE,1,this._keyIndex),this._keyIndex<this._keyframes.length-1&&this._keyIndex>0?this.configKey():this.repeats>0||this.infinity?(this.repeats>0&&--this.repeats,this.alternate?this._direction*=-1:this._keyIndex=0,this.configKey()):(this.living=!1,this.onCompelete&&this.onCompelete())},g.PathMotion=a,a.prototype=Object.create(g.Animate.prototype),a.prototype.constructor=g.PathMotion,a.prototype.update=function(t){if(this.wait>0)return void(this.wait-=Math.abs(t));if(this.paused||!this.living||this.delayCut>0)return void(this.delayCut>0&&(this.delayCut-=Math.abs(t)));this.progress+=this.direction*this.timeScale*t;var i=this.nextPose();this.onUpdate&&this.onUpdate(i,this.progress/this.duration),(this.direction===-1&&this.progress<=0||1===this.direction&&this.progress>=this.duration)&&(this.repeats>0||this.infinity?(this.repeats>0&&--this.repeats,this.delayCut=this.delay,this.alternate?(this.direction*=-1,this._swapEase()):this.progress=0):(this.living=!1,this.onCompelete&&this.onCompelete()))},a.prototype.nextPose=function(){var t={},i=0,e=g.TWEEN[this.ease](this.progress,0,1,this.duration),s=this.getPoint(e,this.points);return t.x=s.x,t.y=s.y,this.attachNormal&&(i=this.decomposeRotate(e,s),t.rotation=i===!1?this.preDegree:i,t.rotation+=this._cacheRotate,i!==!1&&(this.preDegree=i)),this.element.setVal(t),t},a.prototype.getPoint=function(t,i){var e=i,s=e.length,n=1-t,o=e.slice(0,s-1),h=e.slice(1),r={};if(s>3){var a=this.getPoint(t,o),c=this.getPoint(t,h);return r.x=n*a.x+t*c.x,r.y=n*a.y+t*c.y,r}return r.x=n*n*i[0].x+2*t*n*i[1].x+t*t*i[2].x,r.y=n*n*i[0].y+2*t*n*i[1].y+t*t*i[2].y,r},a.prototype.decomposeRotate=function(t,i){var e=i||this.getPoint(t,this.points),s=this.getPoint(t+.01,this.points),n={x:s.x-e.x,y:s.y-e.y},o=this._cacheVector.x*n.y-n.x*this._cacheVector.y,h=o>0?1:-1,r=(n.x*this._cacheVector.x+n.y*this._cacheVector.y)/(Math.sqrt(n.x*n.x+n.y*n.y)*Math.sqrt(this._cacheVector.x*this._cacheVector.x+this._cacheVector.y*this._cacheVector.y));return!isNaN(r)&&h*Math.acos(r)*g.RTD},g.Animator=c,c.prototype.update=function(t){for(var i=0;i<this.animates.length;i++)this.animates[i].living||this.animates.splice(i,1),this.animates[i]&&this.animates[i].update(t)},c.prototype.fromTo=function(t,i){return this.element.setVal(t.from),t.element=this.element,this._addMove(new g.Transition(t),i)},c.prototype.to=function(t,i){t.from={};for(var e in t.to)t.from[e]=this.element[e];return t.element=this.element,this._addMove(new g.Transition(t),i)},c.prototype.motion=function(t,i){return t.element=this.element,this._addMove(new g.PathMotion(t),i)},c.prototype.keyFrames=function(t,i){return t.element=this.element,this._addMove(new g.Animation(t),i)},c.prototype._addMove=function(t,i){return i&&this.clear(),this.animates.push(t),t},c.prototype.clear=function(){this.animates.length=0},g.MovieClip=p,p.prototype.update=function(t){if(!this.paused&&this.living&&(this.nt+=t,!(this.nt-this.pt<this.interval))){this.pt=this.nt;var i=this.index+this.direction;i<this.frames.length&&i>=0?this.index=i:this.repeats>0||this.infinity?(this.repeats>0&&--this.repeats,this.alternate?(this.direction*=-1,this.index+=this.direction):(this.direction=1,this.index=0)):(this.living=!1,this.index=this.fillMode,this.onCompelete&&this.onCompelete(),this.next&&this.next())}},p.prototype.getFramePos=function(){var t={x:this.sx,y:this.sy},i=this.frames[this.index];if(i>0){var e=this.element._textureW/this.element.width>>0,s=this.sx/this.element.width>>0,n=this.sy/this.element.height>>0,o=n+(s+i)/e>>0,h=(s+i)%e;t.x=h*this.element.width,t.y=o*this.element.height}return t},p.prototype.playMovie=function(t){this.next=null;var i=this.format(t.movie);g.isArray(i)&&(this.frames=i,this.index=0,this.direction=1,this.fillMode=t.fillMode||0,this.fps=t.fps||this.fps,this.infinity=t.infinity||!1,this.alternate=t.alternate||!1,this.repeats=t.repeats||0,this.living=!0,this.onCompelete=t.onCompelete||null)},p.prototype.format=function(t){if(g.isString(t)){var i=this.animations[t];return i?this.format(i):(console.warn("%c JC.MovieClip warn %c: you didn`t config %c"+t+"%c in animations ","color: #f98165; background: #80a89e","color: #80a89e; background: #cad9d5;","color: #f98165; background: #cad9d5","color: #80a89e; background: #cad9d5"),!1)}if(g.isArray(t))return t;if(g.isObject(t)){for(var e=[],s=t.start;s<=t.end;s++)e.push(s);if(t.next&&this.animations[t.next]){var n=this;this.next=function(){n.playMovie({movie:this.animations[t.next],infinity:!0})}}return e}},p.prototype.pause=function(){this.paused=!0},p.prototype.start=function(){this.paused=!1},p.prototype.cancle=function(){this.living=!1},Object.defineProperty(p.prototype,"interval",{get:function(){return this.fps>0?1e3/this.fps>>0:16}}),g.Matrix=u,u.prototype.fromArray=function(t){this.a=t[0],this.b=t[1],this.c=t[3],this.d=t[4],this.tx=t[2],this.ty=t[5]},u.prototype.toArray=function(t){this.array||(this.array=new g.Float32Array(9));var i=this.array;return t?(i[0]=this.a,i[1]=this.b,i[2]=0,i[3]=this.c,i[4]=this.d,i[5]=0,i[6]=this.tx,i[7]=this.ty,i[8]=1):(i[0]=this.a,i[1]=this.c,i[2]=this.tx,i[3]=this.b,i[4]=this.d,i[5]=this.ty,i[6]=0,i[7]=0,i[8]=1),i},u.prototype.apply=function(t,i){return i=i||{},i.x=this.a*t.x+this.c*t.y+this.tx,i.y=this.b*t.x+this.d*t.y+this.ty,i},u.prototype.applyInverse=function(t,i){var e=1/(this.a*this.d+this.c*-this.b);return i.x=this.d*e*t.x+-this.c*e*t.y+(this.ty*this.c-this.tx*this.d)*e,i.y=this.a*e*t.y+-this.b*e*t.x+(-this.ty*this.a+this.tx*this.b)*e,i},u.prototype.translate=function(t,i){return this.tx+=t,this.ty+=i,this},u.prototype.scale=function(t,i){return this.a*=t,this.d*=i,this.c*=t,this.b*=i,this.tx*=t,this.ty*=i,this},u.prototype.rotate=function(t){var i=Math.cos(t),e=Math.sin(t),s=this.a,n=this.c,o=this.tx;return this.a=s*i-this.b*e,this.b=s*e+this.b*i,this.c=n*i-this.d*e,this.d=n*e+this.d*i,this.tx=o*i-this.ty*e,this.ty=o*e+this.ty*i,this},u.prototype.append=function(t){var i=this.a,e=this.b,s=this.c,n=this.d;return this.a=t.a*i+t.b*s,this.b=t.a*e+t.b*n,this.c=t.c*i+t.d*s,this.d=t.c*e+t.d*n,this.tx=t.tx*i+t.ty*s+this.tx,this.ty=t.tx*e+t.ty*n+this.ty,this},u.prototype.identity=function(){return this.a=1,this.b=0,this.c=0,this.d=1,this.tx=0,this.ty=0,this},u.prototype.setTransform=function(t,i,e,s,n,o,h,r,a){var c,p,u,l,d,y,f,m,v,g;return d=Math.sin(h),y=Math.cos(h),f=Math.cos(a),m=Math.sin(a),v=-Math.sin(r),g=Math.cos(r),c=y*n,p=d*n,u=-d*o,l=y*o,this.a=f*c+m*u,this.b=f*p+m*l,this.c=v*c+g*u,this.d=v*p+g*l,this.tx=t+(e*c+s*u),this.ty=i+(e*p+s*l),this},g.IDENTITY=new u,g.TEMP_MATRIX=new u,g.DisplayObject=l,l.prototype.constructor=g.DisplayObject,Object.defineProperty(l.prototype,"scale",{get:function(){return this.scaleX},set:function(t){this.scaleX=this.scaleY=t}}),l.prototype.fromTo=function(t,i){return this.Animator.fromTo(t,i)},l.prototype.to=function(t,i){return this.Animator.to(t,i)},l.prototype.motion=function(t,i){return this.Animator.motion(t,i)},l.prototype.keyFrames=function(t,i){return this.Animator.keyFrames(t)},l.prototype.isVisible=function(){return!!(this.visible&&this.alpha>0&&this.scaleX*this.scaleY!==0)},l.prototype.removeMask=function(){this.mask=null},l.prototype.setVal=function(t){if(void 0!==t)for(var i in t)void 0!==this[i]&&(this[i]=t[i])},l.prototype.updateMe=function(){var t,i,e,s,n,o,h=this.parent.worldTransform,r=this.worldTransform;this.skewX||this.skewY?(g.TEMP_MATRIX.setTransform(this.x,this.y,this.pivotX,this.pivotY,this.scaleX,this.scaleY,this.rotation*g.DTR,this.skewX*g.DTR,this.skewY*g.DTR),r.a=g.TEMP_MATRIX.a*h.a+g.TEMP_MATRIX.b*h.c,r.b=g.TEMP_MATRIX.a*h.b+g.TEMP_MATRIX.b*h.d,r.c=g.TEMP_MATRIX.c*h.a+g.TEMP_MATRIX.d*h.c,r.d=g.TEMP_MATRIX.c*h.b+g.TEMP_MATRIX.d*h.d,r.tx=g.TEMP_MATRIX.tx*h.a+g.TEMP_MATRIX.ty*h.c+h.tx,r.ty=g.TEMP_MATRIX.tx*h.b+g.TEMP_MATRIX.ty*h.d+h.ty):this.rotation%360?(this.rotation!==this.rotationCache&&(this.rotationCache=this.rotation,this._sr=Math.sin(this.rotation*g.DTR),this._cr=Math.cos(this.rotation*g.DTR)),t=this._cr*this.scaleX,i=this._sr*this.scaleX,e=-this._sr*this.scaleY,s=this._cr*this.scaleY,n=this.x,o=this.y,(this.pivotX||this.pivotY)&&(n-=this.pivotX*t+this.pivotY*e,o-=this.pivotX*i+this.pivotY*s),r.a=t*h.a+i*h.c,r.b=t*h.b+i*h.d,r.c=e*h.a+s*h.c,r.d=e*h.b+s*h.d,r.tx=n*h.a+o*h.c+h.tx,r.ty=n*h.b+o*h.d+h.ty):(t=this.scaleX,s=this.scaleY,n=this.x-this.pivotX*t,o=this.y-this.pivotY*s,r.a=t*h.a,r.b=t*h.b,r.c=s*h.c,r.d=s*h.d,r.tx=n*h.a+o*h.c+h.tx,r.ty=n*h.b+o*h.d+h.ty),this.worldAlpha=this.alpha*this.parent.worldAlpha},l.prototype.upAnimation=function(t){this.Animator.update(t)},l.prototype.setTransform=function(t){var i=this.worldTransform;t.globalAlpha=this.worldAlpha,t.setTransform(i.a,i.b,i.c,i.d,i.tx,i.ty)},l.prototype.getGlobalPos=function(){return{x:this.worldTransform.tx,y:this.worldTransform.ty}},l.prototype.on=function(t,i){this.event.on(t,i)},l.prototype.off=function(t,i){this.event.off(t,i)},l.prototype.once=function(t,i){var e=this,s=function(n){i&&i(n),e.event.off(t,s)};this.event.on(t,s)},l.prototype.getBound=function(){for(var t=[],i=this.bound.length>>1,e=0;e<i;e++){var s=this.worldTransform.apply({x:this.bound[2*e],y:this.bound[2*e+1]});t[2*e]=s.x,t[2*e+1]=s.y}return t},l.prototype.setBound=function(t,i){var e=this.bound.length;e>4&&i||(t=t||[-this.regX,this.regY,-this.regX,this.regY-this.height,-this.regX+this.width,this.regY-this.height,-this.regX+this.width,this.regY],this.bound=t)},l.prototype.ContainsPoint=function(t,i,e){for(var s,n=t.length>>1,o=t[2*n-3]-e,h=t[2*n-2]-i,r=t[2*n-1]-e,a=0;a<n;a++)s=h,o=r,h=t[2*a]-i,r=t[2*a+1]-e,o!=r&&(lup=r>o);var c=0;for(a=0;a<n;a++)if(s=h,o=r,h=t[2*a]-i,r=t[2*a+1]-e,!(o<0&&r<0||o>0&&r>0||s<0&&h<0)){if(o==r&&Math.min(s,h)<=0)return!0;if(o!=r){var p=s+(h-s)*-o/(r-o);if(0===p)return!0;p>0&&c++,0===o&&lup&&r>o&&c--,0===o&&!lup&&r<o&&c--,lup=r>o}}return 1==(1&c)},g.Container=d,d.prototype=Object.create(g.DisplayObject.prototype),d.prototype.constructor=g.Container,d.prototype.addChilds=function(t){if(void 0===t)return t;var i=arguments.length;if(i>1){for(var e=0;e<i;e++)this.addChilds(arguments[e]);return arguments[i-1]}return t.parent&&t.parent.removeChilds(t),t.parent=this,this.cds.push(t),t},d.prototype.removeChilds=function(){var t=arguments.length;if(t>1)for(var i=0;i<t;i++)this.removeChilds(arguments[i]);else if(1===t)for(var e=0;e<this.cds.length;e++)this.cds[e]===arguments[0]&&(this.cds.splice(e,1),this.cds[e].parent=null,e--)},d.prototype.updateTransform=function(t){this._ready&&(t=this.timeScale*t,this.paused||this.upAnimation(t),this.updateMe(),this.cds.length>0&&this.updateChilds(t))},d.prototype.updateChilds=function(t){for(var i=0,e=this.cds.length;i<e;i++){var s=this.cds[i];s.updateTransform(t)}},d.prototype.render=function(t){t.save(),this.setTransform(t),this.mask&&this.mask.render(t),this.renderMe(t),this.cds.length>0&&this.renderChilds(t),t.restore()},d.prototype.renderMe=function(){return!0},d.prototype.renderChilds=function(t){for(var i=0,e=this.cds.length;i<e;i++){var s=this.cds[i];s.isVisible()&&s._ready&&s.render(t)}},d.prototype.noticeEvent=function(t){for(var i=this.cds.length-1;i>=0;){var e=this.cds[i];if(e.visible&&(e.noticeEvent(t),t.target))break;i--}this.upEvent(t)},d.prototype.upEvent=function(t){if(this._ready&&(t.target||!this.passEvent&&this.hitTest(t))&&(!t.cancleBubble||t.target===this)){if(!(this.event.listeners[t.type]&&this.event.listeners[t.type].length>0))return;this.event.emit(t)}},d.prototype.hitTest=function(t){if("touchmove"===t.type||"touchend"===t.type||"mousemove"===t.type||"mouseup"===t.type){var i=this.event.touchstarted;return i&&(t.target=this),"touchend"!==t.type&&"mouseup"!==t.type||(this.event.touchstarted=!1),i}return!!this.hitTestMe(t)&&(t.target=this,"touchstart"!==t.type&&"mousedown"!==t.type||(this.event.touchstarted=!0),!0)},d.prototype.hitTestMe=function(t){return this.ContainsPoint(this.getBound(),t.global.x,t.global.y)},d.prototype.pause=function(){this.paused=!0},d.prototype.start=function(){this.paused=!1},d.prototype.cancle=function(){this.Animator.clear()},g.Sprite=y,y.prototype=Object.create(g.Container.prototype),y.prototype.constructor=g.Sprite,y.prototype.upTexture=function(t){this._textureW=t.texture.width,this._textureH=t.texture.height,this.width=t.width||this._textureW,this.height=t.height||this._textureH,this.regX=this.width>>1,this.regY=this.height>>1,this.setBound(null,!0)},y.prototype.upAnimation=function(t){this.Animator.update(t),this.MovieClip.update(t)},y.prototype.playMovie=function(t){this.MovieClip.playMovie(t)},y.prototype.renderMe=function(t){if(this._ready){var i=this.MovieClip.getFramePos();t.drawImage(this.texture.texture,i.x,i.y,this.width,this.height,-this.regX,-this.regY,this.width,this.height)}},g.Graphics=f,f.prototype=Object.create(g.Container.prototype),f.prototype.constructor=g.Graphics,f.prototype.renderMe=function(t){this.draw&&(this.cached||this.cache?(this.cache&&(this.cacheCanvas=this.cacheCanvas||document.createElement("canvas"),this.width=this.cacheCanvas.width=this.session.width,this.height=this.cacheCanvas.height=this.session.height,this._ctx=this.cacheCanvas.getContext("2d"),this._ctx.clearRect(0,0,this.width,this.height),this._ctx.save(),this._ctx.setTransform(1,0,0,1,this.session.center.x,this.session.center.y),this._drawBack(this._ctx),this._ctx.restore(),this.cached=!0,this.cache=!1),this.cacheCanvas&&t.drawImage(this.cacheCanvas,0,0,this.width,this.height,-this.session.center.x,-this.session.center.x,this.width,this.height)):this._drawBack(t))},f.prototype._drawBack=function(t){"function"==typeof this.draw?this.draw(t):"object"==typeof this.draw&&"function"==typeof this.draw.render&&this.draw.render(t)},f.prototype.drawCall=function(t,i){void 0!==t&&(i=i||{},this.cache=i.cache||!1,this.cached=!1,this.session=i.session||{center:{x:0,y:0},width:100,height:100},this.draw=t||null)},g.Text=m,m.prototype=Object.create(g.Container.prototype),m.prototype.constructor=g.Text,m.prototype.renderMe=function(t){t.font=this.font,t.textAlign=this.textAlign,t.textBaseline=this.textBaseline,this.UF&&(t.fillStyle=this.color,t.fillText(this.text,0,0)),this.US&&(t.lineWidth=this.lineWidth,t.strokeStyle=this.color,t.strokeText(this.text,0,0))},g.Stage=v,v.prototype=Object.create(g.Container.prototype),v.prototype.constructor=g.Stage,v.prototype.resize=function(t,i,e,s){this.width=this.canvas.width=t,this.height=this.canvas.height=i,this.setStyle&&e&&s&&(this.canvas.style.width=e+"px",this.canvas.style.height=s+"px")},v.prototype.render=function(){(null===this.pt||Date.now()-this.pt>200)&&(this.pt=Date.now());var t=Date.now()-this.pt;t=t<=0?10:t,this.pt+=t,this.updateChilds(this.timeScale*t),this.ctx.setTransform(1,0,0,1,0,0),this.autoClear&&this.ctx.clearRect(0,0,this.width,this.height),this.renderChilds(this.ctx)},v.prototype.initEvent=function(){var t=this;this.canvas.addEventListener("click",function(i){t.eventProxy(i)},!1),this.canvas.addEventListener("touchstart",function(i){t.eventProxy(i)},!1),this.canvas.addEventListener("touchmove",function(i){i.preventDefault(),t.eventProxy(i)},!1),this.canvas.addEventListener("touchend",function(i){t.eventProxy(i)},!1),this.canvas.addEventListener("mousedown",function(i){t.eventProxy(i)},!1),this.canvas.addEventListener("mousemove",function(i){i.preventDefault(),t.eventProxy(i)},!1),this.canvas.addEventListener("mouseup",function(i){t.eventProxy(i)},!1)},v.prototype.eventProxy=function(t){for(var i=this.fixCoord(t),e=this.cds.length-1;e>=0;){var s=this.cds[e];if(s.visible&&(s.noticeEvent(i),i.target))break;e--}},v.prototype.fixCoord=function(t){var i=new g.InteractionData,e=this.getPos(this.canvas);if(i.originalEvent=t,i.type=t.type,i.ratio=this.width/this.canvas.offsetWidth,t.touches){if(i.touches=[],t.touches.length>0){for(var s=0;s<t.touches.length;s++)i.touches[s]={},i.touches[s].global={},i.touches[s].global.x=(t.touches[s].pageX-e.x)*i.ratio,i.touches[s].global.y=(t.touches[s].pageY-e.y)*i.ratio;i.global=i.touches[0].global}}else i.global.x=(t.pageX-e.x)*i.ratio,i.global.y=(t.pageY-e.y)*i.ratio;return i},v.prototype.getPos=function(t){var i={};if(t.offsetParent){var e=this.getPos(t.offsetParent);i.x=t.offsetLeft+e.x,i.y=t.offsetTop+e.y}else i.x=t.offsetLeft,i.y=t.offsetTop;return i},g});
-//# sourceMappingURL=../maps/jcc2d.js.map
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (factory((global.JC = global.JC || {})));
+}(this, (function (exports) { 'use strict';
+
+(function() {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
+    for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] ||
+            window[vendors[x] + 'CancelRequestAnimationFrame'];
+    }
+
+    if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = function(callback) {
+            var currTime = new Date().getTime();
+            var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+              timeToCall);
+            lastTime = currTime + timeToCall;
+            return id;
+        };
+    }
+
+    if (!window.cancelAnimationFrame) {
+        window.cancelAnimationFrame = function(id) {
+            clearTimeout(id);
+        };
+    }
+
+    window.RAF = window.requestAnimationFrame;
+    window.CAF = window.cancelAnimationFrame;
+})();
+
+/**
+ * 事件系统的事件消息对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ */
+function InteractionData(){
+    /**
+     * 转换到canvas坐标系统的事件触发点
+     *
+     * @member {JC.Point}
+     */
+    this.global = {x:-100000,y:-100000};
+
+    /**
+     * 事件源
+     *
+     * @member {JC.DisplayObject}
+     */
+    this.target = null;
+
+    /**
+     * 浏览器的原始事件对象
+     *
+     * @member {Event}
+     */
+    this.originalEvent = null;
+
+    /**
+     * 在canvas内阻止事件冒泡
+     *
+     * @member {Boolean}
+     */
+    this.cancleBubble = false;
+
+    /**
+     * canvas视窗和页面坐标的兑换比例
+     *
+     * @member {Number}
+     */
+    this.ratio = 1;
+
+    /**
+     * 事件类型
+     *
+     * @member {String}
+     */
+    this.type = '';
+}
+
+/**
+ * jcc2d的事件对象的类
+ *
+ * @class
+ * @memberof JC
+ */
+function Eventer(){
+    /**
+     * 标记当前对象是否为touchstart触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this.touchstarted = false;
+
+    /**
+     * 标记当前对象是否为mousedown触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this.mouseDowned = false;
+
+    /**
+     * 事件监听列表
+     *
+     * @member {Object}
+     * @private
+     */
+    this.listeners = {};
+}
+
+/**
+ * 事件对象的事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+Eventer.prototype.on = function(type,fn){
+    this.listeners[type] = this.listeners[type]||[];
+    this.listeners[type].push(fn);
+};
+
+/**
+ * 事件对象的事件解绑函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 注册时回调函数的引用
+ */
+Eventer.prototype.off = function(type,fn){
+    var ears = this.listeners;
+    var cbs = ears[ type ];
+    var i = ears[type].length;
+    if (cbs&&i>0) {
+        if(fn){
+            while (i--) {
+                if (cbs[i] === fn) {
+                    cbs.splice(i, 1);
+                }
+            }
+        }else{
+            cbs.length = 0;
+        }
+    }
+};
+
+/**
+ * 事件对象的一次性事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+Eventer.prototype.once = function(type,fn){
+    var This = this,
+        cb = function(ev){
+            if (fn) fn(ev);
+            This.off(type,cb);
+        };
+    this.on(type,cb);
+};
+
+/**
+ * 事件对象的触发事件函数
+ *
+ * @param ev {JC.InteractionData} 事件类型
+ */
+Eventer.prototype.emit = function(ev){
+    if ( this.listeners === undefined ) return;
+    var ears = this.listeners;
+    var cbs = ears[ ev.type ];
+    if ( cbs !== undefined ) {
+        var length = cbs.length;
+        var i;
+        for ( i = 0; i < length; i ++ ) {
+            cbs[ i ].call( this, ev );
+        }
+    }
+};
+
+/* eslint no-cond-assign: "off" */
+
+
+/**
+ * TWEEN 缓动时间运动函数集合
+ *
+ * ```js
+ * dispay.fromTo({
+ *   from: {x: 100},
+ *   to: {x: 200},
+ *   ease: 'linear' // 配置要调用的运动函数
+ * })
+ * ```
+ * @namespace JC.TWEEN
+ */
+
+var TWEEN = {
+    /**
+     * 匀速运动函数
+     *
+     * @static
+     * @memberof JC.TWEEN
+     */
+    linear: function (t, b, c, d){
+        return c*t/d + b;
+    },
+
+    /**
+     * 加速运动函数
+     *
+     * @static
+     * @memberof JC.TWEEN
+     */
+    easeIn: function(t, b, c, d){
+        return c*(t/=d)*t + b;
+    },
+
+    /**
+     * 减速运动函数
+     *
+     * @static
+     * @memberof JC.TWEEN
+     */
+    easeOut: function(t, b, c, d){
+        return -c *(t/=d)*(t-2) + b;
+    },
+
+    /**
+     * 先加速再减速运动函数
+     *
+     * @static
+     * @memberof JC.TWEEN
+     */
+    easeBoth: function(t, b, c, d){
+        if ((t/=d/2) < 1) {
+            return c/2*t*t + b;
+        }
+        return -c/2 * ((--t)*(t-2) - 1) + b;
+    },
+
+    /**
+     * 扩展运动函数
+     *
+     * ```js
+     * JC.TWEEN.extend({
+     *   elasticIn: function(t, b, c, d){....},
+     *   elasticOut: function(t, b, c, d){....},
+     *   ......
+     * })
+     * ```
+     * @static
+     * @memberof JC.TWEEN
+     */
+    extend: function(opts){
+        if(!opts)return;
+        for(var key in opts){
+            if(key!=='extend'&&opts[key])this[key]=opts[key];
+        }
+    }
+};
+
+/**
+ * 动画对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
+
+function Animate(opts) {
+    this.element = opts.element || {};
+    this.duration = opts.duration || 300;
+    this.living = true;
+
+    this.onCompelete = opts.onCompelete || null;
+    this.onUpdate = opts.onUpdate || null;
+
+    this.infinity = opts.infinity || false;
+    this.alternate = opts.alternate || false;
+    this.ease = opts.ease || 'easeBoth';
+    this.repeats = opts.repeats || 0;
+    this.delay = opts.delay || 0;
+    this.wait = opts.wait || 0;
+    this.delayCut = this.delay;
+    this.progress = 0;
+    this.direction = 1;
+
+    this.timeScale = opts.timeScale || 1;
+
+    this.paused = false;
+}
+Animate.prototype._swapEase = function() {
+    var ease = this.ease;
+    if (ease.indexOf('In') > 0) {
+        ease = ease.replace('In', 'Out');
+    } else if (ease.indexOf('Out') > 0) {
+        ease = ease.replace('Out', 'In');
+    }
+    this.ease = ease;
+};
+Animate.prototype.nextPose = function() {
+    var cache = {};
+    for (var i in this.to) {
+        cache[i] = TWEEN[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
+        if (this.element[i] !== undefined) this.element[i] = cache[i];
+    }
+    return cache; //this.onUpdate
+};
+Animate.prototype.pause = function() {
+    this.paused = true;
+};
+Animate.prototype.start = function() {
+    this.paused = false;
+};
+Animate.prototype.stop = function() {
+    this.progress = this.duration;
+};
+Animate.prototype.cancle = function() {
+    this.living = false;
+};
+
+function _rt(val){
+    return Object.prototype.toString.call(val);
+}
+
+/**
+ * UTILS 引擎工具箱
+ *
+ * @namespace JC.UTILS
+ */
+var UTILS = {
+    /**
+     * 简单拷贝纯数据的JSON对象
+     *
+     * @static
+     * @memberof JC.UTILS
+     * @param {JSON} json 待拷贝的纯数据JSON
+     * @return {JSON} 拷贝后的纯数据JSON
+     */
+    copyJSON: function(json){
+        return JSON.parse(JSON.stringify(json));
+    },
+
+    /**
+     * 将角度转化成弧度的乘法因子
+     *
+     * @static
+     * @memberof JC.UTILS
+     * @type {number}
+     */
+    DTR: Math.PI/180,
+
+    /**
+     * 将弧度转化成角度的乘法因子
+     *
+     * @static
+     * @memberof JC.UTILS
+     * @type {number}
+     */
+    RTD: 180/Math.PI,
+
+    /**
+     * 判断变量是否为数组类型
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Array} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isArray: (function(){
+        var ks = _rt([]);
+        return function(object){
+            return Object.prototype.toString.call(object) === ks;
+        };
+    })(),
+
+    /**
+     * 判断变量是否为对象类型
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Object} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isObject: (function(){
+        var ks = _rt({});
+        return function(object){
+            return Object.prototype.toString.call(object) === ks;
+        };
+    })(),
+
+    /**
+     * 判断变量是否为字符串类型
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {String} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isString: (function(){
+        var ks = _rt('s');
+        return function(object){
+            return Object.prototype.toString.call(object) === ks;
+        };
+    })(),
+
+    /**
+     * 判断变量是否为数字类型
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Number} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isNumber: (function(){
+        var ks = _rt(1);
+        return function(object){
+            return Object.prototype.toString.call(object) === ks;
+        };
+    })(),
+
+    /**
+     * 判断变量是否为函数类型
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Function} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isFunction: (function(){
+        var ks = _rt(function(){});
+        return function(object){
+            return Object.prototype.toString.call(object) === ks;
+        };
+    })(),
+
+    /**
+     * 强化的随机数，可以随机产生给定区间内的数字、随机输出数字内的项
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
+     * @param {Number} max 所给定区间较大的数字
+     * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
+     */
+    random: function(min, max){
+        if (this.isArray(min))
+            return min[~~(Math.random() * min.length)];
+        if (!this.isNumber(max))
+            max = min || 1, min = 0;
+        return min + Math.random() * (max - min);
+    },
+
+    /**
+     * 阿基米德求模
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Number} n 索引
+     * @param {Number} m 模
+     * @return {Number} 映射到模长内到索引
+     */
+    euclideanModulo: function(n, m){
+        return ((n % m) + m) % m;
+    },
+
+    /**
+     * 数字区间闭合，避免超出区间
+     *
+     * @static
+     * @method
+     * @memberof JC.UTILS
+     * @param {Number} x 待闭合到值
+     * @param {Number} a 闭合区间左边界
+     * @param {Number} b 闭合区间右边界
+     * @return {Number} 闭合后的值
+     */
+    clamp: function(x, a, b) {
+        return (x < a) ? a : ((x > b) ? b : x);
+    },
+};
+
+/**
+ * Transition类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画所具备的特性
+ */
+
+function Transition(opts) {
+    Animate.call(this, opts);
+
+    this.ATRS = opts.from;
+    this.ATRE = opts.to;
+
+}
+Transition.prototype = Object.create(Animate.prototype);
+Transition.prototype.update = function(snippet) {
+    if(this.wait>0){
+        this.wait -= Math.abs(snippet);
+        return;
+    }
+    if (this.paused || !this.living || this.delayCut>0){
+        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
+        return;
+    }
+
+    var progress = this.progress += this.direction * this.timeScale * snippet;
+    this.progress = UTILS.clamp(progress,0,this.duration);
+
+    var pose = this.nextPose();
+
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+
+    if ((this.direction === -1 && progress <= 0) || (this.direction === 1 && progress >= this.duration)) {
+        if (this.repeats > 0 || this.infinity) {
+            if (this.repeats > 0) --this.repeats;
+            this.delayCut = this.delay;
+            if (this.alternate) {
+                this.direction *= -1;
+                this._swapEase();
+            } else {
+                this.progress = 0;
+            }
+        } else {
+            this.living = false;
+            if(this.onCompelete) this.onCompelete(pose);
+        }
+    }
+};
+
+/**
+ * PathMotion类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画所具备的特性
+ */
+
+function PathMotion(opts) {
+    Animate.call(this, opts);
+
+    this.points = opts.points;
+    this.attachTangent = opts.attachTangent || false;
+    this._cacheRotate = this.element.rotation;
+    var radian = this._cacheRotate * UTILS.DTR;
+    this._cacheVector = { x: 10 * Math.cos(radian), y: 10 * Math.sin(radian) };
+}
+PathMotion.prototype = Object.create(Animate.prototype);
+PathMotion.prototype.update = function(snippet) {
+    if(this.wait>0){
+        this.wait -= Math.abs(snippet);
+        return;
+    }
+    if (this.paused || !this.living || this.delayCut>0){
+        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
+        return;
+    }
+
+    this.progress += this.direction * this.timeScale * snippet;
+
+    var pose = this.nextPose();
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+
+    if ((this.direction === -1 && this.progress <= 0) || (this.direction === 1 && this.progress >= this.duration)) {
+        if (this.repeats > 0 || this.infinity) {
+            if (this.repeats > 0) --this.repeats;
+            this.delayCut = this.delay;
+            if (this.alternate) {
+                this.direction *= -1;
+                this._swapEase();
+            } else {
+                this.progress = 0;
+            }
+        } else {
+            this.living = false;
+            if (this.onCompelete) this.onCompelete();
+        }
+    }
+};
+PathMotion.prototype.nextPose = function() {
+    var cache = {},
+        _rotate = 0,
+        t = TWEEN[this.ease](this.progress, 0, 1, this.duration),
+        pos = this.getPoint(t, this.points);
+
+    cache.x = pos.x;
+    cache.y = pos.y;
+    if (this.attachTangent) {
+        _rotate = this.decomposeRotate(t, pos);
+        cache.rotation = _rotate === false ? this.preDegree : _rotate;
+        cache.rotation += this._cacheRotate;
+        if (_rotate !== false) this.preDegree = _rotate;
+    }
+    this.element.setVal(cache);
+    return cache;
+};
+PathMotion.prototype.getPoint = function(t, points) {
+    var a = points,
+        len = a.length,
+        rT = 1 - t,
+        l = a.slice(0, len - 1),
+        r = a.slice(1),
+        oP = {};
+    if (len > 3) {
+        var oL = this.getPoint(t, l),
+            oR = this.getPoint(t, r);
+        oP.x = rT * oL.x + t * oR.x;
+        oP.y = rT * oL.y + t * oR.y;
+        return oP;
+    } else {
+        oP.x = rT * rT * points[0].x + 2 * t * rT * points[1].x + t * t * points[2].x;
+        oP.y = rT * rT * points[0].y + 2 * t * rT * points[1].y + t * t * points[2].y;
+        return oP;
+    }
+};
+PathMotion.prototype.decomposeRotate = function(t, pos) {
+    var p1 = pos || this.getPoint(t, this.points);
+    var p2 = this.getPoint(t + 0.01, this.points);
+    var vector = { x: p2.x - p1.x, y: p2.y - p1.y };
+
+    var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
+    var pi = nor > 0 ? 1 : -1;
+    var cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y) / (Math.sqrt(vector.x * vector.x + vector.y * vector.y) * Math.sqrt(this._cacheVector.x * this._cacheVector.x + this._cacheVector.y * this._cacheVector.y));
+    if (isNaN(cos)) return false;
+    return pi * Math.acos(cos) * UTILS.RTD;
+};
+
+/**
+ * KeyFrames类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
+function KeyFrames(opts) {
+    Animate.call(this, opts);
+
+    this._keyframes = opts.keys;
+    this._keyIndex = 0;
+    this._direction = 1;
+    this._keyConfig = opts.keyConfig;
+
+    this.configKey();
+}
+KeyFrames.prototype = Object.create(Animate.prototype);
+KeyFrames.prototype.configKey = function() {
+    this.from = this._keyframes[this._keyIndex];
+    this._keyIndex += this._direction;
+    this.to = this._keyframes[this._keyIndex];
+    var config = this._keyConfig[Math.min(this._keyIndex, this._keyIndex - this._direction)] || {};
+    this.ease = config.ease || this.ease;
+    this.duration = config.duration || this.duration;
+    this.progress = 0;
+};
+KeyFrames.prototype.update = function(snippet) {
+    if (this.paused || !this.living) return;
+    this.progress += this.timeScale * snippet;
+
+    if (this.progress < this.duration) {
+        if (this.progress < 0) return;
+        var pose = this.nextPose();
+        if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+    } else {
+        this.element.setVal(this.to);
+        if (this.onUpdate) this.onUpdate(this.to, 1, this._keyIndex);
+        if (this._keyIndex < this._keyframes.length - 1 && this._keyIndex > 0) {
+            this.configKey();
+        } else {
+            if (this.repeats > 0 || this.infinity) {
+                if (this.repeats > 0) --this.repeats;
+                if (this.alternate) {
+                    this._direction *= -1;
+                } else {
+                    this._keyIndex = 0;
+                }
+                this.configKey();
+            } else {
+                this.living = false;
+                if (this.onCompelete) this.onCompelete();
+            }
+        }
+    }
+};
+
+/**
+ * Animation类型动画对象
+ *
+ * @class
+ * @memberof JC
+ */
+function Animation(element) {
+    this.element = element;
+    // this.start = false;
+    this.animates = [];
+}
+Animation.prototype.update = function(snippet) {
+    for (var i = 0; i < this.animates.length; i++) {
+        if (!this.animates[i].living) this.animates.splice(i, 1);
+        if (this.animates[i]) this.animates[i].update(snippet);
+    }
+};
+Animation.prototype.fromTo = function(opts, clear) {
+    this.element.setVal(opts.from);
+    opts.element = this.element;
+    return this._addMove(new Transition(opts), clear);
+};
+Animation.prototype.to = function(opts, clear) {
+    opts.from = {};
+    for (var i in opts.to) {
+        opts.from[i] = this.element[i];
+    }
+    opts.element = this.element;
+    return this._addMove(new Transition(opts), clear);
+};
+Animation.prototype.motion = function(opts, clear) {
+    opts.element = this.element;
+    return this._addMove(new PathMotion(opts), clear);
+};
+Animation.prototype.keyFrames = function(opts, clear) {
+    opts.element = this.element;
+    return this._addMove(new KeyFrames(opts), clear);
+};
+Animation.prototype._addMove = function(animate, clear) {
+    if (clear) this.clear();
+    this.animates.push(animate);
+    return animate;
+};
+Animation.prototype.clear = function() {
+    this.animates.length = 0;
+};
+
+/**
+ * 图片纹理类
+ *
+ * @class
+ * @memberof JC
+ * @param {string | Image} img 图片url或者图片对象.
+ * @extends JC.Eventer
+ */
+function Texture(img){
+    Eventer.call( this );
+    this.texture = null;
+    this.width = 0;
+    this.height = 0;
+    this.loaded = false;
+
+    this.load(img);
+
+}
+Texture.prototype = Object.create( Eventer.prototype );
+
+/**
+ * 尝试加载图片
+ *
+ * @static
+ * @param {string | Image} img 图片url或者图片对象.
+ * @private
+ */
+Texture.prototype.load = function(img){
+    var This = this;
+    if(typeof img === 'string'){
+        this.texture = new Image();
+        this.texture.crossOrigin = '';
+        this.texture.src = img;
+        this.texture.onload = function(){
+            This.loaded = true;
+            This.emit({type: 'load'});
+        };
+        this.texture.onerror = function(){
+            This.emit({type: 'error'});
+        };
+        this.on('load',function(){
+            This.width = This.texture.width;
+            This.height = This.texture.height;
+        });
+    }
+    if(img instanceof Image && img.width*img.height>0){
+        this.texture = img;
+        this.width = img.width;
+        this.height = img.height;
+    }
+};
+
+
+
+
+/**
+ * 图片资源加载器
+ *
+ * @class
+ * @namespace JC.Loader
+ * @extends JC.Eventer
+ */
+function Loader(){
+    Eventer.call( this );
+    this.textures = {};
+    this._total = 0;
+    this._failed = 0;
+    this._received = 0;
+}
+Loader.prototype = Object.create( Eventer.prototype );
+
+/**
+ * 开始加载资源
+ *
+ * ```js
+ * var loadBox = new JC.Loader();
+ * loadBox.load({
+ *     aaa: 'img/xxx.png',
+ *     bbb: 'img/yyy.png',
+ *     ccc: 'img/zzz.png'
+ * });
+ * ```
+ *
+ * @memberof JC.Loader
+ * @param {object} srcMap 配置了key－value的json格式数据
+ * @return {JC.Loader} 返回本实例对象
+ */
+Loader.prototype.load = function (srcMap){
+    var This = this;
+    this._total = 0;
+    this._failed = 0;
+    this._received = 0;
+    for (var src in srcMap) {
+        this._total++;
+        this.textures[src] = new Texture(srcMap[src]);
+        bind(this.textures[src]);
+    }
+
+    function bind(texture){
+        texture.on('load',function(){
+            This._received++;
+            This.emit({type: 'update'});
+            if(This._received+This._failed>=This._total)This.emit({type: 'compelete'});
+        });
+        texture.on('error',function(){
+            This._failed++;
+            This.emit({type: 'update'});
+            if(This._received+This._failed>=This._total)This.emit({type: 'compelete'});
+        });
+    }
+    return this;
+};
+
+/**
+ * 从纹理图片盒子里面通过id获取纹理图片
+ *
+ * ```js
+ * var texture = loadBox.getById('id');
+ * ```
+ *
+ * @memberof JC.Loader
+ * @param {string} id 之前加载时配置的key值
+ * @return {JC.Texture} 包装出来的JC.Texture对象
+ */
+Loader.prototype.getById = function (id){
+    return this.textures[id];
+};
+
+/**
+ * 获取资源加载的进度
+ *
+ * @member progress
+ * @property progress {number} 0至1之间的值
+ * @memberof JC.Loader
+ */
+Object.defineProperty(Texture.prototype, 'progress', {
+    get: function() {
+        return this._total===0?1:(this._received+this._failed)/this._total;
+    }
+});
+
+
+
+/**
+ * 资源加载工具
+ *
+ * @function
+ * @memberof JC
+ * @param srcMap {object} key-src map
+ * @return {JC.Loader}
+ */
+var loaderUtil = function(srcMap){
+    return new Loader().load(srcMap);
+};
+
+/**
+ * 二维空间内坐标点类
+ *
+ * @class
+ * @memberof JC
+ * @param [x=0] {number} x轴的位置
+ * @param [y=0] {number} y轴的位置
+ */
+function Point(x, y)
+{
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.y = y || 0;
+}
+
+/**
+ * 克隆一这个坐标点
+ *
+ * @return {JC.Point} 克隆的坐标点
+ */
+Point.prototype.clone = function ()
+{
+    return new Point(this.x, this.y);
+};
+
+/**
+ * 拷贝传入的坐标点来设置当前坐标点
+ *
+ * @param p {JC.Point}
+ */
+Point.prototype.copy = function (p) {
+    this.set(p.x, p.y);
+};
+
+/**
+ * 判断坐标点是否相等
+ *
+ * @param p {JC.Point}
+ * @returns {boolean}
+ */
+Point.prototype.equals = function (p) {
+    return (p.x === this.x) && (p.y === this.y);
+};
+
+/**
+ * 设置坐标点
+ *
+ * @param [x=0] {number} x轴的位置
+ * @param [y=0] {number} y轴的位置
+ */
+Point.prototype.set = function (x, y)
+{
+    this.x = x || 0;
+    this.y = y || ( (y !== 0) ? this.x : 0 ) ;
+};
+
+/**
+ * 矩阵对象，用来描述和记录对象的tansform 状态信息
+ *
+ * @class
+ * @memberof JC
+ */
+function Matrix(){
+    this.a = 1;
+    this.b = 0;
+    this.c = 0;
+    this.d = 1;
+    this.tx = 0;
+    this.ty = 0;
+}
+
+/**
+ * 从数组设置一个矩阵
+ *
+ * @param array {number[]}
+ */
+Matrix.prototype.fromArray = function(array){
+    this.a = array[0];
+    this.b = array[1];
+    this.c = array[3];
+    this.d = array[4];
+    this.tx = array[2];
+    this.ty = array[5];
+};
+
+/**
+ * 将对象的数据以数组的形式导出
+ *
+ * @param transpose {boolean} 是否对矩阵进行转置
+ * @return {number[]} 返回数组
+ */
+Matrix.prototype.toArray = function(transpose){
+    if(!this.array) this.array = new Float32Array(9);
+    var array = this.array;
+
+    if(transpose){
+        array[0] = this.a;
+        array[1] = this.b;
+        array[2] = 0;
+        array[3] = this.c;
+        array[4] = this.d;
+        array[5] = 0;
+        array[6] = this.tx;
+        array[7] = this.ty;
+        array[8] = 1;
+    }else{
+        array[0] = this.a;
+        array[1] = this.c;
+        array[2] = this.tx;
+        array[3] = this.b;
+        array[4] = this.d;
+        array[5] = this.ty;
+        array[6] = 0;
+        array[7] = 0;
+        array[8] = 1;
+    }
+    return array;
+};
+
+/**
+ * 将坐标点与矩阵左乘
+ *
+ * @param pos {object} 原始点
+ * @param newPos {object} 变换之后的点
+ * @return {object} 返回数组
+ */
+Matrix.prototype.apply = function(pos, newPos){
+    newPos = newPos || {};
+    newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
+    newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
+    return newPos;
+};
+/**
+ * 将坐标点与转置矩阵左乘
+ *
+ * @param pos {object} 原始点
+ * @param newPos {object} 变换之后的点
+ * @return {object} 变换之后的点
+ */
+Matrix.prototype.applyInverse = function(pos, newPos){
+    var id = 1 / (this.a * this.d + this.c * -this.b);
+    newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
+    newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
+    return newPos;
+};
+/**
+ * 位移操作
+ *
+ * @return {this}
+ */
+Matrix.prototype.translate = function(x, y){
+    this.tx += x;
+    this.ty += y;
+    return this;
+};
+/**
+ * 缩放操作
+ *
+ * @return {this}
+ */
+Matrix.prototype.scale = function(x, y){
+    this.a *= x;
+    this.d *= y;
+    this.c *= x;
+    this.b *= y;
+    this.tx *= x;
+    this.ty *= y;
+    return this;
+};
+/**
+ * 旋转操作
+ *
+ * @return {this}
+ */
+Matrix.prototype.rotate = function(angle){
+    var cos = Math.cos( angle );
+    var sin = Math.sin( angle );
+    var a1 = this.a;
+    var c1 = this.c;
+    var tx1 = this.tx;
+    this.a = a1 * cos-this.b * sin;
+    this.b = a1 * sin+this.b * cos;
+    this.c = c1 * cos-this.d * sin;
+    this.d = c1 * sin+this.d * cos;
+    this.tx = tx1 * cos - this.ty * sin;
+    this.ty = tx1 * sin + this.ty * cos;
+    return this;
+};
+/**
+ * 矩阵相乘
+ *
+ * @return {this}
+ */
+Matrix.prototype.append = function(matrix){
+    var a1 = this.a;
+    var b1 = this.b;
+    var c1 = this.c;
+    var d1 = this.d;
+    this.a  = matrix.a * a1 + matrix.b * c1;
+    this.b  = matrix.a * b1 + matrix.b * d1;
+    this.c  = matrix.c * a1 + matrix.d * c1;
+    this.d  = matrix.c * b1 + matrix.d * d1;
+    this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
+    this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
+    return this;
+};
+/**
+ * 单位矩阵
+ *
+ * @return {this}
+ */
+Matrix.prototype.identity = function(){
+    this.a = 1;
+    this.b = 0;
+    this.c = 0;
+    this.d = 1;
+    this.tx = 0;
+    this.ty = 0;
+    return this;
+};
+/**
+ * 快速设置矩阵各个分量
+ *
+ * @return {this}
+ */
+Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
+{
+    var a, b, c, d, sr, cr, cy, sy, nsx, cx;
+
+    sr  = Math.sin(rotation);
+    cr  = Math.cos(rotation);
+    cy  = Math.cos(skewY);
+    sy  = Math.sin(skewY);
+    nsx = -Math.sin(skewX);
+    cx  =  Math.cos(skewX);
+
+    a  =  cr * scaleX;
+    b  =  sr * scaleX;
+    c  = -sr * scaleY;
+    d  =  cr * scaleY;
+
+    this.a  = cy * a + sy * c;
+    this.b  = cy * b + sy * d;
+    this.c  = nsx * a + cx * c;
+    this.d  = nsx * b + cx * d;
+
+    this.tx = x + ( pivotX * a + pivotY * c );
+    this.ty = y + ( pivotX * b + pivotY * d );
+
+    return this;
+};
+var IDENTITY = new Matrix();
+var TEMP_MATRIX = new Matrix();
+
+/**
+ * 显示对象的基类
+ *
+ * @class
+ * @memberof JC
+ */
+function DisplayObject(){
+    /**
+     * 标记渲染对象是否就绪
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this._ready = true;
+
+    /**
+     * 控制渲染对象是否显示
+     *
+     * @member {Boolean}
+     */
+    this.visible = true;
+
+    /**
+     * 世界透明度
+     *
+     * @member {Number}
+     * @private
+     */
+    this.worldAlpha = 1;
+
+    /**
+     * 控制渲染对象的透明度
+     *
+     * @member {Number}
+     */
+    this.alpha = 1;
+
+    /**
+     * 控制渲染对象的x轴的缩放
+     *
+     * @member {Number}
+     */
+    this.scaleX = 1;
+
+    /**
+     * 控制渲染对象的y轴的缩放
+     *
+     * @member {Number}
+     */
+    this.scaleY = 1;
+
+    /**
+     * 控制渲染对象的x轴的斜切
+     *
+     * @member {Number}
+     */
+    this.skewX = 0;
+
+    /**
+     * 控制渲染对象的y轴的斜切
+     *
+     * @member {Number}
+     */
+    this.skewY = 0;
+
+    /**
+     * 控制渲染对象的旋转角度
+     *
+     * @member {Number}
+     */
+    this.rotation = 0;
+    this.rotationCache = 0;
+    this._sr = 0;
+    this._cr = 1;
+
+    /**
+     * 控制渲染对象的x位置
+     *
+     * @member {Number}
+     */
+    this.x = 0;
+
+    /**
+     * 控制渲染对象的y位置
+     *
+     * @member {Number}
+     */
+    this.y = 0;
+
+    /**
+     * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
+     *
+     * @member {Number}
+     */
+    this.pivotX = 0;
+
+    /**
+     * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
+     *
+     * @member {Number}
+     */
+    this.pivotY = 0;
+
+    /**
+     * 对象的遮罩层
+     *
+     * @member {JC.Graphics}
+     */
+    this.mask = null;
+
+    /**
+     * 当前对象的直接父级
+     *
+     * @member {JC.Container}
+     * @private
+     */
+    this.parent = null;
+
+    /**
+     * 当前对象所应用的矩阵状态
+     *
+     * @member {JC.Matrix}
+     * @private
+     */
+    this.worldTransform = new Matrix();
+
+    /**
+     * 当前对象的事件管家
+     *
+     * @member {JC.Eventer}
+     * @private
+     */
+    this.event = new Eventer();
+
+    /**
+     * 当前对象是否穿透自身的事件监测
+     *
+     * @member {Boolean}
+     */
+    this.passEvent = false;
+
+    /**
+     * 当前对象的事件监测边界
+     *
+     * @member {Array}
+     * @private
+     */
+    this.bound = [];
+
+
+    /**
+     * 当前对象的动画管家
+     *
+     * @member {Array}
+     * @private
+     */
+    this.Animation = new Animation(this);
+}
+
+Object.defineProperty(DisplayObject.prototype, 'scale', {
+    get: function() {
+        return this.scaleX;
+    },
+    set: function(scale) {
+        this.scaleX = this.scaleY = scale;
+    }
+});
+
+/**
+ * fromTo动画，指定动画的启始位置和结束位置
+ *
+ * ```js
+ * dispay.fromTo({
+ *   from: {x: 100},
+ *   to: {x: 200},
+ *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinity: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param [opts] {object} 动画配置参数
+ * @param [opts.from] {json} json格式，设置对象的起始位置和起始姿态等
+ * @param [opts.to] {json} json格式，设置对象的结束位置和结束姿态等
+ * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
+ * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
+ * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
+ * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
+ * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param clear {Boolean} 是否去掉之前的动画
+ */
+DisplayObject.prototype.fromTo = function(opts,clear){
+    return this.Animator.fromTo(opts,clear);
+};
+
+/**
+ * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
+ *
+ * ```js
+ * dispay.to({
+ *   to: {x: 200},
+ *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinity: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param [opts] {object} 动画配置参数
+ * @param [opts.to] {json} json格式，设置对象的结束位置和结束姿态等
+ * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
+ * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
+ * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
+ * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
+ * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param clear {Boolean} 是否去掉之前的动画
+ */
+DisplayObject.prototype.to = function(opts,clear){
+    return this.Animator.to(opts,clear);
+};
+
+/**
+ * motion动画，让物体按照设定好的曲线运动
+ *
+ * ```js
+ * dispay.motion({
+ *   points: [{x: 0,y: 0}, {x: 30,y: 20}, {x: -50,y: -40}, {x: 50,y: 90}], // path路径，数组首尾的分别为贝塞尔曲线的起始点和结束点，其余为控制点
+ *   attachTangent: true, // 物体是否捕获切线方向
+ *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinity: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){}, // 动画更新回调
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ * @param [opts] {object} 动画配置参数
+ * @param [opts.points] {Array} path路径，数组首尾的分别为贝塞尔曲线的起始点和结束点，其余为控制点
+ * @param [opts.attachTangent] {Boolean} 物体是否捕获切线方向
+ * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
+ * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
+ * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
+ * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
+ * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param clear {Boolean} 是否去掉之前的动画
+ */
+DisplayObject.prototype.motion = function(opts,clear){
+    return this.Animator.motion(opts,clear);
+};
+
+/**
+ * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
+ *
+ * ```js
+ * dispay.keyFrames({
+ *   keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90}],
+ *   keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000}],
+ *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinity: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param [opts] {object} 动画配置参数
+ * @param [opts.keys] {json} 配置关键帧的位置、姿态
+ * @param [opts.keyConfig] {json} 相邻两个关键帧之间的动画运动配置
+ * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
+ * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
+ * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
+ * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
+ * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param clear {Boolean} 是否去掉之前的动画
+ */
+DisplayObject.prototype.keyFrames = function(opts,clear){
+    return this.Animator.keyFrames(opts,clear);
+};
+
+/**
+ * 检测是否可见
+ *
+ * @method isVisible
+ * @private
+ */
+DisplayObject.prototype.isVisible = function(){
+    return !!(this.visible && this.alpha>0 && this.scaleX*this.scaleY!==0);
+};
+
+/**
+ * 移除遮罩
+ *
+ */
+DisplayObject.prototype.removeMask = function(){
+    this.mask = null;
+};
+
+/**
+ * 设置对象上的属性值
+ *
+ * @method setVal
+ * @private
+ */
+DisplayObject.prototype.setVal = function(vals){
+    if(vals===undefined)return;
+    for(var key in vals){
+        if(this[key]===undefined){
+            continue;
+        }else{
+            this[key] = vals[key];
+        }
+    }
+};
+DisplayObject.prototype.updateMe = function(){
+    var pt = this.parent.worldTransform;
+    var wt = this.worldTransform;
+
+    var a, b, c, d, tx, ty;
+
+    if(this.skewX || this.skewY){
+
+        TEMP_MATRIX.setTransform(
+            this.x,
+            this.y,
+            this.pivotX,
+            this.pivotY,
+            this.scaleX,
+            this.scaleY,
+            this.rotation*JC.DTR,
+            this.skewX*JC.DTR,
+            this.skewY*JC.DTR
+        );
+
+        wt.a  = JC.TEMP_MATRIX.a  * pt.a + JC.TEMP_MATRIX.b  * pt.c;
+        wt.b  = JC.TEMP_MATRIX.a  * pt.b + JC.TEMP_MATRIX.b  * pt.d;
+        wt.c  = JC.TEMP_MATRIX.c  * pt.a + JC.TEMP_MATRIX.d  * pt.c;
+        wt.d  = JC.TEMP_MATRIX.c  * pt.b + JC.TEMP_MATRIX.d  * pt.d;
+        wt.tx = JC.TEMP_MATRIX.tx * pt.a + JC.TEMP_MATRIX.ty * pt.c + pt.tx;
+        wt.ty = JC.TEMP_MATRIX.tx * pt.b + JC.TEMP_MATRIX.ty * pt.d + pt.ty;
+    }else{
+        if(this.rotation % 360){
+            if(this.rotation !== this.rotationCache){
+                this.rotationCache = this.rotation;
+                this._sr = Math.sin(this.rotation*JC.DTR);
+                this._cr = Math.cos(this.rotation*JC.DTR);
+            }
+
+            a  =  this._cr * this.scaleX;
+            b  =  this._sr * this.scaleX;
+            c  = -this._sr * this.scaleY;
+            d  =  this._cr * this.scaleY;
+            tx =  this.x;
+            ty =  this.y;
+
+            if(this.pivotX || this.pivotY){
+                tx -= this.pivotX * a + this.pivotY * c;
+                ty -= this.pivotX * b + this.pivotY * d;
+            }
+            wt.a  = a  * pt.a + b  * pt.c;
+            wt.b  = a  * pt.b + b  * pt.d;
+            wt.c  = c  * pt.a + d  * pt.c;
+            wt.d  = c  * pt.b + d  * pt.d;
+            wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+            wt.ty = tx * pt.b + ty * pt.d + pt.ty;
+        }else{
+            a  = this.scaleX;
+            d  = this.scaleY;
+
+            tx = this.x - this.pivotX * a;
+            ty = this.y - this.pivotY * d;
+
+            wt.a  = a  * pt.a;
+            wt.b  = a  * pt.b;
+            wt.c  = d  * pt.c;
+            wt.d  = d  * pt.d;
+            wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+            wt.ty = tx * pt.b + ty * pt.d + pt.ty;
+        }
+    }
+    this.worldAlpha = this.alpha * this.parent.worldAlpha;
+};
+DisplayObject.prototype.upAnimation = function(snippet){
+    this.Animator.update(snippet);
+};
+DisplayObject.prototype.setTransform = function(ctx){
+    var matrix = this.worldTransform;
+    ctx.globalAlpha = this.worldAlpha;
+    ctx.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.tx,matrix.ty);
+};
+/**
+ * 获取物体相对于canvas世界坐标系的坐标位置
+ *
+ * @return {object}
+ */
+DisplayObject.prototype.getGlobalPos = function(){
+    return {x: this.worldTransform.tx,y: this.worldTransform.ty};
+};
+/**
+ * 显示对象的事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+DisplayObject.prototype.on = function(type,fn){
+    this.event.on(type,fn);
+};
+/**
+ * 显示对象的事件解绑函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 注册时回调函数的引用
+ */
+DisplayObject.prototype.off = function(type,fn){
+    this.event.off(type,fn);
+};
+/**
+ * 显示对象的一次性事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+DisplayObject.prototype.once = function(type,fn){
+    this.event.once(type,fn);
+};
+/**
+ * 获取当前坐标系下的监测区域
+ *
+ * @method getBound
+ * @private
+ */
+DisplayObject.prototype.getBound = function (){
+    var bound = [],
+        l = this.bound.length>>1;
+
+    for (var i = 0; i < l; i++) {
+        var p = this.worldTransform.apply({x: this.bound[i*2],y: this.bound[i*2+1]});
+        bound[i*2  ] = p.x;
+        bound[i*2+1] = p.y;
+    }
+    return bound;
+};
+/**
+ * 设置显示对象的监测区域
+ *
+ * @param points {Array} 区域的坐标点 [x0,y0 ..... xn,yn]
+ * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
+ * @return {Array}
+ */
+DisplayObject.prototype.setBound = function (points,needless){
+    var l = this.bound.length;
+    if(l>4&&needless)return;
+    points = points||[
+        -this.regX,this.regY,
+        -this.regX,this.regY-this.height,
+        -this.regX+this.width,this.regY-this.height,
+        -this.regX+this.width,this.regY
+    ];
+    this.bound = points;
+};
+DisplayObject.prototype.ContainsPoint = function (p,px,py){
+    var n = p.length>>1;
+    var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
+
+    /* eslint no-undef: "off" */
+    //var lup = by > ay;
+    for(var i=0; i<n; i++){
+        ax = bx;  ay = by;
+        bx = p[2*i  ] - px;
+        by = p[2*i+1] - py;
+        if(ay==by) continue;
+        lup = by>ay;
+    }
+
+    var depth = 0;
+    for(i=0; i<n; i++){
+        ax = bx;  ay = by;
+        bx = p[2*i  ] - px;
+        by = p[2*i+1] - py;
+        if(ay< 0 && by< 0) continue;
+        if(ay> 0 && by> 0) continue;
+        if(ax< 0 && bx< 0) continue;
+
+        if(ay==by && Math.min(ax,bx)<=0) return true;
+        if(ay==by) continue;
+
+        var lx = ax + (bx-ax)*(-ay)/(by-ay);
+        if(lx===0) return true;
+        if(lx> 0) depth++;
+        if(ay===0 &&  lup && by>ay) depth--;
+        if(ay===0 && !lup && by<ay) depth--;
+        lup = by>ay;
+    }
+    return (depth & 1) == 1;
+};
+
+/**
+ * 显示对象容器，继承至DisplayObject
+ *
+ * ```js
+ * var container = new JC.Container();
+ * container.addChilds(sprite);
+ * ```
+ *
+ * @class
+ * @extends JC.DisplayObject
+ * @memberof JC
+ */
+function Container(){
+    DisplayObject.call( this );
+    this.cds = [];
+    this.timeScale = 1;
+    this.paused = false;
+}
+Container.prototype = Object.create( DisplayObject.prototype );
+
+/**
+ * 向容器添加一个物体
+ *
+ * ```js
+ * container.addChilds(sprite,sprite2,text3,graphice);
+ * ```
+ *
+ * @param child {JC.Container}
+ * @return {JC.Container}
+ */
+Container.prototype.addChilds = function (cd){
+    if(cd === undefined)return cd;
+    var l = arguments.length;
+    if(l > 1){
+        for (var i=0; i<l; i++) { this.addChilds(arguments[i]); }
+        return arguments[l-1];
+    }
+    if(cd.parent){ cd.parent.removeChilds(cd); }
+    cd.parent = this;
+    this.cds.push(cd);
+    return cd;
+};
+/**
+ * 从容器移除一个物体
+ *
+ * ```js
+ * container.removeChilds(sprite,sprite2,text3,graphice);
+ * ```
+ *
+ * @param child {JC.Container}
+ * @return {JC.Container}
+ */
+Container.prototype.removeChilds = function (){
+    var l = arguments.length;
+    if(l > 1){
+        for (var i=0; i<l; i++) { this.removeChilds(arguments[i]); }
+    }else if(l===1){
+        for(var a=0;a<this.cds.length;a++){
+            if(this.cds[a]===arguments[0]){
+                this.cds.splice(a,1);
+                this.cds[a].parent = null;
+                a--;
+            }
+        }
+    }
+};
+Container.prototype.updateTransform = function (snippet){
+    if (!this._ready) return;
+    snippet = this.timeScale*snippet;
+    if (!this.paused) this.upAnimation(snippet);
+    this.updateMe();
+    if (this.cds.length>0) this.updateChilds(snippet);
+};
+Container.prototype.updateChilds = function (snippet){
+    for (var i=0,l=this.cds.length; i<l; i++) {
+        var cd = this.cds[i];
+        cd.updateTransform(snippet);
+    }
+};
+Container.prototype.render = function (ctx){
+    ctx.save();
+    this.setTransform(ctx);
+    if (this.mask) this.mask.render(ctx);
+    this.renderMe(ctx);
+    if (this.cds.length>0) this.renderChilds(ctx);
+    ctx.restore();
+};
+Container.prototype.renderMe = function (){
+    return true;
+};
+Container.prototype.renderChilds = function (ctx){
+    for (var i=0,l=this.cds.length; i<l; i++) {
+        var cd = this.cds[i];
+        if (!cd.isVisible()||!cd._ready)continue;
+        cd.render(ctx);
+    }
+};
+Container.prototype.noticeEvent = function (ev){
+    var i = this.cds.length-1;
+    while(i>=0){
+        var child = this.cds[i];
+        if(child.visible){
+            child.noticeEvent(ev);
+            if(ev.target)break;
+        }
+        i--;
+    }
+    this.upEvent(ev);
+};
+Container.prototype.upEvent = function(ev){
+    if(!this._ready)return;
+    if(ev.target||(!this.passEvent&&this.hitTest(ev))){
+        if(!ev.cancleBubble||ev.target===this){
+            if(!(this.event.listeners[ev.type]&&this.event.listeners[ev.type].length>0))return;
+            this.event.emit(ev);
+        }
+    }
+};
+Container.prototype.hitTest = function(ev){
+    if (ev.type==='touchmove'||ev.type==='touchend'||ev.type==='mousemove'||ev.type==='mouseup'){
+        var re = this.event.touchstarted;
+        if(re)ev.target = this;
+        if(ev.type==='touchend'||ev.type==='mouseup')this.event.touchstarted = false;
+        return re;
+    }
+    if(this.hitTestMe(ev)){
+        ev.target = this;
+        if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
+        return true;
+    }
+    return false;
+};
+Container.prototype.hitTestMe = function(ev){
+    return this.ContainsPoint(this.getBound(),ev.global.x,ev.global.y);
+};
+Container.prototype.pause = function(){
+    this.paused = true;
+};
+Container.prototype.start = function(){
+    this.paused = false;
+};
+Container.prototype.cancle = function(){
+    this.Animator.clear();
+};
+
+/**
+ * MovieClip类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [element] {object} 动画对象 内部传入
+ * @param [opts] {object} 动画配置信息 内部传入
+ */
+function MovieClip(element, opts) {
+    this.element = element;
+    this.living = false;
+
+    this.onCompelete = null;
+    // this.onUpdate = null;
+
+    this.infinity = false;
+    this.alternate = false;
+    this.repeats = 0;
+
+    this.animations = opts.animations || {};
+
+    this.index = 0;
+    this.direction = 1;
+    this.frames = [];
+    this.sy = opts.sy || 0;
+    this.sx = opts.sx || 0;
+    this.fillMode = 0;
+    this.fps = 16;
+
+    this.paused = false;
+
+    this.pt = 0;
+    this.nt = 0;
+}
+MovieClip.prototype.update = function(snippet) {
+    if (this.paused || !this.living) return;
+    this.nt += snippet;
+    if (this.nt - this.pt < this.interval) return;
+    this.pt = this.nt;
+    var i = this.index + this.direction;
+    if (i < this.frames.length && i >= 0) {
+        this.index = i;
+        // Do you need this handler???
+        // this.onUpdate&&this.onUpdate(this.index);
+    } else {
+        if (this.repeats > 0 || this.infinity) {
+            if (this.repeats > 0) --this.repeats;
+            if (this.alternate) {
+                this.direction *= -1;
+                this.index += this.direction;
+            } else {
+                this.direction = 1;
+                this.index = 0;
+            }
+            // Do you need this handler???
+            // this.onUpdate&&this.onUpdate(this.index);
+        } else {
+            this.living = false;
+            this.index = this.fillMode;
+            if (this.onCompelete) this.onCompelete();
+            if (this.next) this.next();
+        }
+    }
+};
+MovieClip.prototype.getFramePos = function() {
+    var pos = {
+        x: this.sx,
+        y: this.sy
+    };
+    var cf = this.frames[this.index];
+    if (cf > 0) {
+        var row = this.element._textureW / this.element.width >> 0;
+        var lintRow = this.sx / this.element.width >> 0;
+        var lintCol = this.sy / this.element.height >> 0;
+        var mCol = lintCol + (lintRow + cf) / row >> 0;
+        var mRow = (lintRow + cf) % row;
+        pos.x = mRow * this.element.width;
+        pos.y = mCol * this.element.height;
+    }
+    return pos;
+};
+MovieClip.prototype.playMovie = function(opts) {
+    this.next = null;
+    var movie = this.format(opts.movie);
+    if (!UTILS.isArray(movie)) return;
+    this.frames = movie;
+    this.index = 0;
+    this.direction = 1;
+    this.fillMode = opts.fillMode || 0;
+    this.fps = opts.fps || this.fps;
+    this.infinity = opts.infinity || false;
+    this.alternate = opts.alternate || false;
+    this.repeats = opts.repeats || 0;
+    this.living = true;
+    this.onCompelete = opts.onCompelete || null;
+};
+MovieClip.prototype.format = function(movie) {
+    if (UTILS.isString(movie)) {
+        var config = this.animations[movie];
+        if (config) {
+            return this.format(config);
+        } else {
+            console.warn(
+                '%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ',
+                'color: #f98165; background: #80a89e',
+                'color: #80a89e; background: #cad9d5;',
+                'color: #f98165; background: #cad9d5',
+                'color: #80a89e; background: #cad9d5'
+            );
+            return false;
+        }
+    } else if (UTILS.isArray(movie)) {
+        return movie;
+    } else if (UTILS.isObject(movie)) {
+        var arr = [];
+        for (var i = movie.start; i <= movie.end; i++) {
+            arr.push(i);
+        }
+        if (movie.next && this.animations[movie.next]) {
+            var This = this;
+            this.next = function() {
+                This.playMovie({
+                    movie: this.animations[movie.next],
+                    infinity: true
+                });
+            };
+        }
+        return arr;
+    }
+};
+MovieClip.prototype.pause = function() {
+    this.paused = true;
+};
+MovieClip.prototype.start = function() {
+    this.paused = false;
+};
+MovieClip.prototype.cancle = function() {
+    this.living = false;
+};
+Object.defineProperty(MovieClip.prototype, 'interval', {
+    get: function() {
+        return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
+    }
+});
+
+/**
+ * 位图精灵图，继承至Container
+ *
+ * ```js
+ * var loadBox = JC.loaderUtil({
+ *    frames: './images/frames.png'
+ * });
+ * var sprite = new JC.Sprite({
+ *      texture: loadBox.getById('frames'),
+ *      width: 165,
+ *      height: 292,
+ *      count: 38,
+ *      sx: 0,
+ *      sy: 0,
+ *      animations: {
+ *          fall: {start: 0,end: 4,next: 'stand'},
+ *          fly: {start: 5,end: 9,next: 'stand'},
+ *          stand: {start: 10,end: 39},
+ *          walk: {start: 40,end: 59,next: 'stand'}
+ *      }
+ * });
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
+function Sprite(opts){
+    Container.call( this );
+
+    this.texture = opts.texture;
+    if(this.texture.loaded){
+        this.upTexture(opts);
+    }else{
+        var This = this;
+        this._ready = false;
+        this.texture.on('load',function(){
+            This.upTexture(opts);
+            This._ready = true;
+        });
+    }
+
+    this.MovieClip = new MovieClip(this,opts);
+
+}
+Sprite.prototype = Object.create( Container.prototype );
+Sprite.prototype.upTexture = function(opts){
+    this._textureW = opts.texture.width;
+    this._textureH = opts.texture.height;
+    this.width = opts.width||this._textureW;
+    this.height = opts.height||this._textureH;
+    this.regX = this.width>>1;
+    this.regY = this.height>>1;
+    this.setBound(null,true);
+};
+Sprite.prototype.upAnimation = function(snippet){
+    this.Animator.update(snippet);
+    this.MovieClip.update(snippet);
+};
+Sprite.prototype.playMovie = function(opts){
+    this.MovieClip.playMovie(opts);
+};
+Sprite.prototype.renderMe = function (ctx){
+    if (!this._ready) return;
+    var pos = this.MovieClip.getFramePos();
+    ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+};
+
+/**
+ * 形状对象，继承至Container
+ *
+ *
+ * ```js
+ * var graphics = new JC.Graphics();
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
+function Graphics(){
+    Container.call( this );
+    this.cacheCanvas = null;
+}
+Graphics.prototype = Object.create( Container.prototype );
+Graphics.prototype.renderMe = function (ctx){
+    if(!this.draw)return;
+    if(this.cached||this.cache){
+        if(this.cache){
+            this.cacheCanvas = this.cacheCanvas||document.createElement('canvas');
+            this.width = this.cacheCanvas.width = this.session.width;
+            this.height = this.cacheCanvas.height = this.session.height;
+            this._ctx = this.cacheCanvas.getContext('2d');
+            this._ctx.clearRect(0,0,this.width,this.height);
+            this._ctx.save();
+            this._ctx.setTransform(1,0,0,1,this.session.center.x,this.session.center.y);
+            this._drawBack(this._ctx);
+            this._ctx.restore();
+            this.cached = true;
+            this.cache = false;
+        }
+        this.cacheCanvas&&ctx.drawImage(this.cacheCanvas, 0, 0, this.width, this.height, -this.session.center.x, -this.session.center.x, this.width, this.height);
+    }else{
+        this._drawBack(ctx);
+    }
+};
+Graphics.prototype._drawBack = function (ctx){
+    if(typeof this.draw === 'function'){
+        this.draw(ctx);
+    }else if(typeof this.draw === 'object' && typeof this.draw.render === 'function'){
+        this.draw.render(ctx);
+    }
+};
+/**
+ * 图形绘制挂载函数
+ *
+ *```js
+ *  var cacheMap = new JC.Graphics();  // 创建形状绘制对象
+ *
+ *  cacheMap.drawCall(function(ctx){
+ *      for(var i = 50;i>0;i--){
+ *          ctx.strokeStyle = COLOURS[i%COLOURS.length];
+ *          ctx.beginPath();
+ *          ctx.arc( 0, 0, i, 0, Math.PI*2 );
+ *          ctx.stroke();
+ *      }
+ *  },{
+ *      cache: true,
+ *      session: {center: {x: 50,y: 50},width:100,height:100}
+ *  });
+ * ```
+ *
+ * @param fn {function}
+ * @param opts {object}
+ */
+Graphics.prototype.drawCall = function(fn,opts){
+    if(fn===undefined)return;
+    opts = opts||{};
+    this.cache = opts.cache||false;
+    this.cached = false;
+    this.session = opts.session||{center: {x: 0,y: 0},width:100,height:100};
+    this.draw = fn||null;
+};
+
+/**
+ * 文本，继承至Container
+ *
+ *
+ * ```js
+ * var text = new JC.Text('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
+function Text(text,font,color){
+    Container.call( this );
+    this.text = text.toString();
+    this.font = font || 'bold 12px Arial';
+    this.color = color || '#000000';
+
+    this.textAlign = 'center'; // start left center end right
+    this.textBaseline = 'middle'; // top bottom middle alphabetic hanging
+
+
+    this.outline = 0;
+    this.lineWidth = 1;
+
+    this.US = false; // use stroke
+    this.UF = true; // use fill
+
+    // ctx.measureText(str) 返回指定文本的宽度
+}
+Text.prototype = Object.create( Container.prototype );
+Text.prototype.renderMe = function(ctx){
+    ctx.font = this.font;
+    ctx.textAlign = this.textAlign;
+    ctx.textBaseline = this.textBaseline;
+    if(this.UF){
+        ctx.fillStyle = this.color;
+        ctx.fillText(this.text,0,0);
+    }
+    if(this.US){
+        ctx.lineWidth = this.lineWidth;
+        ctx.strokeStyle = this.color;
+        ctx.strokeText(this.text,0,0);
+    }
+};
+
+/**
+ * 舞台对象，继承至Container
+ *
+ *
+ * ```js
+ * var stage = new JC.Stage('demo_canvas','#fff');
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
+function Stage(id,bgColor){
+    Container.call( this );
+    this.type = 'stage';
+    this.canvas = document.getElementById(id);
+    this.ctx = this.canvas.getContext('2d');
+    this.cds = [];
+    this.canvas.style.backgroundColor = bgColor || 'transparent';
+    this.autoClear = true;
+    this.setStyle = false;
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
+
+    if('imageSmoothingEnabled' in this.ctx)
+        this.ctx.imageSmoothingEnabled = true;
+    else if('webkitImageSmoothingEnabled' in this.ctx)
+        this.ctx.webkitImageSmoothingEnabled = true;
+    else if('mozImageSmoothingEnabled' in this.ctx)
+        this.ctx.mozImageSmoothingEnabled = true;
+    else if('oImageSmoothingEnabled' in this.ctx)
+        this.ctx.oImageSmoothingEnabled = true;
+
+    this.initEvent();
+
+    this.pt = null;
+
+}
+Stage.prototype = Object.create( Container.prototype );
+/**
+ * 舞台尺寸设置
+ *
+ *
+ * @param w {number} 可以是屏幕的宽度
+ * @param h {number} 可以是屏幕的高度
+ */
+Stage.prototype.resize = function (w,h,sw,sh){
+    this.width = this.canvas.width = w;
+    this.height = this.canvas.height = h;
+    if(this.setStyle&&sw&&sh){
+        this.canvas.style.width = sw+'px';
+        this.canvas.style.height = sh+'px';
+    }
+};
+Stage.prototype.render = function (){
+    if(this.pt===null||Date.now()-this.pt>200)this.pt = Date.now();
+    var snippet = Date.now()-this.pt;
+    snippet = snippet <= 0 ? 10: snippet;
+    this.pt += snippet;
+    this.updateChilds(this.timeScale*snippet);
+
+    this.ctx.setTransform(1,0,0,1,0,0);
+    if(this.autoClear)this.ctx.clearRect(0,0,this.width,this.height);
+    this.renderChilds(this.ctx);
+};
+Stage.prototype.initEvent = function (){
+    var This = this;
+    this.canvas.addEventListener('click',function(ev){
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('touchstart',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('touchmove',function(ev){
+        ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('touchend',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('mousedown',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('mousemove',function(ev){
+        ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+    this.canvas.addEventListener('mouseup',function(ev){
+        // ev.preventDefault();
+        This.eventProxy(ev);
+    },false);
+};
+Stage.prototype.eventProxy = function (ev){
+    var evd = this.fixCoord(ev);
+    var i = this.cds.length-1;
+    while(i>=0){
+        var child = this.cds[i];
+        if(child.visible){
+            child.noticeEvent(evd);
+            if(evd.target)break;
+        }
+        i--;
+    }
+};
+Stage.prototype.fixCoord = function (ev){
+    var evd = new InteractionData(),
+        offset = this.getPos(this.canvas);
+    evd.originalEvent = ev;
+    evd.type = ev.type;
+
+    evd.ratio = this.width/this.canvas.offsetWidth;
+    if(ev.touches){
+        evd.touches = [];
+        if(ev.touches.length>0){
+            for(var i=0;i<ev.touches.length;i++){
+                evd.touches[i] = {};
+                evd.touches[i].global = {};
+                evd.touches[i].global.x = (ev.touches[i].pageX-offset.x)*evd.ratio;
+                evd.touches[i].global.y = (ev.touches[i].pageY-offset.y)*evd.ratio;
+            }
+            evd.global = evd.touches[0].global;
+        }
+    }else{
+        evd.global.x = (ev.pageX-offset.x)*evd.ratio;
+        evd.global.y = (ev.pageY-offset.y)*evd.ratio;
+    }
+    return evd;
+};
+Stage.prototype.getPos = function (obj){
+    var pos={};
+    if(obj.offsetParent){
+        var p = this.getPos(obj.offsetParent);
+        pos.x = obj.offsetLeft+p.x;
+        pos.y = obj.offsetTop+p.y;
+    }else{
+        pos.x = obj.offsetLeft;
+        pos.y = obj.offsetTop;
+    }
+    return pos;
+};
+
+exports.UTILS = UTILS;
+exports.Texture = Texture;
+exports.Loader = Loader;
+exports.loaderUtil = loaderUtil;
+exports.Point = Point;
+exports.Matrix = Matrix;
+exports.IDENTITY = IDENTITY;
+exports.TEMP_MATRIX = TEMP_MATRIX;
+exports.DisplayObject = DisplayObject;
+exports.Container = Container;
+exports.Sprite = Sprite;
+exports.Graphics = Graphics;
+exports.Text = Text;
+exports.Stage = Stage;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));

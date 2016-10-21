@@ -1,92 +1,52 @@
 
 /**
- * jcc2d的事件消息对象的类
- *
- * @class JC.InteractionData
- * @constructor
- */
-function InteractionData(){
-    /**
-     * 转换到canvas坐标系统的事件触发点
-     *
-     * @property global
-     * @type Object
-     */
-    this.global = {x:-100000,y:-100000};
-
-    /**
-     * 事件源
-     *
-     * @property target
-     * @type JC.Container
-     */
-    this.target = null;
-
-    /**
-     * 浏览器的原始事件对象
-     *
-     * @property originalEvent
-     * @type Event
-     */
-    this.originalEvent = null;
-
-    /**
-     * 在canvas内阻止事件冒泡
-     *
-     * @property cancleBubble
-     * @type Boolean
-     */
-    this.cancleBubble = false;
-
-    /**
-     * canvas视窗和页面坐标的兑换比例
-     *
-     * @property ratio
-     * @type Number
-     */
-    this.ratio = 1;
-
-    /**
-     * 事件类型
-     *
-     * @property type
-     * @type String
-     */
-    this.type = '';
-}
-JC.InteractionData = InteractionData;
-
-
-
-/**
  * jcc2d的事件对象的类
  *
- * @class JC.Eventer
- * @constructor Eventer
+ * @class
  * @memberof JC
  */
 function Eventer(){
+    /**
+     * 标记当前对象是否为touchstart触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
     this.touchstarted = false;
+
+    /**
+     * 标记当前对象是否为mousedown触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
     this.mouseDowned = false;
+
+    /**
+     * 事件监听列表
+     *
+     * @member {Object}
+     * @private
+     */
     this.listeners = {};
 }
+
 /**
  * 事件对象的事件绑定函数
  *
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
- * @private
  */
 Eventer.prototype.on = function(type,fn){
     this.listeners[type] = this.listeners[type]||[];
     this.listeners[type].push(fn);
 };
+
 /**
  * 事件对象的事件解绑函数
  *
  * @param type {String} 事件类型
  * @param fn {Function} 注册时回调函数的引用
- * @private
  */
 Eventer.prototype.off = function(type,fn){
     var ears = this.listeners;
@@ -104,11 +64,26 @@ Eventer.prototype.off = function(type,fn){
         }
     }
 };
+
+/**
+ * 事件对象的一次性事件绑定函数
+ *
+ * @param type {String} 事件类型
+ * @param fn {Function} 回调函数
+ */
+Eventer.prototype.once = function(type,fn){
+    var This = this,
+        cb = function(ev){
+            if (fn) fn(ev);
+            This.off(type,cb);
+        };
+    this.on(type,cb);
+};
+
 /**
  * 事件对象的触发事件函数
  *
  * @param ev {JC.InteractionData} 事件类型
- * @private
  */
 Eventer.prototype.emit = function(ev){
     if ( this.listeners === undefined ) return;
@@ -122,4 +97,5 @@ Eventer.prototype.emit = function(ev){
         }
     }
 };
-JC.Eventer = Eventer;
+
+export { Eventer };

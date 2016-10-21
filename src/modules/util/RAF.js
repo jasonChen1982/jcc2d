@@ -24,6 +24,6 @@
         };
     }
 
-    window.RAF = window.requestAnimFrame = window.requestAnimationFrame;
+    window.RAF = window.requestAnimationFrame;
     window.CAF = window.cancelAnimationFrame;
 })();
