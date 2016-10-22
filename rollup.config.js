@@ -3,5 +3,6 @@ export default {
     dest: 'build/jcc2d.js',
     moduleName: 'JC',
     format: 'umd',
+    sourceMap: true,
     plugins: [],
 };
