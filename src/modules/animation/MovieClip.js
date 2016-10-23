@@ -120,12 +120,18 @@ MovieClip.prototype.format = function(movie) {
         }
         if (movie.next && this.animations[movie.next]) {
             var This = this;
-            this.next = function() {
-                This.playMovie({
-                    movie: this.animations[movie.next],
-                    infinity: true
-                });
-            };
+            var conf = {};
+            if(UTILS.isString(movie.next) && this.animations[movie.next]){
+                conf.movie = movie.next;
+                conf.infinity = true;
+            } else if(UTILS.isObject(movie.next)) {
+                conf = movie.next;
+            }
+            if (UTILS.isString(conf.movie)) {
+                this.next = function() {
+                    This.playMovie(conf);
+                };
+            }
         }
         return arr;
     }

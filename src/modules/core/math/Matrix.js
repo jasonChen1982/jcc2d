@@ -170,24 +170,24 @@ Matrix.prototype.identity = function(){
  */
 Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
 {
-    var a, b, c, d, sr, cr, cy, sy, nsx, cx;
+    var a, b, c, d, sr, cr, sy, nsx; // cy, cx,
 
     sr  = Math.sin(rotation);
     cr  = Math.cos(rotation);
-    cy  = Math.cos(skewY);
-    sy  = Math.sin(skewY);
-    nsx = -Math.sin(skewX);
-    cx  =  Math.cos(skewX);
+    // cy  = Math.cos(skewY);
+    sy  = Math.tan(skewY);
+    nsx = Math.tan(skewX);
+    // cx  =  Math.cos(skewX);
 
     a  =  cr * scaleX;
     b  =  sr * scaleX;
     c  = -sr * scaleY;
     d  =  cr * scaleY;
 
-    this.a  = cy * a + sy * c;
-    this.b  = cy * b + sy * d;
-    this.c  = nsx * a + cx * c;
-    this.d  = nsx * b + cx * d;
+    this.a  = a + sy * c;
+    this.b  = b + sy * d;
+    this.c  = nsx * a + c;
+    this.d  = nsx * b + d;
 
     this.tx = x + ( pivotX * a + pivotY * c );
     this.ty = y + ( pivotX * b + pivotY * d );

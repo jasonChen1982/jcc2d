@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: core/Stage.js</title>
+    <title>Global</title>
     
     
     
@@ -217,8 +217,6 @@
             
                 <li data-name="JC.Container#rotation"><a href="JC.Container.html#rotation">rotation</a></li>
             
-                <li data-name="JC.Container#scale"><a href="JC.Container.html#scale">scale</a></li>
-            
                 <li data-name="JC.Container#scaleX"><a href="JC.Container.html#scaleX">scaleX</a></li>
             
                 <li data-name="JC.Container#scaleY"><a href="JC.Container.html#scaleY">scaleY</a></li>
@@ -299,8 +297,6 @@
                 <li data-name="JC.DisplayObject#pivotY"><a href="JC.DisplayObject.html#pivotY">pivotY</a></li>
             
                 <li data-name="JC.DisplayObject#rotation"><a href="JC.DisplayObject.html#rotation">rotation</a></li>
-            
-                <li data-name="JC.DisplayObject#scale"><a href="JC.DisplayObject.html#scale">scale</a></li>
             
                 <li data-name="JC.DisplayObject#scaleX"><a href="JC.DisplayObject.html#scaleX">scaleX</a></li>
             
@@ -403,8 +399,6 @@
                 <li data-name="JC.Graphics#pivotY"><a href="JC.Graphics.html#pivotY">pivotY</a></li>
             
                 <li data-name="JC.Graphics#rotation"><a href="JC.Graphics.html#rotation">rotation</a></li>
-            
-                <li data-name="JC.Graphics#scale"><a href="JC.Graphics.html#scale">scale</a></li>
             
                 <li data-name="JC.Graphics#scaleX"><a href="JC.Graphics.html#scaleX">scaleX</a></li>
             
@@ -721,8 +715,6 @@
             
                 <li data-name="JC.Sprite#rotation"><a href="JC.Sprite.html#rotation">rotation</a></li>
             
-                <li data-name="JC.Sprite#scale"><a href="JC.Sprite.html#scale">scale</a></li>
-            
                 <li data-name="JC.Sprite#scaleX"><a href="JC.Sprite.html#scaleX">scaleX</a></li>
             
                 <li data-name="JC.Sprite#scaleY"><a href="JC.Sprite.html#scaleY">scaleY</a></li>
@@ -818,8 +810,6 @@
             
                 <li data-name="JC.Stage#rotation"><a href="JC.Stage.html#rotation">rotation</a></li>
             
-                <li data-name="JC.Stage#scale"><a href="JC.Stage.html#scale">scale</a></li>
-            
                 <li data-name="JC.Stage#scaleX"><a href="JC.Stage.html#scaleX">scaleX</a></li>
             
                 <li data-name="JC.Stage#scaleY"><a href="JC.Stage.html#scaleY">scaleY</a></li>
@@ -912,8 +902,6 @@
                 <li data-name="JC.Text#pivotY"><a href="JC.Text.html#pivotY">pivotY</a></li>
             
                 <li data-name="JC.Text#rotation"><a href="JC.Text.html#rotation">rotation</a></li>
-            
-                <li data-name="JC.Text#scale"><a href="JC.Text.html#scale">scale</a></li>
             
                 <li data-name="JC.Text#scaleX"><a href="JC.Text.html#scaleX">scaleX</a></li>
             
@@ -1026,248 +1014,126 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="core_Stage.js.html">Source: core/Stage.js</h1>
+        <h1 class="page-title" data-filename="global.html">Global</h1>
         
 
 
+
+<section>
     
-    <section>
-        <article>
-            <pre id="source-code" class="prettyprint source linenums"><code>import { Container } from './display/Container';
-import { InteractionData } from '../eventer/InteractionData';
-import { UTILS } from '../util/UTILS';
+<header>
+    <h2>
+    
+    </h2>
+    
+</header>  
 
-/**
- * 舞台对象，继承至Container
- *
- *
- * ```js
- * var stage = new JC.Stage('demo_canvas','#fff');
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- */
-function Stage(canvas,bgColor){
-    Container.call( this );
-    this.type = 'stage';
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
 
-    /**
-     * 场景的canvas的dom
-     *
-     * @member {CANVAS}
-     */
-    this.canvas = UTILS.isString(canvas) ? document.getElementById(canvas) : canvas;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
-    /**
-     * 场景的canvas的绘图环境
-     *
-     * @member {context2d}
-     */
-    this.ctx = this.canvas.getContext('2d');
-    this.canvas.style.backgroundColor = bgColor || 'transparent';
+        
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="scale">scale<span class="type-signature type number">number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>对象进行x、y轴同时缩放</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
 
-    /**
-     * 场景是否自动清除上一帧的像素内容
-     *
-     * @member {Boolean}
-     */
-    this.autoClear = true;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
-    /**
-     * 场景是否应用style控制宽高
-     *
-     * @member {Boolean}
-     */
-    this.setStyle = false;
+    
+    
+</dd>
 
-    /**
-     * canvas的宽度
-     *
-     * @member {Number}
-     */
-    this.width = this.canvas.width;
+        </dl>
+    
+    
+    
+    
+    
+    
+    
+</article>
 
-    /**
-     * canvas的高度
-     *
-     * @member {Number}
-     */
-    this.height = this.canvas.height;
-
-    if('imageSmoothingEnabled' in this.ctx)
-        this.ctx.imageSmoothingEnabled = true;
-    else if('webkitImageSmoothingEnabled' in this.ctx)
-        this.ctx.webkitImageSmoothingEnabled = true;
-    else if('mozImageSmoothingEnabled' in this.ctx)
-        this.ctx.mozImageSmoothingEnabled = true;
-    else if('oImageSmoothingEnabled' in this.ctx)
-        this.ctx.oImageSmoothingEnabled = true;
-
-    this.initEvent();
-
-    /**
-     * 上一次绘制的时间点
-     *
-     * @member {Number}
-     * @private
-     */
-    this.pt = null;
-
-}
-Stage.prototype = Object.create( Container.prototype );
-
-/**
- * 舞台尺寸设置
- *
- *
- * @param w {number} canvas的width值
- * @param h {number} canvas的height值
- * @param sw {number} canvas的style.width值，需将舞台属性setStyle设置为true
- * @param sh {number} canvas的style.height值，需将舞台属性setStyle设置为true
- */
-Stage.prototype.resize = function (w,h,sw,sh){
-    this.width = this.canvas.width = w;
-    this.height = this.canvas.height = h;
-    if(this.setStyle&amp;&amp;sw&amp;&amp;sh){
-        this.canvas.style.width = sw+'px';
-        this.canvas.style.height = sh+'px';
-    }
-};
-
-/**
- * 渲染舞台内的所有可见渲染对象
- *
- *
- */
-Stage.prototype.render = function (){
-    if(this.pt===null||Date.now()-this.pt>200)this.pt = Date.now();
-    var snippet = Date.now()-this.pt;
-    snippet = snippet &lt;= 0 ? 10: snippet;
-    this.pt += snippet;
-    this.updateChilds(this.timeScale*snippet);
-
-    this.ctx.setTransform(1,0,0,1,0,0);
-    if(this.autoClear)this.ctx.clearRect(0,0,this.width,this.height);
-    this.renderChilds(this.ctx);
-};
-
-/**
- * 初始化事件接管
- *
- *
- * @method initEvent
- * @private
- */
-Stage.prototype.initEvent = function (){
-    var This = this;
-    this.canvas.addEventListener('click',function(ev){
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('touchstart',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('touchmove',function(ev){
-        ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('touchend',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('mousedown',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('mousemove',function(ev){
-        ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('mouseup',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-};
-
-/**
- * 代理事件，并对事件做分发
- *
- *
- * @method eventProxy
- * @private
- */
-Stage.prototype.eventProxy = function (ev){
-    var evd = this.fixCoord(ev);
-    var i = this.cds.length-1;
-    while(i>=0){
-        var child = this.cds[i];
-        if(child.visible){
-            child.noticeEvent(evd);
-            if(evd.target)break;
-        }
-        i--;
-    }
-};
-
-/**
- * 将全局的事件坐标点转换到canvas的坐标系
- *
- *
- * @method fixCoord
- * @private
- */
-Stage.prototype.fixCoord = function (ev){
-    var evd = new InteractionData(),
-        offset = this.getPos(this.canvas);
-    evd.originalEvent = ev;
-    evd.type = ev.type;
-
-    evd.ratio = this.width/this.canvas.offsetWidth;
-    if(ev.touches){
-        evd.touches = [];
-        if(ev.touches.length>0){
-            for(var i=0;i&lt;ev.touches.length;i++){
-                evd.touches[i] = {};
-                evd.touches[i].global = {};
-                evd.touches[i].global.x = (ev.touches[i].pageX-offset.x)*evd.ratio;
-                evd.touches[i].global.y = (ev.touches[i].pageY-offset.y)*evd.ratio;
-            }
-            evd.global = evd.touches[0].global;
-        }
-    }else{
-        evd.global.x = (ev.pageX-offset.x)*evd.ratio;
-        evd.global.y = (ev.pageY-offset.y)*evd.ratio;
-    }
-    return evd;
-};
-
-/**
- * 获取canvas相对于页面的偏移量
- *
- *
- * @method getPos
- * @private
- */
-Stage.prototype.getPos = function (obj){
-    var pos={};
-    if(obj.offsetParent){
-        var p = this.getPos(obj.offsetParent);
-        pos.x = obj.offsetLeft+p.x;
-        pos.y = obj.offsetTop+p.y;
-    }else{
-        pos.x = obj.offsetLeft;
-        pos.y = obj.offsetTop;
-    }
-    return pos;
-};
-
-export { Stage };
-</code></pre>
-        </article>
-    </section>
-
+</section>  
 
 
 
@@ -1276,7 +1142,7 @@ export { Stage };
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Sun Oct 23 2016 16:03:17 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Sun Oct 23 2016 16:02:13 GMT+0800 (CST)
         </footer>
     </div>
 </div>

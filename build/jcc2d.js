@@ -1133,24 +1133,24 @@ Matrix.prototype.identity = function(){
  */
 Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
 {
-    var a, b, c, d, sr, cr, cy, sy, nsx, cx;
+    var a, b, c, d, sr, cr, sy, nsx; // cy, cx,
 
     sr  = Math.sin(rotation);
     cr  = Math.cos(rotation);
-    cy  = Math.cos(skewY);
-    sy  = Math.sin(skewY);
-    nsx = -Math.sin(skewX);
-    cx  =  Math.cos(skewX);
+    // cy  = Math.cos(skewY);
+    sy  = Math.tan(skewY);
+    nsx = Math.tan(skewX);
+    // cx  =  Math.cos(skewX);
 
     a  =  cr * scaleX;
     b  =  sr * scaleX;
     c  = -sr * scaleY;
     d  =  cr * scaleY;
 
-    this.a  = cy * a + sy * c;
-    this.b  = cy * b + sy * d;
-    this.c  = nsx * a + cx * c;
-    this.d  = nsx * b + cx * d;
+    this.a  = a + sy * c;
+    this.b  = b + sy * d;
+    this.c  = nsx * a + c;
+    this.d  = nsx * b + d;
 
     this.tx = x + ( pivotX * a + pivotY * c );
     this.ty = y + ( pivotX * b + pivotY * d );
@@ -1319,6 +1319,13 @@ function DisplayObject(){
     this.Animation = new Animation(this);
 }
 
+/**
+ * 对渲染对象进行x、y轴同时缩放
+ *
+ * @member {number}
+ * @name scale
+ * @memberof JC.DisplayObject#
+ */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
     get: function() {
         return this.scaleX;
@@ -2071,12 +2078,18 @@ MovieClip.prototype.format = function(movie) {
         }
         if (movie.next && this.animations[movie.next]) {
             var This = this;
-            this.next = function() {
-                This.playMovie({
-                    movie: this.animations[movie.next],
-                    infinity: true
-                });
-            };
+            var conf = {};
+            if(UTILS.isString(movie.next) && this.animations[movie.next]){
+                conf.movie = movie.next;
+                conf.infinity = true;
+            } else if(UTILS.isObject(movie.next)) {
+                conf = movie.next;
+            }
+            if (UTILS.isString(conf.movie)) {
+                this.next = function() {
+                    This.playMovie(conf);
+                };
+            }
         }
         return arr;
     }

@@ -186,7 +186,7 @@ rectLeftFront.to({
     alternate: true
 });
 
-rectLeftFront.skewX = rectLeftBack.skewX = -30;
+rectLeftFront.skewX = rectLeftBack.skewX = 30;
 bannerLeft.addChilds(rectLeftBack,rectLeftFront);
 bannerLeft.to({
     to: {x: -60},
@@ -216,7 +216,7 @@ rectRightFront.to({
     alternate: true
 });
 
-rectRightFront.skewX = rectRightBack.skewX = -30;
+rectRightFront.skewX = rectRightBack.skewX = 30;
 bannerRight.rotation = 180;
 bannerRight.addChilds(rectRightBack,rectRightFront);
 bannerRight.to({

@@ -161,6 +161,13 @@ function DisplayObject(){
     this.Animation = new Animation(this);
 }
 
+/**
+ * 对渲染对象进行x、y轴同时缩放
+ *
+ * @member {number}
+ * @name scale
+ * @memberof JC.DisplayObject#
+ */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
     get: function() {
         return this.scaleX;
