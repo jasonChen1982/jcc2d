@@ -1,5 +1,6 @@
 import { Container } from './display/Container';
 import { InteractionData } from '../eventer/InteractionData';
+import { UTILS } from '../util/UTILS';
 
 /**
  * 舞台对象，继承至Container
@@ -13,16 +14,51 @@ import { InteractionData } from '../eventer/InteractionData';
  * @extends JC.Container
  * @memberof JC
  */
-function Stage(id,bgColor){
+function Stage(canvas,bgColor){
     Container.call( this );
     this.type = 'stage';
-    this.canvas = document.getElementById(id);
+
+    /**
+     * 场景的canvas的dom
+     *
+     * @member {CANVAS}
+     */
+    this.canvas = UTILS.isString(canvas) ? document.getElementById(canvas) : canvas;
+
+    /**
+     * 场景的canvas的绘图环境
+     *
+     * @member {context2d}
+     */
     this.ctx = this.canvas.getContext('2d');
-    this.cds = [];
     this.canvas.style.backgroundColor = bgColor || 'transparent';
+
+    /**
+     * 场景是否自动清除上一帧的像素内容
+     *
+     * @member {Boolean}
+     */
     this.autoClear = true;
+
+    /**
+     * 场景是否应用style控制宽高
+     *
+     * @member {Boolean}
+     */
     this.setStyle = false;
+
+    /**
+     * canvas的宽度
+     *
+     * @member {Number}
+     */
     this.width = this.canvas.width;
+
+    /**
+     * canvas的高度
+     *
+     * @member {Number}
+     */
     this.height = this.canvas.height;
 
     if('imageSmoothingEnabled' in this.ctx)
@@ -36,16 +72,25 @@ function Stage(id,bgColor){
 
     this.initEvent();
 
+    /**
+     * 上一次绘制的时间点
+     *
+     * @member {Number}
+     * @private
+     */
     this.pt = null;
 
 }
 Stage.prototype = Object.create( Container.prototype );
+
 /**
  * 舞台尺寸设置
  *
  *
- * @param w {number} 可以是屏幕的宽度
- * @param h {number} 可以是屏幕的高度
+ * @param w {number} canvas的width值
+ * @param h {number} canvas的height值
+ * @param sw {number} canvas的style.width值，需将舞台属性setStyle设置为true
+ * @param sh {number} canvas的style.height值，需将舞台属性setStyle设置为true
  */
 Stage.prototype.resize = function (w,h,sw,sh){
     this.width = this.canvas.width = w;
@@ -55,6 +100,12 @@ Stage.prototype.resize = function (w,h,sw,sh){
         this.canvas.style.height = sh+'px';
     }
 };
+
+/**
+ * 渲染舞台内的所有可见渲染对象
+ *
+ *
+ */
 Stage.prototype.render = function (){
     if(this.pt===null||Date.now()-this.pt>200)this.pt = Date.now();
     var snippet = Date.now()-this.pt;
@@ -66,6 +117,14 @@ Stage.prototype.render = function (){
     if(this.autoClear)this.ctx.clearRect(0,0,this.width,this.height);
     this.renderChilds(this.ctx);
 };
+
+/**
+ * 初始化事件接管
+ *
+ *
+ * @method initEvent
+ * @private
+ */
 Stage.prototype.initEvent = function (){
     var This = this;
     this.canvas.addEventListener('click',function(ev){
@@ -96,6 +155,14 @@ Stage.prototype.initEvent = function (){
         This.eventProxy(ev);
     },false);
 };
+
+/**
+ * 代理事件，并对事件做分发
+ *
+ *
+ * @method eventProxy
+ * @private
+ */
 Stage.prototype.eventProxy = function (ev){
     var evd = this.fixCoord(ev);
     var i = this.cds.length-1;
@@ -108,6 +175,14 @@ Stage.prototype.eventProxy = function (ev){
         i--;
     }
 };
+
+/**
+ * 将全局的事件坐标点转换到canvas的坐标系
+ *
+ *
+ * @method fixCoord
+ * @private
+ */
 Stage.prototype.fixCoord = function (ev){
     var evd = new InteractionData(),
         offset = this.getPos(this.canvas);
@@ -132,6 +207,14 @@ Stage.prototype.fixCoord = function (ev){
     }
     return evd;
 };
+
+/**
+ * 获取canvas相对于页面的偏移量
+ *
+ *
+ * @method getPos
+ * @private
+ */
 Stage.prototype.getPos = function (obj){
     var pos={};
     if(obj.offsetParent){

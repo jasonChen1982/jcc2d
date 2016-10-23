@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="640" height="960"></canvas>
+
+<script type="text/javascript" src="../../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+
+var w = window.innerWidth*window.devicePixelRatio,
+    h = window.innerHeight*window.devicePixelRatio,
+    pic,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container(),
+    bodyDoc,
+    body,
+    arm1,
+    arm2,
+    arm3,
+    hand,
+    wheel1,
+    wheel2,
+    ground;
+    stage.setStyle = true;
+
+
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+var loadBox = JC.loaderUtil({
+    body: './images/body.png'
+});
+
+loadBox.on('compelete',function(){
+
+    resize();
+
+    arm1 = new JC.Graphics();
+    arm1.drawCall(function(ctx){
+        ctx.beginPath();
+        ctx.strokeStyle = "#6d6e71";
+        ctx.lineWidth = 4;
+        ctx.arc(0,-220,50,0,Math.PI*2);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+        ctx.fillStyle = "#3d989b";
+        ctx.moveTo(-38,0);
+        ctx.lineTo(38,0);
+        ctx.lineTo(28,-220);
+        ctx.lineTo(-28,-220);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#42a6a9";
+        ctx.arc(0,0,40,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#6d6e71";
+        ctx.arc(0,0,22,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#eeefef";
+        ctx.arc(0,0,10,0,Math.PI*2);
+        ctx.fill();
+    });
+    arm1.x = -82;
+    arm1.y = -100;
+    arm1.rotation = 80;
+
+    arm2 = new JC.Graphics();
+    arm2.drawCall(function(ctx){
+
+        ctx.beginPath();
+        ctx.fillStyle = "#42a6a9";
+        ctx.moveTo(-30,0);
+        ctx.arcTo(-30,30,0,30,30);
+        ctx.arcTo(30,30,30,0,30);
+        ctx.lineTo(24,-220);
+        ctx.lineTo(-24,-220);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#6d6e71";
+        ctx.arc(0,0,14,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#eeefef";
+        ctx.arc(0,0,7,0,Math.PI*2);
+        ctx.fill();
+    });
+    arm2.x = 0;
+    arm2.y = -220;
+    arm2.rotation = 16;
+
+    arm3 = new JC.Graphics();
+    arm3.drawCall(function(ctx){
+
+        ctx.beginPath();
+        ctx.fillStyle = "#3d989b";
+        ctx.moveTo(-22,0);
+        ctx.arcTo(-22,22,0,22,22);
+        ctx.arcTo(22,22,22,0,22);
+        ctx.lineTo(22,-90);
+        ctx.lineTo(-22,-90);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#3d989b";
+        ctx.arc(0,0,22,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#6d6e71";
+        ctx.arc(0,0,14,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#eeefef";
+        ctx.arc(0,0,7,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#42a6a9";
+        ctx.arc(0,-90,22,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#6d6e71";
+        ctx.arc(0,-90,10,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.fillStyle = "#eeefef";
+        ctx.arc(0,-90,6,0,Math.PI*2);
+        ctx.fill();
+    });
+    arm3.x = 0;
+    arm3.y = -220;
+    arm3.rotation = 26;
+
+    hand = new JC.Graphics();
+    hand.drawCall(function(ctx){
+        ctx.beginPath();
+        ctx.fillStyle = "#6d6e71";
+        ctx.fillRect(-42,-80,84,34);
+
+        ctx.beginPath();
+        ctx.fillStyle = "#42a6a9";
+        ctx.fillRect(-50,-50,100,36);
+
+    });
+    hand.x = 0;
+    hand.y = -90;
+    hand.rotation = 50;
+
+    wheel1 = new JC.Graphics();
+    wheel1.drawCall(function(ctx){
+        ctx.beginPath();
+        ctx.fillStyle = "#42a6a9";
+        ctx.fillRect(-10,-56,20,64);
+
+
+    });
+    wheel1.x = 26;
+    wheel1.y = -70;
+    wheel1.rotation = 30;
+
+    wheel2 = new JC.Graphics();
+    wheel2.drawCall(function(ctx){
+        ctx.beginPath();
+        ctx.fillStyle = "#42a6a9";
+        ctx.fillRect(-10,-56,20,64);
+
+
+    });
+    wheel2.x = -26;
+    wheel2.y = -70;
+    wheel2.rotation = -30;
+
+    body = new JC.Sprite({
+        texture: loadBox.getById('body')
+    });
+
+    ground = new JC.Graphics();
+    ground.drawCall(function(ctx){
+        ctx.beginPath();
+        ctx.strokeStyle = "#000000";
+        ctx.moveTo(0,h/2+116);
+        ctx.lineTo(w,h/2+116);
+        ctx.stroke();
+        ctx.closePath();
+    });
+
+    hand.addChilds(wheel1,wheel2);
+    arm3.addChilds(hand);
+    arm2.addChilds(arm3);
+    arm1.addChilds(arm2);
+    body.addChilds(arm1);
+    DOC.addChilds(body);
+    stage.addChilds(DOC,ground);
+
+
+
+    arm1.to({
+        to: {rotation: -10},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+    arm2.to({
+        to: {rotation: 120},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+    arm3.to({
+        to: {rotation: 80},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+    hand.to({
+        to: {rotation: 0},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+    wheel1.to({
+        to: {rotation: -30},
+        duration: 1000,
+        infinity: true,
+        alternate: true
+    });
+    wheel2.to({
+        to: {rotation: 30},
+        duration: 1000,
+        infinity: true,
+        alternate: true
+    });
+
+    render();
+
+});
+
+
+
+function render(){
+    RAF(render);
+
+    stage.render();
+
+    stats.update();
+}
+function resize(){
+	w = window.innerWidth*window.devicePixelRatio;
+	h = window.innerHeight*window.devicePixelRatio;
+    DOC.x = w/4;
+    DOC.y = h/2;
+	stage.resize(w,h,window.innerWidth,window.innerHeight);
+}
+</script>
+</body>
+</html>

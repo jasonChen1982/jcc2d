@@ -47,6 +47,13 @@ function Sprite(opts){
 
 }
 Sprite.prototype = Object.create( Container.prototype );
+
+/**
+ * 更新纹理对象
+ *
+ * @method upTexture
+ * @private
+ */
 Sprite.prototype.upTexture = function(opts){
     this._textureW = opts.texture.width;
     this._textureH = opts.texture.height;
@@ -56,13 +63,32 @@ Sprite.prototype.upTexture = function(opts){
     this.regY = this.height>>1;
     this.setBound(null,true);
 };
+
+/**
+ * 更新对象的动画姿态
+ *
+ * @method upAnimation
+ * @private
+ */
 Sprite.prototype.upAnimation = function(snippet){
-    this.Animator.update(snippet);
+    this.Animation.update(snippet);
     this.MovieClip.update(snippet);
 };
+
+/**
+ * 播放逐帧动画
+ *
+ */
 Sprite.prototype.playMovie = function(opts){
     this.MovieClip.playMovie(opts);
 };
+
+/**
+ * 更新对象本身的矩阵姿态以及透明度
+ *
+ * @method updateMe
+ * @private
+ */
 Sprite.prototype.renderMe = function (ctx){
     if (!this._ready) return;
     var pos = this.MovieClip.getFramePos();

@@ -31,6 +31,13 @@ function Text(text,font,color){
     // ctx.measureText(str) 返回指定文本的宽度
 }
 Text.prototype = Object.create( Container.prototype );
+
+/**
+ * 更新对象本身的矩阵姿态以及透明度
+ *
+ * @method updateMe
+ * @private
+ */
 Text.prototype.renderMe = function(ctx){
     ctx.font = this.font;
     ctx.textAlign = this.textAlign;

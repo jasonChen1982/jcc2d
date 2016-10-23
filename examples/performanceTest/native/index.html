@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>native performance</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+
+<script type="text/javascript" src="./js/jcc2d.js"></script>
+<script type="text/javascript" src="./js/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+function noop(){}
+
+function OBJ(img){
+    this.visible = true;
+    this.worldAlpha = 1;
+    this.alpha = 1;
+
+    this.x = 0;
+    this.y = 0;
+
+    this.image = img.texture;
+
+    this.width = img.width;
+    this.height = img.height;
+
+    this.regX = this.width >> 1;
+    this.regY = this.height >> 1;
+    
+}
+OBJ.prototype.constructor = OBJ;
+OBJ.prototype.draw = function(ctx){
+    ctx.save();
+    ctx.transform(1,0,0,1,this.x,this.y);
+    ctx.drawImage(this.image, 0, 0, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+    ctx.restore();
+};
+OBJ.prototype.setVal = function(vals){
+    if(vals===undefined)return;
+    for(var key in vals){
+        if(this[key]===undefined){
+            continue;
+        }else{
+            this[key] = vals[key];
+        }
+    }
+};
+
+var w = window.innerWidth,
+    h = window.innerHeight,
+    pics=[],
+    canvas = document.getElementById('demo_canvas'),
+    ctx = canvas.getContext('2d');
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+
+var loadBox = JC.loaderUtil({
+    pic: './images/card02.png'
+});
+
+loadBox.on('compelete',function(){
+    resize();
+    for (var i = 0; i < 300; i++) {
+        var el = new OBJ(loadBox.getById('pic'));
+
+        el.x = (Math.random()-0.5)*2*w;
+        el.y = (Math.random()-0.5)*2*h;
+        pics.push(el);
+    }
+    render();
+});
+
+function render(){
+    RAF(render);
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,w,h);
+    ctx.transform(0.3,0,0,0.3,w>>1,h>>1);
+    
+    for (var i = 0; i < pics.length; i++) {
+        pics[i].draw(ctx);
+    }
+
+    stats.update();
+}
+function resize(){
+    w = window.innerWidth;
+    h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+}
+</script>
+</body>
+</html>

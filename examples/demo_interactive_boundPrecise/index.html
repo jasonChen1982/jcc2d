@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    .control_box {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 120px;
+        padding: 20px;
+        background-color: rgba(0,0,0,0.5);
+        font-size: 12px;
+    }
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+<div class="control_box">
+    <input type="checkbox" name="hitArea" id="hitArea"><span id="text_face">点击显示事件热区</span>
+</div>
+<script type="text/javascript" src="../../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+var w = window.innerWidth,
+    h = window.innerHeight,
+    pic,
+    boundBox,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+    DOC.x = w/2;
+    DOC.y = h/2;
+    DOC.name = 'doc';
+    DOC.on('touchstart',function(ev){
+        // ev.cancleBubble = true;
+        console.log('touchstart at my doc by Bubble !!!!!');
+    });
+    DOC.on('touchmove',function(ev){
+        // ev.cancleBubble = true;
+        console.log('touchmove at my doc by Bubble !!!!!');
+    });
+    DOC.on('touchend',function(ev){
+        // ev.cancleBubble = true;
+        console.log('touchend at my doc by Bubble !!!!!');
+    });
+
+
+
+var checkBox = document.getElementById('hitArea');
+var face = document.getElementById('text_face');
+checkBox.addEventListener('click',function(){
+
+    if(checkBox.checked){
+        face.innerHTML = '点击隐藏事件热区';
+        boundBox.visible = true;
+    }else{
+        face.innerHTML = '点击显示事件热区';
+        boundBox.visible = false;
+    }
+});
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+JC.TWEEN.extend({
+    bounceOut: function(t, b, c, d){
+        if ((t/=d) < (1/2.75)) {
+            return c*(7.5625*t*t) + b;
+        } else if (t < (2/2.75)) {
+            return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b;
+        } else if (t < (2.5/2.75)) {
+            return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b;
+        }
+        return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
+    }
+});
+
+
+var loadBox = JC.loaderUtil({
+    daisy: './images/daisy.png'
+});
+
+loadBox.on('compelete',function(){
+    resize();
+    pic = new JC.Sprite({
+        texture: loadBox.getById('daisy')
+    });
+    pic.scaleX = pic.scaleY = 3;
+    pic.to({
+        to: {scaleX: 1,scaleY: 1},
+        duration: 1000,
+        ease: 'bounceOut'
+    });
+    pic.sp = {};pic.pp = {x: pic.x,y: pic.y};
+    pic.on('touchstart',function(ev){
+        pic.sp.x = ev.global.x;
+        pic.sp.y = ev.global.y;
+        console.log('touchstart at my pic as target !!!!!');
+    });
+    pic.on('touchmove',function(ev){
+        var np = {};
+        np.x = ev.global.x-pic.sp.x;
+        np.y = ev.global.y-pic.sp.y;
+
+        pic.x = pic.pp.x+np.x;
+        pic.y = pic.pp.y+np.y;
+        console.log('touchmove at my pic as target !!!!!');
+    });
+    pic.on('touchend',function(ev){
+        pic.pp.x = pic.x;
+        pic.pp.y = pic.y;
+        console.log('touchend at my pic as target !!!!!');
+    });
+    var bounds = [
+            0,-30,
+            -4,-29,
+            -6,-20,
+            -16,-28,
+            -22,-28,
+            -26,-24,
+            -16,-14,
+            -30,-16,
+            -36,-8,
+            -32,-4,
+            -20,-6,
+            -14,-4,
+            -28,2,
+            -30,16,
+            -22,20,
+            -15,18,
+            -2,3,
+            8,28,
+            15,28,
+            22,18,
+            15,0,
+            32,14,
+            38,11,
+            26,-6,
+            20,-8,
+            36,-10,
+            30,-20,
+            12,-14,
+            18,-24,
+            14,-28,
+            14,-28,
+            2,-16,
+            2,-26
+        ];
+    pic.setBound(bounds);
+
+    boundBox = new JC.Graphics();
+    boundBox.drawCall(function(ctx){
+        ctx.strokeStyle = '#ff0000';
+        ctx.beginPath();
+        var l = bounds.length>>1;
+        for (var i = 0; i < l; i++) {
+            var x = bounds[i*2],
+                y = bounds[i*2 + 1];
+            if(i===0){
+                ctx.moveTo(x,y);
+            }else{
+                ctx.lineTo(x,y);
+            }
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+    });
+    boundBox.visible = false;
+    pic.addChilds(boundBox);
+
+
+    DOC.addChilds(pic);
+    stage.addChilds(DOC);
+
+
+    render();
+});
+
+function render(){
+    RAF(render);
+
+    stage.render();
+
+    stats.update();
+}
+function resize(){
+	w = window.innerWidth;
+	h = window.innerHeight;
+	stage.resize(w,h);
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 import { Matrix, TEMP_MATRIX,  } from '../math/Matrix';
 import { Eventer } from '../../eventer/Eventer';
 import { Animation } from '../../animation/Animation';
+import { UTILS } from '../../util/UTILS';
 /**
  * 显示对象的基类
  *
@@ -199,7 +200,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.fromTo = function(opts,clear){
-    return this.Animator.fromTo(opts,clear);
+    return this.Animation.fromTo(opts,clear);
 };
 
 /**
@@ -230,7 +231,7 @@ DisplayObject.prototype.fromTo = function(opts,clear){
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.to = function(opts,clear){
-    return this.Animator.to(opts,clear);
+    return this.Animation.to(opts,clear);
 };
 
 /**
@@ -262,7 +263,7 @@ DisplayObject.prototype.to = function(opts,clear){
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.motion = function(opts,clear){
-    return this.Animator.motion(opts,clear);
+    return this.Animation.motion(opts,clear);
 };
 
 /**
@@ -295,11 +296,11 @@ DisplayObject.prototype.motion = function(opts,clear){
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.keyFrames = function(opts,clear){
-    return this.Animator.keyFrames(opts,clear);
+    return this.Animation.keyFrames(opts,clear);
 };
 
 /**
- * 检测是否可见
+ * 检查对象是否可见
  *
  * @method isVisible
  * @private
@@ -309,7 +310,7 @@ DisplayObject.prototype.isVisible = function(){
 };
 
 /**
- * 移除遮罩
+ * 移除对象上的遮罩
  *
  */
 DisplayObject.prototype.removeMask = function(){
@@ -332,6 +333,13 @@ DisplayObject.prototype.setVal = function(vals){
         }
     }
 };
+
+/**
+ * 更新对象本身的矩阵姿态以及透明度
+ *
+ * @method updateMe
+ * @private
+ */
 DisplayObject.prototype.updateMe = function(){
     var pt = this.parent.worldTransform;
     var wt = this.worldTransform;
@@ -347,23 +355,23 @@ DisplayObject.prototype.updateMe = function(){
             this.pivotY,
             this.scaleX,
             this.scaleY,
-            this.rotation*JC.DTR,
-            this.skewX*JC.DTR,
-            this.skewY*JC.DTR
+            this.rotation * UTILS.DTR,
+            this.skewX * UTILS.DTR,
+            this.skewY * UTILS.DTR
         );
 
-        wt.a  = JC.TEMP_MATRIX.a  * pt.a + JC.TEMP_MATRIX.b  * pt.c;
-        wt.b  = JC.TEMP_MATRIX.a  * pt.b + JC.TEMP_MATRIX.b  * pt.d;
-        wt.c  = JC.TEMP_MATRIX.c  * pt.a + JC.TEMP_MATRIX.d  * pt.c;
-        wt.d  = JC.TEMP_MATRIX.c  * pt.b + JC.TEMP_MATRIX.d  * pt.d;
-        wt.tx = JC.TEMP_MATRIX.tx * pt.a + JC.TEMP_MATRIX.ty * pt.c + pt.tx;
-        wt.ty = JC.TEMP_MATRIX.tx * pt.b + JC.TEMP_MATRIX.ty * pt.d + pt.ty;
+        wt.a  = TEMP_MATRIX.a  * pt.a + TEMP_MATRIX.b  * pt.c;
+        wt.b  = TEMP_MATRIX.a  * pt.b + TEMP_MATRIX.b  * pt.d;
+        wt.c  = TEMP_MATRIX.c  * pt.a + TEMP_MATRIX.d  * pt.c;
+        wt.d  = TEMP_MATRIX.c  * pt.b + TEMP_MATRIX.d  * pt.d;
+        wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
+        wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
     }else{
         if(this.rotation % 360){
             if(this.rotation !== this.rotationCache){
                 this.rotationCache = this.rotation;
-                this._sr = Math.sin(this.rotation*JC.DTR);
-                this._cr = Math.cos(this.rotation*JC.DTR);
+                this._sr = Math.sin(this.rotation * UTILS.DTR);
+                this._cr = Math.cos(this.rotation * UTILS.DTR);
             }
 
             a  =  this._cr * this.scaleX;
@@ -400,14 +408,29 @@ DisplayObject.prototype.updateMe = function(){
     }
     this.worldAlpha = this.alpha * this.parent.worldAlpha;
 };
+
+/**
+ * 更新对象本身的动画
+ *
+ * @method upAnimation
+ * @private
+ */
 DisplayObject.prototype.upAnimation = function(snippet){
-    this.Animator.update(snippet);
+    this.Animation.update(snippet);
 };
+
+/**
+ * 设置矩阵和透明度到当前绘图上下文
+ *
+ * @method setTransform
+ * @private
+ */
 DisplayObject.prototype.setTransform = function(ctx){
     var matrix = this.worldTransform;
     ctx.globalAlpha = this.worldAlpha;
     ctx.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.tx,matrix.ty);
 };
+
 /**
  * 获取物体相对于canvas世界坐标系的坐标位置
  *
@@ -416,6 +439,7 @@ DisplayObject.prototype.setTransform = function(ctx){
 DisplayObject.prototype.getGlobalPos = function(){
     return {x: this.worldTransform.tx,y: this.worldTransform.ty};
 };
+
 /**
  * 显示对象的事件绑定函数
  *
@@ -425,6 +449,7 @@ DisplayObject.prototype.getGlobalPos = function(){
 DisplayObject.prototype.on = function(type,fn){
     this.event.on(type,fn);
 };
+
 /**
  * 显示对象的事件解绑函数
  *
@@ -434,6 +459,7 @@ DisplayObject.prototype.on = function(type,fn){
 DisplayObject.prototype.off = function(type,fn){
     this.event.off(type,fn);
 };
+
 /**
  * 显示对象的一次性事件绑定函数
  *
@@ -443,6 +469,7 @@ DisplayObject.prototype.off = function(type,fn){
 DisplayObject.prototype.once = function(type,fn){
     this.event.once(type,fn);
 };
+
 /**
  * 获取当前坐标系下的监测区域
  *
@@ -460,6 +487,7 @@ DisplayObject.prototype.getBound = function (){
     }
     return bound;
 };
+
 /**
  * 设置显示对象的监测区域
  *
@@ -478,12 +506,19 @@ DisplayObject.prototype.setBound = function (points,needless){
     ];
     this.bound = points;
 };
+
+/**
+ * 监测坐标点是否在多变性内
+ *
+ * @method ContainsPoint
+ * @private
+ */
 DisplayObject.prototype.ContainsPoint = function (p,px,py){
     var n = p.length>>1;
     var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
 
     /* eslint no-undef: "off" */
-    //var lup = by > ay;
+    var lup = by > ay;
     for(var i=0; i<n; i++){
         ax = bx;  ay = by;
         bx = p[2*i  ] - px;

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;background-color: #000;}
+    #demo_canvas {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 320px;
+        height: 450px;
+        margin: -225px 0 0 -160px;
+    }
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="640" height="900"></canvas>
+
+<script type="text/javascript" src="../../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/util/tween.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+
+function Rect(color){
+    this.color = color||'#749d9b';
+}
+Rect.prototype.render = function(ctx){
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
+    ctx.fillRect(-30,-30,60,60);
+    ctx.fill();
+};
+
+
+JC.TWEEN.extend(tween);
+
+var shape = [],
+    c = [],
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+    DOC.x = 320;
+    DOC.y = 400;
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+
+    shape[0] = new JC.Graphics();
+    shape[0].drawCall(new Rect('#749d9b'));
+    shape[0].keyFrames({
+        keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90},{x:100,y:200,rotation:360}],
+        keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000},{ease:'bounceOut',duration: 1000}],
+        infinity: true,
+        alternate: true
+    });
+    DOC.addChilds(shape[0]);
+
+
+    stage.addChilds(DOC);
+
+
+function render(){
+    RAF(render);
+
+    stage.render();
+
+    stats.update();
+}
+render();
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+/* Reset */
+
+body,
+ul,
+ol,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+dl,
+dd,
+form,
+input,
+textarea,
+td,
+th {
+    margin: 0;
+    padding: 0;
+    font-family: "微软雅黑", Arial;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    font-size: 12px;
+    position: relative;
+    -webkit-user-select: none;
+    -webkit-text-size-adjust: none;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+li {
+    list-style: none;
+    vertical-align: top;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+textarea {
+    resize: none;
+    overflow: auto;
+}
+
+img {
+    border: none;
+    vertical-align: top;
+}
+
+em {
+    font-style: normal;
+}
+
+a {
+    text-decoration: none;
+}
+
+mark {
+    background: #c33;
+    color: #fff;
+}
+
+html {
+    height: 100%;
+}
+
+
+/* Tool */
+
+.hide {
+    display: none;
+}
+
+.clear {
+    zoom:1
+}
+.clear:after {
+    display: block;
+    content: "";
+    clear: both;
+}
+
+
+body {
+    height: 100%;
+    overflow: hidden;
+}
+#line-canvas {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    font-family: 'Tangerine', cursive;
+}

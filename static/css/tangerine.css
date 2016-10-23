@@ -1,0 +1,7 @@
+/* latin */
+@font-face {
+  font-family: 'Tangerine';
+  font-style: normal;
+  font-weight: 400;
+  src: url(../font/Tangerine_Regular.ttf) format('truetype');
+}

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="640" height="960"></canvas>
+
+<script type="text/javascript" src="../../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+
+var w = window.innerWidth*window.devicePixelRatio,
+    h = window.innerHeight*window.devicePixelRatio,
+    pic,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container(),
+    bodyDoc,
+    body,
+    arm1,
+    arm2,
+    hand,
+    wheel1,
+    wheel2,
+    ground,
+    wheels;
+    stage.setStyle = true;
+
+
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+
+
+var loadBox = JC.loaderUtil({
+    arm1: './images/arm1.png',
+    arm2: './images/arm2.png',
+    body: './images/body.png',
+    hand: './images/hand.png',
+    s1: './images/s1.png',
+    wheel: './images/wheel.png',
+});
+
+loadBox.on('compelete',function(){
+    resize();
+    bodyDoc = new JC.Container();
+    wheels = new JC.Container();
+    wheels.y = 54;
+    wheel1 = new JC.Sprite({
+        texture: loadBox.getById('wheel')
+    });
+    wheel1.x = -76;
+    wheel2 = new JC.Sprite({
+        texture: loadBox.getById('wheel')
+    });
+    wheel2.x = 48;
+    wheels.addChilds(wheel1,wheel2);
+    body = new JC.Sprite({
+        texture: loadBox.getById('body')
+    });
+    arm1 = new JC.Sprite({
+        texture: loadBox.getById('arm1')
+    });
+    arm1.x = -50;
+    arm1.y = 22;
+    arm1.regX = 140;
+    arm1.regY = 102;
+    arm1.rotation = 30;
+    arm2 = new JC.Sprite({
+        texture: loadBox.getById('arm2')
+    });
+    arm2.x = -135;
+    arm2.y = -94;
+    arm2.regX = 14;
+    arm2.regY = 20;
+    arm1.addChilds(arm2);
+    hand = new JC.Sprite({
+        texture: loadBox.getById('hand')
+    });
+    hand.x = 12;
+    hand.y = 88;
+    hand.regX = 4;
+    hand.regY = 41;
+    arm2.addChilds(hand);
+    bodyDoc.addChilds(arm1,body,wheels);
+    DOC.addChilds(bodyDoc);
+
+    ground = new JC.Graphics();
+    ground.drawCall(function(ctx){
+        ctx.beginPath();
+        ctx.strokeStyle = "#000000";
+        ctx.moveTo(0,h/2+80);
+        ctx.lineTo(w,h/2+80);
+        // ctx.arc(200, 300, 200, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.closePath();
+    });
+
+    stage.addChilds(DOC,ground);
+
+    arm1.to({
+        to: {rotation: -10},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+    hand.to({
+        to: {rotation: 50},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+    arm2.to({
+        to: {rotation: 80},
+        duration: 2000,
+        infinity: true,
+        alternate: true
+    });
+
+
+    render();
+
+    autoMove();
+});
+
+var stat = {velocity:0,enable:false,autoing:false,velocityPool: [-1,1,-2,2,-0.5,0.5]};
+document.addEventListener('touchstart',function(ev){
+    ev.preventDefault();
+    clearTimeout(stat.timer);
+    stat.velocity = ev.touches[0].clientX*2>w/window.devicePixelRatio? 3 : -3 ;
+    stat.enable = true;
+    stat.autoing = false;
+});
+document.addEventListener('touchend',function(ev){
+    ev.preventDefault();
+    stat.velocity = 0;
+    stat.enable = false;
+    autoMove();
+});
+document.addEventListener('mousedown',function(ev){
+    ev.preventDefault();
+    clearTimeout(stat.timer);
+    stat.velocity = ev.clientX*2>w/window.devicePixelRatio? 3 : -3 ;
+    // console.log(ev.clientX);
+    stat.enable = true;
+    stat.autoing = false;
+});
+document.addEventListener('mouseup',function(ev){
+    ev.preventDefault();
+    stat.velocity = 0;
+    stat.enable = false;
+    autoMove();
+});
+
+function autoMove(){
+    if(stat.enable)return;
+    clearTimeout(stat.timer);
+    var time = 1e3+Math.random()*2e3;
+    stat.velocity = stat.velocityPool[Math.random()*stat.velocityPool.length|0];
+    if(bodyDoc.x>w*3/8){
+        stat.velocity = -(Math.abs(stat.velocity)+2);
+    }else if(bodyDoc.x<-w*3/8){
+        stat.velocity = Math.abs(stat.velocity)+2;
+    }
+    stat.enable = false;
+    stat.autoing = true;
+    stat.timer = setTimeout(function(){
+        autoMove();
+    },time);
+}
+
+
+function upPos(){
+    if(!stat.enable&&!stat.autoing)return;
+    var rad = stat.velocity*90/52*Math.PI;
+    wheel1.rotation = wheel2.rotation += rad;
+    bodyDoc.x += stat.velocity;
+}
+
+function render(){
+    RAF(render);
+    upPos();
+
+    stage.render();
+
+    stats.update();
+}
+function resize(){
+	w = window.innerWidth*window.devicePixelRatio;
+	h = window.innerHeight*window.devicePixelRatio;
+    DOC.x = w/2;
+    DOC.y = h/2;
+	stage.resize(w,h,window.innerWidth,window.innerHeight);
+}
+</script>
+</body>
+</html>

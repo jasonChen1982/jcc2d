@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;}
+    </style>
+</head>
+<body>
+<div style="float: right;text-align: right;">
+    <p>点击屏幕随机播放动画</p>
+    <p id="movie">stand</p>
+</div>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+
+<script type="text/javascript" src="../../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+
+var w = window.innerWidth,
+    h = window.innerHeight,
+    runMan,
+    jumpMan,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+    DOC.x = w/2;
+    DOC.y = h/2;
+
+
+
+
+var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+
+
+var loadBox = JC.loaderUtil({
+    dragon: './images/dragon.png'
+});
+
+loadBox.on('compelete',function(){
+    resize();
+    runMan = new JC.Sprite({
+        texture: loadBox.getById('dragon'),
+        width: 210,
+        height: 231,
+        animations: {
+            fall: {start: 0,end: 4,next: 'stand'},
+            fly: {start: 5,end: 9,next: 'stand'},
+            stand: {start: 10,end: 39},
+            walk: {start: 40,end: 59,next: 'stand'}
+        }
+    });
+    runMan.playMovie({ // you can config repeats (repeat some times) or infinity (play infinite times)
+        movie: 'stand',
+        fps: 30,
+        // repeats: 1,
+        infinity: true
+    });
+    runMan.on('click',function(){
+        var movie = JC.UTILS.random(['walk','fly','fall']);
+        document.querySelector('#movie').innerHTML = movie;
+        runMan.playMovie({
+            movie: movie,
+            repeats: 6,
+            onCompelete: function(){
+                document.querySelector('#movie').innerHTML = 'stand';
+            }
+        });
+    });
+    runMan.x = 20;
+
+    DOC.addChilds(runMan);
+    stage.addChilds(DOC);
+
+
+    render();
+});
+
+function render(){
+    RAF(render);
+
+    stage.render();
+
+
+    stats.update();
+}
+function resize(){
+	w = window.innerWidth;
+	h = window.innerHeight;
+	stage.resize(w,h);
+}
+</script>
+</body>
+</html>

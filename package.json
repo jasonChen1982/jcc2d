@@ -3,13 +3,14 @@
   "version": "0.1.16",
   "description": "一个轻量级的canvas渲染引擎",
   "upto": "../jcc2d-site/examples/libs",
-  "main": "build/jcc2d.js",
+  "main": "build/jcc2d.min.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
+    "release": "npm run build && gulp release",
     "build": "rollup -c",
-    "preversion": "gulp release && git add -A && git commit -m 'release new version'",
+    "preversion": "npm run release && git add -A && git commit -m 'release new version'",
     "postversion": "git push origin master && git push origin v$npm_package_version",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "testem ci"
@@ -24,8 +25,8 @@
     "chai": "^3.2.0",
     "eslint": "^3.8.1",
     "gulp": "^3.9.1",
-    "gulp-include": "^2.2.1",
     "gulp-jsdoc3": "^0.3.0",
+    "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.0.0-alpha",
     "gulp-uglify": "^1.5.3",
     "jaguarjs-jsdoc": "^1.0.1",

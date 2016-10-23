@@ -49,7 +49,7 @@
         "recurse"       : true,
         "private"       : false,
         "lenient"       : true,
-        "destination"   : "../jcc2d-site/examples/",
+        "destination"   : "./docs",
         "template"      : "./node_modules/jaguarjs-jsdoc"
     }
 }

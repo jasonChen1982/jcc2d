@@ -4,7 +4,7 @@ import './modules/eventer/InteractionData';
 import './modules/eventer/Eventer';
 
 import './modules/animation/Animation';
-// import './modules/util/TWEEN';
+export { TWEEN } from './modules/util/TWEEN';
 export { UTILS } from './modules/util/UTILS';
 export { Texture, Loader, loaderUtil } from './modules/util/Loader';
 

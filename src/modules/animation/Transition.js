@@ -12,8 +12,8 @@ import { UTILS } from '../util/UTILS';
 function Transition(opts) {
     Animate.call(this, opts);
 
-    this.ATRS = opts.from;
-    this.ATRE = opts.to;
+    this.from = opts.from;
+    this.to = opts.to;
 
 }
 Transition.prototype = Object.create(Animate.prototype);

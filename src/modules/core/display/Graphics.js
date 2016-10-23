@@ -17,6 +17,13 @@ function Graphics(){
     this.cacheCanvas = null;
 }
 Graphics.prototype = Object.create( Container.prototype );
+
+/**
+ * 更新对象本身的矩阵姿态以及透明度
+ *
+ * @method updateMe
+ * @private
+ */
 Graphics.prototype.renderMe = function (ctx){
     if(!this.draw)return;
     if(this.cached||this.cache){
