@@ -16,7 +16,7 @@ jcc2d有几大主要类型，动画师（Animator）、事件系统（Eventer）
 
 其中它们的关系如下图：
 
-![继承关系图](https://jasonchen1982.github.io/jcc2d/images/extend.png)
+![继承关系图](https://jasonchen1982.github.io/jcc2d/static/images/extend.png)
 
 ### 快速入门 ###
 [quick Start](http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010)
