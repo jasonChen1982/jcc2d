@@ -2,7 +2,6 @@
   "name": "jcc2d",
   "version": "0.2.0",
   "description": "一个轻量级的canvas渲染引擎",
-  "upto": "../jcc2d-site/examples/libs",
   "main": "build/jcc2d.min.js",
   "directories": {
     "example": "examples"
@@ -17,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.ucweb.local:Star/JC-canvas.git"
+    "url": "git@github.com:jasonChen1982/jcc2d.git"
   },
   "author": "jasonChen",
   "license": "ISC",

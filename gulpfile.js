@@ -13,6 +13,5 @@ gulp.task('release', function() {
     .pipe(sourcemaps.init())
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(path.dirname(pkg.main)))
-    .pipe(gulp.dest(pkg.upto));
+    .pipe(gulp.dest(path.dirname(pkg.main)));
 });
