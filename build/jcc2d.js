@@ -963,6 +963,159 @@ Point.prototype.set = function (x, y)
 };
 
 /**
+ * 矩形类
+ *
+ * @class
+ * @memberof JC
+ * @param x {number} 左上角的x坐标
+ * @param y {number} 左上角的y坐标
+ * @param width {number} 矩形的宽度
+ * @param height {number} 矩形的高度
+ */
+function Rectangle(x, y, width, height)
+{
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.y = y || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.width = width || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.height = height || 0;
+}
+
+/**
+ * 空矩形对象
+ *
+ * @static
+ * @constant
+ */
+Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
+
+
+/**
+ * 克隆一个与该举行对象同样属性的矩形
+ *
+ * @return {PIXI.Rectangle} 克隆出的矩形
+ */
+Rectangle.prototype.clone = function ()
+{
+    return new Rectangle(this.x, this.y, this.width, this.height);
+};
+
+/**
+ * 检查坐标点是否在矩形区域内
+ *
+ * @param x {number} 坐标点的x轴位置
+ * @param y {number} 坐标点的y轴位置
+ * @return {boolean} 坐标点是否在矩形区域内
+ */
+Rectangle.prototype.contains = function (x, y)
+{
+    if (this.width <= 0 || this.height <= 0)
+    {
+        return false;
+    }
+
+    if (x >= this.x && x < this.x + this.width)
+    {
+        if (y >= this.y && y < this.y + this.height)
+        {
+            return true;
+        }
+    }
+
+    return false;
+};
+
+/**
+ * @class
+ * @memberof JC
+ * @param points {JC.Point[]|number[]|...JC.Point|...number} 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
+ *
+ *
+ *
+ *
+ */
+function Polygon(points_) {
+    var points = points_;
+
+    if (!UTILS.isArray(points)) {
+        points = new Array(arguments.length);
+
+        for (var a = 0; a < points.length; ++a) {
+            points[a] = arguments[a];
+        }
+    }
+
+    if (points[0] instanceof Point) {
+        var p = [];
+        for (var i = 0, il = points.length; i < il; i++) {
+            p.push(points[i].x, points[i].y);
+        }
+
+        points = p;
+    }
+
+    this.closed = true;
+
+    this.points = points;
+}
+
+/**
+ * 克隆一个属性相同的多边型对象
+ *
+ * @return {PIXI.Polygon} 克隆的对象
+ */
+Polygon.prototype.clone = function ()
+{
+    return new Polygon(this.points.slice());
+};
+
+/**
+ * 检查坐标点是否在多边形内部
+ *
+ * @param x {number} 坐标点的x轴坐标
+ * @param y {number} 坐标点的y轴坐标
+ * @return {boolean} 是否在多边形内部
+ */
+Polygon.prototype.contains = function (x, y)
+{
+    var inside = false;
+
+    var length = this.points.length / 2;
+
+    for (var i = 0, j = length - 1; i < length; j = i++)
+    {
+        var xi = this.points[i * 2], yi = this.points[i * 2 + 1],
+            xj = this.points[j * 2], yj = this.points[j * 2 + 1],
+            intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+        if (intersect)
+        {
+            inside = !inside;
+        }
+    }
+
+    return inside;
+};
+
+/**
  * 矩阵对象，用来描述和记录对象的tansform 状态信息
  *
  * @class
@@ -1304,10 +1457,10 @@ function DisplayObject(){
     /**
      * 当前对象的事件监测边界
      *
-     * @member {Array}
+     * @member {JC.Shape}
      * @private
      */
-    this.bound = [];
+    this.bound = null;
 
 
     /**
@@ -1636,82 +1789,15 @@ DisplayObject.prototype.once = function(type,fn){
 };
 
 /**
- * 获取当前坐标系下的监测区域
- *
- * @method getBound
- * @private
- */
-DisplayObject.prototype.getBound = function (){
-    var bound = [],
-        l = this.bound.length>>1;
-
-    for (var i = 0; i < l; i++) {
-        var p = this.worldTransform.apply({x: this.bound[i*2],y: this.bound[i*2+1]});
-        bound[i*2  ] = p.x;
-        bound[i*2+1] = p.y;
-    }
-    return bound;
-};
-
-/**
  * 设置显示对象的监测区域
  *
- * @param points {Array} 区域的坐标点 [x0,y0 ..... xn,yn]
+ * @param shape {JC.Polygon|JC.Rectangle} JC内置形状类型的实例
  * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function (points,needless){
-    var l = this.bound.length;
-    if(l>4&&needless)return;
-    points = points||[
-        -this.regX,this.regY,
-        -this.regX,this.regY-this.height,
-        -this.regX+this.width,this.regY-this.height,
-        -this.regX+this.width,this.regY
-    ];
-    this.bound = points;
-};
-
-/**
- * 监测坐标点是否在多变性内
- *
- * @method ContainsPoint
- * @private
- */
-DisplayObject.prototype.ContainsPoint = function (p,px,py){
-    var n = p.length>>1;
-    var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
-
-    /* eslint no-undef: "off" */
-    var lup = by > ay;
-    for(var i=0; i<n; i++){
-        ax = bx;  ay = by;
-        bx = p[2*i  ] - px;
-        by = p[2*i+1] - py;
-        if(ay==by) continue;
-        lup = by>ay;
-    }
-
-    var depth = 0;
-    for(i=0; i<n; i++){
-        ax = bx;  ay = by;
-        bx = p[2*i  ] - px;
-        by = p[2*i+1] - py;
-        if(ay< 0 && by< 0) continue;
-        if(ay> 0 && by> 0) continue;
-        if(ax< 0 && bx< 0) continue;
-
-        if(ay==by && Math.min(ax,bx)<=0) return true;
-        if(ay==by) continue;
-
-        var lx = ax + (bx-ax)*(-ay)/(by-ay);
-        if(lx===0) return true;
-        if(lx> 0) depth++;
-        if(ay===0 &&  lup && by>ay) depth--;
-        if(ay===0 && !lup && by<ay) depth--;
-        lup = by>ay;
-    }
-    return (depth & 1) == 1;
+DisplayObject.prototype.setBound = function (shape,needless){
+    if(this.bound !== null && needless)return;
+    this.bound = shape;
 };
 
 /**
@@ -1807,10 +1893,10 @@ Container.prototype.removeChilds = function (){
  */
 Container.prototype.updateTransform = function (snippet){
     if (!this._ready) return;
-    snippet = this.timeScale*snippet;
+    snippet = this.timeScale * snippet;
     if (!this.paused) this.upAnimation(snippet);
     this.updateMe();
-    if (this.cds.length>0) this.updateChilds(snippet);
+    if (this.cds.length > 0) this.updateChilds(snippet);
 };
 
 /**
@@ -1820,7 +1906,7 @@ Container.prototype.updateTransform = function (snippet){
  * @private
  */
 Container.prototype.updateChilds = function (snippet){
-    for (var i=0,l=this.cds.length; i<l; i++) {
+    for (var i = 0,l = this.cds.length; i < l; i++) {
         var cd = this.cds[i];
         cd.updateTransform(snippet);
     }
@@ -1837,7 +1923,7 @@ Container.prototype.render = function (ctx){
     this.setTransform(ctx);
     if (this.mask) this.mask.render(ctx);
     this.renderMe(ctx);
-    if (this.cds.length>0) this.renderChilds(ctx);
+    if (this.cds.length > 0) this.renderChilds(ctx);
     ctx.restore();
 };
 
@@ -1858,9 +1944,9 @@ Container.prototype.renderMe = function (){
  * @private
  */
 Container.prototype.renderChilds = function (ctx){
-    for (var i=0,l=this.cds.length; i<l; i++) {
+    for (var i = 0,l = this.cds.length; i < l; i++) {
         var cd = this.cds[i];
-        if (!cd.isVisible()||!cd._ready)continue;
+        if (!cd.isVisible() || !cd._ready)continue;
         cd.render(ctx);
     }
 };
@@ -1928,7 +2014,10 @@ Container.prototype.hitTest = function(ev){
  * @private
  */
 Container.prototype.hitTestMe = function(ev){
-    return this.ContainsPoint(this.getBound(),ev.global.x,ev.global.y);
+    if (this.bound === null) return false;
+    var point = new Point();
+    this.worldTransform.applyInverse(ev.global, point);
+    return this.bound.contains(point.x, point.y);
 };
 
 /**
@@ -2169,7 +2258,7 @@ Sprite.prototype.upTexture = function(opts){
     this.height = opts.height||this._textureH;
     this.regX = this.width>>1;
     this.regY = this.height>>1;
-    this.setBound(null,true);
+    this.setBound(new Rectangle(-this.regX, -this.regY, this.width, this.height),true);
 };
 
 /**
@@ -2571,6 +2660,8 @@ exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;
 exports.Point = Point;
+exports.Rectangle = Rectangle;
+exports.Polygon = Polygon;
 exports.Matrix = Matrix;
 exports.IDENTITY = IDENTITY;
 exports.TEMP_MATRIX = TEMP_MATRIX;

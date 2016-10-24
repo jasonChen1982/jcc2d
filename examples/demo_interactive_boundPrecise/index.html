@@ -160,7 +160,8 @@ loadBox.on('compelete',function(){
             2,-16,
             2,-26
         ];
-    pic.setBound(bounds);
+
+    pic.setBound(new JC.Polygon(bounds));
 
     boundBox = new JC.Graphics();
     boundBox.drawCall(function(ctx){

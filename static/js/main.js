@@ -111,6 +111,8 @@ function LinkFace(options){
     this.height = JC.UI.RTP(.3);
     this.halfW = this.width/2;
     this.halfH = this.height/2;
+
+    this.bound = new JC.Rectangle(-this.halfW, -this.halfH, this.width, this.height);
 }
 LinkFace.prototype.render = function(ctx) {
     var parentAlpha = ctx.globalAlpha;
@@ -129,11 +131,6 @@ LinkFace.prototype.render = function(ctx) {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = this.textColor;
     ctx.fillText(this.text,0,0);
-};
-LinkFace.prototype.getBound = function() {
-    this.halfW = this.width/2;
-    this.halfH = this.height/2;
-    return [-this.halfW,this.halfH, -this.halfW,this.halfH-this.height, -this.halfW+this.width,this.halfH-this.height, -this.halfW+this.width,this.halfH]
 };
 
 
@@ -288,7 +285,7 @@ var linkFace = new LinkFace({
         textColor: '#000000'
     });
 documentLink.drawCall(linkFace);
-documentLink.setBound(linkFace.getBound());
+documentLink.setBound(linkFace.bound);
 documentLink.x = -JC.UI.RTP(1.2);
 documentLink.alpha = 0;
 documentLink.on('click',function(){
@@ -306,7 +303,7 @@ var linkFace2 = new LinkFace({
         textColor: '#000000'
     });
 examplesLink.drawCall(linkFace2);
-examplesLink.setBound(linkFace2.getBound());
+examplesLink.setBound(linkFace2.bound);
 examplesLink.x = JC.UI.RTP(1.2);
 examplesLink.alpha = 0;
 examplesLink.on('click',function(){

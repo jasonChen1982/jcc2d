@@ -9,6 +9,8 @@ export { UTILS } from './modules/util/UTILS';
 export { Texture, Loader, loaderUtil } from './modules/util/Loader';
 
 export { Point } from './modules/core/math/Point';
+export { Rectangle } from './modules/core/math/Rectangle';
+export { Polygon } from './modules/core/math/Polygon';
 export { Matrix, IDENTITY, TEMP_MATRIX } from './modules/core/math/Matrix';
 
 export { DisplayObject } from './modules/core/display/DisplayObject';

@@ -1,5 +1,6 @@
 import { Container } from './Container';
 import { MovieClip } from '../../animation/MovieClip';
+import { Rectangle } from '../math/Rectangle';
 
 /**
  * 位图精灵图，继承至Container
@@ -61,7 +62,7 @@ Sprite.prototype.upTexture = function(opts){
     this.height = opts.height||this._textureH;
     this.regX = this.width>>1;
     this.regY = this.height>>1;
-    this.setBound(null,true);
+    this.setBound(new Rectangle(-this.regX, -this.regY, this.width, this.height),true);
 };
 
 /**

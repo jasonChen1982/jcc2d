@@ -1,4 +1,5 @@
 import { DisplayObject } from './DisplayObject';
+import { Point } from '../math/Point';
 
 /**
  * 显示对象容器，继承至DisplayObject
@@ -93,10 +94,10 @@ Container.prototype.removeChilds = function (){
  */
 Container.prototype.updateTransform = function (snippet){
     if (!this._ready) return;
-    snippet = this.timeScale*snippet;
+    snippet = this.timeScale * snippet;
     if (!this.paused) this.upAnimation(snippet);
     this.updateMe();
-    if (this.cds.length>0) this.updateChilds(snippet);
+    if (this.cds.length > 0) this.updateChilds(snippet);
 };
 
 /**
@@ -106,7 +107,7 @@ Container.prototype.updateTransform = function (snippet){
  * @private
  */
 Container.prototype.updateChilds = function (snippet){
-    for (var i=0,l=this.cds.length; i<l; i++) {
+    for (var i = 0,l = this.cds.length; i < l; i++) {
         var cd = this.cds[i];
         cd.updateTransform(snippet);
     }
@@ -123,7 +124,7 @@ Container.prototype.render = function (ctx){
     this.setTransform(ctx);
     if (this.mask) this.mask.render(ctx);
     this.renderMe(ctx);
-    if (this.cds.length>0) this.renderChilds(ctx);
+    if (this.cds.length > 0) this.renderChilds(ctx);
     ctx.restore();
 };
 
@@ -144,9 +145,9 @@ Container.prototype.renderMe = function (){
  * @private
  */
 Container.prototype.renderChilds = function (ctx){
-    for (var i=0,l=this.cds.length; i<l; i++) {
+    for (var i = 0,l = this.cds.length; i < l; i++) {
         var cd = this.cds[i];
-        if (!cd.isVisible()||!cd._ready)continue;
+        if (!cd.isVisible() || !cd._ready)continue;
         cd.render(ctx);
     }
 };
@@ -214,7 +215,10 @@ Container.prototype.hitTest = function(ev){
  * @private
  */
 Container.prototype.hitTestMe = function(ev){
-    return this.ContainsPoint(this.getBound(),ev.global.x,ev.global.y);
+    if (this.bound === null) return false;
+    var point = new Point();
+    this.worldTransform.applyInverse(ev.global, point);
+    return this.bound.contains(point.x, point.y);
 };
 
 /**

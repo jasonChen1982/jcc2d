@@ -146,10 +146,10 @@ function DisplayObject(){
     /**
      * 当前对象的事件监测边界
      *
-     * @member {Array}
+     * @member {JC.Shape}
      * @private
      */
-    this.bound = [];
+    this.bound = null;
 
 
     /**
@@ -478,40 +478,15 @@ DisplayObject.prototype.once = function(type,fn){
 };
 
 /**
- * 获取当前坐标系下的监测区域
- *
- * @method getBound
- * @private
- */
-DisplayObject.prototype.getBound = function (){
-    var bound = [],
-        l = this.bound.length>>1;
-
-    for (var i = 0; i < l; i++) {
-        var p = this.worldTransform.apply({x: this.bound[i*2],y: this.bound[i*2+1]});
-        bound[i*2  ] = p.x;
-        bound[i*2+1] = p.y;
-    }
-    return bound;
-};
-
-/**
  * 设置显示对象的监测区域
  *
- * @param points {Array} 区域的坐标点 [x0,y0 ..... xn,yn]
+ * @param shape {JC.Polygon|JC.Rectangle} JC内置形状类型的实例
  * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function (points,needless){
-    var l = this.bound.length;
-    if(l>4&&needless)return;
-    points = points||[
-        -this.regX,this.regY,
-        -this.regX,this.regY-this.height,
-        -this.regX+this.width,this.regY-this.height,
-        -this.regX+this.width,this.regY
-    ];
-    this.bound = points;
+DisplayObject.prototype.setBound = function (shape,needless){
+    if(this.bound !== null && needless)return;
+    this.bound = shape;
 };
 
 /**
@@ -520,40 +495,40 @@ DisplayObject.prototype.setBound = function (points,needless){
  * @method ContainsPoint
  * @private
  */
-DisplayObject.prototype.ContainsPoint = function (p,px,py){
-    var n = p.length>>1;
-    var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
+// DisplayObject.prototype.ContainsPoint = function (p,px,py){
+//     var n = p.length>>1;
+//     var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
 
-    /* eslint no-undef: "off" */
-    var lup = by > ay;
-    for(var i=0; i<n; i++){
-        ax = bx;  ay = by;
-        bx = p[2*i  ] - px;
-        by = p[2*i+1] - py;
-        if(ay==by) continue;
-        lup = by>ay;
-    }
+//     /* eslint no-undef: "off" */
+//     var lup = by > ay;
+//     for(var i=0; i<n; i++){
+//         ax = bx;  ay = by;
+//         bx = p[2*i  ] - px;
+//         by = p[2*i+1] - py;
+//         if(ay==by) continue;
+//         lup = by>ay;
+//     }
 
-    var depth = 0;
-    for(i=0; i<n; i++){
-        ax = bx;  ay = by;
-        bx = p[2*i  ] - px;
-        by = p[2*i+1] - py;
-        if(ay< 0 && by< 0) continue;
-        if(ay> 0 && by> 0) continue;
-        if(ax< 0 && bx< 0) continue;
+//     var depth = 0;
+//     for(i=0; i<n; i++){
+//         ax = bx;  ay = by;
+//         bx = p[2*i  ] - px;
+//         by = p[2*i+1] - py;
+//         if(ay< 0 && by< 0) continue;
+//         if(ay> 0 && by> 0) continue;
+//         if(ax< 0 && bx< 0) continue;
 
-        if(ay==by && Math.min(ax,bx)<=0) return true;
-        if(ay==by) continue;
+//         if(ay==by && Math.min(ax,bx)<=0) return true;
+//         if(ay==by) continue;
 
-        var lx = ax + (bx-ax)*(-ay)/(by-ay);
-        if(lx===0) return true;
-        if(lx> 0) depth++;
-        if(ay===0 &&  lup && by>ay) depth--;
-        if(ay===0 && !lup && by<ay) depth--;
-        lup = by>ay;
-    }
-    return (depth & 1) == 1;
-};
+//         var lx = ax + (bx-ax)*(-ay)/(by-ay);
+//         if(lx===0) return true;
+//         if(lx> 0) depth++;
+//         if(ay===0 &&  lup && by>ay) depth--;
+//         if(ay===0 && !lup && by<ay) depth--;
+//         lup = by>ay;
+//     }
+//     return (depth & 1) == 1;
+// };
 
 export { DisplayObject };

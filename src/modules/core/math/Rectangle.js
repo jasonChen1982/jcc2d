@@ -79,3 +79,5 @@ Rectangle.prototype.contains = function (x, y)
 
     return false;
 };
+
+export { Rectangle };
