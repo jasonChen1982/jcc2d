@@ -192,6 +192,41 @@
             </ul>
         </li>
     
+        <li class="item" data-name="JC.Circle">
+            <span class="title">
+                <a href="JC.Circle.html">JC.Circle</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Circle#radius"><a href="JC.Circle.html#radius">radius</a></li>
+            
+                <li data-name="JC.Circle#x"><a href="JC.Circle.html#x">x</a></li>
+            
+                <li data-name="JC.Circle#y"><a href="JC.Circle.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Circle#clone"><a href="JC.Circle.html#clone">clone</a></li>
+            
+                <li data-name="JC.Circle#contains"><a href="JC.Circle.html#contains">contains</a></li>
+            
+                <li data-name="JC.Circle#getBounds"><a href="JC.Circle.html#getBounds">getBounds</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="JC.Container">
             <span class="title">
                 <a href="JC.Container.html">JC.Container</a>
@@ -343,6 +378,43 @@
                 <li data-name="JC.DisplayObject#setBound"><a href="JC.DisplayObject.html#setBound">setBound</a></li>
             
                 <li data-name="JC.DisplayObject#to"><a href="JC.DisplayObject.html#to">to</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Ellipse">
+            <span class="title">
+                <a href="JC.Ellipse.html">JC.Ellipse</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Ellipse#height"><a href="JC.Ellipse.html#height">height</a></li>
+            
+                <li data-name="JC.Ellipse#width"><a href="JC.Ellipse.html#width">width</a></li>
+            
+                <li data-name="JC.Ellipse#x"><a href="JC.Ellipse.html#x">x</a></li>
+            
+                <li data-name="JC.Ellipse#y"><a href="JC.Ellipse.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Ellipse#clone"><a href="JC.Ellipse.html#clone">clone</a></li>
+            
+                <li data-name="JC.Ellipse#contains"><a href="JC.Ellipse.html#contains">contains</a></li>
+            
+                <li data-name="JC.Ellipse#getBounds"><a href="JC.Ellipse.html#getBounds">getBounds</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1922,7 +1994,7 @@
     
         
         <div class="tag-source">
-            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line51">line 51</a>
+            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line52">line 52</a>
         </div>
         
     </div>
@@ -2070,7 +2142,7 @@
     
         
         <div class="tag-source">
-            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line243">line 243</a>
+            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line247">line 247</a>
         </div>
         
     </div>
@@ -4036,7 +4108,7 @@
     
         
         <div class="tag-source">
-            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line225">line 225</a>
+            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line229">line 229</a>
         </div>
         
     </div>
@@ -4109,7 +4181,7 @@
     
         
         <div class="tag-source">
-            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line73">line 73</a>
+            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line74">line 74</a>
         </div>
         
     </div>
@@ -4325,12 +4397,12 @@
             
                 <span class="inherited"><a href="JC.DisplayObject.html#setBound">inherited</a></span>
             
-            setBound<span class="signature">(points, needless)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Array}</span>
+            setBound<span class="signature">(shape, needless)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Array}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="core_display_DisplayObject.js.html">core/display/DisplayObject.js</a>, <a href="core_display_DisplayObject.js.html#line505">line 505</a>
+            <a href="core_display_DisplayObject.js.html">core/display/DisplayObject.js</a>, <a href="core_display_DisplayObject.js.html#line487">line 487</a>
         </div>
         
     </div>
@@ -4372,13 +4444,16 @@
 	
         <tr>
             
-                <td class="name"><code>points</code></td>
+                <td class="name"><code>shape</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">Array</span>
+<span class="param-type"><a href="JC.Polygon.html">JC.Polygon</a></span>
+|
+
+<span class="param-type"><a href="JC.Rectangle.html">JC.Rectangle</a></span>
 
 
             
@@ -4388,7 +4463,7 @@
             
             <td class="description last">
                 
-                <p>区域的坐标点 [x0,y0 ..... xn,yn]</p></td>
+                <p>JC内置形状类型的实例</p></td>
         </tr>
 	
 	
@@ -4500,7 +4575,7 @@
     
         
         <div class="tag-source">
-            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line234">line 234</a>
+            <a href="core_display_Container.js.html">core/display/Container.js</a>, <a href="core_display_Container.js.html#line238">line 238</a>
         </div>
         
     </div>
@@ -5002,7 +5077,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Sun Oct 23 2016 16:03:18 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Mon Oct 24 2016 12:53:17 GMT+0800 (CST)
         </footer>
     </div>
 </div>
