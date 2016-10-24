@@ -150,6 +150,7 @@ var w = window.innerWidth,
     rectRightBack = new JC.Graphics(),
     rectRightFront = new JC.Graphics(),
     stage = new JC.Stage('line-canvas'),
+    BG = new JC.Container(),
     DOC = new JC.Container(),
     LOGO = new JC.Container(),
     BTNBOX = new JC.Container(),
@@ -317,7 +318,8 @@ BTNBOX.y = JC.UI.RTP(.84);
 
 DOC.addChilds(particleDOC, curvePath);
 banner.addChilds(bannerLeft, bannerRight);
-stage.addChilds(DOC, banner, LOGO);
+BG.addChilds(DOC, banner);
+stage.addChilds(BG, LOGO);
 render();
 
 function render() {
@@ -352,6 +354,10 @@ function logoIn(){
                 to: {x: JC.UI.RTP(.7), alpha: 1},
                 duration: 1000
             })
+            // BG.to({
+            //     to: {alpha: 0.5},
+            //     duration: 1000
+            // })
         };
     }
 }
