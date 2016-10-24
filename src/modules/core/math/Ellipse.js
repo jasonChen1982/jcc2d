@@ -80,3 +80,5 @@ Ellipse.prototype.getBounds = function ()
 {
     return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
 };
+
+export { Ellipse };

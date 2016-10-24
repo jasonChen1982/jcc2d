@@ -73,3 +73,5 @@ Circle.prototype.getBounds = function ()
 {
     return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 };
+
+export { Circle };
