@@ -8,8 +8,8 @@ import { Eventer } from '../eventer/Eventer';
  * @param {string | Image} img 图片url或者图片对象.
  * @extends JC.Eventer
  */
-function Texture(img){
-    Eventer.call( this );
+function Texture(img) {
+    Eventer.call(this);
     this.texture = null;
     this.width = 0;
     this.height = 0;
@@ -18,7 +18,7 @@ function Texture(img){
     this.load(img);
 
 }
-Texture.prototype = Object.create( Eventer.prototype );
+Texture.prototype = Object.create(Eventer.prototype);
 
 /**
  * 尝试加载图片
@@ -27,25 +27,25 @@ Texture.prototype = Object.create( Eventer.prototype );
  * @param {string | Image} img 图片url或者图片对象.
  * @private
  */
-Texture.prototype.load = function(img){
+Texture.prototype.load = function(img) {
     var This = this;
-    if(typeof img === 'string'){
+    if (typeof img === 'string') {
         this.texture = new Image();
         this.texture.crossOrigin = '';
         this.texture.src = img;
-        this.texture.onload = function(){
+        this.texture.onload = function() {
             This.loaded = true;
-            This.emit({type: 'load'});
+            This.emit('load');
         };
-        this.texture.onerror = function(){
-            This.emit({type: 'error'});
+        this.texture.onerror = function() {
+            This.emit('error');
         };
-        this.on('load',function(){
+        this.on('load', function() {
             This.width = This.texture.width;
             This.height = This.texture.height;
         });
     }
-    if(img instanceof Image && img.width*img.height>0){
+    if (img instanceof Image && img.width * img.height > 0) {
         this.texture = img;
         this.width = img.width;
         this.height = img.height;
@@ -62,14 +62,14 @@ Texture.prototype.load = function(img){
  * @namespace JC.Loader
  * @extends JC.Eventer
  */
-function Loader(){
-    Eventer.call( this );
+function Loader() {
+    Eventer.call(this);
     this.textures = {};
     this._total = 0;
     this._failed = 0;
     this._received = 0;
 }
-Loader.prototype = Object.create( Eventer.prototype );
+Loader.prototype = Object.create(Eventer.prototype);
 
 /**
  * 开始加载资源
@@ -87,7 +87,7 @@ Loader.prototype = Object.create( Eventer.prototype );
  * @param {object} srcMap 配置了key－value的json格式数据
  * @return {JC.Loader} 返回本实例对象
  */
-Loader.prototype.load = function (srcMap){
+Loader.prototype.load = function(srcMap) {
     var This = this;
     this._total = 0;
     this._failed = 0;
@@ -98,16 +98,16 @@ Loader.prototype.load = function (srcMap){
         bind(this.textures[src]);
     }
 
-    function bind(texture){
-        texture.on('load',function(){
+    function bind(texture) {
+        texture.on('load', function() {
             This._received++;
-            This.emit({type: 'update'});
-            if(This._received+This._failed>=This._total)This.emit({type: 'compelete'});
+            This.emit('update');
+            if (This._received + This._failed >= This._total) This.emit('compelete');
         });
-        texture.on('error',function(){
+        texture.on('error', function() {
             This._failed++;
-            This.emit({type: 'update'});
-            if(This._received+This._failed>=This._total)This.emit({type: 'compelete'});
+            This.emit('update');
+            if (This._received + This._failed >= This._total) This.emit('compelete');
         });
     }
     return this;
@@ -124,7 +124,7 @@ Loader.prototype.load = function (srcMap){
  * @param {string} id 之前加载时配置的key值
  * @return {JC.Texture} 包装出来的JC.Texture对象
  */
-Loader.prototype.getById = function (id){
+Loader.prototype.getById = function(id) {
     return this.textures[id];
 };
 
@@ -137,7 +137,7 @@ Loader.prototype.getById = function (id){
  */
 Object.defineProperty(Texture.prototype, 'progress', {
     get: function() {
-        return this._total===0?1:(this._received+this._failed)/this._total;
+        return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
     }
 });
 
@@ -151,7 +151,7 @@ Object.defineProperty(Texture.prototype, 'progress', {
  * @param srcMap {object} key-src map
  * @return {JC.Loader}
  */
-var loaderUtil = function(srcMap){
+var loaderUtil = function(srcMap) {
     return new Loader().load(srcMap);
 };
 

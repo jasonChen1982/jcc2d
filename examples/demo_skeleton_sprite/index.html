@@ -71,7 +71,7 @@ loadBox.on('compelete',function(){
         texture: loadBox.getById('wheel')
     });
     wheel2.x = 48;
-    wheels.addChilds(wheel1,wheel2);
+    wheels.adds(wheel1,wheel2);
     body = new JC.Sprite({
         texture: loadBox.getById('body')
     });
@@ -90,7 +90,7 @@ loadBox.on('compelete',function(){
     arm2.y = -94;
     arm2.regX = 14;
     arm2.regY = 20;
-    arm1.addChilds(arm2);
+    arm1.adds(arm2);
     hand = new JC.Sprite({
         texture: loadBox.getById('hand')
     });
@@ -98,9 +98,9 @@ loadBox.on('compelete',function(){
     hand.y = 88;
     hand.regX = 4;
     hand.regY = 41;
-    arm2.addChilds(hand);
-    bodyDoc.addChilds(arm1,body,wheels);
-    DOC.addChilds(bodyDoc);
+    arm2.adds(hand);
+    bodyDoc.adds(arm1,body,wheels);
+    DOC.adds(bodyDoc);
 
     ground = new JC.Graphics();
     ground.drawCall(function(ctx){
@@ -113,7 +113,7 @@ loadBox.on('compelete',function(){
         ctx.closePath();
     });
 
-    stage.addChilds(DOC,ground);
+    stage.adds(DOC,ground);
 
     arm1.to({
         to: {rotation: -10},

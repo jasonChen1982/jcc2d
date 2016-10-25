@@ -85,8 +85,8 @@ loadBox.on('compelete',function(){
     });
 
 
-    DOC.addChilds(pic2,pic);
-    stage.addChilds(DOC);
+    DOC.adds(pic2,pic);
+    stage.adds(DOC);
 
 
     render();
@@ -102,7 +102,7 @@ pic3.to({
     delay: 2000,
     duration: 1000
 });
-DOC.addChilds(pic3);
+DOC.adds(pic3);
 
 function render(){
     RAF(render);

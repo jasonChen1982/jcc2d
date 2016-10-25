@@ -1,3 +1,4 @@
+import { Point } from '../core/math/Point';
 
 /**
  * 事件系统的事件消息对象的基本类型
@@ -11,7 +12,7 @@ function InteractionData(){
      *
      * @member {JC.Point}
      */
-    this.global = {x:-100000,y:-100000};
+    this.global = new Point(-100000, -100000);
 
     /**
      * 事件源
@@ -48,5 +49,24 @@ function InteractionData(){
      */
     this.type = '';
 }
+InteractionData.prototype.clone = function() {
+    var evd = new InteractionData();
+    evd.originalEvent = this.originalEvent;
+    evd.ratio = this.ratio;
+
+    if (this.touches) {
+        evd.touches = [];
+        if (this.touches.length > 0) {
+            for (var i = 0; i < this.touches.length; i++) {
+                evd.touches[i] = {};
+                evd.touches[i].global = this.touches[i].global.clone();
+            }
+            evd.global = evd.touches[0].global;
+        }
+    } else {
+        evd.global = this.global.clone();
+    }
+    return evd;
+};
 
 export { InteractionData };

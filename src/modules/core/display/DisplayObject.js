@@ -1,4 +1,5 @@
-import { Matrix, TEMP_MATRIX,  } from '../math/Matrix';
+import { Matrix, TEMP_MATRIX, } from '../math/Matrix';
+import { Point } from '../math/Point';
 import { Eventer } from '../../eventer/Eventer';
 import { Animation } from '../../animation/Animation';
 import { UTILS } from '../../util/UTILS';
@@ -8,7 +9,8 @@ import { UTILS } from '../../util/UTILS';
  * @class
  * @memberof JC
  */
-function DisplayObject(){
+function DisplayObject() {
+    Eventer.call(this);
     /**
      * 标记渲染对象是否就绪
      *
@@ -134,7 +136,7 @@ function DisplayObject(){
      * @member {JC.Eventer}
      * @private
      */
-    this.event = new Eventer();
+    // this.event = new Eventer();
 
     /**
      * 当前对象是否穿透自身的事件监测
@@ -159,7 +161,39 @@ function DisplayObject(){
      * @private
      */
     this.Animation = new Animation(this);
+
+
+    /**
+     * 标记当前对象是否为touchstart触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this._touchstarted = false;
+
+    /**
+     * 标记当前对象是否为mousedown触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this._mousedowned = false;
+
+    /**
+     * 渲染对象是否具备光标样式，例如 cursor
+     *
+     * @member {Boolean}
+     */
+    this.buttonMode = false;
+
+    /**
+     * 当渲染对象是按钮时所具备的光标样式
+     *
+     * @member {Boolean}
+     */
+    this.cursor = 'pointer';
 }
+DisplayObject.prototype = Object.create(Eventer.prototype);
 
 /**
  * 对渲染对象进行x、y轴同时缩放
@@ -206,8 +240,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.fromTo = function(opts,clear){
-    return this.Animation.fromTo(opts,clear);
+DisplayObject.prototype.fromTo = function(opts, clear) {
+    return this.Animation.fromTo(opts, clear);
 };
 
 /**
@@ -237,8 +271,8 @@ DisplayObject.prototype.fromTo = function(opts,clear){
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.to = function(opts,clear){
-    return this.Animation.to(opts,clear);
+DisplayObject.prototype.to = function(opts, clear) {
+    return this.Animation.to(opts, clear);
 };
 
 /**
@@ -269,8 +303,8 @@ DisplayObject.prototype.to = function(opts,clear){
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.motion = function(opts,clear){
-    return this.Animation.motion(opts,clear);
+DisplayObject.prototype.motion = function(opts, clear) {
+    return this.Animation.motion(opts, clear);
 };
 
 /**
@@ -302,8 +336,8 @@ DisplayObject.prototype.motion = function(opts,clear){
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.keyFrames = function(opts,clear){
-    return this.Animation.keyFrames(opts,clear);
+DisplayObject.prototype.keyFrames = function(opts, clear) {
+    return this.Animation.keyFrames(opts, clear);
 };
 
 /**
@@ -312,15 +346,15 @@ DisplayObject.prototype.keyFrames = function(opts,clear){
  * @method isVisible
  * @private
  */
-DisplayObject.prototype.isVisible = function(){
-    return !!(this.visible && this.alpha>0 && this.scaleX*this.scaleY!==0);
+DisplayObject.prototype.isVisible = function() {
+    return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
 };
 
 /**
  * 移除对象上的遮罩
  *
  */
-DisplayObject.prototype.removeMask = function(){
+DisplayObject.prototype.removeMask = function() {
     this.mask = null;
 };
 
@@ -330,12 +364,12 @@ DisplayObject.prototype.removeMask = function(){
  * @method setVal
  * @private
  */
-DisplayObject.prototype.setVal = function(vals){
-    if(vals===undefined)return;
-    for(var key in vals){
-        if(this[key]===undefined){
+DisplayObject.prototype.setVal = function(vals) {
+    if (vals === undefined) return;
+    for (var key in vals) {
+        if (this[key] === undefined) {
             continue;
-        }else{
+        } else {
             this[key] = vals[key];
         }
     }
@@ -344,16 +378,16 @@ DisplayObject.prototype.setVal = function(vals){
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateMe
+ * @method updateTransform
  * @private
  */
-DisplayObject.prototype.updateMe = function(){
+DisplayObject.prototype.updateTransform = function() {
     var pt = this.parent.worldTransform;
     var wt = this.worldTransform;
 
     var a, b, c, d, tx, ty;
 
-    if(this.skewX || this.skewY){
+    if (this.skewX || this.skewY) {
 
         TEMP_MATRIX.setTransform(
             this.x,
@@ -367,48 +401,48 @@ DisplayObject.prototype.updateMe = function(){
             this.skewY * UTILS.DTR
         );
 
-        wt.a  = TEMP_MATRIX.a  * pt.a + TEMP_MATRIX.b  * pt.c;
-        wt.b  = TEMP_MATRIX.a  * pt.b + TEMP_MATRIX.b  * pt.d;
-        wt.c  = TEMP_MATRIX.c  * pt.a + TEMP_MATRIX.d  * pt.c;
-        wt.d  = TEMP_MATRIX.c  * pt.b + TEMP_MATRIX.d  * pt.d;
+        wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
+        wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
+        wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
+        wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
         wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
         wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
-    }else{
-        if(this.rotation % 360){
-            if(this.rotation !== this.rotationCache){
+    } else {
+        if (this.rotation % 360) {
+            if (this.rotation !== this.rotationCache) {
                 this.rotationCache = this.rotation;
                 this._sr = Math.sin(this.rotation * UTILS.DTR);
                 this._cr = Math.cos(this.rotation * UTILS.DTR);
             }
 
-            a  =  this._cr * this.scaleX;
-            b  =  this._sr * this.scaleX;
-            c  = -this._sr * this.scaleY;
-            d  =  this._cr * this.scaleY;
-            tx =  this.x;
-            ty =  this.y;
+            a = this._cr * this.scaleX;
+            b = this._sr * this.scaleX;
+            c = -this._sr * this.scaleY;
+            d = this._cr * this.scaleY;
+            tx = this.x;
+            ty = this.y;
 
-            if(this.pivotX || this.pivotY){
+            if (this.pivotX || this.pivotY) {
                 tx -= this.pivotX * a + this.pivotY * c;
                 ty -= this.pivotX * b + this.pivotY * d;
             }
-            wt.a  = a  * pt.a + b  * pt.c;
-            wt.b  = a  * pt.b + b  * pt.d;
-            wt.c  = c  * pt.a + d  * pt.c;
-            wt.d  = c  * pt.b + d  * pt.d;
+            wt.a = a * pt.a + b * pt.c;
+            wt.b = a * pt.b + b * pt.d;
+            wt.c = c * pt.a + d * pt.c;
+            wt.d = c * pt.b + d * pt.d;
             wt.tx = tx * pt.a + ty * pt.c + pt.tx;
             wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-        }else{
-            a  = this.scaleX;
-            d  = this.scaleY;
+        } else {
+            a = this.scaleX;
+            d = this.scaleY;
 
             tx = this.x - this.pivotX * a;
             ty = this.y - this.pivotY * d;
 
-            wt.a  = a  * pt.a;
-            wt.b  = a  * pt.b;
-            wt.c  = d  * pt.c;
-            wt.d  = d  * pt.d;
+            wt.a = a * pt.a;
+            wt.b = a * pt.b;
+            wt.c = d * pt.c;
+            wt.d = d * pt.d;
             wt.tx = tx * pt.a + ty * pt.c + pt.tx;
             wt.ty = tx * pt.b + ty * pt.d + pt.ty;
         }
@@ -419,10 +453,10 @@ DisplayObject.prototype.updateMe = function(){
 /**
  * 更新对象本身的动画
  *
- * @method upAnimation
+ * @method updateAnimation
  * @private
  */
-DisplayObject.prototype.upAnimation = function(snippet){
+DisplayObject.prototype.updateAnimation = function(snippet) {
     this.Animation.update(snippet);
 };
 
@@ -432,10 +466,10 @@ DisplayObject.prototype.upAnimation = function(snippet){
  * @method setTransform
  * @private
  */
-DisplayObject.prototype.setTransform = function(ctx){
+DisplayObject.prototype.setTransform = function(ctx) {
     var matrix = this.worldTransform;
     ctx.globalAlpha = this.worldAlpha;
-    ctx.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.tx,matrix.ty);
+    ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
 };
 
 /**
@@ -443,8 +477,8 @@ DisplayObject.prototype.setTransform = function(ctx){
  *
  * @return {object}
  */
-DisplayObject.prototype.getGlobalPos = function(){
-    return {x: this.worldTransform.tx,y: this.worldTransform.ty};
+DisplayObject.prototype.getGlobalPos = function() {
+    return { x: this.worldTransform.tx, y: this.worldTransform.ty };
 };
 
 /**
@@ -453,9 +487,9 @@ DisplayObject.prototype.getGlobalPos = function(){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-DisplayObject.prototype.on = function(type,fn){
-    this.event.on(type,fn);
-};
+// DisplayObject.prototype.on = function(type, fn) {
+//     this.event.on(type, fn);
+// };
 
 /**
  * 显示对象的事件解绑函数
@@ -463,9 +497,9 @@ DisplayObject.prototype.on = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 注册时回调函数的引用
  */
-DisplayObject.prototype.off = function(type,fn){
-    this.event.off(type,fn);
-};
+// DisplayObject.prototype.off = function(type, fn) {
+//     this.event.off(type, fn);
+// };
 
 /**
  * 显示对象的一次性事件绑定函数
@@ -473,9 +507,9 @@ DisplayObject.prototype.off = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-DisplayObject.prototype.once = function(type,fn){
-    this.event.once(type,fn);
-};
+// DisplayObject.prototype.once = function(type, fn) {
+//     this.event.once(type, fn);
+// };
 
 /**
  * 设置显示对象的监测区域
@@ -484,51 +518,22 @@ DisplayObject.prototype.once = function(type,fn){
  * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function (shape,needless){
-    if(this.bound !== null && needless)return;
+DisplayObject.prototype.setBound = function(shape, needless) {
+    if (this.bound !== null && needless) return;
     this.bound = shape;
 };
 
 /**
  * 监测坐标点是否在多变性内
  *
- * @method ContainsPoint
+ * @method contains
  * @private
  */
-// DisplayObject.prototype.ContainsPoint = function (p,px,py){
-//     var n = p.length>>1;
-//     var ax, ay = p[2*n-3]-py, bx = p[2*n-2]-px, by = p[2*n-1]-py;
-
-//     /* eslint no-undef: "off" */
-//     var lup = by > ay;
-//     for(var i=0; i<n; i++){
-//         ax = bx;  ay = by;
-//         bx = p[2*i  ] - px;
-//         by = p[2*i+1] - py;
-//         if(ay==by) continue;
-//         lup = by>ay;
-//     }
-
-//     var depth = 0;
-//     for(i=0; i<n; i++){
-//         ax = bx;  ay = by;
-//         bx = p[2*i  ] - px;
-//         by = p[2*i+1] - py;
-//         if(ay< 0 && by< 0) continue;
-//         if(ay> 0 && by> 0) continue;
-//         if(ax< 0 && bx< 0) continue;
-
-//         if(ay==by && Math.min(ax,bx)<=0) return true;
-//         if(ay==by) continue;
-
-//         var lx = ax + (bx-ax)*(-ay)/(by-ay);
-//         if(lx===0) return true;
-//         if(lx> 0) depth++;
-//         if(ay===0 &&  lup && by>ay) depth--;
-//         if(ay===0 && !lup && by<ay) depth--;
-//         lup = by>ay;
-//     }
-//     return (depth & 1) == 1;
-// };
+DisplayObject.prototype.contains = function (global) {
+    if (this.bound === null) return false;
+    var point = new Point();
+    this.worldTransform.applyInverse(global, point);
+    return this.bound && this.bound.contains(point.x, point.y);
+};
 
 export { DisplayObject };

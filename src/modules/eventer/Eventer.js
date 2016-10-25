@@ -1,18 +1,17 @@
-
 /**
  * jcc2d的事件对象的类
  *
  * @class
  * @memberof JC
  */
-function Eventer(){
+function Eventer() {
     /**
      * 标记当前对象是否为touchstart触发状态
      *
      * @member {Boolean}
      * @private
      */
-    this.touchstarted = false;
+    // this.touchstarted = false;
 
     /**
      * 标记当前对象是否为mousedown触发状态
@@ -20,7 +19,7 @@ function Eventer(){
      * @member {Boolean}
      * @private
      */
-    this.mouseDowned = false;
+    // this.mouseDowned = false;
 
     /**
      * 事件监听列表
@@ -37,8 +36,8 @@ function Eventer(){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-Eventer.prototype.on = function(type,fn){
-    this.listeners[type] = this.listeners[type]||[];
+Eventer.prototype.on = function(type, fn) {
+    this.listeners[type] = this.listeners[type] || [];
     this.listeners[type].push(fn);
 };
 
@@ -48,18 +47,18 @@ Eventer.prototype.on = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 注册时回调函数的引用
  */
-Eventer.prototype.off = function(type,fn){
+Eventer.prototype.off = function(type, fn) {
     var ears = this.listeners;
-    var cbs = ears[ type ];
+    var cbs = ears[type];
     var i = ears[type].length;
-    if (cbs&&i>0) {
-        if(fn){
+    if (cbs && i > 0) {
+        if (fn) {
             while (i--) {
                 if (cbs[i] === fn) {
                     cbs.splice(i, 1);
                 }
             }
-        }else{
+        } else {
             cbs.length = 0;
         }
     }
@@ -71,13 +70,13 @@ Eventer.prototype.off = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-Eventer.prototype.once = function(type,fn){
+Eventer.prototype.once = function(type, fn) {
     var This = this,
-        cb = function(ev){
+        cb = function(ev) {
             if (fn) fn(ev);
-            This.off(type,cb);
+            This.off(type, cb);
         };
-    this.on(type,cb);
+    this.on(type, cb);
 };
 
 /**
@@ -85,15 +84,15 @@ Eventer.prototype.once = function(type,fn){
  *
  * @param ev {JC.InteractionData} 事件类型
  */
-Eventer.prototype.emit = function(ev){
-    if ( this.listeners === undefined ) return;
+Eventer.prototype.emit = function(type, ev) {
+    if (this.listeners === undefined) return;
     var ears = this.listeners;
-    var cbs = ears[ ev.type ];
-    if ( cbs !== undefined ) {
+    var cbs = ears[type];
+    if (cbs !== undefined) {
         var length = cbs.length;
         var i;
-        for ( i = 0; i < length; i ++ ) {
-            cbs[ i ].call( this, ev );
+        for (i = 0; i < length; i++) {
+            cbs[i].call(this, ev);
         }
     }
 };

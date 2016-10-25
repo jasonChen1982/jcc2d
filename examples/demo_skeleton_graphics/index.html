@@ -216,13 +216,13 @@ loadBox.on('compelete',function(){
         ctx.closePath();
     });
 
-    hand.addChilds(wheel1,wheel2);
-    arm3.addChilds(hand);
-    arm2.addChilds(arm3);
-    arm1.addChilds(arm2);
-    body.addChilds(arm1);
-    DOC.addChilds(body);
-    stage.addChilds(DOC,ground);
+    hand.adds(wheel1,wheel2);
+    arm3.adds(hand);
+    arm2.adds(arm3);
+    arm1.adds(arm2);
+    body.adds(arm1);
+    DOC.adds(body);
+    stage.adds(DOC,ground);
 
 
 

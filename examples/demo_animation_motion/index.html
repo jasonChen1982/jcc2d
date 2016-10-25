@@ -88,11 +88,11 @@ for(var i=0;i<pathMotion.points.length;i++){
     control.y = point.y;
     var color = i===0||i===pathMotion.points.length-1? '#e46d69': '';
     control.drawCall(new Cricle(color,10));
-    control.setBound([-10,10, 10,10, 10,-10, -10,-10]);
+    control.setBound(new JC.Rectangle(-10,-10,20,20));
     var text = new JC.Text(point.name,'','#acba9d');
     text.y = -20;
-    control.addChilds(text);
-    DOC.addChilds(control);
+    control.adds(text);
+    DOC.adds(control);
     pointsShape[i] = control;
 
     // 为起始点和控制点绑定拖拽事件
@@ -146,11 +146,11 @@ dashLine.drawCall(function(ctx){
     ctx.stroke();
 });
 
-DOC.addChilds(dashLine);
-DOC.addChilds(shape);
+DOC.adds(dashLine);
+DOC.adds(shape);
 
 
-stage.addChilds(DOC);
+stage.adds(DOC);
 resize();
 
 

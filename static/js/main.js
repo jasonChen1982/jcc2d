@@ -185,7 +185,7 @@ rectLeftFront.to({
 });
 
 rectLeftFront.skewX = rectLeftBack.skewX = 30;
-bannerLeft.addChilds(rectLeftBack,rectLeftFront);
+bannerLeft.adds(rectLeftBack,rectLeftFront);
 bannerLeft.to({
     to: {x: -60},
     ease: 'easeBoth',
@@ -216,7 +216,7 @@ rectRightFront.to({
 
 rectRightFront.skewX = rectRightBack.skewX = 30;
 bannerRight.rotation = 180;
-bannerRight.addChilds(rectRightBack,rectRightFront);
+bannerRight.adds(rectRightBack,rectRightFront);
 bannerRight.to({
     to: {x: w+60},
     ease: 'easeBoth',
@@ -245,15 +245,15 @@ var emiter3 = new Emitter({
     type: ParticlePlus
 });
 particleEngine.addEmitter(emiter3);
-particleDOC.addChilds(emiter.doc);
-particleDOC.addChilds(emiter2.doc);
-particleDOC.addChilds(emiter3.doc);
+particleDOC.adds(emiter.doc);
+particleDOC.adds(emiter2.doc);
+particleDOC.adds(emiter3.doc);
 particleDOC.to({
     to: {scale: 1,alpha: 1},
     duration: 1000,
     ease: 'backOut',
     onCompelete: logoIn
-})
+});
 
 var texts = [
     {text: 'j', x: -JC.UI.RTP(.64)},
@@ -271,52 +271,54 @@ for (var i = 0; i < texts.length; i++) {
     textDOC[i].x = texts[i].x;
     textDOC[i].y = -h/3;
     textDOC[i].alpha = 0;
-    LOGO.addChilds(textDOC[i]);
+    LOGO.adds(textDOC[i]);
 }
 var miniText = new JC.Text('The canvas 2d renderer & An awesome animator', 'normal '+JC.UI.RTP(.2)+'px Tangerine');
 miniText.y = JC.UI.RTP(.7);
 miniText.alpha = 0;
-LOGO.addChilds(miniText,BTNBOX);
+LOGO.adds(miniText,BTNBOX);
 var documentLink = new JC.Graphics();
 var linkFace = new LinkFace({
-        text: 'Document',
-        font: 'bold '+JC.UI.RTP(.16)+'px Tangerine',
-        color: '#eca31c',
-        textColor: '#000000'
-    });
+    text: 'Document',
+    font: 'bold '+JC.UI.RTP(.16)+'px Tangerine',
+    color: '#eca31c',
+    textColor: '#000000'
+});
+documentLink.buttonMode = true;
 documentLink.drawCall(linkFace);
 documentLink.setBound(linkFace.bound);
 documentLink.x = -JC.UI.RTP(1.2);
 documentLink.alpha = 0;
 documentLink.on('click',function(){
     window.location.href = './docs';
-})
+});
 
-BTNBOX.addChilds(documentLink);
+BTNBOX.adds(documentLink);
 
 
 var examplesLink = new JC.Graphics();
 var linkFace2 = new LinkFace({
-        text: 'Examples',
-        font: 'bold '+JC.UI.RTP(.16)+'px Tangerine',
-        color: '#53d497',
-        textColor: '#000000'
-    });
+    text: 'Examples',
+    font: 'bold '+JC.UI.RTP(.16)+'px Tangerine',
+    color: '#53d497',
+    textColor: '#000000'
+});
+examplesLink.buttonMode = true;
 examplesLink.drawCall(linkFace2);
 examplesLink.setBound(linkFace2.bound);
 examplesLink.x = JC.UI.RTP(1.2);
 examplesLink.alpha = 0;
 examplesLink.on('click',function(){
     window.location.href = './examples';
-})
+});
 
-BTNBOX.addChilds(examplesLink);
+BTNBOX.adds(examplesLink);
 BTNBOX.y = JC.UI.RTP(.84);
 
-DOC.addChilds(particleDOC, curvePath);
-banner.addChilds(bannerLeft, bannerRight);
-BG.addChilds(DOC, banner);
-stage.addChilds(BG, LOGO);
+DOC.adds(particleDOC, curvePath);
+banner.adds(bannerLeft, bannerRight);
+BG.adds(DOC, banner);
+stage.adds(BG, LOGO);
 render();
 
 function render() {
@@ -333,28 +335,28 @@ function render() {
 function logoIn(){
     for (var i = 0; i < textDOC.length; i++) {
         var animate = textDOC[i].to({
-                    to: {y: 0, alpha: 1},
-                    ease: 'bounceOut',
-                    duration: 800,
-                    wait: i*100
-                })
+            to: {y: 0, alpha: 1},
+            ease: 'bounceOut',
+            duration: 800,
+            wait: i*100
+        });
         if(i===textDOC.length-1)animate.onCompelete = function(){
             miniText.to({
                 to: {y: JC.UI.RTP(.5), alpha: 1},
                 duration: 1000
-            })
+            });
             documentLink.to({
                 to: {x: -JC.UI.RTP(.7), alpha: 1},
                 duration: 1000
-            })
+            });
             examplesLink.to({
                 to: {x: JC.UI.RTP(.7), alpha: 1},
                 duration: 1000
-            })
+            });
             // BG.to({
             //     to: {alpha: 0.5},
             //     duration: 1000
-            // })
+            // });
         };
     }
 }

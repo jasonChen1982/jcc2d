@@ -53,7 +53,7 @@ Emitter.prototype.init = function(options){
   for (var i = 0; i < options.count; i++) {
     var cd = new options.type();
     this.pool.push(cd);
-    this.doc.addChilds(cd.doc);
+    this.doc.adds(cd.doc);
   }
 };
 Emitter.prototype.update = function(){

@@ -71,7 +71,7 @@ Sprite.prototype.upTexture = function(opts){
  * @method upAnimation
  * @private
  */
-Sprite.prototype.upAnimation = function(snippet){
+Sprite.prototype.updateAnimation = function(snippet){
     this.Animation.update(snippet);
     this.MovieClip.update(snippet);
 };
