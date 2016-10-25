@@ -5,7 +5,7 @@ import { InteractionManager } from '../eventer/InteractionManager';
 import { UTILS } from '../util/UTILS';
 
 /**
- * 舞台对象，继承至Container
+ * 舞台对象，继承至Eventer
  *
  *
  * ```js
@@ -13,7 +13,7 @@ import { UTILS } from '../util/UTILS';
  * ```
  *
  * @class
- * @extends JC.Container
+ * @extends JC.Eventer
  * @memberof JC
  */
 function Stage(canvas, bgColor) {

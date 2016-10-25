@@ -4,9 +4,10 @@ import { Eventer } from '../../eventer/Eventer';
 import { Animation } from '../../animation/Animation';
 import { UTILS } from '../../util/UTILS';
 /**
- * 显示对象的基类
+ * 显示对象的基类，继承至Eventer
  *
  * @class
+ * @extends JC.Eventer
  * @memberof JC
  */
 function DisplayObject() {
