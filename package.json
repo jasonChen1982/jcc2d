@@ -9,6 +9,7 @@
   "scripts": {
     "release": "npm run build && gulp release",
     "build": "rollup -c",
+    "watch": "rollup -c -w",
     "preversion": "npm run release && git add -A && git commit -m 'release new version'",
     "postversion": "git push origin master && git push origin v$npm_package_version",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
@@ -33,6 +34,7 @@
     "mocha": "^3.1.0",
     "require-dir": "^0.3.0",
     "rollup": "^0.36.3",
+    "rollup-watch": "^2.5.0",
     "run-sequence": "^1.1.2",
     "testem": "^1.13.0"
   },
