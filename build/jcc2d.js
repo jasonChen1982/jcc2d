@@ -35,6 +35,70 @@
 })();
 
 /**
+ * 二维空间内坐标点类
+ *
+ * @class
+ * @memberof JC
+ * @param [x=0] {number} x轴的位置
+ * @param [y=0] {number} y轴的位置
+ */
+function Point(x, y)
+{
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.y = y || 0;
+}
+
+/**
+ * 克隆一这个坐标点
+ *
+ * @return {JC.Point} 克隆的坐标点
+ */
+Point.prototype.clone = function ()
+{
+    return new Point(this.x, this.y);
+};
+
+/**
+ * 拷贝传入的坐标点来设置当前坐标点
+ *
+ * @param p {JC.Point}
+ */
+Point.prototype.copy = function (p) {
+    this.set(p.x, p.y);
+};
+
+/**
+ * 判断坐标点是否相等
+ *
+ * @param p {JC.Point}
+ * @returns {boolean}
+ */
+Point.prototype.equals = function (p) {
+    return (p.x === this.x) && (p.y === this.y);
+};
+
+/**
+ * 设置坐标点
+ *
+ * @param [x=0] {number} x轴的位置
+ * @param [y=0] {number} y轴的位置
+ */
+Point.prototype.set = function (x, y)
+{
+    this.x = x || 0;
+    this.y = y || ( (y !== 0) ? this.x : 0 ) ;
+};
+
+/**
  * 事件系统的事件消息对象的基本类型
  *
  * @class
@@ -46,7 +110,7 @@ function InteractionData(){
      *
      * @member {JC.Point}
      */
-    this.global = {x:-100000,y:-100000};
+    this.global = new Point(-100000, -100000);
 
     /**
      * 事件源
@@ -83,6 +147,25 @@ function InteractionData(){
      */
     this.type = '';
 }
+InteractionData.prototype.clone = function() {
+    var evd = new InteractionData();
+    evd.originalEvent = this.originalEvent;
+    evd.ratio = this.ratio;
+
+    if (this.touches) {
+        evd.touches = [];
+        if (this.touches.length > 0) {
+            for (var i = 0; i < this.touches.length; i++) {
+                evd.touches[i] = {};
+                evd.touches[i].global = this.touches[i].global.clone();
+            }
+            evd.global = evd.touches[0].global;
+        }
+    } else {
+        evd.global = this.global.clone();
+    }
+    return evd;
+};
 
 /**
  * jcc2d的事件对象的类
@@ -90,14 +173,14 @@ function InteractionData(){
  * @class
  * @memberof JC
  */
-function Eventer(){
+function Eventer() {
     /**
      * 标记当前对象是否为touchstart触发状态
      *
      * @member {Boolean}
      * @private
      */
-    this.touchstarted = false;
+    // this.touchstarted = false;
 
     /**
      * 标记当前对象是否为mousedown触发状态
@@ -105,7 +188,7 @@ function Eventer(){
      * @member {Boolean}
      * @private
      */
-    this.mouseDowned = false;
+    // this.mouseDowned = false;
 
     /**
      * 事件监听列表
@@ -122,8 +205,8 @@ function Eventer(){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-Eventer.prototype.on = function(type,fn){
-    this.listeners[type] = this.listeners[type]||[];
+Eventer.prototype.on = function(type, fn) {
+    this.listeners[type] = this.listeners[type] || [];
     this.listeners[type].push(fn);
 };
 
@@ -133,18 +216,18 @@ Eventer.prototype.on = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 注册时回调函数的引用
  */
-Eventer.prototype.off = function(type,fn){
+Eventer.prototype.off = function(type, fn) {
     var ears = this.listeners;
-    var cbs = ears[ type ];
+    var cbs = ears[type];
     var i = ears[type].length;
-    if (cbs&&i>0) {
-        if(fn){
+    if (cbs && i > 0) {
+        if (fn) {
             while (i--) {
                 if (cbs[i] === fn) {
                     cbs.splice(i, 1);
                 }
             }
-        }else{
+        } else {
             cbs.length = 0;
         }
     }
@@ -156,13 +239,13 @@ Eventer.prototype.off = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-Eventer.prototype.once = function(type,fn){
+Eventer.prototype.once = function(type, fn) {
     var This = this,
-        cb = function(ev){
+        cb = function(ev) {
             if (fn) fn(ev);
-            This.off(type,cb);
+            This.off(type, cb);
         };
-    this.on(type,cb);
+    this.on(type, cb);
 };
 
 /**
@@ -170,15 +253,15 @@ Eventer.prototype.once = function(type,fn){
  *
  * @param ev {JC.InteractionData} 事件类型
  */
-Eventer.prototype.emit = function(ev){
-    if ( this.listeners === undefined ) return;
+Eventer.prototype.emit = function(type, ev) {
+    if (this.listeners === undefined) return;
     var ears = this.listeners;
-    var cbs = ears[ ev.type ];
-    if ( cbs !== undefined ) {
+    var cbs = ears[type];
+    if (cbs !== undefined) {
         var length = cbs.length;
         var i;
-        for ( i = 0; i < length; i ++ ) {
-            cbs[ i ].call( this, ev );
+        for (i = 0; i < length; i++) {
+            cbs[i].call(this, ev);
         }
     }
 };
@@ -751,8 +834,8 @@ Animation.prototype.clear = function() {
  * @param {string | Image} img 图片url或者图片对象.
  * @extends JC.Eventer
  */
-function Texture(img){
-    Eventer.call( this );
+function Texture(img) {
+    Eventer.call(this);
     this.texture = null;
     this.width = 0;
     this.height = 0;
@@ -761,7 +844,7 @@ function Texture(img){
     this.load(img);
 
 }
-Texture.prototype = Object.create( Eventer.prototype );
+Texture.prototype = Object.create(Eventer.prototype);
 
 /**
  * 尝试加载图片
@@ -770,25 +853,25 @@ Texture.prototype = Object.create( Eventer.prototype );
  * @param {string | Image} img 图片url或者图片对象.
  * @private
  */
-Texture.prototype.load = function(img){
+Texture.prototype.load = function(img) {
     var This = this;
-    if(typeof img === 'string'){
+    if (typeof img === 'string') {
         this.texture = new Image();
         this.texture.crossOrigin = '';
         this.texture.src = img;
-        this.texture.onload = function(){
+        this.texture.onload = function() {
             This.loaded = true;
-            This.emit({type: 'load'});
+            This.emit('load');
         };
-        this.texture.onerror = function(){
-            This.emit({type: 'error'});
+        this.texture.onerror = function() {
+            This.emit('error');
         };
-        this.on('load',function(){
+        this.on('load', function() {
             This.width = This.texture.width;
             This.height = This.texture.height;
         });
     }
-    if(img instanceof Image && img.width*img.height>0){
+    if (img instanceof Image && img.width * img.height > 0) {
         this.texture = img;
         this.width = img.width;
         this.height = img.height;
@@ -805,14 +888,14 @@ Texture.prototype.load = function(img){
  * @namespace JC.Loader
  * @extends JC.Eventer
  */
-function Loader(){
-    Eventer.call( this );
+function Loader() {
+    Eventer.call(this);
     this.textures = {};
     this._total = 0;
     this._failed = 0;
     this._received = 0;
 }
-Loader.prototype = Object.create( Eventer.prototype );
+Loader.prototype = Object.create(Eventer.prototype);
 
 /**
  * 开始加载资源
@@ -830,7 +913,7 @@ Loader.prototype = Object.create( Eventer.prototype );
  * @param {object} srcMap 配置了key－value的json格式数据
  * @return {JC.Loader} 返回本实例对象
  */
-Loader.prototype.load = function (srcMap){
+Loader.prototype.load = function(srcMap) {
     var This = this;
     this._total = 0;
     this._failed = 0;
@@ -841,16 +924,16 @@ Loader.prototype.load = function (srcMap){
         bind(this.textures[src]);
     }
 
-    function bind(texture){
-        texture.on('load',function(){
+    function bind(texture) {
+        texture.on('load', function() {
             This._received++;
-            This.emit({type: 'update'});
-            if(This._received+This._failed>=This._total)This.emit({type: 'compelete'});
+            This.emit('update');
+            if (This._received + This._failed >= This._total) This.emit('compelete');
         });
-        texture.on('error',function(){
+        texture.on('error', function() {
             This._failed++;
-            This.emit({type: 'update'});
-            if(This._received+This._failed>=This._total)This.emit({type: 'compelete'});
+            This.emit('update');
+            if (This._received + This._failed >= This._total) This.emit('compelete');
         });
     }
     return this;
@@ -867,7 +950,7 @@ Loader.prototype.load = function (srcMap){
  * @param {string} id 之前加载时配置的key值
  * @return {JC.Texture} 包装出来的JC.Texture对象
  */
-Loader.prototype.getById = function (id){
+Loader.prototype.getById = function(id) {
     return this.textures[id];
 };
 
@@ -880,7 +963,7 @@ Loader.prototype.getById = function (id){
  */
 Object.defineProperty(Texture.prototype, 'progress', {
     get: function() {
-        return this._total===0?1:(this._received+this._failed)/this._total;
+        return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
     }
 });
 
@@ -894,72 +977,8 @@ Object.defineProperty(Texture.prototype, 'progress', {
  * @param srcMap {object} key-src map
  * @return {JC.Loader}
  */
-var loaderUtil = function(srcMap){
+var loaderUtil = function(srcMap) {
     return new Loader().load(srcMap);
-};
-
-/**
- * 二维空间内坐标点类
- *
- * @class
- * @memberof JC
- * @param [x=0] {number} x轴的位置
- * @param [y=0] {number} y轴的位置
- */
-function Point(x, y)
-{
-    /**
-     * @member {number}
-     * @default 0
-     */
-    this.x = x || 0;
-
-    /**
-     * @member {number}
-     * @default 0
-     */
-    this.y = y || 0;
-}
-
-/**
- * 克隆一这个坐标点
- *
- * @return {JC.Point} 克隆的坐标点
- */
-Point.prototype.clone = function ()
-{
-    return new Point(this.x, this.y);
-};
-
-/**
- * 拷贝传入的坐标点来设置当前坐标点
- *
- * @param p {JC.Point}
- */
-Point.prototype.copy = function (p) {
-    this.set(p.x, p.y);
-};
-
-/**
- * 判断坐标点是否相等
- *
- * @param p {JC.Point}
- * @returns {boolean}
- */
-Point.prototype.equals = function (p) {
-    return (p.x === this.x) && (p.y === this.y);
-};
-
-/**
- * 设置坐标点
- *
- * @param [x=0] {number} x轴的位置
- * @param [y=0] {number} y轴的位置
- */
-Point.prototype.set = function (x, y)
-{
-    this.x = x || 0;
-    this.y = y || ( (y !== 0) ? this.x : 0 ) ;
 };
 
 /**
@@ -1474,7 +1493,8 @@ var TEMP_MATRIX = new Matrix();
  * @class
  * @memberof JC
  */
-function DisplayObject(){
+function DisplayObject() {
+    Eventer.call(this);
     /**
      * 标记渲染对象是否就绪
      *
@@ -1600,7 +1620,7 @@ function DisplayObject(){
      * @member {JC.Eventer}
      * @private
      */
-    this.event = new Eventer();
+    // this.event = new Eventer();
 
     /**
      * 当前对象是否穿透自身的事件监测
@@ -1625,7 +1645,39 @@ function DisplayObject(){
      * @private
      */
     this.Animation = new Animation(this);
+
+
+    /**
+     * 标记当前对象是否为touchstart触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this._touchstarted = false;
+
+    /**
+     * 标记当前对象是否为mousedown触发状态
+     *
+     * @member {Boolean}
+     * @private
+     */
+    this._mousedowned = false;
+
+    /**
+     * 渲染对象是否具备光标样式，例如 cursor
+     *
+     * @member {Boolean}
+     */
+    this.buttonMode = false;
+
+    /**
+     * 当渲染对象是按钮时所具备的光标样式
+     *
+     * @member {Boolean}
+     */
+    this.cursor = 'pointer';
 }
+DisplayObject.prototype = Object.create(Eventer.prototype);
 
 /**
  * 对渲染对象进行x、y轴同时缩放
@@ -1672,8 +1724,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.fromTo = function(opts,clear){
-    return this.Animation.fromTo(opts,clear);
+DisplayObject.prototype.fromTo = function(opts, clear) {
+    return this.Animation.fromTo(opts, clear);
 };
 
 /**
@@ -1703,8 +1755,8 @@ DisplayObject.prototype.fromTo = function(opts,clear){
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.to = function(opts,clear){
-    return this.Animation.to(opts,clear);
+DisplayObject.prototype.to = function(opts, clear) {
+    return this.Animation.to(opts, clear);
 };
 
 /**
@@ -1735,8 +1787,8 @@ DisplayObject.prototype.to = function(opts,clear){
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.motion = function(opts,clear){
-    return this.Animation.motion(opts,clear);
+DisplayObject.prototype.motion = function(opts, clear) {
+    return this.Animation.motion(opts, clear);
 };
 
 /**
@@ -1768,8 +1820,8 @@ DisplayObject.prototype.motion = function(opts,clear){
  * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param clear {Boolean} 是否去掉之前的动画
  */
-DisplayObject.prototype.keyFrames = function(opts,clear){
-    return this.Animation.keyFrames(opts,clear);
+DisplayObject.prototype.keyFrames = function(opts, clear) {
+    return this.Animation.keyFrames(opts, clear);
 };
 
 /**
@@ -1778,15 +1830,15 @@ DisplayObject.prototype.keyFrames = function(opts,clear){
  * @method isVisible
  * @private
  */
-DisplayObject.prototype.isVisible = function(){
-    return !!(this.visible && this.alpha>0 && this.scaleX*this.scaleY!==0);
+DisplayObject.prototype.isVisible = function() {
+    return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
 };
 
 /**
  * 移除对象上的遮罩
  *
  */
-DisplayObject.prototype.removeMask = function(){
+DisplayObject.prototype.removeMask = function() {
     this.mask = null;
 };
 
@@ -1796,12 +1848,12 @@ DisplayObject.prototype.removeMask = function(){
  * @method setVal
  * @private
  */
-DisplayObject.prototype.setVal = function(vals){
-    if(vals===undefined)return;
-    for(var key in vals){
-        if(this[key]===undefined){
+DisplayObject.prototype.setVal = function(vals) {
+    if (vals === undefined) return;
+    for (var key in vals) {
+        if (this[key] === undefined) {
             continue;
-        }else{
+        } else {
             this[key] = vals[key];
         }
     }
@@ -1810,16 +1862,16 @@ DisplayObject.prototype.setVal = function(vals){
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateMe
+ * @method updateTransform
  * @private
  */
-DisplayObject.prototype.updateMe = function(){
+DisplayObject.prototype.updateTransform = function() {
     var pt = this.parent.worldTransform;
     var wt = this.worldTransform;
 
     var a, b, c, d, tx, ty;
 
-    if(this.skewX || this.skewY){
+    if (this.skewX || this.skewY) {
 
         TEMP_MATRIX.setTransform(
             this.x,
@@ -1833,48 +1885,48 @@ DisplayObject.prototype.updateMe = function(){
             this.skewY * UTILS.DTR
         );
 
-        wt.a  = TEMP_MATRIX.a  * pt.a + TEMP_MATRIX.b  * pt.c;
-        wt.b  = TEMP_MATRIX.a  * pt.b + TEMP_MATRIX.b  * pt.d;
-        wt.c  = TEMP_MATRIX.c  * pt.a + TEMP_MATRIX.d  * pt.c;
-        wt.d  = TEMP_MATRIX.c  * pt.b + TEMP_MATRIX.d  * pt.d;
+        wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
+        wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
+        wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
+        wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
         wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
         wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
-    }else{
-        if(this.rotation % 360){
-            if(this.rotation !== this.rotationCache){
+    } else {
+        if (this.rotation % 360) {
+            if (this.rotation !== this.rotationCache) {
                 this.rotationCache = this.rotation;
                 this._sr = Math.sin(this.rotation * UTILS.DTR);
                 this._cr = Math.cos(this.rotation * UTILS.DTR);
             }
 
-            a  =  this._cr * this.scaleX;
-            b  =  this._sr * this.scaleX;
-            c  = -this._sr * this.scaleY;
-            d  =  this._cr * this.scaleY;
-            tx =  this.x;
-            ty =  this.y;
+            a = this._cr * this.scaleX;
+            b = this._sr * this.scaleX;
+            c = -this._sr * this.scaleY;
+            d = this._cr * this.scaleY;
+            tx = this.x;
+            ty = this.y;
 
-            if(this.pivotX || this.pivotY){
+            if (this.pivotX || this.pivotY) {
                 tx -= this.pivotX * a + this.pivotY * c;
                 ty -= this.pivotX * b + this.pivotY * d;
             }
-            wt.a  = a  * pt.a + b  * pt.c;
-            wt.b  = a  * pt.b + b  * pt.d;
-            wt.c  = c  * pt.a + d  * pt.c;
-            wt.d  = c  * pt.b + d  * pt.d;
+            wt.a = a * pt.a + b * pt.c;
+            wt.b = a * pt.b + b * pt.d;
+            wt.c = c * pt.a + d * pt.c;
+            wt.d = c * pt.b + d * pt.d;
             wt.tx = tx * pt.a + ty * pt.c + pt.tx;
             wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-        }else{
-            a  = this.scaleX;
-            d  = this.scaleY;
+        } else {
+            a = this.scaleX;
+            d = this.scaleY;
 
             tx = this.x - this.pivotX * a;
             ty = this.y - this.pivotY * d;
 
-            wt.a  = a  * pt.a;
-            wt.b  = a  * pt.b;
-            wt.c  = d  * pt.c;
-            wt.d  = d  * pt.d;
+            wt.a = a * pt.a;
+            wt.b = a * pt.b;
+            wt.c = d * pt.c;
+            wt.d = d * pt.d;
             wt.tx = tx * pt.a + ty * pt.c + pt.tx;
             wt.ty = tx * pt.b + ty * pt.d + pt.ty;
         }
@@ -1885,10 +1937,10 @@ DisplayObject.prototype.updateMe = function(){
 /**
  * 更新对象本身的动画
  *
- * @method upAnimation
+ * @method updateAnimation
  * @private
  */
-DisplayObject.prototype.upAnimation = function(snippet){
+DisplayObject.prototype.updateAnimation = function(snippet) {
     this.Animation.update(snippet);
 };
 
@@ -1898,10 +1950,10 @@ DisplayObject.prototype.upAnimation = function(snippet){
  * @method setTransform
  * @private
  */
-DisplayObject.prototype.setTransform = function(ctx){
+DisplayObject.prototype.setTransform = function(ctx) {
     var matrix = this.worldTransform;
     ctx.globalAlpha = this.worldAlpha;
-    ctx.setTransform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.tx,matrix.ty);
+    ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
 };
 
 /**
@@ -1909,8 +1961,8 @@ DisplayObject.prototype.setTransform = function(ctx){
  *
  * @return {object}
  */
-DisplayObject.prototype.getGlobalPos = function(){
-    return {x: this.worldTransform.tx,y: this.worldTransform.ty};
+DisplayObject.prototype.getGlobalPos = function() {
+    return { x: this.worldTransform.tx, y: this.worldTransform.ty };
 };
 
 /**
@@ -1919,9 +1971,9 @@ DisplayObject.prototype.getGlobalPos = function(){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-DisplayObject.prototype.on = function(type,fn){
-    this.event.on(type,fn);
-};
+// DisplayObject.prototype.on = function(type, fn) {
+//     this.event.on(type, fn);
+// };
 
 /**
  * 显示对象的事件解绑函数
@@ -1929,9 +1981,9 @@ DisplayObject.prototype.on = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 注册时回调函数的引用
  */
-DisplayObject.prototype.off = function(type,fn){
-    this.event.off(type,fn);
-};
+// DisplayObject.prototype.off = function(type, fn) {
+//     this.event.off(type, fn);
+// };
 
 /**
  * 显示对象的一次性事件绑定函数
@@ -1939,9 +1991,9 @@ DisplayObject.prototype.off = function(type,fn){
  * @param type {String} 事件类型
  * @param fn {Function} 回调函数
  */
-DisplayObject.prototype.once = function(type,fn){
-    this.event.once(type,fn);
-};
+// DisplayObject.prototype.once = function(type, fn) {
+//     this.event.once(type, fn);
+// };
 
 /**
  * 设置显示对象的监测区域
@@ -1950,10 +2002,25 @@ DisplayObject.prototype.once = function(type,fn){
  * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function (shape,needless){
-    if(this.bound !== null && needless)return;
+DisplayObject.prototype.setBound = function(shape, needless) {
+    if (this.bound !== null && needless) return;
     this.bound = shape;
 };
+
+/**
+ * 监测坐标点是否在多变性内
+ *
+ * @method contains
+ * @private
+ */
+DisplayObject.prototype.contains = function (global) {
+    if (this.bound === null) return false;
+    var point = new Point();
+    this.worldTransform.applyInverse(global, point);
+    return this.bound && this.bound.contains(point.x, point.y);
+};
+
+// import { Point } from '../math/Point';
 
 /**
  * 显示对象容器，继承至DisplayObject
@@ -1967,15 +2034,15 @@ DisplayObject.prototype.setBound = function (shape,needless){
  * @extends JC.DisplayObject
  * @memberof JC
  */
-function Container(){
-    DisplayObject.call( this );
+function Container() {
+    DisplayObject.call(this);
 
     /**
      * 渲染对象的列表
      *
      * @member {Array}
      */
-    this.cds = [];
+    this.childs = [];
 
     /**
      * 自身及后代动画的缩放比例
@@ -1991,67 +2058,80 @@ function Container(){
      */
     this.paused = false;
 }
-Container.prototype = Object.create( DisplayObject.prototype );
+Container.prototype = Object.create(DisplayObject.prototype);
 
 /**
  * 向容器添加一个物体
  *
  * ```js
- * container.addChilds(sprite,sprite2,text3,graphice);
+ * container.adds(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param child {JC.Container}
+ * @param object {JC.Container}
  * @return {JC.Container}
  */
-Container.prototype.addChilds = function (cd){
-    if(cd === undefined)return cd;
-    var l = arguments.length;
-    if(l > 1){
-        for (var i=0; i<l; i++) { this.addChilds(arguments[i]); }
-        return arguments[l-1];
+Container.prototype.adds = function(object) {
+    if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+            this.adds(arguments[i]);
+        }
+        return this;
     }
-    if(cd.parent){ cd.parent.removeChilds(cd); }
-    cd.parent = this;
-    this.cds.push(cd);
-    return cd;
+    if (object === this) {
+        console.error('adds: object can\'t be added as a child of itself.', object);
+        return this;
+    }
+    if ((object && object instanceof Container)) {
+        if (object.parent !== null) {
+            object.parent.remove(object);
+        }
+        object.parent = this;
+        this.childs.push(object);
+    } else {
+        console.error('adds: object not an instance of Container', object);
+    }
+    return this;
 };
+
 /**
  * 从容器移除一个物体
  *
  * ```js
- * container.removeChilds(sprite,sprite2,text3,graphice);
+ * container.remove(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param child {JC.Container}
+ * @param object {JC.Container}
  * @return {JC.Container}
  */
-Container.prototype.removeChilds = function (){
-    var l = arguments.length;
-    if(l > 1){
-        for (var i=0; i<l; i++) { this.removeChilds(arguments[i]); }
-    }else if(l===1){
-        for(var a=0;a<this.cds.length;a++){
-            if(this.cds[a]===arguments[0]){
-                this.cds.splice(a,1);
-                this.cds[a].parent = null;
-                a--;
-            }
+Container.prototype.remove = function(object) {
+    if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+            this.remove(arguments[i]);
         }
+    }
+    var index = this.childs.indexOf(object);
+    if (index !== -1) {
+        object.parent = null;
+        this.childs.splice(index, 1);
     }
 };
 
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
  *
- * @method updateTransform
+ * @method updatePosture
  * @private
  */
-Container.prototype.updateTransform = function (snippet){
+Container.prototype.updatePosture = function(snippet) {
     if (!this._ready) return;
     snippet = this.timeScale * snippet;
-    if (!this.paused) this.upAnimation(snippet);
-    this.updateMe();
-    if (this.cds.length > 0) this.updateChilds(snippet);
+    if (!this.paused) this.updateAnimation(snippet);
+    this.updateTransform();
+    // if (this.childs.length > 0) this.updateChilds(snippet);
+    for (var i = 0, l = this.childs.length; i < l; i++) {
+        var child = this.childs[i];
+        child.updatePosture(snippet);
+    }
 };
 
 /**
@@ -2060,12 +2140,12 @@ Container.prototype.updateTransform = function (snippet){
  * @method updateChilds
  * @private
  */
-Container.prototype.updateChilds = function (snippet){
-    for (var i = 0,l = this.cds.length; i < l; i++) {
-        var cd = this.cds[i];
-        cd.updateTransform(snippet);
-    }
-};
+// Container.prototype.updateChilds = function(snippet) {
+//     for (var i = 0, l = this.childs.length; i < l; i++) {
+//         var cd = this.childs[i];
+//         cd.updatePosture(snippet);
+//     }
+// };
 
 /**
  * 渲染自己并触发后代渲染
@@ -2073,12 +2153,17 @@ Container.prototype.updateChilds = function (snippet){
  * @method render
  * @private
  */
-Container.prototype.render = function (ctx){
+Container.prototype.render = function(ctx) {
     ctx.save();
     this.setTransform(ctx);
     if (this.mask) this.mask.render(ctx);
     this.renderMe(ctx);
-    if (this.cds.length > 0) this.renderChilds(ctx);
+    // if (this.childs.length > 0) this.renderChilds(ctx);
+    for (var i = 0, l = this.childs.length; i < l; i++) {
+        var child = this.childs[i];
+        if (!child.isVisible() || !child._ready) continue;
+        child.render(ctx);
+    }
     ctx.restore();
 };
 
@@ -2088,7 +2173,7 @@ Container.prototype.render = function (ctx){
  * @method renderMe
  * @private
  */
-Container.prototype.renderMe = function (){
+Container.prototype.renderMe = function() {
     return true;
 };
 
@@ -2098,13 +2183,13 @@ Container.prototype.renderMe = function (){
  * @method renderChilds
  * @private
  */
-Container.prototype.renderChilds = function (ctx){
-    for (var i = 0,l = this.cds.length; i < l; i++) {
-        var cd = this.cds[i];
-        if (!cd.isVisible() || !cd._ready)continue;
-        cd.render(ctx);
-    }
-};
+// Container.prototype.renderChilds = function(ctx) {
+//     for (var i = 0, l = this.childs.length; i < l; i++) {
+//         var cd = this.childs[i];
+//         if (!cd.isVisible() || !cd._ready) continue;
+//         cd.render(ctx);
+//     }
+// };
 
 /**
  * 通知分发事件到自身及后代
@@ -2112,18 +2197,18 @@ Container.prototype.renderChilds = function (ctx){
  * @method noticeEvent
  * @private
  */
-Container.prototype.noticeEvent = function (ev){
-    var i = this.cds.length-1;
-    while(i>=0){
-        var child = this.cds[i];
-        if(child.visible){
-            child.noticeEvent(ev);
-            if(ev.target)break;
-        }
-        i--;
-    }
-    this.upEvent(ev);
-};
+// Container.prototype.noticeEvent = function(ev) {
+//     var i = this.childs.length - 1;
+//     while (i >= 0) {
+//         var child = this.childs[i];
+//         if (child.visible) {
+//             child.noticeEvent(ev);
+//             if (ev.target) break;
+//         }
+//         i--;
+//     }
+//     this.upEvent(ev);
+// };
 
 /**
  * 分发事件到自身后对自身做事件检查
@@ -2131,15 +2216,15 @@ Container.prototype.noticeEvent = function (ev){
  * @method upEvent
  * @private
  */
-Container.prototype.upEvent = function(ev){
-    if(!this._ready)return;
-    if(ev.target||(!this.passEvent&&this.hitTest(ev))){
-        if(!ev.cancleBubble||ev.target===this){
-            if(!(this.event.listeners[ev.type]&&this.event.listeners[ev.type].length>0))return;
-            this.event.emit(ev);
-        }
-    }
-};
+// Container.prototype.upEvent = function(ev) {
+//     if (!this._ready) return;
+//     if (ev.target || (!this.passEvent && this.hitTest(ev))) {
+//         if (!ev.cancleBubble || ev.target === this) {
+//             if (!(this.event.listeners[ev.type] && this.event.listeners[ev.type].length > 0)) return;
+//             this.event.emit(ev);
+//         }
+//     }
+// };
 
 /**
  * 碰撞监测及事件处理
@@ -2147,20 +2232,20 @@ Container.prototype.upEvent = function(ev){
  * @method hitTest
  * @private
  */
-Container.prototype.hitTest = function(ev){
-    if (ev.type==='touchmove'||ev.type==='touchend'||ev.type==='mousemove'||ev.type==='mouseup'){
-        var re = this.event.touchstarted;
-        if(re)ev.target = this;
-        if(ev.type==='touchend'||ev.type==='mouseup')this.event.touchstarted = false;
-        return re;
-    }
-    if(this.hitTestMe(ev)){
-        ev.target = this;
-        if(ev.type==='touchstart'||ev.type==='mousedown')this.event.touchstarted = true;
-        return true;
-    }
-    return false;
-};
+// Container.prototype.hitTest = function(ev) {
+//     if (ev.type === 'touchmove' || ev.type === 'touchend' || ev.type === 'mousemove' || ev.type === 'mouseup') {
+//         var re = this.event.touchstarted;
+//         if (re) ev.target = this;
+//         if (ev.type === 'touchend' || ev.type === 'mouseup') this.event.touchstarted = false;
+//         return re;
+//     }
+//     if (this.hitTestMe(ev)) {
+//         ev.target = this;
+//         if (ev.type === 'touchstart' || ev.type === 'mousedown') this.event.touchstarted = true;
+//         return true;
+//     }
+//     return false;
+// };
 
 /**
  * 对自身的事件监测区域做碰撞监测
@@ -2168,19 +2253,19 @@ Container.prototype.hitTest = function(ev){
  * @method hitTest
  * @private
  */
-Container.prototype.hitTestMe = function(ev){
-    if (this.bound === null) return false;
-    var point = new Point();
-    this.worldTransform.applyInverse(ev.global, point);
-    return this.bound.contains(point.x, point.y);
-};
+// Container.prototype.hitTestMe = function(ev) {
+//     if (this.bound === null) return false;
+//     var point = new Point();
+//     this.worldTransform.applyInverse(ev.global, point);
+//     return this.bound.contains(point.x, point.y);
+// };
 
 /**
  * 暂停自身的动画进度
  *
  *
  */
-Container.prototype.pause = function(){
+Container.prototype.pause = function() {
     this.paused = true;
 };
 
@@ -2189,7 +2274,7 @@ Container.prototype.pause = function(){
  *
  *
  */
-Container.prototype.start = function(){
+Container.prototype.start = function() {
     this.paused = false;
 };
 
@@ -2198,7 +2283,7 @@ Container.prototype.start = function(){
  *
  *
  */
-Container.prototype.cancle = function(){
+Container.prototype.cancle = function() {
     this.Animator.clear();
 };
 
@@ -2422,7 +2507,7 @@ Sprite.prototype.upTexture = function(opts){
  * @method upAnimation
  * @private
  */
-Sprite.prototype.upAnimation = function(snippet){
+Sprite.prototype.updateAnimation = function(snippet){
     this.Animation.update(snippet);
     this.MovieClip.update(snippet);
 };
@@ -2583,6 +2668,291 @@ Text.prototype.renderMe = function(ctx){
     }
 };
 
+function InteractionManager(stage) {
+    Eventer.call(this);
+    this.stage = stage;
+
+    this.canvas = this.stage.canvas;
+
+    this.autoPreventDefault = true;
+    this.strictMode = false;
+
+    this.onMouseUp = this.onMouseUp.bind(this);
+    this.processMouseUp = this.processMouseUp.bind(this);
+
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.processMouseMove = this.processMouseMove.bind(this);
+
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.processMouseDown = this.processMouseDown.bind(this);
+
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.processTouchStart = this.processTouchStart.bind(this);
+
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.processTouchEnd = this.processTouchEnd.bind(this);
+
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.processTouchMove = this.processTouchMove.bind(this);
+
+    this.onMouseOut = this.onMouseOut.bind(this);
+    this.processMouseOverOut = this.processMouseOverOut.bind(this);
+
+    this.onMouseOver = this.onMouseOver.bind(this);
+
+    this.defaultCursorStyle = 'inherit';
+
+    this.currentCursorStyle = 'inherit';
+
+}
+InteractionManager.prototype = Object.create(Eventer.prototype);
+
+InteractionManager.prototype.addEvents = function() {
+    if (!this.canvas || this.eventsAdded) {
+        return;
+    }
+
+    window.document.addEventListener('mousemove', this.onMouseMove, true);
+    this.canvas.addEventListener('mousedown', this.onMouseDown, true);
+    this.canvas.addEventListener('click', this.onMouseDown, true);
+    this.canvas.addEventListener('mouseout', this.onMouseOut, true);
+    this.canvas.addEventListener('mouseover', this.onMouseOver, true);
+
+    this.canvas.addEventListener('touchstart', this.onTouchStart, true);
+    this.canvas.addEventListener('touchend', this.onTouchEnd, true);
+    this.canvas.addEventListener('touchmove', this.onTouchMove, true);
+
+    window.addEventListener('mouseup', this.onMouseUp, true);
+
+    this.eventsAdded = true;
+};
+
+InteractionManager.prototype.removeEvents = function() {
+    if (!this.canvas) {
+        return;
+    }
+
+    window.document.removeEventListener('mousemove', this.onMouseMove, true);
+    this.canvas.removeEventListener('mousedown', this.onMouseDown, true);
+    this.canvas.removeEventListener('click', this.onMouseDown, true);
+    this.canvas.removeEventListener('mouseout',  this.onMouseOut, true);
+    this.canvas.removeEventListener('mouseover', this.onMouseOver, true);
+
+    this.canvas.removeEventListener('touchstart', this.onTouchStart, true);
+    this.canvas.removeEventListener('touchend',  this.onTouchEnd, true);
+    this.canvas.removeEventListener('touchmove', this.onTouchMove, true);
+
+    window.removeEventListener('mouseup',  this.onMouseUp, true);
+
+    this.eventsAdded = false;
+};
+
+InteractionManager.prototype.onMouseMove = function(event) {
+    var eventd = this.fixCoord(event);
+
+    this.cursor = this.defaultCursorStyle;
+    this.processInteractive(this.stage, eventd, this.processMouseMove, true);
+
+    if (this.currentCursorStyle !== this.cursor) {
+        this.currentCursorStyle = this.cursor;
+        this.canvas.style.cursor = this.cursor;
+    }
+};
+
+InteractionManager.prototype.processMouseMove = function(displayObject, event, hit) {
+    this.processMouseOverOut(displayObject, event, hit);
+    if (hit) {
+        this.dispatchEvent(displayObject, 'mousemove', event);
+    }
+};
+
+InteractionManager.prototype.processMouseOverOut = function(displayObject, event, hit) {
+    var eventd = event.clone();
+    if (hit) {
+        if (!displayObject._over) {
+            displayObject._over = true;
+            this.dispatchEvent(displayObject, 'mouseover', eventd);
+        }
+        if (displayObject.buttonMode) {
+            this.cursor = displayObject.cursor;
+        }
+    } else {
+        if (displayObject._over) {
+            displayObject._over = false;
+            this.dispatchEvent(displayObject, 'mouseout', eventd);
+        }
+    }
+};
+
+InteractionManager.prototype.onMouseDown = function(event) {
+    if (this.autoPreventDefault) {
+        event.preventDefault();
+    }
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processMouseDown, true);
+};
+
+InteractionManager.prototype.processMouseDown = function(displayObject, event, hit) {
+    if (hit) {
+        // displayObject._mousedowned = true;
+        this.dispatchEvent(displayObject, event.type, event);
+    }
+};
+
+InteractionManager.prototype.onMouseUp = function(event) {
+    // if (this.autoPreventDefault) {
+    //     event.preventDefault();
+    // }
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processMouseUp, true);
+};
+
+InteractionManager.prototype.processMouseUp = function(displayObject, event, hit) {
+    if (hit) {
+        // displayObject._mousedowned = false;
+        this.dispatchEvent(displayObject, event.type, event);
+    }
+};
+
+InteractionManager.prototype.onMouseOut = function(event) {
+    var eventd = this.fixCoord(event);
+
+    this.processInteractive(this.stage, eventd, this.processMouseOverOut, false);
+
+    this.emit('mouseout', event);
+};
+
+InteractionManager.prototype.onMouseOver = function(event) {
+    this.emit('mouseover', event);
+};
+
+InteractionManager.prototype.onTouchStart = function(event) {
+    if (this.autoPreventDefault) {
+        event.preventDefault();
+    }
+    // console.log(event);
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processTouchStart, true);
+};
+
+InteractionManager.prototype.processTouchStart = function(displayObject, event, hit) {
+    if (hit) {
+        displayObject._touchstarted = true;
+        this.dispatchEvent(displayObject, 'touchstart', event);
+    }
+};
+
+InteractionManager.prototype.onTouchEnd = function(event) {
+    if (this.autoPreventDefault) {
+        event.preventDefault();
+    }
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
+};
+
+InteractionManager.prototype.processTouchEnd = function(displayObject, event) {
+    if (displayObject._touchstarted) {
+        displayObject._touchstarted = false;
+        this.dispatchEvent(displayObject, 'touchend', event);
+    }
+};
+
+InteractionManager.prototype.onTouchMove = function(event) {
+    if (this.autoPreventDefault) {
+        event.preventDefault();
+    }
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processTouchMove, this.strictMode);
+};
+
+InteractionManager.prototype.processTouchMove = function(displayObject, event, hit) {
+    if ((!this.strictMode && displayObject._touchstarted) || hit) {
+        this.dispatchEvent(displayObject, 'touchmove', event);
+    }
+};
+
+InteractionManager.prototype.processInteractive = function(object, event, func, hitTest) {
+    function process(object, event, func, shouldHit) {
+        var childs = object.childs;
+        var hit = false;
+        var i = childs.length - 1;
+        while (i >= 0) {
+            var cchilds = childs[i--];
+            hit = false;
+            if (cchilds.passEvent) continue;
+            if (cchilds.childs.length > 0) {
+                if (process(cchilds, event, func, shouldHit)) {
+                    shouldHit = false;
+                    hit = true;
+                }
+            }
+            if (shouldHit && !hit) {
+                hit = cchilds.contains(event.global);
+                if (hit) {
+                    event.target = cchilds;
+                    shouldHit = false;
+                }
+            }
+            func(cchilds, event, hit);
+        }
+        return hit;
+    }
+    process(object, event, func, hitTest);
+};
+
+InteractionManager.prototype.dispatchEvent = function(displayObject, eventString, event) {
+    if (!event.cancleBubble) {
+        event.target = displayObject;
+        event.type = eventString;
+
+        displayObject.emit(eventString, event);
+
+        var type = 'on' + eventString;
+        if (displayObject[type]) {
+            displayObject[type](event);
+        }
+    }
+};
+
+InteractionManager.prototype.fixCoord = function(event) {
+    var eventd = new InteractionData(),
+        offset = this.getPos(this.canvas);
+    eventd.originalEvent = event;
+    eventd.type = event.type;
+
+    eventd.ratio = this.canvas.width / this.canvas.offsetWidth;
+    if (event.touches) {
+        eventd.touches = [];
+        if (event.touches.length > 0) {
+            for (var i = 0; i < event.touches.length; i++) {
+                eventd.touches[i] = {};
+                eventd.touches[i].global = new Point(
+                    (event.touches[i].pageX - offset.x) * eventd.ratio,
+                    (event.touches[i].pageY - offset.y) * eventd.ratio
+                );
+            }
+            eventd.global = eventd.touches[0].global;
+        }
+    } else {
+        eventd.global.x = (event.pageX - offset.x) * eventd.ratio;
+        eventd.global.y = (event.pageY - offset.y) * eventd.ratio;
+    }
+    return eventd;
+};
+
+InteractionManager.prototype.getPos = function(obj) {
+    var pos = new Point();
+    if (obj.offsetParent) {
+        var p = this.getPos(obj.offsetParent);
+        pos.x = obj.offsetLeft + p.x;
+        pos.y = obj.offsetTop + p.y;
+    } else {
+        pos.x = obj.offsetLeft;
+        pos.y = obj.offsetTop;
+    }
+    return pos;
+};
+
 /**
  * 舞台对象，继承至Container
  *
@@ -2595,9 +2965,8 @@ Text.prototype.renderMe = function(ctx){
  * @extends JC.Container
  * @memberof JC
  */
-function Stage(canvas,bgColor){
-    Container.call( this );
-    this.type = 'stage';
+function Stage(canvas, bgColor) {
+    Eventer.call(this);
 
     /**
      * 场景的canvas的dom
@@ -2615,6 +2984,13 @@ function Stage(canvas,bgColor){
     this.canvas.style.backgroundColor = bgColor || 'transparent';
 
     /**
+     * 渲染对象的列表
+     *
+     * @member {Array}
+     */
+    this.childs = [];
+
+    /**
      * 场景是否自动清除上一帧的像素内容
      *
      * @member {Boolean}
@@ -2622,11 +2998,18 @@ function Stage(canvas,bgColor){
     this.autoClear = true;
 
     /**
+     * 是否在每一帧绘制之前自动更新场景内所有物体的状态
+     *
+     * @member {Boolean}
+     */
+    this.autoUpdate = true;
+
+    /**
      * 场景是否应用style控制宽高
      *
      * @member {Boolean}
      */
-    this.setStyle = false;
+    this.autoStyle = false;
 
     /**
      * canvas的宽度
@@ -2642,17 +3025,6 @@ function Stage(canvas,bgColor){
      */
     this.height = this.canvas.height;
 
-    if('imageSmoothingEnabled' in this.ctx)
-        this.ctx.imageSmoothingEnabled = true;
-    else if('webkitImageSmoothingEnabled' in this.ctx)
-        this.ctx.webkitImageSmoothingEnabled = true;
-    else if('mozImageSmoothingEnabled' in this.ctx)
-        this.ctx.mozImageSmoothingEnabled = true;
-    else if('oImageSmoothingEnabled' in this.ctx)
-        this.ctx.oImageSmoothingEnabled = true;
-
-    this.initEvent();
-
     /**
      * 上一次绘制的时间点
      *
@@ -2661,8 +3033,180 @@ function Stage(canvas,bgColor){
      */
     this.pt = null;
 
+    /**
+     * 本次渲染经历的时间片段长度
+     *
+     * @member {Number}
+     * @private
+     */
+    this.snippet = 0;
+
+
+    /**
+     * 平均渲染经历的时间片段长度
+     *
+     * @member {Number}
+     * @private
+     */
+    this.averageSnippet = 0;
+
+    /**
+     * 渲染的瞬时帧率，仅在enableFPS为true时才可用
+     *
+     * @member {Number}
+     */
+    this.fps = 0;
+
+    /**
+     * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
+     *
+     * @member {Number}
+     */
+    this.averageFps = 0;
+
+    /**
+     * 渲染总花费时间，除去被中断、被暂停等时间
+     *
+     * @member {Number}
+     * @private
+     */
+    this._takeTime = 0;
+
+    /**
+     * 渲染总次数
+     *
+     * @member {Number}
+     * @private
+     */
+    this._renderTimes = 0;
+
+    /**
+     * 是否记录渲染性能
+     *
+     * @member {Boolean}
+     */
+    this.enableFPS = true;
+
+    /**
+     * 自身及后代动画的缩放比例
+     *
+     * @member {Number}
+     */
+    this.timeScale = 1;
+
+    /**
+     * 当前对象所应用的矩阵状态
+     *
+     * @member {JC.Matrix}
+     * @private
+     */
+    this.worldTransform = new Matrix();
+
+    /**
+     * 根层级的透明参数
+     *
+     * @member {Number}
+     * @private
+     */
+    this.worldAlpha = 1;
+
+
+    this.interactionManager = new InteractionManager(this);
+
+    this._interactive = false;
+
+
+    this.interactiveOnChange = function() {
+        if (this.interactive) {
+            this.interactionManager.addEvents();
+        } else {
+            this.interactionManager.removeEvents();
+        }
+    };
+
+    /**
+     * 设置canvas是否可交互
+     *
+     * @member {Boolean}
+     */
+    this.interactive = true;
 }
-Stage.prototype = Object.create( Container.prototype );
+Stage.prototype = Object.create(Eventer.prototype);
+
+/**
+ * 对渲染对象进行x、y轴同时缩放
+ *
+ * @member {Boolean}
+ * @name interactive
+ * @memberof JC.InteractionManager#
+ */
+Object.defineProperty(Stage.prototype, 'interactive', {
+    get: function() {
+        return this._interactive;
+    },
+    set: function(value) {
+        if (this._interactive !== value) {
+            this._interactive = value;
+            this.interactiveOnChange();
+        }
+    }
+});
+
+/**
+ * 向容器添加一个物体
+ *
+ * ```js
+ * stage.adds(sprite,sprite2,text3,graphice);
+ * ```
+ *
+ * @param object {JC.Container}
+ * @return {JC.Container}
+ */
+Stage.prototype.adds = function(object) {
+    if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+            this.adds(arguments[i]);
+        }
+        return this;
+    }
+    if (object === this) {
+        console.error('adds: object can\'t be added as a child of itself.', object);
+        return this;
+    }
+    if ((object && object instanceof Container)) {
+        if (object.parent !== null) {
+            object.parent.remove(object);
+        }
+        object.parent = this;
+        this.childs.push(object);
+    } else {
+        console.error('adds: object not an instance of Container', object);
+    }
+    return this;
+};
+
+/**
+ * 从容器移除一个物体
+ *
+ * ```js
+ * stage.remove(sprite,sprite2,text3,graphice);
+ * ```
+ *
+ * @param object {JC.Container}
+ * @return {JC.Container}
+ */
+Stage.prototype.remove = function(object) {
+    if (arguments.length > 1) {
+        for (var i = 0; i < arguments.length; i++) {
+            this.remove(arguments[i]);
+        }
+    }
+    var index = this.childs.indexOf(object);
+    if (index !== -1) {
+        object.parent = null;
+        this.childs.splice(index, 1);
+    }
+};
 
 /**
  * 舞台尺寸设置
@@ -2670,15 +3214,15 @@ Stage.prototype = Object.create( Container.prototype );
  *
  * @param w {number} canvas的width值
  * @param h {number} canvas的height值
- * @param sw {number} canvas的style.width值，需将舞台属性setStyle设置为true
- * @param sh {number} canvas的style.height值，需将舞台属性setStyle设置为true
+ * @param sw {number} canvas的style.width值，需将舞台属性autoStyle设置为true
+ * @param sh {number} canvas的style.height值，需将舞台属性autoStyle设置为true
  */
-Stage.prototype.resize = function (w,h,sw,sh){
+Stage.prototype.resize = function(w, h, sw, sh) {
     this.width = this.canvas.width = w;
     this.height = this.canvas.height = h;
-    if(this.setStyle&&sw&&sh){
-        this.canvas.style.width = sw+'px';
-        this.canvas.style.height = sh+'px';
+    if (this.autoStyle && sw && sh) {
+        this.canvas.style.width = sw + 'px';
+        this.canvas.style.height = sh + 'px';
     }
 };
 
@@ -2687,126 +3231,69 @@ Stage.prototype.resize = function (w,h,sw,sh){
  *
  *
  */
-Stage.prototype.render = function (){
-    if(this.pt===null||Date.now()-this.pt>200)this.pt = Date.now();
-    var snippet = Date.now()-this.pt;
-    snippet = snippet <= 0 ? 10: snippet;
-    this.pt += snippet;
-    this.updateChilds(this.timeScale*snippet);
+Stage.prototype.render = function() {
+    this.emit('prerender');
 
-    this.ctx.setTransform(1,0,0,1,0,0);
-    if(this.autoClear)this.ctx.clearRect(0,0,this.width,this.height);
-    this.renderChilds(this.ctx);
-};
+    this.timeline();
 
-/**
- * 初始化事件接管
- *
- *
- * @method initEvent
- * @private
- */
-Stage.prototype.initEvent = function (){
-    var This = this;
-    this.canvas.addEventListener('click',function(ev){
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('touchstart',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('touchmove',function(ev){
-        ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('touchend',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('mousedown',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('mousemove',function(ev){
-        ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-    this.canvas.addEventListener('mouseup',function(ev){
-        // ev.preventDefault();
-        This.eventProxy(ev);
-    },false);
-};
+    if (this.autoUpdate) this.update();
 
-/**
- * 代理事件，并对事件做分发
- *
- *
- * @method eventProxy
- * @private
- */
-Stage.prototype.eventProxy = function (ev){
-    var evd = this.fixCoord(ev);
-    var i = this.cds.length-1;
-    while(i>=0){
-        var child = this.cds[i];
-        if(child.visible){
-            child.noticeEvent(evd);
-            if(evd.target)break;
-        }
-        i--;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (this.autoClear) this.ctx.clearRect(0, 0, this.width, this.height);
+
+    for (var i = 0, l = this.childs.length; i < l; i++) {
+        var child = this.childs[i];
+        if (!child.isVisible() || !child._ready) continue;
+        child.render(this.ctx);
     }
+
+    this.emit('postrender');
 };
 
 /**
- * 将全局的事件坐标点转换到canvas的坐标系
+ * 更新场景内物体状态
  *
  *
- * @method fixCoord
- * @private
  */
-Stage.prototype.fixCoord = function (ev){
-    var evd = new InteractionData(),
-        offset = this.getPos(this.canvas);
-    evd.originalEvent = ev;
-    evd.type = ev.type;
-
-    evd.ratio = this.width/this.canvas.offsetWidth;
-    if(ev.touches){
-        evd.touches = [];
-        if(ev.touches.length>0){
-            for(var i=0;i<ev.touches.length;i++){
-                evd.touches[i] = {};
-                evd.touches[i].global = {};
-                evd.touches[i].global.x = (ev.touches[i].pageX-offset.x)*evd.ratio;
-                evd.touches[i].global.y = (ev.touches[i].pageY-offset.y)*evd.ratio;
-            }
-            evd.global = evd.touches[0].global;
-        }
-    }else{
-        evd.global.x = (ev.pageX-offset.x)*evd.ratio;
-        evd.global.y = (ev.pageY-offset.y)*evd.ratio;
-    }
-    return evd;
+Stage.prototype.update = function() {
+    this.updatePosture(this.timeScale * this.snippet);
 };
 
 /**
- * 获取canvas相对于页面的偏移量
+ * 引擎的时间轴
  *
- *
- * @method getPos
+ * @method timeline
  * @private
  */
-Stage.prototype.getPos = function (obj){
-    var pos={};
-    if(obj.offsetParent){
-        var p = this.getPos(obj.offsetParent);
-        pos.x = obj.offsetLeft+p.x;
-        pos.y = obj.offsetTop+p.y;
-    }else{
-        pos.x = obj.offsetLeft;
-        pos.y = obj.offsetTop;
+Stage.prototype.timeline = function() {
+    this.snippet = Date.now() - this.pt;
+    if (this.pt === null || this.snippet > 200) {
+        this.pt = Date.now();
+        this.snippet = Date.now() - this.pt;
     }
-    return pos;
+
+    if(this.enableFPS){
+        this._renderTimes++;
+        this._takeTime += Math.max(15, this.snippet);
+        this.fps = 1000 / Math.max(15, this.snippet) >> 0;
+        this.averageFps = this._takeTime / this._renderTimes >> 0;
+    }
+
+    this.pt += this.snippet;
+};
+
+/**
+ * 更新场景内物体的姿态
+ *
+ *
+ * @method updatePosture
+ * @private
+ */
+Stage.prototype.updatePosture = function(snippet) {
+    for (var i = 0, l = this.childs.length; i < l; i++) {
+        var child = this.childs[i];
+        child.updatePosture(snippet);
+    }
 };
 
 exports.TWEEN = TWEEN;
