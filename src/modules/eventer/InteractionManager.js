@@ -20,6 +20,9 @@ function InteractionManager(stage) {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.processMouseDown = this.processMouseDown.bind(this);
 
+    this.onClick = this.onClick.bind(this);
+    this.processClick = this.processClick.bind(this);
+
     this.onTouchStart = this.onTouchStart.bind(this);
     this.processTouchStart = this.processTouchStart.bind(this);
 
@@ -48,7 +51,7 @@ InteractionManager.prototype.addEvents = function() {
 
     window.document.addEventListener('mousemove', this.onMouseMove, true);
     this.canvas.addEventListener('mousedown', this.onMouseDown, true);
-    this.canvas.addEventListener('click', this.onMouseDown, true);
+    this.canvas.addEventListener('click', this.onClick, true);
     this.canvas.addEventListener('mouseout', this.onMouseOut, true);
     this.canvas.addEventListener('mouseover', this.onMouseOver, true);
 
@@ -68,7 +71,7 @@ InteractionManager.prototype.removeEvents = function() {
 
     window.document.removeEventListener('mousemove', this.onMouseMove, true);
     this.canvas.removeEventListener('mousedown', this.onMouseDown, true);
-    this.canvas.removeEventListener('click', this.onMouseDown, true);
+    this.canvas.removeEventListener('click', this.onClick, true);
     this.canvas.removeEventListener('mouseout',  this.onMouseOut, true);
     this.canvas.removeEventListener('mouseover', this.onMouseOver, true);
 
@@ -91,6 +94,8 @@ InteractionManager.prototype.onMouseMove = function(event) {
         this.currentCursorStyle = this.cursor;
         this.canvas.style.cursor = this.cursor;
     }
+
+    this.emit('mousemove',eventd);
 };
 
 InteractionManager.prototype.processMouseMove = function(displayObject, event, hit) {
@@ -124,9 +129,28 @@ InteractionManager.prototype.onMouseDown = function(event) {
     }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processMouseDown, true);
+
+    this.emit('mousedown',eventd);
 };
 
 InteractionManager.prototype.processMouseDown = function(displayObject, event, hit) {
+    if (hit) {
+        // displayObject._mousedowned = true;
+        this.dispatchEvent(displayObject, event.type, event);
+    }
+};
+
+InteractionManager.prototype.onClick = function(event) {
+    if (this.autoPreventDefault) {
+        event.preventDefault();
+    }
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processClick, true);
+
+    this.emit('click',eventd);
+};
+
+InteractionManager.prototype.processClick = function(displayObject, event, hit) {
     if (hit) {
         // displayObject._mousedowned = true;
         this.dispatchEvent(displayObject, event.type, event);
@@ -139,6 +163,8 @@ InteractionManager.prototype.onMouseUp = function(event) {
     // }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processMouseUp, true);
+
+    this.emit('mouseup',eventd);
 };
 
 InteractionManager.prototype.processMouseUp = function(displayObject, event, hit) {
@@ -167,6 +193,8 @@ InteractionManager.prototype.onTouchStart = function(event) {
     // console.log(event);
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchStart, true);
+
+    this.emit('touchstart', eventd);
 };
 
 InteractionManager.prototype.processTouchStart = function(displayObject, event, hit) {
@@ -182,6 +210,8 @@ InteractionManager.prototype.onTouchEnd = function(event) {
     // }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
+
+    this.emit('touchend', eventd);
 };
 
 InteractionManager.prototype.processTouchEnd = function(displayObject, event) {
@@ -197,6 +227,8 @@ InteractionManager.prototype.onTouchMove = function(event) {
     }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchMove, this.strictMode);
+
+    this.emit('touchmove', eventd);
 };
 
 InteractionManager.prototype.processTouchMove = function(displayObject, event, hit) {
