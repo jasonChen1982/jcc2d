@@ -30,63 +30,56 @@ var w = window.innerWidth,
     COLOURS = [ '#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423' ],
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container();
-    resize();
-    DOC.x = w/2;
-    DOC.y = h/2;
+resize();
+DOC.x = w/2;
+DOC.y = h/2;
 
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
+cacheMap = new JC.Graphics();  // 创建形状绘制对象
+cacheMap2 = new JC.Graphics();  // 创建形状绘制对象
 
+cacheMap.drawCall(function(ctx){
+    for(var i = 50;i>0;i--){
+        ctx.strokeStyle = COLOURS[i%COLOURS.length];
+        ctx.beginPath();
+        ctx.arc( 0, 0, i, 0, Math.PI*2 );
+        ctx.closePath();
+        ctx.stroke();
+    }
+},{
+    cache: true,
+    session: {center: {x: 50,y: 50},width:100,height:100}
+});
+cacheMap.x = -100;
+cacheMap.y = -200;
+cacheMap.to({
+    to: {x: 100,y: 200},
+    duration: 1000,
+    infinity: true,
+    alternate: true
+});
 
-    cacheMap = new JC.Graphics();  // 创建形状绘制对象
-    cacheMap2 = new JC.Graphics();  // 创建形状绘制对象
+cacheMap2.drawCall(function(ctx){
+    for(var i = 50;i>0;i--){
+        ctx.strokeStyle = COLOURS[i%COLOURS.length];
+        ctx.beginPath();
+        ctx.strokeRect( 50-i-50, 50-i-50, i*2, i*2 );
+        ctx.closePath();
+        ctx.stroke();
+    }
+},{
+    cache: true,
+    session: {center: {x: 50,y: 50},width:100,height:100}
+});
 
-    cacheMap.drawCall(function(ctx){
-        for(var i = 50;i>0;i--){
-            ctx.strokeStyle = COLOURS[i%COLOURS.length];
-            ctx.beginPath();
-            ctx.arc( 0, 0, i, 0, Math.PI*2 );
-            ctx.closePath();
-            ctx.stroke();
-        }
-    },{
-        cache: true,
-        session: {center: {x: 50,y: 50},width:100,height:100}
-    });
-    cacheMap.x = -100;
-    cacheMap.y = -200;
-    cacheMap.to({
-        to: {x: 100,y: 200},
-        duration: 1000,
-        infinity: true,
-        alternate: true
-    });
-
-    cacheMap2.drawCall(function(ctx){
-        for(var i = 50;i>0;i--){
-            ctx.strokeStyle = COLOURS[i%COLOURS.length];
-            ctx.beginPath();
-            ctx.strokeRect( 50-i-50, 50-i-50, i*2, i*2 );
-            ctx.closePath();
-            ctx.stroke();
-        }
-    },{
-        cache: true,
-        session: {center: {x: 50,y: 50},width:100,height:100}
-    });
-
-    DOC.adds(cacheMap,cacheMap2);
-    stage.adds(DOC);
-    render();
-
-
-
-
-
+DOC.adds(cacheMap,cacheMap2);
+stage.adds(DOC);
+render();
 
 
 function render(){
@@ -96,9 +89,9 @@ function render(){
     stats.update();
 }
 function resize(){
-	w = window.innerWidth;
-	h = window.innerHeight;
-	stage.resize(w,h);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    stage.resize(w,h);
 }
 </script>
 </body>

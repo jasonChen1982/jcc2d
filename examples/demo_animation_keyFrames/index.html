@@ -36,35 +36,30 @@ Rect.prototype.render = function(ctx){
     ctx.fill();
 };
 
-
 JC.TWEEN.extend(tween);
 
 var shape = [],
-    c = [],
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container();
-    DOC.x = 320;
-    DOC.y = 400;
+DOC.x = 320;
+DOC.y = 400;
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
+shape[0] = new JC.Graphics();
+shape[0].drawCall(new Rect('#749d9b'));
+shape[0].keyFrames({
+    keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90},{x:100,y:200,rotation:360}],
+    keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000},{ease:'bounceOut',duration: 1000}],
+    infinity: true,
+    alternate: true
+});
+DOC.adds(shape[0]);
 
-    shape[0] = new JC.Graphics();
-    shape[0].drawCall(new Rect('#749d9b'));
-    shape[0].keyFrames({
-        keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90},{x:100,y:200,rotation:360}],
-        keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000},{ease:'bounceOut',duration: 1000}],
-        infinity: true,
-        alternate: true
-    });
-    DOC.adds(shape[0]);
-
-
-    stage.adds(DOC);
-
+stage.adds(DOC);
 
 function render(){
     RAF(render);

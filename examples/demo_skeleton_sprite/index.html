@@ -17,7 +17,7 @@
 <script type="text/javascript" src="../libs/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
 };
 window.onresize = function(){
     resize();
@@ -25,7 +25,6 @@ window.onresize = function(){
 
 var w = window.innerWidth*window.devicePixelRatio,
     h = window.innerHeight*window.devicePixelRatio,
-    pic,
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container(),
     bodyDoc,
@@ -37,15 +36,15 @@ var w = window.innerWidth*window.devicePixelRatio,
     wheel2,
     ground,
     wheels;
-    stage.setStyle = true;
+stage.setStyle = true;
 
 
 
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 
 
@@ -105,7 +104,7 @@ loadBox.on('compelete',function(){
     ground = new JC.Graphics();
     ground.drawCall(function(ctx){
         ctx.beginPath();
-        ctx.strokeStyle = "#000000";
+        ctx.strokeStyle = '#000000';
         ctx.moveTo(0,h/2+80);
         ctx.lineTo(w,h/2+80);
         // ctx.arc(200, 300, 200, 0, Math.PI*2);
@@ -203,11 +202,11 @@ function render(){
     stats.update();
 }
 function resize(){
-	w = window.innerWidth*window.devicePixelRatio;
-	h = window.innerHeight*window.devicePixelRatio;
+    w = window.innerWidth*window.devicePixelRatio;
+    h = window.innerHeight*window.devicePixelRatio;
     DOC.x = w/2;
     DOC.y = h/2;
-	stage.resize(w,h,window.innerWidth,window.innerHeight);
+    stage.resize(w,h,window.innerWidth,window.innerHeight);
 }
 </script>
 </body>

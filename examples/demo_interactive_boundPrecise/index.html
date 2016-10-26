@@ -28,7 +28,7 @@
 <script type="text/javascript" src="../libs/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
 };
 window.onresize = function(){
     resize();
@@ -72,9 +72,9 @@ checkBox.addEventListener('click',function(){
 
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 JC.TWEEN.extend({
     bounceOut: function(t, b, c, d){
@@ -126,40 +126,40 @@ loadBox.on('compelete',function(){
         console.log('touchend at my pic as target !!!!!');
     });
     var bounds = [
-            0,-30,
-            -4,-29,
-            -6,-20,
-            -16,-28,
-            -22,-28,
-            -26,-24,
-            -16,-14,
-            -30,-16,
-            -36,-8,
-            -32,-4,
-            -20,-6,
-            -14,-4,
-            -28,2,
-            -30,16,
-            -22,20,
-            -15,18,
-            -2,3,
-            8,28,
-            15,28,
-            22,18,
-            15,0,
-            32,14,
-            38,11,
-            26,-6,
-            20,-8,
-            36,-10,
-            30,-20,
-            12,-14,
-            18,-24,
-            14,-28,
-            14,-28,
-            2,-16,
-            2,-26
-        ];
+        0,-30,
+        -4,-29,
+        -6,-20,
+        -16,-28,
+        -22,-28,
+        -26,-24,
+        -16,-14,
+        -30,-16,
+        -36,-8,
+        -32,-4,
+        -20,-6,
+        -14,-4,
+        -28,2,
+        -30,16,
+        -22,20,
+        -15,18,
+        -2,3,
+        8,28,
+        15,28,
+        22,18,
+        15,0,
+        32,14,
+        38,11,
+        26,-6,
+        20,-8,
+        36,-10,
+        30,-20,
+        12,-14,
+        18,-24,
+        14,-28,
+        14,-28,
+        2,-16,
+        2,-26
+    ];
 
     pic.setBound(new JC.Polygon(bounds));
 
@@ -200,9 +200,9 @@ function render(){
     stats.update();
 }
 function resize(){
-	w = window.innerWidth;
-	h = window.innerHeight;
-	stage.resize(w,h);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    stage.resize(w,h);
 }
 </script>
 </body>

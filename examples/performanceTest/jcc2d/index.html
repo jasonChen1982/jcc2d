@@ -17,7 +17,7 @@
 <script type="text/javascript" src="./js/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
 };
 window.onresize = function(){
     resize();
@@ -27,33 +27,33 @@ var w = window.innerWidth,
     h = window.innerHeight,
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container();
-    DOC.x = w/2;
-    DOC.y = h/2;
-    DOC.scale = 0.3;
+DOC.x = w/2;
+DOC.y = h/2;
+DOC.scale = 0.3;
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 var loadBox = JC.loaderUtil({
-        pic: './images/card02.png'
-    });
+    pic: './images/card02.png'
+});
 
 resize();
 
 for (var i = 0; i < 300; i++) {
     var el = new JC.Sprite({
-            texture: loadBox.getById('pic')
-        });
-        el.x = (Math.random()-0.5)*2*w;
-        el.y = (Math.random()-0.5)*2*h;
-        el.to({
-            to: {rotation: 360},
-            infinity: true,
-            alternate: true,
-            duration: 2e3+Math.random()*1e3
-        });
+        texture: loadBox.getById('pic')
+    });
+    el.x = (Math.random()-0.5)*2*w;
+    el.y = (Math.random()-0.5)*2*h;
+    el.to({
+        to: {rotation: 360},
+        infinity: true,
+        alternate: true,
+        duration: 2e3+Math.random()*1e3
+    });
     DOC.adds(el);
 }
 stage.adds(DOC);
@@ -68,9 +68,9 @@ function render(){
     stats.update();
 }
 function resize(){
-	w = window.innerWidth;
-	h = window.innerHeight;
-	stage.resize(w,h);
+    w = window.innerWidth;
+    h = window.innerHeight;
+    stage.resize(w,h);
 }
 </script>
 </body>

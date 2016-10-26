@@ -19,94 +19,93 @@
 </head>
 
 <body>
-    <canvas id="demo_canvas" width="320" height="410"></canvas>
-    <script type="text/javascript" src="../../build/jcc2d.js"></script>
-    <script type="text/javascript" src="../libs/derivedClass/materialSprite.js"></script>
-    <script type="text/javascript" src="../libs/stats.min.js"></script>
-    <script type="text/javascript">
-    window.onerror = function(msg, url, line) {
-        alert('line::::' + line + 'url::::' + url + 'msg::::' + msg);
-    };
-    window.onresize = function() {
-        resize();
-    };
-    var w = window.innerWidth,
-        h = window.innerHeight,
-        materialSprites=[],
-        boundBox,
-        stage = new JC.Stage('demo_canvas'),
-        DOC = new JC.Container();
-    DOC.x = w / 2;
-    DOC.y = h / 2;
-    DOC.name = 'doc';
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+<script type="text/javascript" src="../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/derivedClass/materialSprite.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg, url, line) {
+    alert('line::::' + line + 'url::::' + url + 'msg::::' + msg);
+};
+window.onresize = function() {
+    resize();
+};
+var w = window.innerWidth,
+    h = window.innerHeight,
+    materialSprites=[],
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+DOC.x = w / 2;
+DOC.y = h / 2;
+DOC.name = 'doc';
 
 
 
-    var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
-    JC.TWEEN.extend({
-        bounceOut: function(t, b, c, d) {
-            if ((t /= d) < (1 / 2.75)) {
-                return c * (7.5625 * t * t) + b;
-            } else if (t < (2 / 2.75)) {
-                return c * (7.5625 * (t -= (1.5 / 2.75)) * t + 0.75) + b;
-            } else if (t < (2.5 / 2.75)) {
-                return c * (7.5625 * (t -= (2.25 / 2.75)) * t + 0.9375) + b;
-            }
-            return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b;
+JC.TWEEN.extend({
+    bounceOut: function(t, b, c, d) {
+        if ((t /= d) < (1 / 2.75)) {
+            return c * (7.5625 * t * t) + b;
+        } else if (t < (2 / 2.75)) {
+            return c * (7.5625 * (t -= (1.5 / 2.75)) * t + 0.75) + b;
+        } else if (t < (2.5 / 2.75)) {
+            return c * (7.5625 * (t -= (2.25 / 2.75)) * t + 0.9375) + b;
         }
-    });
+        return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b;
+    }
+});
 
 
-    var loadBox = JC.loaderUtil({
-        woman: './images/woman.png'
-    });
+var loadBox = JC.loaderUtil({
+    woman: './images/woman.png'
+});
 
-    loadBox.on('compelete',function() {
-        resize();
-        for(var i=0;i<3;i++){
-            materialSprites[i] = new JC.MaterialSprite({
-                texture: loadBox.getById('woman')
-            });
-            materialSprites[i].name = 'pic'+i;
-            materialSprites[i].x = w*(Math.random()-0.5);
-            materialSprites[i].scale = 0.25;
-            materialSprites[i].rotation = 60*(Math.random()-0.5);
-            materialSprites[i].fromTo({
-                from: {
-                    y: -400
-                },
-                to: {
-                    y: h/2-materialSprites[i].regY*materialSprites[i].scale
-                },
-                duration: 1000,
-                ease: 'bounceOut'
-            });
-            DOC.adds(materialSprites[i]);
-        }
-
-        stage.adds(DOC);
-
-        render();
-    });
-
-    function render() {
-        RAF(render);
-
-        stage.render();
-
-        stats.update();
+loadBox.on('compelete',function() {
+    resize();
+    for(var i=0;i<3;i++){
+        materialSprites[i] = new JC.MaterialSprite({
+            texture: loadBox.getById('woman')
+        });
+        materialSprites[i].name = 'pic'+i;
+        materialSprites[i].x = w*(Math.random()-0.5);
+        materialSprites[i].scale = 0.25;
+        materialSprites[i].rotation = 60*(Math.random()-0.5);
+        materialSprites[i].fromTo({
+            from: {
+                y: -400
+            },
+            to: {
+                y: h/2-materialSprites[i].regY*materialSprites[i].scale
+            },
+            duration: 1000,
+            ease: 'bounceOut'
+        });
+        DOC.adds(materialSprites[i]);
     }
 
-    function resize() {
-        w = window.innerWidth;
-        h = window.innerHeight;
-        stage.resize(w, h);
-    }
-    </script>
+    stage.adds(DOC);
+
+    render();
+});
+
+function render() {
+    RAF(render);
+
+    stage.render();
+
+    stats.update();
+}
+
+function resize() {
+    w = window.innerWidth;
+    h = window.innerHeight;
+    stage.resize(w, h);
+}
+</script>
 </body>
 
 </html>

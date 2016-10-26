@@ -22,48 +22,48 @@ var w = window.innerWidth,
 
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 var Scene = new yellowjs.Scene({
-        ele: '#demo_box',
-        width: w,
-        height: h
-    }).play();
-    console.log(Scene.fps);
+    ele: '#demo_box',
+    width: w,
+    height: h
+}).play();
+console.log(Scene.fps);
 
 var DOC = new yellowjs.Container();
-    DOC.x = w>>1;
-    DOC.y = h>>1;
-    DOC.scale = 0.3;
+DOC.x = w>>1;
+DOC.y = h>>1;
+DOC.scale = 0.3;
 
-    for (var i = 0; i < 300; i++) {
-        var el = new yellowjs.Image({
-                src: './images/card02.png',
-                width: 220,
-                height: 220
-            });
-        el.x = (Math.random()-0.5)*2*w;
-        el.y = (Math.random()-0.5)*2*h;
-        loopRotation(el);
-        DOC.addChild(el);
-    }
-    
-    Scene.addChild(DOC);
-    Scene.addTickEnd(function() {
-        stats.update();
+for (var i = 0; i < 300; i++) {
+    var el = new yellowjs.Image({
+        src: './images/card02.png',
+        width: 220,
+        height: 220
     });
-    function loopRotation(ele) {
-        ele.rotation = 0;
-        ele.to({
-                rotation: 360
-            }, 2e3+Math.random()*1e3, yellowjs.EASE)
-            .exec(function() {
-                loopRotation(ele);
-            });
-        return ele;
-    }
+    el.x = (Math.random()-0.5)*2*w;
+    el.y = (Math.random()-0.5)*2*h;
+    loopRotation(el);
+    DOC.addChild(el);
+}
+
+Scene.addChild(DOC);
+Scene.addTickEnd(function() {
+    stats.update();
+});
+function loopRotation(ele) {
+    ele.rotation = 0;
+    ele.to({
+        rotation: 360
+    }, 2e3+Math.random()*1e3, yellowjs.EASE)
+    .exec(function() {
+        loopRotation(ele);
+    });
+    return ele;
+}
 
 </script>
 </body>

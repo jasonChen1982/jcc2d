@@ -21,7 +21,6 @@ window.onresize = function(){
     resize();
 };
 
-
 function Rect(color,size){
     this.size = size||30;
     this.color = color||'#749d9b';
@@ -33,11 +32,11 @@ Rect.prototype.render = function(ctx){
     ctx.fill();
 };
 
-function Cricle(color,radius){
+function Circle(color,radius){
     this.radius = radius||60;
     this.color = color||'#eca378';
 }
-Cricle.prototype.render = function(ctx){
+Circle.prototype.render = function(ctx){
     ctx.beginPath();
     ctx.fillStyle = this.color;
     ctx.arc( 0, 0, this.radius, 0, Math.PI*2 );
@@ -51,17 +50,17 @@ var w = window.innerWidth,
     h = window.innerHeight,
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container();
-    DOC.x = w>>1;
-    DOC.y = h>>1;
+DOC.x = w>>1;
+DOC.y = h>>1;
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 
 var shape = new JC.Graphics();
-    shape.drawCall(new Rect('#749d9b'));
+shape.drawCall(new Rect('#749d9b'));
 
 var pathMotion = shape.motion({
     points: [
@@ -87,8 +86,8 @@ for(var i=0;i<pathMotion.points.length;i++){
     control.x = point.x;
     control.y = point.y;
     var color = i===0||i===pathMotion.points.length-1? '#e46d69': '';
-    control.drawCall(new Cricle(color,10));
-    control.setBound(new JC.Rectangle(-10,-10,20,20));
+    control.drawCall(new Circle(color,10));
+    control.setBound(new JC.Circle(0,0,20));
     var text = new JC.Text(point.name,'','#acba9d');
     text.y = -20;
     control.adds(text);
@@ -119,8 +118,7 @@ function bindDrag(el,point){
         point.y = el.y = el.preY + data.translate.y;
 
     });
-    el.on('touchend',function(ev){
-        // data.translate = {};
+    el.on('touchend',function(){
         el.preX = el.x;
         el.preY = el.y;
     });

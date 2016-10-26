@@ -17,7 +17,7 @@
 <script type="text/javascript" src="./js/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
 };
 window.onresize = function(){
     resize();
@@ -26,46 +26,45 @@ window.onresize = function(){
 var stage = new createjs.Stage(document.getElementById("demo_canvas"));
 var w = window.innerWidth,
     h = window.innerHeight,
-    pic,
     DOC = new createjs.Container();
-    DOC.x = w/2;
-    DOC.y = h/2;
-    DOC.scaleX = DOC.scaleY = DOC.scale = 0.3;
+DOC.x = w/2;
+DOC.y = h/2;
+DOC.scaleX = DOC.scaleY = DOC.scale = 0.3;
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 var img = new Image();
-	img.src = './images/card02.png';
-	img.onload = init;
+img.src = './images/card02.png';
+img.onload = init;
 
 function init(){
-	resize();
+    resize();
 
-	for (var i = 0; i < 300; i++) {
-	    var el = new createjs.Bitmap(img);
-	        el.x = (Math.random()-0.5)*2*w;
-	        el.y = (Math.random()-0.5)*2*h;
-	        el.regX = img.width>>1;
-	        el.regY = img.height>>1;
-	        loop(el);
-	    DOC.addChild(el);
-	}
-	stage.addChild(DOC);
+    for (var i = 0; i < 300; i++) {
+        var el = new createjs.Bitmap(img);
+        el.x = (Math.random()-0.5)*2*w;
+        el.y = (Math.random()-0.5)*2*h;
+        el.regX = img.width>>1;
+        el.regY = img.height>>1;
+        loop(el);
+        DOC.addChild(el);
+    }
+    stage.addChild(DOC);
 
-	render();
+    render();
 }
 
 function loop(el){
-	el.rotation = 0;
-	var t = 2e3+Math.random()*1e3;
-	createjs.Tween.get(el)
-         .to({rotation: 360}, t, createjs.Ease.sineInOut)
-         .call(function(){
-         	loop(el);
-         });
+    el.rotation = 0;
+    var t = 2e3+Math.random()*1e3;
+    createjs.Tween.get(el)
+    .to({rotation: 360}, t, createjs.Ease.sineInOut)
+    .call(function(){
+        loop(el);
+    });
 }
 
 function render(){
@@ -76,10 +75,10 @@ function render(){
     stats.update();
 }
 function resize(){
-	w = window.innerWidth;
-	h = window.innerHeight;
-	stage.canvas.width = w;
-	stage.canvas.height = h;
+    w = window.innerWidth;
+    h = window.innerHeight;
+    stage.canvas.width = w;
+    stage.canvas.height = h;
 }
 </script>
 </body>

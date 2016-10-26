@@ -17,40 +17,36 @@
 <script type="text/javascript" src="./js/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
 };
-window.onresize = function(){
-    resize();
-};
-
 
 var w = window.innerWidth,
     h = window.innerHeight;
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 
-init(1000/60,"mylegend",w,h,main);  
+init(1000/60,"mylegend",w,h,main);
 function main(){
-    LLoadManage.load([{name:"aaa",path:"./images/card02.png"}],null,loadBitmapdata); 
-}  
+    LLoadManage.load([{name:"aaa",path:"./images/card02.png"}],null,loadBitmapdata);
+}
 function loadBitmapdata(result){
-    var bitmapData = new LBitmapData(result["aaa"]);  
+    var bitmapData = new LBitmapData(result["aaa"]);
     var DOC = new LSprite();
-        DOC.x = w/2;
-        DOC.y = h/2;
-        DOC.scaleX = DOC.scaleY = DOC.scale = 0.3;
-    for(var i=0;i<300;i++){  
-        var bitmap = new LBitmap(bitmapData);  
+    DOC.x = w/2;
+    DOC.y = h/2;
+    DOC.scaleX = DOC.scaleY = DOC.scale = 0.3;
+    for(var i=0;i<300;i++){
+        var bitmap = new LBitmap(bitmapData);
         bitmap.x = (Math.random()-0.5)*2*w;
         bitmap.y = (Math.random()-0.5)*2*h;
         loopRotation(bitmap);
         DOC.addChild(bitmap);
-    } 
-    addChild(DOC);  
+    }
+    addChild(DOC);
 
     DOC.addEventListener(LEvent.ENTER_FRAME, function(){
         stats.update();
@@ -60,7 +56,7 @@ function loadBitmapdata(result){
 function loopRotation(el) {
     el.rotate = 0;
     var t = 2+Math.random()*1;
-    LTweenLite.to(el,t,{rotate: 360,ease:Strong.easeInOut,onComplete: function(){
+    LTweenLite.to(el,t,{rotate: 360,ease: Strong.easeInOut,onComplete: function(){
         loopRotation(el);
     }});
 }

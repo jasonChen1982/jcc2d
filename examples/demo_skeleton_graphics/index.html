@@ -7,7 +7,17 @@
 	<title>JC_demo</title>
 	<style type="text/css">
     * {padding:0;margin:0;}
-    body {overflow: hidden;}
+    html {
+        height: 100%;
+    }
+    body {
+        height: 100%;
+        overflow: hidden;
+    }
+    #demo_canvas {
+        width: 100%;
+        height: 100%;
+    }
     </style>
 </head>
 <body>
@@ -17,7 +27,7 @@
 <script type="text/javascript" src="../libs/stats.min.js"></script>
 <script type="text/javascript">
 window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
 };
 window.onresize = function(){
     resize();
@@ -25,10 +35,8 @@ window.onresize = function(){
 
 var w = window.innerWidth*window.devicePixelRatio,
     h = window.innerHeight*window.devicePixelRatio,
-    pic,
     stage = new JC.Stage('demo_canvas'),
     DOC = new JC.Container(),
-    bodyDoc,
     body,
     arm1,
     arm2,
@@ -37,15 +45,15 @@ var w = window.innerWidth*window.devicePixelRatio,
     wheel1,
     wheel2,
     ground;
-    stage.setStyle = true;
+stage.setStyle = true;
 
 
 
 
 var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
 
 var loadBox = JC.loaderUtil({
     body: './images/body.png'
@@ -58,14 +66,14 @@ loadBox.on('compelete',function(){
     arm1 = new JC.Graphics();
     arm1.drawCall(function(ctx){
         ctx.beginPath();
-        ctx.strokeStyle = "#6d6e71";
+        ctx.strokeStyle = '#6d6e71';
         ctx.lineWidth = 4;
         ctx.arc(0,-220,50,0,Math.PI*2);
         ctx.stroke();
         ctx.lineWidth = 1;
 
         ctx.beginPath();
-        ctx.fillStyle = "#3d989b";
+        ctx.fillStyle = '#3d989b';
         ctx.moveTo(-38,0);
         ctx.lineTo(38,0);
         ctx.lineTo(28,-220);
@@ -73,17 +81,17 @@ loadBox.on('compelete',function(){
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#42a6a9";
+        ctx.fillStyle = '#42a6a9';
         ctx.arc(0,0,40,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#6d6e71";
+        ctx.fillStyle = '#6d6e71';
         ctx.arc(0,0,22,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#eeefef";
+        ctx.fillStyle = '#eeefef';
         ctx.arc(0,0,10,0,Math.PI*2);
         ctx.fill();
     });
@@ -95,7 +103,7 @@ loadBox.on('compelete',function(){
     arm2.drawCall(function(ctx){
 
         ctx.beginPath();
-        ctx.fillStyle = "#42a6a9";
+        ctx.fillStyle = '#42a6a9';
         ctx.moveTo(-30,0);
         ctx.arcTo(-30,30,0,30,30);
         ctx.arcTo(30,30,30,0,30);
@@ -104,12 +112,12 @@ loadBox.on('compelete',function(){
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#6d6e71";
+        ctx.fillStyle = '#6d6e71';
         ctx.arc(0,0,14,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#eeefef";
+        ctx.fillStyle = '#eeefef';
         ctx.arc(0,0,7,0,Math.PI*2);
         ctx.fill();
     });
@@ -121,7 +129,7 @@ loadBox.on('compelete',function(){
     arm3.drawCall(function(ctx){
 
         ctx.beginPath();
-        ctx.fillStyle = "#3d989b";
+        ctx.fillStyle = '#3d989b';
         ctx.moveTo(-22,0);
         ctx.arcTo(-22,22,0,22,22);
         ctx.arcTo(22,22,22,0,22);
@@ -130,32 +138,32 @@ loadBox.on('compelete',function(){
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#3d989b";
+        ctx.fillStyle = '#3d989b';
         ctx.arc(0,0,22,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#6d6e71";
+        ctx.fillStyle = '#6d6e71';
         ctx.arc(0,0,14,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#eeefef";
+        ctx.fillStyle = '#eeefef';
         ctx.arc(0,0,7,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#42a6a9";
+        ctx.fillStyle = '#42a6a9';
         ctx.arc(0,-90,22,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#6d6e71";
+        ctx.fillStyle = '#6d6e71';
         ctx.arc(0,-90,10,0,Math.PI*2);
         ctx.fill();
 
         ctx.beginPath();
-        ctx.fillStyle = "#eeefef";
+        ctx.fillStyle = '#eeefef';
         ctx.arc(0,-90,6,0,Math.PI*2);
         ctx.fill();
     });
@@ -166,11 +174,11 @@ loadBox.on('compelete',function(){
     hand = new JC.Graphics();
     hand.drawCall(function(ctx){
         ctx.beginPath();
-        ctx.fillStyle = "#6d6e71";
+        ctx.fillStyle = '#6d6e71';
         ctx.fillRect(-42,-80,84,34);
 
         ctx.beginPath();
-        ctx.fillStyle = "#42a6a9";
+        ctx.fillStyle = '#42a6a9';
         ctx.fillRect(-50,-50,100,36);
 
     });
@@ -181,7 +189,7 @@ loadBox.on('compelete',function(){
     wheel1 = new JC.Graphics();
     wheel1.drawCall(function(ctx){
         ctx.beginPath();
-        ctx.fillStyle = "#42a6a9";
+        ctx.fillStyle = '#42a6a9';
         ctx.fillRect(-10,-56,20,64);
 
 
@@ -193,7 +201,7 @@ loadBox.on('compelete',function(){
     wheel2 = new JC.Graphics();
     wheel2.drawCall(function(ctx){
         ctx.beginPath();
-        ctx.fillStyle = "#42a6a9";
+        ctx.fillStyle = '#42a6a9';
         ctx.fillRect(-10,-56,20,64);
 
 
@@ -209,7 +217,7 @@ loadBox.on('compelete',function(){
     ground = new JC.Graphics();
     ground.drawCall(function(ctx){
         ctx.beginPath();
-        ctx.strokeStyle = "#000000";
+        ctx.strokeStyle = '#000000';
         ctx.moveTo(0,h/2+116);
         ctx.lineTo(w,h/2+116);
         ctx.stroke();
@@ -277,11 +285,11 @@ function render(){
     stats.update();
 }
 function resize(){
-	w = window.innerWidth*window.devicePixelRatio;
-	h = window.innerHeight*window.devicePixelRatio;
+    w = window.innerWidth*window.devicePixelRatio;
+    h = window.innerHeight*window.devicePixelRatio;
     DOC.x = w/4;
     DOC.y = h/2;
-	stage.resize(w,h,window.innerWidth,window.innerHeight);
+    stage.resize(w,h,window.innerWidth,window.innerHeight);
 }
 </script>
 </body>
