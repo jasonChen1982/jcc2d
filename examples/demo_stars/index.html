@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+    <title>JC_demo</title>
+    <style type="text/css">
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            overflow: hidden;
+            background-color: #222;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 30px;
+            color: #fff;
+            margin-top: 50px;
+        }
+
+        #demo_canvas {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 320px;
+            height: 450px;
+            margin: -225px 0 0 -160px;
+            border: 1px solid;
+        }
+    </style>
+</head>
+
+<body>
+    <p class="title">随意点击</p>
+    <canvas id="demo_canvas" width="640" height="900"></canvas>
+    <script type="text/javascript" src="../../build/jcc2d.js"></script>
+    <script type="text/javascript" src="../libs/util/tween.js"></script>
+    <script type="text/javascript" src="../libs/stats.min.js"></script>
+    <script type="text/javascript">
+        var stats = new Stats();
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.top = '0px';
+        document.body.appendChild(stats.domElement);
+
+        // init
+        var stage = new JC.Stage('demo_canvas');
+        var starContainer = new JC.Container();
+        var COLORS = ['#f00', '#f6f', '#ff0', '#66f'];
+
+        JC.TWEEN.extend(tween);
+
+        // 画圆类
+        function Cricle(color, radius) {
+            this.radius = radius || 60;
+            this.color = color || '#eca378';
+        }
+        Cricle.prototype.render = function (ctx) {
+            ctx.beginPath();
+            ctx.fillStyle = this.color;
+            ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        // 创建好多小星星
+        for (var i = 0; i < 26; i++) {
+            var star = new JC.Graphics();
+            star.drawCall(new Cricle(JC.UTILS.random(COLORS), JC.UTILS.random(24, 48)));
+            starContainer.adds(star);
+        }
+        starContainer.visible = false;
+
+        // 创建一个浅黄色的圆
+        var circle = new JC.Graphics();
+        circle.drawCall(new Cricle('rgba(255,255,102,0.46)', 78));
+        circle.visible = false;
+
+        stage.adds(circle, starContainer);
+
+        /**
+        * 执行动画
+        *
+        */
+        function play() {
+            var p = getPos();
+            var x = p.x;
+            var y = p.y;
+
+            circle.x = x;
+            circle.y = y;
+            circle.visible = true;
+            starContainer.visible = true;
+
+            circle.fromTo({
+                from: {
+                    scale: 1,
+                    alpha: 1
+                },
+                to: {
+                    scale: 2.15,
+                    alpha: 0
+                },
+                ease: 'linear',
+                duration: 300,
+                onCompelete: function onCompelete() {
+                    circle.visible = false;
+                }
+            }, true);
+
+            starContainer.childs.forEach(function (el) {
+                el.fromTo({
+                    from: {
+                        x: x,
+                        y: y,
+                        scale: 1
+                    },
+                    to: {
+                        x: JC.UTILS.random(x - 200, x + 200),
+                        y: JC.UTILS.random((y - 200) * 1.15, (y + 200) * 1.15),
+                        scale: 0
+                    },
+                    ease: 'linear',
+                    duration: 350,
+                    onCompelete: function onCompelete() {
+                        starContainer.visible = false;
+                    }
+                }, true);
+            });
+        }
+
+        /**
+        * 随机坐标
+        */
+        function getPos() {
+            var pos = parseInt(JC.UTILS.random(0, 4), 10);
+
+            var posArr = [
+                { x: 97, y: 300 },
+                { x: 252, y: 300 },
+                { x: 392, y: 300 },
+                { x: 543, y: 300 }
+            ];
+
+            //return posArr[pos];
+            return {
+                x: JC.UTILS.random(640 * .1, 640 * .9),
+                y: JC.UTILS.random(900 * .1, 900 * .9)
+            }
+        }
+
+        function render(){
+            RAF(render);
+            stage.render();
+            stats.update();
+        }
+        render();
+
+        document.addEventListener('click', play)
+    </script>
+</body>
+
+</html>
