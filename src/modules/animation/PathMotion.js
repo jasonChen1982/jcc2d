@@ -9,7 +9,6 @@ import { TWEEN } from '../util/TWEEN';
  * @memberof JC
  * @param [opts] {object} 动画所具备的特性
  */
-
 function PathMotion(opts) {
     Animate.call(this, opts);
 
@@ -20,37 +19,6 @@ function PathMotion(opts) {
     this._cacheVector = { x: 10 * Math.cos(radian), y: 10 * Math.sin(radian) };
 }
 PathMotion.prototype = Object.create(Animate.prototype);
-PathMotion.prototype.update = function(snippet) {
-    if(this.wait>0){
-        this.wait -= Math.abs(snippet);
-        return;
-    }
-    if (this.paused || !this.living || this.delayCut>0){
-        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
-        return;
-    }
-
-    this.progress += this.direction * this.timeScale * snippet;
-
-    var pose = this.nextPose();
-    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
-
-    if ((this.direction === -1 && this.progress <= 0) || (this.direction === 1 && this.progress >= this.duration)) {
-        if (this.repeats > 0 || this.infinity) {
-            if (this.repeats > 0) --this.repeats;
-            this.delayCut = this.delay;
-            if (this.alternate) {
-                this.direction *= -1;
-                this._swapEase();
-            } else {
-                this.progress = 0;
-            }
-        } else {
-            this.living = false;
-            if (this.onCompelete) this.onCompelete();
-        }
-    }
-};
 PathMotion.prototype.nextPose = function() {
     var cache = {},
         _rotate = 0,

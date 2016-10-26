@@ -1,4 +1,6 @@
 import { TWEEN } from '../util/TWEEN';
+import { UTILS } from '../util/UTILS';
+
 /**
  * 动画对象的基本类型
  *
@@ -6,7 +8,6 @@ import { TWEEN } from '../util/TWEEN';
  * @memberof JC
  * @param [opts] {object} 动画配置信息
  */
-
 function Animate(opts) {
     this.element = opts.element || {};
     this.duration = opts.duration || 300;
@@ -27,6 +28,8 @@ function Animate(opts) {
 
     this.timeScale = opts.timeScale || 1;
 
+    this.totalTime = 0;
+
     this.paused = false;
 }
 Animate.prototype._swapEase = function() {
@@ -37,6 +40,41 @@ Animate.prototype._swapEase = function() {
         ease = ease.replace('Out', 'In');
     }
     this.ease = ease;
+};
+Animate.prototype.update = function(snippet) {
+    if (this.wait > 0) {
+        this.wait -= Math.abs(snippet);
+        return;
+    }
+    if (this.paused || !this.living || this.delayCut > 0) {
+        if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+        return;
+    }
+
+    var snippetCache = this.direction * this.timeScale * snippet;
+    this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+    this.totalTime += Math.abs(snippetCache);
+
+    var pose = this.nextPose();
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+
+    if (this.totalTime >= this.duration) {
+        if (this.repeats > 0 || this.infinity) {
+            if (this.repeats > 0) --this.repeats;
+            this.delayCut = this.delay;
+            this.totalTime = 0;
+            if (this.alternate) {
+                this.direction *= -1;
+                this._swapEase();
+            } else {
+                this.direction = 1;
+                this.progress = 0;
+            }
+        } else {
+            this.living = false;
+            if (this.onCompelete) this.onCompelete(pose);
+        }
+    }
 };
 Animate.prototype.nextPose = function() {
     var cache = {};

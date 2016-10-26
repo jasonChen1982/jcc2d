@@ -162,7 +162,7 @@ InteractionManager.prototype.onMouseOver = function(event) {
 
 InteractionManager.prototype.onTouchStart = function(event) {
     // if (this.autoPreventDefault) {
-    //     event.preventDefault();
+        // event.preventDefault();
     // }
     // console.log(event);
     var eventd = this.fixCoord(event);
@@ -178,7 +178,7 @@ InteractionManager.prototype.processTouchStart = function(displayObject, event, 
 
 InteractionManager.prototype.onTouchEnd = function(event) {
     // if (this.autoPreventDefault) {
-    //     event.preventDefault();
+        // event.preventDefault();
     // }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
