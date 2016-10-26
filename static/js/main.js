@@ -252,7 +252,10 @@ particleDOC.to({
     to: {scale: 1,alpha: 1},
     duration: 1000,
     ease: 'backOut',
-    onCompelete: logoIn
+    onCompelete: function() {
+        shapeIn = true;
+        if (fontLoaded && shapeIn) logoIn();
+    }
 });
 
 var texts = [
@@ -367,3 +370,27 @@ function resize() {
     bannerLeft.scale = bannerRight.scale = Math.sqrt(Math.min(1, w/1280), 0.5);
     stage.resize(w, h);
 }
+
+
+var fontLoaded = false;
+var shapeIn = false;
+WebFontConfig = {
+    custom: { families: ['Tangerine'],
+      urls: [ './static/css/tangerine.css']},
+    active: function() {
+        fontLoaded = true;
+        if (fontLoaded && shapeIn) logoIn();
+    },
+    fontinactive: function() {
+        fontLoaded = true;
+        if (fontLoaded && shapeIn) logoIn();
+    }
+};
+(function() {
+    var wf = document.createElement('script');
+    wf.src = './static/js/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+})();
