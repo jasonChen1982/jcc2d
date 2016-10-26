@@ -1488,9 +1488,10 @@ var IDENTITY = new Matrix();
 var TEMP_MATRIX = new Matrix();
 
 /**
- * 显示对象的基类
+ * 显示对象的基类，继承至Eventer
  *
  * @class
+ * @extends JC.Eventer
  * @memberof JC
  */
 function DisplayObject() {
@@ -2827,9 +2828,9 @@ InteractionManager.prototype.onMouseOver = function(event) {
 };
 
 InteractionManager.prototype.onTouchStart = function(event) {
-    if (this.autoPreventDefault) {
-        event.preventDefault();
-    }
+    // if (this.autoPreventDefault) {
+    //     event.preventDefault();
+    // }
     // console.log(event);
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchStart, true);
@@ -2843,9 +2844,9 @@ InteractionManager.prototype.processTouchStart = function(displayObject, event, 
 };
 
 InteractionManager.prototype.onTouchEnd = function(event) {
-    if (this.autoPreventDefault) {
-        event.preventDefault();
-    }
+    // if (this.autoPreventDefault) {
+    //     event.preventDefault();
+    // }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
 };
@@ -2954,7 +2955,7 @@ InteractionManager.prototype.getPos = function(obj) {
 };
 
 /**
- * 舞台对象，继承至Container
+ * 舞台对象，继承至Eventer
  *
  *
  * ```js
@@ -2962,7 +2963,7 @@ InteractionManager.prototype.getPos = function(obj) {
  * ```
  *
  * @class
- * @extends JC.Container
+ * @extends JC.Eventer
  * @memberof JC
  */
 function Stage(canvas, bgColor) {
