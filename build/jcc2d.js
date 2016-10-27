@@ -347,66 +347,6 @@ var TWEEN = {
     }
 };
 
-/**
- * 动画对象的基本类型
- *
- * @class
- * @memberof JC
- * @param [opts] {object} 动画配置信息
- */
-
-function Animate(opts) {
-    this.element = opts.element || {};
-    this.duration = opts.duration || 300;
-    this.living = true;
-
-    this.onCompelete = opts.onCompelete || null;
-    this.onUpdate = opts.onUpdate || null;
-
-    this.infinity = opts.infinity || false;
-    this.alternate = opts.alternate || false;
-    this.ease = opts.ease || 'easeBoth';
-    this.repeats = opts.repeats || 0;
-    this.delay = opts.delay || 0;
-    this.wait = opts.wait || 0;
-    this.delayCut = this.delay;
-    this.progress = 0;
-    this.direction = 1;
-
-    this.timeScale = opts.timeScale || 1;
-
-    this.paused = false;
-}
-Animate.prototype._swapEase = function() {
-    var ease = this.ease;
-    if (ease.indexOf('In') > 0) {
-        ease = ease.replace('In', 'Out');
-    } else if (ease.indexOf('Out') > 0) {
-        ease = ease.replace('Out', 'In');
-    }
-    this.ease = ease;
-};
-Animate.prototype.nextPose = function() {
-    var cache = {};
-    for (var i in this.to) {
-        cache[i] = TWEEN[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
-        if (this.element[i] !== undefined) this.element[i] = cache[i];
-    }
-    return cache; //this.onUpdate
-};
-Animate.prototype.pause = function() {
-    this.paused = true;
-};
-Animate.prototype.start = function() {
-    this.paused = false;
-};
-Animate.prototype.stop = function() {
-    this.progress = this.duration;
-};
-Animate.prototype.cancle = function() {
-    this.living = false;
-};
-
 function _rt(val){
     return Object.prototype.toString.call(val);
 }
@@ -576,13 +516,110 @@ var UTILS = {
 };
 
 /**
+ * 动画对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
+function Animate(opts) {
+    this.element = opts.element || {};
+    this.duration = opts.duration || 300;
+    this.living = true;
+
+    this.onCompelete = opts.onCompelete || null;
+    this.onUpdate = opts.onUpdate || null;
+
+    this.infinity = opts.infinity || false;
+    this.alternate = opts.alternate || false;
+    this.ease = opts.ease || 'easeBoth';
+    this.repeats = opts.repeats || 0;
+    this.delay = opts.delay || 0;
+    this.wait = opts.wait || 0;
+    this.delayCut = this.delay;
+    this.progress = 0;
+    this.direction = 1;
+
+    this.timeScale = opts.timeScale || 1;
+
+    this.totalTime = 0;
+
+    this.paused = false;
+}
+Animate.prototype._swapEase = function() {
+    var ease = this.ease;
+    if (ease.indexOf('In') > 0) {
+        ease = ease.replace('In', 'Out');
+    } else if (ease.indexOf('Out') > 0) {
+        ease = ease.replace('Out', 'In');
+    }
+    this.ease = ease;
+};
+Animate.prototype.update = function(snippet) {
+    if (this.wait > 0) {
+        this.wait -= Math.abs(snippet);
+        return;
+    }
+    if (this.paused || !this.living || this.delayCut > 0) {
+        if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+        return;
+    }
+
+    var snippetCache = this.direction * this.timeScale * snippet;
+    this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+    this.totalTime += Math.abs(snippetCache);
+
+    var pose = this.nextPose();
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+
+    if (this.totalTime >= this.duration) {
+        if (this.repeats > 0 || this.infinity) {
+            if (this.repeats > 0) --this.repeats;
+            this.delayCut = this.delay;
+            this.totalTime = 0;
+            if (this.alternate) {
+                this.direction *= -1;
+                this._swapEase();
+            } else {
+                this.direction = 1;
+                this.progress = 0;
+            }
+        } else {
+            this.living = false;
+            if (this.onCompelete) this.onCompelete(pose);
+        }
+    }
+};
+Animate.prototype.nextPose = function() {
+    var cache = {};
+    for (var i in this.to) {
+        cache[i] = TWEEN[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
+        if (this.element[i] !== undefined) this.element[i] = cache[i];
+    }
+    return cache; //this.onUpdate
+};
+Animate.prototype.pause = function() {
+    this.paused = true;
+};
+Animate.prototype.start = function() {
+    this.paused = false;
+};
+Animate.prototype.stop = function() {
+    this.progress = this.duration;
+};
+Animate.prototype.cancle = function() {
+    this.living = false;
+};
+
+// import { UTILS } from '../util/UTILS';
+
+/**
  * Transition类型动画对象
  *
  * @class
  * @memberof JC
  * @param [opts] {object} 动画所具备的特性
  */
-
 function Transition(opts) {
     Animate.call(this, opts);
 
@@ -591,39 +628,6 @@ function Transition(opts) {
 
 }
 Transition.prototype = Object.create(Animate.prototype);
-Transition.prototype.update = function(snippet) {
-    if(this.wait>0){
-        this.wait -= Math.abs(snippet);
-        return;
-    }
-    if (this.paused || !this.living || this.delayCut>0){
-        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
-        return;
-    }
-
-    var progress = this.progress += this.direction * this.timeScale * snippet;
-    this.progress = UTILS.clamp(progress,0,this.duration);
-
-    var pose = this.nextPose();
-
-    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
-
-    if ((this.direction === -1 && progress <= 0) || (this.direction === 1 && progress >= this.duration)) {
-        if (this.repeats > 0 || this.infinity) {
-            if (this.repeats > 0) --this.repeats;
-            this.delayCut = this.delay;
-            if (this.alternate) {
-                this.direction *= -1;
-                this._swapEase();
-            } else {
-                this.progress = 0;
-            }
-        } else {
-            this.living = false;
-            if(this.onCompelete) this.onCompelete(pose);
-        }
-    }
-};
 
 /**
  * PathMotion类型动画对象
@@ -632,7 +636,6 @@ Transition.prototype.update = function(snippet) {
  * @memberof JC
  * @param [opts] {object} 动画所具备的特性
  */
-
 function PathMotion(opts) {
     Animate.call(this, opts);
 
@@ -643,37 +646,6 @@ function PathMotion(opts) {
     this._cacheVector = { x: 10 * Math.cos(radian), y: 10 * Math.sin(radian) };
 }
 PathMotion.prototype = Object.create(Animate.prototype);
-PathMotion.prototype.update = function(snippet) {
-    if(this.wait>0){
-        this.wait -= Math.abs(snippet);
-        return;
-    }
-    if (this.paused || !this.living || this.delayCut>0){
-        if (this.delayCut>0) this.delayCut -= Math.abs(snippet);
-        return;
-    }
-
-    this.progress += this.direction * this.timeScale * snippet;
-
-    var pose = this.nextPose();
-    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
-
-    if ((this.direction === -1 && this.progress <= 0) || (this.direction === 1 && this.progress >= this.duration)) {
-        if (this.repeats > 0 || this.infinity) {
-            if (this.repeats > 0) --this.repeats;
-            this.delayCut = this.delay;
-            if (this.alternate) {
-                this.direction *= -1;
-                this._swapEase();
-            } else {
-                this.progress = 0;
-            }
-        } else {
-            this.living = false;
-            if (this.onCompelete) this.onCompelete();
-        }
-    }
-};
 PathMotion.prototype.nextPose = function() {
     var cache = {},
         _rotate = 0,
@@ -734,7 +706,7 @@ function KeyFrames(opts) {
 
     this._keyframes = opts.keys;
     this._keyIndex = 0;
-    this._direction = 1;
+    this._cursor = 1;
     this._keyConfig = opts.keyConfig;
 
     this.configKey();
@@ -742,32 +714,44 @@ function KeyFrames(opts) {
 KeyFrames.prototype = Object.create(Animate.prototype);
 KeyFrames.prototype.configKey = function() {
     this.from = this._keyframes[this._keyIndex];
-    this._keyIndex += this._direction;
+    this._keyIndex += this._cursor;
     this.to = this._keyframes[this._keyIndex];
-    var config = this._keyConfig[Math.min(this._keyIndex, this._keyIndex - this._direction)] || {};
+    var config = this._keyConfig[Math.min(this._keyIndex, this._keyIndex - this._cursor)] || {};
     this.ease = config.ease || this.ease;
     this.duration = config.duration || this.duration;
     this.progress = 0;
 };
 KeyFrames.prototype.update = function(snippet) {
-    if (this.paused || !this.living) return;
-    this.progress += this.timeScale * snippet;
+    if (this.wait > 0) {
+        this.wait -= Math.abs(snippet);
+        return;
+    }
+    if (this.paused || !this.living || this.delayCut > 0) {
+        if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+        return;
+    }
+    // if (this.paused || !this.living) return;
 
-    if (this.progress < this.duration) {
-        if (this.progress < 0) return;
-        var pose = this.nextPose();
-        if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
-    } else {
-        this.element.setVal(this.to);
-        if (this.onUpdate) this.onUpdate(this.to, 1, this._keyIndex);
+    var snippetCache = this.direction * this.timeScale * snippet;
+    this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+    this.totalTime += Math.abs(snippetCache);
+
+    var pose = this.nextPose();
+    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+
+    // this.progress += this.timeScale * snippet;
+    if (this.totalTime >= this.duration) {
+        this.totalTime = 0;
         if (this._keyIndex < this._keyframes.length - 1 && this._keyIndex > 0) {
             this.configKey();
         } else {
             if (this.repeats > 0 || this.infinity) {
                 if (this.repeats > 0) --this.repeats;
+                this.delayCut = this.delay;
                 if (this.alternate) {
-                    this._direction *= -1;
+                    this._cursor *= -1;
                 } else {
+                    this._cursor = 1;
                     this._keyIndex = 0;
                 }
                 this.configKey();
@@ -2058,8 +2042,80 @@ function Container() {
      * @member {Boolean}
      */
     this.paused = false;
+
+    /**
+     * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+     *
+     * @member {Number}
+     * @private
+     */
+    this._zIndex = 0;
+
+    /**
+     * 强制该对象在渲染子集之前为他们排序
+     *
+     * @member {Boolean}
+     */
+    this.souldSort = false;
 }
 Container.prototype = Object.create(DisplayObject.prototype);
+
+/**
+ * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+ *
+ * @member {number}
+ * @name zIndex
+ * @memberof JC.Container#
+ */
+Object.defineProperty(Container.prototype, 'zIndex', {
+    get: function() {
+        return this._zIndex;
+    },
+    set: function(zIndex) {
+        if (this._zIndex !== zIndex) {
+            this._zIndex = zIndex;
+            if (this.parent) {
+                this.parent.souldSort = true;
+            }
+        }
+    }
+});
+
+/**
+ * 比较当前渲染对象的zIndex是否超出其前后两个兄弟节点的zIndex
+ *
+ * @method _cpi
+ * @private
+ */
+// Container.prototype._cpi = function(idx) {
+//     var rr = this.parent.childs.length - 1;
+//     var i = this.parent.childs.indexOf(this);
+//     if (i <= 0 || i >= rr) {
+//         return false;
+//     }
+//     var p = this.parent.childs[i-1];
+//     var n = this.parent.childs[i+1];
+//     return idx > n.zIndex || idx < p.zIndex;
+// };
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ *
+ * @method _sortList
+ * @private
+ */
+Container.prototype._sortList = function() {
+    this.childs.sort(function(a, b){
+        if (a.zIndex > b.zIndex) {
+            return 1;
+        }
+        if (a.zIndex < b.zIndex) {
+            return -1;
+        }
+        return 0;
+    });
+    this.souldSort = false;
+};
 
 /**
  * 向容器添加一个物体
@@ -2088,6 +2144,7 @@ Container.prototype.adds = function(object) {
         }
         object.parent = this;
         this.childs.push(object);
+        this.souldSort = true;
     } else {
         console.error('adds: object not an instance of Container', object);
     }
@@ -2125,6 +2182,7 @@ Container.prototype.remove = function(object) {
  */
 Container.prototype.updatePosture = function(snippet) {
     if (!this._ready) return;
+    if (this.souldSort) this._sortList();
     snippet = this.timeScale * snippet;
     if (!this.paused) this.updateAnimation(snippet);
     this.updateTransform();
@@ -2687,6 +2745,9 @@ function InteractionManager(stage) {
     this.onMouseDown = this.onMouseDown.bind(this);
     this.processMouseDown = this.processMouseDown.bind(this);
 
+    this.onClick = this.onClick.bind(this);
+    this.processClick = this.processClick.bind(this);
+
     this.onTouchStart = this.onTouchStart.bind(this);
     this.processTouchStart = this.processTouchStart.bind(this);
 
@@ -2715,7 +2776,7 @@ InteractionManager.prototype.addEvents = function() {
 
     window.document.addEventListener('mousemove', this.onMouseMove, true);
     this.canvas.addEventListener('mousedown', this.onMouseDown, true);
-    this.canvas.addEventListener('click', this.onMouseDown, true);
+    this.canvas.addEventListener('click', this.onClick, true);
     this.canvas.addEventListener('mouseout', this.onMouseOut, true);
     this.canvas.addEventListener('mouseover', this.onMouseOver, true);
 
@@ -2735,7 +2796,7 @@ InteractionManager.prototype.removeEvents = function() {
 
     window.document.removeEventListener('mousemove', this.onMouseMove, true);
     this.canvas.removeEventListener('mousedown', this.onMouseDown, true);
-    this.canvas.removeEventListener('click', this.onMouseDown, true);
+    this.canvas.removeEventListener('click', this.onClick, true);
     this.canvas.removeEventListener('mouseout',  this.onMouseOut, true);
     this.canvas.removeEventListener('mouseover', this.onMouseOver, true);
 
@@ -2758,6 +2819,8 @@ InteractionManager.prototype.onMouseMove = function(event) {
         this.currentCursorStyle = this.cursor;
         this.canvas.style.cursor = this.cursor;
     }
+
+    this.emit('mousemove',eventd);
 };
 
 InteractionManager.prototype.processMouseMove = function(displayObject, event, hit) {
@@ -2791,9 +2854,28 @@ InteractionManager.prototype.onMouseDown = function(event) {
     }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processMouseDown, true);
+
+    this.emit('mousedown',eventd);
 };
 
 InteractionManager.prototype.processMouseDown = function(displayObject, event, hit) {
+    if (hit) {
+        // displayObject._mousedowned = true;
+        this.dispatchEvent(displayObject, event.type, event);
+    }
+};
+
+InteractionManager.prototype.onClick = function(event) {
+    if (this.autoPreventDefault) {
+        event.preventDefault();
+    }
+    var eventd = this.fixCoord(event);
+    this.processInteractive(this.stage, eventd, this.processClick, true);
+
+    this.emit('click',eventd);
+};
+
+InteractionManager.prototype.processClick = function(displayObject, event, hit) {
     if (hit) {
         // displayObject._mousedowned = true;
         this.dispatchEvent(displayObject, event.type, event);
@@ -2806,6 +2888,8 @@ InteractionManager.prototype.onMouseUp = function(event) {
     // }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processMouseUp, true);
+
+    this.emit('mouseup',eventd);
 };
 
 InteractionManager.prototype.processMouseUp = function(displayObject, event, hit) {
@@ -2829,11 +2913,13 @@ InteractionManager.prototype.onMouseOver = function(event) {
 
 InteractionManager.prototype.onTouchStart = function(event) {
     // if (this.autoPreventDefault) {
-    //     event.preventDefault();
+        // event.preventDefault();
     // }
     // console.log(event);
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchStart, true);
+
+    this.emit('touchstart', eventd);
 };
 
 InteractionManager.prototype.processTouchStart = function(displayObject, event, hit) {
@@ -2845,10 +2931,12 @@ InteractionManager.prototype.processTouchStart = function(displayObject, event, 
 
 InteractionManager.prototype.onTouchEnd = function(event) {
     // if (this.autoPreventDefault) {
-    //     event.preventDefault();
+        // event.preventDefault();
     // }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
+
+    this.emit('touchend', eventd);
 };
 
 InteractionManager.prototype.processTouchEnd = function(displayObject, event) {
@@ -2864,6 +2952,8 @@ InteractionManager.prototype.onTouchMove = function(event) {
     }
     var eventd = this.fixCoord(event);
     this.processInteractive(this.stage, eventd, this.processTouchMove, this.strictMode);
+
+    this.emit('touchmove', eventd);
 };
 
 InteractionManager.prototype.processTouchMove = function(displayObject, event, hit) {
@@ -2954,6 +3044,8 @@ InteractionManager.prototype.getPos = function(obj) {
     return pos;
 };
 
+// import { Matrix } from './math/Matrix';
+// import { Eventer } from '../eventer/Eventer';
 /**
  * 舞台对象，继承至Eventer
  *
@@ -2963,11 +3055,11 @@ InteractionManager.prototype.getPos = function(obj) {
  * ```
  *
  * @class
- * @extends JC.Eventer
+ * @extends JC.Container
  * @memberof JC
  */
 function Stage(canvas, bgColor) {
-    Eventer.call(this);
+    Container.call(this);
 
     /**
      * 场景的canvas的dom
@@ -2989,7 +3081,7 @@ function Stage(canvas, bgColor) {
      *
      * @member {Array}
      */
-    this.childs = [];
+    // this.childs = [];
 
     /**
      * 场景是否自动清除上一帧的像素内容
@@ -3093,7 +3185,7 @@ function Stage(canvas, bgColor) {
      *
      * @member {Number}
      */
-    this.timeScale = 1;
+    // this.timeScale = 1;
 
     /**
      * 当前对象所应用的矩阵状态
@@ -3101,7 +3193,7 @@ function Stage(canvas, bgColor) {
      * @member {JC.Matrix}
      * @private
      */
-    this.worldTransform = new Matrix();
+    // this.worldTransform = new Matrix();
 
     /**
      * 根层级的透明参数
@@ -3109,7 +3201,7 @@ function Stage(canvas, bgColor) {
      * @member {Number}
      * @private
      */
-    this.worldAlpha = 1;
+    // this.worldAlpha = 1;
 
 
     this.interactionManager = new InteractionManager(this);
@@ -3131,8 +3223,49 @@ function Stage(canvas, bgColor) {
      * @member {Boolean}
      */
     this.interactive = true;
+
+    this.proxyOn();
 }
-Stage.prototype = Object.create(Eventer.prototype);
+Stage.prototype = Object.create(Container.prototype);
+
+Stage.prototype.proxyOn = function() {
+    var This = this;
+    this.interactionManager.on('click', function(ev){
+        This.emit('click', ev);
+    });
+
+    this.interactionManager.on('mousemove', function(ev){
+        This.emit('mousemove', ev);
+    });
+
+    this.interactionManager.on('mousedown', function(ev){
+        This.emit('mousedown', ev);
+    });
+
+    this.interactionManager.on('mouseout', function(ev){
+        This.emit('mouseout', ev);
+    });
+
+    this.interactionManager.on('mouseover', function(ev){
+        This.emit('mouseover', ev);
+    });
+
+    this.interactionManager.on('touchstart', function(ev){
+        This.emit('touchstart', ev);
+    });
+
+    this.interactionManager.on('touchend', function(ev){
+        This.emit('touchend', ev);
+    });
+
+    this.interactionManager.on('touchmove', function(ev){
+        This.emit('touchmove', ev);
+    });
+
+    this.interactionManager.on('mouseup', function(ev){
+        This.emit('mouseup', ev);
+    });
+};
 
 /**
  * 对渲染对象进行x、y轴同时缩放
@@ -3163,28 +3296,28 @@ Object.defineProperty(Stage.prototype, 'interactive', {
  * @param object {JC.Container}
  * @return {JC.Container}
  */
-Stage.prototype.adds = function(object) {
-    if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-            this.adds(arguments[i]);
-        }
-        return this;
-    }
-    if (object === this) {
-        console.error('adds: object can\'t be added as a child of itself.', object);
-        return this;
-    }
-    if ((object && object instanceof Container)) {
-        if (object.parent !== null) {
-            object.parent.remove(object);
-        }
-        object.parent = this;
-        this.childs.push(object);
-    } else {
-        console.error('adds: object not an instance of Container', object);
-    }
-    return this;
-};
+// Stage.prototype.adds = function(object) {
+//     if (arguments.length > 1) {
+//         for (var i = 0; i < arguments.length; i++) {
+//             this.adds(arguments[i]);
+//         }
+//         return this;
+//     }
+//     if (object === this) {
+//         console.error('adds: object can\'t be added as a child of itself.', object);
+//         return this;
+//     }
+//     if ((object && object instanceof Container)) {
+//         if (object.parent !== null) {
+//             object.parent.remove(object);
+//         }
+//         object.parent = this;
+//         this.childs.push(object);
+//     } else {
+//         console.error('adds: object not an instance of Container', object);
+//     }
+//     return this;
+// };
 
 /**
  * 从容器移除一个物体
@@ -3196,18 +3329,18 @@ Stage.prototype.adds = function(object) {
  * @param object {JC.Container}
  * @return {JC.Container}
  */
-Stage.prototype.remove = function(object) {
-    if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-            this.remove(arguments[i]);
-        }
-    }
-    var index = this.childs.indexOf(object);
-    if (index !== -1) {
-        object.parent = null;
-        this.childs.splice(index, 1);
-    }
-};
+// Stage.prototype.remove = function(object) {
+//     if (arguments.length > 1) {
+//         for (var i = 0; i < arguments.length; i++) {
+//             this.remove(arguments[i]);
+//         }
+//     }
+//     var index = this.childs.indexOf(object);
+//     if (index !== -1) {
+//         object.parent = null;
+//         this.childs.splice(index, 1);
+//     }
+// };
 
 /**
  * 舞台尺寸设置
