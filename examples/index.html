@@ -1,43 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
     <title>Documentation Index</title>
-    <style type="text/css">
-        .performance{
-            padding: 0 10px;
-            border: 2px solid #ffcc00;
-        }
-    </style>
+    <script type="text/javascript">
+    (function() {
+        'use strict';
+        var UI = {
+            VOH: 'width',
+            DsgSize: 960,
+            root: document.documentElement,
+            needPut: false,
+            ucHole: 1,
+            resolution: Math.min(1, window.devicePixelRatio),
+            rem: 100,
+            monitoring: false,
+            isUC: /uc/i.test(window.navigator.userAgent)
+        };
+
+        UI.init = function(opts) {
+            opts = opts || {};
+            this.VOH = opts.VOH || 'width';
+            this.DsgSize = opts.DsgSize || 960;
+            this.rem = opts.rem || 100;
+            this.resolution = opts.resolution || this.resolution;
+            this.meta = this.meta || document.querySelector('meta[name="viewport"]');
+            this._putMeta();
+        };
+        UI._putMeta = function() {
+            if (!this.meta) {
+                this.meta = document.createElement('meta');
+                this.meta.setAttribute('name', 'viewport');
+                this.needPut = true;
+            }
+            var ratio = 1 / this.resolution;
+            this.meta.setAttribute('content', 'width=device-width,initial-scale=' + ratio + ', maximum-scale=' + ratio + ', minimum-scale=' + ratio + ', user-scalable=no');
+            if (this.needPut) {
+                document.head.appendChild(this.meta);
+                this.needPut = false;
+            }
+            this.suit();
+            this._ears();
+        };
+        UI._ears = function() {
+            if (this.monitoring) return;
+            var This = this;
+            window.addEventListener('resize', function() {
+                This.suit();
+            }, false);
+            document.addEventListener("DOMContentLoaded", function() {
+                This.isUC && This._fillHole();
+            });
+            setTimeout(function() {
+                This.suit();
+            }, 100);
+            this.monitoring = true;
+        };
+        UI._fillHole = function() {
+            var dom = document.createElement('div'),
+                sPX = 100,
+                tPX = 100;
+            dom.style.fontSize = sPX + "px";
+            document.body.appendChild(dom);
+            tPX = parseInt(window.getComputedStyle(dom, null).fontSize, 10) || tPX;
+
+            this.ucHole = sPX / tPX;
+
+            this.suit();
+
+            setTimeout(function() {
+                document.body.removeChild(dom);
+            }, 100);
+        };
+        UI.suit = function() {
+            var nowSize = this.VOH === 'width' ? document.documentElement.offsetWidth : document.documentElement.offsetHeight;
+            this.sPPR = this.rem * nowSize / this.DsgSize;
+            this.curPPR = this.ucHole * this.sPPR;
+            this.root.style.fontSize = this.curPPR + 'px';
+        };
+        UI.RTP = function(rem, bool) {
+            return (bool ? rem * this.curPPR : rem * this.sPPR) >> 0;
+        };
+        UI.PTR = function(px) {
+            return px / this.curPPR;
+        };
+
+        window.JC = window.JC || {};
+        window.JC.UI = UI;
+    })();
+    window.JC.UI.init();
+    </script>
+    <link rel="stylesheet" type="text/css" href="./css/example.css">
 </head>
 <body>
-    <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
-    <p><a href="demo_graphics_cache">demo_graphics_cache</a></p>
-    <p><a href="demo_graphics_particle">demo_graphics_particle</a></p>
-    <p><a href="demo_skeleton_graphics">demo_skeleton_graphics</a></p>
-    <p><a href="demo_skeleton_sprite">demo_skeleton_sprite</a></p>
-    <p><a href="demo_text_style">demo_text_style</a></p>
-    <p><a href="demo_doc_sprite">demo_doc_sprite</a></p>
-    <p><a href="demo_interactive_bitmap">demo_interactive_bitmap</a></p>
-    <p><a href="demo_interactive_boundPrecise">demo_interactive_boundPrecise</a></p>
-    <p><a href="demo_interactive_multitouch">demo_interactive_multitouch</a></p>
-    <p><a href="demo_timingfunction_allInOne">demo_timingfunction_allInOne</a></p>
-    <p><a href="demo_animation_fromTo">demo_animation_fromTo</a></p>
-    <p><a href="demo_animation_to">demo_animation_to</a></p>
-    <p><a href="demo_animation_motion">demo_animation_motion</a></p>
-    <p><a href="demo_animation_keyFrames">demo_animation_keyFrames</a></p>
-    <div class="performance">
-        <h3>性能PK</h3>
-        <p><a href="performanceTest/lufy">300个图片物体渲染（engine： lufylegend.js）</a>
-            <br/><span style="font-size:12px;">ps:用法好不习惯啊</span>
-        </p>
-        <p><a href="performanceTest/create">300个图片物体渲染（engine： create.js）</a></p>
-        <p><a href="performanceTest/yel">300个图片物体渲染（engine： yellow.js）</a>
-            <br/><span style="font-size:12px;">ps:我实在找不到怎么在yellow里面让图片物体绕图片中心点旋转（不用Container的情况）</span>
-        </p>
-        <p><a href="performanceTest/jcc2d">300个图片物体渲染（engine： jcc2d.js）</a></p>
-        <p><a href="performanceTest/native">300个图片物体渲染（原生API实现渲染）</a></p>
+    <div class="window-box" id="windowBox">
+        <div class="center-view-box">
+            <span class="gray-face"></span>
+            <iframe class="view-port" id="viewPort" src="demo_frames_sprite"></iframe>
+        </div>
+        <div class="left-side-box" id="sideBox">
+            <div class="left-side">
+                <ul class="demo-list-box" id="listBox">
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                    <li class="demo-item">
+                        <p><a href="demo_frames_sprite">demo_frames_sprite</a></p>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
+    <script type="text/javascript" src="./js/zepto.min.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+    <script type="text/javascript" src="./js/stroll.min.js"></script>
+    <script type="text/javascript" src="./js/example.js"></script>
 </body>
 </html>
