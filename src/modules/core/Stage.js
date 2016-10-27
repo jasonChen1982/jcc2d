@@ -1,6 +1,6 @@
-import { Matrix } from './math/Matrix';
+// import { Matrix } from './math/Matrix';
 import { Container } from './display/Container';
-import { Eventer } from '../eventer/Eventer';
+// import { Eventer } from '../eventer/Eventer';
 import { InteractionManager } from '../eventer/InteractionManager';
 import { UTILS } from '../util/UTILS';
 
@@ -13,11 +13,11 @@ import { UTILS } from '../util/UTILS';
  * ```
  *
  * @class
- * @extends JC.Eventer
+ * @extends JC.Container
  * @memberof JC
  */
 function Stage(canvas, bgColor) {
-    Eventer.call(this);
+    Container.call(this);
 
     /**
      * 场景的canvas的dom
@@ -39,7 +39,7 @@ function Stage(canvas, bgColor) {
      *
      * @member {Array}
      */
-    this.childs = [];
+    // this.childs = [];
 
     /**
      * 场景是否自动清除上一帧的像素内容
@@ -143,7 +143,7 @@ function Stage(canvas, bgColor) {
      *
      * @member {Number}
      */
-    this.timeScale = 1;
+    // this.timeScale = 1;
 
     /**
      * 当前对象所应用的矩阵状态
@@ -151,7 +151,7 @@ function Stage(canvas, bgColor) {
      * @member {JC.Matrix}
      * @private
      */
-    this.worldTransform = new Matrix();
+    // this.worldTransform = new Matrix();
 
     /**
      * 根层级的透明参数
@@ -159,7 +159,7 @@ function Stage(canvas, bgColor) {
      * @member {Number}
      * @private
      */
-    this.worldAlpha = 1;
+    // this.worldAlpha = 1;
 
 
     this.interactionManager = new InteractionManager(this);
@@ -181,8 +181,10 @@ function Stage(canvas, bgColor) {
      * @member {Boolean}
      */
     this.interactive = true;
+
+    this.proxyOn();
 }
-Stage.prototype = Object.create(Eventer.prototype);
+Stage.prototype = Object.create(Container.prototype);
 
 Stage.prototype.proxyOn = function() {
     var This = this;
@@ -252,28 +254,28 @@ Object.defineProperty(Stage.prototype, 'interactive', {
  * @param object {JC.Container}
  * @return {JC.Container}
  */
-Stage.prototype.adds = function(object) {
-    if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-            this.adds(arguments[i]);
-        }
-        return this;
-    }
-    if (object === this) {
-        console.error('adds: object can\'t be added as a child of itself.', object);
-        return this;
-    }
-    if ((object && object instanceof Container)) {
-        if (object.parent !== null) {
-            object.parent.remove(object);
-        }
-        object.parent = this;
-        this.childs.push(object);
-    } else {
-        console.error('adds: object not an instance of Container', object);
-    }
-    return this;
-};
+// Stage.prototype.adds = function(object) {
+//     if (arguments.length > 1) {
+//         for (var i = 0; i < arguments.length; i++) {
+//             this.adds(arguments[i]);
+//         }
+//         return this;
+//     }
+//     if (object === this) {
+//         console.error('adds: object can\'t be added as a child of itself.', object);
+//         return this;
+//     }
+//     if ((object && object instanceof Container)) {
+//         if (object.parent !== null) {
+//             object.parent.remove(object);
+//         }
+//         object.parent = this;
+//         this.childs.push(object);
+//     } else {
+//         console.error('adds: object not an instance of Container', object);
+//     }
+//     return this;
+// };
 
 /**
  * 从容器移除一个物体
@@ -285,18 +287,18 @@ Stage.prototype.adds = function(object) {
  * @param object {JC.Container}
  * @return {JC.Container}
  */
-Stage.prototype.remove = function(object) {
-    if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-            this.remove(arguments[i]);
-        }
-    }
-    var index = this.childs.indexOf(object);
-    if (index !== -1) {
-        object.parent = null;
-        this.childs.splice(index, 1);
-    }
-};
+// Stage.prototype.remove = function(object) {
+//     if (arguments.length > 1) {
+//         for (var i = 0; i < arguments.length; i++) {
+//             this.remove(arguments[i]);
+//         }
+//     }
+//     var index = this.childs.indexOf(object);
+//     if (index !== -1) {
+//         object.parent = null;
+//         this.childs.splice(index, 1);
+//     }
+// };
 
 /**
  * 舞台尺寸设置

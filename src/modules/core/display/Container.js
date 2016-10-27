@@ -36,8 +36,80 @@ function Container() {
      * @member {Boolean}
      */
     this.paused = false;
+
+    /**
+     * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+     *
+     * @member {Number}
+     * @private
+     */
+    this._zIndex = 0;
+
+    /**
+     * 强制该对象在渲染子集之前为他们排序
+     *
+     * @member {Boolean}
+     */
+    this.souldSort = false;
 }
 Container.prototype = Object.create(DisplayObject.prototype);
+
+/**
+ * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+ *
+ * @member {number}
+ * @name zIndex
+ * @memberof JC.Container#
+ */
+Object.defineProperty(Container.prototype, 'zIndex', {
+    get: function() {
+        return this._zIndex;
+    },
+    set: function(zIndex) {
+        if (this._zIndex !== zIndex) {
+            this._zIndex = zIndex;
+            if (this.parent) {
+                this.parent.souldSort = true;
+            }
+        }
+    }
+});
+
+/**
+ * 比较当前渲染对象的zIndex是否超出其前后两个兄弟节点的zIndex
+ *
+ * @method _cpi
+ * @private
+ */
+// Container.prototype._cpi = function(idx) {
+//     var rr = this.parent.childs.length - 1;
+//     var i = this.parent.childs.indexOf(this);
+//     if (i <= 0 || i >= rr) {
+//         return false;
+//     }
+//     var p = this.parent.childs[i-1];
+//     var n = this.parent.childs[i+1];
+//     return idx > n.zIndex || idx < p.zIndex;
+// };
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ *
+ * @method _sortList
+ * @private
+ */
+Container.prototype._sortList = function() {
+    this.childs.sort(function(a, b){
+        if (a.zIndex > b.zIndex) {
+            return 1;
+        }
+        if (a.zIndex < b.zIndex) {
+            return -1;
+        }
+        return 0;
+    });
+    this.souldSort = false;
+};
 
 /**
  * 向容器添加一个物体
@@ -66,6 +138,7 @@ Container.prototype.adds = function(object) {
         }
         object.parent = this;
         this.childs.push(object);
+        this.souldSort = true;
     } else {
         console.error('adds: object not an instance of Container', object);
     }
@@ -103,6 +176,7 @@ Container.prototype.remove = function(object) {
  */
 Container.prototype.updatePosture = function(snippet) {
     if (!this._ready) return;
+    if (this.souldSort) this._sortList();
     snippet = this.timeScale * snippet;
     if (!this.paused) this.updateAnimation(snippet);
     this.updateTransform();
