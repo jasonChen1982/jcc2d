@@ -9,7 +9,7 @@ for (var i = 0; i < EXAMPLES.length; i++) {
 $('#listBox').html(list);
 $('#listBox li').on('click',function(){
     if (this.dataset.url) {
-        document.getElementById('viewPort').src = this.dataset.url;
+        document.getElementById('viewPort').src = location.href + this.dataset.url;
     }
 });
 
