@@ -11,7 +11,7 @@ $('#listBox').html(list);
 $('#listBox').on('click','.demo-item',function() {
     if (this.dataset.url) {
         $('#viewPort').attr('src', this.dataset.url);
-        location.hash = this.dataset.url;
+        location.hash = this.dataset.url+'/index.html';
     }
 });
 $(window).on('load', function() {
