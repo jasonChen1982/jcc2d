@@ -87,7 +87,7 @@ for(var i=0;i<pathMotion.points.length;i++){
     control.y = point.y;
     var color = i===0||i===pathMotion.points.length-1? '#e46d69': '';
     control.drawCall(new Circle(color,10));
-    control.setBound(new JC.Circle(0,0,20));
+    control.setArea(new JC.Circle(0,0,20));
     var text = new JC.Text(point.name,'','#acba9d');
     text.y = -20;
     control.adds(text);

@@ -97,22 +97,30 @@ a {
 
 .left-side-box {
     position: absolute;
-    left: -2rem;
-    width: 2rem;
+    left: -3rem;
+    width: 3rem;
     height: 100%;
-    padding-right: .6rem;
-}
+    padding-right: 1rem;
+    z-index: 10;
 
-.left-side {
-    position: absolute;
-    left: 0;
-    width: 2rem;
-    height: 100%;
     transition: all .5s ease;
     -webkit-transition: all .5s ease;
 
     transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
+
+    transform-origin: right;
+    -webkit-transform-origin: right;
+}
+
+.left-side {
+    position: absolute;
+    left: 0;
+    width: 3rem;
+    height: 100%;
+
+    transition: all .5s ease;
+    -webkit-transition: all .5s ease;
 
     transform-origin: right;
     -webkit-transform-origin: right;
@@ -146,14 +154,19 @@ a {
     overflow-y: auto;
 }
 
+.active-window .left-side-box {
+    transform: translateX(3rem);
+    -webkit-transform: translateX(3rem);
+}
+
 .active-window .left-side {
-    transform: translateX(2rem);
-    -webkit-transform: translateX(2rem);
+    transform: rotateY(0);
+    -webkit-transform: rotateY(0);
 }
 
 .active-window .center-view-box {
-    transform: translateX(2rem) rotateY(15deg);
-    -webkit-transform: translateX(2rem) rotateY(15deg);
+    transform: translateX(3rem) rotateY(15deg);
+    -webkit-transform: translateX(3rem) rotateY(15deg);
 }
 
 .view-port {

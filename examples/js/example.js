@@ -15,10 +15,11 @@ $('#sideBox').on('mouseout',function() {
     $('#windowBox').removeClass('active-window');
 });
 
-$('#sideBox').on('click',function() {
+$('#sideBox').on('touchend',function() {
+    console.log(111);
     $('#windowBox').addClass('active-window');
 });
-$('#center-view-box').on('click',function() {
+$('.center-view-box').on('touchend',function() {
     $('#windowBox').removeClass('active-window');
 });
 

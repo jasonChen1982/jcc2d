@@ -289,7 +289,7 @@ var linkFace = new LinkFace({
 });
 documentLink.buttonMode = true;
 documentLink.drawCall(linkFace);
-documentLink.setBound(linkFace.bound);
+documentLink.setArea(linkFace.bound);
 documentLink.x = -JC.UI.RTP(1.2);
 documentLink.alpha = 0;
 documentLink.on('click',function(){
@@ -308,7 +308,7 @@ var linkFace2 = new LinkFace({
 });
 examplesLink.buttonMode = true;
 examplesLink.drawCall(linkFace2);
-examplesLink.setBound(linkFace2.bound);
+examplesLink.setArea(linkFace2.bound);
 examplesLink.x = JC.UI.RTP(1.2);
 examplesLink.alpha = 0;
 examplesLink.on('click',function(){

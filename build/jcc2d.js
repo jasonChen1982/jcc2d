@@ -1047,6 +1047,141 @@ Rectangle.prototype.contains = function (x, y)
 };
 
 /**
+ * 显示对象的包围盒子
+ *
+ * @class
+ * @memberof JC
+ */
+function Bounds(minX, minY, maxX, maxY) {
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.minX = minX || Infinity;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.minY = minY || Infinity;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.maxX = maxX || -Infinity;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.maxY = maxY || -Infinity;
+
+    this.rect = null;
+}
+
+Bounds.prototype.isEmpty = function() {
+    return this.minX > this.maxX || this.minY > this.maxY;
+};
+
+Bounds.prototype.clear = function() {
+    // this.updateID++;
+
+    this.minX = Infinity;
+    this.minY = Infinity;
+    this.maxX = -Infinity;
+    this.maxY = -Infinity;
+};
+
+/**
+ * 将包围盒子转换成矩形描述
+ *
+ * @param rect {JC.Rectangle} 待转换的矩形
+ * @returns {JC.Rectangle}
+ */
+Bounds.prototype.getRectangle = function(rect) {
+    if (this.isEmpty()) {
+        return Rectangle.EMPTY;
+    }
+
+    rect = rect || new Rectangle(0, 0, 1, 1);
+
+    rect.x = this.minX;
+    rect.y = this.minY;
+    rect.width = this.maxX - this.minX;
+    rect.height = this.maxY - this.minY;
+
+    return rect;
+};
+
+/**
+ * 往包围盒增加外部顶点，更新包围盒区域
+ *
+ * @param point {JC.Point}
+ */
+Bounds.prototype.addPoint = function(point) {
+    this.minX = Math.min(this.minX, point.x);
+    this.maxX = Math.max(this.maxX, point.x);
+    this.minY = Math.min(this.minY, point.y);
+    this.maxY = Math.max(this.maxY, point.y);
+};
+
+/**
+ * 往包围盒增加矩形区域，更新包围盒区域
+ *
+ * @param point {JC.Rectangle}
+ */
+Bounds.prototype.addRect = function(rect) {
+    this.minX = rect.x;
+    this.maxX = rect.width + rect.x;
+    this.minY = rect.y;
+    this.maxY = rect.height + rect.y;
+};
+
+/**
+ * 往包围盒增加顶点数组，更新包围盒区域
+ *
+ * @param point {Array}
+ */
+Bounds.prototype.addVert = function(vertices) {
+    var minX = this.minX,
+        minY = this.minY,
+        maxX = this.maxX,
+        maxY = this.maxY;
+
+    for (var i = 0; i < vertices.length; i += 2) {
+        var x = vertices[i    ];
+        var y = vertices[i + 1];
+        minX = x < minX ? x : minX;
+        minY = y < minY ? y : minY;
+        maxX = x > maxX ? x : maxX;
+        maxY = y > maxY ? y : maxY;
+    }
+
+    this.minX = minX;
+    this.minY = minY;
+    this.maxX = maxX;
+    this.maxY = maxY;
+};
+
+/**
+ * 往包围盒增加包围盒，更新包围盒区域
+ *
+ * @param point {JC.Bounds}
+ */
+Bounds.prototype.addBounds = function(bounds) {
+    var minX = this.minX,
+        minY = this.minY,
+        maxX = this.maxX,
+        maxY = this.maxY;
+
+    this.minX = bounds.minX < minX ? bounds.minX : minX;
+    this.minY = bounds.minY < minY ? bounds.minY : minY;
+    this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
+    this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
+};
+
+/**
  * @class
  * @memberof JC
  * @param points {JC.Point[]|number[]|...JC.Point|...number} 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
@@ -1608,19 +1743,19 @@ function DisplayObject() {
     // this.event = new Eventer();
 
     /**
-     * 当前对象是否穿透自身的事件监测
+     * 当前对象是否穿透自身的事件检测
      *
      * @member {Boolean}
      */
     this.passEvent = false;
 
     /**
-     * 当前对象的事件监测边界
+     * 当前对象的事件检测边界
      *
      * @member {JC.Shape}
      * @private
      */
-    this.bound = null;
+    this.eventArea = null;
 
 
     /**
@@ -1981,31 +2116,29 @@ DisplayObject.prototype.getGlobalPos = function() {
 // };
 
 /**
- * 设置显示对象的监测区域
+ * 设置显示对象的事件检测区域
  *
  * @param shape {JC.Polygon|JC.Rectangle} JC内置形状类型的实例
- * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
+ * @param needless {boolean} 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function(shape, needless) {
-    if (this.bound !== null && needless) return;
-    this.bound = shape;
+DisplayObject.prototype.setArea = function(shape, needless) {
+    if (this.eventArea !== null && needless) return;
+    this.eventArea = shape;
 };
 
 /**
- * 监测坐标点是否在多变性内
+ * 检测坐标点是否在多变性内
  *
  * @method contains
  * @private
  */
 DisplayObject.prototype.contains = function (global) {
-    if (this.bound === null) return false;
+    if (this.eventArea === null) return false;
     var point = new Point();
     this.worldTransform.applyInverse(global, point);
-    return this.bound && this.bound.contains(point.x, point.y);
+    return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
-
-// import { Point } from '../math/Point';
 
 /**
  * 显示对象容器，继承至DisplayObject
@@ -2057,6 +2190,23 @@ function Container() {
      * @member {Boolean}
      */
     this.souldSort = false;
+
+    /**
+     * 强制该对象在渲染子集之前为他们排序
+     *
+     * @member {JC.Bounds}
+     */
+    this.bounds = new Bounds();
+
+    /**
+     * 显示对象内部表示的边界
+     *
+     * @member {JC.Bounds}
+     * @private
+     */
+    this._bounds = new Bounds();
+
+    this.vertexData = new Float32Array(8);
 }
 Container.prototype = Object.create(DisplayObject.prototype);
 
@@ -2080,23 +2230,6 @@ Object.defineProperty(Container.prototype, 'zIndex', {
         }
     }
 });
-
-/**
- * 比较当前渲染对象的zIndex是否超出其前后两个兄弟节点的zIndex
- *
- * @method _cpi
- * @private
- */
-// Container.prototype._cpi = function(idx) {
-//     var rr = this.parent.childs.length - 1;
-//     var i = this.parent.childs.indexOf(this);
-//     if (i <= 0 || i >= rr) {
-//         return false;
-//     }
-//     var p = this.parent.childs[i-1];
-//     var n = this.parent.childs[i+1];
-//     return idx > n.zIndex || idx < p.zIndex;
-// };
 
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
@@ -2194,19 +2327,6 @@ Container.prototype.updatePosture = function(snippet) {
 };
 
 /**
- * 调用后代的姿态更新函数
- *
- * @method updateChilds
- * @private
- */
-// Container.prototype.updateChilds = function(snippet) {
-//     for (var i = 0, l = this.childs.length; i < l; i++) {
-//         var cd = this.childs[i];
-//         cd.updatePosture(snippet);
-//     }
-// };
-
-/**
  * 渲染自己并触发后代渲染
  *
  * @method render
@@ -2236,88 +2356,79 @@ Container.prototype.renderMe = function() {
     return true;
 };
 
-/**
- * 调用后代的渲染
- *
- * @method renderChilds
- * @private
- */
-// Container.prototype.renderChilds = function(ctx) {
-//     for (var i = 0, l = this.childs.length; i < l; i++) {
-//         var cd = this.childs[i];
-//         if (!cd.isVisible() || !cd._ready) continue;
-//         cd.render(ctx);
-//     }
-// };
+Container.prototype.calculateVertices = function() {
+    var wt = this.worldTransform,
+        a = wt.a,
+        b = wt.b,
+        c = wt.c,
+        d = wt.d,
+        tx = wt.tx,
+        ty = wt.ty,
+        vertexData = this.vertexData,
+        w0, w1, h0, h1;
+
+    w0 = this._bounds.minX;
+    w1 = this._bounds.maxX;
+
+    h0 = this._bounds.minY;
+    h1 = this._bounds.maxY;
+
+    // xy
+    vertexData[0] = a * w1 + c * h1 + tx;
+    vertexData[1] = d * h1 + b * w1 + ty;
+
+    // xy
+    vertexData[2] = a * w0 + c * h1 + tx;
+    vertexData[3] = d * h1 + b * w0 + ty;
+
+    // xy
+    vertexData[4] = a * w0 + c * h0 + tx;
+    vertexData[5] = d * h0 + b * w0 + ty;
+
+    // xy
+    vertexData[6] = a * w1 + c * h0 + tx;
+    vertexData[7] = d * h0 + b * w1 + ty;
+};
+
 
 /**
- * 通知分发事件到自身及后代
+ * 计算包围盒子
  *
- * @method noticeEvent
- * @private
+ * @method calculateBounds
  */
-// Container.prototype.noticeEvent = function(ev) {
-//     var i = this.childs.length - 1;
-//     while (i >= 0) {
-//         var child = this.childs[i];
-//         if (child.visible) {
-//             child.noticeEvent(ev);
-//             if (ev.target) break;
-//         }
-//         i--;
-//     }
-//     this.upEvent(ev);
-// };
+Container.prototype.calculateBounds = function () {
+    this.bounds.clear();
+    if(!this.visible) {
+        return;
+    }
+    this._calculateBounds();
+
+    for (var i = 0; i < this.childs.length; i++) {
+        var child = this.childs[i];
+
+        child.calculateBounds();
+
+        this.bounds.addBounds(child.bounds);
+    }
+    // this._boundsID = this._lastBoundsID;
+};
+
+Container.prototype._calculateBounds = function () {
+    this.calculateVertices();
+    this.bounds.addVert(this.vertexData);
+};
+
 
 /**
- * 分发事件到自身后对自身做事件检查
+ * 设置渲染物体的包围盒
  *
- * @method upEvent
- * @private
+ * @method setBounds
  */
-// Container.prototype.upEvent = function(ev) {
-//     if (!this._ready) return;
-//     if (ev.target || (!this.passEvent && this.hitTest(ev))) {
-//         if (!ev.cancleBubble || ev.target === this) {
-//             if (!(this.event.listeners[ev.type] && this.event.listeners[ev.type].length > 0)) return;
-//             this.event.emit(ev);
-//         }
-//     }
-// };
-
-/**
- * 碰撞监测及事件处理
- *
- * @method hitTest
- * @private
- */
-// Container.prototype.hitTest = function(ev) {
-//     if (ev.type === 'touchmove' || ev.type === 'touchend' || ev.type === 'mousemove' || ev.type === 'mouseup') {
-//         var re = this.event.touchstarted;
-//         if (re) ev.target = this;
-//         if (ev.type === 'touchend' || ev.type === 'mouseup') this.event.touchstarted = false;
-//         return re;
-//     }
-//     if (this.hitTestMe(ev)) {
-//         ev.target = this;
-//         if (ev.type === 'touchstart' || ev.type === 'mousedown') this.event.touchstarted = true;
-//         return true;
-//     }
-//     return false;
-// };
-
-/**
- * 对自身的事件监测区域做碰撞监测
- *
- * @method hitTest
- * @private
- */
-// Container.prototype.hitTestMe = function(ev) {
-//     if (this.bound === null) return false;
-//     var point = new Point();
-//     this.worldTransform.applyInverse(ev.global, point);
-//     return this.bound.contains(point.x, point.y);
-// };
+Container.prototype.setBounds = function(bounds){
+    if (bounds instanceof Bounds) {
+        this._bounds = bounds;
+    }
+};
 
 /**
  * 暂停自身的动画进度
@@ -2346,6 +2457,7 @@ Container.prototype.cancle = function() {
     this.Animator.clear();
 };
 
+// TODO 继承事件对象
 /**
  * MovieClip类型动画对象
  *
@@ -2513,7 +2625,7 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  *      sy: 0,
  *      animations: {
  *          fall: {start: 0,end: 4,next: 'stand'},
- *          fly: {start: 5,end: 9,next: 'stand'},
+ *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
  *          stand: {start: 10,end: 39},
  *          walk: {start: 40,end: 59,next: 'stand'}
  *      }
@@ -2524,25 +2636,25 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  * @extends JC.Container
  * @memberof JC
  */
-function Sprite(opts){
-    Container.call( this );
+function Sprite(opts) {
+    Container.call(this);
 
     this.texture = opts.texture;
-    if(this.texture.loaded){
+    if (this.texture.loaded) {
         this.upTexture(opts);
-    }else{
+    } else {
         var This = this;
         this._ready = false;
-        this.texture.on('load',function(){
+        this.texture.on('load', function() {
             This.upTexture(opts);
             This._ready = true;
         });
     }
 
-    this.MovieClip = new MovieClip(this,opts);
+    this.MovieClip = new MovieClip(this, opts);
 
 }
-Sprite.prototype = Object.create( Container.prototype );
+Sprite.prototype = Object.create(Container.prototype);
 
 /**
  * 更新纹理对象
@@ -2550,14 +2662,16 @@ Sprite.prototype = Object.create( Container.prototype );
  * @method upTexture
  * @private
  */
-Sprite.prototype.upTexture = function(opts){
+Sprite.prototype.upTexture = function(opts) {
     this._textureW = opts.texture.width;
     this._textureH = opts.texture.height;
-    this.width = opts.width||this._textureW;
-    this.height = opts.height||this._textureH;
-    this.regX = this.width>>1;
-    this.regY = this.height>>1;
-    this.setBound(new Rectangle(-this.regX, -this.regY, this.width, this.height),true);
+    this.width = opts.width || this._textureW;
+    this.height = opts.height || this._textureH;
+    this.regX = this.width >> 1;
+    this.regY = this.height >> 1;
+    var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
+    this._bounds.addRect(rect);
+    this.setArea(rect, true);
 };
 
 /**
@@ -2566,7 +2680,7 @@ Sprite.prototype.upTexture = function(opts){
  * @method upAnimation
  * @private
  */
-Sprite.prototype.updateAnimation = function(snippet){
+Sprite.prototype.updateAnimation = function(snippet) {
     this.Animation.update(snippet);
     this.MovieClip.update(snippet);
 };
@@ -2575,7 +2689,7 @@ Sprite.prototype.updateAnimation = function(snippet){
  * 播放逐帧动画
  *
  */
-Sprite.prototype.playMovie = function(opts){
+Sprite.prototype.playMovie = function(opts) {
     this.MovieClip.playMovie(opts);
 };
 
@@ -2585,7 +2699,7 @@ Sprite.prototype.playMovie = function(opts){
  * @method updateMe
  * @private
  */
-Sprite.prototype.renderMe = function (ctx){
+Sprite.prototype.renderMe = function(ctx) {
     if (!this._ready) return;
     var pos = this.MovieClip.getFramePos();
     ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
@@ -2659,6 +2773,7 @@ Graphics.prototype._drawBack = function (ctx){
  *  },{
  *      cache: true,
  *      session: {center: {x: 50,y: 50},width:100,height:100}
+ *      bounds: new JC.Bounds(-50, -50, 50, 50)
  *  });
  * ```
  *
@@ -2670,8 +2785,10 @@ Graphics.prototype.drawCall = function(fn,opts){
     opts = opts||{};
     this.cache = opts.cache||false;
     this.cached = false;
-    this.session = opts.session||{center: {x: 0,y: 0},width:100,height:100};
+    this.session = opts.session||{bounds: {x: 0,y: 0},width:100,height:100};
     this.draw = fn||null;
+
+    this.setBounds(opts.bounds);
 };
 
 /**
@@ -2725,6 +2842,383 @@ Text.prototype.renderMe = function(ctx){
         ctx.strokeStyle = this.color;
         ctx.strokeText(this.text,0,0);
     }
+};
+
+function FrameBuffer() {
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    // document.body.appendChild(this.canvas);
+}
+FrameBuffer.prototype.setSize = function(rect) {
+    this.width = this.canvas.width = rect.width + rect.px*2;
+    this.height = this.canvas.height = rect.height + rect.py*2;
+};
+FrameBuffer.prototype.clear = function() {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+};
+FrameBuffer.prototype.getBuffer = function() {
+    this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
+    return this.bufferData;
+};
+FrameBuffer.prototype.putBuffer = function() {
+    this.ctx.putImageData(this.bufferData, 0, 0);
+    return this.canvas;
+};
+FrameBuffer.prototype.createBuffer = function() {
+};
+
+function BlurFilter(blurX, blurY, quality) {
+    Container.call(this);
+
+    if (isNaN(blurX) || blurX < 0) blurX = 0;
+    if (isNaN(blurY) || blurY < 0) blurY = 0;
+    if (isNaN(quality) || quality < 1) quality = 1;
+
+    this.frameBuffer = new FrameBuffer();
+
+    /**
+     * x轴的模糊值
+     * @property blurX
+     * @default 0
+     * @type Number
+     **/
+    this.blurX = blurX | 0;
+
+    /**
+     * y轴的模糊值
+     * @property blurY
+     * @default 0
+     * @type Number
+     **/
+    this.blurY = blurY | 0;
+
+    /**
+     * 模糊的质量，模糊计算会被递归多少次
+     * @property quality
+     * @default 1
+     * @type Number
+     **/
+    this.quality = quality | 0;
+
+    /**
+     * 下一帧的图像需要更新
+     * @property needUpdateBuffer
+     * @default false
+     * @type Boolean
+     **/
+    this.needUpdateBuffer = true;
+
+    /**
+     * 每一帧渲染都重新绘制
+     * @property autoUpdateBuffer
+     * @default false
+     * @type Boolean
+     **/
+    this.autoUpdateBuffer = false;
+
+    /**
+     * 时候给帧缓冲区加padding
+     * @property padding
+     * @default false
+     * @type Boolean
+     **/
+    this.padding = false;
+}
+BlurFilter.prototype = Object.create( Container.prototype );
+
+/**
+ * 对渲染对象进行x、y轴同时设置模糊半径
+ *
+ * @member {number}
+ * @name blur
+ * @memberof JC.BlurFilter#
+ */
+Object.defineProperty(BlurFilter.prototype, 'blur', {
+    get: function() {
+        return this.blurX;
+    },
+    set: function(blur) {
+        this.blurX = this.blurY = blur;
+    }
+});
+
+BlurFilter.prototype.updatePosture = function(snippet) {
+    if (!this._ready) return;
+    if (this.souldSort) this._sortList();
+    snippet = this.timeScale * snippet;
+    if (!this.paused) this.updateAnimation(snippet);
+
+    this.updateTransform();
+
+    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+        this.cacheMatrix = this.worldTransform;
+        this.worldTransform = __tmpMatrix.identity();
+        this._upc(snippet);
+
+        this.calculateBounds();
+        this.__o = this.bounds.getRectangle();
+        this.__o.px = this.__o.py = 0;
+        if (this.padding) {
+            this.__o.px = this.blurX;
+            this.__o.py = this.blurY;
+        }
+        this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
+        this._upc(0);
+
+        this.worldTransform = this.cacheMatrix;
+    } else {
+        this._upc(snippet);
+    }
+};
+
+BlurFilter.prototype._upc = function(snippet) {
+    for (var i = 0, l = this.childs.length; i < l; i++) {
+        var child = this.childs[i];
+        child.updatePosture(snippet);
+    }
+};
+
+BlurFilter.prototype.render = function(ctx) {
+    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+        var i = 0,
+            l = this.childs.length,
+            child = null;
+
+        this.frameBuffer.clear();
+        this.frameBuffer.setSize(this.__o);
+        for (i = 0; i < l; i++) {
+            child = this.childs[i];
+            if (!child.isVisible() || !child._ready) continue;
+            child.render(this.frameBuffer.ctx);
+        }
+        this._applyFilter(this.frameBuffer.getBuffer());
+
+        this.needUpdateBuffer = false;
+    }
+    this.renderMe(ctx, this.__o.x - this.__o.px, this.__o.y - this.__o.py, this.frameBuffer.width, this.frameBuffer.height);
+};
+
+BlurFilter.prototype.renderMe = function(ctx ,x ,y, w, h) {
+    this.setTransform(ctx);
+    ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
+};
+
+
+var __tmpMatrix = new Matrix();
+
+
+var MUL_TABLE = [1, 171, 205, 293, 57, 373, 79, 137, 241, 27, 391, 357, 41, 19, 283, 265, 497, 469, 443, 421, 25, 191, 365, 349, 335, 161, 155, 149, 9, 278, 269, 261, 505, 245, 475, 231, 449, 437, 213, 415, 405, 395, 193, 377, 369, 361, 353, 345, 169, 331, 325, 319, 313, 307, 301, 37, 145, 285, 281, 69, 271, 267, 263, 259, 509, 501, 493, 243, 479, 118, 465, 459, 113, 446, 55, 435, 429, 423, 209, 413, 51, 403, 199, 393, 97, 3, 379, 375, 371, 367, 363, 359, 355, 351, 347, 43, 85, 337, 333, 165, 327, 323, 5, 317, 157, 311, 77, 305, 303, 75, 297, 294, 73, 289, 287, 71, 141, 279, 277, 275, 68, 135, 67, 133, 33, 262, 260, 129, 511, 507, 503, 499, 495, 491, 61, 121, 481, 477, 237, 235, 467, 232, 115, 457, 227, 451, 7, 445, 221, 439, 218, 433, 215, 427, 425, 211, 419, 417, 207, 411, 409, 203, 202, 401, 399, 396, 197, 49, 389, 387, 385, 383, 95, 189, 47, 187, 93, 185, 23, 183, 91, 181, 45, 179, 89, 177, 11, 175, 87, 173, 345, 343, 341, 339, 337, 21, 167, 83, 331, 329, 327, 163, 81, 323, 321, 319, 159, 79, 315, 313, 39, 155, 309, 307, 153, 305, 303, 151, 75, 299, 149, 37, 295, 147, 73, 291, 145, 289, 287, 143, 285, 71, 141, 281, 35, 279, 139, 69, 275, 137, 273, 17, 271, 135, 269, 267, 133, 265, 33, 263, 131, 261, 130, 259, 129, 257, 1];
+
+
+
+var SHG_TABLE = [0, 9, 10, 11, 9, 12, 10, 11, 12, 9, 13, 13, 10, 9, 13, 13, 14, 14, 14, 14, 10, 13, 14, 14, 14, 13, 13, 13, 9, 14, 14, 14, 15, 14, 15, 14, 15, 15, 14, 15, 15, 15, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15, 15, 15, 12, 14, 15, 15, 13, 15, 15, 15, 15, 16, 16, 16, 15, 16, 14, 16, 16, 14, 16, 13, 16, 16, 16, 15, 16, 13, 16, 15, 16, 14, 9, 16, 16, 16, 16, 16, 16, 16, 16, 16, 13, 14, 16, 16, 15, 16, 16, 10, 16, 15, 16, 14, 16, 16, 14, 16, 16, 14, 16, 16, 14, 15, 16, 16, 16, 14, 15, 14, 15, 13, 16, 16, 15, 17, 17, 17, 17, 17, 17, 14, 15, 17, 17, 16, 16, 17, 16, 15, 17, 16, 17, 11, 17, 16, 17, 16, 17, 16, 17, 17, 16, 17, 17, 16, 17, 17, 16, 16, 17, 17, 17, 16, 14, 17, 17, 17, 17, 15, 16, 14, 16, 15, 16, 13, 16, 15, 16, 14, 16, 15, 16, 12, 16, 15, 16, 17, 17, 17, 17, 17, 13, 16, 15, 17, 17, 17, 16, 15, 17, 17, 17, 16, 15, 17, 17, 14, 16, 17, 17, 16, 17, 17, 16, 15, 17, 16, 14, 17, 16, 15, 17, 16, 17, 17, 16, 17, 15, 16, 17, 14, 17, 16, 15, 17, 16, 17, 13, 17, 16, 17, 17, 16, 17, 14, 17, 16, 17, 16, 17, 16, 17, 9];
+
+
+BlurFilter.prototype._applyFilter = function(imageData) {
+
+    var radiusX = this.blurX >> 1;
+    if (isNaN(radiusX) || radiusX < 0) return false;
+    var radiusY = this.blurY >> 1;
+    if (isNaN(radiusY) || radiusY < 0) return false;
+    if (radiusX == 0 && radiusY == 0) return false;
+
+    var iterations = this.quality;
+    if (isNaN(iterations) || iterations < 1) iterations = 1;
+    iterations |= 0;
+    if (iterations > 3) iterations = 3;
+    if (iterations < 1) iterations = 1;
+
+    var px = imageData.data;
+    var x = 0,
+        y = 0,
+        i = 0,
+        p = 0,
+        yp = 0,
+        yi = 0,
+        yw = 0,
+        r = 0,
+        g = 0,
+        b = 0,
+        a = 0,
+        pr = 0,
+        pg = 0,
+        pb = 0,
+        pa = 0;
+
+    var divx = (radiusX + radiusX + 1) | 0;
+    var divy = (radiusY + radiusY + 1) | 0;
+    var w = imageData.width | 0;
+    var h = imageData.height | 0;
+
+    var w1 = (w - 1) | 0;
+    var h1 = (h - 1) | 0;
+    var rxp1 = (radiusX + 1) | 0;
+    var ryp1 = (radiusY + 1) | 0;
+
+    var ssx = { r: 0, b: 0, g: 0, a: 0 };
+    var sx = ssx;
+    for (i = 1; i < divx; i++) {
+        sx = sx.n = { r: 0, b: 0, g: 0, a: 0 };
+    }
+    sx.n = ssx;
+
+    var ssy = { r: 0, b: 0, g: 0, a: 0 };
+    var sy = ssy;
+    for (i = 1; i < divy; i++) {
+        sy = sy.n = { r: 0, b: 0, g: 0, a: 0 };
+    }
+    sy.n = ssy;
+
+    var si = null;
+
+
+    var mtx = MUL_TABLE[radiusX] | 0;
+    var stx = SHG_TABLE[radiusX] | 0;
+    var mty = MUL_TABLE[radiusY] | 0;
+    var sty = SHG_TABLE[radiusY] | 0;
+
+    while (iterations-- > 0) {
+
+        yw = yi = 0;
+        var ms = mtx;
+        var ss = stx;
+        for (y = h; --y > -1;) {
+            r = rxp1 * (pr = px[(yi) | 0]);
+            g = rxp1 * (pg = px[(yi + 1) | 0]);
+            b = rxp1 * (pb = px[(yi + 2) | 0]);
+            a = rxp1 * (pa = px[(yi + 3) | 0]);
+
+            sx = ssx;
+
+            for (i = rxp1; --i > -1;) {
+                sx.r = pr;
+                sx.g = pg;
+                sx.b = pb;
+                sx.a = pa;
+                sx = sx.n;
+            }
+
+            for (i = 1; i < rxp1; i++) {
+                p = (yi + ((w1 < i ? w1 : i) << 2)) | 0;
+                r += (sx.r = px[p]);
+                g += (sx.g = px[p + 1]);
+                b += (sx.b = px[p + 2]);
+                a += (sx.a = px[p + 3]);
+
+                sx = sx.n;
+            }
+
+            si = ssx;
+            for (x = 0; x < w; x++) {
+                px[yi++] = (r * ms) >>> ss;
+                px[yi++] = (g * ms) >>> ss;
+                px[yi++] = (b * ms) >>> ss;
+                px[yi++] = (a * ms) >>> ss;
+
+                p = ((yw + ((p = x + radiusX + 1) < w1 ? p : w1)) << 2);
+
+                r -= si.r - (si.r = px[p]);
+                g -= si.g - (si.g = px[p + 1]);
+                b -= si.b - (si.b = px[p + 2]);
+                a -= si.a - (si.a = px[p + 3]);
+
+                si = si.n;
+
+            }
+            yw += w;
+        }
+
+        ms = mty;
+        ss = sty;
+        for (x = 0; x < w; x++) {
+            yi = (x << 2) | 0;
+
+            r = (ryp1 * (pr = px[yi])) | 0;
+            g = (ryp1 * (pg = px[(yi + 1) | 0])) | 0;
+            b = (ryp1 * (pb = px[(yi + 2) | 0])) | 0;
+            a = (ryp1 * (pa = px[(yi + 3) | 0])) | 0;
+
+            sy = ssy;
+            for (i = 0; i < ryp1; i++) {
+                sy.r = pr;
+                sy.g = pg;
+                sy.b = pb;
+                sy.a = pa;
+                sy = sy.n;
+            }
+
+            yp = w;
+
+            for (i = 1; i <= radiusY; i++) {
+                yi = (yp + x) << 2;
+
+                r += (sy.r = px[yi]);
+                g += (sy.g = px[yi + 1]);
+                b += (sy.b = px[yi + 2]);
+                a += (sy.a = px[yi + 3]);
+
+                sy = sy.n;
+
+                if (i < h1) {
+                    yp += w;
+                }
+            }
+
+            yi = x;
+            si = ssy;
+            if (iterations > 0) {
+                for (y = 0; y < h; y++) {
+                    p = yi << 2;
+                    px[p + 3] = pa = (a * ms) >>> ss;
+                    if (pa > 0) {
+                        px[p] = ((r * ms) >>> ss);
+                        px[p + 1] = ((g * ms) >>> ss);
+                        px[p + 2] = ((b * ms) >>> ss);
+                    } else {
+                        px[p] = px[p + 1] = px[p + 2] = 0;
+                    }
+
+                    p = (x + (((p = y + ryp1) < h1 ? p : h1) * w)) << 2;
+
+                    r -= si.r - (si.r = px[p]);
+                    g -= si.g - (si.g = px[p + 1]);
+                    b -= si.b - (si.b = px[p + 2]);
+                    a -= si.a - (si.a = px[p + 3]);
+
+                    si = si.n;
+
+                    yi += w;
+                }
+            } else {
+                for (y = 0; y < h; y++) {
+                    p = yi << 2;
+                    px[p + 3] = pa = (a * ms) >>> ss;
+                    if (pa > 0) {
+                        pa = 255 / pa;
+                        px[p] = ((r * ms) >>> ss) * pa;
+                        px[p + 1] = ((g * ms) >>> ss) * pa;
+                        px[p + 2] = ((b * ms) >>> ss) * pa;
+                    } else {
+                        px[p] = px[p + 1] = px[p + 2] = 0;
+                    }
+
+                    p = (x + (((p = y + ryp1) < h1 ? p : h1) * w)) << 2;
+
+                    r -= si.r - (si.r = px[p]);
+                    g -= si.g - (si.g = px[p + 1]);
+                    b -= si.b - (si.b = px[p + 2]);
+                    a -= si.a - (si.a = px[p + 3]);
+
+                    si = si.n;
+
+                    yi += w;
+                }
+            }
+        }
+
+    }
+    return true;
 };
 
 function InteractionManager(stage) {
@@ -3435,6 +3929,7 @@ exports.UTILS = UTILS;
 exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;
+exports.Bounds = Bounds;
 exports.Point = Point;
 exports.Rectangle = Rectangle;
 exports.Polygon = Polygon;
@@ -3448,6 +3943,7 @@ exports.Container = Container;
 exports.Sprite = Sprite;
 exports.Graphics = Graphics;
 exports.Text = Text;
+exports.BlurFilter = BlurFilter;
 exports.Stage = Stage;
 
 Object.defineProperty(exports, '__esModule', { value: true });
