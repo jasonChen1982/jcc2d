@@ -10,7 +10,7 @@
     "release": "npm run build && gulp release",
     "build": "rollup -c",
     "watch": "rollup -c -w",
-    "preversion": "npm run release && git add -A && git commit -m 'release new version'",
+    "preversion": "npm run release && git add -A && git commit -m 'version: release new version'",
     "postversion": "git push origin master && git push origin v$npm_package_version",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "testem ci"
