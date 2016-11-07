@@ -16,11 +16,10 @@ $('#sideBox').on('mouseout',function() {
 });
 
 $('#sideBox').on('touchend',function() {
-    console.log(111);
     $('#windowBox').addClass('active-window');
 });
 $('.center-view-box').on('touchend',function() {
     $('#windowBox').removeClass('active-window');
 });
 
-stroll.bind( $( '.demo-list-box' ) );
+stroll.bind( $( '#listBox' ) );
