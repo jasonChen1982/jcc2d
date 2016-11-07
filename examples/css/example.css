@@ -119,14 +119,14 @@ a {
     width: 3rem;
     height: 100%;
 
-    transition: all .5s ease;
-    -webkit-transition: all .5s ease;
+    transition: all .4s ease;
+    -webkit-transition: all .4s ease;
 
     transform-origin: right;
     -webkit-transform-origin: right;
 
-    transform: rotateY(-15deg);
-    -webkit-transform: rotateY(-15deg);
+    transform: rotateY(-30deg);
+    -webkit-transform: rotateY(-30deg);
 }
 
 .center-view-box {
@@ -165,8 +165,8 @@ a {
 }
 
 .active-window .center-view-box {
-    transform: translateX(3rem) rotateY(15deg);
-    -webkit-transform: translateX(3rem) rotateY(15deg);
+    transform: translateX(3rem) rotateY(25deg);
+    -webkit-transform: translateX(3rem) rotateY(25deg);
 }
 
 .view-port {
@@ -200,17 +200,17 @@ a {
  * Shrink styles
  */
 .demo-list-box {
-    -webkit-perspective: 600px;
-       -moz-perspective: 600px;
-        -ms-perspective: 600px;
-         -o-perspective: 600px;
-            perspective: 600px;
+    -webkit-perspective: 400px;
+       -moz-perspective: 400px;
+        -ms-perspective: 400px;
+         -o-perspective: 400px;
+            perspective: 400px;
 
-    -webkit-perspective-origin: 0% 50%;
-       -moz-perspective-origin: 0% 50%;
-        -ms-perspective-origin: 0% 50%;
-         -o-perspective-origin: 0% 50%;
-            perspective-origin: 0% 50%;
+    -webkit-perspective-origin: 100% 50%;
+       -moz-perspective-origin: 100% 50%;
+        -ms-perspective-origin: 100% 50%;
+         -o-perspective-origin: 100% 50%;
+            perspective-origin: 100% 50%;
 }
 
 
@@ -225,11 +225,11 @@ a {
             transition: all 600ms ease,
                         opacity 200ms ease;
 
-    -webkit-transform-origin: 0% 0%;
-       -moz-transform-origin: 0% 0%;
-        -ms-transform-origin: 0% 0%;
-         -o-transform-origin: 0% 0%;
-            transform-origin: 0% 0%;
+    -webkit-transform-origin: 100% 0%;
+       -moz-transform-origin: 100% 0%;
+        -ms-transform-origin: 100% 0%;
+         -o-transform-origin: 100% 0%;
+            transform-origin: 100% 0%;
 
     -webkit-backface-visibility: hidden;
        -moz-backface-visibility: hidden;
@@ -240,7 +240,7 @@ a {
 
 
 .demo-item {
-    height: .5rem;
+    height: 1rem;
     background-color: #fff;
     font-size: .2rem;
 }
@@ -252,19 +252,33 @@ a {
 .demo-list-box li.past {
     opacity: 0;
 
-    -webkit-transform: rotateY( 90deg );
-       -moz-transform: rotateY( 90deg );
-        -ms-transform: rotateY( 90deg );
-         -o-transform: rotateY( 90deg );
-            transform: rotateY( 90deg );
+    -webkit-transform: rotateY( -90deg );
+       -moz-transform: rotateY( -90deg );
+        -ms-transform: rotateY( -90deg );
+         -o-transform: rotateY( -90deg );
+            transform: rotateY( -90deg );
 }
 .demo-list-box li.future {
     opacity: 0;
 
-    -webkit-transform: rotateY( 90deg );
-       -moz-transform: rotateY( 90deg );
-        -ms-transform: rotateY( 90deg );
-         -o-transform: rotateY( 90deg );
-            transform: rotateY( 90deg );
+    -webkit-transform: rotateY( -90deg );
+       -moz-transform: rotateY( -90deg );
+        -ms-transform: rotateY( -90deg );
+         -o-transform: rotateY( -90deg );
+            transform: rotateY( -90deg );
 }
 
+
+.open-other {
+    position: absolute;
+    bottom: .5rem;
+    right: 1rem;
+    width: 1.8rem;
+    height: .4rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    font-size: .18rem;
+    line-height: .4rem;
+    color: #fff;
+    text-align: center;
+    z-index: 20;
+}

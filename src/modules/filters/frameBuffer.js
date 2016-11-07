@@ -12,6 +12,9 @@ FrameBuffer.prototype.clear = function() {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.width, this.height);
 };
+FrameBuffer.prototype.setTransform = function(a, b, c, d, e, f) {
+    this.ctx.setTransform(a, b, c, d, e, f);
+};
 FrameBuffer.prototype.getBuffer = function() {
     this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
     return this.bufferData;
