@@ -2705,6 +2705,33 @@ Sprite.prototype.renderMe = function(ctx) {
     ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
 };
 
+function FrameBuffer() {
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    // document.body.appendChild(this.canvas);
+}
+FrameBuffer.prototype.setSize = function(rect) {
+    this.width = this.canvas.width = rect.width + rect.px*2;
+    this.height = this.canvas.height = rect.height + rect.py*2;
+};
+FrameBuffer.prototype.clear = function() {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+};
+FrameBuffer.prototype.setTransform = function(a, b, c, d, e, f) {
+    this.ctx.setTransform(a, b, c, d, e, f);
+};
+FrameBuffer.prototype.getBuffer = function() {
+    this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
+    return this.bufferData;
+};
+FrameBuffer.prototype.putBuffer = function() {
+    this.ctx.putImageData(this.bufferData, 0, 0);
+    return this.canvas;
+};
+FrameBuffer.prototype.createBuffer = function() {
+};
+
 /**
  * 形状对象，继承至Container
  *
@@ -2717,11 +2744,11 @@ Sprite.prototype.renderMe = function(ctx) {
  * @extends JC.Container
  * @memberof JC
  */
-function Graphics(){
-    Container.call( this );
-    this.cacheCanvas = null;
+function Graphics() {
+    Container.call(this);
+    this.frameBuffer = null;
 }
-Graphics.prototype = Object.create( Container.prototype );
+Graphics.prototype = Object.create(Container.prototype);
 
 /**
  * 更新对象本身的矩阵姿态以及透明度
@@ -2729,31 +2756,32 @@ Graphics.prototype = Object.create( Container.prototype );
  * @method updateMe
  * @private
  */
-Graphics.prototype.renderMe = function (ctx){
-    if(!this.draw)return;
-    if(this.cached||this.cache){
-        if(this.cache){
-            this.cacheCanvas = this.cacheCanvas||document.createElement('canvas');
-            this.width = this.cacheCanvas.width = this.session.width;
-            this.height = this.cacheCanvas.height = this.session.height;
-            this._ctx = this.cacheCanvas.getContext('2d');
-            this._ctx.clearRect(0,0,this.width,this.height);
-            this._ctx.save();
-            this._ctx.setTransform(1,0,0,1,this.session.center.x,this.session.center.y);
-            this._drawBack(this._ctx);
-            this._ctx.restore();
+Graphics.prototype.renderMe = function(ctx) {
+    if (!this.draw) return;
+    if (this.cached || this.cache) {
+        if (this.cache) {
+            if (this.frameBuffer === null) this.frameBuffer = new FrameBuffer();
+
+            this.frameBuffer.clear();
+            this.__co = this._bounds.getRectangle();
+            this.__co.px = this.__co.py = 0;
+            this.frameBuffer.setSize(this.__co);
+            this.frameBuffer.setTransform(1, 0, 0, 1, -this.__co.x, -this.__co.y);
+
+            this._drawBack(this.frameBuffer.ctx);
+
             this.cached = true;
             this.cache = false;
         }
-        this.cacheCanvas&&ctx.drawImage(this.cacheCanvas, 0, 0, this.width, this.height, -this.session.center.x, -this.session.center.x, this.width, this.height);
-    }else{
+        this.frameBuffer && ctx.drawImage(this.frameBuffer.canvas, this.__co.x - this.__co.px, this.__co.y - this.__co.py, this.frameBuffer.width, this.frameBuffer.height);
+    } else {
         this._drawBack(ctx);
     }
 };
-Graphics.prototype._drawBack = function (ctx){
-    if(typeof this.draw === 'function'){
+Graphics.prototype._drawBack = function(ctx) {
+    if (typeof this.draw === 'function') {
         this.draw(ctx);
-    }else if(typeof this.draw === 'object' && typeof this.draw.render === 'function'){
+    } else if (typeof this.draw === 'object' && typeof this.draw.render === 'function') {
         this.draw.render(ctx);
     }
 };
@@ -2772,7 +2800,6 @@ Graphics.prototype._drawBack = function (ctx){
  *      }
  *  },{
  *      cache: true,
- *      session: {center: {x: 50,y: 50},width:100,height:100}
  *      bounds: new JC.Bounds(-50, -50, 50, 50)
  *  });
  * ```
@@ -2780,13 +2807,13 @@ Graphics.prototype._drawBack = function (ctx){
  * @param fn {function}
  * @param opts {object}
  */
-Graphics.prototype.drawCall = function(fn,opts){
-    if(fn===undefined)return;
-    opts = opts||{};
-    this.cache = opts.cache||false;
+Graphics.prototype.drawCall = function(fn, opts) {
+    if (fn === undefined) return;
+    opts = opts || {};
+    this.cache = opts.cache || false;
     this.cached = false;
-    this.session = opts.session||{bounds: {x: 0,y: 0},width:100,height:100};
-    this.draw = fn||null;
+    // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
+    this.draw = fn || null;
 
     this.setBounds(opts.bounds);
 };
@@ -2842,30 +2869,6 @@ Text.prototype.renderMe = function(ctx){
         ctx.strokeStyle = this.color;
         ctx.strokeText(this.text,0,0);
     }
-};
-
-function FrameBuffer() {
-    this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d');
-    // document.body.appendChild(this.canvas);
-}
-FrameBuffer.prototype.setSize = function(rect) {
-    this.width = this.canvas.width = rect.width + rect.px*2;
-    this.height = this.canvas.height = rect.height + rect.py*2;
-};
-FrameBuffer.prototype.clear = function() {
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.clearRect(0, 0, this.width, this.height);
-};
-FrameBuffer.prototype.getBuffer = function() {
-    this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
-    return this.bufferData;
-};
-FrameBuffer.prototype.putBuffer = function() {
-    this.ctx.putImageData(this.bufferData, 0, 0);
-    return this.canvas;
-};
-FrameBuffer.prototype.createBuffer = function() {
 };
 
 function BlurFilter(blurX, blurY, quality) {
