@@ -1,5 +1,6 @@
 import { UTILS } from '../util/UTILS';
 
+// TODO 继承事件对象
 /**
  * MovieClip类型动画对象
  *

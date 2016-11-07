@@ -43,7 +43,3 @@ jcc2d有几大主要类型，动画师（Animator）、事件系统（Eventer）
 
 ### 使用例子 ###
   查看项目下的 [examples](https://jasonchen1982.github.io/jcc2d/examples/) 目录
-
-
-### 说明 ###
-由于选择轻量级，所以不是非常实用的canvas滤镜并没有包含在该库里面。

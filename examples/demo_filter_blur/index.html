@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body { overflow: hidden; }
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="320" height="410"></canvas>
+
+<script type="text/javascript" src="../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/util/tween.js"></script>
+<script type="text/javascript" src="../libs/dat.gui.min.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript">
+window.onerror = function(msg,url,line){
+    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
+};
+window.onresize = function(){
+    resize();
+};
+
+
+function Rect(color){
+    this.color = color||'#749d9b';
+}
+Rect.prototype.render = function(ctx){
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
+    ctx.fillRect(-30,-30,60,60);
+    ctx.fill();
+};
+
+var w = window.innerWidth,
+    h = window.innerHeight,
+    pic,
+    shape,
+    blurPass,
+    stage = new JC.Stage('demo_canvas'),
+    DOC = new JC.Container();
+DOC.x = w/2;
+DOC.y = h/2;
+
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
+
+function BlurControl(){
+    this.quality = 1;
+    this.blurX = 0;
+    this.blurY = 0;
+    this.blur = 0;
+    this.padding = false;
+}
+
+JC.TWEEN.extend(tween);
+
+
+var loadBox = JC.loaderUtil({
+    pic: './images/card.jpg'
+});
+
+loadBox.on('compelete',function(){
+    resize();
+    pic = new JC.Sprite({
+        texture: loadBox.getById('pic')
+    });
+
+    blurPass = new JC.BlurFilter(0,0,1);
+    // blurPass.autoUpdateBuffer = true;
+    // blurPass.padding = true;
+    blurPass.adds(pic);
+
+
+    var gui = new dat.GUI();
+    var blurControl = new BlurControl();
+    var blurX = gui.add(blurControl, 'blurX', 0, 20);
+    var blurY = gui.add(blurControl, 'blurY', 0, 20);
+    var blur = gui.add(blurControl, 'blur', 0, 20);
+    var padding = gui.add(blurControl, 'padding');
+    var quality = gui.add(blurControl, 'quality', 0, 4);
+    blurX.onChange(function(value){
+        blurPass.blurX = value;
+        blurPass.needUpdateBuffer = true;
+    });
+    blurY.onChange(function(value){
+        blurPass.blurY = value;
+        blurPass.needUpdateBuffer = true;
+    });
+    blur.onChange(function(value){
+        blurControl.blurY = blurControl.blurX = blurPass.blurY = blurPass.blurX = value;
+        blurPass.needUpdateBuffer = true;
+    });
+    padding.onChange(function(value){
+        blurPass.padding = value;
+        blurPass.needUpdateBuffer = true;
+    });
+    quality.onChange(function(value){
+        blurPass.quality = value;
+        blurPass.needUpdateBuffer = true;
+    });
+
+    DOC.adds(blurPass);
+    stage.adds(DOC);
+
+
+    render();
+});
+
+function render(){
+    RAF(render);
+
+    stage.render();
+
+    stats.update();
+}
+function resize(){
+    w = window.innerWidth;
+    h = window.innerHeight;
+    stage.resize(w,h);
+}
+</script>
+</body>
+</html>

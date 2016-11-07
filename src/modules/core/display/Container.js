@@ -1,5 +1,5 @@
 import { DisplayObject } from './DisplayObject';
-// import { Point } from '../math/Point';
+import { Bounds } from '../math/Bounds';
 
 /**
  * 显示对象容器，继承至DisplayObject
@@ -51,6 +51,23 @@ function Container() {
      * @member {Boolean}
      */
     this.souldSort = false;
+
+    /**
+     * 强制该对象在渲染子集之前为他们排序
+     *
+     * @member {JC.Bounds}
+     */
+    this.bounds = new Bounds();
+
+    /**
+     * 显示对象内部表示的边界
+     *
+     * @member {JC.Bounds}
+     * @private
+     */
+    this._bounds = new Bounds();
+
+    this.vertexData = new Float32Array(8);
 }
 Container.prototype = Object.create(DisplayObject.prototype);
 
@@ -74,23 +91,6 @@ Object.defineProperty(Container.prototype, 'zIndex', {
         }
     }
 });
-
-/**
- * 比较当前渲染对象的zIndex是否超出其前后两个兄弟节点的zIndex
- *
- * @method _cpi
- * @private
- */
-// Container.prototype._cpi = function(idx) {
-//     var rr = this.parent.childs.length - 1;
-//     var i = this.parent.childs.indexOf(this);
-//     if (i <= 0 || i >= rr) {
-//         return false;
-//     }
-//     var p = this.parent.childs[i-1];
-//     var n = this.parent.childs[i+1];
-//     return idx > n.zIndex || idx < p.zIndex;
-// };
 
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
@@ -188,19 +188,6 @@ Container.prototype.updatePosture = function(snippet) {
 };
 
 /**
- * 调用后代的姿态更新函数
- *
- * @method updateChilds
- * @private
- */
-// Container.prototype.updateChilds = function(snippet) {
-//     for (var i = 0, l = this.childs.length; i < l; i++) {
-//         var cd = this.childs[i];
-//         cd.updatePosture(snippet);
-//     }
-// };
-
-/**
  * 渲染自己并触发后代渲染
  *
  * @method render
@@ -230,88 +217,79 @@ Container.prototype.renderMe = function() {
     return true;
 };
 
-/**
- * 调用后代的渲染
- *
- * @method renderChilds
- * @private
- */
-// Container.prototype.renderChilds = function(ctx) {
-//     for (var i = 0, l = this.childs.length; i < l; i++) {
-//         var cd = this.childs[i];
-//         if (!cd.isVisible() || !cd._ready) continue;
-//         cd.render(ctx);
-//     }
-// };
+Container.prototype.calculateVertices = function() {
+    var wt = this.worldTransform,
+        a = wt.a,
+        b = wt.b,
+        c = wt.c,
+        d = wt.d,
+        tx = wt.tx,
+        ty = wt.ty,
+        vertexData = this.vertexData,
+        w0, w1, h0, h1;
+
+    w0 = this._bounds.minX;
+    w1 = this._bounds.maxX;
+
+    h0 = this._bounds.minY;
+    h1 = this._bounds.maxY;
+
+    // xy
+    vertexData[0] = a * w1 + c * h1 + tx;
+    vertexData[1] = d * h1 + b * w1 + ty;
+
+    // xy
+    vertexData[2] = a * w0 + c * h1 + tx;
+    vertexData[3] = d * h1 + b * w0 + ty;
+
+    // xy
+    vertexData[4] = a * w0 + c * h0 + tx;
+    vertexData[5] = d * h0 + b * w0 + ty;
+
+    // xy
+    vertexData[6] = a * w1 + c * h0 + tx;
+    vertexData[7] = d * h0 + b * w1 + ty;
+};
+
 
 /**
- * 通知分发事件到自身及后代
+ * 计算包围盒子
  *
- * @method noticeEvent
- * @private
+ * @method calculateBounds
  */
-// Container.prototype.noticeEvent = function(ev) {
-//     var i = this.childs.length - 1;
-//     while (i >= 0) {
-//         var child = this.childs[i];
-//         if (child.visible) {
-//             child.noticeEvent(ev);
-//             if (ev.target) break;
-//         }
-//         i--;
-//     }
-//     this.upEvent(ev);
-// };
+Container.prototype.calculateBounds = function () {
+    this.bounds.clear();
+    if(!this.visible) {
+        return;
+    }
+    this._calculateBounds();
+
+    for (var i = 0; i < this.childs.length; i++) {
+        var child = this.childs[i];
+
+        child.calculateBounds();
+
+        this.bounds.addBounds(child.bounds);
+    }
+    // this._boundsID = this._lastBoundsID;
+};
+
+Container.prototype._calculateBounds = function () {
+    this.calculateVertices();
+    this.bounds.addVert(this.vertexData);
+};
+
 
 /**
- * 分发事件到自身后对自身做事件检查
+ * 设置渲染物体的包围盒
  *
- * @method upEvent
- * @private
+ * @method setBounds
  */
-// Container.prototype.upEvent = function(ev) {
-//     if (!this._ready) return;
-//     if (ev.target || (!this.passEvent && this.hitTest(ev))) {
-//         if (!ev.cancleBubble || ev.target === this) {
-//             if (!(this.event.listeners[ev.type] && this.event.listeners[ev.type].length > 0)) return;
-//             this.event.emit(ev);
-//         }
-//     }
-// };
-
-/**
- * 碰撞监测及事件处理
- *
- * @method hitTest
- * @private
- */
-// Container.prototype.hitTest = function(ev) {
-//     if (ev.type === 'touchmove' || ev.type === 'touchend' || ev.type === 'mousemove' || ev.type === 'mouseup') {
-//         var re = this.event.touchstarted;
-//         if (re) ev.target = this;
-//         if (ev.type === 'touchend' || ev.type === 'mouseup') this.event.touchstarted = false;
-//         return re;
-//     }
-//     if (this.hitTestMe(ev)) {
-//         ev.target = this;
-//         if (ev.type === 'touchstart' || ev.type === 'mousedown') this.event.touchstarted = true;
-//         return true;
-//     }
-//     return false;
-// };
-
-/**
- * 对自身的事件监测区域做碰撞监测
- *
- * @method hitTest
- * @private
- */
-// Container.prototype.hitTestMe = function(ev) {
-//     if (this.bound === null) return false;
-//     var point = new Point();
-//     this.worldTransform.applyInverse(ev.global, point);
-//     return this.bound.contains(point.x, point.y);
-// };
+Container.prototype.setBounds = function(bounds){
+    if (bounds instanceof Bounds) {
+        this._bounds = bounds;
+    }
+};
 
 /**
  * 暂停自身的动画进度

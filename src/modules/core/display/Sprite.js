@@ -18,7 +18,7 @@ import { Rectangle } from '../math/Rectangle';
  *      sy: 0,
  *      animations: {
  *          fall: {start: 0,end: 4,next: 'stand'},
- *          fly: {start: 5,end: 9,next: 'stand'},
+ *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
  *          stand: {start: 10,end: 39},
  *          walk: {start: 40,end: 59,next: 'stand'}
  *      }
@@ -29,25 +29,25 @@ import { Rectangle } from '../math/Rectangle';
  * @extends JC.Container
  * @memberof JC
  */
-function Sprite(opts){
-    Container.call( this );
+function Sprite(opts) {
+    Container.call(this);
 
     this.texture = opts.texture;
-    if(this.texture.loaded){
+    if (this.texture.loaded) {
         this.upTexture(opts);
-    }else{
+    } else {
         var This = this;
         this._ready = false;
-        this.texture.on('load',function(){
+        this.texture.on('load', function() {
             This.upTexture(opts);
             This._ready = true;
         });
     }
 
-    this.MovieClip = new MovieClip(this,opts);
+    this.MovieClip = new MovieClip(this, opts);
 
 }
-Sprite.prototype = Object.create( Container.prototype );
+Sprite.prototype = Object.create(Container.prototype);
 
 /**
  * 更新纹理对象
@@ -55,14 +55,16 @@ Sprite.prototype = Object.create( Container.prototype );
  * @method upTexture
  * @private
  */
-Sprite.prototype.upTexture = function(opts){
+Sprite.prototype.upTexture = function(opts) {
     this._textureW = opts.texture.width;
     this._textureH = opts.texture.height;
-    this.width = opts.width||this._textureW;
-    this.height = opts.height||this._textureH;
-    this.regX = this.width>>1;
-    this.regY = this.height>>1;
-    this.setBound(new Rectangle(-this.regX, -this.regY, this.width, this.height),true);
+    this.width = opts.width || this._textureW;
+    this.height = opts.height || this._textureH;
+    this.regX = this.width >> 1;
+    this.regY = this.height >> 1;
+    var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
+    this._bounds.addRect(rect);
+    this.setArea(rect, true);
 };
 
 /**
@@ -71,7 +73,7 @@ Sprite.prototype.upTexture = function(opts){
  * @method upAnimation
  * @private
  */
-Sprite.prototype.updateAnimation = function(snippet){
+Sprite.prototype.updateAnimation = function(snippet) {
     this.Animation.update(snippet);
     this.MovieClip.update(snippet);
 };
@@ -80,7 +82,7 @@ Sprite.prototype.updateAnimation = function(snippet){
  * 播放逐帧动画
  *
  */
-Sprite.prototype.playMovie = function(opts){
+Sprite.prototype.playMovie = function(opts) {
     this.MovieClip.playMovie(opts);
 };
 
@@ -90,7 +92,7 @@ Sprite.prototype.playMovie = function(opts){
  * @method updateMe
  * @private
  */
-Sprite.prototype.renderMe = function (ctx){
+Sprite.prototype.renderMe = function(ctx) {
     if (!this._ready) return;
     var pos = this.MovieClip.getFramePos();
     ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);

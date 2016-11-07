@@ -68,6 +68,7 @@ Graphics.prototype._drawBack = function (ctx){
  *  },{
  *      cache: true,
  *      session: {center: {x: 50,y: 50},width:100,height:100}
+ *      bounds: new JC.Bounds(-50, -50, 50, 50)
  *  });
  * ```
  *
@@ -79,8 +80,11 @@ Graphics.prototype.drawCall = function(fn,opts){
     opts = opts||{};
     this.cache = opts.cache||false;
     this.cached = false;
-    this.session = opts.session||{center: {x: 0,y: 0},width:100,height:100};
+    this.session = opts.session||{bounds: {x: 0,y: 0},width:100,height:100};
     this.draw = fn||null;
+
+    this.setBounds(opts.bounds);
 };
+
 
 export { Graphics };

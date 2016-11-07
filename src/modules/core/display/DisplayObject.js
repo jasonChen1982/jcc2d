@@ -1,4 +1,4 @@
-import { Matrix, TEMP_MATRIX, } from '../math/Matrix';
+import { Matrix, TEMP_MATRIX } from '../math/Matrix';
 import { Point } from '../math/Point';
 import { Eventer } from '../../eventer/Eventer';
 import { Animation } from '../../animation/Animation';
@@ -140,19 +140,19 @@ function DisplayObject() {
     // this.event = new Eventer();
 
     /**
-     * 当前对象是否穿透自身的事件监测
+     * 当前对象是否穿透自身的事件检测
      *
      * @member {Boolean}
      */
     this.passEvent = false;
 
     /**
-     * 当前对象的事件监测边界
+     * 当前对象的事件检测边界
      *
      * @member {JC.Shape}
      * @private
      */
-    this.bound = null;
+    this.eventArea = null;
 
 
     /**
@@ -513,28 +513,28 @@ DisplayObject.prototype.getGlobalPos = function() {
 // };
 
 /**
- * 设置显示对象的监测区域
+ * 设置显示对象的事件检测区域
  *
  * @param shape {JC.Polygon|JC.Rectangle} JC内置形状类型的实例
- * @param needless {boolean} 当该值为true，当且仅当this.bound为空时才会更新点击区域。默认为false，总是更新点击区域。
+ * @param needless {boolean} 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
  * @return {Array}
  */
-DisplayObject.prototype.setBound = function(shape, needless) {
-    if (this.bound !== null && needless) return;
-    this.bound = shape;
+DisplayObject.prototype.setArea = function(shape, needless) {
+    if (this.eventArea !== null && needless) return;
+    this.eventArea = shape;
 };
 
 /**
- * 监测坐标点是否在多变性内
+ * 检测坐标点是否在多变性内
  *
  * @method contains
  * @private
  */
 DisplayObject.prototype.contains = function (global) {
-    if (this.bound === null) return false;
+    if (this.eventArea === null) return false;
     var point = new Point();
     this.worldTransform.applyInverse(global, point);
-    return this.bound && this.bound.contains(point.x, point.y);
+    return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
 
 export { DisplayObject };
