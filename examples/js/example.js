@@ -10,8 +10,8 @@ $('#listBox').html(list);
 
 $('#listBox').on('click','.demo-item',function() {
     if (this.dataset.url) {
-        $('#viewPort').attr('src', this.dataset.url);
-        location.hash = this.dataset.url+'/index.html';
+        $('#viewPort').attr('src', this.dataset.url+'/index.html');
+        location.hash = this.dataset.url;
     }
 });
 $(window).on('load', function() {
