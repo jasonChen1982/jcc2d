@@ -1,7 +1,7 @@
 {
   "name": "jcc2d",
   "version": "0.2.5",
-  "description": "一个轻量级的canvas渲染引擎",
+  "description": "一个轻量级的canvas渲染引擎，高性能动画引擎",
   "main": "build/jcc2d.min.js",
   "directories": {
     "example": "examples"
@@ -15,11 +15,24 @@
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "testem ci"
   },
+  "keywords": [
+    "canvas",
+    "canvas 2d",
+    "renderer",
+    "browser",
+    "animation",
+    "canvas engine",
+    "javascript"
+  ],
   "repository": {
     "type": "git",
     "url": "git@github.com:jasonChen1982/jcc2d.git"
   },
-  "author": "jasonChen",
+  "author": {
+    "name": "jason Chen",
+    "email": "jasonchen1882@gmail.com",
+    "url": "http://jason82.com"
+  },
   "license": "ISC",
   "devDependencies": {
     "chai": "^3.2.0",
