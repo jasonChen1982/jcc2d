@@ -50,7 +50,7 @@ export var UTILS = {
     isArray: (function(){
         var ks = _rt([]);
         return function(object){
-            return Object.prototype.toString.call(object) === ks;
+            return _rt(object) === ks;
         };
     })(),
 
@@ -66,7 +66,7 @@ export var UTILS = {
     isObject: (function(){
         var ks = _rt({});
         return function(object){
-            return Object.prototype.toString.call(object) === ks;
+            return _rt(object) === ks;
         };
     })(),
 
@@ -82,7 +82,7 @@ export var UTILS = {
     isString: (function(){
         var ks = _rt('s');
         return function(object){
-            return Object.prototype.toString.call(object) === ks;
+            return _rt(object) === ks;
         };
     })(),
 
@@ -98,7 +98,7 @@ export var UTILS = {
     isNumber: (function(){
         var ks = _rt(1);
         return function(object){
-            return Object.prototype.toString.call(object) === ks;
+            return _rt(object) === ks;
         };
     })(),
 
@@ -114,7 +114,7 @@ export var UTILS = {
     isFunction: (function(){
         var ks = _rt(function(){});
         return function(object){
-            return Object.prototype.toString.call(object) === ks;
+            return _rt(object) === ks;
         };
     })(),
 
