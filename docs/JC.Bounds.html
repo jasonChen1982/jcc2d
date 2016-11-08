@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: animation/KeyFrames.js</title>
+    <title>Class: Bounds</title>
     
     
     
@@ -1217,89 +1217,911 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="animation_KeyFrames.js.html">Source: animation/KeyFrames.js</h1>
+        <h1 class="page-title" data-filename="JC.Bounds.html">Class: Bounds</h1>
         
 
 
+
+<section>
     
-    <section>
-        <article>
-            <pre id="source-code" class="prettyprint source linenums"><code>import { Animate } from './Animate';
-import { UTILS } from '../util/UTILS';
-/**
- * KeyFrames类型动画对象
- *
- * @class
- * @memberof JC
- * @param [opts] {object} 动画配置信息
- */
-function KeyFrames(opts) {
-    Animate.call(this, opts);
+<header>
+    <h2>
+    Bounds
+    </h2>
+    
+</header>  
 
-    this._keyframes = opts.keys;
-    this._keyIndex = 0;
-    this._cursor = 1;
-    this._keyConfig = opts.keyConfig;
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="Bounds">
+            
+            new JC.Bounds<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_math_Bounds.js.html">core/math/Bounds.js</a>, <a href="core_math_Bounds.js.html#line9">line 9</a>
+        </div>
+        
+    </div>
 
-    this.configKey();
-}
-KeyFrames.prototype = Object.create(Animate.prototype);
-KeyFrames.prototype.configKey = function() {
-    this.from = this._keyframes[this._keyIndex];
-    this._keyIndex += this._cursor;
-    this.to = this._keyframes[this._keyIndex];
-    var config = this._keyConfig[Math.min(this._keyIndex, this._keyIndex - this._cursor)] || {};
-    this.ease = config.ease || this.ease;
-    this.duration = config.duration || this.duration;
-    this.progress = 0;
-};
-KeyFrames.prototype.update = function(snippet) {
-    if (this.wait > 0) {
-        this.wait -= Math.abs(snippet);
-        return;
-    }
-    if (this.paused || !this.living || this.delayCut > 0) {
-        if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
-        return;
-    }
-    // if (this.paused || !this.living) return;
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>显示对象的包围盒子</p>
+    </div>
+    
 
-    var snippetCache = this.direction * this.timeScale * snippet;
-    this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
-    this.totalTime += Math.abs(snippetCache);
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
 
-    var pose = this.nextPose();
-    if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
-    // this.progress += this.timeScale * snippet;
-    if (this.totalTime >= this.duration) {
-        this.totalTime = 0;
-        if (this._keyIndex &lt; this._keyframes.length - 1 &amp;&amp; this._keyIndex > 0) {
-            this.configKey();
-        } else {
-            if (this.repeats > 0 || this.infinity) {
-                if (this.repeats > 0) --this.repeats;
-                this.delayCut = this.delay;
-                if (this.alternate) {
-                    this._cursor *= -1;
-                } else {
-                    this._cursor = 1;
-                    this._keyIndex = 0;
-                }
-                this.configKey();
-            } else {
-                this.living = false;
-                if (this.onCompelete) this.onCompelete();
-            }
-        }
-    }
-};
+    
+    
 
-export { KeyFrames };
-</code></pre>
-        </article>
-    </section>
+    
 
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="maxX">maxX<span class="type-signature type number">number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="maxY">maxY<span class="type-signature type number">number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="minX">minX<span class="type-signature type number">number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="minY">minY<span class="type-signature type number">number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <dt class="tag-default">Default Value:</dt>
+    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addBounds">
+            
+            addBounds<span class="signature">(point)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_math_Bounds.js.html">core/math/Bounds.js</a>, <a href="core_math_Bounds.js.html#line126">line 126</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>往包围盒增加包围盒，更新包围盒区域</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>point</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.Bounds.html">JC.Bounds</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addPoint">
+            
+            addPoint<span class="signature">(point)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_math_Bounds.js.html">core/math/Bounds.js</a>, <a href="core_math_Bounds.js.html#line76">line 76</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>往包围盒增加外部顶点，更新包围盒区域</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>point</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.Point.html">JC.Point</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addRect">
+            
+            addRect<span class="signature">(point)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_math_Bounds.js.html">core/math/Bounds.js</a>, <a href="core_math_Bounds.js.html#line88">line 88</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>往包围盒增加矩形区域，更新包围盒区域</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>point</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.Rectangle.html">JC.Rectangle</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="addVert">
+            
+            addVert<span class="signature">(point)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_math_Bounds.js.html">core/math/Bounds.js</a>, <a href="core_math_Bounds.js.html#line100">line 100</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>往包围盒增加顶点数组，更新包围盒区域</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>point</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getRectangle">
+            
+            getRectangle<span class="signature">(rect)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Rectangle.html">JC.Rectangle</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_math_Bounds.js.html">core/math/Bounds.js</a>, <a href="core_math_Bounds.js.html#line56">line 56</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>将包围盒子转换成矩形描述</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>rect</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.Rectangle.html">JC.Rectangle</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>待转换的矩形</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="JC.Rectangle.html">JC.Rectangle</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+</article>
+
+</section>  
 
 
 
@@ -1308,7 +2130,7 @@ export { KeyFrames };
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Tue Nov 08 2016 16:17:53 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a> on Tue Nov 08 2016 16:17:53 GMT+0800 (CST)
         </footer>
     </div>
 </div>
