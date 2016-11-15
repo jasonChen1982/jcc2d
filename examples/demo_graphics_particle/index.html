@@ -145,10 +145,10 @@ DOC.x = w/2;
 DOC.y = h-30;
 
 
-var stats = new Stats();
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
+// var stats = new Stats();
+// stats.domElement.style.position = 'absolute';
+// stats.domElement.style.top = '0px';
+// document.body.appendChild(stats.domElement);
 
 
 init();  // 创建粒子更新循环
@@ -171,7 +171,7 @@ render();
 function render(){
     RAF(render);
     stage.render();
-    stats.update();
+    // stats.update();
 }
 function resize(){
     w = window.innerWidth;
