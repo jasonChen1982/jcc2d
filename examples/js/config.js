@@ -112,12 +112,6 @@ var EXAMPLES = [
         link: 'performanceTest/create'
     },
     {
-        title: '渲染300个物体yellow引擎性能对比',
-        type: 'PK',
-        describe: 'ps:我实在找不到怎么在yellow里面让图片物体绕图片中心点旋转（不用Container的情况）',
-        link: 'performanceTest/yel'
-    },
-    {
         title: '渲染300个物体jcc2d引擎性能对比',
         type: 'PK',
         link: 'performanceTest/jcc2d'
