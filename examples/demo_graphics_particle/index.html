@@ -72,7 +72,7 @@ Particle.prototype = {
         this.vx += Math.sin( this.theta ) * 0.1;
         this.vy += Math.cos( this.theta ) * 0.1;
 
-        this.radius *= 0.96;
+        this.radius *= 0.97;
         this.alive = this.radius > 0.5;
     },
     draw: function( ctx ) {
@@ -84,7 +84,7 @@ Particle.prototype = {
     }
 };
 function init() {
-    var i, now = Date.now(), interval = 30;
+    var i, now = Date.now(), interval = 18;
     function loop(){
         var pNow = Date.now(),
             cur = pNow-now>interval;
@@ -101,7 +101,7 @@ function spawn( x, y ) {
         pool.push( particles.shift() );
 
     particle = pool.length ? pool.pop() : new Particle();
-    particle.init( x, y, random( 5, 24 ) );
+    particle.init( x, y, random( 10, 24 ) );
 
     particle.wander = random( 0.5, 2.0 );
     particle.color = COLOURS[Math.random()*COLOURS.length >> 0];
@@ -129,7 +129,7 @@ function update() {
 
 var w = window.innerWidth,
     h = window.innerHeight,
-    MAX_PARTICLES = 200,
+    MAX_PARTICLES = 300,
     TWO_PI = Math.PI*2,
     particles = [],
     pool = [],

@@ -93,7 +93,7 @@ Object.defineProperty(Container.prototype, 'zIndex', {
 });
 
 /**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ * 对自身子集进行zIndex排序
  *
  * @method _sortList
  * @private
