@@ -39,5 +39,8 @@ $('#openOther').on('click', function(){
     if (location.hash) hash = location.hash.substring(1);
     this.href = hash+'/index.html';
 });
+window.onload = function() {
+    $('#windowBox').removeClass('active-window');
+};
 
 stroll.bind( $( '#listBox' ) );
