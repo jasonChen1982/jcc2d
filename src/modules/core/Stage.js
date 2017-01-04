@@ -326,7 +326,7 @@ Stage.prototype.timeline = function() {
         this._renderTimes++;
         this._takeTime += Math.max(15, this.snippet);
         this.fps = 1000 / Math.max(15, this.snippet) >> 0;
-        this.averageFps = this._takeTime / this._renderTimes >> 0;
+        this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
     }
 
     this.pt += this.snippet;
