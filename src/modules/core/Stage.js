@@ -78,7 +78,7 @@ function Stage(options) { // canvas, bgColor, resolution
      *
      * @member {Number}
      */
-    this._resolution = 1;
+    this._resolution = 0;
 
     /**
      * 场景分辨率
