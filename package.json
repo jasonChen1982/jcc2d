@@ -20,7 +20,8 @@
     "patch": "npm version patch -m 'release: v%s'",
     "postversion": "git push github-origin master && git push github-origin v$npm_package_version",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
-    "test": "testem ci"
+    "test": "testem ci",
+    "changelog": "git changelog"
   },
   "keywords": [
     "canvas",
