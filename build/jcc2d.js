@@ -660,7 +660,7 @@ PathMotion.prototype.nextPose = function() {
         cache.rotation += this._cacheRotate;
         if (_rotate !== false) this.preDegree = _rotate;
     }
-    this.element.setVal(cache);
+    this.element.setProps(cache);
     return cache;
 };
 PathMotion.prototype.getPoint = function(t, points) {
@@ -781,7 +781,7 @@ Animation.prototype.update = function(snippet) {
     }
 };
 Animation.prototype.fromTo = function(opts, clear) {
-    this.element.setVal(opts.from);
+    this.element.setProps(opts.from);
     opts.element = this.element;
     return this._addMove(new Transition(opts), clear);
 };
@@ -818,17 +818,37 @@ Animation.prototype.clear = function() {
  * @param {string | Image} img 图片url或者图片对象.
  * @extends JC.Eventer
  */
-function Texture(img) {
+function Texture(img, lazy) {
     Eventer.call(this);
     this.texture = null;
     this.width = 0;
     this.height = 0;
+    this.naturalWidth = 0;
+    this.naturalHeight = 0;
     this.loaded = false;
-
-    this.load(img);
+    this.hadload = false;
+    this.src = img;
+    this.resole(img);
+    if (!lazy || !UTILS.isString(img)) this.load(img);
 
 }
 Texture.prototype = Object.create(Eventer.prototype);
+
+/**
+ * 预先处理一些数据
+ *
+ * @static
+ * @param {string | Image} 先生成对应的对象
+ * @private
+ */
+Texture.prototype.resole = function(img) {
+    if (UTILS.isString(img)) {
+        this.texture = new Image();
+    }
+    if (img instanceof Image || img.nodeName === 'IMG') {
+        this.texture = img;
+    }
+};
 
 /**
  * 尝试加载图片
@@ -838,9 +858,11 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.load = function(img) {
+    if (this.hadload) return;
     var This = this;
-    if (typeof img === 'string') {
-        this.texture = new Image();
+    this.hadload = true;
+    img = img || this.src;
+    if (UTILS.isString(img)) {
         this.texture.crossOrigin = '';
         this.texture.src = img;
         this.texture.onload = function() {
@@ -853,12 +875,15 @@ Texture.prototype.load = function(img) {
         this.on('load', function() {
             This.width = This.texture.width;
             This.height = This.texture.height;
+            This.naturalWidth = This.texture.naturalWidth;
+            This.naturalHeight = This.texture.naturalHeight;
         });
     }
-    if (img instanceof Image && img.width * img.height > 0) {
-        this.texture = img;
+    if ((img instanceof Image || img.nodeName === 'IMG') && img.naturalWidth * img.naturalHeight > 0) {
         this.width = img.width;
         this.height = img.height;
+        this.naturalWidth = img.naturalWidth;
+        this.naturalHeight = img.naturalHeight;
     }
 };
 
@@ -1965,16 +1990,16 @@ DisplayObject.prototype.removeMask = function() {
 /**
  * 设置对象上的属性值
  *
- * @method setVal
+ * @method setProps
  * @private
  */
-DisplayObject.prototype.setVal = function(vals) {
-    if (vals === undefined) return;
-    for (var key in vals) {
+DisplayObject.prototype.setProps = function(props) {
+    if (props === undefined) return;
+    for (var key in props) {
         if (this[key] === undefined) {
             continue;
         } else {
-            this[key] = vals[key];
+            this[key] = props[key];
         }
     }
 };
@@ -2232,7 +2257,7 @@ Object.defineProperty(Container.prototype, 'zIndex', {
 });
 
 /**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ * 对自身子集进行zIndex排序
  *
  * @method _sortList
  * @private
@@ -2480,10 +2505,13 @@ function MovieClip(element, opts) {
     this.animations = opts.animations || {};
 
     this.index = 0;
+    this.preIndex = -1;
     this.direction = 1;
     this.frames = [];
-    this.sy = opts.sy || 0;
-    this.sx = opts.sx || 0;
+    this.frame = opts.frame;
+    this.preFrame = null;
+    // this.sy = opts.sy || 0;
+    // this.sx = opts.sx || 0;
     this.fillMode = 0;
     this.fps = 16;
 
@@ -2522,22 +2550,22 @@ MovieClip.prototype.update = function(snippet) {
         }
     }
 };
-MovieClip.prototype.getFramePos = function() {
-    var pos = {
-        x: this.sx,
-        y: this.sy
-    };
+MovieClip.prototype.getFrame = function() {
+    if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
+    var frame = this.frame.clone();
     var cf = this.frames[this.index];
     if (cf > 0) {
-        var row = this.element._textureW / this.element.width >> 0;
-        var lintRow = this.sx / this.element.width >> 0;
-        var lintCol = this.sy / this.element.height >> 0;
-        var mCol = lintCol + (lintRow + cf) / row >> 0;
+        var row = this.element.naturalWidth / this.frame.width >> 0;
+        var lintRow = this.frame.x / this.frame.width >> 0;
+        // var lintCol = this.frame.y / this.frame.height >> 0;
+        var mCol = (lintRow + cf) / row >> 0;
         var mRow = (lintRow + cf) % row;
-        pos.x = mRow * this.element.width;
-        pos.y = mCol * this.element.height;
+        frame.x = mRow * this.frame.width;
+        frame.y += mCol * this.frame.height;
     }
-    return pos;
+    this.preIndex = this.index;
+    this.preFrame = frame;
+    return frame;
 };
 MovieClip.prototype.playMovie = function(opts) {
     this.next = null;
@@ -2618,11 +2646,10 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  * });
  * var sprite = new JC.Sprite({
  *      texture: loadBox.getById('frames'),
- *      width: 165,
- *      height: 292,
+ *      frame: new JC.Rectangle(0, 0, w, h),
+ *      width: 100,
+ *      height: 100,
  *      count: 38,
- *      sx: 0,
- *      sy: 0,
  *      animations: {
  *          fall: {start: 0,end: 4,next: 'stand'},
  *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
@@ -2663,10 +2690,10 @@ Sprite.prototype = Object.create(Container.prototype);
  * @private
  */
 Sprite.prototype.upTexture = function(opts) {
-    this._textureW = opts.texture.width;
-    this._textureH = opts.texture.height;
-    this.width = opts.width || this._textureW;
-    this.height = opts.height || this._textureH;
+    this.naturalWidth = opts.texture.naturalWidth;
+    this.naturalHeight = opts.texture.naturalHeight;
+    this.width = opts.width || this.naturalWidth;
+    this.height = opts.height || this.naturalHeight;
     this.regX = this.width >> 1;
     this.regY = this.height >> 1;
     var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
@@ -2677,7 +2704,7 @@ Sprite.prototype.upTexture = function(opts) {
 /**
  * 更新对象的动画姿态
  *
- * @method upAnimation
+ * @method updateAnimation
  * @private
  */
 Sprite.prototype.updateAnimation = function(snippet) {
@@ -2701,8 +2728,8 @@ Sprite.prototype.playMovie = function(opts) {
  */
 Sprite.prototype.renderMe = function(ctx) {
     if (!this._ready) return;
-    var pos = this.MovieClip.getFramePos();
-    ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+    var frame = this.MovieClip.getFrame();
+    ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, -this.regX, -this.regY, this.width, this.height);
 };
 
 function FrameBuffer() {
