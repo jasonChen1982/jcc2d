@@ -19,7 +19,7 @@ Animation.prototype.update = function(snippet) {
     }
 };
 Animation.prototype.fromTo = function(opts, clear) {
-    this.element.setVal(opts.from);
+    this.element.setProps(opts.from);
     opts.element = this.element;
     return this._addMove(new Transition(opts), clear);
 };

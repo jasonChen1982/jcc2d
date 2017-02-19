@@ -1,4 +1,5 @@
 import { Eventer } from '../eventer/Eventer';
+import UTILS from './UTILS';
 
 /**
  * 图片纹理类
@@ -8,17 +9,37 @@ import { Eventer } from '../eventer/Eventer';
  * @param {string | Image} img 图片url或者图片对象.
  * @extends JC.Eventer
  */
-function Texture(img) {
+function Texture(img, lazy) {
     Eventer.call(this);
     this.texture = null;
     this.width = 0;
     this.height = 0;
+    this.naturalWidth = 0;
+    this.naturalHeight = 0;
     this.loaded = false;
-
-    this.load(img);
+    this.hadload = false;
+    this.src = img;
+    this.resole(img);
+    if (!lazy || !UTILS.isString(img)) this.load(img);
 
 }
 Texture.prototype = Object.create(Eventer.prototype);
+
+/**
+ * 预先处理一些数据
+ *
+ * @static
+ * @param {string | Image} 先生成对应的对象
+ * @private
+ */
+Texture.prototype.resole = function(img) {
+    if (UTILS.isString(img)) {
+        this.texture = new Image();
+    }
+    if (img instanceof Image || img.nodeName === 'IMG') {
+        this.texture = img;
+    }
+};
 
 /**
  * 尝试加载图片
@@ -28,9 +49,11 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.load = function(img) {
+    if (this.hadload) return;
     var This = this;
-    if (typeof img === 'string') {
-        this.texture = new Image();
+    this.hadload = true;
+    img = img || this.src;
+    if (UTILS.isString(img)) {
         this.texture.crossOrigin = '';
         this.texture.src = img;
         this.texture.onload = function() {
@@ -43,12 +66,15 @@ Texture.prototype.load = function(img) {
         this.on('load', function() {
             This.width = This.texture.width;
             This.height = This.texture.height;
+            This.naturalWidth = This.texture.naturalWidth;
+            This.naturalHeight = This.texture.naturalHeight;
         });
     }
-    if (img instanceof Image && img.width * img.height > 0) {
-        this.texture = img;
+    if ((img instanceof Image || img.nodeName === 'IMG') && img.naturalWidth * img.naturalHeight > 0) {
         this.width = img.width;
         this.height = img.height;
+        this.naturalWidth = img.naturalWidth;
+        this.naturalHeight = img.naturalHeight;
     }
 };
 

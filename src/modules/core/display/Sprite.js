@@ -11,11 +11,10 @@ import { Rectangle } from '../math/Rectangle';
  * });
  * var sprite = new JC.Sprite({
  *      texture: loadBox.getById('frames'),
- *      width: 165,
- *      height: 292,
+ *      frame: new JC.Rectangle(0, 0, w, h),
+ *      width: 100,
+ *      height: 100,
  *      count: 38,
- *      sx: 0,
- *      sy: 0,
  *      animations: {
  *          fall: {start: 0,end: 4,next: 'stand'},
  *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
@@ -56,10 +55,10 @@ Sprite.prototype = Object.create(Container.prototype);
  * @private
  */
 Sprite.prototype.upTexture = function(opts) {
-    this._textureW = opts.texture.width;
-    this._textureH = opts.texture.height;
-    this.width = opts.width || this._textureW;
-    this.height = opts.height || this._textureH;
+    this.naturalWidth = opts.texture.naturalWidth;
+    this.naturalHeight = opts.texture.naturalHeight;
+    this.width = opts.width || this.naturalWidth;
+    this.height = opts.height || this.naturalHeight;
     this.regX = this.width >> 1;
     this.regY = this.height >> 1;
     var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
@@ -70,7 +69,7 @@ Sprite.prototype.upTexture = function(opts) {
 /**
  * 更新对象的动画姿态
  *
- * @method upAnimation
+ * @method updateAnimation
  * @private
  */
 Sprite.prototype.updateAnimation = function(snippet) {
@@ -94,8 +93,8 @@ Sprite.prototype.playMovie = function(opts) {
  */
 Sprite.prototype.renderMe = function(ctx) {
     if (!this._ready) return;
-    var pos = this.MovieClip.getFramePos();
-    ctx.drawImage(this.texture.texture, pos.x, pos.y, this.width, this.height, -this.regX, -this.regY, this.width, this.height);
+    var frame = this.MovieClip.getFrame();
+    ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, -this.regX, -this.regY, this.width, this.height);
 };
 
 export { Sprite };

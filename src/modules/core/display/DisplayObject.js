@@ -362,16 +362,16 @@ DisplayObject.prototype.removeMask = function() {
 /**
  * 设置对象上的属性值
  *
- * @method setVal
+ * @method setProps
  * @private
  */
-DisplayObject.prototype.setVal = function(vals) {
-    if (vals === undefined) return;
-    for (var key in vals) {
+DisplayObject.prototype.setProps = function(props) {
+    if (props === undefined) return;
+    for (var key in props) {
         if (this[key] === undefined) {
             continue;
         } else {
-            this[key] = vals[key];
+            this[key] = props[key];
         }
     }
 };

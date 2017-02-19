@@ -23,10 +23,13 @@ function MovieClip(element, opts) {
     this.animations = opts.animations || {};
 
     this.index = 0;
+    this.preIndex = -1;
     this.direction = 1;
     this.frames = [];
-    this.sy = opts.sy || 0;
-    this.sx = opts.sx || 0;
+    this.frame = opts.frame;
+    this.preFrame = null;
+    // this.sy = opts.sy || 0;
+    // this.sx = opts.sx || 0;
     this.fillMode = 0;
     this.fps = 16;
 
@@ -65,22 +68,22 @@ MovieClip.prototype.update = function(snippet) {
         }
     }
 };
-MovieClip.prototype.getFramePos = function() {
-    var pos = {
-        x: this.sx,
-        y: this.sy
-    };
+MovieClip.prototype.getFrame = function() {
+    if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
+    var frame = this.frame.clone();
     var cf = this.frames[this.index];
     if (cf > 0) {
-        var row = this.element._textureW / this.element.width >> 0;
-        var lintRow = this.sx / this.element.width >> 0;
-        var lintCol = this.sy / this.element.height >> 0;
-        var mCol = lintCol + (lintRow + cf) / row >> 0;
+        var row = this.element.naturalWidth / this.frame.width >> 0;
+        var lintRow = this.frame.x / this.frame.width >> 0;
+        // var lintCol = this.frame.y / this.frame.height >> 0;
+        var mCol = (lintRow + cf) / row >> 0;
         var mRow = (lintRow + cf) % row;
-        pos.x = mRow * this.element.width;
-        pos.y = mCol * this.element.height;
+        frame.x = mRow * this.frame.width;
+        frame.y += mCol * this.frame.height;
     }
-    return pos;
+    this.preIndex = this.index;
+    this.preFrame = frame;
+    return frame;
 };
 MovieClip.prototype.playMovie = function(opts) {
     this.next = null;

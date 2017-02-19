@@ -33,7 +33,7 @@ PathMotion.prototype.nextPose = function() {
         cache.rotation += this._cacheRotate;
         if (_rotate !== false) this.preDegree = _rotate;
     }
-    this.element.setVal(cache);
+    this.element.setProps(cache);
     return cache;
 };
 PathMotion.prototype.getPoint = function(t, points) {
