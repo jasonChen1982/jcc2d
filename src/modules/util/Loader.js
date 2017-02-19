@@ -1,5 +1,5 @@
 import { Eventer } from '../eventer/Eventer';
-import UTILS from './UTILS';
+import { UTILS } from './UTILS';
 
 /**
  * 图片纹理类
