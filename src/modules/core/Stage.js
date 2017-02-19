@@ -232,9 +232,9 @@ Object.defineProperty(Stage.prototype, 'interactive', {
 });
 
 /**
- * 对渲染对象进行x、y轴同时缩放
+ * 场景设置分辨率
  *
- * @member {Boolean}
+ * @member {Number}
  * @name resolution
  * @memberof JC.Stage#
  */
@@ -288,7 +288,7 @@ Stage.prototype.render = function() {
 
     if (this.autoUpdate) this.update();
 
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.setTransform(this.worldTransform.a, this.worldTransform.b, this.worldTransform.c, this.worldTransform.d, this.worldTransform.tx, this.worldTransform.ty);
     if (this.autoClear) this.ctx.clearRect(0, 0, this.width, this.height);
 
     for (var i = 0, l = this.childs.length; i < l; i++) {
