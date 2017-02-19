@@ -16,7 +16,8 @@ import { UTILS } from '../util/UTILS';
  * @extends JC.Container
  * @memberof JC
  */
-function Stage(canvas, bgColor) {
+function Stage(options) { // canvas, bgColor, resolution
+    options = options || {};
     Container.call(this);
 
     /**
@@ -24,7 +25,10 @@ function Stage(canvas, bgColor) {
      *
      * @member {CANVAS}
      */
-    this.canvas = UTILS.isString(canvas) ? document.getElementById(canvas) : canvas;
+    this.canvas = UTILS.isString(options.dom) ? document.getElementById(options.dom) : options.dom;
+
+    this.realWidth = options.width || this.canvas.width;
+    this.realHeight = options.height || this.canvas.height;
 
     /**
      * 场景的canvas的绘图环境
@@ -32,14 +36,7 @@ function Stage(canvas, bgColor) {
      * @member {context2d}
      */
     this.ctx = this.canvas.getContext('2d');
-    this.canvas.style.backgroundColor = bgColor || 'transparent';
-
-    /**
-     * 渲染对象的列表
-     *
-     * @member {Array}
-     */
-    // this.childs = [];
+    this.canvas.style.backgroundColor = options.bgColor || 'transparent';
 
     /**
      * 场景是否自动清除上一帧的像素内容
@@ -67,14 +64,28 @@ function Stage(canvas, bgColor) {
      *
      * @member {Number}
      */
-    this.width = this.canvas.width;
+    this.width = this.canvas.width = this.realWidth * this.resolution;
 
     /**
      * canvas的高度
      *
      * @member {Number}
      */
-    this.height = this.canvas.height;
+    this.height = this.canvas.height = this.realHeight * this.resolution;
+
+    /**
+     * 场景分辨率
+     *
+     * @member {Number}
+     */
+    this._resolution = 0;
+
+    /**
+     * 场景分辨率
+     *
+     * @member {Number}
+     */
+    this.resolution = options.resolution || 1;
 
     /**
      * 上一次绘制的时间点
@@ -137,30 +148,6 @@ function Stage(canvas, bgColor) {
      * @member {Boolean}
      */
     this.enableFPS = true;
-
-    /**
-     * 自身及后代动画的缩放比例
-     *
-     * @member {Number}
-     */
-    // this.timeScale = 1;
-
-    /**
-     * 当前对象所应用的矩阵状态
-     *
-     * @member {JC.Matrix}
-     * @private
-     */
-    // this.worldTransform = new Matrix();
-
-    /**
-     * 根层级的透明参数
-     *
-     * @member {Number}
-     * @private
-     */
-    // this.worldAlpha = 1;
-
 
     this.interactionManager = new InteractionManager(this);
 
@@ -226,11 +213,11 @@ Stage.prototype.proxyOn = function() {
 };
 
 /**
- * 对渲染对象进行x、y轴同时缩放
+ * 标记场景是否可交互，涉及到是否进行事件检测
  *
  * @member {Boolean}
  * @name interactive
- * @memberof JC.InteractionManager#
+ * @memberof JC.Stage#
  */
 Object.defineProperty(Stage.prototype, 'interactive', {
     get: function() {
@@ -245,60 +232,24 @@ Object.defineProperty(Stage.prototype, 'interactive', {
 });
 
 /**
- * 向容器添加一个物体
+ * 对渲染对象进行x、y轴同时缩放
  *
- * ```js
- * stage.adds(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param object {JC.Container}
- * @return {JC.Container}
+ * @member {Boolean}
+ * @name resolution
+ * @memberof JC.Stage#
  */
-// Stage.prototype.adds = function(object) {
-//     if (arguments.length > 1) {
-//         for (var i = 0; i < arguments.length; i++) {
-//             this.adds(arguments[i]);
-//         }
-//         return this;
-//     }
-//     if (object === this) {
-//         console.error('adds: object can\'t be added as a child of itself.', object);
-//         return this;
-//     }
-//     if ((object && object instanceof Container)) {
-//         if (object.parent !== null) {
-//             object.parent.remove(object);
-//         }
-//         object.parent = this;
-//         this.childs.push(object);
-//     } else {
-//         console.error('adds: object not an instance of Container', object);
-//     }
-//     return this;
-// };
-
-/**
- * 从容器移除一个物体
- *
- * ```js
- * stage.remove(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param object {JC.Container}
- * @return {JC.Container}
- */
-// Stage.prototype.remove = function(object) {
-//     if (arguments.length > 1) {
-//         for (var i = 0; i < arguments.length; i++) {
-//             this.remove(arguments[i]);
-//         }
-//     }
-//     var index = this.childs.indexOf(object);
-//     if (index !== -1) {
-//         object.parent = null;
-//         this.childs.splice(index, 1);
-//     }
-// };
+Object.defineProperty(Stage.prototype, 'resolution', {
+    get: function() {
+        return this._resolution;
+    },
+    set: function(value) {
+        if (this._resolution !== value) {
+            this._resolution = value;
+            this.worldTransform.identity().scale(value, value);
+            this.resize();
+        }
+    }
+});
 
 /**
  * 舞台尺寸设置
@@ -310,11 +261,18 @@ Object.defineProperty(Stage.prototype, 'interactive', {
  * @param sh {number} canvas的style.height值，需将舞台属性autoStyle设置为true
  */
 Stage.prototype.resize = function(w, h, sw, sh) {
-    this.width = this.canvas.width = w;
-    this.height = this.canvas.height = h;
+    if (UTILS.isNumber(w) && UTILS.isNumber(h)) {
+        this.realWidth = w;
+        this.realHeight = h;
+    } else {
+        w = this.realWidth;
+        h = this.realHeight;
+    }
+    this.width = this.canvas.width = w * this.resolution;
+    this.height = this.canvas.height = h * this.resolution;
     if (this.autoStyle && sw && sh) {
-        this.canvas.style.width = sw + 'px';
-        this.canvas.style.height = sh + 'px';
+        this.canvas.style.width = UTILS.isString(sw) ? sw : sw + 'px';
+        this.canvas.style.height = UTILS.isString(sh) ? sh : sh + 'px';
     }
 };
 
@@ -368,7 +326,7 @@ Stage.prototype.timeline = function() {
         this._renderTimes++;
         this._takeTime += Math.max(15, this.snippet);
         this.fps = 1000 / Math.max(15, this.snippet) >> 0;
-        this.averageFps = this._takeTime / this._renderTimes >> 0;
+        this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
     }
 
     this.pt += this.snippet;
