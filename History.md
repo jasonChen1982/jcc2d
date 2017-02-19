@@ -1,3 +1,9 @@
+0.2.8 / 2017-02-19
+==================
+
+  * feat: sprite can adjust width and height
+  * fix: fix averageFps
+  * feat: change Stage arguments to options
 
 0.2.5 / 2016-11-07
 ==================
