@@ -98,6 +98,12 @@ Point.prototype.set = function (x, y)
     this.y = y || ( (y !== 0) ? this.x : 0 ) ;
 };
 
+/**
+ * 事件系统的事件消息对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ */
 function InteractionData(){
     /**
      * 转换到canvas坐标系统的事件触发点
@@ -509,6 +515,13 @@ var UTILS = {
     },
 };
 
+/**
+ * 动画对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
 function Animate(opts) {
     this.element = opts.element || {};
     this.duration = opts.duration || 300;
@@ -598,6 +611,15 @@ Animate.prototype.cancle = function() {
     this.living = false;
 };
 
+// import { UTILS } from '../util/UTILS';
+
+/**
+ * Transition类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画所具备的特性
+ */
 function Transition(opts) {
     Animate.call(this, opts);
 
@@ -607,6 +629,13 @@ function Transition(opts) {
 }
 Transition.prototype = Object.create(Animate.prototype);
 
+/**
+ * PathMotion类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画所具备的特性
+ */
 function PathMotion(opts) {
     Animate.call(this, opts);
 
@@ -665,6 +694,13 @@ PathMotion.prototype.decomposeRotate = function(t, pos) {
     return pi * Math.acos(cos) * UTILS.RTD;
 };
 
+/**
+ * KeyFrames类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [opts] {object} 动画配置信息
+ */
 function KeyFrames(opts) {
     Animate.call(this, opts);
 
@@ -727,6 +763,12 @@ KeyFrames.prototype.update = function(snippet) {
     }
 };
 
+/**
+ * Animation类型动画对象
+ *
+ * @class
+ * @memberof JC
+ */
 function Animation(element) {
     this.element = element;
     // this.start = false;
@@ -768,6 +810,14 @@ Animation.prototype.clear = function() {
     this.animates.length = 0;
 };
 
+/**
+ * 图片纹理类
+ *
+ * @class
+ * @memberof JC
+ * @param {string | Image} img 图片url或者图片对象.
+ * @extends JC.Eventer
+ */
 function Texture(img, lazy) {
     Eventer.call(this);
     this.texture = null;
@@ -1021,6 +1071,12 @@ Rectangle.prototype.contains = function (x, y)
     return false;
 };
 
+/**
+ * 显示对象的包围盒子
+ *
+ * @class
+ * @memberof JC
+ */
 function Bounds(minX, minY, maxX, maxY) {
     /**
      * @member {number}
@@ -1150,6 +1206,15 @@ Bounds.prototype.addBounds = function(bounds) {
     this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
+/**
+ * @class
+ * @memberof JC
+ * @param points {JC.Point[]|number[]|...JC.Point|...number} 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
+ *
+ *
+ *
+ *
+ */
 function Polygon(points_) {
     var points = points_;
 
@@ -1213,6 +1278,15 @@ Polygon.prototype.contains = function (x, y)
     return inside;
 };
 
+/**
+ * 圆形对象
+ *
+ * @class
+ * @memberof JC
+ * @param x {number} x轴的坐标
+ * @param y {number} y轴的坐标
+ * @param radius {number} 圆的半径
+ */
 function Circle(x, y, radius)
 {
     /**
@@ -1278,6 +1352,16 @@ Circle.prototype.getBounds = function ()
     return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 };
 
+/**
+ * 椭圆对象
+ *
+ * @class
+ * @memberof JC
+ * @param x {number} x轴的坐标
+ * @param y {number} y轴的坐标
+ * @param width {number} 椭圆的宽度
+ * @param height {number} 椭圆的高度
+ */
 function Ellipse(x, y, width, height)
 {
     /**
@@ -1547,6 +1631,13 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 var IDENTITY = new Matrix();
 var TEMP_MATRIX = new Matrix();
 
+/**
+ * 显示对象的基类，继承至Eventer
+ *
+ * @class
+ * @extends JC.Eventer
+ * @memberof JC
+ */
 function DisplayObject() {
     Eventer.call(this);
     /**
@@ -2074,6 +2165,18 @@ DisplayObject.prototype.contains = function (global) {
     return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
 
+/**
+ * 显示对象容器，继承至DisplayObject
+ *
+ * ```js
+ * var container = new JC.Container();
+ * container.addChilds(sprite);
+ * ```
+ *
+ * @class
+ * @extends JC.DisplayObject
+ * @memberof JC
+ */
 function Container() {
     DisplayObject.call(this);
 
@@ -2379,6 +2482,15 @@ Container.prototype.cancle = function() {
     this.Animator.clear();
 };
 
+// TODO 继承事件对象
+/**
+ * MovieClip类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param [element] {object} 动画对象 内部传入
+ * @param [opts] {object} 动画配置信息 内部传入
+ */
 function MovieClip(element, opts) {
     this.element = element;
     this.living = false;
@@ -2647,6 +2759,18 @@ FrameBuffer.prototype.putBuffer = function() {
 FrameBuffer.prototype.createBuffer = function() {
 };
 
+/**
+ * 形状对象，继承至Container
+ *
+ *
+ * ```js
+ * var graphics = new JC.Graphics();
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
 function Graphics() {
     Container.call(this);
     this.frameBuffer = null;
@@ -2721,6 +2845,18 @@ Graphics.prototype.drawCall = function(fn, opts) {
     this.setBounds(opts.bounds);
 };
 
+/**
+ * 文本，继承至Container
+ *
+ *
+ * ```js
+ * var text = new JC.Text('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
 function Text(text,font,color){
     Container.call( this );
     this.text = text.toString();
@@ -3433,6 +3569,19 @@ InteractionManager.prototype.getPos = function(obj) {
 };
 
 // import { Matrix } from './math/Matrix';
+// import { Eventer } from '../eventer/Eventer';
+/**
+ * 舞台对象，继承至Eventer
+ *
+ *
+ * ```js
+ * var stage = new JC.Stage('demo_canvas','#fff');
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
 function Stage(options) { // canvas, bgColor, resolution
     options = options || {};
     Container.call(this);
