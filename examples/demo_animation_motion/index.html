@@ -48,7 +48,9 @@ JC.TWEEN.extend(tween);
 
 var w = window.innerWidth,
     h = window.innerHeight,
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container();
 DOC.x = w>>1;
 DOC.y = h>>1;

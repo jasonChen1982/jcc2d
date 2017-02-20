@@ -49,7 +49,9 @@
         document.body.appendChild(stats.domElement);
 
         // init
-        var stage = new JC.Stage('demo_canvas');
+        var stage = new JC.Stage({
+            dom: 'demo_canvas'
+        });
         var starContainer = new JC.Container();
         var COLORS = ['#f00', '#f6f', '#ff0', '#66f'];
 

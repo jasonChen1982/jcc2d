@@ -33,7 +33,9 @@ window.onresize = function() {
 var w = window.innerWidth,
     h = window.innerHeight,
     materialSprites=[],
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container();
 DOC.x = w / 2;
 DOC.y = h / 2;

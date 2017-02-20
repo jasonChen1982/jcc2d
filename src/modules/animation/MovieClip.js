@@ -26,7 +26,6 @@ function MovieClip(element, opts) {
     this.preIndex = -1;
     this.direction = 1;
     this.frames = [];
-    this.frame = opts.frame;
     this.preFrame = null;
     // this.sy = opts.sy || 0;
     // this.sx = opts.sx || 0;
@@ -70,16 +69,16 @@ MovieClip.prototype.update = function(snippet) {
 };
 MovieClip.prototype.getFrame = function() {
     if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
-    var frame = this.frame.clone();
+    var frame = this.element.frame.clone();
     var cf = this.frames[this.index];
     if (cf > 0) {
-        var row = this.element.naturalWidth / this.frame.width >> 0;
-        var lintRow = this.frame.x / this.frame.width >> 0;
-        // var lintCol = this.frame.y / this.frame.height >> 0;
+        var row = this.element.naturalWidth / this.element.frame.width >> 0;
+        var lintRow = this.element.frame.x / this.element.frame.width >> 0;
+        // var lintCol = this.element.frame.y / this.element.frame.height >> 0;
         var mCol = (lintRow + cf) / row >> 0;
         var mRow = (lintRow + cf) % row;
-        frame.x = mRow * this.frame.width;
-        frame.y += mCol * this.frame.height;
+        frame.x = mRow * this.element.frame.width;
+        frame.y += mCol * this.element.frame.height;
     }
     this.preIndex = this.index;
     this.preFrame = frame;

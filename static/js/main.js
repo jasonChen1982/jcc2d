@@ -146,7 +146,9 @@ var w = window.innerWidth,
     rectLeftFront = new JC.Graphics(),
     rectRightBack = new JC.Graphics(),
     rectRightFront = new JC.Graphics(),
-    stage = new JC.Stage('line-canvas'),
+    stage = new JC.Stage({
+        dom: 'line-canvas'
+    }),
     BG = new JC.Container(),
     DOC = new JC.Container(),
     LOGO = new JC.Container(),

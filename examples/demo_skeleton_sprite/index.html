@@ -29,7 +29,9 @@ window.onresize = function(){
 
 var w = window.innerWidth*window.devicePixelRatio,
     h = window.innerHeight*window.devicePixelRatio,
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container(),
     bodyDoc,
     body,

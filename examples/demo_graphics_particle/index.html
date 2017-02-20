@@ -138,7 +138,9 @@ var w = window.innerWidth,
     COLOURS = [ '#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423' ],
     particle,
     JCparticle,
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container();
 resize();
 DOC.x = w/2;

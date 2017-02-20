@@ -28,7 +28,9 @@ var w = window.innerWidth,
     pic,
     pic2,
     pic3,
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container();
 DOC.x = w/2;
 DOC.y = h/2;

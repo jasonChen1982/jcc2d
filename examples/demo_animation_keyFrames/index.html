@@ -39,7 +39,9 @@ Rect.prototype.render = function(ctx){
 JC.TWEEN.extend(tween);
 
 var shape = [],
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container();
 DOC.x = 320;
 DOC.y = 400;

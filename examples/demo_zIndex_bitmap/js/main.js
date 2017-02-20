@@ -6,7 +6,9 @@ var HEIGHT = window.innerHeight;
 var WIDTH = window.innerWidth;
 var COLORS = ['#FF324A', '#31FFA6', '#206EFF', '#FFFF99'];
 
-var stage = new JC.Stage('canvas-3d');
+var stage = new JC.Stage({
+    dom: 'canvas-3d'
+});
 var DOC = new JC.Container();
 var sphere = null;
 resize();
@@ -165,6 +167,7 @@ stage.on('mousemove', function(ev){
 
     var r = Math.sqrt(point.x * point.x + point.y * point.y);
     var s = r / Math.max(HEIGHT/3,WIDTH/3);
+    if (r === 0) return;
 
     sphere.palstance.x = Math.sqrt(s) * point.y / r;
     sphere.palstance.y = Math.sqrt(s) * point.x / r;

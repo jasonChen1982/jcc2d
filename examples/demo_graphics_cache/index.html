@@ -28,7 +28,9 @@ var w = window.innerWidth,
     cacheMap,
     cacheMap2,
     COLOURS = [ '#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423' ],
-    stage = new JC.Stage('demo_canvas'),
+    stage = new JC.Stage({
+        dom: 'demo_canvas'
+    }),
     DOC = new JC.Container();
 resize();
 DOC.x = w/2;
