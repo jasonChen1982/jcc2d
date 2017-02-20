@@ -95,3 +95,4 @@ jspm_packages
 
 # just for myself
 .sublimelinterrc
+.vscode
