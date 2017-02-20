@@ -46,7 +46,8 @@ resize();
 
 for (var i = 0; i < 300; i++) {
     var el = new JC.Sprite({
-        texture: loadBox.getById('pic')
+        texture: loadBox.getById('pic'),
+        frame: new JC.Rectangle(0, 0, 220, 220)
     });
     el.x = (Math.random()-0.5)*2*w;
     el.y = (Math.random()-0.5)*2*h;
