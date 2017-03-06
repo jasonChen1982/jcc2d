@@ -2850,14 +2850,14 @@ Graphics.prototype.drawCall = function(fn, opts) {
  *
  *
  * ```js
- * var text = new JC.Text('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * var text = new JC.TextFace('JC jcc2d canvas renderer','bold 36px Arial','#f00');
  * ```
  *
  * @class
  * @extends JC.Container
  * @memberof JC
  */
-function Text(text,font,color){
+function TextFace(text,font,color){
     Container.call( this );
     this.text = text.toString();
     this.font = font || 'bold 12px Arial';
@@ -2875,7 +2875,7 @@ function Text(text,font,color){
 
     // ctx.measureText(str) 返回指定文本的宽度
 }
-Text.prototype = Object.create( Container.prototype );
+TextFace.prototype = Object.create( Container.prototype );
 
 /**
  * 更新对象本身的矩阵姿态以及透明度
@@ -2883,7 +2883,7 @@ Text.prototype = Object.create( Container.prototype );
  * @method updateMe
  * @private
  */
-Text.prototype.renderMe = function(ctx){
+TextFace.prototype.renderMe = function(ctx){
     ctx.font = this.font;
     ctx.textAlign = this.textAlign;
     ctx.textBaseline = this.textBaseline;
@@ -3044,7 +3044,7 @@ var MUL_TABLE = [1, 171, 205, 293, 57, 373, 79, 137, 241, 27, 391, 357, 41, 19, 
 
 var SHG_TABLE = [0, 9, 10, 11, 9, 12, 10, 11, 12, 9, 13, 13, 10, 9, 13, 13, 14, 14, 14, 14, 10, 13, 14, 14, 14, 13, 13, 13, 9, 14, 14, 14, 15, 14, 15, 14, 15, 15, 14, 15, 15, 15, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15, 15, 15, 12, 14, 15, 15, 13, 15, 15, 15, 15, 16, 16, 16, 15, 16, 14, 16, 16, 14, 16, 13, 16, 16, 16, 15, 16, 13, 16, 15, 16, 14, 9, 16, 16, 16, 16, 16, 16, 16, 16, 16, 13, 14, 16, 16, 15, 16, 16, 10, 16, 15, 16, 14, 16, 16, 14, 16, 16, 14, 16, 16, 14, 15, 16, 16, 16, 14, 15, 14, 15, 13, 16, 16, 15, 17, 17, 17, 17, 17, 17, 14, 15, 17, 17, 16, 16, 17, 16, 15, 17, 16, 17, 11, 17, 16, 17, 16, 17, 16, 17, 17, 16, 17, 17, 16, 17, 17, 16, 16, 17, 17, 17, 16, 14, 17, 17, 17, 17, 15, 16, 14, 16, 15, 16, 13, 16, 15, 16, 14, 16, 15, 16, 12, 16, 15, 16, 17, 17, 17, 17, 17, 13, 16, 15, 17, 17, 17, 16, 15, 17, 17, 17, 16, 15, 17, 17, 14, 16, 17, 17, 16, 17, 17, 16, 15, 17, 16, 14, 17, 16, 15, 17, 16, 17, 17, 16, 17, 15, 16, 17, 14, 17, 16, 15, 17, 16, 17, 13, 17, 16, 17, 17, 16, 17, 14, 17, 16, 17, 16, 17, 16, 17, 9];
 
-
+/* eslint-disable */
 BlurFilter.prototype._applyFilter = function(imageData) {
 
     var radiusX = this.blurX >> 1;
@@ -3930,7 +3930,7 @@ exports.DisplayObject = DisplayObject;
 exports.Container = Container;
 exports.Sprite = Sprite;
 exports.Graphics = Graphics;
-exports.Text = Text;
+exports.TextFace = TextFace;
 exports.BlurFilter = BlurFilter;
 exports.Stage = Stage;
 
