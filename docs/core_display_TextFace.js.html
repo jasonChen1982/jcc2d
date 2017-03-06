@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: core/math/Bounds.js</title>
+    <title>Source: core/display/TextFace.js</title>
     
     
     
@@ -1225,151 +1225,69 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="core_math_Bounds.js.html">Source: core/math/Bounds.js</h1>
+        <h1 class="page-title" data-filename="core_display_TextFace.js.html">Source: core/display/TextFace.js</h1>
         
 
 
     
     <section>
         <article>
-            <pre id="source-code" class="prettyprint source linenums"><code>import { Rectangle } from './Rectangle';
+            <pre id="source-code" class="prettyprint source linenums"><code>import { Container } from './Container';
 
 /**
- * 显示对象的包围盒子
+ * 文本，继承至Container
+ *
+ *
+ * ```js
+ * var text = new JC.TextFace('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * ```
  *
  * @class
+ * @extends JC.Container
  * @memberof JC
  */
-function Bounds(minX, minY, maxX, maxY) {
-    /**
-     * @member {number}
-     * @default 0
-     */
-    this.minX = minX || Infinity;
+function TextFace(text,font,color){
+    Container.call( this );
+    this.text = text.toString();
+    this.font = font || 'bold 12px Arial';
+    this.color = color || '#000000';
 
-    /**
-     * @member {number}
-     * @default 0
-     */
-    this.minY = minY || Infinity;
+    this.textAlign = 'center'; // start left center end right
+    this.textBaseline = 'middle'; // top bottom middle alphabetic hanging
 
-    /**
-     * @member {number}
-     * @default 0
-     */
-    this.maxX = maxX || -Infinity;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
-    this.maxY = maxY || -Infinity;
+    this.outline = 0;
+    this.lineWidth = 1;
 
-    this.rect = null;
+    this.US = false; // use stroke
+    this.UF = true; // use fill
+
+    // ctx.measureText(str) 返回指定文本的宽度
 }
-
-Bounds.prototype.isEmpty = function() {
-    return this.minX > this.maxX || this.minY > this.maxY;
-};
-
-Bounds.prototype.clear = function() {
-    // this.updateID++;
-
-    this.minX = Infinity;
-    this.minY = Infinity;
-    this.maxX = -Infinity;
-    this.maxY = -Infinity;
-};
+TextFace.prototype = Object.create( Container.prototype );
 
 /**
- * 将包围盒子转换成矩形描述
+ * 更新对象本身的矩阵姿态以及透明度
  *
- * @param rect {JC.Rectangle} 待转换的矩形
- * @returns {JC.Rectangle}
+ * @method updateMe
+ * @private
  */
-Bounds.prototype.getRectangle = function(rect) {
-    if (this.isEmpty()) {
-        return Rectangle.EMPTY;
+TextFace.prototype.renderMe = function(ctx){
+    ctx.font = this.font;
+    ctx.textAlign = this.textAlign;
+    ctx.textBaseline = this.textBaseline;
+    if(this.UF){
+        ctx.fillStyle = this.color;
+        ctx.fillText(this.text,0,0);
     }
-
-    rect = rect || new Rectangle(0, 0, 1, 1);
-
-    rect.x = this.minX;
-    rect.y = this.minY;
-    rect.width = this.maxX - this.minX;
-    rect.height = this.maxY - this.minY;
-
-    return rect;
-};
-
-/**
- * 往包围盒增加外部顶点，更新包围盒区域
- *
- * @param point {JC.Point}
- */
-Bounds.prototype.addPoint = function(point) {
-    this.minX = Math.min(this.minX, point.x);
-    this.maxX = Math.max(this.maxX, point.x);
-    this.minY = Math.min(this.minY, point.y);
-    this.maxY = Math.max(this.maxY, point.y);
-};
-
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param point {JC.Rectangle}
- */
-Bounds.prototype.addRect = function(rect) {
-    this.minX = rect.x;
-    this.maxX = rect.width + rect.x;
-    this.minY = rect.y;
-    this.maxY = rect.height + rect.y;
-};
-
-/**
- * 往包围盒增加顶点数组，更新包围盒区域
- *
- * @param point {Array}
- */
-Bounds.prototype.addVert = function(vertices) {
-    var minX = this.minX,
-        minY = this.minY,
-        maxX = this.maxX,
-        maxY = this.maxY;
-
-    for (var i = 0; i &lt; vertices.length; i += 2) {
-        var x = vertices[i    ];
-        var y = vertices[i + 1];
-        minX = x &lt; minX ? x : minX;
-        minY = y &lt; minY ? y : minY;
-        maxX = x > maxX ? x : maxX;
-        maxY = y > maxY ? y : maxY;
+    if(this.US){
+        ctx.lineWidth = this.lineWidth;
+        ctx.strokeStyle = this.color;
+        ctx.strokeText(this.text,0,0);
     }
-
-    this.minX = minX;
-    this.minY = minY;
-    this.maxX = maxX;
-    this.maxY = maxY;
 };
 
-/**
- * 往包围盒增加包围盒，更新包围盒区域
- *
- * @param point {JC.Bounds}
- */
-Bounds.prototype.addBounds = function(bounds) {
-    var minX = this.minX,
-        minY = this.minY,
-        maxX = this.maxX,
-        maxY = this.maxY;
-
-    this.minX = bounds.minX &lt; minX ? bounds.minX : minX;
-    this.minY = bounds.minY &lt; minY ? bounds.minY : minY;
-    this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
-    this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
-};
-
-export { Bounds };
+export { TextFace };
 </code></pre>
         </article>
     </section>
