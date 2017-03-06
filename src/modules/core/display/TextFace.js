@@ -5,14 +5,14 @@ import { Container } from './Container';
  *
  *
  * ```js
- * var text = new JC.Text('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * var text = new JC.TextFace('JC jcc2d canvas renderer','bold 36px Arial','#f00');
  * ```
  *
  * @class
  * @extends JC.Container
  * @memberof JC
  */
-function Text(text,font,color){
+function TextFace(text,font,color){
     Container.call( this );
     this.text = text.toString();
     this.font = font || 'bold 12px Arial';
@@ -30,7 +30,7 @@ function Text(text,font,color){
 
     // ctx.measureText(str) 返回指定文本的宽度
 }
-Text.prototype = Object.create( Container.prototype );
+TextFace.prototype = Object.create( Container.prototype );
 
 /**
  * 更新对象本身的矩阵姿态以及透明度
@@ -38,7 +38,7 @@ Text.prototype = Object.create( Container.prototype );
  * @method updateMe
  * @private
  */
-Text.prototype.renderMe = function(ctx){
+TextFace.prototype.renderMe = function(ctx){
     ctx.font = this.font;
     ctx.textAlign = this.textAlign;
     ctx.textBaseline = this.textBaseline;
@@ -53,4 +53,4 @@ Text.prototype.renderMe = function(ctx){
     }
 };
 
-export { Text };
+export { TextFace };
