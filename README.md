@@ -2,7 +2,21 @@
 [![Build Status](https://img.shields.io/travis/jasonChen1982/jcc2d.svg?style=flat-square)](https://travis-ci.org/jasonChen1982/jcc2d)
 [![npm](https://img.shields.io/npm/v/jcc2d.svg?style=flat-square)](https://jasonchen1982.github.io/jcc2d/)
 
-一个高性能的轻量级canvas渲染引擎、动画引擎 [demo&documention](https://jasonchen1982.github.io/jcc2d/)
+A lightweight render engine based on canvas2d & An awesome animator with high performance [demo&documention](https://jasonchen1982.github.io/jcc2d/)
+---
+
+### Show case
+ * [refactor usopen-sessions main page][jcc2d]
+ * [particle effect][particle]
+ * [3D pictures cloud][zIndex-demo]
+ * [sprites movieclip][movieclip]
+ * [blur mask high performance filter][blur-mask]
+ * [skeleton draw by graphics][skeleton-graphics]
+ * [skeleton draw by sprite][skeleton-sprite]
+ * [check eventer pointer exact polygon][event-exact-polygon]
+ * [varied timingfunction supported][varied-timingfunction]
+ * [path motion animation][path-motion]
+
 
 ### 优势
   体积小、功能强大、低门槛、精简的[API](https://jasonchen1982.github.io/jcc2d/docs/)、优异的性能、成熟的引擎结构设计、高度可扩展性、强大的事件机制及事件系统，该引擎足以实现绝大部分canvas动画，为你提供快速的canvas动画开发。 
@@ -48,3 +62,14 @@ jcc2d有几大主要类型，动画师（Animator）、事件系统（Eventer）
 ### License
 
 [MIT](http://opensource.org/licenses/MIT)
+
+[jcc2d]:https://jasonchen1982.github.io/jcc2d/ "jcc2d main page"
+[particle]:https://jasonchen1982.github.io/jcc2d/examples/ "Particle effect"
+[zIndex-demo]:https://jasonchen1982.github.io/jcc2d/examples/#demo_zIndex_bitmap "3D pictures cloud used zIndex"
+[movieclip]:https://jasonchen1982.github.io/jcc2d/examples/#demo_frames_sprite "sprites movieclip"
+[blur-mask]:https://jasonchen1982.github.io/jcc2d/examples/#demo_filter_blur "blur mask high performance filter"
+[skeleton-graphics]:https://jasonchen1982.github.io/jcc2d/examples/#demo_skeleton_graphics "skeleton draw by graphics"
+[skeleton-sprite]:https://jasonchen1982.github.io/jcc2d/examples/#demo_skeleton_sprite "skeleton draw by sprite"
+[event-exact-polygon]:https://jasonchen1982.github.io/jcc2d/examples/#demo_interactive_boundPrecise "check eventer pointer exact polygon"
+[varied-timingfunction]:https://jasonchen1982.github.io/jcc2d/examples/#demo_timingfunction_allInOne "varied timingfunction supported"
+[path-motion]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_motion "path motion animation"
