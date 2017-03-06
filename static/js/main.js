@@ -272,13 +272,13 @@ var texts = [
     ],
     textDOC = [];
 for (var i = 0; i < texts.length; i++) {
-    textDOC[i] = new JC.Text(texts[i].text, 'bold '+JC.UI.RTP(.7)+'px Tangerine');
+    textDOC[i] = new JC.TextFace(texts[i].text, 'bold '+JC.UI.RTP(.7)+'px Tangerine');
     textDOC[i].x = texts[i].x;
     textDOC[i].y = -h/3;
     textDOC[i].alpha = 0;
     LOGO.adds(textDOC[i]);
 }
-var miniText = new JC.Text('The canvas 2d renderer & An awesome animator', 'normal '+JC.UI.RTP(.2)+'px Tangerine');
+var miniText = new JC.TextFace('The canvas 2d renderer & An awesome animator', 'normal '+JC.UI.RTP(.2)+'px Tangerine');
 miniText.y = JC.UI.RTP(.7);
 miniText.alpha = 0;
 LOGO.adds(miniText,BTNBOX);
