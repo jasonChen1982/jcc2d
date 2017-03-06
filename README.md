@@ -4,24 +4,24 @@
 
 一个高性能的轻量级canvas渲染引擎、动画引擎 [demo&documention](https://jasonchen1982.github.io/jcc2d/)
 
-### 优势 ###
+### 优势
   体积小、功能强大、低门槛、精简的[API](https://jasonchen1982.github.io/jcc2d/docs/)、优异的性能、成熟的引擎结构设计、高度可扩展性、强大的事件机制及事件系统，该引擎足以实现绝大部分canvas动画，为你提供快速的canvas动画开发。 
 
-### 引擎功能 ###
+### 引擎功能
 
 主要渲染canvas的三种类型的物体，位图、形状和文字。jcc2d提供了简单的API接口来操作物体，并且可以调用每个物体的时间缓动函数来使物体做制定属性的运动（动画）。可以操作的属性有alpha、scale、scaleX、scaleY、skewX、skewY、rotation、x、y、pivotX、pivotY等。
 
-### 框架介绍 ###
+### 框架介绍
 jcc2d有几大主要类型，动画师（Animator）、事件系统（Eventer）、显示对象（DisplayObject）、容器（Container）、位图（Sprite）、形状（Graphics）、文字（Text）、舞台（Stage）。
 
 其中它们的关系如下图：
 
 ![继承关系图](https://jasonchen1982.github.io/jcc2d/static/images/extend.png)
 
-### 快速入门 ###
+### 快速入门
 [quick Start](http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010)
 
-### 常用的类 ###
+### 常用的类
 
 容器（Container）：
   从DisplayObject类继承而来，这是一个抽象层，可以用来装位图（Sprite）、形状（Graphics）、文字（Text）等物体形成一个组。容器可以想象成是PS里面的一个组或者前端页面布局里面的div。如果你想对一组物体进行缩放，你可以将这些物体放在同一个容器中，之后你只需要操作这个容器的缩放属性即可。
@@ -41,5 +41,10 @@ jcc2d有几大主要类型，动画师（Animator）、事件系统（Eventer）
   从Container类继承而来，舞台负责绑定canvas元素以及对canvas视口进行操作，需要显示的物体都得添加到舞台中，最好通过舞台的render方法进行逐一绘制。
   
 
-### 使用例子 ###
+### 使用例子
   查看项目下的 [examples](https://jasonchen1982.github.io/jcc2d/examples/) 目录
+
+
+### License
+
+[MIT](http://opensource.org/licenses/MIT)

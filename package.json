@@ -21,6 +21,9 @@
     "postversion": "git push github-origin master && git push github-origin v$npm_package_version",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "testem ci",
+    "lint": "eslint .",
+    "precommit": "npm run lint",
+    "commitmsg": "validate-commit-msg",
     "changelog": "git changelog"
   },
   "keywords": [
@@ -57,7 +60,27 @@
     "rollup": "^0.36.3",
     "rollup-watch": "^2.5.0",
     "run-sequence": "^1.1.2",
+    "husky": "^0.13.2",
+    "validate-commit-msg": "^2.11.1",
     "testem": "^1.13.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "config": {
+    "validate-commit-msg": {
+      "types": [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "chore",
+        "release",
+        "build",
+        "revert",
+        "deps"
+      ]
+    }
+  }
 }

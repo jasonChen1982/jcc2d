@@ -4,3 +4,4 @@ static/**
 examples/**
 docs/**
 test/**
+gulpfile.js
