@@ -5,6 +5,7 @@
 
 A canvas 2d renderer & An awesome animator
 ---
+[![main page][main-page]][jcc2d]
 
 ## Show case
 * [refactor usopen-sessions main page][jcc2d]
