@@ -61,13 +61,13 @@ ball.fromTo({
 
 
 
-## Quick start
+## Quick Start
 [runing man][quick-start]
 
-## Documention
- [documention][documention]
+## Documentation
+ [documentation][documentation]
 
-## Example
+## Examples
  [examples][examples]
 
 ## License
@@ -76,7 +76,7 @@ ball.fromTo({
 
 [main-page]:https://jasonchen1982.github.io/jcc2d/static/images/main-page.png "main page"
 [jcc2d]:https://jasonchen1982.github.io/jcc2d/ "jcc2d main page"
-[documention]:https://jasonchen1982.github.io/jcc2d/docs "jcc2d documention page"
+[documentation]:https://jasonchen1982.github.io/jcc2d/docs "jcc2d documention page"
 [examples]:https://jasonchen1982.github.io/jcc2d/examples "jcc2d examples page"
 [particle]:https://jasonchen1982.github.io/jcc2d/examples/ "Particle effect"
 [zIndex-demo]:https://jasonchen1982.github.io/jcc2d/examples/#demo_zIndex_bitmap "3D pictures cloud used zIndex"
