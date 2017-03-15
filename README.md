@@ -49,14 +49,14 @@ ball.fromTo({
 
 ## Display animation property
 
-|                   type                   |         property          |
-| :--------------------------------------: | :-----------------------: |
+|                   type                    |         property          |
+| :---------------------------------------: | :-----------------------: |
 | display instance coordinate axis position |          `x` `y`          |
-|       display instance scale value       | `scale` `scaleX` `scaleY` |
-|       display instance skew value        |      `skewX` `skewY`      |
-|    display instance rotation with CCW    |        `rotation`         |
-|      display instance opacity alpha      |          `alpha`          |
-|          display instance pivot          |    ` pivotX` ` pivotY`    |
+|       display instance scale value        | `scale` `scaleX` `scaleY` |
+|       display instance skew value         |      `skewX` `skewY`      |
+|    display instance rotation with CCW     |        `rotation`         |
+|      display instance opacity alpha       |          `alpha`          |
+|          display instance pivot           |    ` pivotX` ` pivotY`    |
 
 
 
@@ -65,10 +65,10 @@ ball.fromTo({
 [runing man][quick-start]
 
 ## Documention
- [documention][documention]
+[documention][documention]
 
 ## Example
- [examples][examples]
+[examples][examples]
 
 ## License
 
