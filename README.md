@@ -49,11 +49,11 @@ ball.fromTo({
 
 ## Display animation property
 
-|                   type                    |         property          |
+|                    type                   |         property          |
 | :---------------------------------------: | :-----------------------: |
 | display instance coordinate axis position |          `x` `y`          |
 |       display instance scale value        | `scale` `scaleX` `scaleY` |
-|       display instance skew value         |      `skewX` `skewY`      |
+|        display instance skew value        |      `skewX` `skewY`      |
 |    display instance rotation with CCW     |        `rotation`         |
 |      display instance opacity alpha       |          `alpha`          |
 |          display instance pivot           |    ` pivotX` ` pivotY`    |
@@ -61,14 +61,14 @@ ball.fromTo({
 
 
 
-## Quick start
+## Quick Start
 [runing man][quick-start]
 
-## Documention
-[documention][documention]
+## Documentation
+ [documentation][documentation]
 
-## Example
-[examples][examples]
+## Examples
+ [examples][examples]
 
 ## License
 
@@ -76,7 +76,7 @@ ball.fromTo({
 
 [main-page]:https://jasonchen1982.github.io/jcc2d/static/images/main-page.png "main page"
 [jcc2d]:https://jasonchen1982.github.io/jcc2d/ "jcc2d main page"
-[documention]:https://jasonchen1982.github.io/jcc2d/docs "jcc2d documention page"
+[documentation]:https://jasonchen1982.github.io/jcc2d/docs "jcc2d documention page"
 [examples]:https://jasonchen1982.github.io/jcc2d/examples "jcc2d examples page"
 [particle]:https://jasonchen1982.github.io/jcc2d/examples/ "Particle effect"
 [zIndex-demo]:https://jasonchen1982.github.io/jcc2d/examples/#demo_zIndex_bitmap "3D pictures cloud used zIndex"
