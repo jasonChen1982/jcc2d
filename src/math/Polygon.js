@@ -1,5 +1,5 @@
 import { Point } from './Point';
-import { UTILS } from '../../util/UTILS';
+import { UTILS } from '../util/UTILS';
 
 /**
  * @class

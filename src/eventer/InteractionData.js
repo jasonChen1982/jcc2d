@@ -1,4 +1,4 @@
-import { Point } from '../core/math/Point';
+import { Point } from '../math/Point';
 
 /**
  * 事件系统的事件消息对象的基本类型

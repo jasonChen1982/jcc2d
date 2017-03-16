@@ -1,5 +1,5 @@
 import { Container } from './Container';
-import { FrameBuffer } from '../../filters/FrameBuffer';
+import { FrameBuffer } from '../filters/FrameBuffer';
 
 /**
  * 形状对象，继承至Container

@@ -1,5 +1,5 @@
 export default {
-    entry: 'src/jcc2d.js',
+    entry: 'src/index.js',
     dest: 'build/jcc2d.js',
     moduleName: 'JC',
     format: 'umd',

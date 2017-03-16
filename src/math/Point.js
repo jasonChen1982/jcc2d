@@ -5,8 +5,10 @@
  * @memberof JC
  * @param [x=0] {number} x轴的位置
  * @param [y=0] {number} y轴的位置
+ * @param [z=0] {number} z轴的位置
+ * @param [w=0] {number} w轴的位置
  */
-function Point(x, y)
+function Point(x, y, z, w)
 {
     /**
      * @member {number}
@@ -19,6 +21,18 @@ function Point(x, y)
      * @default 0
      */
     this.y = y || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.z = z || 0;
+
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.w = w || 0;
 }
 
 /**
@@ -28,7 +42,7 @@ function Point(x, y)
  */
 Point.prototype.clone = function ()
 {
-    return new Point(this.x, this.y);
+    return new Point(this.x, this.y, this.z, this.w);
 };
 
 /**
@@ -37,17 +51,7 @@ Point.prototype.clone = function ()
  * @param p {JC.Point}
  */
 Point.prototype.copy = function (p) {
-    this.set(p.x, p.y);
-};
-
-/**
- * 判断坐标点是否相等
- *
- * @param p {JC.Point}
- * @returns {boolean}
- */
-Point.prototype.equals = function (p) {
-    return (p.x === this.x) && (p.y === this.y);
+    this.set(p.x, p.y, p.z, p.w);
 };
 
 /**

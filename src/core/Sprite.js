@@ -1,5 +1,5 @@
 import { Container } from './Container';
-import { MovieClip } from '../../animation/MovieClip';
+import { MovieClip } from '../animation/MovieClip';
 import { Rectangle } from '../math/Rectangle';
 
 /**

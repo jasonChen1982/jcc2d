@@ -1,4 +1,4 @@
-import { Rectangle } from '../math/Rectangle';
+import { Rectangle } from './Rectangle';
 
 /**
  * 圆形对象

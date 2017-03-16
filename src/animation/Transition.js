@@ -1,5 +1,5 @@
+
 import { Animate } from './Animate';
-// import { UTILS } from '../util/UTILS';
 
 /**
  * Transition类型动画对象

@@ -1,6 +1,6 @@
 import { Eventer } from './Eventer';
 import { InteractionData } from './InteractionData';
-import { Point } from '../core/math/Point';
+import { Point } from '../math/Point';
 
 function InteractionManager(stage) {
     Eventer.call(this);

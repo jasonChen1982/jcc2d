@@ -1,6 +1,5 @@
-// import { Matrix } from './math/Matrix';
-import { Container } from './display/Container';
-// import { Eventer } from '../eventer/Eventer';
+
+import { Container } from './Container';
 import { InteractionManager } from '../eventer/InteractionManager';
 import { UTILS } from '../util/UTILS';
 

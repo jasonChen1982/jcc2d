@@ -1,6 +1,6 @@
 import { FrameBuffer } from './FrameBuffer';
-import { Container } from '../core/display/Container';
-import { Matrix } from '../core/math/Matrix';
+import { Container } from '../core/Container';
+import { Matrix } from '../math/Matrix';
 
 
 function BlurFilter(blurX, blurY, quality) {

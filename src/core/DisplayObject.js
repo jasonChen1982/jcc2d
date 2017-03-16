@@ -1,8 +1,8 @@
 import { Matrix, TEMP_MATRIX } from '../math/Matrix';
 import { Point } from '../math/Point';
-import { Eventer } from '../../eventer/Eventer';
-import { Animation } from '../../animation/Animation';
-import { UTILS } from '../../util/UTILS';
+import { Eventer } from '../eventer/Eventer';
+import { Animation } from '../animation/Animation';
+import { UTILS } from '../util/UTILS';
 /**
  * 显示对象的基类，继承至Eventer
  *
