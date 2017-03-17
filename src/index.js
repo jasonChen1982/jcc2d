@@ -16,6 +16,7 @@ export { Circle } from './math/Circle';
 export { Ellipse } from './math/Ellipse';
 export { Matrix, IDENTITY, TEMP_MATRIX } from './math/Matrix';
 
+export { Curve } from './math/Curve';
 export { BezierCurve } from './math/BezierCurve';
 export { SvgCurve } from './math/SvgCurve';
 export { NURBSCurve } from './math/NURBSCurve';
