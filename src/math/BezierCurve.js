@@ -14,7 +14,7 @@ function BezierCurve( points ) {
 BezierCurve.prototype = Object.create( Curve.prototype );
 
 BezierCurve.prototype.getPoint = function (t , points) {
-  var a = points,
+  var a = points || this.points,
     len = a.length,
     rT = 1 - t,
     l = a.slice(0, len - 1),
