@@ -12,186 +12,186 @@ import { UTILS } from '../util/UTILS';
  */
 function DisplayObject() {
   Eventer.call(this);
-    /**
-     * 标记渲染对象是否就绪
-     *
-     * @member {Boolean}
-     * @private
-     */
+  /**
+   * 标记渲染对象是否就绪
+   *
+   * @member {Boolean}
+   * @private
+   */
   this._ready = true;
 
-    /**
-     * 控制渲染对象是否显示
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 控制渲染对象是否显示
+   *
+   * @member {Boolean}
+   */
   this.visible = true;
 
-    /**
-     * 世界透明度
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 世界透明度
+   *
+   * @member {Number}
+   * @private
+   */
   this.worldAlpha = 1;
 
-    /**
-     * 控制渲染对象的透明度
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的透明度
+   *
+   * @member {Number}
+   */
   this.alpha = 1;
 
-    /**
-     * 控制渲染对象的x轴的缩放
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的x轴的缩放
+   *
+   * @member {Number}
+   */
   this.scaleX = 1;
 
-    /**
-     * 控制渲染对象的y轴的缩放
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的y轴的缩放
+   *
+   * @member {Number}
+   */
   this.scaleY = 1;
 
-    /**
-     * 控制渲染对象的x轴的斜切
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的x轴的斜切
+   *
+   * @member {Number}
+   */
   this.skewX = 0;
 
-    /**
-     * 控制渲染对象的y轴的斜切
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的y轴的斜切
+   *
+   * @member {Number}
+   */
   this.skewY = 0;
 
-    /**
-     * 控制渲染对象的旋转角度
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的旋转角度
+   *
+   * @member {Number}
+   */
   this.rotation = 0;
   this.rotationCache = 0;
   this._sr = 0;
   this._cr = 1;
 
-    /**
-     * 控制渲染对象的x位置
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的x位置
+   *
+   * @member {Number}
+   */
   this.x = 0;
 
-    /**
-     * 控制渲染对象的y位置
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的y位置
+   *
+   * @member {Number}
+   */
   this.y = 0;
 
-    /**
-     * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
+   *
+   * @member {Number}
+   */
   this.pivotX = 0;
 
-    /**
-     * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
-     *
-     * @member {Number}
-     */
+  /**
+   * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
+   *
+   * @member {Number}
+   */
   this.pivotY = 0;
 
-    /**
-     * 对象的遮罩层
-     *
-     * @member {JC.Graphics}
-     */
+  /**
+   * 对象的遮罩层
+   *
+   * @member {JC.Graphics}
+   */
   this.mask = null;
 
-    /**
-     * 当前对象的直接父级
-     *
-     * @member {JC.Container}
-     * @private
-     */
+  /**
+   * 当前对象的直接父级
+   *
+   * @member {JC.Container}
+   * @private
+   */
   this.parent = null;
 
-    /**
-     * 当前对象所应用的矩阵状态
-     *
-     * @member {JC.Matrix}
-     * @private
-     */
+  /**
+   * 当前对象所应用的矩阵状态
+   *
+   * @member {JC.Matrix}
+   * @private
+   */
   this.worldTransform = new Matrix();
 
-    /**
-     * 当前对象的事件管家
-     *
-     * @member {JC.Eventer}
-     * @private
-     */
-    // this.event = new Eventer();
+  /**
+   * 当前对象的事件管家
+   *
+   * @member {JC.Eventer}
+   * @private
+   */
+  // this.event = new Eventer();
 
-    /**
-     * 当前对象是否穿透自身的事件检测
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 当前对象是否穿透自身的事件检测
+   *
+   * @member {Boolean}
+   */
   this.passEvent = false;
 
-    /**
-     * 当前对象的事件检测边界
-     *
-     * @member {JC.Shape}
-     * @private
-     */
+  /**
+   * 当前对象的事件检测边界
+   *
+   * @member {JC.Shape}
+   * @private
+   */
   this.eventArea = null;
 
 
-    /**
-     * 当前对象的动画管家
-     *
-     * @member {Array}
-     * @private
-     */
+  /**
+   * 当前对象的动画管家
+   *
+   * @member {Array}
+   * @private
+   */
   this.Animation = new Animation(this);
 
 
-    /**
-     * 标记当前对象是否为touchstart触发状态
-     *
-     * @member {Boolean}
-     * @private
-     */
+  /**
+   * 标记当前对象是否为touchstart触发状态
+   *
+   * @member {Boolean}
+   * @private
+   */
   this._touchstarted = false;
 
-    /**
-     * 标记当前对象是否为mousedown触发状态
-     *
-     * @member {Boolean}
-     * @private
-     */
+  /**
+   * 标记当前对象是否为mousedown触发状态
+   *
+   * @member {Boolean}
+   * @private
+   */
   this._mousedowned = false;
 
-    /**
-     * 渲染对象是否具备光标样式，例如 cursor
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 渲染对象是否具备光标样式，例如 cursor
+   *
+   * @member {Boolean}
+   */
   this.buttonMode = false;
 
-    /**
-     * 当渲染对象是按钮时所具备的光标样式
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 当渲染对象是按钮时所具备的光标样式
+   *
+   * @member {Boolean}
+   */
   this.cursor = 'pointer';
 }
 DisplayObject.prototype = Object.create(Eventer.prototype);
@@ -281,7 +281,7 @@ DisplayObject.prototype.to = function(opts, clear) {
  *
  * ```js
  * dispay.motion({
- *   points: [{x: 0,y: 0}, {x: 30,y: 20}, {x: -50,y: -40}, {x: 50,y: 90}], // path路径，数组首尾的分别为贝塞尔曲线的起始点和结束点，其余为控制点
+ *   path: new JC.SvgCurve(''M10 10 H 90 V 90 H 10 L 10 10''), path路径，继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
@@ -293,7 +293,7 @@ DisplayObject.prototype.to = function(opts, clear) {
  * });
  * ```
  * @param [opts] {object} 动画配置参数
- * @param [opts.points] {Array} path路径，数组首尾的分别为贝塞尔曲线的起始点和结束点，其余为控制点
+ * @param [opts.path] {Curve} path路径，继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param [opts.attachTangent] {Boolean} 物体是否捕获切线方向
  * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
  * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
@@ -481,36 +481,6 @@ DisplayObject.prototype.setTransform = function(ctx) {
 DisplayObject.prototype.getGlobalPos = function() {
   return { x: this.worldTransform.tx, y: this.worldTransform.ty };
 };
-
-/**
- * 显示对象的事件绑定函数
- *
- * @param type {String} 事件类型
- * @param fn {Function} 回调函数
- */
-// DisplayObject.prototype.on = function(type, fn) {
-//     this.event.on(type, fn);
-// };
-
-/**
- * 显示对象的事件解绑函数
- *
- * @param type {String} 事件类型
- * @param fn {Function} 注册时回调函数的引用
- */
-// DisplayObject.prototype.off = function(type, fn) {
-//     this.event.off(type, fn);
-// };
-
-/**
- * 显示对象的一次性事件绑定函数
- *
- * @param type {String} 事件类型
- * @param fn {Function} 回调函数
- */
-// DisplayObject.prototype.once = function(type, fn) {
-//     this.event.once(type, fn);
-// };
 
 /**
  * 设置显示对象的事件检测区域

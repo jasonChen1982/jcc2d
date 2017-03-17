@@ -14,7 +14,7 @@ function MovieClip(element, opts) {
   this.living = false;
 
   this.onCompelete = null;
-    // this.onUpdate = null;
+  // this.onUpdate = null;
 
   this.infinity = false;
   this.alternate = false;
@@ -27,8 +27,8 @@ function MovieClip(element, opts) {
   this.direction = 1;
   this.frames = [];
   this.preFrame = null;
-    // this.sy = opts.sy || 0;
-    // this.sx = opts.sx || 0;
+  // this.sy = opts.sy || 0;
+  // this.sx = opts.sx || 0;
   this.fillMode = 0;
   this.fps = 16;
 
@@ -45,8 +45,8 @@ MovieClip.prototype.update = function(snippet) {
   var i = this.index + this.direction;
   if (i < this.frames.length && i >= 0) {
     this.index = i;
-        // Do you need this handler???
-        // this.onUpdate&&this.onUpdate(this.index);
+    // Do you need this handler???
+    // this.onUpdate&&this.onUpdate(this.index);
   } else {
     if (this.repeats > 0 || this.infinity) {
       if (this.repeats > 0) --this.repeats;
@@ -57,8 +57,8 @@ MovieClip.prototype.update = function(snippet) {
         this.direction = 1;
         this.index = 0;
       }
-            // Do you need this handler???
-            // this.onUpdate&&this.onUpdate(this.index);
+      // Do you need this handler???
+      // this.onUpdate&&this.onUpdate(this.index);
     } else {
       this.living = false;
       this.index = this.fillMode;
@@ -74,7 +74,7 @@ MovieClip.prototype.getFrame = function() {
   if (cf > 0) {
     var row = this.element.naturalWidth / this.element.frame.width >> 0;
     var lintRow = this.element.frame.x / this.element.frame.width >> 0;
-        // var lintCol = this.element.frame.y / this.element.frame.height >> 0;
+    // var lintCol = this.element.frame.y / this.element.frame.height >> 0;
     var mCol = (lintRow + cf) / row >> 0;
     var mRow = (lintRow + cf) % row;
     frame.x = mRow * this.element.frame.width;
@@ -106,12 +106,12 @@ MovieClip.prototype.format = function(movie) {
       return this.format(config);
     } else {
       console.warn(
-                '%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ',
-                'color: #f98165; background: #80a89e',
-                'color: #80a89e; background: #cad9d5;',
-                'color: #f98165; background: #cad9d5',
-                'color: #80a89e; background: #cad9d5'
-            );
+          '%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ',
+          'color: #f98165; background: #80a89e',
+          'color: #80a89e; background: #cad9d5;',
+          'color: #f98165; background: #cad9d5',
+          'color: #80a89e; background: #cad9d5'
+      );
       return false;
     }
   } else if (UTILS.isArray(movie)) {

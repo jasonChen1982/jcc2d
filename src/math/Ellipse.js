@@ -12,28 +12,28 @@ import { Rectangle } from './Rectangle';
  */
 function Ellipse(x, y, width, height)
 {
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.x = x || 0;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.y = y || 0;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.width = width || 0;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.height = height || 0;
 }
 
@@ -61,7 +61,7 @@ Ellipse.prototype.contains = function (x, y)
     return false;
   }
 
-    //normalize the coords to an ellipse with center 0,0
+  //normalize the coords to an ellipse with center 0,0
   var normx = ((x - this.x) / this.width),
     normy = ((y - this.y) / this.height);
 

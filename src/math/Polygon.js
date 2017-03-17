@@ -5,10 +5,6 @@ import { UTILS } from '../util/UTILS';
  * @class
  * @memberof JC
  * @param points {JC.Point[]|number[]|...JC.Point|...number} 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
- *
- *
- *
- *
  */
 function Polygon(points_) {
   var points = points_;

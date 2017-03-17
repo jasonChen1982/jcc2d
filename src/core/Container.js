@@ -16,55 +16,55 @@ import { Bounds } from '../math/Bounds';
 function Container() {
   DisplayObject.call(this);
 
-    /**
-     * 渲染对象的列表
-     *
-     * @member {Array}
-     */
+  /**
+   * 渲染对象的列表
+   *
+   * @member {Array}
+   */
   this.childs = [];
 
-    /**
-     * 自身及后代动画的缩放比例
-     *
-     * @member {Number}
-     */
+  /**
+   * 自身及后代动画的缩放比例
+   *
+   * @member {Number}
+   */
   this.timeScale = 1;
 
-    /**
-     * 是否暂停自身的动画
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 是否暂停自身的动画
+   *
+   * @member {Boolean}
+   */
   this.paused = false;
 
-    /**
-     * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+   *
+   * @member {Number}
+   * @private
+   */
   this._zIndex = 0;
 
-    /**
-     * 强制该对象在渲染子集之前为他们排序
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 强制该对象在渲染子集之前为他们排序
+   *
+   * @member {Boolean}
+   */
   this.souldSort = false;
 
-    /**
-     * 强制该对象在渲染子集之前为他们排序
-     *
-     * @member {JC.Bounds}
-     */
+  /**
+   * 强制该对象在渲染子集之前为他们排序
+   *
+   * @member {JC.Bounds}
+   */
   this.bounds = new Bounds();
 
-    /**
-     * 显示对象内部表示的边界
-     *
-     * @member {JC.Bounds}
-     * @private
-     */
+  /**
+   * 显示对象内部表示的边界
+   *
+   * @member {JC.Bounds}
+   * @private
+   */
   this._bounds = new Bounds();
 
   this.vertexData = new Float32Array(8);
@@ -234,19 +234,19 @@ Container.prototype.calculateVertices = function() {
   h0 = this._bounds.minY;
   h1 = this._bounds.maxY;
 
-    // xy
+  // xy
   vertexData[0] = a * w1 + c * h1 + tx;
   vertexData[1] = d * h1 + b * w1 + ty;
 
-    // xy
+  // xy
   vertexData[2] = a * w0 + c * h1 + tx;
   vertexData[3] = d * h1 + b * w0 + ty;
 
-    // xy
+  // xy
   vertexData[4] = a * w0 + c * h0 + tx;
   vertexData[5] = d * h0 + b * w0 + ty;
 
-    // xy
+  // xy
   vertexData[6] = a * w1 + c * h0 + tx;
   vertexData[7] = d * h0 + b * w1 + ty;
 };
@@ -271,7 +271,7 @@ Container.prototype.calculateBounds = function () {
 
     this.bounds.addBounds(child.bounds);
   }
-    // this._boundsID = this._lastBoundsID;
+  // this._boundsID = this._lastBoundsID;
 };
 
 Container.prototype._calculateBounds = function () {

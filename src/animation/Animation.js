@@ -9,7 +9,7 @@ import { KeyFrames } from './KeyFrames';
  */
 function Animation(element) {
   this.element = element;
-    // this.start = false;
+  // this.start = false;
   this.animates = [];
 }
 Animation.prototype.update = function(snippet) {

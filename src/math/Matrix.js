@@ -174,10 +174,10 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 
   sr  = Math.sin(rotation);
   cr  = Math.cos(rotation);
-    // cy  = Math.cos(skewY);
+  // cy  = Math.cos(skewY);
   sy  = Math.tan(skewY);
   nsx = Math.tan(skewX);
-    // cx  =  Math.cos(skewX);
+  // cx  =  Math.cos(skewX);
 
   a  =  cr * scaleX;
   b  =  sr * scaleX;

@@ -7,46 +7,46 @@ import { Point } from '../math/Point';
  * @memberof JC
  */
 function InteractionData(){
-    /**
-     * 转换到canvas坐标系统的事件触发点
-     *
-     * @member {JC.Point}
-     */
+  /**
+   * 转换到canvas坐标系统的事件触发点
+   *
+   * @member {JC.Point}
+   */
   this.global = new Point(-100000, -100000);
 
-    /**
-     * 事件源
-     *
-     * @member {JC.DisplayObject}
-     */
+  /**
+   * 事件源
+   *
+   * @member {JC.DisplayObject}
+   */
   this.target = null;
 
-    /**
-     * 浏览器的原始事件对象
-     *
-     * @member {Event}
-     */
+  /**
+   * 浏览器的原始事件对象
+   *
+   * @member {Event}
+   */
   this.originalEvent = null;
 
-    /**
-     * 在canvas内阻止事件冒泡
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 在canvas内阻止事件冒泡
+   *
+   * @member {Boolean}
+   */
   this.cancleBubble = false;
 
-    /**
-     * canvas视窗和页面坐标的兑换比例
-     *
-     * @member {Number}
-     */
+  /**
+   * canvas视窗和页面坐标的兑换比例
+   *
+   * @member {Number}
+   */
   this.ratio = 1;
 
-    /**
-     * 事件类型
-     *
-     * @member {String}
-     */
+  /**
+   * 事件类型
+   *
+   * @member {String}
+   */
   this.type = '';
 }
 InteractionData.prototype.clone = function() {

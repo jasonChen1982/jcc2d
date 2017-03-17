@@ -36,7 +36,7 @@ KeyFrames.prototype.update = function(snippet) {
     if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
     return;
   }
-    // if (this.paused || !this.living) return;
+  // if (this.paused || !this.living) return;
 
   var snippetCache = this.direction * this.timeScale * snippet;
   this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
@@ -45,7 +45,7 @@ KeyFrames.prototype.update = function(snippet) {
   var pose = this.nextPose();
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
 
-    // this.progress += this.timeScale * snippet;
+  // this.progress += this.timeScale * snippet;
   if (this.totalTime >= this.duration) {
     this.totalTime = 0;
     if (this._keyIndex < this._keyframes.length - 1 && this._keyIndex > 0) {

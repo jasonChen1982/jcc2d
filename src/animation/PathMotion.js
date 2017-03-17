@@ -1,6 +1,8 @@
 import { Animate } from './Animate';
 import { UTILS } from '../util/UTILS';
 import { TWEEN } from '../util/TWEEN';
+import { Curve } from '../math/Curve';
+import { Point } from '../math/Point';
 
 /**
  * PathMotion类型动画对象
@@ -11,24 +13,33 @@ import { TWEEN } from '../util/TWEEN';
  */
 function PathMotion(opts) {
   Animate.call(this, opts);
+  if (!opts.path || !(opts.path instanceof Curve)) {
+    console.warn(
+      '%c JC.PathMotion warn %c: path is not instanceof Curve',
+      'color: #f98165; background: #80a89e',
+      'color: #80a89e; background: #cad9d5;'
+    );
+  }
 
-  this.points = opts.points;
+  this.path = opts.path;
   this.attachTangent = opts.attachTangent || false;
   this._cacheRotate = this.element.rotation;
   var radian = this._cacheRotate * UTILS.DTR;
-  this._cacheVector = { x: 10 * Math.cos(radian), y: 10 * Math.sin(radian) };
+  this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
-PathMotion.prototype = Object.create(Animate.prototype);
-PathMotion.prototype.nextPose = function() {
-  var cache = {},
-    _rotate = 0,
-    t = TWEEN[this.ease](this.progress, 0, 1, this.duration),
-    pos = this.getPoint(t, this.points);
 
-  cache.x = pos.x;
-  cache.y = pos.y;
+PathMotion.prototype = Object.create(Animate.prototype);
+
+PathMotion.prototype.nextPose = function() {
+  var _rotate = 0,
+    t = TWEEN[this.ease](this.progress, 0, 1, this.duration),
+    pos = this.path.getPoint(t),
+    cache = pos.clone();
+
+  // cache.x = pos.x;
+  // cache.y = pos.y;
   if (this.attachTangent) {
-    _rotate = this.decomposeRotate(t, pos);
+    _rotate = this.decomposeRotate(t);
     cache.rotation = _rotate === false ? this.preDegree : _rotate;
     cache.rotation += this._cacheRotate;
     if (_rotate !== false) this.preDegree = _rotate;
@@ -36,29 +47,11 @@ PathMotion.prototype.nextPose = function() {
   this.element.setProps(cache);
   return cache;
 };
-PathMotion.prototype.getPoint = function(t, points) {
-  var a = points,
-    len = a.length,
-    rT = 1 - t,
-    l = a.slice(0, len - 1),
-    r = a.slice(1),
-    oP = {};
-  if (len > 3) {
-    var oL = this.getPoint(t, l),
-      oR = this.getPoint(t, r);
-    oP.x = rT * oL.x + t * oR.x;
-    oP.y = rT * oL.y + t * oR.y;
-    return oP;
-  } else {
-    oP.x = rT * rT * points[0].x + 2 * t * rT * points[1].x + t * t * points[2].x;
-    oP.y = rT * rT * points[0].y + 2 * t * rT * points[1].y + t * t * points[2].y;
-    return oP;
-  }
-};
-PathMotion.prototype.decomposeRotate = function(t, pos) {
-  var p1 = pos || this.getPoint(t, this.points);
-  var p2 = this.getPoint(t + 0.01, this.points);
-  var vector = { x: p2.x - p1.x, y: p2.y - p1.y };
+
+PathMotion.prototype.decomposeRotate = function(t) {
+  // var p1 = pos || this.getPoint(t, this.points);
+  // var p2 = this.getPoint(t + 0.01, this.points);
+  var vector = this.path.getTangent(t); // { x: p2.x - p1.x, y: p2.y - p1.y };
 
   var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
   var pi = nor > 0 ? 1 : -1;

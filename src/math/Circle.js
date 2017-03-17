@@ -11,22 +11,22 @@ import { Rectangle } from './Rectangle';
  */
 function Circle(x, y, radius)
 {
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.x = x || 0;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.y = y || 0;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.radius = radius || 0;
 }
 

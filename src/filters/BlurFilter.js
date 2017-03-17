@@ -12,52 +12,52 @@ function BlurFilter(blurX, blurY, quality) {
 
   this.frameBuffer = new FrameBuffer();
 
-    /**
-     * x轴的模糊值
-     * @property blurX
-     * @default 0
-     * @type Number
-     **/
+  /**
+   * x轴的模糊值
+   * @property blurX
+   * @default 0
+   * @type Number
+   **/
   this.blurX = blurX | 0;
 
-    /**
-     * y轴的模糊值
-     * @property blurY
-     * @default 0
-     * @type Number
-     **/
+  /**
+   * y轴的模糊值
+   * @property blurY
+   * @default 0
+   * @type Number
+   **/
   this.blurY = blurY | 0;
 
-    /**
-     * 模糊的质量，模糊计算会被递归多少次
-     * @property quality
-     * @default 1
-     * @type Number
-     **/
+  /**
+   * 模糊的质量，模糊计算会被递归多少次
+   * @property quality
+   * @default 1
+   * @type Number
+   **/
   this.quality = quality | 0;
 
-    /**
-     * 下一帧的图像需要更新
-     * @property needUpdateBuffer
-     * @default false
-     * @type Boolean
-     **/
+  /**
+   * 下一帧的图像需要更新
+   * @property needUpdateBuffer
+   * @default false
+   * @type Boolean
+   **/
   this.needUpdateBuffer = true;
 
-    /**
-     * 每一帧渲染都重新绘制
-     * @property autoUpdateBuffer
-     * @default false
-     * @type Boolean
-     **/
+  /**
+   * 每一帧渲染都重新绘制
+   * @property autoUpdateBuffer
+   * @default false
+   * @type Boolean
+   **/
   this.autoUpdateBuffer = false;
 
-    /**
-     * 时候给帧缓冲区加padding
-     * @property padding
-     * @default false
-     * @type Boolean
-     **/
+  /**
+   * 时候给帧缓冲区加padding
+   * @property padding
+   * @default false
+   * @type Boolean
+   **/
   this.padding = false;
 }
 BlurFilter.prototype = Object.create( Container.prototype );

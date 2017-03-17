@@ -7,28 +7,28 @@ import { Rectangle } from './Rectangle';
  * @memberof JC
  */
 function Bounds(minX, minY, maxX, maxY) {
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.minX = minX || Infinity;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.minY = minY || Infinity;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.maxX = maxX || -Infinity;
 
-    /**
-     * @member {number}
-     * @default 0
-     */
+  /**
+   * @member {number}
+   * @default 0
+   */
   this.maxY = maxY || -Infinity;
 
   this.rect = null;

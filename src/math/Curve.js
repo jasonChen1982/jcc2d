@@ -153,8 +153,9 @@ Curve.prototype = {
     var t1 = t - delta;
     var t2 = t + delta;
 
-    if ( t1 < 0 ) t1 = 0;
-    if ( t2 > 1 ) t2 = 1;
+    // TODO: svg and bezier accept out of [0, 1] value
+    // if ( t1 < 0 ) t1 = 0;
+    // if ( t2 > 1 ) t2 = 1;
 
     var pt1 = this.getPoint( t1 );
     var pt2 = this.getPoint( t2 );

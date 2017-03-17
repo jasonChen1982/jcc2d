@@ -19,133 +19,133 @@ function Stage(options) { // canvas, bgColor, resolution
   options = options || {};
   Container.call(this);
 
-    /**
-     * 场景的canvas的dom
-     *
-     * @member {CANVAS}
-     */
+  /**
+   * 场景的canvas的dom
+   *
+   * @member {CANVAS}
+   */
   this.canvas = UTILS.isString(options.dom) ? document.getElementById(options.dom) : options.dom;
 
   this.realWidth = options.width || this.canvas.width;
   this.realHeight = options.height || this.canvas.height;
 
-    /**
-     * 场景的canvas的绘图环境
-     *
-     * @member {context2d}
-     */
+  /**
+   * 场景的canvas的绘图环境
+   *
+   * @member {context2d}
+   */
   this.ctx = this.canvas.getContext('2d');
   this.canvas.style.backgroundColor = options.bgColor || 'transparent';
 
-    /**
-     * 场景是否自动清除上一帧的像素内容
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 场景是否自动清除上一帧的像素内容
+   *
+   * @member {Boolean}
+   */
   this.autoClear = true;
 
-    /**
-     * 是否在每一帧绘制之前自动更新场景内所有物体的状态
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 是否在每一帧绘制之前自动更新场景内所有物体的状态
+   *
+   * @member {Boolean}
+   */
   this.autoUpdate = true;
 
-    /**
-     * 场景是否应用style控制宽高
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 场景是否应用style控制宽高
+   *
+   * @member {Boolean}
+   */
   this.autoStyle = false;
 
-    /**
-     * canvas的宽度
-     *
-     * @member {Number}
-     */
+  /**
+   * canvas的宽度
+   *
+   * @member {Number}
+   */
   this.width = this.canvas.width = this.realWidth * this.resolution;
 
-    /**
-     * canvas的高度
-     *
-     * @member {Number}
-     */
+  /**
+   * canvas的高度
+   *
+   * @member {Number}
+   */
   this.height = this.canvas.height = this.realHeight * this.resolution;
 
-    /**
-     * 场景分辨率
-     *
-     * @member {Number}
-     */
+  /**
+   * 场景分辨率
+   *
+   * @member {Number}
+   */
   this._resolution = 0;
 
-    /**
-     * 场景分辨率
-     *
-     * @member {Number}
-     */
+  /**
+   * 场景分辨率
+   *
+   * @member {Number}
+   */
   this.resolution = options.resolution || 1;
 
-    /**
-     * 上一次绘制的时间点
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 上一次绘制的时间点
+   *
+   * @member {Number}
+   * @private
+   */
   this.pt = null;
 
-    /**
-     * 本次渲染经历的时间片段长度
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 本次渲染经历的时间片段长度
+   *
+   * @member {Number}
+   * @private
+   */
   this.snippet = 0;
 
 
-    /**
-     * 平均渲染经历的时间片段长度
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 平均渲染经历的时间片段长度
+   *
+   * @member {Number}
+   * @private
+   */
   this.averageSnippet = 0;
 
-    /**
-     * 渲染的瞬时帧率，仅在enableFPS为true时才可用
-     *
-     * @member {Number}
-     */
+  /**
+   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
   this.fps = 0;
 
-    /**
-     * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
-     *
-     * @member {Number}
-     */
+  /**
+   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
   this.averageFps = 0;
 
-    /**
-     * 渲染总花费时间，除去被中断、被暂停等时间
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 渲染总花费时间，除去被中断、被暂停等时间
+   *
+   * @member {Number}
+   * @private
+   */
   this._takeTime = 0;
 
-    /**
-     * 渲染总次数
-     *
-     * @member {Number}
-     * @private
-     */
+  /**
+   * 渲染总次数
+   *
+   * @member {Number}
+   * @private
+   */
   this._renderTimes = 0;
 
-    /**
-     * 是否记录渲染性能
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 是否记录渲染性能
+   *
+   * @member {Boolean}
+   */
   this.enableFPS = true;
 
   this.interactionManager = new InteractionManager(this);
@@ -161,11 +161,11 @@ function Stage(options) { // canvas, bgColor, resolution
     }
   };
 
-    /**
-     * 设置canvas是否可交互
-     *
-     * @member {Boolean}
-     */
+  /**
+   * 设置canvas是否可交互
+   *
+   * @member {Boolean}
+   */
   this.interactive = true;
 
   this.proxyOn();

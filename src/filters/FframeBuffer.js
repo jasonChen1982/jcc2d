@@ -2,7 +2,7 @@
 function FrameBuffer() {
   this.canvas = document.createElement('canvas');
   this.ctx = this.canvas.getContext('2d');
-    // document.body.appendChild(this.canvas);
+  // document.body.appendChild(this.canvas);
 }
 FrameBuffer.prototype.setSize = function(rect) {
   this.width = this.canvas.width = rect.width + rect.px*2;
