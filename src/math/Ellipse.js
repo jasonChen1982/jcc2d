@@ -16,25 +16,25 @@ function Ellipse(x, y, width, height)
      * @member {number}
      * @default 0
      */
-    this.x = x || 0;
+  this.x = x || 0;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.y = y || 0;
+  this.y = y || 0;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.width = width || 0;
+  this.width = width || 0;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.height = height || 0;
+  this.height = height || 0;
 }
 
 /**
@@ -44,7 +44,7 @@ function Ellipse(x, y, width, height)
  */
 Ellipse.prototype.clone = function ()
 {
-    return new Ellipse(this.x, this.y, this.width, this.height);
+  return new Ellipse(this.x, this.y, this.width, this.height);
 };
 
 /**
@@ -56,19 +56,19 @@ Ellipse.prototype.clone = function ()
  */
 Ellipse.prototype.contains = function (x, y)
 {
-    if (this.width <= 0 || this.height <= 0)
+  if (this.width <= 0 || this.height <= 0)
     {
-        return false;
-    }
+    return false;
+  }
 
     //normalize the coords to an ellipse with center 0,0
-    var normx = ((x - this.x) / this.width),
-        normy = ((y - this.y) / this.height);
+  var normx = ((x - this.x) / this.width),
+    normy = ((y - this.y) / this.height);
 
-    normx *= normx;
-    normy *= normy;
+  normx *= normx;
+  normy *= normy;
 
-    return (normx + normy <= 1);
+  return (normx + normy <= 1);
 };
 
 /**
@@ -78,7 +78,7 @@ Ellipse.prototype.contains = function (x, y)
  */
 Ellipse.prototype.getBounds = function ()
 {
-    return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
+  return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
 };
 
 export { Ellipse };

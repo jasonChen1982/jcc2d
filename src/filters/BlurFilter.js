@@ -4,13 +4,13 @@ import { Matrix } from '../math/Matrix';
 
 
 function BlurFilter(blurX, blurY, quality) {
-    Container.call(this);
+  Container.call(this);
 
-    if (isNaN(blurX) || blurX < 0) blurX = 0;
-    if (isNaN(blurY) || blurY < 0) blurY = 0;
-    if (isNaN(quality) || quality < 1) quality = 1;
+  if (isNaN(blurX) || blurX < 0) blurX = 0;
+  if (isNaN(blurY) || blurY < 0) blurY = 0;
+  if (isNaN(quality) || quality < 1) quality = 1;
 
-    this.frameBuffer = new FrameBuffer();
+  this.frameBuffer = new FrameBuffer();
 
     /**
      * x轴的模糊值
@@ -18,7 +18,7 @@ function BlurFilter(blurX, blurY, quality) {
      * @default 0
      * @type Number
      **/
-    this.blurX = blurX | 0;
+  this.blurX = blurX | 0;
 
     /**
      * y轴的模糊值
@@ -26,7 +26,7 @@ function BlurFilter(blurX, blurY, quality) {
      * @default 0
      * @type Number
      **/
-    this.blurY = blurY | 0;
+  this.blurY = blurY | 0;
 
     /**
      * 模糊的质量，模糊计算会被递归多少次
@@ -34,7 +34,7 @@ function BlurFilter(blurX, blurY, quality) {
      * @default 1
      * @type Number
      **/
-    this.quality = quality | 0;
+  this.quality = quality | 0;
 
     /**
      * 下一帧的图像需要更新
@@ -42,7 +42,7 @@ function BlurFilter(blurX, blurY, quality) {
      * @default false
      * @type Boolean
      **/
-    this.needUpdateBuffer = true;
+  this.needUpdateBuffer = true;
 
     /**
      * 每一帧渲染都重新绘制
@@ -50,7 +50,7 @@ function BlurFilter(blurX, blurY, quality) {
      * @default false
      * @type Boolean
      **/
-    this.autoUpdateBuffer = false;
+  this.autoUpdateBuffer = false;
 
     /**
      * 时候给帧缓冲区加padding
@@ -58,7 +58,7 @@ function BlurFilter(blurX, blurY, quality) {
      * @default false
      * @type Boolean
      **/
-    this.padding = false;
+  this.padding = false;
 }
 BlurFilter.prototype = Object.create( Container.prototype );
 
@@ -70,73 +70,73 @@ BlurFilter.prototype = Object.create( Container.prototype );
  * @memberof JC.BlurFilter#
  */
 Object.defineProperty(BlurFilter.prototype, 'blur', {
-    get: function() {
-        return this.blurX;
-    },
-    set: function(blur) {
-        this.blurX = this.blurY = blur;
-    }
+  get: function() {
+    return this.blurX;
+  },
+  set: function(blur) {
+    this.blurX = this.blurY = blur;
+  }
 });
 
 BlurFilter.prototype.updatePosture = function(snippet) {
-    if (!this._ready) return;
-    if (this.souldSort) this._sortList();
-    snippet = this.timeScale * snippet;
-    if (!this.paused) this.updateAnimation(snippet);
+  if (!this._ready) return;
+  if (this.souldSort) this._sortList();
+  snippet = this.timeScale * snippet;
+  if (!this.paused) this.updateAnimation(snippet);
 
-    this.updateTransform();
+  this.updateTransform();
 
-    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-        this.cacheMatrix = this.worldTransform;
-        this.worldTransform = __tmpMatrix.identity();
-        this._upc(snippet);
+  if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+    this.cacheMatrix = this.worldTransform;
+    this.worldTransform = __tmpMatrix.identity();
+    this._upc(snippet);
 
-        this.calculateBounds();
-        this.__o = this.bounds.getRectangle();
-        this.__o.px = this.__o.py = 0;
-        if (this.padding) {
-            this.__o.px = this.blurX;
-            this.__o.py = this.blurY;
-        }
-        this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
-        this._upc(0);
-
-        this.worldTransform = this.cacheMatrix;
-    } else {
-        this._upc(snippet);
+    this.calculateBounds();
+    this.__o = this.bounds.getRectangle();
+    this.__o.px = this.__o.py = 0;
+    if (this.padding) {
+      this.__o.px = this.blurX;
+      this.__o.py = this.blurY;
     }
+    this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
+    this._upc(0);
+
+    this.worldTransform = this.cacheMatrix;
+  } else {
+    this._upc(snippet);
+  }
 };
 
 BlurFilter.prototype._upc = function(snippet) {
-    for (var i = 0, l = this.childs.length; i < l; i++) {
-        var child = this.childs[i];
-        child.updatePosture(snippet);
-    }
+  for (var i = 0, l = this.childs.length; i < l; i++) {
+    var child = this.childs[i];
+    child.updatePosture(snippet);
+  }
 };
 
 BlurFilter.prototype.render = function(ctx) {
-    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-        var i = 0,
-            l = this.childs.length,
-            child = null;
+  if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+    var i = 0,
+      l = this.childs.length,
+      child = null;
 
-        this.frameBuffer.clear();
-        this.frameBuffer.setSize(this.__o);
-        for (i = 0; i < l; i++) {
-            child = this.childs[i];
-            if (!child.isVisible() || !child._ready) continue;
-            child.render(this.frameBuffer.ctx);
-        }
-        this._applyFilter(this.frameBuffer.getBuffer());
-
-        this.needUpdateBuffer = false;
+    this.frameBuffer.clear();
+    this.frameBuffer.setSize(this.__o);
+    for (i = 0; i < l; i++) {
+      child = this.childs[i];
+      if (!child.isVisible() || !child._ready) continue;
+      child.render(this.frameBuffer.ctx);
     }
-    this.renderMe(ctx, this.__o.x - this.__o.px, this.__o.y - this.__o.py, this.frameBuffer.width, this.frameBuffer.height);
+    this._applyFilter(this.frameBuffer.getBuffer());
+
+    this.needUpdateBuffer = false;
+  }
+  this.renderMe(ctx, this.__o.x - this.__o.px, this.__o.y - this.__o.py, this.frameBuffer.width, this.frameBuffer.height);
 };
 
 BlurFilter.prototype.renderMe = function(ctx ,x ,y, w, h) {
-    this.setTransform(ctx);
-    ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
+  this.setTransform(ctx);
+  ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
 };
 
 

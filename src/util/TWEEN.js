@@ -21,9 +21,9 @@ export var TWEEN = {
      * @static
      * @memberof JC.TWEEN
      */
-    linear: function (t, b, c, d){
-        return c*t/d + b;
-    },
+  linear: function (t, b, c, d){
+    return c*t/d + b;
+  },
 
     /**
      * 加速运动函数
@@ -31,9 +31,9 @@ export var TWEEN = {
      * @static
      * @memberof JC.TWEEN
      */
-    easeIn: function(t, b, c, d){
-        return c*(t/=d)*t + b;
-    },
+  easeIn: function(t, b, c, d){
+    return c*(t/=d)*t + b;
+  },
 
     /**
      * 减速运动函数
@@ -41,9 +41,9 @@ export var TWEEN = {
      * @static
      * @memberof JC.TWEEN
      */
-    easeOut: function(t, b, c, d){
-        return -c *(t/=d)*(t-2) + b;
-    },
+  easeOut: function(t, b, c, d){
+    return -c *(t/=d)*(t-2) + b;
+  },
 
     /**
      * 先加速再减速运动函数
@@ -51,12 +51,12 @@ export var TWEEN = {
      * @static
      * @memberof JC.TWEEN
      */
-    easeBoth: function(t, b, c, d){
-        if ((t/=d/2) < 1) {
-            return c/2*t*t + b;
-        }
-        return -c/2 * ((--t)*(t-2) - 1) + b;
-    },
+  easeBoth: function(t, b, c, d){
+    if ((t/=d/2) < 1) {
+      return c/2*t*t + b;
+    }
+    return -c/2 * ((--t)*(t-2) - 1) + b;
+  },
 
     /**
      * 扩展运动函数
@@ -71,10 +71,10 @@ export var TWEEN = {
      * @static
      * @memberof JC.TWEEN
      */
-    extend: function(opts){
-        if(!opts)return;
-        for(var key in opts){
-            if(key!=='extend'&&opts[key])this[key]=opts[key];
-        }
+  extend: function(opts){
+    if(!opts)return;
+    for(var key in opts){
+      if(key!=='extend'&&opts[key])this[key]=opts[key];
     }
+  }
 };

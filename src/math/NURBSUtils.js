@@ -85,13 +85,13 @@ const NURBSUtils = {
         N[ r ] = saved + rv * temp;
         saved = lv * temp;
 
-       }
+      }
 
-       N[ j ] = saved;
+      N[ j ] = saved;
 
-     }
+    }
 
-     return N;
+    return N;
 
   },
 

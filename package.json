@@ -22,6 +22,7 @@
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "testem ci",
     "lint": "eslint .",
+    "fix": "eslint --fix ./src",
     "precommit": "npm run lint",
     "commitmsg": "validate-commit-msg",
     "changelog": "git changelog"

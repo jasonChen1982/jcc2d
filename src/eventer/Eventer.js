@@ -27,7 +27,7 @@ function Eventer() {
      * @member {Object}
      * @private
      */
-    this.listeners = {};
+  this.listeners = {};
 }
 
 /**
@@ -37,8 +37,8 @@ function Eventer() {
  * @param fn {Function} 回调函数
  */
 Eventer.prototype.on = function(type, fn) {
-    this.listeners[type] = this.listeners[type] || [];
-    this.listeners[type].push(fn);
+  this.listeners[type] = this.listeners[type] || [];
+  this.listeners[type].push(fn);
 };
 
 /**
@@ -48,20 +48,20 @@ Eventer.prototype.on = function(type, fn) {
  * @param fn {Function} 注册时回调函数的引用
  */
 Eventer.prototype.off = function(type, fn) {
-    var ears = this.listeners;
-    var cbs = ears[type];
-    var i = ears[type].length;
-    if (cbs && i > 0) {
-        if (fn) {
-            while (i--) {
-                if (cbs[i] === fn) {
-                    cbs.splice(i, 1);
-                }
-            }
-        } else {
-            cbs.length = 0;
+  var ears = this.listeners;
+  var cbs = ears[type];
+  var i = ears[type].length;
+  if (cbs && i > 0) {
+    if (fn) {
+      while (i--) {
+        if (cbs[i] === fn) {
+          cbs.splice(i, 1);
         }
+      }
+    } else {
+      cbs.length = 0;
     }
+  }
 };
 
 /**
@@ -71,12 +71,12 @@ Eventer.prototype.off = function(type, fn) {
  * @param fn {Function} 回调函数
  */
 Eventer.prototype.once = function(type, fn) {
-    var This = this,
-        cb = function(ev) {
-            if (fn) fn(ev);
-            This.off(type, cb);
-        };
-    this.on(type, cb);
+  var This = this,
+    cb = function(ev) {
+      if (fn) fn(ev);
+      This.off(type, cb);
+    };
+  this.on(type, cb);
 };
 
 /**
@@ -85,16 +85,16 @@ Eventer.prototype.once = function(type, fn) {
  * @param ev {JC.InteractionData} 事件类型
  */
 Eventer.prototype.emit = function(type, ev) {
-    if (this.listeners === undefined) return;
-    var ears = this.listeners;
-    var cbs = ears[type];
-    if (cbs !== undefined) {
-        var length = cbs.length;
-        var i;
-        for (i = 0; i < length; i++) {
-            cbs[i].call(this, ev);
-        }
+  if (this.listeners === undefined) return;
+  var ears = this.listeners;
+  var cbs = ears[type];
+  if (cbs !== undefined) {
+    var length = cbs.length;
+    var i;
+    for (i = 0; i < length; i++) {
+      cbs[i].call(this, ev);
     }
+  }
 };
 
 export { Eventer };

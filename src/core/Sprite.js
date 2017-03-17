@@ -29,21 +29,21 @@ import { Rectangle } from '../math/Rectangle';
  * @memberof JC
  */
 function Sprite(opts) {
-    Container.call(this);
+  Container.call(this);
 
-    this.texture = opts.texture;
-    if (this.texture.loaded) {
-        this.upTexture(opts);
-    } else {
-        var This = this;
-        this._ready = false;
-        this.texture.on('load', function() {
-            This.upTexture(opts);
-            This._ready = true;
-        });
-    }
+  this.texture = opts.texture;
+  if (this.texture.loaded) {
+    this.upTexture(opts);
+  } else {
+    var This = this;
+    this._ready = false;
+    this.texture.on('load', function() {
+      This.upTexture(opts);
+      This._ready = true;
+    });
+  }
 
-    this.MovieClip = new MovieClip(this, opts);
+  this.MovieClip = new MovieClip(this, opts);
 
 }
 Sprite.prototype = Object.create(Container.prototype);
@@ -55,16 +55,16 @@ Sprite.prototype = Object.create(Container.prototype);
  * @private
  */
 Sprite.prototype.upTexture = function(opts) {
-    this.naturalWidth = opts.texture.naturalWidth;
-    this.naturalHeight = opts.texture.naturalHeight;
-    this.frame = opts.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
-    this.width = opts.width || this.frame.width || this.naturalWidth;
-    this.height = opts.height || this.frame.height || this.naturalHeight;
-    this.regX = this.width >> 1;
-    this.regY = this.height >> 1;
-    var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
-    this._bounds.addRect(rect);
-    this.setArea(rect, true);
+  this.naturalWidth = opts.texture.naturalWidth;
+  this.naturalHeight = opts.texture.naturalHeight;
+  this.frame = opts.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
+  this.width = opts.width || this.frame.width || this.naturalWidth;
+  this.height = opts.height || this.frame.height || this.naturalHeight;
+  this.regX = this.width >> 1;
+  this.regY = this.height >> 1;
+  var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
+  this._bounds.addRect(rect);
+  this.setArea(rect, true);
 };
 
 /**
@@ -74,8 +74,8 @@ Sprite.prototype.upTexture = function(opts) {
  * @private
  */
 Sprite.prototype.updateAnimation = function(snippet) {
-    this.Animation.update(snippet);
-    this.MovieClip.update(snippet);
+  this.Animation.update(snippet);
+  this.MovieClip.update(snippet);
 };
 
 /**
@@ -83,7 +83,7 @@ Sprite.prototype.updateAnimation = function(snippet) {
  *
  */
 Sprite.prototype.playMovie = function(opts) {
-    this.MovieClip.playMovie(opts);
+  this.MovieClip.playMovie(opts);
 };
 
 /**
@@ -93,9 +93,9 @@ Sprite.prototype.playMovie = function(opts) {
  * @private
  */
 Sprite.prototype.renderMe = function(ctx) {
-    if (!this._ready) return;
-    var frame = this.MovieClip.getFrame();
-    ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, -this.regX, -this.regY, this.width, this.height);
+  if (!this._ready) return;
+  var frame = this.MovieClip.getFrame();
+  ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, -this.regX, -this.regY, this.width, this.height);
 };
 
 export { Sprite };

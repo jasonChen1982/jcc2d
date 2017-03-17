@@ -14,25 +14,25 @@ function Point(x, y, z, w)
      * @member {number}
      * @default 0
      */
-    this.x = x || 0;
+  this.x = x || 0;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.y = y || 0;
+  this.y = y || 0;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.z = z || 0;
+  this.z = z || 0;
 
     /**
      * @member {number}
      * @default 0
      */
-    this.w = w || 0;
+  this.w = w || 0;
 }
 
 /**
@@ -42,7 +42,7 @@ function Point(x, y, z, w)
  */
 Point.prototype.clone = function ()
 {
-    return new Point(this.x, this.y, this.z, this.w);
+  return new Point(this.x, this.y, this.z, this.w);
 };
 
 /**
@@ -51,7 +51,7 @@ Point.prototype.clone = function ()
  * @param p {JC.Point}
  */
 Point.prototype.copy = function (p) {
-    this.set(p.x, p.y, p.z, p.w);
+  this.set(p.x, p.y, p.z, p.w);
 };
 
 /**
@@ -62,8 +62,8 @@ Point.prototype.copy = function (p) {
  */
 Point.prototype.set = function (x, y)
 {
-    this.x = x || 0;
-    this.y = y || ( (y !== 0) ? this.x : 0 ) ;
+  this.x = x || 0;
+  this.y = y || ( (y !== 0) ? this.x : 0 ) ;
 };
 
 export { Point };

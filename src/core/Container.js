@@ -14,28 +14,28 @@ import { Bounds } from '../math/Bounds';
  * @memberof JC
  */
 function Container() {
-    DisplayObject.call(this);
+  DisplayObject.call(this);
 
     /**
      * 渲染对象的列表
      *
      * @member {Array}
      */
-    this.childs = [];
+  this.childs = [];
 
     /**
      * 自身及后代动画的缩放比例
      *
      * @member {Number}
      */
-    this.timeScale = 1;
+  this.timeScale = 1;
 
     /**
      * 是否暂停自身的动画
      *
      * @member {Boolean}
      */
-    this.paused = false;
+  this.paused = false;
 
     /**
      * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
@@ -43,21 +43,21 @@ function Container() {
      * @member {Number}
      * @private
      */
-    this._zIndex = 0;
+  this._zIndex = 0;
 
     /**
      * 强制该对象在渲染子集之前为他们排序
      *
      * @member {Boolean}
      */
-    this.souldSort = false;
+  this.souldSort = false;
 
     /**
      * 强制该对象在渲染子集之前为他们排序
      *
      * @member {JC.Bounds}
      */
-    this.bounds = new Bounds();
+  this.bounds = new Bounds();
 
     /**
      * 显示对象内部表示的边界
@@ -65,9 +65,9 @@ function Container() {
      * @member {JC.Bounds}
      * @private
      */
-    this._bounds = new Bounds();
+  this._bounds = new Bounds();
 
-    this.vertexData = new Float32Array(8);
+  this.vertexData = new Float32Array(8);
 }
 Container.prototype = Object.create(DisplayObject.prototype);
 
@@ -79,17 +79,17 @@ Container.prototype = Object.create(DisplayObject.prototype);
  * @memberof JC.Container#
  */
 Object.defineProperty(Container.prototype, 'zIndex', {
-    get: function() {
-        return this._zIndex;
-    },
-    set: function(zIndex) {
-        if (this._zIndex !== zIndex) {
-            this._zIndex = zIndex;
-            if (this.parent) {
-                this.parent.souldSort = true;
-            }
-        }
+  get: function() {
+    return this._zIndex;
+  },
+  set: function(zIndex) {
+    if (this._zIndex !== zIndex) {
+      this._zIndex = zIndex;
+      if (this.parent) {
+        this.parent.souldSort = true;
+      }
     }
+  }
 });
 
 /**
@@ -99,16 +99,16 @@ Object.defineProperty(Container.prototype, 'zIndex', {
  * @private
  */
 Container.prototype._sortList = function() {
-    this.childs.sort(function(a, b){
-        if (a.zIndex > b.zIndex) {
-            return 1;
-        }
-        if (a.zIndex < b.zIndex) {
-            return -1;
-        }
-        return 0;
-    });
-    this.souldSort = false;
+  this.childs.sort(function(a, b){
+    if (a.zIndex > b.zIndex) {
+      return 1;
+    }
+    if (a.zIndex < b.zIndex) {
+      return -1;
+    }
+    return 0;
+  });
+  this.souldSort = false;
 };
 
 /**
@@ -122,27 +122,27 @@ Container.prototype._sortList = function() {
  * @return {JC.Container}
  */
 Container.prototype.adds = function(object) {
-    if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-            this.adds(arguments[i]);
-        }
-        return this;
-    }
-    if (object === this) {
-        console.error('adds: object can\'t be added as a child of itself.', object);
-        return this;
-    }
-    if ((object && object instanceof Container)) {
-        if (object.parent !== null) {
-            object.parent.remove(object);
-        }
-        object.parent = this;
-        this.childs.push(object);
-        this.souldSort = true;
-    } else {
-        console.error('adds: object not an instance of Container', object);
+  if (arguments.length > 1) {
+    for (var i = 0; i < arguments.length; i++) {
+      this.adds(arguments[i]);
     }
     return this;
+  }
+  if (object === this) {
+    console.error('adds: object can\'t be added as a child of itself.', object);
+    return this;
+  }
+  if ((object && object instanceof Container)) {
+    if (object.parent !== null) {
+      object.parent.remove(object);
+    }
+    object.parent = this;
+    this.childs.push(object);
+    this.souldSort = true;
+  } else {
+    console.error('adds: object not an instance of Container', object);
+  }
+  return this;
 };
 
 /**
@@ -156,16 +156,16 @@ Container.prototype.adds = function(object) {
  * @return {JC.Container}
  */
 Container.prototype.remove = function(object) {
-    if (arguments.length > 1) {
-        for (var i = 0; i < arguments.length; i++) {
-            this.remove(arguments[i]);
-        }
+  if (arguments.length > 1) {
+    for (var i = 0; i < arguments.length; i++) {
+      this.remove(arguments[i]);
     }
-    var index = this.childs.indexOf(object);
-    if (index !== -1) {
-        object.parent = null;
-        this.childs.splice(index, 1);
-    }
+  }
+  var index = this.childs.indexOf(object);
+  if (index !== -1) {
+    object.parent = null;
+    this.childs.splice(index, 1);
+  }
 };
 
 /**
@@ -175,16 +175,16 @@ Container.prototype.remove = function(object) {
  * @private
  */
 Container.prototype.updatePosture = function(snippet) {
-    if (!this._ready) return;
-    if (this.souldSort) this._sortList();
-    snippet = this.timeScale * snippet;
-    if (!this.paused) this.updateAnimation(snippet);
-    this.updateTransform();
+  if (!this._ready) return;
+  if (this.souldSort) this._sortList();
+  snippet = this.timeScale * snippet;
+  if (!this.paused) this.updateAnimation(snippet);
+  this.updateTransform();
     // if (this.childs.length > 0) this.updateChilds(snippet);
-    for (var i = 0, l = this.childs.length; i < l; i++) {
-        var child = this.childs[i];
-        child.updatePosture(snippet);
-    }
+  for (var i = 0, l = this.childs.length; i < l; i++) {
+    var child = this.childs[i];
+    child.updatePosture(snippet);
+  }
 };
 
 /**
@@ -194,17 +194,17 @@ Container.prototype.updatePosture = function(snippet) {
  * @private
  */
 Container.prototype.render = function(ctx) {
-    ctx.save();
-    this.setTransform(ctx);
-    if (this.mask) this.mask.render(ctx);
-    this.renderMe(ctx);
+  ctx.save();
+  this.setTransform(ctx);
+  if (this.mask) this.mask.render(ctx);
+  this.renderMe(ctx);
     // if (this.childs.length > 0) this.renderChilds(ctx);
-    for (var i = 0, l = this.childs.length; i < l; i++) {
-        var child = this.childs[i];
-        if (!child.isVisible() || !child._ready) continue;
-        child.render(ctx);
-    }
-    ctx.restore();
+  for (var i = 0, l = this.childs.length; i < l; i++) {
+    var child = this.childs[i];
+    if (!child.isVisible() || !child._ready) continue;
+    child.render(ctx);
+  }
+  ctx.restore();
 };
 
 /**
@@ -214,41 +214,41 @@ Container.prototype.render = function(ctx) {
  * @private
  */
 Container.prototype.renderMe = function() {
-    return true;
+  return true;
 };
 
 Container.prototype.calculateVertices = function() {
-    var wt = this.worldTransform,
-        a = wt.a,
-        b = wt.b,
-        c = wt.c,
-        d = wt.d,
-        tx = wt.tx,
-        ty = wt.ty,
-        vertexData = this.vertexData,
-        w0, w1, h0, h1;
+  var wt = this.worldTransform,
+    a = wt.a,
+    b = wt.b,
+    c = wt.c,
+    d = wt.d,
+    tx = wt.tx,
+    ty = wt.ty,
+    vertexData = this.vertexData,
+    w0, w1, h0, h1;
 
-    w0 = this._bounds.minX;
-    w1 = this._bounds.maxX;
+  w0 = this._bounds.minX;
+  w1 = this._bounds.maxX;
 
-    h0 = this._bounds.minY;
-    h1 = this._bounds.maxY;
-
-    // xy
-    vertexData[0] = a * w1 + c * h1 + tx;
-    vertexData[1] = d * h1 + b * w1 + ty;
+  h0 = this._bounds.minY;
+  h1 = this._bounds.maxY;
 
     // xy
-    vertexData[2] = a * w0 + c * h1 + tx;
-    vertexData[3] = d * h1 + b * w0 + ty;
+  vertexData[0] = a * w1 + c * h1 + tx;
+  vertexData[1] = d * h1 + b * w1 + ty;
 
     // xy
-    vertexData[4] = a * w0 + c * h0 + tx;
-    vertexData[5] = d * h0 + b * w0 + ty;
+  vertexData[2] = a * w0 + c * h1 + tx;
+  vertexData[3] = d * h1 + b * w0 + ty;
 
     // xy
-    vertexData[6] = a * w1 + c * h0 + tx;
-    vertexData[7] = d * h0 + b * w1 + ty;
+  vertexData[4] = a * w0 + c * h0 + tx;
+  vertexData[5] = d * h0 + b * w0 + ty;
+
+    // xy
+  vertexData[6] = a * w1 + c * h0 + tx;
+  vertexData[7] = d * h0 + b * w1 + ty;
 };
 
 
@@ -258,25 +258,25 @@ Container.prototype.calculateVertices = function() {
  * @method calculateBounds
  */
 Container.prototype.calculateBounds = function () {
-    this.bounds.clear();
-    if(!this.visible) {
-        return;
-    }
-    this._calculateBounds();
+  this.bounds.clear();
+  if(!this.visible) {
+    return;
+  }
+  this._calculateBounds();
 
-    for (var i = 0; i < this.childs.length; i++) {
-        var child = this.childs[i];
+  for (var i = 0; i < this.childs.length; i++) {
+    var child = this.childs[i];
 
-        child.calculateBounds();
+    child.calculateBounds();
 
-        this.bounds.addBounds(child.bounds);
-    }
+    this.bounds.addBounds(child.bounds);
+  }
     // this._boundsID = this._lastBoundsID;
 };
 
 Container.prototype._calculateBounds = function () {
-    this.calculateVertices();
-    this.bounds.addVert(this.vertexData);
+  this.calculateVertices();
+  this.bounds.addVert(this.vertexData);
 };
 
 
@@ -286,9 +286,9 @@ Container.prototype._calculateBounds = function () {
  * @method setBounds
  */
 Container.prototype.setBounds = function(bounds){
-    if (bounds instanceof Bounds) {
-        this._bounds = bounds;
-    }
+  if (bounds instanceof Bounds) {
+    this._bounds = bounds;
+  }
 };
 
 /**
@@ -297,7 +297,7 @@ Container.prototype.setBounds = function(bounds){
  *
  */
 Container.prototype.pause = function() {
-    this.paused = true;
+  this.paused = true;
 };
 
 /**
@@ -306,7 +306,7 @@ Container.prototype.pause = function() {
  *
  */
 Container.prototype.start = function() {
-    this.paused = false;
+  this.paused = false;
 };
 
 /**
@@ -315,7 +315,7 @@ Container.prototype.start = function() {
  *
  */
 Container.prototype.cancle = function() {
-    this.Animator.clear();
+  this.Animator.clear();
 };
 
 export { Container };

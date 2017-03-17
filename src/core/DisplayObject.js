@@ -11,21 +11,21 @@ import { UTILS } from '../util/UTILS';
  * @memberof JC
  */
 function DisplayObject() {
-    Eventer.call(this);
+  Eventer.call(this);
     /**
      * 标记渲染对象是否就绪
      *
      * @member {Boolean}
      * @private
      */
-    this._ready = true;
+  this._ready = true;
 
     /**
      * 控制渲染对象是否显示
      *
      * @member {Boolean}
      */
-    this.visible = true;
+  this.visible = true;
 
     /**
      * 世界透明度
@@ -33,87 +33,87 @@ function DisplayObject() {
      * @member {Number}
      * @private
      */
-    this.worldAlpha = 1;
+  this.worldAlpha = 1;
 
     /**
      * 控制渲染对象的透明度
      *
      * @member {Number}
      */
-    this.alpha = 1;
+  this.alpha = 1;
 
     /**
      * 控制渲染对象的x轴的缩放
      *
      * @member {Number}
      */
-    this.scaleX = 1;
+  this.scaleX = 1;
 
     /**
      * 控制渲染对象的y轴的缩放
      *
      * @member {Number}
      */
-    this.scaleY = 1;
+  this.scaleY = 1;
 
     /**
      * 控制渲染对象的x轴的斜切
      *
      * @member {Number}
      */
-    this.skewX = 0;
+  this.skewX = 0;
 
     /**
      * 控制渲染对象的y轴的斜切
      *
      * @member {Number}
      */
-    this.skewY = 0;
+  this.skewY = 0;
 
     /**
      * 控制渲染对象的旋转角度
      *
      * @member {Number}
      */
-    this.rotation = 0;
-    this.rotationCache = 0;
-    this._sr = 0;
-    this._cr = 1;
+  this.rotation = 0;
+  this.rotationCache = 0;
+  this._sr = 0;
+  this._cr = 1;
 
     /**
      * 控制渲染对象的x位置
      *
      * @member {Number}
      */
-    this.x = 0;
+  this.x = 0;
 
     /**
      * 控制渲染对象的y位置
      *
      * @member {Number}
      */
-    this.y = 0;
+  this.y = 0;
 
     /**
      * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
      *
      * @member {Number}
      */
-    this.pivotX = 0;
+  this.pivotX = 0;
 
     /**
      * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
      *
      * @member {Number}
      */
-    this.pivotY = 0;
+  this.pivotY = 0;
 
     /**
      * 对象的遮罩层
      *
      * @member {JC.Graphics}
      */
-    this.mask = null;
+  this.mask = null;
 
     /**
      * 当前对象的直接父级
@@ -121,7 +121,7 @@ function DisplayObject() {
      * @member {JC.Container}
      * @private
      */
-    this.parent = null;
+  this.parent = null;
 
     /**
      * 当前对象所应用的矩阵状态
@@ -129,7 +129,7 @@ function DisplayObject() {
      * @member {JC.Matrix}
      * @private
      */
-    this.worldTransform = new Matrix();
+  this.worldTransform = new Matrix();
 
     /**
      * 当前对象的事件管家
@@ -144,7 +144,7 @@ function DisplayObject() {
      *
      * @member {Boolean}
      */
-    this.passEvent = false;
+  this.passEvent = false;
 
     /**
      * 当前对象的事件检测边界
@@ -152,7 +152,7 @@ function DisplayObject() {
      * @member {JC.Shape}
      * @private
      */
-    this.eventArea = null;
+  this.eventArea = null;
 
 
     /**
@@ -161,7 +161,7 @@ function DisplayObject() {
      * @member {Array}
      * @private
      */
-    this.Animation = new Animation(this);
+  this.Animation = new Animation(this);
 
 
     /**
@@ -170,7 +170,7 @@ function DisplayObject() {
      * @member {Boolean}
      * @private
      */
-    this._touchstarted = false;
+  this._touchstarted = false;
 
     /**
      * 标记当前对象是否为mousedown触发状态
@@ -178,21 +178,21 @@ function DisplayObject() {
      * @member {Boolean}
      * @private
      */
-    this._mousedowned = false;
+  this._mousedowned = false;
 
     /**
      * 渲染对象是否具备光标样式，例如 cursor
      *
      * @member {Boolean}
      */
-    this.buttonMode = false;
+  this.buttonMode = false;
 
     /**
      * 当渲染对象是按钮时所具备的光标样式
      *
      * @member {Boolean}
      */
-    this.cursor = 'pointer';
+  this.cursor = 'pointer';
 }
 DisplayObject.prototype = Object.create(Eventer.prototype);
 
@@ -204,12 +204,12 @@ DisplayObject.prototype = Object.create(Eventer.prototype);
  * @memberof JC.DisplayObject#
  */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
-    get: function() {
-        return this.scaleX;
-    },
-    set: function(scale) {
-        this.scaleX = this.scaleY = scale;
-    }
+  get: function() {
+    return this.scaleX;
+  },
+  set: function(scale) {
+    this.scaleX = this.scaleY = scale;
+  }
 });
 
 /**
@@ -242,7 +242,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.fromTo = function(opts, clear) {
-    return this.Animation.fromTo(opts, clear);
+  return this.Animation.fromTo(opts, clear);
 };
 
 /**
@@ -273,7 +273,7 @@ DisplayObject.prototype.fromTo = function(opts, clear) {
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.to = function(opts, clear) {
-    return this.Animation.to(opts, clear);
+  return this.Animation.to(opts, clear);
 };
 
 /**
@@ -305,7 +305,7 @@ DisplayObject.prototype.to = function(opts, clear) {
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.motion = function(opts, clear) {
-    return this.Animation.motion(opts, clear);
+  return this.Animation.motion(opts, clear);
 };
 
 /**
@@ -338,7 +338,7 @@ DisplayObject.prototype.motion = function(opts, clear) {
  * @param clear {Boolean} 是否去掉之前的动画
  */
 DisplayObject.prototype.keyFrames = function(opts, clear) {
-    return this.Animation.keyFrames(opts, clear);
+  return this.Animation.keyFrames(opts, clear);
 };
 
 /**
@@ -348,7 +348,7 @@ DisplayObject.prototype.keyFrames = function(opts, clear) {
  * @private
  */
 DisplayObject.prototype.isVisible = function() {
-    return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
+  return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
 };
 
 /**
@@ -356,7 +356,7 @@ DisplayObject.prototype.isVisible = function() {
  *
  */
 DisplayObject.prototype.removeMask = function() {
-    this.mask = null;
+  this.mask = null;
 };
 
 /**
@@ -366,14 +366,14 @@ DisplayObject.prototype.removeMask = function() {
  * @private
  */
 DisplayObject.prototype.setProps = function(props) {
-    if (props === undefined) return;
-    for (var key in props) {
-        if (this[key] === undefined) {
-            continue;
-        } else {
-            this[key] = props[key];
-        }
+  if (props === undefined) return;
+  for (var key in props) {
+    if (this[key] === undefined) {
+      continue;
+    } else {
+      this[key] = props[key];
     }
+  }
 };
 
 /**
@@ -383,14 +383,14 @@ DisplayObject.prototype.setProps = function(props) {
  * @private
  */
 DisplayObject.prototype.updateTransform = function() {
-    var pt = this.parent.worldTransform;
-    var wt = this.worldTransform;
+  var pt = this.parent.worldTransform;
+  var wt = this.worldTransform;
 
-    var a, b, c, d, tx, ty;
+  var a, b, c, d, tx, ty;
 
-    if (this.skewX || this.skewY) {
+  if (this.skewX || this.skewY) {
 
-        TEMP_MATRIX.setTransform(
+    TEMP_MATRIX.setTransform(
             this.x,
             this.y,
             this.pivotX,
@@ -402,53 +402,53 @@ DisplayObject.prototype.updateTransform = function() {
             this.skewY * UTILS.DTR
         );
 
-        wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
-        wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
-        wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
-        wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
-        wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
-        wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
+    wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
+    wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
+    wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
+    wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
+    wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
+    wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
+  } else {
+    if (this.rotation % 360) {
+      if (this.rotation !== this.rotationCache) {
+        this.rotationCache = this.rotation;
+        this._sr = Math.sin(this.rotation * UTILS.DTR);
+        this._cr = Math.cos(this.rotation * UTILS.DTR);
+      }
+
+      a = this._cr * this.scaleX;
+      b = this._sr * this.scaleX;
+      c = -this._sr * this.scaleY;
+      d = this._cr * this.scaleY;
+      tx = this.x;
+      ty = this.y;
+
+      if (this.pivotX || this.pivotY) {
+        tx -= this.pivotX * a + this.pivotY * c;
+        ty -= this.pivotX * b + this.pivotY * d;
+      }
+      wt.a = a * pt.a + b * pt.c;
+      wt.b = a * pt.b + b * pt.d;
+      wt.c = c * pt.a + d * pt.c;
+      wt.d = c * pt.b + d * pt.d;
+      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
     } else {
-        if (this.rotation % 360) {
-            if (this.rotation !== this.rotationCache) {
-                this.rotationCache = this.rotation;
-                this._sr = Math.sin(this.rotation * UTILS.DTR);
-                this._cr = Math.cos(this.rotation * UTILS.DTR);
-            }
+      a = this.scaleX;
+      d = this.scaleY;
 
-            a = this._cr * this.scaleX;
-            b = this._sr * this.scaleX;
-            c = -this._sr * this.scaleY;
-            d = this._cr * this.scaleY;
-            tx = this.x;
-            ty = this.y;
+      tx = this.x - this.pivotX * a;
+      ty = this.y - this.pivotY * d;
 
-            if (this.pivotX || this.pivotY) {
-                tx -= this.pivotX * a + this.pivotY * c;
-                ty -= this.pivotX * b + this.pivotY * d;
-            }
-            wt.a = a * pt.a + b * pt.c;
-            wt.b = a * pt.b + b * pt.d;
-            wt.c = c * pt.a + d * pt.c;
-            wt.d = c * pt.b + d * pt.d;
-            wt.tx = tx * pt.a + ty * pt.c + pt.tx;
-            wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-        } else {
-            a = this.scaleX;
-            d = this.scaleY;
-
-            tx = this.x - this.pivotX * a;
-            ty = this.y - this.pivotY * d;
-
-            wt.a = a * pt.a;
-            wt.b = a * pt.b;
-            wt.c = d * pt.c;
-            wt.d = d * pt.d;
-            wt.tx = tx * pt.a + ty * pt.c + pt.tx;
-            wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-        }
+      wt.a = a * pt.a;
+      wt.b = a * pt.b;
+      wt.c = d * pt.c;
+      wt.d = d * pt.d;
+      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
     }
-    this.worldAlpha = this.alpha * this.parent.worldAlpha;
+  }
+  this.worldAlpha = this.alpha * this.parent.worldAlpha;
 };
 
 /**
@@ -458,7 +458,7 @@ DisplayObject.prototype.updateTransform = function() {
  * @private
  */
 DisplayObject.prototype.updateAnimation = function(snippet) {
-    this.Animation.update(snippet);
+  this.Animation.update(snippet);
 };
 
 /**
@@ -468,9 +468,9 @@ DisplayObject.prototype.updateAnimation = function(snippet) {
  * @private
  */
 DisplayObject.prototype.setTransform = function(ctx) {
-    var matrix = this.worldTransform;
-    ctx.globalAlpha = this.worldAlpha;
-    ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
+  var matrix = this.worldTransform;
+  ctx.globalAlpha = this.worldAlpha;
+  ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
 };
 
 /**
@@ -479,7 +479,7 @@ DisplayObject.prototype.setTransform = function(ctx) {
  * @return {object}
  */
 DisplayObject.prototype.getGlobalPos = function() {
-    return { x: this.worldTransform.tx, y: this.worldTransform.ty };
+  return { x: this.worldTransform.tx, y: this.worldTransform.ty };
 };
 
 /**
@@ -520,8 +520,8 @@ DisplayObject.prototype.getGlobalPos = function() {
  * @return {Array}
  */
 DisplayObject.prototype.setArea = function(shape, needless) {
-    if (this.eventArea !== null && needless) return;
-    this.eventArea = shape;
+  if (this.eventArea !== null && needless) return;
+  this.eventArea = shape;
 };
 
 /**
@@ -531,10 +531,10 @@ DisplayObject.prototype.setArea = function(shape, needless) {
  * @private
  */
 DisplayObject.prototype.contains = function (global) {
-    if (this.eventArea === null) return false;
-    var point = new Point();
-    this.worldTransform.applyInverse(global, point);
-    return this.eventArea && this.eventArea.contains(point.x, point.y);
+  if (this.eventArea === null) return false;
+  var point = new Point();
+  this.worldTransform.applyInverse(global, point);
+  return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
 
 export { DisplayObject };

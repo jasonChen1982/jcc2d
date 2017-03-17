@@ -10,17 +10,17 @@ import { UTILS } from './UTILS';
  * @extends JC.Eventer
  */
 function Texture(img, lazy) {
-    Eventer.call(this);
-    this.texture = null;
-    this.width = 0;
-    this.height = 0;
-    this.naturalWidth = 0;
-    this.naturalHeight = 0;
-    this.loaded = false;
-    this.hadload = false;
-    this.src = img;
-    this.resole(img);
-    if (!lazy || !UTILS.isString(img)) this.load(img);
+  Eventer.call(this);
+  this.texture = null;
+  this.width = 0;
+  this.height = 0;
+  this.naturalWidth = 0;
+  this.naturalHeight = 0;
+  this.loaded = false;
+  this.hadload = false;
+  this.src = img;
+  this.resole(img);
+  if (!lazy || !UTILS.isString(img)) this.load(img);
 
 }
 Texture.prototype = Object.create(Eventer.prototype);
@@ -33,12 +33,12 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.resole = function(img) {
-    if (UTILS.isString(img)) {
-        this.texture = new Image();
-    }
-    if (img instanceof Image || img.nodeName === 'IMG') {
-        this.texture = img;
-    }
+  if (UTILS.isString(img)) {
+    this.texture = new Image();
+  }
+  if (img instanceof Image || img.nodeName === 'IMG') {
+    this.texture = img;
+  }
 };
 
 /**
@@ -49,33 +49,33 @@ Texture.prototype.resole = function(img) {
  * @private
  */
 Texture.prototype.load = function(img) {
-    if (this.hadload) return;
-    var This = this;
-    this.hadload = true;
-    img = img || this.src;
-    if (UTILS.isString(img)) {
-        this.texture.crossOrigin = '';
-        this.texture.src = img;
-        this.texture.onload = function() {
-            This.loaded = true;
-            This.emit('load');
-        };
-        this.texture.onerror = function() {
-            This.emit('error');
-        };
-        this.on('load', function() {
-            This.width = This.texture.width;
-            This.height = This.texture.height;
-            This.naturalWidth = This.texture.naturalWidth;
-            This.naturalHeight = This.texture.naturalHeight;
-        });
-    }
-    if ((img instanceof Image || img.nodeName === 'IMG') && img.naturalWidth * img.naturalHeight > 0) {
-        this.width = img.width;
-        this.height = img.height;
-        this.naturalWidth = img.naturalWidth;
-        this.naturalHeight = img.naturalHeight;
-    }
+  if (this.hadload) return;
+  var This = this;
+  this.hadload = true;
+  img = img || this.src;
+  if (UTILS.isString(img)) {
+    this.texture.crossOrigin = '';
+    this.texture.src = img;
+    this.texture.onload = function() {
+      This.loaded = true;
+      This.emit('load');
+    };
+    this.texture.onerror = function() {
+      This.emit('error');
+    };
+    this.on('load', function() {
+      This.width = This.texture.width;
+      This.height = This.texture.height;
+      This.naturalWidth = This.texture.naturalWidth;
+      This.naturalHeight = This.texture.naturalHeight;
+    });
+  }
+  if ((img instanceof Image || img.nodeName === 'IMG') && img.naturalWidth * img.naturalHeight > 0) {
+    this.width = img.width;
+    this.height = img.height;
+    this.naturalWidth = img.naturalWidth;
+    this.naturalHeight = img.naturalHeight;
+  }
 };
 
 
@@ -89,11 +89,11 @@ Texture.prototype.load = function(img) {
  * @extends JC.Eventer
  */
 function Loader() {
-    Eventer.call(this);
-    this.textures = {};
-    this._total = 0;
-    this._failed = 0;
-    this._received = 0;
+  Eventer.call(this);
+  this.textures = {};
+  this._total = 0;
+  this._failed = 0;
+  this._received = 0;
 }
 Loader.prototype = Object.create(Eventer.prototype);
 
@@ -114,29 +114,29 @@ Loader.prototype = Object.create(Eventer.prototype);
  * @return {JC.Loader} 返回本实例对象
  */
 Loader.prototype.load = function(srcMap) {
-    var This = this;
-    this._total = 0;
-    this._failed = 0;
-    this._received = 0;
-    for (var src in srcMap) {
-        this._total++;
-        this.textures[src] = new Texture(srcMap[src]);
-        bind(this.textures[src]);
-    }
+  var This = this;
+  this._total = 0;
+  this._failed = 0;
+  this._received = 0;
+  for (var src in srcMap) {
+    this._total++;
+    this.textures[src] = new Texture(srcMap[src]);
+    bind(this.textures[src]);
+  }
 
-    function bind(texture) {
-        texture.on('load', function() {
-            This._received++;
-            This.emit('update');
-            if (This._received + This._failed >= This._total) This.emit('compelete');
-        });
-        texture.on('error', function() {
-            This._failed++;
-            This.emit('update');
-            if (This._received + This._failed >= This._total) This.emit('compelete');
-        });
-    }
-    return this;
+  function bind(texture) {
+    texture.on('load', function() {
+      This._received++;
+      This.emit('update');
+      if (This._received + This._failed >= This._total) This.emit('compelete');
+    });
+    texture.on('error', function() {
+      This._failed++;
+      This.emit('update');
+      if (This._received + This._failed >= This._total) This.emit('compelete');
+    });
+  }
+  return this;
 };
 
 /**
@@ -151,7 +151,7 @@ Loader.prototype.load = function(srcMap) {
  * @return {JC.Texture} 包装出来的JC.Texture对象
  */
 Loader.prototype.getById = function(id) {
-    return this.textures[id];
+  return this.textures[id];
 };
 
 /**
@@ -162,9 +162,9 @@ Loader.prototype.getById = function(id) {
  * @memberof JC.Loader
  */
 Object.defineProperty(Texture.prototype, 'progress', {
-    get: function() {
-        return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
-    }
+  get: function() {
+    return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
+  }
 });
 
 
@@ -178,7 +178,7 @@ Object.defineProperty(Texture.prototype, 'progress', {
  * @return {JC.Loader}
  */
 var loaderUtil = function(srcMap) {
-    return new Loader().load(srcMap);
+  return new Loader().load(srcMap);
 };
 
 export { Texture, Loader, loaderUtil };
