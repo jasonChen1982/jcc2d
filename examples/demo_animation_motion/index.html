@@ -63,16 +63,17 @@ document.body.appendChild(stats.domElement);
 
 var shape = new JC.Graphics();
 shape.drawCall(new Rect('#749d9b'));
+var bezierPath = new JC.BezierCurve([
+    {x: -80, y: -80, name: '起始点'},
+    {x: 150, y: 60, name: '控制点1'},
+    {x: 80, y: 200, name: '控制点2'},
+    {x: -80, y: 200, name: '控制点3'},
+    {x: -150, y: 60, name: '控制点4'},
+    {x: 80, y: -80, name: '结束点'}
+]);
 
-var pathMotion = shape.motion({
-    points: [
-        {x: -80, y: -80, name: '起始点'},
-        {x: 150, y: 60, name: '控制点1'},
-        {x: 80, y: 200, name: '控制点2'},
-        {x: -80, y: 200, name: '控制点3'},
-        {x: -150, y: 60, name: '控制点4'},
-        {x: 80, y: -80, name: '结束点'}
-    ],
+shape.motion({
+    path: bezierPath,
     ease: 'elasticBoth',
     duration: 4000,
     attachTangent: true,
@@ -82,12 +83,12 @@ var pathMotion = shape.motion({
 
 // 生成起始点和控制点的现实并绑定拖拽事件
 var pointsShape = [];
-for(var i=0;i<pathMotion.points.length;i++){
-    var point = pathMotion.points[i],
+for(var i=0;i<bezierPath.points.length;i++){
+    var point = bezierPath.points[i],
         control = new JC.Graphics();
     control.x = point.x;
     control.y = point.y;
-    var color = i===0||i===pathMotion.points.length-1? '#e46d69': '';
+    var color = i === 0 || i === bezierPath.points.length-1 ? '#e46d69' : '';
     control.drawCall(new Circle(color,10));
     control.setArea(new JC.Circle(0,0,20));
     var text = new JC.TextFace(point.name,'','#acba9d');
@@ -134,7 +135,7 @@ dashLine.drawCall(function(ctx){
     ctx.beginPath();
     ctx.strokeStyle = '#ffffff';
     for(var i=0;i<100;i++){
-        var pos = pathMotion.getPoint(i/99,pathMotion.points);
+        var pos = bezierPath.getPoint(i/99);
         if(i===0||dashLine.dash){
             dashLine.dash = false;
             ctx.moveTo(pos.x,pos.y);

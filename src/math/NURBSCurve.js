@@ -56,3 +56,4 @@ NURBSCurve.prototype.getTangent = function ( t ) {
 
 };
 
+export { NURBSCurve };
