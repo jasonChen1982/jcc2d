@@ -1,7 +1,7 @@
 
 import { Point } from './Point';
 
-const NURBSUtils = {
+var NURBSUtils = {
 
   /*
   Finds knot vector span.

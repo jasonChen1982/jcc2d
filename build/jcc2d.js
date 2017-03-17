@@ -1948,7 +1948,7 @@ SvgCurve.prototype.getPoint = function (t) {
   return new Point(point.x, point.y);
 };
 
-const NURBSUtils = {
+var NURBSUtils = {
 
   /*
   Finds knot vector span.
