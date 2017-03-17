@@ -4721,7 +4721,6 @@ exports.Ellipse = Ellipse;
 exports.Matrix = Matrix;
 exports.IDENTITY = IDENTITY;
 exports.TEMP_MATRIX = TEMP_MATRIX;
-exports.Curve = Curve;
 exports.BezierCurve = BezierCurve;
 exports.SvgCurve = SvgCurve;
 exports.NURBSCurve = NURBSCurve;
