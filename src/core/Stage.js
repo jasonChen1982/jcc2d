@@ -1,7 +1,7 @@
 
-import { Container } from './Container';
-import { InteractionManager } from '../eventer/InteractionManager';
-import { UTILS } from '../util/UTILS';
+import {Container} from './Container';
+import {InteractionManager} from '../eventer/InteractionManager';
+import {UTILS} from '../util/UTILS';
 
 /**
  * 舞台对象，继承至Eventer
@@ -14,6 +14,7 @@ import { UTILS } from '../util/UTILS';
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {json} options
  */
 function Stage(options) { // canvas, bgColor, resolution
   options = options || {};
@@ -24,7 +25,9 @@ function Stage(options) { // canvas, bgColor, resolution
    *
    * @member {CANVAS}
    */
-  this.canvas = UTILS.isString(options.dom) ? document.getElementById(options.dom) : options.dom;
+  this.canvas = UTILS.isString(options.dom)
+                ?
+                document.getElementById(options.dom) : options.dom;
 
   this.realWidth = options.width || this.canvas.width;
   this.realHeight = options.height || this.canvas.height;
@@ -173,40 +176,40 @@ function Stage(options) { // canvas, bgColor, resolution
 Stage.prototype = Object.create(Container.prototype);
 
 Stage.prototype.proxyOn = function() {
-  var This = this;
-  this.interactionManager.on('click', function(ev){
+  let This = this;
+  this.interactionManager.on('click', function(ev) {
     This.emit('click', ev);
   });
 
-  this.interactionManager.on('mousemove', function(ev){
+  this.interactionManager.on('mousemove', function(ev) {
     This.emit('mousemove', ev);
   });
 
-  this.interactionManager.on('mousedown', function(ev){
+  this.interactionManager.on('mousedown', function(ev) {
     This.emit('mousedown', ev);
   });
 
-  this.interactionManager.on('mouseout', function(ev){
+  this.interactionManager.on('mouseout', function(ev) {
     This.emit('mouseout', ev);
   });
 
-  this.interactionManager.on('mouseover', function(ev){
+  this.interactionManager.on('mouseover', function(ev) {
     This.emit('mouseover', ev);
   });
 
-  this.interactionManager.on('touchstart', function(ev){
+  this.interactionManager.on('touchstart', function(ev) {
     This.emit('touchstart', ev);
   });
 
-  this.interactionManager.on('touchend', function(ev){
+  this.interactionManager.on('touchend', function(ev) {
     This.emit('touchend', ev);
   });
 
-  this.interactionManager.on('touchmove', function(ev){
+  this.interactionManager.on('touchmove', function(ev) {
     This.emit('touchmove', ev);
   });
 
-  this.interactionManager.on('mouseup', function(ev){
+  this.interactionManager.on('mouseup', function(ev) {
     This.emit('mouseup', ev);
   });
 };
@@ -227,7 +230,7 @@ Object.defineProperty(Stage.prototype, 'interactive', {
       this._interactive = value;
       this.interactiveOnChange();
     }
-  }
+  },
 });
 
 /**
@@ -247,17 +250,17 @@ Object.defineProperty(Stage.prototype, 'resolution', {
       this.worldTransform.identity().scale(value, value);
       this.resize();
     }
-  }
+  },
 });
 
 /**
  * 舞台尺寸设置
  *
  *
- * @param w {number} canvas的width值
- * @param h {number} canvas的height值
- * @param sw {number} canvas的style.width值，需将舞台属性autoStyle设置为true
- * @param sh {number} canvas的style.height值，需将舞台属性autoStyle设置为true
+ * @param {number} w canvas的width值
+ * @param {number} h canvas的height值
+ * @param {number} sw canvas的style.width值，需将舞台属性autoStyle设置为true
+ * @param {number} sh canvas的style.height值，需将舞台属性autoStyle设置为true
  */
 Stage.prototype.resize = function(w, h, sw, sh) {
   if (UTILS.isNumber(w) && UTILS.isNumber(h)) {
@@ -287,11 +290,18 @@ Stage.prototype.render = function() {
 
   if (this.autoUpdate) this.update();
 
-  this.ctx.setTransform(this.worldTransform.a, this.worldTransform.b, this.worldTransform.c, this.worldTransform.d, this.worldTransform.tx, this.worldTransform.ty);
+  this.ctx.setTransform(
+    this.worldTransform.a,
+    this.worldTransform.b,
+    this.worldTransform.c,
+    this.worldTransform.d,
+    this.worldTransform.tx,
+    this.worldTransform.ty
+  );
   if (this.autoClear) this.ctx.clearRect(0, 0, this.width, this.height);
 
-  for (var i = 0, l = this.childs.length; i < l; i++) {
-    var child = this.childs[i];
+  for (let i = 0, l = this.childs.length; i < l; i++) {
+    let child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
     child.render(this.ctx);
   }
@@ -321,7 +331,7 @@ Stage.prototype.timeline = function() {
     this.snippet = Date.now() - this.pt;
   }
 
-  if(this.enableFPS){
+  if(this.enableFPS) {
     this._renderTimes++;
     this._takeTime += Math.max(15, this.snippet);
     this.fps = 1000 / Math.max(15, this.snippet) >> 0;
@@ -337,12 +347,13 @@ Stage.prototype.timeline = function() {
  *
  * @method updatePosture
  * @private
+ * @param {number} snippet
  */
 Stage.prototype.updatePosture = function(snippet) {
-  for (var i = 0, l = this.childs.length; i < l; i++) {
-    var child = this.childs[i];
+  for (let i = 0, l = this.childs.length; i < l; i++) {
+    let child = this.childs[i];
     child.updatePosture(snippet);
   }
 };
 
-export { Stage };
+export {Stage};

@@ -1,8 +1,8 @@
-import { Matrix, TEMP_MATRIX } from '../math/Matrix';
-import { Point } from '../math/Point';
-import { Eventer } from '../eventer/Eventer';
-import { Animation } from '../animation/Animation';
-import { UTILS } from '../util/UTILS';
+import {Matrix, TEMP_MATRIX} from '../math/Matrix';
+import {Point} from '../math/Point';
+import {Eventer} from '../eventer/Eventer';
+import {Animation} from '../animation/Animation';
+import {UTILS} from '../util/UTILS';
 /**
  * 显示对象的基类，继承至Eventer
  *
@@ -209,7 +209,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
   },
   set: function(scale) {
     this.scaleX = this.scaleY = scale;
-  }
+  },
 });
 
 /**
@@ -229,17 +229,18 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param [opts] {object} 动画配置参数
- * @param [opts.from] {json} json格式，设置对象的起始位置和起始姿态等
- * @param [opts.to] {json} json格式，设置对象的结束位置和结束姿态等
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {json} [opts.from] json格式，设置对象的起始位置和起始姿态等
+ * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
 DisplayObject.prototype.fromTo = function(opts, clear) {
   return this.Animation.fromTo(opts, clear);
@@ -261,27 +262,29 @@ DisplayObject.prototype.fromTo = function(opts, clear) {
  * });
  * ```
  *
- * @param [opts] {object} 动画配置参数
- * @param [opts.to] {json} json格式，设置对象的结束位置和结束姿态等
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
 DisplayObject.prototype.to = function(opts, clear) {
   return this.Animation.to(opts, clear);
 };
 
+/* eslint max-len: "off" */
 /**
  * motion动画，让物体按照设定好的曲线运动
  *
  * ```js
  * dispay.motion({
- *   path: new JC.SvgCurve(''M10 10 H 90 V 90 H 10 L 10 10''), path路径，继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
@@ -292,17 +295,18 @@ DisplayObject.prototype.to = function(opts, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param [opts] {object} 动画配置参数
- * @param [opts.path] {Curve} path路径，继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
- * @param [opts.attachTangent] {Boolean} 物体是否捕获切线方向
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {Curve} [opts.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ * @param {Boolean} [opts.attachTangent] 物体是否捕获切线方向
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
 DisplayObject.prototype.motion = function(opts, clear) {
   return this.Animation.motion(opts, clear);
@@ -325,17 +329,18 @@ DisplayObject.prototype.motion = function(opts, clear) {
  * });
  * ```
  *
- * @param [opts] {object} 动画配置参数
- * @param [opts.keys] {json} 配置关键帧的位置、姿态
- * @param [opts.keyConfig] {json} 相邻两个关键帧之间的动画运动配置
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {json} [opts.keys] 配置关键帧的位置、姿态
+ * @param {json} [opts.keyConfig] 相邻两个关键帧之间的动画运动配置
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
 DisplayObject.prototype.keyFrames = function(opts, clear) {
   return this.Animation.keyFrames(opts, clear);
@@ -345,7 +350,7 @@ DisplayObject.prototype.keyFrames = function(opts, clear) {
  * 检查对象是否可见
  *
  * @method isVisible
- * @private
+ * @return {Boolean} 对象是否可见
  */
 DisplayObject.prototype.isVisible = function() {
   return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
@@ -362,12 +367,12 @@ DisplayObject.prototype.removeMask = function() {
 /**
  * 设置对象上的属性值
  *
- * @method setProps
+ * @param {json} props
  * @private
  */
 DisplayObject.prototype.setProps = function(props) {
   if (props === undefined) return;
-  for (var key in props) {
+  for (let key in props) {
     if (this[key] === undefined) {
       continue;
     } else {
@@ -383,13 +388,17 @@ DisplayObject.prototype.setProps = function(props) {
  * @private
  */
 DisplayObject.prototype.updateTransform = function() {
-  var pt = this.parent.worldTransform;
-  var wt = this.worldTransform;
+  let pt = this.parent.worldTransform;
+  let wt = this.worldTransform;
 
-  var a, b, c, d, tx, ty;
+  let a;
+  let b;
+  let c;
+  let d;
+  let tx;
+  let ty;
 
   if (this.skewX || this.skewY) {
-
     TEMP_MATRIX.setTransform(
             this.x,
             this.y,
@@ -454,7 +463,7 @@ DisplayObject.prototype.updateTransform = function() {
 /**
  * 更新对象本身的动画
  *
- * @method updateAnimation
+ * @param {Number} snippet
  * @private
  */
 DisplayObject.prototype.updateAnimation = function(snippet) {
@@ -464,11 +473,11 @@ DisplayObject.prototype.updateAnimation = function(snippet) {
 /**
  * 设置矩阵和透明度到当前绘图上下文
  *
- * @method setTransform
+ * @param {context} ctx
  * @private
  */
 DisplayObject.prototype.setTransform = function(ctx) {
-  var matrix = this.worldTransform;
+  let matrix = this.worldTransform;
   ctx.globalAlpha = this.worldAlpha;
   ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
 };
@@ -479,15 +488,14 @@ DisplayObject.prototype.setTransform = function(ctx) {
  * @return {object}
  */
 DisplayObject.prototype.getGlobalPos = function() {
-  return { x: this.worldTransform.tx, y: this.worldTransform.ty };
+  return {x: this.worldTransform.tx, y: this.worldTransform.ty};
 };
 
 /**
  * 设置显示对象的事件检测区域
  *
- * @param shape {JC.Polygon|JC.Rectangle} JC内置形状类型的实例
- * @param needless {boolean} 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
- * @return {Array}
+ * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
+ * @param {boolean} needless 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
  */
 DisplayObject.prototype.setArea = function(shape, needless) {
   if (this.eventArea !== null && needless) return;
@@ -497,14 +505,14 @@ DisplayObject.prototype.setArea = function(shape, needless) {
 /**
  * 检测坐标点是否在多变性内
  *
- * @method contains
- * @private
+ * @param {JC.Point} global
+ * @return {Boolean} 是否包含该点
  */
-DisplayObject.prototype.contains = function (global) {
+DisplayObject.prototype.contains = function(global) {
   if (this.eventArea === null) return false;
-  var point = new Point();
+  let point = new Point();
   this.worldTransform.applyInverse(global, point);
   return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
 
-export { DisplayObject };
+export {DisplayObject};

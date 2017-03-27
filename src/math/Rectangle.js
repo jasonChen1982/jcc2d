@@ -4,13 +4,12 @@
  *
  * @class
  * @memberof JC
- * @param x {number} 左上角的x坐标
- * @param y {number} 左上角的y坐标
- * @param width {number} 矩形的宽度
- * @param height {number} 矩形的高度
+ * @param {number} x 左上角的x坐标
+ * @param {number} y 左上角的y坐标
+ * @param {number} width 矩形的宽度
+ * @param {number} height 矩形的高度
  */
-function Rectangle(x, y, width, height)
-{
+function Rectangle(x, y, width, height) {
   /**
    * @member {number}
    * @default 0
@@ -50,29 +49,24 @@ Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
  *
  * @return {PIXI.Rectangle} 克隆出的矩形
  */
-Rectangle.prototype.clone = function ()
-{
+Rectangle.prototype.clone = function() {
   return new Rectangle(this.x, this.y, this.width, this.height);
 };
 
 /**
  * 检查坐标点是否在矩形区域内
  *
- * @param x {number} 坐标点的x轴位置
- * @param y {number} 坐标点的y轴位置
+ * @param {number} x 坐标点的x轴位置
+ * @param {number} y 坐标点的y轴位置
  * @return {boolean} 坐标点是否在矩形区域内
  */
-Rectangle.prototype.contains = function (x, y)
-{
-  if (this.width <= 0 || this.height <= 0)
-    {
+Rectangle.prototype.contains = function(x, y) {
+  if (this.width <= 0 || this.height <= 0) {
     return false;
   }
 
-  if (x >= this.x && x < this.x + this.width)
-    {
-    if (y >= this.y && y < this.y + this.height)
-        {
+  if (x >= this.x && x < this.x + this.width) {
+    if (y >= this.y && y < this.y + this.height) {
       return true;
     }
   }
@@ -80,4 +74,4 @@ Rectangle.prototype.contains = function (x, y)
   return false;
 };
 
-export { Rectangle };
+export {Rectangle};

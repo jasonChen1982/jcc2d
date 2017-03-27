@@ -1,4 +1,9 @@
-function _rt(val){
+/**
+ * 返回数据类型
+ * @param {*} val
+ * @return {String} 数据类型
+ */
+function _rt(val) {
   return Object.prototype.toString.call(val);
 }
 
@@ -7,7 +12,7 @@ function _rt(val){
  *
  * @namespace JC.UTILS
  */
-export var UTILS = {
+export const UTILS = {
   /**
    * 简单拷贝纯数据的JSON对象
    *
@@ -16,7 +21,7 @@ export var UTILS = {
    * @param {JSON} json 待拷贝的纯数据JSON
    * @return {JSON} 拷贝后的纯数据JSON
    */
-  copyJSON: function(json){
+  copyJSON: function(json) {
     return JSON.parse(JSON.stringify(json));
   },
 
@@ -47,9 +52,9 @@ export var UTILS = {
    * @param {Array} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isArray: (function(){
-    var ks = _rt([]);
-    return function(object){
+  isArray: (function() {
+    let ks = _rt([]);
+    return function(object) {
       return _rt(object) === ks;
     };
   })(),
@@ -63,9 +68,9 @@ export var UTILS = {
    * @param {Object} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isObject: (function(){
-    var ks = _rt({});
-    return function(object){
+  isObject: (function() {
+    let ks = _rt({});
+    return function(object) {
       return _rt(object) === ks;
     };
   })(),
@@ -79,9 +84,9 @@ export var UTILS = {
    * @param {String} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isString: (function(){
-    var ks = _rt('s');
-    return function(object){
+  isString: (function() {
+    let ks = _rt('s');
+    return function(object) {
       return _rt(object) === ks;
     };
   })(),
@@ -95,9 +100,9 @@ export var UTILS = {
    * @param {Number} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isNumber: (function(){
-    var ks = _rt(1);
-    return function(object){
+  isNumber: (function() {
+    let ks = _rt(1);
+    return function(object) {
       return _rt(object) === ks;
     };
   })(),
@@ -111,9 +116,9 @@ export var UTILS = {
    * @param {Function} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isFunction: (function(){
-    var ks = _rt(function(){});
-    return function(object){
+  isFunction: (function() {
+    let ks = _rt(function() {});
+    return function(object) {
       return _rt(object) === ks;
     };
   })(),
@@ -128,7 +133,7 @@ export var UTILS = {
    * @param {Number} max 所给定区间较大的数字
    * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
    */
-  random: function(min, max){
+  random: function(min, max) {
     if (this.isArray(min))
       return min[~~(Math.random() * min.length)];
     if (!this.isNumber(max))
@@ -146,7 +151,7 @@ export var UTILS = {
    * @param {Number} m 模
    * @return {Number} 映射到模长内到索引
    */
-  euclideanModulo: function(n, m){
+  euclideanModulo: function(n, m) {
     return ((n % m) + m) % m;
   },
 

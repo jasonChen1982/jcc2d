@@ -1,19 +1,26 @@
 
-import { Container } from './Container';
+import {Container} from './Container';
 
 /**
  * 文本，继承至Container
  *
  *
  * ```js
- * var text = new JC.TextFace('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * var text = new JC.TextFace(
+ *              'JC jcc2d canvas renderer',
+ *              'bold 36px Arial',
+ *              '#f00'
+ *            );
  * ```
  *
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {string} text
+ * @param {string} font
+ * @param {string} color
  */
-function TextFace(text,font,color){
+function TextFace(text, font, color) {
   Container.call( this );
   this.text = text.toString();
   this.font = font || 'bold 12px Arial';
@@ -38,20 +45,21 @@ TextFace.prototype = Object.create( Container.prototype );
  *
  * @method updateMe
  * @private
+ * @param {context} ctx
  */
-TextFace.prototype.renderMe = function(ctx){
+TextFace.prototype.renderMe = function(ctx) {
   ctx.font = this.font;
   ctx.textAlign = this.textAlign;
   ctx.textBaseline = this.textBaseline;
-  if(this.UF){
+  if(this.UF) {
     ctx.fillStyle = this.color;
-    ctx.fillText(this.text,0,0);
+    ctx.fillText(this.text, 0, 0);
   }
-  if(this.US){
+  if(this.US) {
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.color;
-    ctx.strokeText(this.text,0,0);
+    ctx.strokeText(this.text, 0, 0);
   }
 };
 
-export { TextFace };
+export {TextFace};

@@ -1,5 +1,5 @@
-import { DisplayObject } from './DisplayObject';
-import { Bounds } from '../math/Bounds';
+import {DisplayObject} from './DisplayObject';
+import {Bounds} from '../math/Bounds';
 
 /**
  * 显示对象容器，继承至DisplayObject
@@ -89,7 +89,7 @@ Object.defineProperty(Container.prototype, 'zIndex', {
         this.parent.souldSort = true;
       }
     }
-  }
+  },
 });
 
 /**
@@ -99,7 +99,7 @@ Object.defineProperty(Container.prototype, 'zIndex', {
  * @private
  */
 Container.prototype._sortList = function() {
-  this.childs.sort(function(a, b){
+  this.childs.sort(function(a, b) {
     if (a.zIndex > b.zIndex) {
       return 1;
     }
@@ -118,12 +118,13 @@ Container.prototype._sortList = function() {
  * container.adds(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param object {JC.Container}
+ * @param {JC.Container} object
  * @return {JC.Container}
  */
 Container.prototype.adds = function(object) {
+  /* eslint prefer-rest-params: "off" */
   if (arguments.length > 1) {
-    for (var i = 0; i < arguments.length; i++) {
+    for (let i = 0; i < arguments.length; i++) {
       this.adds(arguments[i]);
     }
     return this;
@@ -152,16 +153,15 @@ Container.prototype.adds = function(object) {
  * container.remove(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param object {JC.Container}
- * @return {JC.Container}
+ * @param {JC.Container} object
  */
 Container.prototype.remove = function(object) {
   if (arguments.length > 1) {
-    for (var i = 0; i < arguments.length; i++) {
+    for (let i = 0; i < arguments.length; i++) {
       this.remove(arguments[i]);
     }
   }
-  var index = this.childs.indexOf(object);
+  let index = this.childs.indexOf(object);
   if (index !== -1) {
     object.parent = null;
     this.childs.splice(index, 1);
@@ -171,7 +171,7 @@ Container.prototype.remove = function(object) {
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
  *
- * @method updatePosture
+ * @param {Number} snippet
  * @private
  */
 Container.prototype.updatePosture = function(snippet) {
@@ -181,16 +181,15 @@ Container.prototype.updatePosture = function(snippet) {
   if (!this.paused) this.updateAnimation(snippet);
   this.updateTransform();
     // if (this.childs.length > 0) this.updateChilds(snippet);
-  for (var i = 0, l = this.childs.length; i < l; i++) {
-    var child = this.childs[i];
+  for (let i = 0, l = this.childs.length; i < l; i++) {
+    let child = this.childs[i];
     child.updatePosture(snippet);
   }
 };
 
 /**
  * 渲染自己并触发后代渲染
- *
- * @method render
+ * @param {context} ctx
  * @private
  */
 Container.prototype.render = function(ctx) {
@@ -199,8 +198,8 @@ Container.prototype.render = function(ctx) {
   if (this.mask) this.mask.render(ctx);
   this.renderMe(ctx);
     // if (this.childs.length > 0) this.renderChilds(ctx);
-  for (var i = 0, l = this.childs.length; i < l; i++) {
-    var child = this.childs[i];
+  for (let i = 0, l = this.childs.length; i < l; i++) {
+    let child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
     child.render(ctx);
   }
@@ -209,24 +208,26 @@ Container.prototype.render = function(ctx) {
 
 /**
  * 渲染自己
- *
- * @method renderMe
  * @private
+ * @return {Boolean} 是否渲染
  */
 Container.prototype.renderMe = function() {
   return true;
 };
 
 Container.prototype.calculateVertices = function() {
-  var wt = this.worldTransform,
-    a = wt.a,
-    b = wt.b,
-    c = wt.c,
-    d = wt.d,
-    tx = wt.tx,
-    ty = wt.ty,
-    vertexData = this.vertexData,
-    w0, w1, h0, h1;
+  let wt = this.worldTransform;
+  let a = wt.a;
+  let b = wt.b;
+  let c = wt.c;
+  let d = wt.d;
+  let tx = wt.tx;
+  let ty = wt.ty;
+  let vertexData = this.vertexData;
+  let w0;
+  let w1;
+  let h0;
+  let h1;
 
   w0 = this._bounds.minX;
   w1 = this._bounds.maxX;
@@ -257,15 +258,15 @@ Container.prototype.calculateVertices = function() {
  *
  * @method calculateBounds
  */
-Container.prototype.calculateBounds = function () {
+Container.prototype.calculateBounds = function() {
   this.bounds.clear();
   if(!this.visible) {
     return;
   }
   this._calculateBounds();
 
-  for (var i = 0; i < this.childs.length; i++) {
-    var child = this.childs[i];
+  for (let i = 0; i < this.childs.length; i++) {
+    let child = this.childs[i];
 
     child.calculateBounds();
 
@@ -274,7 +275,7 @@ Container.prototype.calculateBounds = function () {
   // this._boundsID = this._lastBoundsID;
 };
 
-Container.prototype._calculateBounds = function () {
+Container.prototype._calculateBounds = function() {
   this.calculateVertices();
   this.bounds.addVert(this.vertexData);
 };
@@ -282,10 +283,9 @@ Container.prototype._calculateBounds = function () {
 
 /**
  * 设置渲染物体的包围盒
- *
- * @method setBounds
+ * @param {JC.Bounds} bounds
  */
-Container.prototype.setBounds = function(bounds){
+Container.prototype.setBounds = function(bounds) {
   if (bounds instanceof Bounds) {
     this._bounds = bounds;
   }
@@ -318,4 +318,4 @@ Container.prototype.cancle = function() {
   this.Animator.clear();
 };
 
-export { Container };
+export {Container};

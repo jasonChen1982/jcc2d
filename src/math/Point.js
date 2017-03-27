@@ -3,10 +3,10 @@
  *
  * @class
  * @memberof JC
- * @param [x=0] {number} x轴的位置
- * @param [y=0] {number} y轴的位置
- * @param [z=0] {number} z轴的位置
- * @param [w=0] {number} w轴的位置
+ * @param {number} [x=0] x轴的位置
+ * @param {number} [y=0] y轴的位置
+ * @param {number} [z=0] z轴的位置
+ * @param {number} [w=0] w轴的位置
  */
 function Point(x, y, z, w) {
   /**
@@ -39,36 +39,37 @@ function Point(x, y, z, w) {
  *
  * @return {JC.Point} 克隆的坐标点
  */
-Point.prototype.clone = function () {
+Point.prototype.clone = function() {
   return new Point(this.x, this.y, this.z, this.w);
 };
 
 /**
  * 拷贝传入的坐标点来设置当前坐标点
  *
- * @param p {JC.Point}
+ * @param {JC.Point} p
  */
-Point.prototype.copy = function (p) {
+Point.prototype.copy = function(p) {
   this.set(p.x, p.y, p.z, p.w);
 };
 
 /**
  * 设置坐标点
  *
- * @param {number} x轴的位置
- * @param {number} y轴的位置
- * @param {number} z轴的位置
- * @param {number} w轴的位置
+ * @param {number} x 轴的位置
+ * @param {number} y 轴的位置
+ * @param {number} z 轴的位置
+ * @param {number} w 轴的位置
+ * @return {Point} this
  */
-Point.prototype.set = function ( x, y, z, w ) {
+Point.prototype.set = function( x, y, z, w ) {
   this.x = x;
   this.y = y;
   this.z = z;
   this.w = w;
   return this;
 };
-
-Point.prototype.add = function ( v, w ) {
+/* eslint max-len: "off" */
+Point.prototype.add = function( v, w ) {
   if ( w !== undefined ) {
     console.warn( 'JC.Point: .add() now only accepts one argument. Use .addVectors( a, b ) instead.' );
     return this.addVectors( v, w );
@@ -80,7 +81,7 @@ Point.prototype.add = function ( v, w ) {
   return this;
 };
 
-Point.prototype.addVectors = function ( a, b ) {
+Point.prototype.addVectors = function( a, b ) {
   this.x = a.x + b.x;
   this.y = a.y + b.y;
   this.z = a.z + b.z;
@@ -89,7 +90,7 @@ Point.prototype.addVectors = function ( a, b ) {
 };
 
 
-Point.prototype.sub = function ( v, w ) {
+Point.prototype.sub = function( v, w ) {
   if ( w !== undefined ) {
     console.warn( 'JC.Point: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.' );
     return this.subVectors( v, w );
@@ -102,7 +103,7 @@ Point.prototype.sub = function ( v, w ) {
 };
 
 
-Point.prototype.subVectors = function ( a, b ) {
+Point.prototype.subVectors = function( a, b ) {
   this.x = a.x - b.x;
   this.y = a.y - b.y;
   this.z = a.z - b.z;
@@ -111,33 +112,24 @@ Point.prototype.subVectors = function ( a, b ) {
 };
 
 
-Point.prototype.lengthSq = function () {
-
+Point.prototype.lengthSq = function() {
   return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
-
 };
 
-Point.prototype.length = function () {
-
+Point.prototype.length = function() {
   return Math.sqrt( this.lengthSq() );
-
 };
 
-Point.prototype.normalize = function () {
-
+Point.prototype.normalize = function() {
   return this.divideScalar( this.length() );
-
 };
 
-Point.prototype.divideScalar = function ( scalar ) {
-
+Point.prototype.divideScalar = function( scalar ) {
   return this.multiplyScalar( 1 / scalar );
-
 };
 
 
-Point.prototype.multiplyScalar = function ( scalar ) {
-
+Point.prototype.multiplyScalar = function( scalar ) {
   if ( isFinite( scalar ) ) {
     this.x *= scalar;
     this.y *= scalar;
@@ -150,7 +142,6 @@ Point.prototype.multiplyScalar = function ( scalar ) {
     this.w = 0;
   }
   return this;
-
 };
 
-export { Point };
+export {Point};

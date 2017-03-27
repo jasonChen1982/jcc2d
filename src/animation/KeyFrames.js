@@ -1,11 +1,11 @@
-import { Animate } from './Animate';
-import { UTILS } from '../util/UTILS';
+import {Animate} from './Animate';
+import {UTILS} from '../util/UTILS';
 /**
  * KeyFrames类型动画对象
  *
  * @class
  * @memberof JC
- * @param [opts] {object} 动画配置信息
+ * @param {object} [opts] 动画配置信息
  */
 function KeyFrames(opts) {
   Animate.call(this, opts);
@@ -22,7 +22,12 @@ KeyFrames.prototype.configKey = function() {
   this.from = this._keyframes[this._keyIndex];
   this._keyIndex += this._cursor;
   this.to = this._keyframes[this._keyIndex];
-  var config = this._keyConfig[Math.min(this._keyIndex, this._keyIndex - this._cursor)] || {};
+  let config = this._keyConfig[
+                 Math.min(
+                   this._keyIndex,
+                   this._keyIndex - this._cursor
+                 )
+               ]||{};
   this.ease = config.ease || this.ease;
   this.duration = config.duration || this.duration;
   this.progress = 0;
@@ -38,12 +43,17 @@ KeyFrames.prototype.update = function(snippet) {
   }
   // if (this.paused || !this.living) return;
 
-  var snippetCache = this.direction * this.timeScale * snippet;
+  let snippetCache = this.direction * this.timeScale * snippet;
   this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
-  var pose = this.nextPose();
-  if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+  let pose = this.nextPose();
+  if (this.onUpdate) {
+    this.onUpdate(pose,
+      this.progress / this.duration,
+      this._keyIndex
+    );
+  }
 
   // this.progress += this.timeScale * snippet;
   if (this.totalTime >= this.duration) {
@@ -69,4 +79,4 @@ KeyFrames.prototype.update = function(snippet) {
   }
 };
 
-export { KeyFrames };
+export {KeyFrames};

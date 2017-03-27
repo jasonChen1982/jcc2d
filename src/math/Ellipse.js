@@ -1,17 +1,16 @@
-import { Rectangle } from './Rectangle';
+import {Rectangle} from './Rectangle';
 
 /**
  * 椭圆对象
  *
  * @class
  * @memberof JC
- * @param x {number} x轴的坐标
- * @param y {number} y轴的坐标
- * @param width {number} 椭圆的宽度
- * @param height {number} 椭圆的高度
+ * @param {number} x x轴的坐标
+ * @param {number} y y轴的坐标
+ * @param {number} width 椭圆的宽度
+ * @param {number} height 椭圆的高度
  */
-function Ellipse(x, y, width, height)
-{
+function Ellipse(x, y, width, height) {
   /**
    * @member {number}
    * @default 0
@@ -42,28 +41,25 @@ function Ellipse(x, y, width, height)
  *
  * @return {PIXI.Ellipse} 克隆出来的椭圆对象
  */
-Ellipse.prototype.clone = function ()
-{
+Ellipse.prototype.clone = function() {
   return new Ellipse(this.x, this.y, this.width, this.height);
 };
 
 /**
  * 检测坐标点是否在椭园内
  *
- * @param x {number} 坐标点的x轴坐标
- * @param y {number} 坐标点的y轴坐标
+ * @param {number} x 坐标点的x轴坐标
+ * @param {number} y 坐标点的y轴坐标
  * @return {boolean} 坐标点是否在椭园内
  */
-Ellipse.prototype.contains = function (x, y)
-{
-  if (this.width <= 0 || this.height <= 0)
-    {
+Ellipse.prototype.contains = function(x, y) {
+  if (this.width <= 0 || this.height <= 0) {
     return false;
   }
 
-  //normalize the coords to an ellipse with center 0,0
-  var normx = ((x - this.x) / this.width),
-    normy = ((y - this.y) / this.height);
+  // normalize the coords to an ellipse with center 0,0
+  let normx = ((x - this.x) / this.width);
+  let normy = ((y - this.y) / this.height);
 
   normx *= normx;
   normy *= normy;
@@ -76,9 +72,13 @@ Ellipse.prototype.contains = function (x, y)
  *
  * @return {PIXI.Rectangle} 矩形对象
  */
-Ellipse.prototype.getBounds = function ()
-{
-  return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
+Ellipse.prototype.getBounds = function() {
+  return new Rectangle(
+    this.x - this.width,
+    this.y - this.height,
+    this.width,
+    this.height
+  );
 };
 
-export { Ellipse };
+export {Ellipse};

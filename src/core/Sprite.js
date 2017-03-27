@@ -1,6 +1,6 @@
-import { Container } from './Container';
-import { MovieClip } from '../animation/MovieClip';
-import { Rectangle } from '../math/Rectangle';
+import {Container} from './Container';
+import {MovieClip} from '../animation/MovieClip';
+import {Rectangle} from '../math/Rectangle';
 
 /**
  * 位图精灵图，继承至Container
@@ -27,6 +27,7 @@ import { Rectangle } from '../math/Rectangle';
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {json} opts
  */
 function Sprite(opts) {
   Container.call(this);
@@ -35,7 +36,7 @@ function Sprite(opts) {
   if (this.texture.loaded) {
     this.upTexture(opts);
   } else {
-    var This = this;
+    let This = this;
     this._ready = false;
     this.texture.on('load', function() {
       This.upTexture(opts);
@@ -44,7 +45,6 @@ function Sprite(opts) {
   }
 
   this.MovieClip = new MovieClip(this, opts);
-
 }
 Sprite.prototype = Object.create(Container.prototype);
 
@@ -53,16 +53,23 @@ Sprite.prototype = Object.create(Container.prototype);
  *
  * @method upTexture
  * @private
+ * @param {json} opts
  */
 Sprite.prototype.upTexture = function(opts) {
   this.naturalWidth = opts.texture.naturalWidth;
   this.naturalHeight = opts.texture.naturalHeight;
-  this.frame = opts.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
+  this.frame = opts.frame || new Rectangle(
+                                0,
+                                0,
+                                this.naturalWidth,
+                                this.naturalHeight
+                              );
+
   this.width = opts.width || this.frame.width || this.naturalWidth;
   this.height = opts.height || this.frame.height || this.naturalHeight;
   this.regX = this.width >> 1;
   this.regY = this.height >> 1;
-  var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
+  let rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
   this._bounds.addRect(rect);
   this.setArea(rect, true);
 };
@@ -72,6 +79,7 @@ Sprite.prototype.upTexture = function(opts) {
  *
  * @method updateAnimation
  * @private
+ * @param {number} snippet
  */
 Sprite.prototype.updateAnimation = function(snippet) {
   this.Animation.update(snippet);
@@ -80,7 +88,7 @@ Sprite.prototype.updateAnimation = function(snippet) {
 
 /**
  * 播放逐帧动画
- *
+ * @param {json} opts
  */
 Sprite.prototype.playMovie = function(opts) {
   this.MovieClip.playMovie(opts);
@@ -91,11 +99,22 @@ Sprite.prototype.playMovie = function(opts) {
  *
  * @method updateMe
  * @private
+ * @param {context} ctx
  */
 Sprite.prototype.renderMe = function(ctx) {
   if (!this._ready) return;
-  var frame = this.MovieClip.getFrame();
-  ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, -this.regX, -this.regY, this.width, this.height);
+  let frame = this.MovieClip.getFrame();
+  ctx.drawImage(
+    this.texture.texture,
+    frame.x,
+    frame.y,
+    frame.width,
+    frame.height,
+    -this.regX,
+    -this.regY,
+    this.width,
+    this.height
+  );
 };
 
-export { Sprite };
+export {Sprite};

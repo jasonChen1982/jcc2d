@@ -1,5 +1,5 @@
-import { Eventer } from '../eventer/Eventer';
-import { UTILS } from './UTILS';
+import {Eventer} from '../eventer/Eventer';
+import {UTILS} from './UTILS';
 
 /**
  * 图片纹理类
@@ -7,6 +7,7 @@ import { UTILS } from './UTILS';
  * @class
  * @memberof JC
  * @param {string | Image} img 图片url或者图片对象.
+ * @param {Boolean} lazy 图片是否需要懒加载
  * @extends JC.Eventer
  */
 function Texture(img, lazy) {
@@ -21,7 +22,6 @@ function Texture(img, lazy) {
   this.src = img;
   this.resole(img);
   if (!lazy || !UTILS.isString(img)) this.load(img);
-
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
@@ -29,7 +29,7 @@ Texture.prototype = Object.create(Eventer.prototype);
  * 预先处理一些数据
  *
  * @static
- * @param {string | Image} 先生成对应的对象
+ * @param {string | Image} img 先生成对应的对象
  * @private
  */
 Texture.prototype.resole = function(img) {
@@ -50,7 +50,7 @@ Texture.prototype.resole = function(img) {
  */
 Texture.prototype.load = function(img) {
   if (this.hadload) return;
-  var This = this;
+  let This = this;
   this.hadload = true;
   img = img || this.src;
   if (UTILS.isString(img)) {
@@ -70,15 +70,16 @@ Texture.prototype.load = function(img) {
       This.naturalHeight = This.texture.naturalHeight;
     });
   }
-  if ((img instanceof Image || img.nodeName === 'IMG') && img.naturalWidth * img.naturalHeight > 0) {
+  if (
+    (img instanceof Image || img.nodeName === 'IMG') &&
+    img.naturalWidth * img.naturalHeight > 0
+  ) {
     this.width = img.width;
     this.height = img.height;
     this.naturalWidth = img.naturalWidth;
     this.naturalHeight = img.naturalHeight;
   }
 };
-
-
 
 
 /**
@@ -114,16 +115,21 @@ Loader.prototype = Object.create(Eventer.prototype);
  * @return {JC.Loader} 返回本实例对象
  */
 Loader.prototype.load = function(srcMap) {
-  var This = this;
+  let This = this;
   this._total = 0;
   this._failed = 0;
   this._received = 0;
-  for (var src in srcMap) {
+
+  /* eslint guard-for-in: "off" */
+  for (let src in srcMap) {
     this._total++;
     this.textures[src] = new Texture(srcMap[src]);
     bind(this.textures[src]);
   }
 
+  /**
+   * @param {Texture} texture
+   */
   function bind(texture) {
     texture.on('load', function() {
       This._received++;
@@ -163,10 +169,10 @@ Loader.prototype.getById = function(id) {
  */
 Object.defineProperty(Texture.prototype, 'progress', {
   get: function() {
-    return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
-  }
+    return this._total === 0 ? 1 :
+    (this._received + this._failed) / this._total;
+  },
 });
-
 
 
 /**
@@ -174,11 +180,11 @@ Object.defineProperty(Texture.prototype, 'progress', {
  *
  * @function
  * @memberof JC
- * @param srcMap {object} key-src map
+ * @param {object} srcMap key-src map
  * @return {JC.Loader}
  */
-var loaderUtil = function(srcMap) {
+let loaderUtil = function(srcMap) {
   return new Loader().load(srcMap);
 };
 
-export { Texture, Loader, loaderUtil };
+export {Texture, Loader, loaderUtil};

@@ -14,44 +14,64 @@
  * @namespace JC.TWEEN
  */
 
-export var TWEEN = {
+export const TWEEN = {
   /**
    * 匀速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  linear: function (t, b, c, d){
+  linear: function(t, b, c, d) {
     return c*t/d + b;
   },
 
   /**
    * 加速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  easeIn: function(t, b, c, d){
+  easeIn: function(t, b, c, d) {
     return c*(t/=d)*t + b;
   },
 
   /**
    * 减速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  easeOut: function(t, b, c, d){
+  easeOut: function(t, b, c, d) {
     return -c *(t/=d)*(t-2) + b;
   },
 
   /**
    * 先加速再减速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  easeBoth: function(t, b, c, d){
+  easeBoth: function(t, b, c, d) {
     if ((t/=d/2) < 1) {
       return c/2*t*t + b;
     }
@@ -68,13 +88,14 @@ export var TWEEN = {
    *   ......
    * })
    * ```
+   * @param {Number} opts 扩展的时间函数
    * @static
    * @memberof JC.TWEEN
    */
-  extend: function(opts){
+  extend: function(opts) {
     if(!opts)return;
-    for(var key in opts){
+    for(let key in opts) {
       if(key!=='extend'&&opts[key])this[key]=opts[key];
     }
-  }
+  },
 };

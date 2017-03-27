@@ -1,7 +1,11 @@
-import { Eventer } from './Eventer';
-import { InteractionData } from './InteractionData';
-import { Point } from '../math/Point';
+import {Eventer} from './Eventer';
+import {InteractionData} from './InteractionData';
+import {Point} from '../math/Point';
 
+/**
+ *
+ * @param {JC.Stage} stage 徐亚接入事件系统的的场景
+ */
 function InteractionManager(stage) {
   Eventer.call(this);
   this.stage = stage;
@@ -40,7 +44,6 @@ function InteractionManager(stage) {
   this.defaultCursorStyle = 'inherit';
 
   this.currentCursorStyle = 'inherit';
-
 }
 InteractionManager.prototype = Object.create(Eventer.prototype);
 
@@ -72,20 +75,20 @@ InteractionManager.prototype.removeEvents = function() {
   window.document.removeEventListener('mousemove', this.onMouseMove, true);
   this.canvas.removeEventListener('mousedown', this.onMouseDown, true);
   this.canvas.removeEventListener('click', this.onClick, true);
-  this.canvas.removeEventListener('mouseout',  this.onMouseOut, true);
+  this.canvas.removeEventListener('mouseout', this.onMouseOut, true);
   this.canvas.removeEventListener('mouseover', this.onMouseOver, true);
 
   this.canvas.removeEventListener('touchstart', this.onTouchStart, true);
-  this.canvas.removeEventListener('touchend',  this.onTouchEnd, true);
+  this.canvas.removeEventListener('touchend', this.onTouchEnd, true);
   this.canvas.removeEventListener('touchmove', this.onTouchMove, true);
 
-  window.removeEventListener('mouseup',  this.onMouseUp, true);
+  window.removeEventListener('mouseup', this.onMouseUp, true);
 
   this.eventsAdded = false;
 };
 
 InteractionManager.prototype.onMouseMove = function(event) {
-  var eventd = this.fixCoord(event);
+  let eventd = this.fixCoord(event);
 
   this.cursor = this.defaultCursorStyle;
   this.processInteractive(this.stage, eventd, this.processMouseMove, true);
@@ -95,18 +98,26 @@ InteractionManager.prototype.onMouseMove = function(event) {
     this.canvas.style.cursor = this.cursor;
   }
 
-  this.emit('mousemove',eventd);
+  this.emit('mousemove', eventd);
 };
 
-InteractionManager.prototype.processMouseMove = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseMove = function(
+  displayObject,
+  event,
+  hit
+) {
   this.processMouseOverOut(displayObject, event, hit);
   if (hit) {
     this.dispatchEvent(displayObject, 'mousemove', event);
   }
 };
 
-InteractionManager.prototype.processMouseOverOut = function(displayObject, event, hit) {
-  var eventd = event.clone();
+InteractionManager.prototype.processMouseOverOut = function(
+  displayObject,
+  event,
+  hit
+) {
+  let eventd = event.clone();
   if (hit) {
     if (!displayObject._over) {
       displayObject._over = true;
@@ -127,13 +138,17 @@ InteractionManager.prototype.onMouseDown = function(event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
-  var eventd = this.fixCoord(event);
+  let eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseDown, true);
 
-  this.emit('mousedown',eventd);
+  this.emit('mousedown', eventd);
 };
 
-InteractionManager.prototype.processMouseDown = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseDown = function(
+  displayObject,
+  event,
+  hit
+) {
   if (hit) {
         // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
@@ -144,13 +159,17 @@ InteractionManager.prototype.onClick = function(event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
-  var eventd = this.fixCoord(event);
+  let eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processClick, true);
 
-  this.emit('click',eventd);
+  this.emit('click', eventd);
 };
 
-InteractionManager.prototype.processClick = function(displayObject, event, hit) {
+InteractionManager.prototype.processClick = function(
+  displayObject,
+  event,
+  hit
+) {
   if (hit) {
         // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
@@ -161,13 +180,17 @@ InteractionManager.prototype.onMouseUp = function(event) {
     // if (this.autoPreventDefault) {
     //     event.preventDefault();
     // }
-  var eventd = this.fixCoord(event);
+  let eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseUp, true);
 
-  this.emit('mouseup',eventd);
+  this.emit('mouseup', eventd);
 };
 
-InteractionManager.prototype.processMouseUp = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseUp = function(
+  displayObject,
+  event,
+  hit
+) {
   if (hit) {
         // displayObject._mousedowned = false;
     this.dispatchEvent(displayObject, event.type, event);
@@ -175,7 +198,7 @@ InteractionManager.prototype.processMouseUp = function(displayObject, event, hit
 };
 
 InteractionManager.prototype.onMouseOut = function(event) {
-  var eventd = this.fixCoord(event);
+  let eventd = this.fixCoord(event);
 
   this.processInteractive(this.stage, eventd, this.processMouseOverOut, false);
 
@@ -191,13 +214,17 @@ InteractionManager.prototype.onTouchStart = function(event) {
         // event.preventDefault();
     // }
     // console.log(event);
-  var eventd = this.fixCoord(event);
+  let eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchStart, true);
 
   this.emit('touchstart', eventd);
 };
 
-InteractionManager.prototype.processTouchStart = function(displayObject, event, hit) {
+InteractionManager.prototype.processTouchStart = function(
+  displayObject,
+  event,
+  hit
+) {
   if (hit) {
     displayObject._touchstarted = true;
     this.dispatchEvent(displayObject, 'touchstart', event);
@@ -208,8 +235,13 @@ InteractionManager.prototype.onTouchEnd = function(event) {
     // if (this.autoPreventDefault) {
         // event.preventDefault();
     // }
-  var eventd = this.fixCoord(event);
-  this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
+  let eventd = this.fixCoord(event);
+  this.processInteractive(
+    this.stage,
+    eventd,
+    this.processTouchEnd,
+    this.strictMode
+  );
 
   this.emit('touchend', eventd);
 };
@@ -225,25 +257,47 @@ InteractionManager.prototype.onTouchMove = function(event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
-  var eventd = this.fixCoord(event);
-  this.processInteractive(this.stage, eventd, this.processTouchMove, this.strictMode);
+  let eventd = this.fixCoord(event);
+  this.processInteractive(
+    this.stage,
+    eventd,
+    this.processTouchMove,
+    this.strictMode
+  );
 
   this.emit('touchmove', eventd);
 };
 
-InteractionManager.prototype.processTouchMove = function(displayObject, event, hit) {
+InteractionManager.prototype.processTouchMove = function(
+  displayObject,
+  event,
+  hit
+) {
   if ((!this.strictMode && displayObject._touchstarted) || hit) {
     this.dispatchEvent(displayObject, 'touchmove', event);
   }
 };
 
-InteractionManager.prototype.processInteractive = function(object, event, func, hitTest) {
+InteractionManager.prototype.processInteractive = function(
+  object,
+  event,
+  func,
+  hitTest
+) {
+  /**
+   *
+   * @param {JC.DisplayObject} object 现实对象
+   * @param {JC.InteractionData} event JC的交互数据对象
+   * @param {Function} func 事件检测函数
+   * @param {Boolean} shouldHit 是否需要检测
+   * @return {Boolean} 是否检测到
+   */
   function process(object, event, func, shouldHit) {
-    var childs = object.childs;
-    var hit = false;
-    var i = childs.length - 1;
+    let childs = object.childs;
+    let hit = false;
+    let i = childs.length - 1;
     while (i >= 0) {
-      var cchilds = childs[i--];
+      let cchilds = childs[i--];
       hit = false;
       if (cchilds.passEvent) continue;
       if (cchilds.childs.length > 0) {
@@ -266,14 +320,18 @@ InteractionManager.prototype.processInteractive = function(object, event, func, 
   process(object, event, func, hitTest);
 };
 
-InteractionManager.prototype.dispatchEvent = function(displayObject, eventString, event) {
+InteractionManager.prototype.dispatchEvent = function(
+  displayObject,
+  eventString,
+  event
+) {
   if (!event.cancleBubble) {
     event.target = displayObject;
     event.type = eventString;
 
     displayObject.emit(eventString, event);
 
-    var type = 'on' + eventString;
+    let type = 'on' + eventString;
     if (displayObject[type]) {
       displayObject[type](event);
     }
@@ -281,8 +339,8 @@ InteractionManager.prototype.dispatchEvent = function(displayObject, eventString
 };
 
 InteractionManager.prototype.fixCoord = function(event) {
-  var eventd = new InteractionData(),
-    offset = this.getPos(this.canvas);
+  let eventd = new InteractionData();
+  let offset = this.getPos(this.canvas);
   eventd.originalEvent = event;
   eventd.type = event.type;
 
@@ -290,7 +348,7 @@ InteractionManager.prototype.fixCoord = function(event) {
   if (event.touches) {
     eventd.touches = [];
     if (event.touches.length > 0) {
-      for (var i = 0; i < event.touches.length; i++) {
+      for (let i = 0; i < event.touches.length; i++) {
         eventd.touches[i] = {};
         eventd.touches[i].global = new Point(
                     (event.touches[i].pageX - offset.x) * eventd.ratio,
@@ -307,9 +365,9 @@ InteractionManager.prototype.fixCoord = function(event) {
 };
 
 InteractionManager.prototype.getPos = function(obj) {
-  var pos = new Point();
+  let pos = new Point();
   if (obj.offsetParent) {
-    var p = this.getPos(obj.offsetParent);
+    let p = this.getPos(obj.offsetParent);
     pos.x = obj.offsetLeft + p.x;
     pos.y = obj.offsetTop + p.y;
   } else {
@@ -319,4 +377,4 @@ InteractionManager.prototype.getPos = function(obj) {
   return pos;
 };
 
-export { InteractionManager };
+export {InteractionManager};

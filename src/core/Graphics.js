@@ -1,5 +1,5 @@
-import { Container } from './Container';
-import { FrameBuffer } from '../filters/FrameBuffer';
+import {Container} from './Container';
+import {FrameBuffer} from '../filters/FrameBuffer';
 
 /**
  * 形状对象，继承至Container
@@ -22,7 +22,7 @@ Graphics.prototype = Object.create(Container.prototype);
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateMe
+ * @param {context} ctx
  * @private
  */
 Graphics.prototype.renderMe = function(ctx) {
@@ -42,7 +42,15 @@ Graphics.prototype.renderMe = function(ctx) {
       this.cached = true;
       this.cache = false;
     }
-    this.frameBuffer && ctx.drawImage(this.frameBuffer.canvas, this.__co.x - this.__co.px, this.__co.y - this.__co.py, this.frameBuffer.width, this.frameBuffer.height);
+    this.frameBuffer
+    &&
+    ctx.drawImage(
+      this.frameBuffer.canvas,
+      this.__co.x - this.__co.px,
+      this.__co.y - this.__co.py,
+      this.frameBuffer.width,
+      this.frameBuffer.height
+    );
   } else {
     this._drawBack(ctx);
   }
@@ -50,7 +58,11 @@ Graphics.prototype.renderMe = function(ctx) {
 Graphics.prototype._drawBack = function(ctx) {
   if (typeof this.draw === 'function') {
     this.draw(ctx);
-  } else if (typeof this.draw === 'object' && typeof this.draw.render === 'function') {
+  } else if (
+    typeof this.draw === 'object'
+    &&
+    typeof this.draw.render === 'function'
+  ) {
     this.draw.render(ctx);
   }
 };
@@ -73,19 +85,20 @@ Graphics.prototype._drawBack = function(ctx) {
  *  });
  * ```
  *
- * @param fn {function}
- * @param opts {object}
+ * @param {function} fn
+ * @param {object} opts
  */
 Graphics.prototype.drawCall = function(fn, opts) {
   if (fn === undefined) return;
   opts = opts || {};
   this.cache = opts.cache || false;
   this.cached = false;
-    // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
+  /* eslint max-len: "off" */
+  // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
   this.draw = fn || null;
 
   this.setBounds(opts.bounds);
 };
 
 
-export { Graphics };
+export {Graphics};

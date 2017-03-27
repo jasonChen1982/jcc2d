@@ -1,9 +1,13 @@
-import { Rectangle } from './Rectangle';
+import {Rectangle} from './Rectangle';
 
 /**
  * 显示对象的包围盒子
  *
  * @class
+ * @param {Number} minX
+ * @param {Number} minY
+ * @param {Number} maxX
+ * @param {Number} maxY
  * @memberof JC
  */
 function Bounds(minX, minY, maxX, maxY) {
@@ -50,8 +54,8 @@ Bounds.prototype.clear = function() {
 /**
  * 将包围盒子转换成矩形描述
  *
- * @param rect {JC.Rectangle} 待转换的矩形
- * @returns {JC.Rectangle}
+ * @param {JC.Rectangle} rect 待转换的矩形
+ * @return {JC.Rectangle}
  */
 Bounds.prototype.getRectangle = function(rect) {
   if (this.isEmpty()) {
@@ -71,7 +75,7 @@ Bounds.prototype.getRectangle = function(rect) {
 /**
  * 往包围盒增加外部顶点，更新包围盒区域
  *
- * @param point {JC.Point}
+ * @param {JC.Point} point
  */
 Bounds.prototype.addPoint = function(point) {
   this.minX = Math.min(this.minX, point.x);
@@ -83,7 +87,7 @@ Bounds.prototype.addPoint = function(point) {
 /**
  * 往包围盒增加矩形区域，更新包围盒区域
  *
- * @param point {JC.Rectangle}
+ * @param {JC.Rectangle} rect
  */
 Bounds.prototype.addRect = function(rect) {
   this.minX = rect.x;
@@ -95,17 +99,17 @@ Bounds.prototype.addRect = function(rect) {
 /**
  * 往包围盒增加顶点数组，更新包围盒区域
  *
- * @param point {Array}
+ * @param {Array} vertices
  */
 Bounds.prototype.addVert = function(vertices) {
-  var minX = this.minX,
-    minY = this.minY,
-    maxX = this.maxX,
-    maxY = this.maxY;
+  let minX = this.minX;
+  let minY = this.minY;
+  let maxX = this.maxX;
+  let maxY = this.maxY;
 
-  for (var i = 0; i < vertices.length; i += 2) {
-    var x = vertices[i    ];
-    var y = vertices[i + 1];
+  for (let i = 0; i < vertices.length; i += 2) {
+    let x = vertices[i];
+    let y = vertices[i + 1];
     minX = x < minX ? x : minX;
     minY = y < minY ? y : minY;
     maxX = x > maxX ? x : maxX;
@@ -121,13 +125,13 @@ Bounds.prototype.addVert = function(vertices) {
 /**
  * 往包围盒增加包围盒，更新包围盒区域
  *
- * @param point {JC.Bounds}
+ * @param {JC.Bounds} bounds
  */
 Bounds.prototype.addBounds = function(bounds) {
-  var minX = this.minX,
-    minY = this.minY,
-    maxX = this.maxX,
-    maxY = this.maxY;
+  const minX = this.minX;
+  const minY = this.minY;
+  const maxX = this.maxX;
+  const maxY = this.maxY;
 
   this.minX = bounds.minX < minX ? bounds.minX : minX;
   this.minY = bounds.minY < minY ? bounds.minY : minY;
@@ -135,4 +139,4 @@ Bounds.prototype.addBounds = function(bounds) {
   this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
-export { Bounds };
+export {Bounds};

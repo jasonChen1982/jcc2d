@@ -1,4 +1,4 @@
-import { Point } from '../math/Point';
+import {Point} from '../math/Point';
 
 /**
  * 事件系统的事件消息对象的基本类型
@@ -6,7 +6,7 @@ import { Point } from '../math/Point';
  * @class
  * @memberof JC
  */
-function InteractionData(){
+function InteractionData() {
   /**
    * 转换到canvas坐标系统的事件触发点
    *
@@ -50,14 +50,14 @@ function InteractionData(){
   this.type = '';
 }
 InteractionData.prototype.clone = function() {
-  var evd = new InteractionData();
+  let evd = new InteractionData();
   evd.originalEvent = this.originalEvent;
   evd.ratio = this.ratio;
 
   if (this.touches) {
     evd.touches = [];
     if (this.touches.length > 0) {
-      for (var i = 0; i < this.touches.length; i++) {
+      for (let i = 0; i < this.touches.length; i++) {
         evd.touches[i] = {};
         evd.touches[i].global = this.touches[i].global.clone();
       }
@@ -69,4 +69,4 @@ InteractionData.prototype.clone = function() {
   return evd;
 };
 
-export { InteractionData };
+export {InteractionData};

@@ -1,4 +1,4 @@
-import { UTILS } from '../util/UTILS';
+import {UTILS} from '../util/UTILS';
 
 // TODO 继承事件对象
 /**
@@ -6,8 +6,8 @@ import { UTILS } from '../util/UTILS';
  *
  * @class
  * @memberof JC
- * @param [element] {object} 动画对象 内部传入
- * @param [opts] {object} 动画配置信息 内部传入
+ * @param {object} [element] 动画对象 内部传入
+ * @param {object} [opts] 动画配置信息 内部传入
  */
 function MovieClip(element, opts) {
   this.element = element;
@@ -42,7 +42,7 @@ MovieClip.prototype.update = function(snippet) {
   this.nt += snippet;
   if (this.nt - this.pt < this.interval) return;
   this.pt = this.nt;
-  var i = this.index + this.direction;
+  let i = this.index + this.direction;
   if (i < this.frames.length && i >= 0) {
     this.index = i;
     // Do you need this handler???
@@ -68,15 +68,19 @@ MovieClip.prototype.update = function(snippet) {
   }
 };
 MovieClip.prototype.getFrame = function() {
-  if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
-  var frame = this.element.frame.clone();
-  var cf = this.frames[this.index];
+  if (
+    this.index === this.preIndex
+    &&
+    this.preFrame !== null
+  ) return this.preFrame;
+  let frame = this.element.frame.clone();
+  let cf = this.frames[this.index];
   if (cf > 0) {
-    var row = this.element.naturalWidth / this.element.frame.width >> 0;
-    var lintRow = this.element.frame.x / this.element.frame.width >> 0;
+    let row = this.element.naturalWidth / this.element.frame.width >> 0;
+    let lintRow = this.element.frame.x / this.element.frame.width >> 0;
     // var lintCol = this.element.frame.y / this.element.frame.height >> 0;
-    var mCol = (lintRow + cf) / row >> 0;
-    var mRow = (lintRow + cf) % row;
+    let mCol = (lintRow + cf) / row >> 0;
+    let mRow = (lintRow + cf) % row;
     frame.x = mRow * this.element.frame.width;
     frame.y += mCol * this.element.frame.height;
   }
@@ -86,7 +90,7 @@ MovieClip.prototype.getFrame = function() {
 };
 MovieClip.prototype.playMovie = function(opts) {
   this.next = null;
-  var movie = this.format(opts.movie);
+  let movie = this.format(opts.movie);
   if (!UTILS.isArray(movie)) return;
   this.frames = movie;
   this.index = 0;
@@ -101,10 +105,11 @@ MovieClip.prototype.playMovie = function(opts) {
 };
 MovieClip.prototype.format = function(movie) {
   if (UTILS.isString(movie)) {
-    var config = this.animations[movie];
+    let config = this.animations[movie];
     if (config) {
       return this.format(config);
     } else {
+      /* eslint max-len: "off" */
       console.warn(
           '%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ',
           'color: #f98165; background: #80a89e',
@@ -117,14 +122,14 @@ MovieClip.prototype.format = function(movie) {
   } else if (UTILS.isArray(movie)) {
     return movie;
   } else if (UTILS.isObject(movie)) {
-    var arr = [];
-    for (var i = movie.start; i <= movie.end; i++) {
+    let arr = [];
+    for (let i = movie.start; i <= movie.end; i++) {
       arr.push(i);
     }
     if (movie.next && this.animations[movie.next]) {
-      var This = this;
-      var conf = {};
-      if(UTILS.isString(movie.next) && this.animations[movie.next]){
+      let This = this;
+      let conf = {};
+      if(UTILS.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
         conf.infinity = true;
       } else if(UTILS.isObject(movie.next)) {
@@ -151,7 +156,7 @@ MovieClip.prototype.cancle = function() {
 Object.defineProperty(MovieClip.prototype, 'interval', {
   get: function() {
     return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
-  }
+  },
 });
 
-export { MovieClip };
+export {MovieClip};

@@ -1,4 +1,6 @@
-
+/**
+ * @class
+ */
 function FrameBuffer() {
   this.canvas = document.createElement('canvas');
   this.ctx = this.canvas.getContext('2d');
@@ -26,4 +28,4 @@ FrameBuffer.prototype.putBuffer = function() {
 FrameBuffer.prototype.createBuffer = function() {
 };
 
-export { FrameBuffer };
+export {FrameBuffer};

@@ -33,8 +33,8 @@ function Eventer() {
 /**
  * 事件对象的事件绑定函数
  *
- * @param type {String} 事件类型
- * @param fn {Function} 回调函数
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
  */
 Eventer.prototype.on = function(type, fn) {
   this.listeners[type] = this.listeners[type] || [];
@@ -44,13 +44,13 @@ Eventer.prototype.on = function(type, fn) {
 /**
  * 事件对象的事件解绑函数
  *
- * @param type {String} 事件类型
- * @param fn {Function} 注册时回调函数的引用
+ * @param {String} type 事件类型
+ * @param {Function} fn 注册时回调函数的引用
  */
 Eventer.prototype.off = function(type, fn) {
-  var ears = this.listeners;
-  var cbs = ears[type];
-  var i = ears[type].length;
+  let ears = this.listeners;
+  let cbs = ears[type];
+  let i = ears[type].length;
   if (cbs && i > 0) {
     if (fn) {
       while (i--) {
@@ -67,34 +67,35 @@ Eventer.prototype.off = function(type, fn) {
 /**
  * 事件对象的一次性事件绑定函数
  *
- * @param type {String} 事件类型
- * @param fn {Function} 回调函数
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
  */
 Eventer.prototype.once = function(type, fn) {
-  var This = this,
-    cb = function(ev) {
-      if (fn) fn(ev);
-      This.off(type, cb);
-    };
+  const This = this;
+  const cb = function(ev) {
+    if (fn) fn(ev);
+    This.off(type, cb);
+  };
   this.on(type, cb);
 };
 
 /**
  * 事件对象的触发事件函数
  *
- * @param ev {JC.InteractionData} 事件类型
+ * @param {String} type 事件类型
+ * @param {JC.InteractionData} ev 事件类型
  */
 Eventer.prototype.emit = function(type, ev) {
   if (this.listeners === undefined) return;
-  var ears = this.listeners;
-  var cbs = ears[type];
+  let ears = this.listeners;
+  let cbs = ears[type];
   if (cbs !== undefined) {
-    var length = cbs.length;
-    var i;
+    let length = cbs.length;
+    let i;
     for (i = 0; i < length; i++) {
       cbs[i].call(this, ev);
     }
   }
 };
 
-export { Eventer };
+export {Eventer};

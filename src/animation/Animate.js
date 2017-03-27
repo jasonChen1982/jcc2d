@@ -1,12 +1,12 @@
-import { TWEEN } from '../util/TWEEN';
-import { UTILS } from '../util/UTILS';
+import {TWEEN} from '../util/TWEEN';
+import {UTILS} from '../util/UTILS';
 
 /**
  * 动画对象的基本类型
  *
  * @class
  * @memberof JC
- * @param [opts] {object} 动画配置信息
+ * @param {object} [opts] 动画配置信息
  */
 function Animate(opts) {
   this.element = opts.element || {};
@@ -33,7 +33,7 @@ function Animate(opts) {
   this.paused = false;
 }
 Animate.prototype._swapEase = function() {
-  var ease = this.ease;
+  let ease = this.ease;
   if (ease.indexOf('In') > 0) {
     ease = ease.replace('In', 'Out');
   } else if (ease.indexOf('Out') > 0) {
@@ -51,11 +51,11 @@ Animate.prototype.update = function(snippet) {
     return;
   }
 
-  var snippetCache = this.direction * this.timeScale * snippet;
+  let snippetCache = this.direction * this.timeScale * snippet;
   this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
-  var pose = this.nextPose();
+  let pose = this.nextPose();
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.totalTime >= this.duration) {
@@ -77,12 +77,17 @@ Animate.prototype.update = function(snippet) {
   }
 };
 Animate.prototype.nextPose = function() {
-  var cache = {};
-  for (var i in this.to) {
-    cache[i] = TWEEN[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
+  let cache = {};
+  /* eslint guard-for-in: "off" */
+  for (let i in this.to) {
+    cache[i] = TWEEN[this.ease](this.progress,
+                                this.from[i],
+                                this.to[i] - this.from[i],
+                                this.duration
+                              );
     if (this.element[i] !== undefined) this.element[i] = cache[i];
   }
-  return cache; //this.onUpdate
+  return cache; // this.onUpdate
 };
 Animate.prototype.pause = function() {
   this.paused = true;
@@ -97,4 +102,4 @@ Animate.prototype.cancle = function() {
   this.living = false;
 };
 
-export { Animate };
+export {Animate};

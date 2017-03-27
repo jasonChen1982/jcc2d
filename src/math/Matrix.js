@@ -5,7 +5,7 @@
  * @class
  * @memberof JC
  */
-function Matrix(){
+function Matrix() {
   this.a = 1;
   this.b = 0;
   this.c = 0;
@@ -17,9 +17,9 @@ function Matrix(){
 /**
  * 从数组设置一个矩阵
  *
- * @param array {number[]}
+ * @param {array} array
  */
-Matrix.prototype.fromArray = function(array){
+Matrix.prototype.fromArray = function(array) {
   this.a = array[0];
   this.b = array[1];
   this.c = array[3];
@@ -31,14 +31,14 @@ Matrix.prototype.fromArray = function(array){
 /**
  * 将对象的数据以数组的形式导出
  *
- * @param transpose {boolean} 是否对矩阵进行转置
+ * @param {boolean} transpose 是否对矩阵进行转置
  * @return {number[]} 返回数组
  */
-Matrix.prototype.toArray = function(transpose){
+Matrix.prototype.toArray = function(transpose) {
   if(!this.array) this.array = new Float32Array(9);
-  var array = this.array;
+  let array = this.array;
 
-  if(transpose){
+  if(transpose) {
     array[0] = this.a;
     array[1] = this.b;
     array[2] = 0;
@@ -65,11 +65,11 @@ Matrix.prototype.toArray = function(transpose){
 /**
  * 将坐标点与矩阵左乘
  *
- * @param pos {object} 原始点
- * @param newPos {object} 变换之后的点
+ * @param {object} pos 原始点
+ * @param {object} newPos 变换之后的点
  * @return {object} 返回数组
  */
-Matrix.prototype.apply = function(pos, newPos){
+Matrix.prototype.apply = function(pos, newPos) {
   newPos = newPos || {};
   newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
   newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
@@ -78,32 +78,42 @@ Matrix.prototype.apply = function(pos, newPos){
 /**
  * 将坐标点与转置矩阵左乘
  *
- * @param pos {object} 原始点
- * @param newPos {object} 变换之后的点
+ * @param {object} pos 原始点
+ * @param {object} newPos 变换之后的点
  * @return {object} 变换之后的点
  */
-Matrix.prototype.applyInverse = function(pos, newPos){
-  var id = 1 / (this.a * this.d + this.c * -this.b);
-  newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
-  newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
+Matrix.prototype.applyInverse = function(pos, newPos) {
+  let id = 1 / (this.a * this.d + this.c * -this.b);
+  newPos.x = this.d * id * pos.x
+             +
+             -this.c * id * pos.y
+             +
+             (this.ty * this.c - this.tx * this.d) * id;
+  newPos.y = this.a * id * pos.y
+             +
+             -this.b * id * pos.x
+             +
+             (-this.ty * this.a + this.tx * this.b) * id;
   return newPos;
 };
 /**
  * 位移操作
- *
+ * @param {number} x
+ * @param {number} y
  * @return {this}
  */
-Matrix.prototype.translate = function(x, y){
+Matrix.prototype.translate = function(x, y) {
   this.tx += x;
   this.ty += y;
   return this;
 };
 /**
  * 缩放操作
- *
+ * @param {number} x
+ * @param {number} y
  * @return {this}
  */
-Matrix.prototype.scale = function(x, y){
+Matrix.prototype.scale = function(x, y) {
   this.a *= x;
   this.d *= y;
   this.c *= x;
@@ -114,15 +124,15 @@ Matrix.prototype.scale = function(x, y){
 };
 /**
  * 旋转操作
- *
+ * @param {number} angle
  * @return {this}
  */
-Matrix.prototype.rotate = function(angle){
-  var cos = Math.cos( angle );
-  var sin = Math.sin( angle );
-  var a1 = this.a;
-  var c1 = this.c;
-  var tx1 = this.tx;
+Matrix.prototype.rotate = function(angle) {
+  let cos = Math.cos( angle );
+  let sin = Math.sin( angle );
+  let a1 = this.a;
+  let c1 = this.c;
+  let tx1 = this.tx;
   this.a = a1 * cos-this.b * sin;
   this.b = a1 * sin+this.b * cos;
   this.c = c1 * cos-this.d * sin;
@@ -133,18 +143,18 @@ Matrix.prototype.rotate = function(angle){
 };
 /**
  * 矩阵相乘
- *
+ * @param {matrix} matrix
  * @return {this}
  */
-Matrix.prototype.append = function(matrix){
-  var a1 = this.a;
-  var b1 = this.b;
-  var c1 = this.c;
-  var d1 = this.d;
-  this.a  = matrix.a * a1 + matrix.b * c1;
-  this.b  = matrix.a * b1 + matrix.b * d1;
-  this.c  = matrix.c * a1 + matrix.d * c1;
-  this.d  = matrix.c * b1 + matrix.d * d1;
+Matrix.prototype.append = function(matrix) {
+  let a1 = this.a;
+  let b1 = this.b;
+  let c1 = this.c;
+  let d1 = this.d;
+  this.a = matrix.a * a1 + matrix.b * c1;
+  this.b = matrix.a * b1 + matrix.b * d1;
+  this.c = matrix.c * a1 + matrix.d * c1;
+  this.d = matrix.c * b1 + matrix.d * d1;
   this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
   this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
   return this;
@@ -154,7 +164,7 @@ Matrix.prototype.append = function(matrix){
  *
  * @return {this}
  */
-Matrix.prototype.identity = function(){
+Matrix.prototype.identity = function() {
   this.a = 1;
   this.b = 0;
   this.c = 0;
@@ -165,36 +175,60 @@ Matrix.prototype.identity = function(){
 };
 /**
  * 快速设置矩阵各个分量
- *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} pivotX
+ * @param {number} pivotY
+ * @param {number} scaleX
+ * @param {number} scaleY
+ * @param {number} rotation
+ * @param {number} skewX
+ * @param {number} skewY
  * @return {this}
  */
-Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
-{
-  var a, b, c, d, sr, cr, sy, nsx; // cy, cx,
+Matrix.prototype.setTransform = function(
+  x,
+  y,
+  pivotX,
+  pivotY,
+  scaleX,
+  scaleY,
+  rotation,
+  skewX,
+  skewY
+) {
+  let a;
+  let b;
+  let c;
+  let d;
+  let sr;
+  let cr;
+  let sy;
+  let nsx; // cy, cx,
 
-  sr  = Math.sin(rotation);
-  cr  = Math.cos(rotation);
+  sr = Math.sin(rotation);
+  cr = Math.cos(rotation);
   // cy  = Math.cos(skewY);
-  sy  = Math.tan(skewY);
+  sy = Math.tan(skewY);
   nsx = Math.tan(skewX);
   // cx  =  Math.cos(skewX);
 
-  a  =  cr * scaleX;
-  b  =  sr * scaleX;
-  c  = -sr * scaleY;
-  d  =  cr * scaleY;
+  a = cr * scaleX;
+  b = sr * scaleX;
+  c = -sr * scaleY;
+  d = cr * scaleY;
 
-  this.a  = a + sy * c;
-  this.b  = b + sy * d;
-  this.c  = nsx * a + c;
-  this.d  = nsx * b + d;
+  this.a = a + sy * c;
+  this.b = b + sy * d;
+  this.c = nsx * a + c;
+  this.d = nsx * b + d;
 
   this.tx = x + ( pivotX * a + pivotY * c );
   this.ty = y + ( pivotX * b + pivotY * d );
 
   return this;
 };
-var IDENTITY = new Matrix();
-var TEMP_MATRIX = new Matrix();
+let IDENTITY = new Matrix();
+let TEMP_MATRIX = new Matrix();
 
-export { Matrix, IDENTITY, TEMP_MATRIX };
+export {Matrix, IDENTITY, TEMP_MATRIX};
