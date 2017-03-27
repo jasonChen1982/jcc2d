@@ -40,8 +40,10 @@ ball.fromTo({
   to: {x: 200},
   ease: 'bounceOut', // set a timingfunction
   repeats: 10, // repeat sometimes
-  infinity: true, // want infinity loop?
-  alternate: true, // loop with alternate
+  delay: 1000, // delay a moment every repeat
+  wait: 1000, // wait a moment to start
+  infinity: true, // want infinity repeats?
+  alternate: true, // repeats with alternate
   duration: 1000, // duration
   onUpdate: function(state,rate){}, // onUpdate callback
   onCompelete: function(){ console.log('end'); } // onCompelete callback
