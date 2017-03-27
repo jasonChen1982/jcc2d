@@ -1,31 +1,31 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (factory((global.JC = global.JC || {})));
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (factory((global.JC = global.JC || {})));
 }(this, (function (exports) { 'use strict';
 
-(function() {
+(function () {
   var lastTime = 0;
   var vendors = ['ms', 'moz', 'webkit', 'o'];
-  for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+  for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
     window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] ||
-            window[vendors[x] + 'CancelRequestAnimationFrame'];
+    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
   }
 
   if (!window.requestAnimationFrame) {
-    window.requestAnimationFrame = function(callback) {
+    window.requestAnimationFrame = function (callback) {
       var currTime = new Date().getTime();
       var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-      var id = window.setTimeout(function() { callback(currTime + timeToCall); },
-              timeToCall);
+      var id = window.setTimeout(function () {
+        callback(currTime + timeToCall);
+      }, timeToCall);
       lastTime = currTime + timeToCall;
       return id;
     };
   }
 
   if (!window.cancelAnimationFrame) {
-    window.cancelAnimationFrame = function(id) {
+    window.cancelAnimationFrame = function (id) {
       clearTimeout(id);
     };
   }
@@ -39,10 +39,10 @@
  *
  * @class
  * @memberof JC
- * @param [x=0] {number} x轴的位置
- * @param [y=0] {number} y轴的位置
- * @param [z=0] {number} z轴的位置
- * @param [w=0] {number} w轴的位置
+ * @param {number} [x=0] x轴的位置
+ * @param {number} [y=0] y轴的位置
+ * @param {number} [z=0] z轴的位置
+ * @param {number} [w=0] w轴的位置
  */
 function Point(x, y, z, w) {
   /**
@@ -82,7 +82,7 @@ Point.prototype.clone = function () {
 /**
  * 拷贝传入的坐标点来设置当前坐标点
  *
- * @param p {JC.Point}
+ * @param {JC.Point} p
  */
 Point.prototype.copy = function (p) {
   this.set(p.x, p.y, p.z, p.w);
@@ -91,23 +91,24 @@ Point.prototype.copy = function (p) {
 /**
  * 设置坐标点
  *
- * @param {number} x轴的位置
- * @param {number} y轴的位置
- * @param {number} z轴的位置
- * @param {number} w轴的位置
+ * @param {number} x 轴的位置
+ * @param {number} y 轴的位置
+ * @param {number} z 轴的位置
+ * @param {number} w 轴的位置
+ * @return {Point} this
  */
-Point.prototype.set = function ( x, y, z, w ) {
+Point.prototype.set = function (x, y, z, w) {
   this.x = x;
   this.y = y;
   this.z = z;
   this.w = w;
   return this;
 };
-
-Point.prototype.add = function ( v, w ) {
-  if ( w !== undefined ) {
-    console.warn( 'JC.Point: .add() now only accepts one argument. Use .addVectors( a, b ) instead.' );
-    return this.addVectors( v, w );
+/* eslint max-len: "off" */
+Point.prototype.add = function (v, w) {
+  if (w !== undefined) {
+    console.warn('JC.Point: .add() now only accepts one argument. Use .addVectors( a, b ) instead.');
+    return this.addVectors(v, w);
   }
   this.x += v.x;
   this.y += v.y;
@@ -116,7 +117,7 @@ Point.prototype.add = function ( v, w ) {
   return this;
 };
 
-Point.prototype.addVectors = function ( a, b ) {
+Point.prototype.addVectors = function (a, b) {
   this.x = a.x + b.x;
   this.y = a.y + b.y;
   this.z = a.z + b.z;
@@ -124,11 +125,10 @@ Point.prototype.addVectors = function ( a, b ) {
   return this;
 };
 
-
-Point.prototype.sub = function ( v, w ) {
-  if ( w !== undefined ) {
-    console.warn( 'JC.Point: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.' );
-    return this.subVectors( v, w );
+Point.prototype.sub = function (v, w) {
+  if (w !== undefined) {
+    console.warn('JC.Point: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.');
+    return this.subVectors(v, w);
   }
   this.x -= v.x;
   this.y -= v.y;
@@ -137,8 +137,7 @@ Point.prototype.sub = function ( v, w ) {
   return this;
 };
 
-
-Point.prototype.subVectors = function ( a, b ) {
+Point.prototype.subVectors = function (a, b) {
   this.x = a.x - b.x;
   this.y = a.y - b.y;
   this.z = a.z - b.z;
@@ -146,35 +145,24 @@ Point.prototype.subVectors = function ( a, b ) {
   return this;
 };
 
-
 Point.prototype.lengthSq = function () {
-
   return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
-
 };
 
 Point.prototype.length = function () {
-
-  return Math.sqrt( this.lengthSq() );
-
+  return Math.sqrt(this.lengthSq());
 };
 
 Point.prototype.normalize = function () {
-
-  return this.divideScalar( this.length() );
-
+  return this.divideScalar(this.length());
 };
 
-Point.prototype.divideScalar = function ( scalar ) {
-
-  return this.multiplyScalar( 1 / scalar );
-
+Point.prototype.divideScalar = function (scalar) {
+  return this.multiplyScalar(1 / scalar);
 };
 
-
-Point.prototype.multiplyScalar = function ( scalar ) {
-
-  if ( isFinite( scalar ) ) {
+Point.prototype.multiplyScalar = function (scalar) {
+  if (isFinite(scalar)) {
     this.x *= scalar;
     this.y *= scalar;
     this.z *= scalar;
@@ -186,7 +174,6 @@ Point.prototype.multiplyScalar = function ( scalar ) {
     this.w = 0;
   }
   return this;
-
 };
 
 /**
@@ -195,7 +182,7 @@ Point.prototype.multiplyScalar = function ( scalar ) {
  * @class
  * @memberof JC
  */
-function InteractionData(){
+function InteractionData() {
   /**
    * 转换到canvas坐标系统的事件触发点
    *
@@ -238,7 +225,7 @@ function InteractionData(){
    */
   this.type = '';
 }
-InteractionData.prototype.clone = function() {
+InteractionData.prototype.clone = function () {
   var evd = new InteractionData();
   evd.originalEvent = this.originalEvent;
   evd.ratio = this.ratio;
@@ -293,10 +280,10 @@ function Eventer() {
 /**
  * 事件对象的事件绑定函数
  *
- * @param type {String} 事件类型
- * @param fn {Function} 回调函数
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
  */
-Eventer.prototype.on = function(type, fn) {
+Eventer.prototype.on = function (type, fn) {
   this.listeners[type] = this.listeners[type] || [];
   this.listeners[type].push(fn);
 };
@@ -304,10 +291,10 @@ Eventer.prototype.on = function(type, fn) {
 /**
  * 事件对象的事件解绑函数
  *
- * @param type {String} 事件类型
- * @param fn {Function} 注册时回调函数的引用
+ * @param {String} type 事件类型
+ * @param {Function} fn 注册时回调函数的引用
  */
-Eventer.prototype.off = function(type, fn) {
+Eventer.prototype.off = function (type, fn) {
   var ears = this.listeners;
   var cbs = ears[type];
   var i = ears[type].length;
@@ -327,30 +314,31 @@ Eventer.prototype.off = function(type, fn) {
 /**
  * 事件对象的一次性事件绑定函数
  *
- * @param type {String} 事件类型
- * @param fn {Function} 回调函数
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
  */
-Eventer.prototype.once = function(type, fn) {
-  var This = this,
-    cb = function(ev) {
-      if (fn) fn(ev);
-      This.off(type, cb);
-    };
+Eventer.prototype.once = function (type, fn) {
+  var This = this;
+  var cb = function cb(ev) {
+    if (fn) fn(ev);
+    This.off(type, cb);
+  };
   this.on(type, cb);
 };
 
 /**
  * 事件对象的触发事件函数
  *
- * @param ev {JC.InteractionData} 事件类型
+ * @param {String} type 事件类型
+ * @param {JC.InteractionData} ev 事件类型
  */
-Eventer.prototype.emit = function(type, ev) {
+Eventer.prototype.emit = function (type, ev) {
   if (this.listeners === undefined) return;
   var ears = this.listeners;
   var cbs = ears[type];
   if (cbs !== undefined) {
     var length = cbs.length;
-    var i;
+    var i = void 0;
     for (i = 0; i < length; i++) {
       cbs[i].call(this, ev);
     }
@@ -358,7 +346,6 @@ Eventer.prototype.emit = function(type, ev) {
 };
 
 /* eslint no-cond-assign: "off" */
-
 
 /**
  * TWEEN 缓动时间运动函数集合
@@ -377,44 +364,64 @@ var TWEEN = {
   /**
    * 匀速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  linear: function (t, b, c, d){
-    return c*t/d + b;
+  linear: function linear(t, b, c, d) {
+    return c * t / d + b;
   },
 
   /**
    * 加速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  easeIn: function(t, b, c, d){
-    return c*(t/=d)*t + b;
+  easeIn: function easeIn(t, b, c, d) {
+    return c * (t /= d) * t + b;
   },
 
   /**
    * 减速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  easeOut: function(t, b, c, d){
-    return -c *(t/=d)*(t-2) + b;
+  easeOut: function easeOut(t, b, c, d) {
+    return -c * (t /= d) * (t - 2) + b;
   },
 
   /**
    * 先加速再减速运动函数
    *
+   * @param {Number} t 当前时间
+   * @param {Number} b 起始值
+   * @param {Number} c 结束值
+   * @param {Number} d 总时间
    * @static
    * @memberof JC.TWEEN
+   * @return {Number} 当前时间对应的值
    */
-  easeBoth: function(t, b, c, d){
-    if ((t/=d/2) < 1) {
-      return c/2*t*t + b;
+  easeBoth: function easeBoth(t, b, c, d) {
+    if ((t /= d / 2) < 1) {
+      return c / 2 * t * t + b;
     }
-    return -c/2 * ((--t)*(t-2) - 1) + b;
+    return -c / 2 * (--t * (t - 2) - 1) + b;
   },
 
   /**
@@ -427,18 +434,24 @@ var TWEEN = {
    *   ......
    * })
    * ```
+   * @param {Number} opts 扩展的时间函数
    * @static
    * @memberof JC.TWEEN
    */
-  extend: function(opts){
-    if(!opts)return;
-    for(var key in opts){
-      if(key!=='extend'&&opts[key])this[key]=opts[key];
+  extend: function extend(opts) {
+    if (!opts) return;
+    for (var key in opts) {
+      if (key !== 'extend' && opts[key]) this[key] = opts[key];
     }
   }
 };
 
-function _rt(val){
+/**
+ * 返回数据类型
+ * @param {*} val
+ * @return {String} 数据类型
+ */
+function _rt(val) {
   return Object.prototype.toString.call(val);
 }
 
@@ -456,7 +469,7 @@ var UTILS = {
    * @param {JSON} json 待拷贝的纯数据JSON
    * @return {JSON} 拷贝后的纯数据JSON
    */
-  copyJSON: function(json){
+  copyJSON: function copyJSON(json) {
     return JSON.parse(JSON.stringify(json));
   },
 
@@ -467,7 +480,7 @@ var UTILS = {
    * @memberof JC.UTILS
    * @type {number}
    */
-  DTR: Math.PI/180,
+  DTR: Math.PI / 180,
 
   /**
    * 将弧度转化成角度的乘法因子
@@ -476,7 +489,7 @@ var UTILS = {
    * @memberof JC.UTILS
    * @type {number}
    */
-  RTD: 180/Math.PI,
+  RTD: 180 / Math.PI,
 
   /**
    * 判断变量是否为数组类型
@@ -487,12 +500,12 @@ var UTILS = {
    * @param {Array} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isArray: (function(){
+  isArray: function () {
     var ks = _rt([]);
-    return function(object){
+    return function (object) {
       return _rt(object) === ks;
     };
-  })(),
+  }(),
 
   /**
    * 判断变量是否为对象类型
@@ -503,12 +516,12 @@ var UTILS = {
    * @param {Object} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isObject: (function(){
+  isObject: function () {
     var ks = _rt({});
-    return function(object){
+    return function (object) {
       return _rt(object) === ks;
     };
-  })(),
+  }(),
 
   /**
    * 判断变量是否为字符串类型
@@ -519,12 +532,12 @@ var UTILS = {
    * @param {String} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isString: (function(){
+  isString: function () {
     var ks = _rt('s');
-    return function(object){
+    return function (object) {
       return _rt(object) === ks;
     };
-  })(),
+  }(),
 
   /**
    * 判断变量是否为数字类型
@@ -535,12 +548,12 @@ var UTILS = {
    * @param {Number} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isNumber: (function(){
+  isNumber: function () {
     var ks = _rt(1);
-    return function(object){
+    return function (object) {
       return _rt(object) === ks;
     };
-  })(),
+  }(),
 
   /**
    * 判断变量是否为函数类型
@@ -551,12 +564,12 @@ var UTILS = {
    * @param {Function} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
-  isFunction: (function(){
-    var ks = _rt(function(){});
-    return function(object){
+  isFunction: function () {
+    var ks = _rt(function () {});
+    return function (object) {
       return _rt(object) === ks;
     };
-  })(),
+  }(),
 
   /**
    * 强化的随机数，可以随机产生给定区间内的数字、随机输出数字内的项
@@ -568,11 +581,9 @@ var UTILS = {
    * @param {Number} max 所给定区间较大的数字
    * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
    */
-  random: function(min, max){
-    if (this.isArray(min))
-      return min[~~(Math.random() * min.length)];
-    if (!this.isNumber(max))
-      max = min || 1, min = 0;
+  random: function random(min, max) {
+    if (this.isArray(min)) return min[~~(Math.random() * min.length)];
+    if (!this.isNumber(max)) max = min || 1, min = 0;
     return min + Math.random() * (max - min);
   },
 
@@ -586,8 +597,8 @@ var UTILS = {
    * @param {Number} m 模
    * @return {Number} 映射到模长内到索引
    */
-  euclideanModulo: function(n, m){
-    return ((n % m) + m) % m;
+  euclideanModulo: function euclideanModulo(n, m) {
+    return (n % m + m) % m;
   },
 
   /**
@@ -601,9 +612,9 @@ var UTILS = {
    * @param {Number} b 闭合区间右边界
    * @return {Number} 闭合后的值
    */
-  clamp: function(x, a, b) {
-    return (x < a) ? a : ((x > b) ? b : x);
-  },
+  clamp: function clamp(x, a, b) {
+    return x < a ? a : x > b ? b : x;
+  }
 };
 
 /**
@@ -611,7 +622,7 @@ var UTILS = {
  *
  * @class
  * @memberof JC
- * @param [opts] {object} 动画配置信息
+ * @param {object} [opts] 动画配置信息
  */
 function Animate(opts) {
   this.element = opts.element || {};
@@ -637,7 +648,7 @@ function Animate(opts) {
 
   this.paused = false;
 }
-Animate.prototype._swapEase = function() {
+Animate.prototype._swapEase = function () {
   var ease = this.ease;
   if (ease.indexOf('In') > 0) {
     ease = ease.replace('In', 'Out');
@@ -646,7 +657,7 @@ Animate.prototype._swapEase = function() {
   }
   this.ease = ease;
 };
-Animate.prototype.update = function(snippet) {
+Animate.prototype.update = function (snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
     return;
@@ -681,24 +692,25 @@ Animate.prototype.update = function(snippet) {
     }
   }
 };
-Animate.prototype.nextPose = function() {
+Animate.prototype.nextPose = function () {
   var cache = {};
+  /* eslint guard-for-in: "off" */
   for (var i in this.to) {
     cache[i] = TWEEN[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
     if (this.element[i] !== undefined) this.element[i] = cache[i];
   }
-  return cache; //this.onUpdate
+  return cache; // this.onUpdate
 };
-Animate.prototype.pause = function() {
+Animate.prototype.pause = function () {
   this.paused = true;
 };
-Animate.prototype.start = function() {
+Animate.prototype.start = function () {
   this.paused = false;
 };
-Animate.prototype.stop = function() {
+Animate.prototype.stop = function () {
   this.progress = this.duration;
 };
-Animate.prototype.cancle = function() {
+Animate.prototype.cancle = function () {
   this.living = false;
 };
 
@@ -707,167 +719,148 @@ Animate.prototype.cancle = function() {
  *
  * @class
  * @memberof JC
- * @param [opts] {object} 动画所具备的特性
+ * @param {object} [opts] 动画所具备的特性
  */
 function Transition(opts) {
   Animate.call(this, opts);
 
   this.from = opts.from;
   this.to = opts.to;
-
 }
 Transition.prototype = Object.create(Animate.prototype);
 
 // import { Point } from './Point';
-
+/**
+ * @class Curve
+ */
 function Curve() {}
 
 Curve.prototype = {
 
   constructor: Curve,
 
-  getPoint: function ( t ) {
-
-    console.warn( 'Curve: Warning, getPoint() not implemented!', t );
+  getPoint: function getPoint(t) {
+    console.warn('Curve: Warning, getPoint() not implemented!', t);
     return null;
-
   },
 
-  getPointAt: function ( u ) {
-
-    var t = this.getUtoTmapping( u );
-    return this.getPoint( t );
-
+  getPointAt: function getPointAt(u) {
+    var t = this.getUtoTmapping(u);
+    return this.getPoint(t);
   },
 
-  getPoints: function ( divisions ) {
-
-    if ( isNaN( divisions ) ) divisions = 5;
+  getPoints: function getPoints(divisions) {
+    if (isNaN(divisions)) divisions = 5;
 
     var points = [];
 
-    for ( var d = 0; d <= divisions; d ++ ) {
-
-      points.push( this.getPoint( d / divisions ) );
-
+    for (var d = 0; d <= divisions; d++) {
+      points.push(this.getPoint(d / divisions));
     }
 
     return points;
-
   },
 
-  getSpacedPoints: function ( divisions ) {
-
-    if ( isNaN( divisions ) ) divisions = 5;
+  getSpacedPoints: function getSpacedPoints(divisions) {
+    if (isNaN(divisions)) divisions = 5;
 
     var points = [];
 
-    for ( var d = 0; d <= divisions; d ++ ) {
-
-      points.push( this.getPointAt( d / divisions ) );
-
+    for (var d = 0; d <= divisions; d++) {
+      points.push(this.getPointAt(d / divisions));
     }
 
     return points;
-
   },
 
-  getLength: function () {
-
+  getLength: function getLength() {
     var lengths = this.getLengths();
-    return lengths[ lengths.length - 1 ];
-
+    return lengths[lengths.length - 1];
   },
 
-  getLengths: function ( divisions ) {
+  getLengths: function getLengths(divisions) {
+    if (isNaN(divisions)) divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
 
-    if ( isNaN( divisions ) ) divisions = ( this.__arcLengthDivisions ) ? ( this.__arcLengthDivisions ) : 200;
-
-    if ( this.cacheArcLengths
-      && ( this.cacheArcLengths.length === divisions + 1 )
-      && ! this.needsUpdate ) {
+    if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
       return this.cacheArcLengths;
     }
 
     this.needsUpdate = false;
 
     var cache = [];
-    var current, last = this.getPoint( 0 );
-    var p, sum = 0;
+    var current = void 0;
+    var last = this.getPoint(0);
+    var p = void 0;
+    var sum = 0;
 
-    cache.push( 0 );
+    cache.push(0);
 
-    for ( p = 1; p <= divisions; p ++ ) {
-      current = this.getPoint ( p / divisions );
-      sum += current.distanceTo( last );
-      cache.push( sum );
+    for (p = 1; p <= divisions; p++) {
+      current = this.getPoint(p / divisions);
+      sum += current.distanceTo(last);
+      cache.push(sum);
       last = current;
     }
     this.cacheArcLengths = cache;
     return cache;
   },
 
-  updateArcLengths: function() {
-
+  updateArcLengths: function updateArcLengths() {
     this.needsUpdate = true;
     this.getLengths();
-
   },
 
-  getUtoTmapping: function ( u, distance ) {
-
+  getUtoTmapping: function getUtoTmapping(u, distance) {
     var arcLengths = this.getLengths();
 
-    var i = 0, il = arcLengths.length, t;
+    var i = 0;
+    var il = arcLengths.length;
+    var t = void 0;
 
-    var targetArcLength;
+    var targetArcLength = void 0;
 
-    if ( distance ) {
-
+    if (distance) {
       targetArcLength = distance;
-
     } else {
-
-      targetArcLength = u * arcLengths[ il - 1 ];
-
+      targetArcLength = u * arcLengths[il - 1];
     }
 
-    var low = 0, high = il - 1, comparison;
-    while ( low <= high ) {
-      i = Math.floor( low + ( high - low ) / 2 );
-      comparison = arcLengths[ i ] - targetArcLength;
-      if ( comparison < 0 ) {
+    var low = 0;
+    var high = il - 1;
+    var comparison = void 0;
+    while (low <= high) {
+      i = Math.floor(low + (high - low) / 2);
+      comparison = arcLengths[i] - targetArcLength;
+      if (comparison < 0) {
         low = i + 1;
-      } else if ( comparison > 0 ) {
+      } else if (comparison > 0) {
         high = i - 1;
       } else {
         high = i;
         break;
       }
-
     }
 
     i = high;
 
-    if ( arcLengths[ i ] === targetArcLength ) {
-      t = i / ( il - 1 );
+    if (arcLengths[i] === targetArcLength) {
+      t = i / (il - 1);
       return t;
     }
 
-    var lengthBefore = arcLengths[ i ];
-    var lengthAfter = arcLengths[ i + 1 ];
+    var lengthBefore = arcLengths[i];
+    var lengthAfter = arcLengths[i + 1];
 
     var segmentLength = lengthAfter - lengthBefore;
 
-    var segmentFraction = ( targetArcLength - lengthBefore ) / segmentLength;
+    var segmentFraction = (targetArcLength - lengthBefore) / segmentLength;
 
-    t = ( i + segmentFraction ) / ( il - 1 );
+    t = (i + segmentFraction) / (il - 1);
 
     return t;
   },
 
-  getTangent: function( t ) {
-
+  getTangent: function getTangent(t) {
     var delta = 0.0001;
     var t1 = t - delta;
     var t2 = t + delta;
@@ -876,20 +869,17 @@ Curve.prototype = {
     // if ( t1 < 0 ) t1 = 0;
     // if ( t2 > 1 ) t2 = 1;
 
-    var pt1 = this.getPoint( t1 );
-    var pt2 = this.getPoint( t2 );
+    var pt1 = this.getPoint(t1);
+    var pt2 = this.getPoint(t2);
 
-    var vec = pt2.clone().sub( pt1 );
+    var vec = pt2.clone().sub(pt1);
     return vec.normalize();
-
   },
 
-  getTangentAt: function ( u ) {
-
-    var t = this.getUtoTmapping( u );
-    return this.getTangent( t );
-
-  },
+  getTangentAt: function getTangentAt(u) {
+    var t = this.getUtoTmapping(u);
+    return this.getTangent(t);
+  }
 
 };
 
@@ -898,16 +888,12 @@ Curve.prototype = {
  *
  * @class
  * @memberof JC
- * @param [opts] {object} 动画所具备的特性
+ * @param {object} [opts] 动画所具备的特性
  */
 function PathMotion(opts) {
   Animate.call(this, opts);
   if (!opts.path || !(opts.path instanceof Curve)) {
-    console.warn(
-      '%c JC.PathMotion warn %c: path is not instanceof Curve',
-      'color: #f98165; background: #80a89e',
-      'color: #80a89e; background: #cad9d5;'
-    );
+    console.warn('%c JC.PathMotion warn %c: path is not instanceof Curve', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;');
   }
 
   this.path = opts.path;
@@ -919,11 +905,11 @@ function PathMotion(opts) {
 
 PathMotion.prototype = Object.create(Animate.prototype);
 
-PathMotion.prototype.nextPose = function() {
-  var _rotate = 0,
-    t = TWEEN[this.ease](this.progress, 0, 1, this.duration),
-    pos = this.path.getPoint(t),
-    cache = pos.clone();
+PathMotion.prototype.nextPose = function () {
+  var _rotate = 0;
+  var t = TWEEN[this.ease](this.progress, 0, 1, this.duration);
+  var pos = this.path.getPoint(t);
+  var cache = pos.clone();
 
   // cache.x = pos.x;
   // cache.y = pos.y;
@@ -937,7 +923,7 @@ PathMotion.prototype.nextPose = function() {
   return cache;
 };
 
-PathMotion.prototype.decomposeRotate = function(t) {
+PathMotion.prototype.decomposeRotate = function (t) {
   // var p1 = pos || this.getPoint(t, this.points);
   // var p2 = this.getPoint(t + 0.01, this.points);
   var vector = this.path.getTangent(t); // { x: p2.x - p1.x, y: p2.y - p1.y };
@@ -954,7 +940,7 @@ PathMotion.prototype.decomposeRotate = function(t) {
  *
  * @class
  * @memberof JC
- * @param [opts] {object} 动画配置信息
+ * @param {object} [opts] 动画配置信息
  */
 function KeyFrames(opts) {
   Animate.call(this, opts);
@@ -967,7 +953,7 @@ function KeyFrames(opts) {
   this.configKey();
 }
 KeyFrames.prototype = Object.create(Animate.prototype);
-KeyFrames.prototype.configKey = function() {
+KeyFrames.prototype.configKey = function () {
   this.from = this._keyframes[this._keyIndex];
   this._keyIndex += this._cursor;
   this.to = this._keyframes[this._keyIndex];
@@ -976,7 +962,7 @@ KeyFrames.prototype.configKey = function() {
   this.duration = config.duration || this.duration;
   this.progress = 0;
 };
-KeyFrames.prototype.update = function(snippet) {
+KeyFrames.prototype.update = function (snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
     return;
@@ -992,7 +978,9 @@ KeyFrames.prototype.update = function(snippet) {
   this.totalTime += Math.abs(snippetCache);
 
   var pose = this.nextPose();
-  if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+  if (this.onUpdate) {
+    this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+  }
 
   // this.progress += this.timeScale * snippet;
   if (this.totalTime >= this.duration) {
@@ -1023,45 +1011,47 @@ KeyFrames.prototype.update = function(snippet) {
  *
  * @class
  * @memberof JC
+ * @param {JC.DisplayObject} element
  */
 function Animation(element) {
   this.element = element;
   // this.start = false;
   this.animates = [];
 }
-Animation.prototype.update = function(snippet) {
+Animation.prototype.update = function (snippet) {
   for (var i = 0; i < this.animates.length; i++) {
     if (!this.animates[i].living) this.animates.splice(i, 1);
     if (this.animates[i]) this.animates[i].update(snippet);
   }
 };
-Animation.prototype.fromTo = function(opts, clear) {
+Animation.prototype.fromTo = function (opts, clear) {
   this.element.setProps(opts.from);
   opts.element = this.element;
   return this._addMove(new Transition(opts), clear);
 };
-Animation.prototype.to = function(opts, clear) {
+Animation.prototype.to = function (opts, clear) {
   opts.from = {};
+  /* eslint guard-for-in: "off" */
   for (var i in opts.to) {
     opts.from[i] = this.element[i];
   }
   opts.element = this.element;
   return this._addMove(new Transition(opts), clear);
 };
-Animation.prototype.motion = function(opts, clear) {
+Animation.prototype.motion = function (opts, clear) {
   opts.element = this.element;
   return this._addMove(new PathMotion(opts), clear);
 };
-Animation.prototype.keyFrames = function(opts, clear) {
+Animation.prototype.keyFrames = function (opts, clear) {
   opts.element = this.element;
   return this._addMove(new KeyFrames(opts), clear);
 };
-Animation.prototype._addMove = function(animate, clear) {
+Animation.prototype._addMove = function (animate, clear) {
   if (clear) this.clear();
   this.animates.push(animate);
   return animate;
 };
-Animation.prototype.clear = function() {
+Animation.prototype.clear = function () {
   this.animates.length = 0;
 };
 
@@ -1071,6 +1061,7 @@ Animation.prototype.clear = function() {
  * @class
  * @memberof JC
  * @param {string | Image} img 图片url或者图片对象.
+ * @param {Boolean} lazy 图片是否需要懒加载
  * @extends JC.Eventer
  */
 function Texture(img, lazy) {
@@ -1085,7 +1076,6 @@ function Texture(img, lazy) {
   this.src = img;
   this.resole(img);
   if (!lazy || !UTILS.isString(img)) this.load(img);
-
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
@@ -1093,10 +1083,10 @@ Texture.prototype = Object.create(Eventer.prototype);
  * 预先处理一些数据
  *
  * @static
- * @param {string | Image} 先生成对应的对象
+ * @param {string | Image} img 先生成对应的对象
  * @private
  */
-Texture.prototype.resole = function(img) {
+Texture.prototype.resole = function (img) {
   if (UTILS.isString(img)) {
     this.texture = new Image();
   }
@@ -1112,7 +1102,7 @@ Texture.prototype.resole = function(img) {
  * @param {string | Image} img 图片url或者图片对象.
  * @private
  */
-Texture.prototype.load = function(img) {
+Texture.prototype.load = function (img) {
   if (this.hadload) return;
   var This = this;
   this.hadload = true;
@@ -1120,14 +1110,14 @@ Texture.prototype.load = function(img) {
   if (UTILS.isString(img)) {
     this.texture.crossOrigin = '';
     this.texture.src = img;
-    this.texture.onload = function() {
+    this.texture.onload = function () {
       This.loaded = true;
       This.emit('load');
     };
-    this.texture.onerror = function() {
+    this.texture.onerror = function () {
       This.emit('error');
     };
-    this.on('load', function() {
+    this.on('load', function () {
       This.width = This.texture.width;
       This.height = This.texture.height;
       This.naturalWidth = This.texture.naturalWidth;
@@ -1141,9 +1131,6 @@ Texture.prototype.load = function(img) {
     this.naturalHeight = img.naturalHeight;
   }
 };
-
-
-
 
 /**
  * 图片资源加载器
@@ -1177,24 +1164,29 @@ Loader.prototype = Object.create(Eventer.prototype);
  * @param {object} srcMap 配置了key－value的json格式数据
  * @return {JC.Loader} 返回本实例对象
  */
-Loader.prototype.load = function(srcMap) {
+Loader.prototype.load = function (srcMap) {
   var This = this;
   this._total = 0;
   this._failed = 0;
   this._received = 0;
+
+  /* eslint guard-for-in: "off" */
   for (var src in srcMap) {
     this._total++;
     this.textures[src] = new Texture(srcMap[src]);
     bind(this.textures[src]);
   }
 
+  /**
+   * @param {Texture} texture
+   */
   function bind(texture) {
-    texture.on('load', function() {
+    texture.on('load', function () {
       This._received++;
       This.emit('update');
       if (This._received + This._failed >= This._total) This.emit('compelete');
     });
-    texture.on('error', function() {
+    texture.on('error', function () {
       This._failed++;
       This.emit('update');
       if (This._received + This._failed >= This._total) This.emit('compelete');
@@ -1214,7 +1206,7 @@ Loader.prototype.load = function(srcMap) {
  * @param {string} id 之前加载时配置的key值
  * @return {JC.Texture} 包装出来的JC.Texture对象
  */
-Loader.prototype.getById = function(id) {
+Loader.prototype.getById = function (id) {
   return this.textures[id];
 };
 
@@ -1226,22 +1218,20 @@ Loader.prototype.getById = function(id) {
  * @memberof JC.Loader
  */
 Object.defineProperty(Texture.prototype, 'progress', {
-  get: function() {
+  get: function get() {
     return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
   }
 });
-
-
 
 /**
  * 资源加载工具
  *
  * @function
  * @memberof JC
- * @param srcMap {object} key-src map
+ * @param {object} srcMap key-src map
  * @return {JC.Loader}
  */
-var loaderUtil = function(srcMap) {
+var loaderUtil = function loaderUtil(srcMap) {
   return new Loader().load(srcMap);
 };
 
@@ -1250,13 +1240,12 @@ var loaderUtil = function(srcMap) {
  *
  * @class
  * @memberof JC
- * @param x {number} 左上角的x坐标
- * @param y {number} 左上角的y坐标
- * @param width {number} 矩形的宽度
- * @param height {number} 矩形的高度
+ * @param {number} x 左上角的x坐标
+ * @param {number} y 左上角的y坐标
+ * @param {number} width 矩形的宽度
+ * @param {number} height 矩形的高度
  */
-function Rectangle(x, y, width, height)
-{
+function Rectangle(x, y, width, height) {
   /**
    * @member {number}
    * @default 0
@@ -1290,35 +1279,29 @@ function Rectangle(x, y, width, height)
  */
 Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
 
-
 /**
  * 克隆一个与该举行对象同样属性的矩形
  *
  * @return {PIXI.Rectangle} 克隆出的矩形
  */
-Rectangle.prototype.clone = function ()
-{
+Rectangle.prototype.clone = function () {
   return new Rectangle(this.x, this.y, this.width, this.height);
 };
 
 /**
  * 检查坐标点是否在矩形区域内
  *
- * @param x {number} 坐标点的x轴位置
- * @param y {number} 坐标点的y轴位置
+ * @param {number} x 坐标点的x轴位置
+ * @param {number} y 坐标点的y轴位置
  * @return {boolean} 坐标点是否在矩形区域内
  */
-Rectangle.prototype.contains = function (x, y)
-{
-  if (this.width <= 0 || this.height <= 0)
-    {
+Rectangle.prototype.contains = function (x, y) {
+  if (this.width <= 0 || this.height <= 0) {
     return false;
   }
 
-  if (x >= this.x && x < this.x + this.width)
-    {
-    if (y >= this.y && y < this.y + this.height)
-        {
+  if (x >= this.x && x < this.x + this.width) {
+    if (y >= this.y && y < this.y + this.height) {
       return true;
     }
   }
@@ -1330,6 +1313,10 @@ Rectangle.prototype.contains = function (x, y)
  * 显示对象的包围盒子
  *
  * @class
+ * @param {Number} minX
+ * @param {Number} minY
+ * @param {Number} maxX
+ * @param {Number} maxY
  * @memberof JC
  */
 function Bounds(minX, minY, maxX, maxY) {
@@ -1360,12 +1347,12 @@ function Bounds(minX, minY, maxX, maxY) {
   this.rect = null;
 }
 
-Bounds.prototype.isEmpty = function() {
+Bounds.prototype.isEmpty = function () {
   return this.minX > this.maxX || this.minY > this.maxY;
 };
 
-Bounds.prototype.clear = function() {
-    // this.updateID++;
+Bounds.prototype.clear = function () {
+  // this.updateID++;
 
   this.minX = Infinity;
   this.minY = Infinity;
@@ -1376,10 +1363,10 @@ Bounds.prototype.clear = function() {
 /**
  * 将包围盒子转换成矩形描述
  *
- * @param rect {JC.Rectangle} 待转换的矩形
- * @returns {JC.Rectangle}
+ * @param {JC.Rectangle} rect 待转换的矩形
+ * @return {JC.Rectangle}
  */
-Bounds.prototype.getRectangle = function(rect) {
+Bounds.prototype.getRectangle = function (rect) {
   if (this.isEmpty()) {
     return Rectangle.EMPTY;
   }
@@ -1397,9 +1384,9 @@ Bounds.prototype.getRectangle = function(rect) {
 /**
  * 往包围盒增加外部顶点，更新包围盒区域
  *
- * @param point {JC.Point}
+ * @param {JC.Point} point
  */
-Bounds.prototype.addPoint = function(point) {
+Bounds.prototype.addPoint = function (point) {
   this.minX = Math.min(this.minX, point.x);
   this.maxX = Math.max(this.maxX, point.x);
   this.minY = Math.min(this.minY, point.y);
@@ -1409,9 +1396,9 @@ Bounds.prototype.addPoint = function(point) {
 /**
  * 往包围盒增加矩形区域，更新包围盒区域
  *
- * @param point {JC.Rectangle}
+ * @param {JC.Rectangle} rect
  */
-Bounds.prototype.addRect = function(rect) {
+Bounds.prototype.addRect = function (rect) {
   this.minX = rect.x;
   this.maxX = rect.width + rect.x;
   this.minY = rect.y;
@@ -1421,16 +1408,16 @@ Bounds.prototype.addRect = function(rect) {
 /**
  * 往包围盒增加顶点数组，更新包围盒区域
  *
- * @param point {Array}
+ * @param {Array} vertices
  */
-Bounds.prototype.addVert = function(vertices) {
-  var minX = this.minX,
-    minY = this.minY,
-    maxX = this.maxX,
-    maxY = this.maxY;
+Bounds.prototype.addVert = function (vertices) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
 
   for (var i = 0; i < vertices.length; i += 2) {
-    var x = vertices[i    ];
+    var x = vertices[i];
     var y = vertices[i + 1];
     minX = x < minX ? x : minX;
     minY = y < minY ? y : minY;
@@ -1447,13 +1434,13 @@ Bounds.prototype.addVert = function(vertices) {
 /**
  * 往包围盒增加包围盒，更新包围盒区域
  *
- * @param point {JC.Bounds}
+ * @param {JC.Bounds} bounds
  */
-Bounds.prototype.addBounds = function(bounds) {
-  var minX = this.minX,
-    minY = this.minY,
-    maxX = this.maxX,
-    maxY = this.maxY;
+Bounds.prototype.addBounds = function (bounds) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
 
   this.minX = bounds.minX < minX ? bounds.minX : minX;
   this.minY = bounds.minY < minY ? bounds.minY : minY;
@@ -1464,14 +1451,12 @@ Bounds.prototype.addBounds = function(bounds) {
 /**
  * @class
  * @memberof JC
- * @param points {JC.Point[]|number[]|...JC.Point|...number} 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
+ * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
  */
-function Polygon(points_) {
-  var points = points_;
-
+function Polygon(points) {
   if (!UTILS.isArray(points)) {
     points = new Array(arguments.length);
-
+    /* eslint-disable */
     for (var a = 0; a < points.length; ++a) {
       points[a] = arguments[a];
     }
@@ -1496,32 +1481,30 @@ function Polygon(points_) {
  *
  * @return {PIXI.Polygon} 克隆的对象
  */
-Polygon.prototype.clone = function ()
-{
+Polygon.prototype.clone = function () {
   return new Polygon(this.points.slice());
 };
 
 /**
  * 检查坐标点是否在多边形内部
  *
- * @param x {number} 坐标点的x轴坐标
- * @param y {number} 坐标点的y轴坐标
+ * @param {number} x 坐标点的x轴坐标
+ * @param {number} y 坐标点的y轴坐标
  * @return {boolean} 是否在多边形内部
  */
-Polygon.prototype.contains = function (x, y)
-{
+Polygon.prototype.contains = function (x, y) {
   var inside = false;
 
   var length = this.points.length / 2;
 
-  for (var i = 0, j = length - 1; i < length; j = i++)
-    {
-    var xi = this.points[i * 2], yi = this.points[i * 2 + 1],
-      xj = this.points[j * 2], yj = this.points[j * 2 + 1],
-      intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+  for (var i = 0, j = length - 1; i < length; j = i++) {
+    var xi = this.points[i * 2];
+    var yi = this.points[i * 2 + 1];
+    var xj = this.points[j * 2];
+    var yj = this.points[j * 2 + 1];
+    var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
 
-    if (intersect)
-        {
+    if (intersect) {
       inside = !inside;
     }
   }
@@ -1534,12 +1517,11 @@ Polygon.prototype.contains = function (x, y)
  *
  * @class
  * @memberof JC
- * @param x {number} x轴的坐标
- * @param y {number} y轴的坐标
- * @param radius {number} 圆的半径
+ * @param {number} x x轴的坐标
+ * @param {number} y y轴的坐标
+ * @param {number} radius 圆的半径
  */
-function Circle(x, y, radius)
-{
+function Circle(x, y, radius) {
   /**
    * @member {number}
    * @default 0
@@ -1564,33 +1546,30 @@ function Circle(x, y, radius)
  *
  * @return {PIXI.Circle} 克隆出来的圆对象
  */
-Circle.prototype.clone = function ()
-{
+Circle.prototype.clone = function () {
   return new Circle(this.x, this.y, this.radius);
 };
 
 /**
  * 检测坐标点是否在园内
  *
- * @param x {number} 坐标点的x轴坐标
- * @param y {number} 坐标点的y轴坐标
+ * @param {number} x 坐标点的x轴坐标
+ * @param {number} y 坐标点的y轴坐标
  * @return {boolean} 坐标点是否在园内
  */
-Circle.prototype.contains = function (x, y)
-{
-  if (this.radius <= 0)
-    {
+Circle.prototype.contains = function (x, y) {
+  if (this.radius <= 0) {
     return false;
   }
 
-  var dx = (this.x - x),
-    dy = (this.y - y),
-    r2 = this.radius * this.radius;
+  var dx = this.x - x;
+  var dy = this.y - y;
+  var r2 = this.radius * this.radius;
 
   dx *= dx;
   dy *= dy;
 
-  return (dx + dy <= r2);
+  return dx + dy <= r2;
 };
 
 /**
@@ -1598,8 +1577,7 @@ Circle.prototype.contains = function (x, y)
 *
 * @return {PIXI.Rectangle} 矩形对象
 */
-Circle.prototype.getBounds = function ()
-{
+Circle.prototype.getBounds = function () {
   return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 };
 
@@ -1608,13 +1586,12 @@ Circle.prototype.getBounds = function ()
  *
  * @class
  * @memberof JC
- * @param x {number} x轴的坐标
- * @param y {number} y轴的坐标
- * @param width {number} 椭圆的宽度
- * @param height {number} 椭圆的高度
+ * @param {number} x x轴的坐标
+ * @param {number} y y轴的坐标
+ * @param {number} width 椭圆的宽度
+ * @param {number} height 椭圆的高度
  */
-function Ellipse(x, y, width, height)
-{
+function Ellipse(x, y, width, height) {
   /**
    * @member {number}
    * @default 0
@@ -1645,33 +1622,30 @@ function Ellipse(x, y, width, height)
  *
  * @return {PIXI.Ellipse} 克隆出来的椭圆对象
  */
-Ellipse.prototype.clone = function ()
-{
+Ellipse.prototype.clone = function () {
   return new Ellipse(this.x, this.y, this.width, this.height);
 };
 
 /**
  * 检测坐标点是否在椭园内
  *
- * @param x {number} 坐标点的x轴坐标
- * @param y {number} 坐标点的y轴坐标
+ * @param {number} x 坐标点的x轴坐标
+ * @param {number} y 坐标点的y轴坐标
  * @return {boolean} 坐标点是否在椭园内
  */
-Ellipse.prototype.contains = function (x, y)
-{
-  if (this.width <= 0 || this.height <= 0)
-    {
+Ellipse.prototype.contains = function (x, y) {
+  if (this.width <= 0 || this.height <= 0) {
     return false;
   }
 
-  //normalize the coords to an ellipse with center 0,0
-  var normx = ((x - this.x) / this.width),
-    normy = ((y - this.y) / this.height);
+  // normalize the coords to an ellipse with center 0,0
+  var normx = (x - this.x) / this.width;
+  var normy = (y - this.y) / this.height;
 
   normx *= normx;
   normy *= normy;
 
-  return (normx + normy <= 1);
+  return normx + normy <= 1;
 };
 
 /**
@@ -1679,8 +1653,7 @@ Ellipse.prototype.contains = function (x, y)
  *
  * @return {PIXI.Rectangle} 矩形对象
  */
-Ellipse.prototype.getBounds = function ()
-{
+Ellipse.prototype.getBounds = function () {
   return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
 };
 
@@ -1690,7 +1663,7 @@ Ellipse.prototype.getBounds = function ()
  * @class
  * @memberof JC
  */
-function Matrix(){
+function Matrix() {
   this.a = 1;
   this.b = 0;
   this.c = 0;
@@ -1702,9 +1675,9 @@ function Matrix(){
 /**
  * 从数组设置一个矩阵
  *
- * @param array {number[]}
+ * @param {array} array
  */
-Matrix.prototype.fromArray = function(array){
+Matrix.prototype.fromArray = function (array) {
   this.a = array[0];
   this.b = array[1];
   this.c = array[3];
@@ -1716,14 +1689,14 @@ Matrix.prototype.fromArray = function(array){
 /**
  * 将对象的数据以数组的形式导出
  *
- * @param transpose {boolean} 是否对矩阵进行转置
+ * @param {boolean} transpose 是否对矩阵进行转置
  * @return {number[]} 返回数组
  */
-Matrix.prototype.toArray = function(transpose){
-  if(!this.array) this.array = new Float32Array(9);
+Matrix.prototype.toArray = function (transpose) {
+  if (!this.array) this.array = new Float32Array(9);
   var array = this.array;
 
-  if(transpose){
+  if (transpose) {
     array[0] = this.a;
     array[1] = this.b;
     array[2] = 0;
@@ -1733,7 +1706,7 @@ Matrix.prototype.toArray = function(transpose){
     array[6] = this.tx;
     array[7] = this.ty;
     array[8] = 1;
-  }else{
+  } else {
     array[0] = this.a;
     array[1] = this.c;
     array[2] = this.tx;
@@ -1750,11 +1723,11 @@ Matrix.prototype.toArray = function(transpose){
 /**
  * 将坐标点与矩阵左乘
  *
- * @param pos {object} 原始点
- * @param newPos {object} 变换之后的点
+ * @param {object} pos 原始点
+ * @param {object} newPos 变换之后的点
  * @return {object} 返回数组
  */
-Matrix.prototype.apply = function(pos, newPos){
+Matrix.prototype.apply = function (pos, newPos) {
   newPos = newPos || {};
   newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
   newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
@@ -1763,11 +1736,11 @@ Matrix.prototype.apply = function(pos, newPos){
 /**
  * 将坐标点与转置矩阵左乘
  *
- * @param pos {object} 原始点
- * @param newPos {object} 变换之后的点
+ * @param {object} pos 原始点
+ * @param {object} newPos 变换之后的点
  * @return {object} 变换之后的点
  */
-Matrix.prototype.applyInverse = function(pos, newPos){
+Matrix.prototype.applyInverse = function (pos, newPos) {
   var id = 1 / (this.a * this.d + this.c * -this.b);
   newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
   newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
@@ -1775,20 +1748,22 @@ Matrix.prototype.applyInverse = function(pos, newPos){
 };
 /**
  * 位移操作
- *
+ * @param {number} x
+ * @param {number} y
  * @return {this}
  */
-Matrix.prototype.translate = function(x, y){
+Matrix.prototype.translate = function (x, y) {
   this.tx += x;
   this.ty += y;
   return this;
 };
 /**
  * 缩放操作
- *
+ * @param {number} x
+ * @param {number} y
  * @return {this}
  */
-Matrix.prototype.scale = function(x, y){
+Matrix.prototype.scale = function (x, y) {
   this.a *= x;
   this.d *= y;
   this.c *= x;
@@ -1799,37 +1774,37 @@ Matrix.prototype.scale = function(x, y){
 };
 /**
  * 旋转操作
- *
+ * @param {number} angle
  * @return {this}
  */
-Matrix.prototype.rotate = function(angle){
-  var cos = Math.cos( angle );
-  var sin = Math.sin( angle );
+Matrix.prototype.rotate = function (angle) {
+  var cos = Math.cos(angle);
+  var sin = Math.sin(angle);
   var a1 = this.a;
   var c1 = this.c;
   var tx1 = this.tx;
-  this.a = a1 * cos-this.b * sin;
-  this.b = a1 * sin+this.b * cos;
-  this.c = c1 * cos-this.d * sin;
-  this.d = c1 * sin+this.d * cos;
+  this.a = a1 * cos - this.b * sin;
+  this.b = a1 * sin + this.b * cos;
+  this.c = c1 * cos - this.d * sin;
+  this.d = c1 * sin + this.d * cos;
   this.tx = tx1 * cos - this.ty * sin;
   this.ty = tx1 * sin + this.ty * cos;
   return this;
 };
 /**
  * 矩阵相乘
- *
+ * @param {matrix} matrix
  * @return {this}
  */
-Matrix.prototype.append = function(matrix){
+Matrix.prototype.append = function (matrix) {
   var a1 = this.a;
   var b1 = this.b;
   var c1 = this.c;
   var d1 = this.d;
-  this.a  = matrix.a * a1 + matrix.b * c1;
-  this.b  = matrix.a * b1 + matrix.b * d1;
-  this.c  = matrix.c * a1 + matrix.d * c1;
-  this.d  = matrix.c * b1 + matrix.d * d1;
+  this.a = matrix.a * a1 + matrix.b * c1;
+  this.b = matrix.a * b1 + matrix.b * d1;
+  this.c = matrix.c * a1 + matrix.d * c1;
+  this.d = matrix.c * b1 + matrix.d * d1;
   this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
   this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
   return this;
@@ -1839,7 +1814,7 @@ Matrix.prototype.append = function(matrix){
  *
  * @return {this}
  */
-Matrix.prototype.identity = function(){
+Matrix.prototype.identity = function () {
   this.a = 1;
   this.b = 0;
   this.c = 0;
@@ -1850,32 +1825,46 @@ Matrix.prototype.identity = function(){
 };
 /**
  * 快速设置矩阵各个分量
- *
+ * @param {number} x
+ * @param {number} y
+ * @param {number} pivotX
+ * @param {number} pivotY
+ * @param {number} scaleX
+ * @param {number} scaleY
+ * @param {number} rotation
+ * @param {number} skewX
+ * @param {number} skewY
  * @return {this}
  */
-Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY)
-{
-  var a, b, c, d, sr, cr, sy, nsx; // cy, cx,
+Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY) {
+  var a = void 0;
+  var b = void 0;
+  var c = void 0;
+  var d = void 0;
+  var sr = void 0;
+  var cr = void 0;
+  var sy = void 0;
+  var nsx = void 0; // cy, cx,
 
-  sr  = Math.sin(rotation);
-  cr  = Math.cos(rotation);
+  sr = Math.sin(rotation);
+  cr = Math.cos(rotation);
   // cy  = Math.cos(skewY);
-  sy  = Math.tan(skewY);
+  sy = Math.tan(skewY);
   nsx = Math.tan(skewX);
   // cx  =  Math.cos(skewX);
 
-  a  =  cr * scaleX;
-  b  =  sr * scaleX;
-  c  = -sr * scaleY;
-  d  =  cr * scaleY;
+  a = cr * scaleX;
+  b = sr * scaleX;
+  c = -sr * scaleY;
+  d = cr * scaleY;
 
-  this.a  = a + sy * c;
-  this.b  = b + sy * d;
-  this.c  = nsx * a + c;
-  this.d  = nsx * b + d;
+  this.a = a + sy * c;
+  this.b = b + sy * d;
+  this.c = nsx * a + c;
+  this.d = nsx * b + d;
 
-  this.tx = x + ( pivotX * a + pivotY * c );
-  this.ty = y + ( pivotX * b + pivotY * d );
+  this.tx = x + (pivotX * a + pivotY * c);
+  this.ty = y + (pivotX * b + pivotY * d);
 
   return this;
 };
@@ -1886,23 +1875,22 @@ var TEMP_MATRIX = new Matrix();
  *
  * @param {Array}  points  array of points
  */
-
-function BezierCurve( points ) {
+function BezierCurve(points) {
   this.points = points;
 }
 
-BezierCurve.prototype = Object.create( Curve.prototype );
+BezierCurve.prototype = Object.create(Curve.prototype);
 
-BezierCurve.prototype.getPoint = function (t , points) {
-  var a = points || this.points,
-    len = a.length,
-    rT = 1 - t,
-    l = a.slice(0, len - 1),
-    r = a.slice(1),
-    oP = new Point();
+BezierCurve.prototype.getPoint = function (t, points) {
+  var a = points || this.points;
+  var len = a.length;
+  var rT = 1 - t;
+  var l = a.slice(0, len - 1);
+  var r = a.slice(1);
+  var oP = new Point();
   if (len > 3) {
-    var oL = this.getPoint(t, l),
-      oR = this.getPoint(t, r);
+    var oL = this.getPoint(t, l);
+    var oR = this.getPoint(t, r);
     oP.x = rT * oL.x + t * oR.x;
     oP.y = rT * oL.y + t * oR.y;
     return oP;
@@ -1919,24 +1907,19 @@ BezierCurve.prototype.getPoint = function (t , points) {
  *
  * @param {String}  path  array of points
  */
-function SvgCurve( path ) {
+function SvgCurve(path) {
   if (UTILS.isString(path)) {
     this.path = this.createPath(path);
   } else if (path.nodeName === 'path' && path.getAttribute('d')) {
     this.path = path;
   } else {
-    console.warn(
-        '%c JC.SvgCurve warn %c: SvgCurve just accept <path d="M10 10"> element or "M10 10" string but found %c' + path + '%c',
-        'color: #f98165; background: #80a89e',
-        'color: #80a89e; background: #cad9d5;',
-        'color: #f98165; background: #cad9d5',
-        'color: #80a89e; background: #cad9d5'
-    );
+    /* eslint max-len: "off" */
+    console.warn('%c JC.SvgCurve warn %c: SvgCurve just accept <path d="M10 10"> element or "M10 10" string but found %c' + path + '%c', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;', 'color: #f98165; background: #cad9d5', 'color: #80a89e; background: #cad9d5');
   }
   this.totalLength = this.path.getTotalLength();
 }
 
-SvgCurve.prototype = Object.create( Curve.prototype );
+SvgCurve.prototype = Object.create(Curve.prototype);
 
 SvgCurve.prototype.createPath = function (d) {
   var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1952,455 +1935,365 @@ var NURBSUtils = {
 
   /*
   Finds knot vector span.
-
-  p : degree
+   p : degree
   u : parametric value
   U : knot vector
-
-  returns the span
+   returns the span
   */
-  findSpan: function( p,  u,  U ) {
-
+  findSpan: function findSpan(p, u, U) {
     var n = U.length - p - 1;
 
-    if ( u >= U[ n ] ) {
-
+    if (u >= U[n]) {
       return n - 1;
-
     }
 
-    if ( u <= U[ p ] ) {
-
+    if (u <= U[p]) {
       return p;
-
     }
 
     var low = p;
     var high = n;
-    var mid = Math.floor( ( low + high ) / 2 );
+    var mid = Math.floor((low + high) / 2);
 
-    while ( u < U[ mid ] || u >= U[ mid + 1 ] ) {
-
-      if ( u < U[ mid ] ) {
-
+    while (u < U[mid] || u >= U[mid + 1]) {
+      if (u < U[mid]) {
         high = mid;
-
       } else {
-
         low = mid;
-
       }
 
-      mid = Math.floor( ( low + high ) / 2 );
-
+      mid = Math.floor((low + high) / 2);
     }
 
     return mid;
-
   },
-
 
   /*
   Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
-
-  span : span in which u lies
+   span : span in which u lies
   u    : parametric point
   p    : degree
   U    : knot vector
-
-  returns array[p+1] with basis functions values.
+   returns array[p+1] with basis functions values.
   */
-  calcBasisFunctions: function( span, u, p, U ) {
-
+  calcBasisFunctions: function calcBasisFunctions(span, u, p, U) {
     var N = [];
     var left = [];
     var right = [];
-    N[ 0 ] = 1.0;
+    N[0] = 1.0;
 
-    for ( var j = 1; j <= p; ++ j ) {
-
-      left[ j ] = u - U[ span + 1 - j ];
-      right[ j ] = U[ span + j ] - u;
+    for (var j = 1; j <= p; ++j) {
+      left[j] = u - U[span + 1 - j];
+      right[j] = U[span + j] - u;
 
       var saved = 0.0;
 
-      for ( var r = 0; r < j; ++ r ) {
-
-        var rv = right[ r + 1 ];
-        var lv = left[ j - r ];
-        var temp = N[ r ] / ( rv + lv );
-        N[ r ] = saved + rv * temp;
+      for (var r = 0; r < j; ++r) {
+        var rv = right[r + 1];
+        var lv = left[j - r];
+        var temp = N[r] / (rv + lv);
+        N[r] = saved + rv * temp;
         saved = lv * temp;
-
       }
 
-      N[ j ] = saved;
-
+      N[j] = saved;
     }
 
     return N;
-
   },
-
 
   /*
   Calculate B-Spline curve points. See The NURBS Book, page 82, algorithm A3.1.
-
-  p : degree of B-Spline
+   p : degree of B-Spline
   U : knot vector
   P : control points (x, y, z, w)
   u : parametric point
-
-  returns point for given u
+   returns point for given u
   */
-  calcBSplinePoint: function( p, U, P, u ) {
+  calcBSplinePoint: function calcBSplinePoint(p, U, P, u) {
+    var span = this.findSpan(p, u, U);
+    var N = this.calcBasisFunctions(span, u, p, U);
+    var C = new Point(0, 0, 0, 0);
 
-    var span = this.findSpan( p, u, U );
-    var N = this.calcBasisFunctions( span, u, p, U );
-    var C = new Point( 0, 0, 0, 0 );
-
-    for ( var j = 0; j <= p; ++ j ) {
-
-      var point = P[ span - p + j ];
-      var Nj = N[ j ];
+    for (var j = 0; j <= p; ++j) {
+      var point = P[span - p + j];
+      var Nj = N[j];
       var wNj = point.w * Nj;
       C.x += point.x * wNj;
       C.y += point.y * wNj;
       C.z += point.z * wNj;
       C.w += point.w * Nj;
-
     }
 
     return C;
-
   },
 
-
-  /*
-  Calculate basis functions derivatives. See The NURBS Book, page 72, algorithm A2.3.
-
-  span : span in which u lies
-  u    : parametric point
-  p    : degree
-  n    : number of derivatives to calculate
-  U    : knot vector
-
-  returns array[n+1][p+1] with basis functions derivatives
-  */
-  calcBasisFunctionDerivatives: function( span,  u,  p,  n,  U ) {
-
+  /**
+   * Calculate basis functions derivatives.
+   * See The NURBS Book, page 72, algorithm A2.3.
+   * @param {number} span span in which u lies
+   * @param {number} u    parametric point
+   * @param {number} p    degree
+   * @param {number} n    number of derivatives to calculate
+   * @param {number} U    knot vector
+   * @return {array} ders
+   */
+  calcBasisFunctionDerivatives: function calcBasisFunctionDerivatives(span, u, p, n, U) {
     var zeroArr = [];
-    for ( var i = 0; i <= p; ++ i )
-      zeroArr[ i ] = 0.0;
+    var i = 0;
+    for (i = 0; i <= p; ++i) {
+      zeroArr[i] = 0.0;
+    }var ders = [];
+    for (i = 0; i <= n; ++i) {
+      ders[i] = zeroArr.slice(0);
+    }var ndu = [];
+    for (i = 0; i <= p; ++i) {
+      ndu[i] = zeroArr.slice(0);
+    }ndu[0][0] = 1.0;
 
-    var ders = [];
-    for ( i = 0; i <= n; ++ i )
-      ders[ i ] = zeroArr.slice( 0 );
+    var left = zeroArr.slice(0);
+    var right = zeroArr.slice(0);
+    var j = 1;
+    var r = 0;
+    var k = 1;
 
-    var ndu = [];
-    for ( i = 0; i <= p; ++ i )
-      ndu[ i ] = zeroArr.slice( 0 );
-
-    ndu[ 0 ][ 0 ] = 1.0;
-
-    var left = zeroArr.slice( 0 );
-    var right = zeroArr.slice( 0 );
-
-    for ( var j = 1; j <= p; ++ j ) {
-
-      left[ j ] = u - U[ span + 1 - j ];
-      right[ j ] = U[ span + j ] - u;
+    for (j = 1; j <= p; ++j) {
+      left[j] = u - U[span + 1 - j];
+      right[j] = U[span + j] - u;
 
       var saved = 0.0;
+      for (r = 0; r < j; ++r) {
+        var rv = right[r + 1];
+        var lv = left[j - r];
+        ndu[j][r] = rv + lv;
 
-      for ( var r = 0; r < j; ++ r ) {
-
-        var rv = right[ r + 1 ];
-        var lv = left[ j - r ];
-        ndu[ j ][ r ] = rv + lv;
-
-        var temp = ndu[ r ][ j - 1 ] / ndu[ j ][ r ];
-        ndu[ r ][ j ] = saved + rv * temp;
+        var temp = ndu[r][j - 1] / ndu[j][r];
+        ndu[r][j] = saved + rv * temp;
         saved = lv * temp;
-
       }
 
-      ndu[ j ][ j ] = saved;
-
+      ndu[j][j] = saved;
     }
 
-    for ( j = 0; j <= p; ++ j ) {
-
-      ders[ 0 ][ j ] = ndu[ j ][ p ];
-
+    for (j = 0; j <= p; ++j) {
+      ders[0][j] = ndu[j][p];
     }
 
-    for ( r = 0; r <= p; ++ r ) {
-
+    for (r = 0; r <= p; ++r) {
       var s1 = 0;
       var s2 = 1;
 
       var a = [];
-      for ( i = 0; i <= p; ++ i ) {
-
-        a[ i ] = zeroArr.slice( 0 );
-
+      for (i = 0; i <= p; ++i) {
+        a[i] = zeroArr.slice(0);
       }
-      a[ 0 ][ 0 ] = 1.0;
+      a[0][0] = 1.0;
 
-      for ( var k = 1; k <= n; ++ k ) {
-
+      for (k = 1; k <= n; ++k) {
         var d = 0.0;
         var rk = r - k;
         var pk = p - k;
 
-        if ( r >= k ) {
-
-          a[ s2 ][ 0 ] = a[ s1 ][ 0 ] / ndu[ pk + 1 ][ rk ];
-          d = a[ s2 ][ 0 ] * ndu[ rk ][ pk ];
-
+        if (r >= k) {
+          a[s2][0] = a[s1][0] / ndu[pk + 1][rk];
+          d = a[s2][0] * ndu[rk][pk];
         }
 
-        var j1 = ( rk >= - 1 ) ? 1 : - rk;
-        var j2 = ( r - 1 <= pk ) ? k - 1 :  p - r;
+        var j1 = rk >= -1 ? 1 : -rk;
+        var j2 = r - 1 <= pk ? k - 1 : p - r;
 
-        for ( j = j1; j <= j2; ++ j ) {
-
-          a[ s2 ][ j ] = ( a[ s1 ][ j ] - a[ s1 ][ j - 1 ] ) / ndu[ pk + 1 ][ rk + j ];
-          d += a[ s2 ][ j ] * ndu[ rk + j ][ pk ];
-
+        for (j = j1; j <= j2; ++j) {
+          a[s2][j] = (a[s1][j] - a[s1][j - 1]) / ndu[pk + 1][rk + j];
+          d += a[s2][j] * ndu[rk + j][pk];
         }
 
-        if ( r <= pk ) {
-
-          a[ s2 ][ k ] = - a[ s1 ][ k - 1 ] / ndu[ pk + 1 ][ r ];
-          d += a[ s2 ][ k ] * ndu[ r ][ pk ];
-
+        if (r <= pk) {
+          a[s2][k] = -a[s1][k - 1] / ndu[pk + 1][r];
+          d += a[s2][k] * ndu[r][pk];
         }
 
-        ders[ k ][ r ] = d;
+        ders[k][r] = d;
 
         j = s1;
         s1 = s2;
         s2 = j;
-
       }
-
     }
 
     r = p;
 
-    for ( k = 1; k <= n; ++ k ) {
-
-      for ( j = 0; j <= p; ++ j ) {
-
-        ders[ k ][ j ] *= r;
-
+    for (k = 1; k <= n; ++k) {
+      for (j = 0; j <= p; ++j) {
+        ders[k][j] *= r;
       }
       r *= p - k;
-
     }
 
     return ders;
-
   },
 
-
-  /*
-    Calculate derivatives of a B-Spline. See The NURBS Book, page 93, algorithm A3.2.
-
-    p  : degree
-    U  : knot vector
-    P  : control points
-    u  : Parametric points
-    nd : number of derivatives
-
-    returns array[d+1] with derivatives
-    */
-  calcBSplineDerivatives: function( p,  U,  P,  u,  nd ) {
-
+  /**
+   * Calculate derivatives of a B-Spline.
+   * See The NURBS Book, page 93, algorithm A3.2.
+   * @param {number} p   degree
+   * @param {number} U  : knot vector
+   * @param {number} P  : control points
+   * @param {number} u  : Parametric points
+   * @param {number} nd : number of derivatives
+   * @return {array} array[d+1] with derivatives
+   */
+  calcBSplineDerivatives: function calcBSplineDerivatives(p, U, P, u, nd) {
     var du = nd < p ? nd : p;
     var CK = [];
-    var span = this.findSpan( p, u, U );
-    var nders = this.calcBasisFunctionDerivatives( span, u, p, du, U );
-    var Pw = [], point;
+    var span = this.findSpan(p, u, U);
+    var nders = this.calcBasisFunctionDerivatives(span, u, p, du, U);
+    var Pw = [];
+    var point = void 0;
+    var i = 0;
+    var k = 0;
 
-    for ( var i = 0; i < P.length; ++ i ) {
-
-      point = P[ i ].clone();
+    for (; i < P.length; ++i) {
+      point = P[i].clone();
       var w = point.w;
 
       point.x *= w;
       point.y *= w;
       point.z *= w;
 
-      Pw[ i ] = point;
-
+      Pw[i] = point;
     }
-    for ( var k = 0; k <= du; ++ k ) {
+    for (; k <= du; ++k) {
+      point = Pw[span - p].clone().multiplyScalar(nders[k][0]);
 
-      point = Pw[ span - p ].clone().multiplyScalar( nders[ k ][ 0 ] );
-
-      for ( var j = 1; j <= p; ++ j ) {
-
-        point.add( Pw[ span - p + j ].clone().multiplyScalar( nders[ k ][ j ] ) );
-
+      for (var j = 1; j <= p; ++j) {
+        point.add(Pw[span - p + j].clone().multiplyScalar(nders[k][j]));
       }
 
-      CK[ k ] = point;
-
+      CK[k] = point;
     }
 
-    for ( k = du + 1; k <= nd + 1; ++ k ) {
-
-      CK[ k ] = new Point( 0, 0, 0 );
-
+    for (k = du + 1; k <= nd + 1; ++k) {
+      CK[k] = new Point(0, 0, 0);
     }
 
     return CK;
-
   },
-
 
   /*
   Calculate "K over I"
-
-  returns k!/(i!(k-i)!)
+   returns k!/(i!(k-i)!)
   */
-  calcKoverI: function( k, i ) {
-
+  calcKoverI: function calcKoverI(k, i) {
     var nom = 1;
+    var j = 2;
 
-    for ( var j = 2; j <= k; ++ j ) {
-
+    for (j = 2; j <= k; ++j) {
       nom *= j;
-
     }
 
     var denom = 1;
 
-    for ( j = 2; j <= i; ++ j ) {
-
+    for (j = 2; j <= i; ++j) {
       denom *= j;
-
     }
 
-    for ( j = 2; j <= k - i; ++ j ) {
-
+    for (j = 2; j <= k - i; ++j) {
       denom *= j;
-
     }
 
     return nom / denom;
-
   },
 
-
-  /*
-  Calculate derivatives (0-nd) of rational curve. See The NURBS Book, page 127, algorithm A4.2.
-
-  Pders : result of function calcBSplineDerivatives
-
-  returns array with derivatives for rational curve.
-  */
-  calcRationalCurveDerivatives: function ( Pders ) {
-
+  /**
+   * Calculate derivatives (0-nd) of rational curve.
+   * See The NURBS Book, page 127, algorithm A4.2.
+   * @param {array} Pders result of function calcBSplineDerivatives
+   * @return {array} with derivatives for rational curve.
+   */
+  calcRationalCurveDerivatives: function calcRationalCurveDerivatives(Pders) {
     var nd = Pders.length;
     var Aders = [];
     var wders = [];
+    var i = 0;
 
-    for ( var i = 0; i < nd; ++ i ) {
-
-      var point = Pders[ i ];
-      Aders[ i ] = new Point( point.x, point.y, point.z );
-      wders[ i ] = point.w;
-
+    for (i = 0; i < nd; ++i) {
+      var point = Pders[i];
+      Aders[i] = new Point(point.x, point.y, point.z);
+      wders[i] = point.w;
     }
 
     var CK = [];
 
-    for ( var k = 0; k < nd; ++ k ) {
+    for (var k = 0; k < nd; ++k) {
+      var v = Aders[k].clone();
 
-      var v = Aders[ k ].clone();
-
-      for ( i = 1; i <= k; ++ i ) {
-
-        v.sub( CK[ k - i ].clone().multiplyScalar( this.calcKoverI( k, i ) * wders[ i ] ) );
-
+      for (i = 1; i <= k; ++i) {
+        v.sub(CK[k - i].clone().multiplyScalar(this.calcKoverI(k, i) * wders[i]));
       }
 
-      CK[ k ] = v.divideScalar( wders[ 0 ] );
-
+      CK[k] = v.divideScalar(wders[0]);
     }
 
     return CK;
-
   },
 
-
-  /*
-  Calculate NURBS curve derivatives. See The NURBS Book, page 127, algorithm A4.2.
-
-  p  : degree
-  U  : knot vector
-  P  : control points in homogeneous space
-  u  : parametric points
-  nd : number of derivatives
-
-  returns array with derivatives.
-  */
-  calcNURBSDerivatives: function( p,  U,  P,  u,  nd ) {
-
-    var Pders = this.calcBSplineDerivatives( p, U, P, u, nd );
-    return this.calcRationalCurveDerivatives( Pders );
-
+  /**
+   * Calculate NURBS curve derivatives.
+   * See The NURBS Book, page 127, algorithm A4.2.
+   * @param {number} p  degree
+   * @param {number} U  knot vector
+   * @param {number} P  control points in homogeneous space
+   * @param {number} u  parametric points
+   * @param {number} nd number of derivatives
+   * @return {array} returns array with derivatives.
+   */
+  calcNURBSDerivatives: function calcNURBSDerivatives(p, U, P, u, nd) {
+    var Pders = this.calcBSplineDerivatives(p, U, P, u, nd);
+    return this.calcRationalCurveDerivatives(Pders);
   },
 
-
-  /*
-  Calculate rational B-Spline surface point. See The NURBS Book, page 134, algorithm A4.3.
-
-  p1, p2 : degrees of B-Spline surface
-  U1, U2 : knot vectors
-  P      : control points (x, y, z, w)
-  u, v   : parametric values
-
-  returns point for given (u, v)
-  */
-  calcSurfacePoint: function( p, q, U, V, P, u, v ) {
-
-    var uspan = this.findSpan( p, u, U );
-    var vspan = this.findSpan( q, v, V );
-    var Nu = this.calcBasisFunctions( uspan, u, p, U );
-    var Nv = this.calcBasisFunctions( vspan, v, q, V );
+  /**
+   * Calculate rational B-Spline surface point.
+   * See The NURBS Book, page 134, algorithm A4.3.
+   * @param {number} p degrees of B-Spline surface
+   * @param {number} q degrees of B-Spline surface
+   *
+   * @param {number} U knot vectors
+   * @param {number} V knot vectors
+   *
+   * @param {number} P control points (x, y, z, w)
+   *
+   * @param {number} u parametric values
+   * @param {number} v parametric values
+   * @return {JC.Point} point for given (u, v)
+   */
+  calcSurfacePoint: function calcSurfacePoint(p, q, U, V, P, u, v) {
+    var uspan = this.findSpan(p, u, U);
+    var vspan = this.findSpan(q, v, V);
+    var Nu = this.calcBasisFunctions(uspan, u, p, U);
+    var Nv = this.calcBasisFunctions(vspan, v, q, V);
     var temp = [];
+    var l = 0;
 
-    for ( var l = 0; l <= q; ++ l ) {
-
-      temp[ l ] = new Point( 0, 0, 0, 0 );
-      for ( var k = 0; k <= p; ++ k ) {
-
-        var point = P[ uspan - p + k ][ vspan - q + l ].clone();
+    for (; l <= q; ++l) {
+      temp[l] = new Point(0, 0, 0, 0);
+      for (var k = 0; k <= p; ++k) {
+        var point = P[uspan - p + k][vspan - q + l].clone();
         var w = point.w;
         point.x *= w;
         point.y *= w;
         point.z *= w;
-        temp[ l ].add( point.multiplyScalar( Nu[ k ] ) );
-
+        temp[l].add(point.multiplyScalar(Nu[k]));
       }
-
     }
 
-    var Sw = new Point( 0, 0, 0, 0 );
-    for ( l = 0; l <= q; ++ l ) {
-
-      Sw.add( temp[ l ].multiplyScalar( Nv[ l ] ) );
-
+    var Sw = new Point(0, 0, 0, 0);
+    for (l = 0; l <= q; ++l) {
+      Sw.add(temp[l].multiplyScalar(Nv[l]));
     }
 
-    Sw.divideScalar( Sw.w );
-    return new Point( Sw.x, Sw.y, Sw.z );
-
+    Sw.divideScalar(Sw.w);
+    return new Point(Sw.x, Sw.y, Sw.z);
   }
 
 };
@@ -2411,51 +2304,36 @@ var NURBSUtils = {
  * @param {Array}  knots           array of reals
  * @param {Array}  controlPoints   array of Point
  */
-
-function NURBSCurve( degree, knots, controlPoints ) {
+function NURBSCurve(degree, knots, controlPoints) {
   this.degree = degree;
   this.knots = knots;
   this.controlPoints = controlPoints; // [];
-  // for ( var i = 0; i < controlPoints.length; ++ i ) {
-  //     // ensure Vector4 for control points
-  //     var point = controlPoints[ i ];
-  //     this.controlPoints[ i ] = new Point( point.x, point.y, point.z, point.w );
-  // }
 }
 
-
-NURBSCurve.prototype = Object.create( Curve.prototype );
+NURBSCurve.prototype = Object.create(Curve.prototype);
 NURBSCurve.prototype.constructor = NURBSCurve;
 
-
-NURBSCurve.prototype.getPoint = function ( t ) {
-
-  var u = this.knots[ 0 ] + t * ( this.knots[ this.knots.length - 1 ] - this.knots[ 0 ] ); // linear mapping t->u
+NURBSCurve.prototype.getPoint = function (t) {
+  var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]); // linear mapping t->u
 
   // following results in (wx, wy, wz, w) homogeneous point
-  var hpoint = NURBSUtils.calcBSplinePoint( this.degree, this.knots, this.controlPoints, u );
+  var hpoint = NURBSUtils.calcBSplinePoint(this.degree, this.knots, this.controlPoints, u);
 
-  if ( hpoint.w !== 1.0 ) {
-
+  if (hpoint.w !== 1.0) {
     // project to 3D space: (wx, wy, wz, w) -> (x, y, z, 1)
-    hpoint.divideScalar( hpoint.w );
-
+    hpoint.divideScalar(hpoint.w);
   }
 
-  return new Point( hpoint.x, hpoint.y, hpoint.z );
-
+  return new Point(hpoint.x, hpoint.y, hpoint.z);
 };
 
-
-NURBSCurve.prototype.getTangent = function ( t ) {
-
-  var u = this.knots[ 0 ] + t * ( this.knots[ this.knots.length - 1 ] - this.knots[ 0 ] );
-  var ders = NURBSUtils.calcNURBSDerivatives( this.degree, this.knots, this.controlPoints, u, 1 );
-  var tangent = ders[ 1 ].clone();
+NURBSCurve.prototype.getTangent = function (t) {
+  var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]);
+  var ders = NURBSUtils.calcNURBSDerivatives(this.degree, this.knots, this.controlPoints, u, 1);
+  var tangent = ders[1].clone();
   tangent.normalize();
 
   return tangent;
-
 };
 
 /**
@@ -2609,7 +2487,6 @@ function DisplayObject() {
    */
   this.eventArea = null;
 
-
   /**
    * 当前对象的动画管家
    *
@@ -2617,7 +2494,6 @@ function DisplayObject() {
    * @private
    */
   this.Animation = new Animation(this);
-
 
   /**
    * 标记当前对象是否为touchstart触发状态
@@ -2659,10 +2535,10 @@ DisplayObject.prototype = Object.create(Eventer.prototype);
  * @memberof JC.DisplayObject#
  */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
-  get: function() {
+  get: function get() {
     return this.scaleX;
   },
-  set: function(scale) {
+  set: function set(scale) {
     this.scaleX = this.scaleY = scale;
   }
 });
@@ -2684,19 +2560,20 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param [opts] {object} 动画配置参数
- * @param [opts.from] {json} json格式，设置对象的起始位置和起始姿态等
- * @param [opts.to] {json} json格式，设置对象的结束位置和结束姿态等
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {json} [opts.from] json格式，设置对象的起始位置和起始姿态等
+ * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
-DisplayObject.prototype.fromTo = function(opts, clear) {
+DisplayObject.prototype.fromTo = function (opts, clear) {
   return this.Animation.fromTo(opts, clear);
 };
 
@@ -2716,27 +2593,29 @@ DisplayObject.prototype.fromTo = function(opts, clear) {
  * });
  * ```
  *
- * @param [opts] {object} 动画配置参数
- * @param [opts.to] {json} json格式，设置对象的结束位置和结束姿态等
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
-DisplayObject.prototype.to = function(opts, clear) {
+DisplayObject.prototype.to = function (opts, clear) {
   return this.Animation.to(opts, clear);
 };
 
+/* eslint max-len: "off" */
 /**
  * motion动画，让物体按照设定好的曲线运动
  *
  * ```js
  * dispay.motion({
- *   path: new JC.SvgCurve(''M10 10 H 90 V 90 H 10 L 10 10''), path路径，继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
@@ -2747,19 +2626,20 @@ DisplayObject.prototype.to = function(opts, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param [opts] {object} 动画配置参数
- * @param [opts.path] {Curve} path路径，继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
- * @param [opts.attachTangent] {Boolean} 物体是否捕获切线方向
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {Curve} [opts.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ * @param {Boolean} [opts.attachTangent] 物体是否捕获切线方向
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
-DisplayObject.prototype.motion = function(opts, clear) {
+DisplayObject.prototype.motion = function (opts, clear) {
   return this.Animation.motion(opts, clear);
 };
 
@@ -2780,19 +2660,20 @@ DisplayObject.prototype.motion = function(opts, clear) {
  * });
  * ```
  *
- * @param [opts] {object} 动画配置参数
- * @param [opts.keys] {json} 配置关键帧的位置、姿态
- * @param [opts.keyConfig] {json} 相邻两个关键帧之间的动画运动配置
- * @param [opts.ease] {String} 执行动画使用的缓动函数 默认值为 easeBoth
- * @param [opts.repeats] {Number} 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param [opts.infinity] {Boolean} 设置动画无限次执行，优先级高于repeats
- * @param [opts.alternate] {Boolean} 设置动画是否偶数次回返
- * @param [opts.duration] {Number} 设置动画执行时间 默认 300ms
- * @param [opts.onUpdate] {Function} 设置动画更新时的回调函数
- * @param [opts.onCompelete] {Function} 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param clear {Boolean} 是否去掉之前的动画
+ * @param {object} [opts] 动画配置参数
+ * @param {json} [opts.keys] 配置关键帧的位置、姿态
+ * @param {json} [opts.keyConfig] 相邻两个关键帧之间的动画运动配置
+ * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
+ * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
  */
-DisplayObject.prototype.keyFrames = function(opts, clear) {
+DisplayObject.prototype.keyFrames = function (opts, clear) {
   return this.Animation.keyFrames(opts, clear);
 };
 
@@ -2800,9 +2681,9 @@ DisplayObject.prototype.keyFrames = function(opts, clear) {
  * 检查对象是否可见
  *
  * @method isVisible
- * @private
+ * @return {Boolean} 对象是否可见
  */
-DisplayObject.prototype.isVisible = function() {
+DisplayObject.prototype.isVisible = function () {
   return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
 };
 
@@ -2810,17 +2691,17 @@ DisplayObject.prototype.isVisible = function() {
  * 移除对象上的遮罩
  *
  */
-DisplayObject.prototype.removeMask = function() {
+DisplayObject.prototype.removeMask = function () {
   this.mask = null;
 };
 
 /**
  * 设置对象上的属性值
  *
- * @method setProps
+ * @param {json} props
  * @private
  */
-DisplayObject.prototype.setProps = function(props) {
+DisplayObject.prototype.setProps = function (props) {
   if (props === undefined) return;
   for (var key in props) {
     if (this[key] === undefined) {
@@ -2837,25 +2718,19 @@ DisplayObject.prototype.setProps = function(props) {
  * @method updateTransform
  * @private
  */
-DisplayObject.prototype.updateTransform = function() {
+DisplayObject.prototype.updateTransform = function () {
   var pt = this.parent.worldTransform;
   var wt = this.worldTransform;
 
-  var a, b, c, d, tx, ty;
+  var a = void 0;
+  var b = void 0;
+  var c = void 0;
+  var d = void 0;
+  var tx = void 0;
+  var ty = void 0;
 
   if (this.skewX || this.skewY) {
-
-    TEMP_MATRIX.setTransform(
-            this.x,
-            this.y,
-            this.pivotX,
-            this.pivotY,
-            this.scaleX,
-            this.scaleY,
-            this.rotation * UTILS.DTR,
-            this.skewX * UTILS.DTR,
-            this.skewY * UTILS.DTR
-        );
+    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * UTILS.DTR, this.skewX * UTILS.DTR, this.skewY * UTILS.DTR);
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
     wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
@@ -2909,20 +2784,20 @@ DisplayObject.prototype.updateTransform = function() {
 /**
  * 更新对象本身的动画
  *
- * @method updateAnimation
+ * @param {Number} snippet
  * @private
  */
-DisplayObject.prototype.updateAnimation = function(snippet) {
+DisplayObject.prototype.updateAnimation = function (snippet) {
   this.Animation.update(snippet);
 };
 
 /**
  * 设置矩阵和透明度到当前绘图上下文
  *
- * @method setTransform
+ * @param {context} ctx
  * @private
  */
-DisplayObject.prototype.setTransform = function(ctx) {
+DisplayObject.prototype.setTransform = function (ctx) {
   var matrix = this.worldTransform;
   ctx.globalAlpha = this.worldAlpha;
   ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
@@ -2933,18 +2808,17 @@ DisplayObject.prototype.setTransform = function(ctx) {
  *
  * @return {object}
  */
-DisplayObject.prototype.getGlobalPos = function() {
+DisplayObject.prototype.getGlobalPos = function () {
   return { x: this.worldTransform.tx, y: this.worldTransform.ty };
 };
 
 /**
  * 设置显示对象的事件检测区域
  *
- * @param shape {JC.Polygon|JC.Rectangle} JC内置形状类型的实例
- * @param needless {boolean} 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
- * @return {Array}
+ * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
+ * @param {boolean} needless 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
  */
-DisplayObject.prototype.setArea = function(shape, needless) {
+DisplayObject.prototype.setArea = function (shape, needless) {
   if (this.eventArea !== null && needless) return;
   this.eventArea = shape;
 };
@@ -2952,8 +2826,8 @@ DisplayObject.prototype.setArea = function(shape, needless) {
 /**
  * 检测坐标点是否在多变性内
  *
- * @method contains
- * @private
+ * @param {JC.Point} global
+ * @return {Boolean} 是否包含该点
  */
 DisplayObject.prototype.contains = function (global) {
   if (this.eventArea === null) return false;
@@ -3040,10 +2914,10 @@ Container.prototype = Object.create(DisplayObject.prototype);
  * @memberof JC.Container#
  */
 Object.defineProperty(Container.prototype, 'zIndex', {
-  get: function() {
+  get: function get() {
     return this._zIndex;
   },
-  set: function(zIndex) {
+  set: function set(zIndex) {
     if (this._zIndex !== zIndex) {
       this._zIndex = zIndex;
       if (this.parent) {
@@ -3059,8 +2933,8 @@ Object.defineProperty(Container.prototype, 'zIndex', {
  * @method _sortList
  * @private
  */
-Container.prototype._sortList = function() {
-  this.childs.sort(function(a, b){
+Container.prototype._sortList = function () {
+  this.childs.sort(function (a, b) {
     if (a.zIndex > b.zIndex) {
       return 1;
     }
@@ -3079,10 +2953,11 @@ Container.prototype._sortList = function() {
  * container.adds(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param object {JC.Container}
+ * @param {JC.Container} object
  * @return {JC.Container}
  */
-Container.prototype.adds = function(object) {
+Container.prototype.adds = function (object) {
+  /* eslint prefer-rest-params: "off" */
   if (arguments.length > 1) {
     for (var i = 0; i < arguments.length; i++) {
       this.adds(arguments[i]);
@@ -3093,7 +2968,7 @@ Container.prototype.adds = function(object) {
     console.error('adds: object can\'t be added as a child of itself.', object);
     return this;
   }
-  if ((object && object instanceof Container)) {
+  if (object && object instanceof Container) {
     if (object.parent !== null) {
       object.parent.remove(object);
     }
@@ -3113,10 +2988,9 @@ Container.prototype.adds = function(object) {
  * container.remove(sprite,sprite2,text3,graphice);
  * ```
  *
- * @param object {JC.Container}
- * @return {JC.Container}
+ * @param {JC.Container} object
  */
-Container.prototype.remove = function(object) {
+Container.prototype.remove = function (object) {
   if (arguments.length > 1) {
     for (var i = 0; i < arguments.length; i++) {
       this.remove(arguments[i]);
@@ -3132,16 +3006,16 @@ Container.prototype.remove = function(object) {
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
  *
- * @method updatePosture
+ * @param {Number} snippet
  * @private
  */
-Container.prototype.updatePosture = function(snippet) {
+Container.prototype.updatePosture = function (snippet) {
   if (!this._ready) return;
   if (this.souldSort) this._sortList();
   snippet = this.timeScale * snippet;
   if (!this.paused) this.updateAnimation(snippet);
   this.updateTransform();
-    // if (this.childs.length > 0) this.updateChilds(snippet);
+  // if (this.childs.length > 0) this.updateChilds(snippet);
   for (var i = 0, l = this.childs.length; i < l; i++) {
     var child = this.childs[i];
     child.updatePosture(snippet);
@@ -3150,16 +3024,15 @@ Container.prototype.updatePosture = function(snippet) {
 
 /**
  * 渲染自己并触发后代渲染
- *
- * @method render
+ * @param {context} ctx
  * @private
  */
-Container.prototype.render = function(ctx) {
+Container.prototype.render = function (ctx) {
   ctx.save();
   this.setTransform(ctx);
   if (this.mask) this.mask.render(ctx);
   this.renderMe(ctx);
-    // if (this.childs.length > 0) this.renderChilds(ctx);
+  // if (this.childs.length > 0) this.renderChilds(ctx);
   for (var i = 0, l = this.childs.length; i < l; i++) {
     var child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
@@ -3170,24 +3043,26 @@ Container.prototype.render = function(ctx) {
 
 /**
  * 渲染自己
- *
- * @method renderMe
  * @private
+ * @return {Boolean} 是否渲染
  */
-Container.prototype.renderMe = function() {
+Container.prototype.renderMe = function () {
   return true;
 };
 
-Container.prototype.calculateVertices = function() {
-  var wt = this.worldTransform,
-    a = wt.a,
-    b = wt.b,
-    c = wt.c,
-    d = wt.d,
-    tx = wt.tx,
-    ty = wt.ty,
-    vertexData = this.vertexData,
-    w0, w1, h0, h1;
+Container.prototype.calculateVertices = function () {
+  var wt = this.worldTransform;
+  var a = wt.a;
+  var b = wt.b;
+  var c = wt.c;
+  var d = wt.d;
+  var tx = wt.tx;
+  var ty = wt.ty;
+  var vertexData = this.vertexData;
+  var w0 = void 0;
+  var w1 = void 0;
+  var h0 = void 0;
+  var h1 = void 0;
 
   w0 = this._bounds.minX;
   w1 = this._bounds.maxX;
@@ -3212,7 +3087,6 @@ Container.prototype.calculateVertices = function() {
   vertexData[7] = d * h0 + b * w1 + ty;
 };
 
-
 /**
  * 计算包围盒子
  *
@@ -3220,7 +3094,7 @@ Container.prototype.calculateVertices = function() {
  */
 Container.prototype.calculateBounds = function () {
   this.bounds.clear();
-  if(!this.visible) {
+  if (!this.visible) {
     return;
   }
   this._calculateBounds();
@@ -3240,13 +3114,11 @@ Container.prototype._calculateBounds = function () {
   this.bounds.addVert(this.vertexData);
 };
 
-
 /**
  * 设置渲染物体的包围盒
- *
- * @method setBounds
+ * @param {JC.Bounds} bounds
  */
-Container.prototype.setBounds = function(bounds){
+Container.prototype.setBounds = function (bounds) {
   if (bounds instanceof Bounds) {
     this._bounds = bounds;
   }
@@ -3257,7 +3129,7 @@ Container.prototype.setBounds = function(bounds){
  *
  *
  */
-Container.prototype.pause = function() {
+Container.prototype.pause = function () {
   this.paused = true;
 };
 
@@ -3266,7 +3138,7 @@ Container.prototype.pause = function() {
  *
  *
  */
-Container.prototype.start = function() {
+Container.prototype.start = function () {
   this.paused = false;
 };
 
@@ -3275,7 +3147,7 @@ Container.prototype.start = function() {
  *
  *
  */
-Container.prototype.cancle = function() {
+Container.prototype.cancle = function () {
   this.Animator.clear();
 };
 
@@ -3285,8 +3157,8 @@ Container.prototype.cancle = function() {
  *
  * @class
  * @memberof JC
- * @param [element] {object} 动画对象 内部传入
- * @param [opts] {object} 动画配置信息 内部传入
+ * @param {object} [element] 动画对象 内部传入
+ * @param {object} [opts] 动画配置信息 内部传入
  */
 function MovieClip(element, opts) {
   this.element = element;
@@ -3316,7 +3188,7 @@ function MovieClip(element, opts) {
   this.pt = 0;
   this.nt = 0;
 }
-MovieClip.prototype.update = function(snippet) {
+MovieClip.prototype.update = function (snippet) {
   if (this.paused || !this.living) return;
   this.nt += snippet;
   if (this.nt - this.pt < this.interval) return;
@@ -3346,7 +3218,7 @@ MovieClip.prototype.update = function(snippet) {
     }
   }
 };
-MovieClip.prototype.getFrame = function() {
+MovieClip.prototype.getFrame = function () {
   if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
   var frame = this.element.frame.clone();
   var cf = this.frames[this.index];
@@ -3363,7 +3235,7 @@ MovieClip.prototype.getFrame = function() {
   this.preFrame = frame;
   return frame;
 };
-MovieClip.prototype.playMovie = function(opts) {
+MovieClip.prototype.playMovie = function (opts) {
   this.next = null;
   var movie = this.format(opts.movie);
   if (!UTILS.isArray(movie)) return;
@@ -3378,19 +3250,14 @@ MovieClip.prototype.playMovie = function(opts) {
   this.living = true;
   this.onCompelete = opts.onCompelete || null;
 };
-MovieClip.prototype.format = function(movie) {
+MovieClip.prototype.format = function (movie) {
   if (UTILS.isString(movie)) {
     var config = this.animations[movie];
     if (config) {
       return this.format(config);
     } else {
-      console.warn(
-          '%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ',
-          'color: #f98165; background: #80a89e',
-          'color: #80a89e; background: #cad9d5;',
-          'color: #f98165; background: #cad9d5',
-          'color: #80a89e; background: #cad9d5'
-      );
+      /* eslint max-len: "off" */
+      console.warn('%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;', 'color: #f98165; background: #cad9d5', 'color: #80a89e; background: #cad9d5');
       return false;
     }
   } else if (UTILS.isArray(movie)) {
@@ -3403,14 +3270,14 @@ MovieClip.prototype.format = function(movie) {
     if (movie.next && this.animations[movie.next]) {
       var This = this;
       var conf = {};
-      if(UTILS.isString(movie.next) && this.animations[movie.next]){
+      if (UTILS.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
         conf.infinity = true;
-      } else if(UTILS.isObject(movie.next)) {
+      } else if (UTILS.isObject(movie.next)) {
         conf = movie.next;
       }
       if (UTILS.isString(conf.movie)) {
-        this.next = function() {
+        this.next = function () {
           This.playMovie(conf);
         };
       }
@@ -3418,17 +3285,17 @@ MovieClip.prototype.format = function(movie) {
     return arr;
   }
 };
-MovieClip.prototype.pause = function() {
+MovieClip.prototype.pause = function () {
   this.paused = true;
 };
-MovieClip.prototype.start = function() {
+MovieClip.prototype.start = function () {
   this.paused = false;
 };
-MovieClip.prototype.cancle = function() {
+MovieClip.prototype.cancle = function () {
   this.living = false;
 };
 Object.defineProperty(MovieClip.prototype, 'interval', {
-  get: function() {
+  get: function get() {
     return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
   }
 });
@@ -3458,6 +3325,7 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {json} opts
  */
 function Sprite(opts) {
   Container.call(this);
@@ -3468,14 +3336,13 @@ function Sprite(opts) {
   } else {
     var This = this;
     this._ready = false;
-    this.texture.on('load', function() {
+    this.texture.on('load', function () {
       This.upTexture(opts);
       This._ready = true;
     });
   }
 
   this.MovieClip = new MovieClip(this, opts);
-
 }
 Sprite.prototype = Object.create(Container.prototype);
 
@@ -3484,11 +3351,13 @@ Sprite.prototype = Object.create(Container.prototype);
  *
  * @method upTexture
  * @private
+ * @param {json} opts
  */
-Sprite.prototype.upTexture = function(opts) {
+Sprite.prototype.upTexture = function (opts) {
   this.naturalWidth = opts.texture.naturalWidth;
   this.naturalHeight = opts.texture.naturalHeight;
   this.frame = opts.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
+
   this.width = opts.width || this.frame.width || this.naturalWidth;
   this.height = opts.height || this.frame.height || this.naturalHeight;
   this.regX = this.width >> 1;
@@ -3503,17 +3372,18 @@ Sprite.prototype.upTexture = function(opts) {
  *
  * @method updateAnimation
  * @private
+ * @param {number} snippet
  */
-Sprite.prototype.updateAnimation = function(snippet) {
+Sprite.prototype.updateAnimation = function (snippet) {
   this.Animation.update(snippet);
   this.MovieClip.update(snippet);
 };
 
 /**
  * 播放逐帧动画
- *
+ * @param {json} opts
  */
-Sprite.prototype.playMovie = function(opts) {
+Sprite.prototype.playMovie = function (opts) {
   this.MovieClip.playMovie(opts);
 };
 
@@ -3522,38 +3392,130 @@ Sprite.prototype.playMovie = function(opts) {
  *
  * @method updateMe
  * @private
+ * @param {context} ctx
  */
-Sprite.prototype.renderMe = function(ctx) {
+Sprite.prototype.renderMe = function (ctx) {
   if (!this._ready) return;
   var frame = this.MovieClip.getFrame();
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, -this.regX, -this.regY, this.width, this.height);
 };
 
+/**
+ * @class
+ */
 function FrameBuffer() {
   this.canvas = document.createElement('canvas');
   this.ctx = this.canvas.getContext('2d');
   // document.body.appendChild(this.canvas);
 }
-FrameBuffer.prototype.setSize = function(rect) {
-  this.width = this.canvas.width = rect.width + rect.px*2;
-  this.height = this.canvas.height = rect.height + rect.py*2;
+FrameBuffer.prototype.setSize = function (rect) {
+  this.width = this.canvas.width = rect.width + rect.px * 2;
+  this.height = this.canvas.height = rect.height + rect.py * 2;
 };
-FrameBuffer.prototype.clear = function() {
+FrameBuffer.prototype.clear = function () {
   this.ctx.setTransform(1, 0, 0, 1, 0, 0);
   this.ctx.clearRect(0, 0, this.width, this.height);
 };
-FrameBuffer.prototype.setTransform = function(a, b, c, d, e, f) {
+FrameBuffer.prototype.setTransform = function (a, b, c, d, e, f) {
   this.ctx.setTransform(a, b, c, d, e, f);
 };
-FrameBuffer.prototype.getBuffer = function() {
+FrameBuffer.prototype.getBuffer = function () {
   this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
   return this.bufferData;
 };
-FrameBuffer.prototype.putBuffer = function() {
+FrameBuffer.prototype.putBuffer = function () {
   this.ctx.putImageData(this.bufferData, 0, 0);
   return this.canvas;
 };
-FrameBuffer.prototype.createBuffer = function() {
+FrameBuffer.prototype.createBuffer = function () {};
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var get$1 = function get$1(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get$1(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var set$1 = function set$1(object, property, value, receiver) {
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent !== null) {
+      set$1(parent, property, value, receiver);
+    }
+  } else if ("value" in desc && desc.writable) {
+    desc.value = value;
+  } else {
+    var setter = desc.set;
+
+    if (setter !== undefined) {
+      setter.call(receiver, value);
+    }
+  }
+
+  return value;
 };
 
 /**
@@ -3577,10 +3539,10 @@ Graphics.prototype = Object.create(Container.prototype);
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateMe
+ * @param {context} ctx
  * @private
  */
-Graphics.prototype.renderMe = function(ctx) {
+Graphics.prototype.renderMe = function (ctx) {
   if (!this.draw) return;
   if (this.cached || this.cache) {
     if (this.cache) {
@@ -3602,10 +3564,10 @@ Graphics.prototype.renderMe = function(ctx) {
     this._drawBack(ctx);
   }
 };
-Graphics.prototype._drawBack = function(ctx) {
+Graphics.prototype._drawBack = function (ctx) {
   if (typeof this.draw === 'function') {
     this.draw(ctx);
-  } else if (typeof this.draw === 'object' && typeof this.draw.render === 'function') {
+  } else if (_typeof(this.draw) === 'object' && typeof this.draw.render === 'function') {
     this.draw.render(ctx);
   }
 };
@@ -3628,15 +3590,16 @@ Graphics.prototype._drawBack = function(ctx) {
  *  });
  * ```
  *
- * @param fn {function}
- * @param opts {object}
+ * @param {function} fn
+ * @param {object} opts
  */
-Graphics.prototype.drawCall = function(fn, opts) {
+Graphics.prototype.drawCall = function (fn, opts) {
   if (fn === undefined) return;
   opts = opts || {};
   this.cache = opts.cache || false;
   this.cached = false;
-    // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
+  /* eslint max-len: "off" */
+  // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
   this.draw = fn || null;
 
   this.setBounds(opts.bounds);
@@ -3647,15 +3610,22 @@ Graphics.prototype.drawCall = function(fn, opts) {
  *
  *
  * ```js
- * var text = new JC.TextFace('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+ * var text = new JC.TextFace(
+ *              'JC jcc2d canvas renderer',
+ *              'bold 36px Arial',
+ *              '#f00'
+ *            );
  * ```
  *
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {string} text
+ * @param {string} font
+ * @param {string} color
  */
-function TextFace(text,font,color){
-  Container.call( this );
+function TextFace(text, font, color) {
+  Container.call(this);
   this.text = text.toString();
   this.font = font || 'bold 12px Arial';
   this.color = color || '#000000';
@@ -3670,89 +3640,96 @@ function TextFace(text,font,color){
   this.US = false; // use stroke
   this.UF = true; // use fill
 
-    // ctx.measureText(str) 返回指定文本的宽度
+  // ctx.measureText(str) 返回指定文本的宽度
 }
-TextFace.prototype = Object.create( Container.prototype );
+TextFace.prototype = Object.create(Container.prototype);
 
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
  * @method updateMe
  * @private
+ * @param {context} ctx
  */
-TextFace.prototype.renderMe = function(ctx){
+TextFace.prototype.renderMe = function (ctx) {
   ctx.font = this.font;
   ctx.textAlign = this.textAlign;
   ctx.textBaseline = this.textBaseline;
-  if(this.UF){
+  if (this.UF) {
     ctx.fillStyle = this.color;
-    ctx.fillText(this.text,0,0);
+    ctx.fillText(this.text, 0, 0);
   }
-  if(this.US){
+  if (this.US) {
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.color;
-    ctx.strokeText(this.text,0,0);
+    ctx.strokeText(this.text, 0, 0);
   }
 };
 
+/**
+ *
+ * @param {number} blurX x轴的模糊值
+ * @param {number} blurY y轴的模糊值
+ * @param {number} quality 模糊的质量，模糊计算会被递归多少次
+ */
 function BlurFilter(blurX, blurY, quality) {
-  Container.call(this);
+    Container.call(this);
 
-  if (isNaN(blurX) || blurX < 0) blurX = 0;
-  if (isNaN(blurY) || blurY < 0) blurY = 0;
-  if (isNaN(quality) || quality < 1) quality = 1;
+    if (isNaN(blurX) || blurX < 0) blurX = 0;
+    if (isNaN(blurY) || blurY < 0) blurY = 0;
+    if (isNaN(quality) || quality < 1) quality = 1;
 
-  this.frameBuffer = new FrameBuffer();
+    this.frameBuffer = new FrameBuffer();
 
-  /**
-   * x轴的模糊值
-   * @property blurX
-   * @default 0
-   * @type Number
-   **/
-  this.blurX = blurX | 0;
+    /**
+     * x轴的模糊值
+     * @property blurX
+     * @default 0
+     * @type Number
+     **/
+    this.blurX = blurX | 0;
 
-  /**
-   * y轴的模糊值
-   * @property blurY
-   * @default 0
-   * @type Number
-   **/
-  this.blurY = blurY | 0;
+    /**
+     * y轴的模糊值
+     * @property blurY
+     * @default 0
+     * @type Number
+     **/
+    this.blurY = blurY | 0;
 
-  /**
-   * 模糊的质量，模糊计算会被递归多少次
-   * @property quality
-   * @default 1
-   * @type Number
-   **/
-  this.quality = quality | 0;
+    /**
+     * 模糊的质量，模糊计算会被递归多少次
+     * @property quality
+     * @default 1
+     * @type Number
+     **/
+    this.quality = quality | 0;
 
-  /**
-   * 下一帧的图像需要更新
-   * @property needUpdateBuffer
-   * @default false
-   * @type Boolean
-   **/
-  this.needUpdateBuffer = true;
+    /**
+     * 下一帧的图像需要更新
+     * @property needUpdateBuffer
+     * @default false
+     * @type Boolean
+     **/
+    this.needUpdateBuffer = true;
 
-  /**
-   * 每一帧渲染都重新绘制
-   * @property autoUpdateBuffer
-   * @default false
-   * @type Boolean
-   **/
-  this.autoUpdateBuffer = false;
+    /**
+     * 每一帧渲染都重新绘制
+     * @property autoUpdateBuffer
+     * @default false
+     * @type Boolean
+     **/
+    this.autoUpdateBuffer = false;
 
-  /**
-   * 时候给帧缓冲区加padding
-   * @property padding
-   * @default false
-   * @type Boolean
-   **/
-  this.padding = false;
+    /**
+     * 时候给帧缓冲区加padding
+     * @property padding
+     * @default false
+     * @type Boolean
+     **/
+    this.padding = false;
 }
-BlurFilter.prototype = Object.create( Container.prototype );
+BlurFilter.prototype = Object.create(Container.prototype);
 
 /**
  * 对渲染对象进行x、y轴同时设置模糊半径
@@ -3762,87 +3739,84 @@ BlurFilter.prototype = Object.create( Container.prototype );
  * @memberof JC.BlurFilter#
  */
 Object.defineProperty(BlurFilter.prototype, 'blur', {
-  get: function() {
-    return this.blurX;
-  },
-  set: function(blur) {
-    this.blurX = this.blurY = blur;
-  }
+    get: function get() {
+        return this.blurX;
+    },
+    set: function set(blur) {
+        this.blurX = this.blurY = blur;
+    }
 });
 
-BlurFilter.prototype.updatePosture = function(snippet) {
-  if (!this._ready) return;
-  if (this.souldSort) this._sortList();
-  snippet = this.timeScale * snippet;
-  if (!this.paused) this.updateAnimation(snippet);
+BlurFilter.prototype.updatePosture = function (snippet) {
+    if (!this._ready) return;
+    if (this.souldSort) this._sortList();
+    snippet = this.timeScale * snippet;
+    if (!this.paused) this.updateAnimation(snippet);
 
-  this.updateTransform();
+    this.updateTransform();
 
-  if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-    this.cacheMatrix = this.worldTransform;
-    this.worldTransform = __tmpMatrix.identity();
-    this._upc(snippet);
+    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+        this.cacheMatrix = this.worldTransform;
+        this.worldTransform = __tmpMatrix.identity();
+        this._upc(snippet);
 
-    this.calculateBounds();
-    this.__o = this.bounds.getRectangle();
-    this.__o.px = this.__o.py = 0;
-    if (this.padding) {
-      this.__o.px = this.blurX;
-      this.__o.py = this.blurY;
+        this.calculateBounds();
+        this.__o = this.bounds.getRectangle();
+        this.__o.px = this.__o.py = 0;
+        if (this.padding) {
+            this.__o.px = this.blurX;
+            this.__o.py = this.blurY;
+        }
+        this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
+        this._upc(0);
+
+        this.worldTransform = this.cacheMatrix;
+    } else {
+        this._upc(snippet);
     }
-    this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
-    this._upc(0);
-
-    this.worldTransform = this.cacheMatrix;
-  } else {
-    this._upc(snippet);
-  }
 };
 
-BlurFilter.prototype._upc = function(snippet) {
-  for (var i = 0, l = this.childs.length; i < l; i++) {
-    var child = this.childs[i];
-    child.updatePosture(snippet);
-  }
-};
-
-BlurFilter.prototype.render = function(ctx) {
-  if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-    var i = 0,
-      l = this.childs.length,
-      child = null;
-
-    this.frameBuffer.clear();
-    this.frameBuffer.setSize(this.__o);
-    for (i = 0; i < l; i++) {
-      child = this.childs[i];
-      if (!child.isVisible() || !child._ready) continue;
-      child.render(this.frameBuffer.ctx);
+BlurFilter.prototype._upc = function (snippet) {
+    for (var i = 0, l = this.childs.length; i < l; i++) {
+        var child = this.childs[i];
+        child.updatePosture(snippet);
     }
-    this._applyFilter(this.frameBuffer.getBuffer());
-
-    this.needUpdateBuffer = false;
-  }
-  this.renderMe(ctx, this.__o.x - this.__o.px, this.__o.y - this.__o.py, this.frameBuffer.width, this.frameBuffer.height);
 };
 
-BlurFilter.prototype.renderMe = function(ctx ,x ,y, w, h) {
-  this.setTransform(ctx);
-  ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
+BlurFilter.prototype.render = function (ctx) {
+    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+        var i = 0;
+        var l = this.childs.length;
+        var child = null;
+
+        this.frameBuffer.clear();
+        this.frameBuffer.setSize(this.__o);
+        for (i = 0; i < l; i++) {
+            child = this.childs[i];
+            if (!child.isVisible() || !child._ready) continue;
+            child.render(this.frameBuffer.ctx);
+        }
+        this._applyFilter(this.frameBuffer.getBuffer());
+
+        this.needUpdateBuffer = false;
+    }
+    this.renderMe(ctx, this.__o.x - this.__o.px, this.__o.y - this.__o.py, this.frameBuffer.width, this.frameBuffer.height);
 };
 
+BlurFilter.prototype.renderMe = function (ctx, x, y, w, h) {
+    this.setTransform(ctx);
+    ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
+};
 
 var __tmpMatrix = new Matrix();
 
-
+/* eslint max-len: "off" */
 var MUL_TABLE = [1, 171, 205, 293, 57, 373, 79, 137, 241, 27, 391, 357, 41, 19, 283, 265, 497, 469, 443, 421, 25, 191, 365, 349, 335, 161, 155, 149, 9, 278, 269, 261, 505, 245, 475, 231, 449, 437, 213, 415, 405, 395, 193, 377, 369, 361, 353, 345, 169, 331, 325, 319, 313, 307, 301, 37, 145, 285, 281, 69, 271, 267, 263, 259, 509, 501, 493, 243, 479, 118, 465, 459, 113, 446, 55, 435, 429, 423, 209, 413, 51, 403, 199, 393, 97, 3, 379, 375, 371, 367, 363, 359, 355, 351, 347, 43, 85, 337, 333, 165, 327, 323, 5, 317, 157, 311, 77, 305, 303, 75, 297, 294, 73, 289, 287, 71, 141, 279, 277, 275, 68, 135, 67, 133, 33, 262, 260, 129, 511, 507, 503, 499, 495, 491, 61, 121, 481, 477, 237, 235, 467, 232, 115, 457, 227, 451, 7, 445, 221, 439, 218, 433, 215, 427, 425, 211, 419, 417, 207, 411, 409, 203, 202, 401, 399, 396, 197, 49, 389, 387, 385, 383, 95, 189, 47, 187, 93, 185, 23, 183, 91, 181, 45, 179, 89, 177, 11, 175, 87, 173, 345, 343, 341, 339, 337, 21, 167, 83, 331, 329, 327, 163, 81, 323, 321, 319, 159, 79, 315, 313, 39, 155, 309, 307, 153, 305, 303, 151, 75, 299, 149, 37, 295, 147, 73, 291, 145, 289, 287, 143, 285, 71, 141, 281, 35, 279, 139, 69, 275, 137, 273, 17, 271, 135, 269, 267, 133, 265, 33, 263, 131, 261, 130, 259, 129, 257, 1];
-
-
 
 var SHG_TABLE = [0, 9, 10, 11, 9, 12, 10, 11, 12, 9, 13, 13, 10, 9, 13, 13, 14, 14, 14, 14, 10, 13, 14, 14, 14, 13, 13, 13, 9, 14, 14, 14, 15, 14, 15, 14, 15, 15, 14, 15, 15, 15, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15, 15, 15, 12, 14, 15, 15, 13, 15, 15, 15, 15, 16, 16, 16, 15, 16, 14, 16, 16, 14, 16, 13, 16, 16, 16, 15, 16, 13, 16, 15, 16, 14, 9, 16, 16, 16, 16, 16, 16, 16, 16, 16, 13, 14, 16, 16, 15, 16, 16, 10, 16, 15, 16, 14, 16, 16, 14, 16, 16, 14, 16, 16, 14, 15, 16, 16, 16, 14, 15, 14, 15, 13, 16, 16, 15, 17, 17, 17, 17, 17, 17, 14, 15, 17, 17, 16, 16, 17, 16, 15, 17, 16, 17, 11, 17, 16, 17, 16, 17, 16, 17, 17, 16, 17, 17, 16, 17, 17, 16, 16, 17, 17, 17, 16, 14, 17, 17, 17, 17, 15, 16, 14, 16, 15, 16, 13, 16, 15, 16, 14, 16, 15, 16, 12, 16, 15, 16, 17, 17, 17, 17, 17, 13, 16, 15, 17, 17, 17, 16, 15, 17, 17, 17, 16, 15, 17, 17, 14, 16, 17, 17, 16, 17, 17, 16, 15, 17, 16, 14, 17, 16, 15, 17, 16, 17, 17, 16, 17, 15, 16, 17, 14, 17, 16, 15, 17, 16, 17, 13, 17, 16, 17, 17, 16, 17, 14, 17, 16, 17, 16, 17, 16, 17, 9];
 
 /* eslint-disable */
-BlurFilter.prototype._applyFilter = function(imageData) {
+BlurFilter.prototype._applyFilter = function (imageData) {
 
     var radiusX = this.blurX >> 1;
     if (isNaN(radiusX) || radiusX < 0) return false;
@@ -3873,15 +3847,15 @@ BlurFilter.prototype._applyFilter = function(imageData) {
         pb = 0,
         pa = 0;
 
-    var divx = (radiusX + radiusX + 1) | 0;
-    var divy = (radiusY + radiusY + 1) | 0;
+    var divx = radiusX + radiusX + 1 | 0;
+    var divy = radiusY + radiusY + 1 | 0;
     var w = imageData.width | 0;
     var h = imageData.height | 0;
 
-    var w1 = (w - 1) | 0;
-    var h1 = (h - 1) | 0;
-    var rxp1 = (radiusX + 1) | 0;
-    var ryp1 = (radiusY + 1) | 0;
+    var w1 = w - 1 | 0;
+    var h1 = h - 1 | 0;
+    var rxp1 = radiusX + 1 | 0;
+    var ryp1 = radiusY + 1 | 0;
 
     var ssx = { r: 0, b: 0, g: 0, a: 0 };
     var sx = ssx;
@@ -3899,7 +3873,6 @@ BlurFilter.prototype._applyFilter = function(imageData) {
 
     var si = null;
 
-
     var mtx = MUL_TABLE[radiusX] | 0;
     var stx = SHG_TABLE[radiusX] | 0;
     var mty = MUL_TABLE[radiusY] | 0;
@@ -3911,10 +3884,10 @@ BlurFilter.prototype._applyFilter = function(imageData) {
         var ms = mtx;
         var ss = stx;
         for (y = h; --y > -1;) {
-            r = rxp1 * (pr = px[(yi) | 0]);
-            g = rxp1 * (pg = px[(yi + 1) | 0]);
-            b = rxp1 * (pb = px[(yi + 2) | 0]);
-            a = rxp1 * (pa = px[(yi + 3) | 0]);
+            r = rxp1 * (pr = px[yi | 0]);
+            g = rxp1 * (pg = px[yi + 1 | 0]);
+            b = rxp1 * (pb = px[yi + 2 | 0]);
+            a = rxp1 * (pa = px[yi + 3 | 0]);
 
             sx = ssx;
 
@@ -3927,23 +3900,23 @@ BlurFilter.prototype._applyFilter = function(imageData) {
             }
 
             for (i = 1; i < rxp1; i++) {
-                p = (yi + ((w1 < i ? w1 : i) << 2)) | 0;
-                r += (sx.r = px[p]);
-                g += (sx.g = px[p + 1]);
-                b += (sx.b = px[p + 2]);
-                a += (sx.a = px[p + 3]);
+                p = yi + ((w1 < i ? w1 : i) << 2) | 0;
+                r += sx.r = px[p];
+                g += sx.g = px[p + 1];
+                b += sx.b = px[p + 2];
+                a += sx.a = px[p + 3];
 
                 sx = sx.n;
             }
 
             si = ssx;
             for (x = 0; x < w; x++) {
-                px[yi++] = (r * ms) >>> ss;
-                px[yi++] = (g * ms) >>> ss;
-                px[yi++] = (b * ms) >>> ss;
-                px[yi++] = (a * ms) >>> ss;
+                px[yi++] = r * ms >>> ss;
+                px[yi++] = g * ms >>> ss;
+                px[yi++] = b * ms >>> ss;
+                px[yi++] = a * ms >>> ss;
 
-                p = ((yw + ((p = x + radiusX + 1) < w1 ? p : w1)) << 2);
+                p = yw + ((p = x + radiusX + 1) < w1 ? p : w1) << 2;
 
                 r -= si.r - (si.r = px[p]);
                 g -= si.g - (si.g = px[p + 1]);
@@ -3951,7 +3924,6 @@ BlurFilter.prototype._applyFilter = function(imageData) {
                 a -= si.a - (si.a = px[p + 3]);
 
                 si = si.n;
-
             }
             yw += w;
         }
@@ -3959,12 +3931,12 @@ BlurFilter.prototype._applyFilter = function(imageData) {
         ms = mty;
         ss = sty;
         for (x = 0; x < w; x++) {
-            yi = (x << 2) | 0;
+            yi = x << 2 | 0;
 
-            r = (ryp1 * (pr = px[yi])) | 0;
-            g = (ryp1 * (pg = px[(yi + 1) | 0])) | 0;
-            b = (ryp1 * (pb = px[(yi + 2) | 0])) | 0;
-            a = (ryp1 * (pa = px[(yi + 3) | 0])) | 0;
+            r = ryp1 * (pr = px[yi]) | 0;
+            g = ryp1 * (pg = px[yi + 1 | 0]) | 0;
+            b = ryp1 * (pb = px[yi + 2 | 0]) | 0;
+            a = ryp1 * (pa = px[yi + 3 | 0]) | 0;
 
             sy = ssy;
             for (i = 0; i < ryp1; i++) {
@@ -3978,12 +3950,12 @@ BlurFilter.prototype._applyFilter = function(imageData) {
             yp = w;
 
             for (i = 1; i <= radiusY; i++) {
-                yi = (yp + x) << 2;
+                yi = yp + x << 2;
 
-                r += (sy.r = px[yi]);
-                g += (sy.g = px[yi + 1]);
-                b += (sy.b = px[yi + 2]);
-                a += (sy.a = px[yi + 3]);
+                r += sy.r = px[yi];
+                g += sy.g = px[yi + 1];
+                b += sy.b = px[yi + 2];
+                a += sy.a = px[yi + 3];
 
                 sy = sy.n;
 
@@ -3997,16 +3969,16 @@ BlurFilter.prototype._applyFilter = function(imageData) {
             if (iterations > 0) {
                 for (y = 0; y < h; y++) {
                     p = yi << 2;
-                    px[p + 3] = pa = (a * ms) >>> ss;
+                    px[p + 3] = pa = a * ms >>> ss;
                     if (pa > 0) {
-                        px[p] = ((r * ms) >>> ss);
-                        px[p + 1] = ((g * ms) >>> ss);
-                        px[p + 2] = ((b * ms) >>> ss);
+                        px[p] = r * ms >>> ss;
+                        px[p + 1] = g * ms >>> ss;
+                        px[p + 2] = b * ms >>> ss;
                     } else {
                         px[p] = px[p + 1] = px[p + 2] = 0;
                     }
 
-                    p = (x + (((p = y + ryp1) < h1 ? p : h1) * w)) << 2;
+                    p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
 
                     r -= si.r - (si.r = px[p]);
                     g -= si.g - (si.g = px[p + 1]);
@@ -4020,17 +3992,17 @@ BlurFilter.prototype._applyFilter = function(imageData) {
             } else {
                 for (y = 0; y < h; y++) {
                     p = yi << 2;
-                    px[p + 3] = pa = (a * ms) >>> ss;
+                    px[p + 3] = pa = a * ms >>> ss;
                     if (pa > 0) {
                         pa = 255 / pa;
-                        px[p] = ((r * ms) >>> ss) * pa;
-                        px[p + 1] = ((g * ms) >>> ss) * pa;
-                        px[p + 2] = ((b * ms) >>> ss) * pa;
+                        px[p] = (r * ms >>> ss) * pa;
+                        px[p + 1] = (g * ms >>> ss) * pa;
+                        px[p + 2] = (b * ms >>> ss) * pa;
                     } else {
                         px[p] = px[p + 1] = px[p + 2] = 0;
                     }
 
-                    p = (x + (((p = y + ryp1) < h1 ? p : h1) * w)) << 2;
+                    p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
 
                     r -= si.r - (si.r = px[p]);
                     g -= si.g - (si.g = px[p + 1]);
@@ -4043,11 +4015,14 @@ BlurFilter.prototype._applyFilter = function(imageData) {
                 }
             }
         }
-
     }
     return true;
 };
 
+/**
+ *
+ * @param {JC.Stage} stage 徐亚接入事件系统的的场景
+ */
 function InteractionManager(stage) {
   Eventer.call(this);
   this.stage = stage;
@@ -4086,11 +4061,10 @@ function InteractionManager(stage) {
   this.defaultCursorStyle = 'inherit';
 
   this.currentCursorStyle = 'inherit';
-
 }
 InteractionManager.prototype = Object.create(Eventer.prototype);
 
-InteractionManager.prototype.addEvents = function() {
+InteractionManager.prototype.addEvents = function () {
   if (!this.canvas || this.eventsAdded) {
     return;
   }
@@ -4110,7 +4084,7 @@ InteractionManager.prototype.addEvents = function() {
   this.eventsAdded = true;
 };
 
-InteractionManager.prototype.removeEvents = function() {
+InteractionManager.prototype.removeEvents = function () {
   if (!this.canvas) {
     return;
   }
@@ -4118,19 +4092,19 @@ InteractionManager.prototype.removeEvents = function() {
   window.document.removeEventListener('mousemove', this.onMouseMove, true);
   this.canvas.removeEventListener('mousedown', this.onMouseDown, true);
   this.canvas.removeEventListener('click', this.onClick, true);
-  this.canvas.removeEventListener('mouseout',  this.onMouseOut, true);
+  this.canvas.removeEventListener('mouseout', this.onMouseOut, true);
   this.canvas.removeEventListener('mouseover', this.onMouseOver, true);
 
   this.canvas.removeEventListener('touchstart', this.onTouchStart, true);
-  this.canvas.removeEventListener('touchend',  this.onTouchEnd, true);
+  this.canvas.removeEventListener('touchend', this.onTouchEnd, true);
   this.canvas.removeEventListener('touchmove', this.onTouchMove, true);
 
-  window.removeEventListener('mouseup',  this.onMouseUp, true);
+  window.removeEventListener('mouseup', this.onMouseUp, true);
 
   this.eventsAdded = false;
 };
 
-InteractionManager.prototype.onMouseMove = function(event) {
+InteractionManager.prototype.onMouseMove = function (event) {
   var eventd = this.fixCoord(event);
 
   this.cursor = this.defaultCursorStyle;
@@ -4141,17 +4115,17 @@ InteractionManager.prototype.onMouseMove = function(event) {
     this.canvas.style.cursor = this.cursor;
   }
 
-  this.emit('mousemove',eventd);
+  this.emit('mousemove', eventd);
 };
 
-InteractionManager.prototype.processMouseMove = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseMove = function (displayObject, event, hit) {
   this.processMouseOverOut(displayObject, event, hit);
   if (hit) {
     this.dispatchEvent(displayObject, 'mousemove', event);
   }
 };
 
-InteractionManager.prototype.processMouseOverOut = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseOverOut = function (displayObject, event, hit) {
   var eventd = event.clone();
   if (hit) {
     if (!displayObject._over) {
@@ -4169,58 +4143,58 @@ InteractionManager.prototype.processMouseOverOut = function(displayObject, event
   }
 };
 
-InteractionManager.prototype.onMouseDown = function(event) {
+InteractionManager.prototype.onMouseDown = function (event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseDown, true);
 
-  this.emit('mousedown',eventd);
+  this.emit('mousedown', eventd);
 };
 
-InteractionManager.prototype.processMouseDown = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseDown = function (displayObject, event, hit) {
   if (hit) {
-        // displayObject._mousedowned = true;
+    // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
 
-InteractionManager.prototype.onClick = function(event) {
+InteractionManager.prototype.onClick = function (event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processClick, true);
 
-  this.emit('click',eventd);
+  this.emit('click', eventd);
 };
 
-InteractionManager.prototype.processClick = function(displayObject, event, hit) {
+InteractionManager.prototype.processClick = function (displayObject, event, hit) {
   if (hit) {
-        // displayObject._mousedowned = true;
+    // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
 
-InteractionManager.prototype.onMouseUp = function(event) {
-    // if (this.autoPreventDefault) {
-    //     event.preventDefault();
-    // }
+InteractionManager.prototype.onMouseUp = function (event) {
+  // if (this.autoPreventDefault) {
+  //     event.preventDefault();
+  // }
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseUp, true);
 
-  this.emit('mouseup',eventd);
+  this.emit('mouseup', eventd);
 };
 
-InteractionManager.prototype.processMouseUp = function(displayObject, event, hit) {
+InteractionManager.prototype.processMouseUp = function (displayObject, event, hit) {
   if (hit) {
-        // displayObject._mousedowned = false;
+    // displayObject._mousedowned = false;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
 
-InteractionManager.prototype.onMouseOut = function(event) {
+InteractionManager.prototype.onMouseOut = function (event) {
   var eventd = this.fixCoord(event);
 
   this.processInteractive(this.stage, eventd, this.processMouseOverOut, false);
@@ -4228,46 +4202,46 @@ InteractionManager.prototype.onMouseOut = function(event) {
   this.emit('mouseout', event);
 };
 
-InteractionManager.prototype.onMouseOver = function(event) {
+InteractionManager.prototype.onMouseOver = function (event) {
   this.emit('mouseover', event);
 };
 
-InteractionManager.prototype.onTouchStart = function(event) {
-    // if (this.autoPreventDefault) {
-        // event.preventDefault();
-    // }
-    // console.log(event);
+InteractionManager.prototype.onTouchStart = function (event) {
+  // if (this.autoPreventDefault) {
+  // event.preventDefault();
+  // }
+  // console.log(event);
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchStart, true);
 
   this.emit('touchstart', eventd);
 };
 
-InteractionManager.prototype.processTouchStart = function(displayObject, event, hit) {
+InteractionManager.prototype.processTouchStart = function (displayObject, event, hit) {
   if (hit) {
     displayObject._touchstarted = true;
     this.dispatchEvent(displayObject, 'touchstart', event);
   }
 };
 
-InteractionManager.prototype.onTouchEnd = function(event) {
-    // if (this.autoPreventDefault) {
-        // event.preventDefault();
-    // }
+InteractionManager.prototype.onTouchEnd = function (event) {
+  // if (this.autoPreventDefault) {
+  // event.preventDefault();
+  // }
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
 
   this.emit('touchend', eventd);
 };
 
-InteractionManager.prototype.processTouchEnd = function(displayObject, event) {
+InteractionManager.prototype.processTouchEnd = function (displayObject, event) {
   if (displayObject._touchstarted) {
     displayObject._touchstarted = false;
     this.dispatchEvent(displayObject, 'touchend', event);
   }
 };
 
-InteractionManager.prototype.onTouchMove = function(event) {
+InteractionManager.prototype.onTouchMove = function (event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
@@ -4277,13 +4251,21 @@ InteractionManager.prototype.onTouchMove = function(event) {
   this.emit('touchmove', eventd);
 };
 
-InteractionManager.prototype.processTouchMove = function(displayObject, event, hit) {
-  if ((!this.strictMode && displayObject._touchstarted) || hit) {
+InteractionManager.prototype.processTouchMove = function (displayObject, event, hit) {
+  if (!this.strictMode && displayObject._touchstarted || hit) {
     this.dispatchEvent(displayObject, 'touchmove', event);
   }
 };
 
-InteractionManager.prototype.processInteractive = function(object, event, func, hitTest) {
+InteractionManager.prototype.processInteractive = function (object, event, func, hitTest) {
+  /**
+   *
+   * @param {JC.DisplayObject} object 现实对象
+   * @param {JC.InteractionData} event JC的交互数据对象
+   * @param {Function} func 事件检测函数
+   * @param {Boolean} shouldHit 是否需要检测
+   * @return {Boolean} 是否检测到
+   */
   function process(object, event, func, shouldHit) {
     var childs = object.childs;
     var hit = false;
@@ -4312,7 +4294,7 @@ InteractionManager.prototype.processInteractive = function(object, event, func, 
   process(object, event, func, hitTest);
 };
 
-InteractionManager.prototype.dispatchEvent = function(displayObject, eventString, event) {
+InteractionManager.prototype.dispatchEvent = function (displayObject, eventString, event) {
   if (!event.cancleBubble) {
     event.target = displayObject;
     event.type = eventString;
@@ -4326,9 +4308,9 @@ InteractionManager.prototype.dispatchEvent = function(displayObject, eventString
   }
 };
 
-InteractionManager.prototype.fixCoord = function(event) {
-  var eventd = new InteractionData(),
-    offset = this.getPos(this.canvas);
+InteractionManager.prototype.fixCoord = function (event) {
+  var eventd = new InteractionData();
+  var offset = this.getPos(this.canvas);
   eventd.originalEvent = event;
   eventd.type = event.type;
 
@@ -4338,10 +4320,7 @@ InteractionManager.prototype.fixCoord = function(event) {
     if (event.touches.length > 0) {
       for (var i = 0; i < event.touches.length; i++) {
         eventd.touches[i] = {};
-        eventd.touches[i].global = new Point(
-                    (event.touches[i].pageX - offset.x) * eventd.ratio,
-                    (event.touches[i].pageY - offset.y) * eventd.ratio
-                );
+        eventd.touches[i].global = new Point((event.touches[i].pageX - offset.x) * eventd.ratio, (event.touches[i].pageY - offset.y) * eventd.ratio);
       }
       eventd.global = eventd.touches[0].global;
     }
@@ -4352,7 +4331,7 @@ InteractionManager.prototype.fixCoord = function(event) {
   return eventd;
 };
 
-InteractionManager.prototype.getPos = function(obj) {
+InteractionManager.prototype.getPos = function (obj) {
   var pos = new Point();
   if (obj.offsetParent) {
     var p = this.getPos(obj.offsetParent);
@@ -4376,8 +4355,10 @@ InteractionManager.prototype.getPos = function(obj) {
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {json} options
  */
-function Stage(options) { // canvas, bgColor, resolution
+function Stage(options) {
+  // canvas, bgColor, resolution
   options = options || {};
   Container.call(this);
 
@@ -4464,7 +4445,6 @@ function Stage(options) { // canvas, bgColor, resolution
    */
   this.snippet = 0;
 
-
   /**
    * 平均渲染经历的时间片段长度
    *
@@ -4514,8 +4494,7 @@ function Stage(options) { // canvas, bgColor, resolution
 
   this._interactive = false;
 
-
-  this.interactiveOnChange = function() {
+  this.interactiveOnChange = function () {
     if (this.interactive) {
       this.interactionManager.addEvents();
     } else {
@@ -4534,41 +4513,41 @@ function Stage(options) { // canvas, bgColor, resolution
 }
 Stage.prototype = Object.create(Container.prototype);
 
-Stage.prototype.proxyOn = function() {
+Stage.prototype.proxyOn = function () {
   var This = this;
-  this.interactionManager.on('click', function(ev){
+  this.interactionManager.on('click', function (ev) {
     This.emit('click', ev);
   });
 
-  this.interactionManager.on('mousemove', function(ev){
+  this.interactionManager.on('mousemove', function (ev) {
     This.emit('mousemove', ev);
   });
 
-  this.interactionManager.on('mousedown', function(ev){
+  this.interactionManager.on('mousedown', function (ev) {
     This.emit('mousedown', ev);
   });
 
-  this.interactionManager.on('mouseout', function(ev){
+  this.interactionManager.on('mouseout', function (ev) {
     This.emit('mouseout', ev);
   });
 
-  this.interactionManager.on('mouseover', function(ev){
+  this.interactionManager.on('mouseover', function (ev) {
     This.emit('mouseover', ev);
   });
 
-  this.interactionManager.on('touchstart', function(ev){
+  this.interactionManager.on('touchstart', function (ev) {
     This.emit('touchstart', ev);
   });
 
-  this.interactionManager.on('touchend', function(ev){
+  this.interactionManager.on('touchend', function (ev) {
     This.emit('touchend', ev);
   });
 
-  this.interactionManager.on('touchmove', function(ev){
+  this.interactionManager.on('touchmove', function (ev) {
     This.emit('touchmove', ev);
   });
 
-  this.interactionManager.on('mouseup', function(ev){
+  this.interactionManager.on('mouseup', function (ev) {
     This.emit('mouseup', ev);
   });
 };
@@ -4581,10 +4560,10 @@ Stage.prototype.proxyOn = function() {
  * @memberof JC.Stage#
  */
 Object.defineProperty(Stage.prototype, 'interactive', {
-  get: function() {
+  get: function get() {
     return this._interactive;
   },
-  set: function(value) {
+  set: function set(value) {
     if (this._interactive !== value) {
       this._interactive = value;
       this.interactiveOnChange();
@@ -4600,10 +4579,10 @@ Object.defineProperty(Stage.prototype, 'interactive', {
  * @memberof JC.Stage#
  */
 Object.defineProperty(Stage.prototype, 'resolution', {
-  get: function() {
+  get: function get() {
     return this._resolution;
   },
-  set: function(value) {
+  set: function set(value) {
     if (this._resolution !== value) {
       this._resolution = value;
       this.worldTransform.identity().scale(value, value);
@@ -4616,12 +4595,12 @@ Object.defineProperty(Stage.prototype, 'resolution', {
  * 舞台尺寸设置
  *
  *
- * @param w {number} canvas的width值
- * @param h {number} canvas的height值
- * @param sw {number} canvas的style.width值，需将舞台属性autoStyle设置为true
- * @param sh {number} canvas的style.height值，需将舞台属性autoStyle设置为true
+ * @param {number} w canvas的width值
+ * @param {number} h canvas的height值
+ * @param {number} sw canvas的style.width值，需将舞台属性autoStyle设置为true
+ * @param {number} sh canvas的style.height值，需将舞台属性autoStyle设置为true
  */
-Stage.prototype.resize = function(w, h, sw, sh) {
+Stage.prototype.resize = function (w, h, sw, sh) {
   if (UTILS.isNumber(w) && UTILS.isNumber(h)) {
     this.realWidth = w;
     this.realHeight = h;
@@ -4642,7 +4621,7 @@ Stage.prototype.resize = function(w, h, sw, sh) {
  *
  *
  */
-Stage.prototype.render = function() {
+Stage.prototype.render = function () {
   this.emit('prerender');
 
   this.timeline();
@@ -4666,7 +4645,7 @@ Stage.prototype.render = function() {
  *
  *
  */
-Stage.prototype.update = function() {
+Stage.prototype.update = function () {
   this.updatePosture(this.timeScale * this.snippet);
 };
 
@@ -4676,14 +4655,14 @@ Stage.prototype.update = function() {
  * @method timeline
  * @private
  */
-Stage.prototype.timeline = function() {
+Stage.prototype.timeline = function () {
   this.snippet = Date.now() - this.pt;
   if (this.pt === null || this.snippet > 200) {
     this.pt = Date.now();
     this.snippet = Date.now() - this.pt;
   }
 
-  if(this.enableFPS){
+  if (this.enableFPS) {
     this._renderTimes++;
     this._takeTime += Math.max(15, this.snippet);
     this.fps = 1000 / Math.max(15, this.snippet) >> 0;
@@ -4699,8 +4678,9 @@ Stage.prototype.timeline = function() {
  *
  * @method updatePosture
  * @private
+ * @param {number} snippet
  */
-Stage.prototype.updatePosture = function(snippet) {
+Stage.prototype.updatePosture = function (snippet) {
   for (var i = 0, l = this.childs.length; i < l; i++) {
     var child = this.childs[i];
     child.updatePosture(snippet);
