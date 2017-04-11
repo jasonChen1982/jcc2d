@@ -1,38 +1,38 @@
 import {Animate} from './Animate';
 import {UTILS} from '../util/UTILS';
 /**
- * KeyFrames类型动画对象
+ * AnimateRunner类型动画对象
  *
  * @class
  * @memberof JC
  * @param {object} [opts] 动画配置信息
  */
-function KeyFrames(opts) {
+function AnimateRunner(opts) {
   Animate.call(this, opts);
 
-  this.keyframes = opts.keyframes;
-  this._keyIndex = 0;
+  this._runners = opts.runners;
+  this._runnerIndex = 0;
   this._cursor = 1;
-  this._keyConfig = opts.keyConfig;
+  this._runnerConfig = opts.runnersConfig;
 
-  this.configKey();
+  this.configRunner();
 }
-KeyFrames.prototype = Object.create(Animate.prototype);
-KeyFrames.prototype.configKey = function() {
-  this.from = this.keyframes[this._keyIndex];
-  this._keyIndex += this._cursor;
-  this.to = this.keyframes[this._keyIndex];
-  let config = this._keyConfig[
+AnimateRunner.prototype = Object.create(Animate.prototype);
+AnimateRunner.prototype.configRunner = function() {
+  this.from = this._runners[this._runnerIndex];
+  this._runnerIndex += this._cursor;
+  this.to = this._runners[this._runnerIndex];
+  let config = this._runnerConfig[
                  Math.min(
-                   this._keyIndex,
-                   this._keyIndex - this._cursor
+                   this._runnerIndex,
+                   this._runnerIndex - this._cursor
                  )
                ]||{};
   this.ease = config.ease || this.ease;
   this.duration = config.duration || this.duration;
   this.progress = 0;
 };
-KeyFrames.prototype.update = function(snippet) {
+AnimateRunner.prototype.update = function(snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
     return;
@@ -51,15 +51,15 @@ KeyFrames.prototype.update = function(snippet) {
   if (this.onUpdate) {
     this.onUpdate(pose,
       this.progress / this.duration,
-      this._keyIndex
+      this._runnerIndex
     );
   }
 
   // this.progress += this.timeScale * snippet;
   if (this.totalTime >= this.duration) {
     this.totalTime = 0;
-    if (this._keyIndex < this.keyframes.length - 1 && this._keyIndex > 0) {
-      this.configKey();
+    if (this._runnerIndex < this._runners.length - 1 && this._runnerIndex > 0) {
+      this.configRunner();
     } else {
       if (this.repeats > 0 || this.infinity) {
         if (this.repeats > 0) --this.repeats;
@@ -68,9 +68,9 @@ KeyFrames.prototype.update = function(snippet) {
           this._cursor *= -1;
         } else {
           this._cursor = 1;
-          this._keyIndex = 0;
+          this._runnerIndex = 0;
         }
-        this.configKey();
+        this.configRunner();
       } else {
         this.living = false;
         if (this.onCompelete) this.onCompelete();
@@ -79,4 +79,4 @@ KeyFrames.prototype.update = function(snippet) {
   }
 };
 
-export {KeyFrames};
+export {AnimateRunner};

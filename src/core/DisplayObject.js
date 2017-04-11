@@ -230,7 +230,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * ```
  *
  * @param {object} [opts] 动画配置参数
- * @param {json} [opts.from] json格式，设置对象的起始位置和起始姿态等
+ * @param {json} [opts.from] json格式，设置对象的起始位置和起始姿态等，该项配置可有可无
  * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
  * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
  * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
@@ -242,8 +242,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.fromTo = function(opts, clear) {
-  return this.Animation.fromTo(opts, clear);
+DisplayObject.prototype.animate = function(opts, clear) {
+  return this.Animation.animate(opts, clear);
 };
 
 /**
@@ -274,9 +274,9 @@ DisplayObject.prototype.fromTo = function(opts, clear) {
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.to = function(opts, clear) {
-  return this.Animation.to(opts, clear);
-};
+// DisplayObject.prototype.to = function(opts, clear) {
+//   return this.Animation.to(opts, clear);
+// };
 
 /* eslint max-len: "off" */
 /**

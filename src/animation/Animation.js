@@ -1,6 +1,7 @@
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
 import {KeyFrames} from './KeyFrames';
+import {isObject} from '../util/UTILS';
 /**
  * Animation类型动画对象
  *
@@ -19,20 +20,28 @@ Animation.prototype.update = function(snippet) {
     if (this.animates[i]) this.animates[i].update(snippet);
   }
 };
-Animation.prototype.fromTo = function(opts, clear) {
-  this.element.setProps(opts.from);
-  opts.element = this.element;
-  return this._addMove(new Transition(opts), clear);
-};
-Animation.prototype.to = function(opts, clear) {
-  opts.from = {};
-  /* eslint guard-for-in: "off" */
-  for (let i in opts.to) {
-    opts.from[i] = this.element[i];
+Animation.prototype.animate = function(opts, clear) {
+  if (isObject(opts.from)) {
+    this.element.setProps(opts.from);
+  } else {
+    opts.from = {};
+    /* eslint guard-for-in: "off" */
+    for (let i in opts.to) {
+      opts.from[i] = this.element[i];
+    }
   }
   opts.element = this.element;
   return this._addMove(new Transition(opts), clear);
 };
+// Animation.prototype.to = function(opts, clear) {
+//   opts.from = {};
+//   /* eslint guard-for-in: "off" */
+//   for (let i in opts.to) {
+//     opts.from[i] = this.element[i];
+//   }
+//   opts.element = this.element;
+//   return this._addMove(new Transition(opts), clear);
+// };
 Animation.prototype.motion = function(opts, clear) {
   opts.element = this.element;
   return this._addMove(new PathMotion(opts), clear);
