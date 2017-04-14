@@ -1,6 +1,6 @@
 import {Animate} from './Animate';
-import {UTILS} from '../util/UTILS';
-import {TWEEN} from '../util/TWEEN';
+import {Utils} from '../util/Utils';
+import {Tween} from '../util/Tween';
 import {Curve} from '../math/Curve';
 import {Point} from '../math/Point';
 
@@ -9,11 +9,11 @@ import {Point} from '../math/Point';
  *
  * @class
  * @memberof JC
- * @param {object} [opts] 动画所具备的特性
+ * @param {object} [options] 动画所具备的特性
  */
-function PathMotion(opts) {
-  Animate.call(this, opts);
-  if (!opts.path || !(opts.path instanceof Curve)) {
+function PathMotion(options) {
+  Animate.call(this, options);
+  if (!options.path || !(options.path instanceof Curve)) {
     console.warn(
       '%c JC.PathMotion warn %c: path is not instanceof Curve',
       'color: #f98165; background: #80a89e',
@@ -21,10 +21,10 @@ function PathMotion(opts) {
     );
   }
 
-  this.path = opts.path;
-  this.attachTangent = opts.attachTangent || false;
+  this.path = options.path;
+  this.attachTangent = options.attachTangent || false;
   this._cacheRotate = this.element.rotation;
-  let radian = this._cacheRotate * UTILS.DTR;
+  let radian = this._cacheRotate * Utils.DTR;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
 
@@ -32,7 +32,7 @@ PathMotion.prototype = Object.create(Animate.prototype);
 
 PathMotion.prototype.nextPose = function() {
   let _rotate = 0;
-  const t = TWEEN[this.ease](this.progress, 0, 1, this.duration);
+  const t = Tween[this.ease](this.progress, 0, 1, this.duration);
   const pos = this.path.getPoint(t);
   const cache = pos.clone();
 
@@ -66,7 +66,7 @@ PathMotion.prototype.decomposeRotate = function(t) {
               )
             );
   if (isNaN(cos)) return false;
-  return pi * Math.acos(cos) * UTILS.RTD;
+  return pi * Math.acos(cos) * Utils.RTD;
 };
 
 export {PathMotion};

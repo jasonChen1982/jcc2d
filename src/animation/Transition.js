@@ -6,13 +6,13 @@ import {Animate} from './Animate';
  *
  * @class
  * @memberof JC
- * @param {object} [opts] 动画所具备的特性
+ * @param {object} [options] 动画所具备的特性
  */
-function Transition(opts) {
-  Animate.call(this, opts);
+function Transition(options) {
+  Animate.call(this, options);
 
-  this.from = opts.from;
-  this.to = opts.to;
+  this.from = options.from;
+  this.to = options.to;
 }
 Transition.prototype = Object.create(Animate.prototype);
 

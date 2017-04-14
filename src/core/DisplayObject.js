@@ -2,7 +2,7 @@ import {Matrix, TEMP_MATRIX} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
 import {Animation} from '../animation/Animation';
-import {UTILS} from '../util/UTILS';
+import {Utils} from '../util/Utils';
 /**
  * 显示对象的基类，继承至Eventer
  *
@@ -229,21 +229,21 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param {object} [opts] 动画配置参数
- * @param {json} [opts.from] json格式，设置对象的起始位置和起始姿态等，该项配置可有可无
- * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {json} [options.from] json格式，设置对象的起始位置和起始姿态等，该项配置可有可无
+ * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.animate = function(opts, clear) {
-  return this.Animation.animate(opts, clear);
+DisplayObject.prototype.animate = function(options, clear) {
+  return this.Animation.animate(options, clear);
 };
 
 /**
@@ -262,20 +262,20 @@ DisplayObject.prototype.animate = function(opts, clear) {
  * });
  * ```
  *
- * @param {object} [opts] 动画配置参数
- * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-// DisplayObject.prototype.to = function(opts, clear) {
-//   return this.Animation.to(opts, clear);
+// DisplayObject.prototype.to = function(options, clear) {
+//   return this.Animation.to(options, clear);
 // };
 
 /* eslint max-len: "off" */
@@ -295,21 +295,21 @@ DisplayObject.prototype.animate = function(opts, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param {object} [opts] 动画配置参数
- * @param {Curve} [opts.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
- * @param {Boolean} [opts.attachTangent] 物体是否捕获切线方向
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {Curve} [options.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.motion = function(opts, clear) {
-  return this.Animation.motion(opts, clear);
+DisplayObject.prototype.motion = function(options, clear) {
+  return this.Animation.motion(options, clear);
 };
 
 /**
@@ -329,21 +329,21 @@ DisplayObject.prototype.motion = function(opts, clear) {
  * });
  * ```
  *
- * @param {object} [opts] 动画配置参数
- * @param {json} [opts.keys] 配置关键帧的位置、姿态
- * @param {json} [opts.keyConfig] 相邻两个关键帧之间的动画运动配置
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {json} [options.keys] 配置关键帧的位置、姿态
+ * @param {json} [options.keyConfig] 相邻两个关键帧之间的动画运动配置
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.keyFrames = function(opts, clear) {
-  return this.Animation.keyFrames(opts, clear);
+DisplayObject.prototype.keyFrames = function(options, clear) {
+  return this.Animation.keyFrames(options, clear);
 };
 
 /**
@@ -406,9 +406,9 @@ DisplayObject.prototype.updateTransform = function() {
             this.pivotY,
             this.scaleX,
             this.scaleY,
-            this.rotation * UTILS.DTR,
-            this.skewX * UTILS.DTR,
-            this.skewY * UTILS.DTR
+            this.rotation * Utils.DTR,
+            this.skewX * Utils.DTR,
+            this.skewY * Utils.DTR
         );
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
@@ -421,8 +421,8 @@ DisplayObject.prototype.updateTransform = function() {
     if (this.rotation % 360) {
       if (this.rotation !== this.rotationCache) {
         this.rotationCache = this.rotation;
-        this._sr = Math.sin(this.rotation * UTILS.DTR);
-        this._cr = Math.cos(this.rotation * UTILS.DTR);
+        this._sr = Math.sin(this.rotation * Utils.DTR);
+        this._cr = Math.cos(this.rotation * Utils.DTR);
       }
 
       a = this._cr * this.scaleX;

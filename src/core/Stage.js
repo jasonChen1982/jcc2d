@@ -1,7 +1,7 @@
 
 import {Container} from './Container';
 import {InteractionManager} from '../eventer/InteractionManager';
-import {UTILS} from '../util/UTILS';
+import {Utils} from '../util/Utils';
 
 /**
  * 舞台对象，继承至Eventer
@@ -25,7 +25,7 @@ function Stage(options) { // canvas, bgColor, resolution
    *
    * @member {CANVAS}
    */
-  this.canvas = UTILS.isString(options.dom)
+  this.canvas = Utils.isString(options.dom)
                 ?
                 document.getElementById(options.dom) : options.dom;
 
@@ -263,7 +263,7 @@ Object.defineProperty(Stage.prototype, 'resolution', {
  * @param {number} sh canvas的style.height值，需将舞台属性autoStyle设置为true
  */
 Stage.prototype.resize = function(w, h, sw, sh) {
-  if (UTILS.isNumber(w) && UTILS.isNumber(h)) {
+  if (Utils.isNumber(w) && Utils.isNumber(h)) {
     this.realWidth = w;
     this.realHeight = h;
   } else {
@@ -273,8 +273,8 @@ Stage.prototype.resize = function(w, h, sw, sh) {
   this.width = this.canvas.width = w * this.resolution;
   this.height = this.canvas.height = h * this.resolution;
   if (this.autoStyle && sw && sh) {
-    this.canvas.style.width = UTILS.isString(sw) ? sw : sw + 'px';
-    this.canvas.style.height = UTILS.isString(sh) ? sh : sh + 'px';
+    this.canvas.style.width = Utils.isString(sw) ? sw : sw + 'px';
+    this.canvas.style.height = Utils.isString(sh) ? sh : sh + 'px';
   }
 };
 

@@ -1,32 +1,32 @@
-import {TWEEN} from '../util/TWEEN';
-import {UTILS} from '../util/UTILS';
+import {Tween} from '../util/Tween';
+import {Utils} from '../util/Utils';
 
 /**
  * 动画对象的基本类型
  *
  * @class
  * @memberof JC
- * @param {object} [opts] 动画配置信息
+ * @param {object} [options] 动画配置信息
  */
-function Animate(opts) {
-  this.element = opts.element || {};
-  this.duration = opts.duration || 300;
+function Animate(options) {
+  this.element = options.element || {};
+  this.duration = options.duration || 300;
   this.living = true;
 
-  this.onCompelete = opts.onCompelete || null;
-  this.onUpdate = opts.onUpdate || null;
+  this.onCompelete = options.onCompelete || null;
+  this.onUpdate = options.onUpdate || null;
 
-  this.infinity = opts.infinity || false;
-  this.alternate = opts.alternate || false;
-  this.ease = opts.ease || 'easeBoth';
-  this.repeats = opts.repeats || 0;
-  this.delay = opts.delay || 0;
-  this.wait = opts.wait || 0;
+  this.infinity = options.infinity || false;
+  this.alternate = options.alternate || false;
+  this.ease = options.ease || 'easeBoth';
+  this.repeats = options.repeats || 0;
+  this.delay = options.delay || 0;
+  this.wait = options.wait || 0;
   this.delayCut = this.delay;
   this.progress = 0;
   this.direction = 1;
 
-  this.timeScale = opts.timeScale || 1;
+  this.timeScale = options.timeScale || 1;
 
   this.totalTime = 0;
 
@@ -52,7 +52,7 @@ Animate.prototype.update = function(snippet) {
   }
 
   let snippetCache = this.direction * this.timeScale * snippet;
-  this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
   let pose = this.nextPose();
@@ -80,7 +80,7 @@ Animate.prototype.nextPose = function() {
   let cache = {};
   /* eslint guard-for-in: "off" */
   for (let i in this.to) {
-    cache[i] = TWEEN[this.ease](this.progress,
+    cache[i] = Tween[this.ease](this.progress,
                                 this.from[i],
                                 this.to[i] - this.from[i],
                                 this.duration

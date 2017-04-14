@@ -27,24 +27,24 @@ import {Rectangle} from '../math/Rectangle';
  * @class
  * @extends JC.Container
  * @memberof JC
- * @param {json} opts
+ * @param {json} options
  */
-function Sprite(opts) {
+function Sprite(options) {
   Container.call(this);
 
-  this.texture = opts.texture;
+  this.texture = options.texture;
   if (this.texture.loaded) {
-    this.upTexture(opts);
+    this.upTexture(options);
   } else {
     let This = this;
     this._ready = false;
     this.texture.on('load', function() {
-      This.upTexture(opts);
+      This.upTexture(options);
       This._ready = true;
     });
   }
 
-  this.MovieClip = new MovieClip(this, opts);
+  this.MovieClip = new MovieClip(this, options);
 }
 Sprite.prototype = Object.create(Container.prototype);
 
@@ -53,20 +53,20 @@ Sprite.prototype = Object.create(Container.prototype);
  *
  * @method upTexture
  * @private
- * @param {json} opts
+ * @param {json} options
  */
-Sprite.prototype.upTexture = function(opts) {
-  this.naturalWidth = opts.texture.naturalWidth;
-  this.naturalHeight = opts.texture.naturalHeight;
-  this.frame = opts.frame || new Rectangle(
+Sprite.prototype.upTexture = function(options) {
+  this.naturalWidth = options.texture.naturalWidth;
+  this.naturalHeight = options.texture.naturalHeight;
+  this.frame = options.frame || new Rectangle(
                                 0,
                                 0,
                                 this.naturalWidth,
                                 this.naturalHeight
                               );
 
-  this.width = opts.width || this.frame.width || this.naturalWidth;
-  this.height = opts.height || this.frame.height || this.naturalHeight;
+  this.width = options.width || this.frame.width || this.naturalWidth;
+  this.height = options.height || this.frame.height || this.naturalHeight;
   this.regX = this.width >> 1;
   this.regY = this.height >> 1;
   let rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
@@ -88,10 +88,10 @@ Sprite.prototype.updateAnimation = function(snippet) {
 
 /**
  * 播放逐帧动画
- * @param {json} opts
+ * @param {json} options
  */
-Sprite.prototype.playMovie = function(opts) {
-  this.MovieClip.playMovie(opts);
+Sprite.prototype.playMovie = function(options) {
+  this.MovieClip.playMovie(options);
 };
 
 /**

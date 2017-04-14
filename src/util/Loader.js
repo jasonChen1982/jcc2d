@@ -1,5 +1,5 @@
 import {Eventer} from '../eventer/Eventer';
-import {UTILS} from './UTILS';
+import {Utils} from './Utils';
 
 /**
  * 图片纹理类
@@ -21,7 +21,7 @@ function Texture(img, lazy) {
   this.hadload = false;
   this.src = img;
   this.resole(img);
-  if (!lazy || !UTILS.isString(img)) this.load(img);
+  if (!lazy || !Utils.isString(img)) this.load(img);
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
@@ -33,7 +33,7 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.resole = function(img) {
-  if (UTILS.isString(img)) {
+  if (Utils.isString(img)) {
     this.texture = new Image();
   }
   if (img instanceof Image || img.nodeName === 'IMG') {
@@ -53,7 +53,7 @@ Texture.prototype.load = function(img) {
   let This = this;
   this.hadload = true;
   img = img || this.src;
-  if (UTILS.isString(img)) {
+  if (Utils.isString(img)) {
     this.texture.crossOrigin = '';
     this.texture.src = img;
     this.texture.onload = function() {

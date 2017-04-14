@@ -8,16 +8,16 @@ function _rt(val) {
 }
 
 /**
- * UTILS 引擎工具箱
+ * Utils 引擎工具箱
  *
- * @namespace JC.UTILS
+ * @namespace JC.Utils
  */
-export const UTILS = {
+export const Utils = {
   /**
    * 简单拷贝纯数据的JSON对象
    *
    * @static
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {JSON} json 待拷贝的纯数据JSON
    * @return {JSON} 拷贝后的纯数据JSON
    */
@@ -29,7 +29,7 @@ export const UTILS = {
    * 将角度转化成弧度的乘法因子
    *
    * @static
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @type {number}
    */
   DTR: Math.PI/180,
@@ -38,7 +38,7 @@ export const UTILS = {
    * 将弧度转化成角度的乘法因子
    *
    * @static
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @type {number}
    */
   RTD: 180/Math.PI,
@@ -48,7 +48,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Array} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -64,7 +64,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Object} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -80,7 +80,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {String} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -96,7 +96,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Number} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -112,7 +112,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Function} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -128,7 +128,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
    * @param {Number} max 所给定区间较大的数字
    * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
@@ -146,7 +146,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Number} n 索引
    * @param {Number} m 模
    * @return {Number} 映射到模长内到索引
@@ -160,7 +160,7 @@ export const UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Number} x 待闭合到值
    * @param {Number} a 闭合区间左边界
    * @param {Number} b 闭合区间右边界

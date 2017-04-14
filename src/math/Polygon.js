@@ -1,5 +1,5 @@
 import {Point} from './Point';
-import {UTILS} from '../util/UTILS';
+import {Utils} from '../util/Utils';
 
 /**
  * @class
@@ -7,7 +7,7 @@ import {UTILS} from '../util/UTILS';
  * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
  */
 function Polygon(points) {
-  if (!UTILS.isArray(points)) {
+  if (!Utils.isArray(points)) {
     points = new Array(arguments.length);
     /* eslint-disable */
     for (let a = 0; a < points.length; ++a) {

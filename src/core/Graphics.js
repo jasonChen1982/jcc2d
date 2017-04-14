@@ -86,18 +86,17 @@ Graphics.prototype._drawBack = function(ctx) {
  * ```
  *
  * @param {function} fn
- * @param {object} opts
+ * @param {object} options
  */
-Graphics.prototype.drawCall = function(fn, opts) {
+Graphics.prototype.drawCall = function(fn, options) {
   if (fn === undefined) return;
-  opts = opts || {};
-  this.cache = opts.cache || false;
+  options = options || {};
+  this.cache = options.cache || false;
   this.cached = false;
   /* eslint max-len: "off" */
-  // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
   this.draw = fn || null;
 
-  this.setBounds(opts.bounds);
+  this.setBounds(options.bounds);
 };
 
 

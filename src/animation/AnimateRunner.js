@@ -1,19 +1,19 @@
 import {Animate} from './Animate';
-import {UTILS} from '../util/UTILS';
+import {Utils} from '../util/Utils';
 /**
  * AnimateRunner类型动画对象
  *
  * @class
  * @memberof JC
- * @param {object} [opts] 动画配置信息
+ * @param {object} [options] 动画配置信息
  */
-function AnimateRunner(opts) {
-  Animate.call(this, opts);
+function AnimateRunner(options) {
+  Animate.call(this, options);
 
-  this._runners = opts.runners;
+  this._runners = options.runners;
   this._runnerIndex = 0;
   this._cursor = 1;
-  this._runnerConfig = opts.runnersConfig;
+  this._runnerConfig = options.runnersConfig;
 
   this.configRunner();
 }
@@ -44,7 +44,7 @@ AnimateRunner.prototype.update = function(snippet) {
   // if (this.paused || !this.living) return;
 
   let snippetCache = this.direction * this.timeScale * snippet;
-  this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
   let pose = this.nextPose();

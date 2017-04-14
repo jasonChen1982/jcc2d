@@ -1,7 +1,7 @@
 
 import {Point} from './Point';
 import {Curve} from './Curve';
-import {UTILS} from '../util/UTILS';
+import {Utils} from '../util/Utils';
 
 // SvgCurve.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // TODO: some like don`t need svg tag to wrap
 
@@ -10,7 +10,7 @@ import {UTILS} from '../util/UTILS';
  * @param {String}  path  array of points
  */
 function SvgCurve( path ) {
-  if (UTILS.isString(path)) {
+  if (Utils.isString(path)) {
     this.path = this.createPath(path);
   } else if (path.nodeName === 'path' && path.getAttribute('d')) {
     this.path = path;

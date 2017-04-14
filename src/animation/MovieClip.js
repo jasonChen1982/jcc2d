@@ -1,4 +1,4 @@
-import {UTILS} from '../util/UTILS';
+import {Utils} from '../util/Utils';
 
 // TODO 继承事件对象
 /**
@@ -7,9 +7,9 @@ import {UTILS} from '../util/UTILS';
  * @class
  * @memberof JC
  * @param {object} [element] 动画对象 内部传入
- * @param {object} [opts] 动画配置信息 内部传入
+ * @param {object} [options] 动画配置信息 内部传入
  */
-function MovieClip(element, opts) {
+function MovieClip(element, options) {
   this.element = element;
   this.living = false;
 
@@ -20,15 +20,15 @@ function MovieClip(element, opts) {
   this.alternate = false;
   this.repeats = 0;
 
-  this.animations = opts.animations || {};
+  this.animations = options.animations || {};
 
   this.index = 0;
   this.preIndex = -1;
   this.direction = 1;
   this.frames = [];
   this.preFrame = null;
-  // this.sy = opts.sy || 0;
-  // this.sx = opts.sx || 0;
+  // this.sy = options.sy || 0;
+  // this.sx = options.sx || 0;
   this.fillMode = 0;
   this.fps = 16;
 
@@ -88,23 +88,23 @@ MovieClip.prototype.getFrame = function() {
   this.preFrame = frame;
   return frame;
 };
-MovieClip.prototype.playMovie = function(opts) {
+MovieClip.prototype.playMovie = function(options) {
   this.next = null;
-  let movie = this.format(opts.movie);
-  if (!UTILS.isArray(movie)) return;
+  let movie = this.format(options.movie);
+  if (!Utils.isArray(movie)) return;
   this.frames = movie;
   this.index = 0;
   this.direction = 1;
-  this.fillMode = opts.fillMode || 0;
-  this.fps = opts.fps || this.fps;
-  this.infinity = opts.infinity || false;
-  this.alternate = opts.alternate || false;
-  this.repeats = opts.repeats || 0;
+  this.fillMode = options.fillMode || 0;
+  this.fps = options.fps || this.fps;
+  this.infinity = options.infinity || false;
+  this.alternate = options.alternate || false;
+  this.repeats = options.repeats || 0;
   this.living = true;
-  this.onCompelete = opts.onCompelete || null;
+  this.onCompelete = options.onCompelete || null;
 };
 MovieClip.prototype.format = function(movie) {
-  if (UTILS.isString(movie)) {
+  if (Utils.isString(movie)) {
     let config = this.animations[movie];
     if (config) {
       return this.format(config);
@@ -119,9 +119,9 @@ MovieClip.prototype.format = function(movie) {
       );
       return false;
     }
-  } else if (UTILS.isArray(movie)) {
+  } else if (Utils.isArray(movie)) {
     return movie;
-  } else if (UTILS.isObject(movie)) {
+  } else if (Utils.isObject(movie)) {
     let arr = [];
     for (let i = movie.start; i <= movie.end; i++) {
       arr.push(i);
@@ -129,13 +129,13 @@ MovieClip.prototype.format = function(movie) {
     if (movie.next && this.animations[movie.next]) {
       let This = this;
       let conf = {};
-      if(UTILS.isString(movie.next) && this.animations[movie.next]) {
+      if(Utils.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
         conf.infinity = true;
-      } else if(UTILS.isObject(movie.next)) {
+      } else if(Utils.isObject(movie.next)) {
         conf = movie.next;
       }
-      if (UTILS.isString(conf.movie)) {
+      if (Utils.isString(conf.movie)) {
         this.next = function() {
           This.playMovie(conf);
         };

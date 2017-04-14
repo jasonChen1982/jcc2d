@@ -2,7 +2,7 @@
 
 
 /**
- * TWEEN 缓动时间运动函数集合
+ * Tween 缓动时间运动函数集合
  *
  * ```js
  * dispay.fromTo({
@@ -11,10 +11,10 @@
  *   ease: 'linear' // 配置要调用的运动函数
  * })
  * ```
- * @namespace JC.TWEEN
+ * @namespace JC.Tween
  */
 
-export const TWEEN = {
+export const Tween = {
   /**
    * 匀速运动函数
    *
@@ -23,7 +23,7 @@ export const TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   linear: function(t, b, c, d) {
@@ -38,7 +38,7 @@ export const TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   easeIn: function(t, b, c, d) {
@@ -53,7 +53,7 @@ export const TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   easeOut: function(t, b, c, d) {
@@ -68,7 +68,7 @@ export const TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   easeBoth: function(t, b, c, d) {
@@ -82,20 +82,20 @@ export const TWEEN = {
    * 扩展运动函数
    *
    * ```js
-   * JC.TWEEN.extend({
+   * JC.Tween.extend({
    *   elasticIn: function(t, b, c, d){....},
    *   elasticOut: function(t, b, c, d){....},
    *   ......
    * })
    * ```
-   * @param {Number} opts 扩展的时间函数
+   * @param {Number} options 扩展的时间函数
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    */
-  extend: function(opts) {
-    if(!opts)return;
-    for(let key in opts) {
-      if(key!=='extend'&&opts[key])this[key]=opts[key];
+  extend: function(options) {
+    if(!options)return;
+    for(let key in options) {
+      if(key!=='extend'&&options[key])this[key]=options[key];
     }
   },
 };
