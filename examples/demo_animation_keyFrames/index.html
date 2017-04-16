@@ -24,6 +24,7 @@
 <script type="text/javascript" src="../../build/jcc2d.js"></script>
 <script type="text/javascript" src="../libs/util/tween.js"></script>
 <script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript" src="./js/data.js"></script>
 <script type="text/javascript">
 
 function Rect(color){
@@ -32,34 +33,38 @@ function Rect(color){
 Rect.prototype.render = function(ctx){
     ctx.beginPath();
     ctx.fillStyle = this.color;
-    ctx.fillRect(-30,-30,60,60);
+    ctx.fillRect(-30,-5,60,10);
     ctx.fill();
 };
 
-JC.TWEEN.extend(tween);
+JC.Tween.extend(tween);
 
 var shape = [],
     stage = new JC.Stage({
         dom: 'demo_canvas'
     }),
     DOC = new JC.Container();
-DOC.x = 320;
-DOC.y = 400;
+DOC.x = -200;
+DOC.y = 0;
 
 var stats = new Stats();
 stats.domElement.style.position = 'absolute';
 stats.domElement.style.top = '0px';
 document.body.appendChild(stats.domElement);
 
-shape[0] = new JC.Graphics();
-shape[0].drawCall(new Rect('#749d9b'));
-shape[0].keyFrames({
-    keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90},{x:100,y:200,rotation:360}],
-    keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000},{ease:'bounceOut',duration: 1000}],
+shape = new JC.Graphics();
+shape.drawCall(new Rect('#749d9b'));
+shape.keyFrames({
+    ks: data.layers[0],
+    fr: 30,
     infinity: true,
-    alternate: true
+    alternate: true,
+    onCompelete(info) {
+      console.log(this.element);
+    }
 });
-DOC.adds(shape[0]);
+DOC.timeScale = 0.2;
+DOC.adds(shape);
 
 stage.adds(DOC);
 

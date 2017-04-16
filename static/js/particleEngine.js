@@ -84,12 +84,12 @@ Emitter.prototype.update = function(){
 
 function ParticleCricle(){
   this.doc = new JC.Graphics();
-  this.speed = JC.UTILS.random(1,2);
-  this.alphaEnd = JC.UTILS.random(0.5,1);
+  this.speed = JC.Utils.random(1,2);
+  this.alphaEnd = JC.Utils.random(0.5,1);
 
-  var degree = JC.UTILS.random(0,360);
-  this.directionX = Math.sin(degree * JC.UTILS.DTR);
-  this.directionY = Math.cos(degree * JC.UTILS.DTR);
+  var degree = JC.Utils.random(0,360);
+  this.directionX = Math.sin(degree * JC.Utils.DTR);
+  this.directionY = Math.cos(degree * JC.Utils.DTR);
 
   this.init();
   this.reset();
@@ -97,8 +97,8 @@ function ParticleCricle(){
 ParticleCricle.prototype.init = function(){
   var This = this;
   this.spin = 0;
-  this.color = JC.UTILS.random(COLORS);
-  this.radius = JC.UTILS.random(0,10)>>0;
+  this.color = JC.Utils.random(COLORS);
+  this.radius = JC.Utils.random(0,10)>>0;
   this.doc.drawCall(function(ctx){
     ctx.beginPath();
     ctx.fillStyle = This.color;
@@ -110,8 +110,8 @@ ParticleCricle.prototype.init = function(){
 ParticleCricle.prototype.reset = function(){
   var halfW = w>>1;
   var halfH = h>>1;
-  this.doc.x = JC.UTILS.random(-halfW, halfW);
-  this.doc.y = JC.UTILS.random(-halfH, halfH);
+  this.doc.x = JC.Utils.random(-halfW, halfW);
+  this.doc.y = JC.Utils.random(-halfH, halfH);
   this.doc.alpha = 0;
 
   this.birthday = Date.now();
@@ -126,27 +126,27 @@ ParticleCricle.prototype.checkBound = function(){
 
 function ParticleTriangle(){
   this.doc = new JC.Graphics();
-  this.speed = JC.UTILS.random(0,1);
-  this.alphaEnd = JC.UTILS.random(0.5,1);
+  this.speed = JC.Utils.random(0,1);
+  this.alphaEnd = JC.Utils.random(0.5,1);
 
-  var degree = JC.UTILS.random(0,360);
-  this.directionX = Math.sin(degree * JC.UTILS.DTR);
-  this.directionY = Math.cos(degree * JC.UTILS.DTR);
+  var degree = JC.Utils.random(0,360);
+  this.directionX = Math.sin(degree * JC.Utils.DTR);
+  this.directionY = Math.cos(degree * JC.Utils.DTR);
 
-  this.FOS = JC.UTILS.random(['fill','stroke']);
+  this.FOS = JC.Utils.random(['fill','stroke']);
 
   this.init();
   this.reset();
 }
 ParticleTriangle.prototype.init = function(){
   var This = this;
-  this.spin = JC.UTILS.random(-3,3);
-  this.color = JC.UTILS.random(COLORS);
-  this.radius = JC.UTILS.random(4,16)>>0;
+  this.spin = JC.Utils.random(-3,3);
+  this.color = JC.Utils.random(COLORS);
+  this.radius = JC.Utils.random(4,16)>>0;
   var points = [
       {x: this.radius*Math.cos(0                 ), y: this.radius*Math.sin(0                 )},
-      {x: this.radius*Math.cos(120 * JC.UTILS.DTR), y: this.radius*Math.sin(120 * JC.UTILS.DTR)},
-      {x: this.radius*Math.cos(240 * JC.UTILS.DTR), y: this.radius*Math.sin(240 * JC.UTILS.DTR)}
+      {x: this.radius*Math.cos(120 * JC.Utils.DTR), y: this.radius*Math.sin(120 * JC.Utils.DTR)},
+      {x: this.radius*Math.cos(240 * JC.Utils.DTR), y: this.radius*Math.sin(240 * JC.Utils.DTR)}
   ];
   this.doc.drawCall(function(ctx){
     ctx.beginPath();
@@ -166,8 +166,8 @@ ParticleTriangle.prototype.init = function(){
 ParticleTriangle.prototype.reset = function(){
   var halfW = w>>1;
   var halfH = h>>1;
-  this.doc.x = JC.UTILS.random(-halfW, halfW);
-  this.doc.y = JC.UTILS.random(-halfH, halfH);
+  this.doc.x = JC.Utils.random(-halfW, halfW);
+  this.doc.y = JC.Utils.random(-halfH, halfH);
   this.doc.alpha = 0;
 
   this.birthday = Date.now();
@@ -184,23 +184,23 @@ ParticleTriangle.prototype.checkBound = function(){
 
 function ParticlePlus(){
   this.doc = new JC.Graphics();
-  this.speed = JC.UTILS.random(0,1);
-  this.alphaEnd = JC.UTILS.random(0.5,1);
+  this.speed = JC.Utils.random(0,1);
+  this.alphaEnd = JC.Utils.random(0.5,1);
 
-  var degree = JC.UTILS.random(0,360);
-  this.directionX = Math.sin(degree * JC.UTILS.DTR);
-  this.directionY = Math.cos(degree * JC.UTILS.DTR);
+  var degree = JC.Utils.random(0,360);
+  this.directionX = Math.sin(degree * JC.Utils.DTR);
+  this.directionY = Math.cos(degree * JC.Utils.DTR);
 
   this.init();
   this.reset();
 }
 ParticlePlus.prototype.init = function(){
   var This = this,
-    scale = JC.UTILS.random(0.5,1),
+    scale = JC.Utils.random(0.5,1),
     ww = 6*scale,hh = 30*scale;
-  this.spin = JC.UTILS.random(-3,3)>0?JC.UTILS.random(2,3):JC.UTILS.random(-3,-2);
-  this.color = JC.UTILS.random(COLORS);
-  this.radius = JC.UTILS.random(4,16)>>0;
+  this.spin = JC.Utils.random(-3,3)>0?JC.Utils.random(2,3):JC.Utils.random(-3,-2);
+  this.color = JC.Utils.random(COLORS);
+  this.radius = JC.Utils.random(4,16)>>0;
   this.doc.drawCall(function(ctx){
     ctx.beginPath();
     ctx.fillStyle = This.color;
@@ -212,8 +212,8 @@ ParticlePlus.prototype.init = function(){
 ParticlePlus.prototype.reset = function(){
   var halfW = w>>1;
   var halfH = h>>1;
-  this.doc.x = JC.UTILS.random(-halfW, halfW);
-  this.doc.y = JC.UTILS.random(-halfH, halfH);
+  this.doc.x = JC.Utils.random(-halfW, halfW);
+  this.doc.y = JC.Utils.random(-halfH, halfH);
   this.doc.alpha = 0;
 
   this.birthday = Date.now();

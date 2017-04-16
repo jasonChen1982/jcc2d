@@ -36,9 +36,9 @@ function Euler(x, y, z) {
     this.z = z || 0;
 }
 Euler.prototype.rotate = function() {
-    var x = JC.UTILS.DTR * this.x,
-        y = JC.UTILS.DTR * this.y,
-        z = JC.UTILS.DTR * this.z;
+    var x = JC.Utils.DTR * this.x,
+        y = JC.Utils.DTR * this.y,
+        z = JC.Utils.DTR * this.z;
     var xc = Math.cos(x),
         xs = Math.sin(x);
     var yc = Math.cos(y),
@@ -93,7 +93,7 @@ Sphere.prototype.createVertex = function(parent, imgs) {
         for (var j = 0; j < this.col; j++) {
             degY = PI_2 * j / this.col;
             var shape = new JC.Sprite({
-                texture: loadBox.getById(JC.UTILS.random(imgs))
+                texture: loadBox.getById(JC.Utils.random(imgs))
             });
 
             shape.x      = Math.sin(degX) * Math.sin(degY) * this.radius,
@@ -116,8 +116,8 @@ Sphere.prototype.update = function() {
         shape.x      = m[0] * x + m[1] * y + m[ 2] * z;
         shape.y      = m[4] * x + m[5] * y + m[ 6] * z;
         var zz = (shape.zIndex + 220) / 320;
-        shape.alpha = 0.8 * JC.UTILS.clamp(zz+0.4, 0, 1);
-        shape.scale = JC.UTILS.clamp(zz + 0.5, 0, 1.2);
+        shape.alpha = 0.8 * JC.Utils.clamp(zz+0.4, 0, 1);
+        shape.scale = JC.Utils.clamp(zz + 0.5, 0, 1.2);
     }
     this.parent.souldSort = true;
 };

@@ -77,14 +77,14 @@ var EXAMPLES = [
         link: 'demo_timingfunction_allInOne'
     },
     {
-        title: 'fromTo动画',
+        title: 'animate动画1',
         type: 'demo',
-        link: 'demo_animation_fromTo'
+        link: 'demo_animation_animate_1'
     },
     {
-        title: 'to动画',
+        title: 'animate动画2',
         type: 'demo',
-        link: 'demo_animation_to'
+        link: 'demo_animation_animate_2'
     },
     {
         title: 'keyframes动画',

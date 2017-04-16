@@ -1,7 +1,8 @@
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
 import {KeyFrames} from './KeyFrames';
-import {isObject} from '../util/Utils';
+import {AnimateRunner} from './AnimateRunner';
+import {Utils} from '../util/Utils';
 /**
  * Animation类型动画对象
  *
@@ -21,7 +22,7 @@ Animation.prototype.update = function(snippet) {
   }
 };
 Animation.prototype.animate = function(options, clear) {
-  if (isObject(options.from)) {
+  if (Utils.isObject(options.from)) {
     this.element.setProps(options.from);
   } else {
     options.from = {};
@@ -48,7 +49,7 @@ Animation.prototype.motion = function(options, clear) {
 };
 Animation.prototype.runners = function(options, clear) {
   options.element = this.element;
-  return this._addMove(new KeyFrames(options), clear);
+  return this._addMove(new AnimateRunner(options), clear);
 };
 Animation.prototype.keyFrames = function(options, clear) {
   options.element = this.element;

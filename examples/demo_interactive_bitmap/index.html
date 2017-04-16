@@ -54,7 +54,7 @@ stats.domElement.style.position = 'absolute';
 stats.domElement.style.top = '0px';
 document.body.appendChild(stats.domElement);
 
-JC.TWEEN.extend({
+JC.Tween.extend({
     bounceOut: function(t, b, c, d){
         if ((t/=d) < (1/2.75)) {
             return c*(7.5625*t*t) + b;

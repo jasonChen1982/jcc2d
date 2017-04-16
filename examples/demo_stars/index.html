@@ -55,7 +55,7 @@
         var starContainer = new JC.Container();
         var COLORS = ['#f00', '#f6f', '#ff0', '#66f'];
 
-        JC.TWEEN.extend(tween);
+        JC.Tween.extend(tween);
 
         // 画圆类
         function Cricle(color, radius) {
@@ -72,7 +72,7 @@
         // 创建好多小星星
         for (var i = 0; i < 26; i++) {
             var star = new JC.Graphics();
-            star.drawCall(new Cricle(JC.UTILS.random(COLORS), JC.UTILS.random(24, 48)));
+            star.drawCall(new Cricle(JC.Utils.random(COLORS), JC.Utils.random(24, 48)));
             starContainer.adds(star);
         }
         starContainer.visible = false;
@@ -122,8 +122,8 @@
                         scale: 1
                     },
                     to: {
-                        x: JC.UTILS.random(x - 200, x + 200),
-                        y: JC.UTILS.random((y - 200) * 1.15, (y + 200) * 1.15),
+                        x: JC.Utils.random(x - 200, x + 200),
+                        y: JC.Utils.random((y - 200) * 1.15, (y + 200) * 1.15),
                         scale: 0
                     },
                     ease: 'linear',
@@ -139,7 +139,7 @@
         * 随机坐标
         */
         function getPos() {
-            var pos = parseInt(JC.UTILS.random(0, 4), 10);
+            var pos = parseInt(JC.Utils.random(0, 4), 10);
 
             var posArr = [
                 { x: 97, y: 300 },
@@ -150,8 +150,8 @@
 
             //return posArr[pos];
             return {
-                x: JC.UTILS.random(640 * .1, 640 * .9),
-                y: JC.UTILS.random(900 * .1, 900 * .9)
+                x: JC.Utils.random(640 * .1, 640 * .9),
+                y: JC.Utils.random(900 * .1, 900 * .9)
             }
         }
 

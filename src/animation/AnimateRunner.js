@@ -41,7 +41,6 @@ AnimateRunner.prototype.update = function(snippet) {
     if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
     return;
   }
-  // if (this.paused || !this.living) return;
 
   let snippetCache = this.direction * this.timeScale * snippet;
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
@@ -55,7 +54,6 @@ AnimateRunner.prototype.update = function(snippet) {
     );
   }
 
-  // this.progress += this.timeScale * snippet;
   if (this.totalTime >= this.duration) {
     this.totalTime = 0;
     if (this._runnerIndex < this._runners.length - 1 && this._runnerIndex > 0) {

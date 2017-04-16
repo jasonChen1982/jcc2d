@@ -176,12 +176,6 @@ Point.prototype.multiplyScalar = function (scalar) {
   return this;
 };
 
-/**
- * 事件系统的事件消息对象的基本类型
- *
- * @class
- * @memberof JC
- */
 function InteractionData() {
   /**
    * 转换到canvas坐标系统的事件触发点
@@ -348,7 +342,7 @@ Eventer.prototype.emit = function (type, ev) {
 /* eslint no-cond-assign: "off" */
 
 /**
- * TWEEN 缓动时间运动函数集合
+ * Tween 缓动时间运动函数集合
  *
  * ```js
  * dispay.fromTo({
@@ -357,10 +351,10 @@ Eventer.prototype.emit = function (type, ev) {
  *   ease: 'linear' // 配置要调用的运动函数
  * })
  * ```
- * @namespace JC.TWEEN
+ * @namespace JC.Tween
  */
 
-var TWEEN = {
+var Tween = {
   /**
    * 匀速运动函数
    *
@@ -369,7 +363,7 @@ var TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   linear: function linear(t, b, c, d) {
@@ -384,7 +378,7 @@ var TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   easeIn: function easeIn(t, b, c, d) {
@@ -399,7 +393,7 @@ var TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   easeOut: function easeOut(t, b, c, d) {
@@ -414,7 +408,7 @@ var TWEEN = {
    * @param {Number} c 结束值
    * @param {Number} d 总时间
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    * @return {Number} 当前时间对应的值
    */
   easeBoth: function easeBoth(t, b, c, d) {
@@ -428,20 +422,20 @@ var TWEEN = {
    * 扩展运动函数
    *
    * ```js
-   * JC.TWEEN.extend({
+   * JC.Tween.extend({
    *   elasticIn: function(t, b, c, d){....},
    *   elasticOut: function(t, b, c, d){....},
    *   ......
    * })
    * ```
-   * @param {Number} opts 扩展的时间函数
+   * @param {Number} options 扩展的时间函数
    * @static
-   * @memberof JC.TWEEN
+   * @memberof JC.Tween
    */
-  extend: function extend(opts) {
-    if (!opts) return;
-    for (var key in opts) {
-      if (key !== 'extend' && opts[key]) this[key] = opts[key];
+  extend: function extend(options) {
+    if (!options) return;
+    for (var key in options) {
+      if (key !== 'extend' && options[key]) this[key] = options[key];
     }
   }
 };
@@ -456,16 +450,16 @@ function _rt(val) {
 }
 
 /**
- * UTILS 引擎工具箱
+ * Utils 引擎工具箱
  *
- * @namespace JC.UTILS
+ * @namespace JC.Utils
  */
-var UTILS = {
+var Utils = {
   /**
    * 简单拷贝纯数据的JSON对象
    *
    * @static
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {JSON} json 待拷贝的纯数据JSON
    * @return {JSON} 拷贝后的纯数据JSON
    */
@@ -477,7 +471,7 @@ var UTILS = {
    * 将角度转化成弧度的乘法因子
    *
    * @static
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @type {number}
    */
   DTR: Math.PI / 180,
@@ -486,7 +480,7 @@ var UTILS = {
    * 将弧度转化成角度的乘法因子
    *
    * @static
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @type {number}
    */
   RTD: 180 / Math.PI,
@@ -496,7 +490,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Array} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -512,7 +506,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Object} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -528,7 +522,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {String} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -544,7 +538,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Number} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -560,7 +554,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Function} variable 待判断的变量
    * @return {Boolean} 判断的结果
    */
@@ -576,7 +570,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
    * @param {Number} max 所给定区间较大的数字
    * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
@@ -592,7 +586,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Number} n 索引
    * @param {Number} m 模
    * @return {Number} 映射到模长内到索引
@@ -606,7 +600,7 @@ var UTILS = {
    *
    * @static
    * @method
-   * @memberof JC.UTILS
+   * @memberof JC.Utils
    * @param {Number} x 待闭合到值
    * @param {Number} a 闭合区间左边界
    * @param {Number} b 闭合区间右边界
@@ -614,35 +608,82 @@ var UTILS = {
    */
   clamp: function clamp(x, a, b) {
     return x < a ? a : x > b ? b : x;
+  },
+
+  /**
+   * 线性插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  linear: function linear(x, min, max) {
+    if (x <= min) return 0;
+    if (x >= max) return 1;
+    x = (x - min) / (max - min);
+    return x;
+  },
+
+  /**
+   * 平滑插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  smoothstep: function smoothstep(x, min, max) {
+    if (x <= min) return 0;
+    if (x >= max) return 1;
+    x = (x - min) / (max - min);
+    return x * x * (3 - 2 * x);
+  },
+
+  /**
+   * 更平滑的插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  smootherstep: function smootherstep(x, min, max) {
+    if (x <= min) return 0;
+    if (x >= max) return 1;
+    x = (x - min) / (max - min);
+    return x * x * x * (x * (x * 6 - 15) + 10);
   }
 };
 
-/**
- * 动画对象的基本类型
- *
- * @class
- * @memberof JC
- * @param {object} [opts] 动画配置信息
- */
-function Animate(opts) {
-  this.element = opts.element || {};
-  this.duration = opts.duration || 300;
+function Animate(options) {
+  this.element = options.element || {};
+  this.duration = options.duration || 300;
   this.living = true;
 
-  this.onCompelete = opts.onCompelete || null;
-  this.onUpdate = opts.onUpdate || null;
+  this.onCompelete = options.onCompelete || null;
+  this.onUpdate = options.onUpdate || null;
 
-  this.infinity = opts.infinity || false;
-  this.alternate = opts.alternate || false;
-  this.ease = opts.ease || 'easeBoth';
-  this.repeats = opts.repeats || 0;
-  this.delay = opts.delay || 0;
-  this.wait = opts.wait || 0;
+  this.infinity = options.infinity || false;
+  this.alternate = options.alternate || false;
+  this.ease = options.ease || 'easeBoth';
+  this.repeats = options.repeats || 0;
+  this.delay = options.delay || 0;
+  this.wait = options.wait || 0;
   this.delayCut = this.delay;
   this.progress = 0;
   this.direction = 1;
 
-  this.timeScale = opts.timeScale || 1;
+  this.timeScale = options.timeScale || 1;
 
   this.totalTime = 0;
 
@@ -668,7 +709,7 @@ Animate.prototype.update = function (snippet) {
   }
 
   var snippetCache = this.direction * this.timeScale * snippet;
-  this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
   var pose = this.nextPose();
@@ -696,7 +737,7 @@ Animate.prototype.nextPose = function () {
   var cache = {};
   /* eslint guard-for-in: "off" */
   for (var i in this.to) {
-    cache[i] = TWEEN[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
+    cache[i] = Tween[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
     if (this.element[i] !== undefined) this.element[i] = cache[i];
   }
   return cache; // this.onUpdate
@@ -714,18 +755,11 @@ Animate.prototype.cancle = function () {
   this.living = false;
 };
 
-/**
- * Transition类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [opts] 动画所具备的特性
- */
-function Transition(opts) {
-  Animate.call(this, opts);
+function Transition(options) {
+  Animate.call(this, options);
 
-  this.from = opts.from;
-  this.to = opts.to;
+  this.from = options.from;
+  this.to = options.to;
 }
 Transition.prototype = Object.create(Animate.prototype);
 
@@ -883,23 +917,16 @@ Curve.prototype = {
 
 };
 
-/**
- * PathMotion类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [opts] 动画所具备的特性
- */
-function PathMotion(opts) {
-  Animate.call(this, opts);
-  if (!opts.path || !(opts.path instanceof Curve)) {
+function PathMotion(options) {
+  Animate.call(this, options);
+  if (!options.path || !(options.path instanceof Curve)) {
     console.warn('%c JC.PathMotion warn %c: path is not instanceof Curve', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;');
   }
 
-  this.path = opts.path;
-  this.attachTangent = opts.attachTangent || false;
+  this.path = options.path;
+  this.attachTangent = options.attachTangent || false;
   this._cacheRotate = this.element.rotation;
-  var radian = this._cacheRotate * UTILS.DTR;
+  var radian = this._cacheRotate * Utils.DTR;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
 
@@ -907,12 +934,10 @@ PathMotion.prototype = Object.create(Animate.prototype);
 
 PathMotion.prototype.nextPose = function () {
   var _rotate = 0;
-  var t = TWEEN[this.ease](this.progress, 0, 1, this.duration);
+  var t = Tween[this.ease](this.progress, 0, 1, this.duration);
   var pos = this.path.getPoint(t);
   var cache = pos.clone();
 
-  // cache.x = pos.x;
-  // cache.y = pos.y;
   if (this.attachTangent) {
     _rotate = this.decomposeRotate(t);
     cache.rotation = _rotate === false ? this.preDegree : _rotate;
@@ -924,15 +949,36 @@ PathMotion.prototype.nextPose = function () {
 };
 
 PathMotion.prototype.decomposeRotate = function (t) {
-  // var p1 = pos || this.getPoint(t, this.points);
-  // var p2 = this.getPoint(t + 0.01, this.points);
-  var vector = this.path.getTangent(t); // { x: p2.x - p1.x, y: p2.y - p1.y };
+  var vector = this.path.getTangent(t);
 
   var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
   var pi = nor > 0 ? 1 : -1;
   var cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y) / (Math.sqrt(vector.x * vector.x + vector.y * vector.y) * Math.sqrt(this._cacheVector.x * this._cacheVector.x + this._cacheVector.y * this._cacheVector.y));
   if (isNaN(cos)) return false;
-  return pi * Math.acos(cos) * UTILS.RTD;
+  return pi * Math.acos(cos) * Utils.RTD;
+};
+
+var PM = {
+  o: {
+    label: 'alpha',
+    scale: 0.01
+  },
+  r: {
+    label: 'rotation',
+    scale: 1
+  },
+  p: {
+    label: ['x', 'y'],
+    scale: 1
+  },
+  a: {
+    label: ['pivotX', 'pivotY'],
+    scale: 1
+  },
+  s: {
+    label: ['scaleX', 'scaleY'],
+    scale: 0.01
+  }
 };
 
 /**
@@ -940,29 +986,132 @@ PathMotion.prototype.decomposeRotate = function (t) {
  *
  * @class
  * @memberof JC
- * @param {object} [opts] 动画配置信息
+ * @param {object} [options] 动画配置信息
  */
-function KeyFrames(opts) {
-  Animate.call(this, opts);
+function KeyFrames(options) {
+  Animate.call(this, options);
 
-  this._keyframes = opts.keys;
-  this._keyIndex = 0;
-  this._cursor = 1;
-  this._keyConfig = opts.keyConfig;
+  this.keys = options.ks;
+  this.aks = {};
+  this.fr = this.keys.fr || 30;
+  this.rfr = 1000 / this.fr;
+  this.ip = this.keys.ip;
+  this.op = this.keys.op;
 
-  this.configKey();
+  this.tfs = Math.floor(this.op - this.ip);
+  this.duration = this.tfs * this.rfr;
+
+  this.jcst = this.ip * this.rfr;
+
+  this.preParser(Utils.copyJSON(options.ks));
 }
 KeyFrames.prototype = Object.create(Animate.prototype);
-KeyFrames.prototype.configKey = function () {
-  this.from = this._keyframes[this._keyIndex];
-  this._keyIndex += this._cursor;
-  this.to = this._keyframes[this._keyIndex];
-  var config = this._keyConfig[Math.min(this._keyIndex, this._keyIndex - this._cursor)] || {};
+
+KeyFrames.prototype.preParser = function (keys) {
+  var _this = this;
+
+  var ks = keys.ks;
+  for (var key in ks) {
+    if (ks[key] && ks[key].a) {
+      (function () {
+        _this.aks[key] = ks[key];
+        var kl = ks[key].k.length - 1;
+        var et = ks[key].k[kl].t;
+        var pPose = null;
+        _this.aks[key].jcet = et * _this.rfr;
+        _this.aks[key].k.forEach(function (pose) {
+          if (!pose.s && !pose.e && pPose) {
+            pose.s = pPose.e;
+            pose.e = pPose.e;
+          }
+          pPose = Utils.copyJSON(pose);
+        });
+      })();
+    }
+  }
+};
+
+KeyFrames.prototype.nextPose = function () {
+  var cache = {};
+  /* eslint guard-for-in: "off" */
+  for (var k in this.aks) {
+    var ak = this.aks[k];
+    cache[k] = this.interpolation(k, ak);
+  }
+  return cache;
+};
+
+KeyFrames.prototype.prepare = function (kk, ak) {
+  var k = ak.k;
+  var result = {};
+  var pRange = this.jcst;
+  var progress = Utils.clamp(this.progress, this.jcst, ak.jcet);
+  // let pose;
+  var range = 0;
+  for (var i = 0; i < k.length; i++) {
+    var pose = k[i];
+    range = pose.t * this.rfr;
+    result.pose = pose;
+    result.progress = progress - pRange;
+    result.range = [0, range - pRange];
+    if (this.progress > pRange && this.progress <= range) {
+      return result;
+    }
+    pRange = range;
+  }
+  return result;
+};
+KeyFrames.prototype.interpolation = function (k, ak) {
+  var info = this.prepare(k, ak);
+  if (!info.pose || !info.pose.s) return;
+  var p = Utils.linear(info.progress, info.range[0], info.range[1]);
+  var prop = PM[k].label;
+  var scale = PM[k].scale;
+  var s = 0;
+  var e = 0;
+  var cache = {};
+  if (Utils.isString(prop)) {
+    if (Utils.isNumber(info.pose.s)) {
+      e = info.pose.e;
+      s = info.pose.s;
+    }
+    if (Utils.isArray(info.pose.s)) {
+      e = info.pose.e[0];
+      s = info.pose.s[0];
+    }
+
+    cache[prop] = this.element[prop] = scale * (s + (e - s) * p);
+  } else if (Utils.isArray(prop)) {
+    for (var i = 0; i < prop.length; i++) {
+      e = info.pose.e[i];
+      s = info.pose.s[i];
+      cache[prop[i]] = this.element[prop[i]] = scale * (s + (e - s) * p);
+    }
+  }
+  return cache;
+};
+
+function AnimateRunner(options) {
+  Animate.call(this, options);
+
+  this._runners = options.runners;
+  this._runnerIndex = 0;
+  this._cursor = 1;
+  this._runnerConfig = options.runnersConfig;
+
+  this.configRunner();
+}
+AnimateRunner.prototype = Object.create(Animate.prototype);
+AnimateRunner.prototype.configRunner = function () {
+  this.from = this._runners[this._runnerIndex];
+  this._runnerIndex += this._cursor;
+  this.to = this._runners[this._runnerIndex];
+  var config = this._runnerConfig[Math.min(this._runnerIndex, this._runnerIndex - this._cursor)] || {};
   this.ease = config.ease || this.ease;
   this.duration = config.duration || this.duration;
   this.progress = 0;
 };
-KeyFrames.prototype.update = function (snippet) {
+AnimateRunner.prototype.update = function (snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
     return;
@@ -971,22 +1120,20 @@ KeyFrames.prototype.update = function (snippet) {
     if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
     return;
   }
-  // if (this.paused || !this.living) return;
 
   var snippetCache = this.direction * this.timeScale * snippet;
-  this.progress = UTILS.clamp(this.progress + snippetCache, 0, this.duration);
+  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
   var pose = this.nextPose();
   if (this.onUpdate) {
-    this.onUpdate(pose, this.progress / this.duration, this._keyIndex);
+    this.onUpdate(pose, this.progress / this.duration, this._runnerIndex);
   }
 
-  // this.progress += this.timeScale * snippet;
   if (this.totalTime >= this.duration) {
     this.totalTime = 0;
-    if (this._keyIndex < this._keyframes.length - 1 && this._keyIndex > 0) {
-      this.configKey();
+    if (this._runnerIndex < this._runners.length - 1 && this._runnerIndex > 0) {
+      this.configRunner();
     } else {
       if (this.repeats > 0 || this.infinity) {
         if (this.repeats > 0) --this.repeats;
@@ -995,9 +1142,9 @@ KeyFrames.prototype.update = function (snippet) {
           this._cursor *= -1;
         } else {
           this._cursor = 1;
-          this._keyIndex = 0;
+          this._runnerIndex = 0;
         }
-        this.configKey();
+        this.configRunner();
       } else {
         this.living = false;
         if (this.onCompelete) this.onCompelete();
@@ -1006,13 +1153,6 @@ KeyFrames.prototype.update = function (snippet) {
   }
 };
 
-/**
- * Animation类型动画对象
- *
- * @class
- * @memberof JC
- * @param {JC.DisplayObject} element
- */
 function Animation(element) {
   this.element = element;
   // this.start = false;
@@ -1024,27 +1164,39 @@ Animation.prototype.update = function (snippet) {
     if (this.animates[i]) this.animates[i].update(snippet);
   }
 };
-Animation.prototype.fromTo = function (opts, clear) {
-  this.element.setProps(opts.from);
-  opts.element = this.element;
-  return this._addMove(new Transition(opts), clear);
-};
-Animation.prototype.to = function (opts, clear) {
-  opts.from = {};
-  /* eslint guard-for-in: "off" */
-  for (var i in opts.to) {
-    opts.from[i] = this.element[i];
+Animation.prototype.animate = function (options, clear) {
+  if (Utils.isObject(options.from)) {
+    this.element.setProps(options.from);
+  } else {
+    options.from = {};
+    /* eslint guard-for-in: "off" */
+    for (var i in options.to) {
+      options.from[i] = this.element[i];
+    }
   }
-  opts.element = this.element;
-  return this._addMove(new Transition(opts), clear);
+  options.element = this.element;
+  return this._addMove(new Transition(options), clear);
 };
-Animation.prototype.motion = function (opts, clear) {
-  opts.element = this.element;
-  return this._addMove(new PathMotion(opts), clear);
+// Animation.prototype.to = function(options, clear) {
+//   options.from = {};
+//   /* eslint guard-for-in: "off" */
+//   for (let i in options.to) {
+//     options.from[i] = this.element[i];
+//   }
+//   options.element = this.element;
+//   return this._addMove(new Transition(options), clear);
+// };
+Animation.prototype.motion = function (options, clear) {
+  options.element = this.element;
+  return this._addMove(new PathMotion(options), clear);
 };
-Animation.prototype.keyFrames = function (opts, clear) {
-  opts.element = this.element;
-  return this._addMove(new KeyFrames(opts), clear);
+Animation.prototype.runners = function (options, clear) {
+  options.element = this.element;
+  return this._addMove(new AnimateRunner(options), clear);
+};
+Animation.prototype.keyFrames = function (options, clear) {
+  options.element = this.element;
+  return this._addMove(new KeyFrames(options), clear);
 };
 Animation.prototype._addMove = function (animate, clear) {
   if (clear) this.clear();
@@ -1055,15 +1207,6 @@ Animation.prototype.clear = function () {
   this.animates.length = 0;
 };
 
-/**
- * 图片纹理类
- *
- * @class
- * @memberof JC
- * @param {string | Image} img 图片url或者图片对象.
- * @param {Boolean} lazy 图片是否需要懒加载
- * @extends JC.Eventer
- */
 function Texture(img, lazy) {
   Eventer.call(this);
   this.texture = null;
@@ -1075,7 +1218,7 @@ function Texture(img, lazy) {
   this.hadload = false;
   this.src = img;
   this.resole(img);
-  if (!lazy || !UTILS.isString(img)) this.load(img);
+  if (!lazy || !Utils.isString(img)) this.load(img);
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
@@ -1087,7 +1230,7 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.resole = function (img) {
-  if (UTILS.isString(img)) {
+  if (Utils.isString(img)) {
     this.texture = new Image();
   }
   if (img instanceof Image || img.nodeName === 'IMG') {
@@ -1107,7 +1250,7 @@ Texture.prototype.load = function (img) {
   var This = this;
   this.hadload = true;
   img = img || this.src;
-  if (UTILS.isString(img)) {
+  if (Utils.isString(img)) {
     this.texture.crossOrigin = '';
     this.texture.src = img;
     this.texture.onload = function () {
@@ -1309,16 +1452,6 @@ Rectangle.prototype.contains = function (x, y) {
   return false;
 };
 
-/**
- * 显示对象的包围盒子
- *
- * @class
- * @param {Number} minX
- * @param {Number} minY
- * @param {Number} maxX
- * @param {Number} maxY
- * @memberof JC
- */
 function Bounds(minX, minY, maxX, maxY) {
   /**
    * @member {number}
@@ -1448,13 +1581,8 @@ Bounds.prototype.addBounds = function (bounds) {
   this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
-/**
- * @class
- * @memberof JC
- * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
- */
 function Polygon(points) {
-  if (!UTILS.isArray(points)) {
+  if (!Utils.isArray(points)) {
     points = new Array(arguments.length);
     /* eslint-disable */
     for (var a = 0; a < points.length; ++a) {
@@ -1512,15 +1640,6 @@ Polygon.prototype.contains = function (x, y) {
   return inside;
 };
 
-/**
- * 圆形对象
- *
- * @class
- * @memberof JC
- * @param {number} x x轴的坐标
- * @param {number} y y轴的坐标
- * @param {number} radius 圆的半径
- */
 function Circle(x, y, radius) {
   /**
    * @member {number}
@@ -1581,16 +1700,6 @@ Circle.prototype.getBounds = function () {
   return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 };
 
-/**
- * 椭圆对象
- *
- * @class
- * @memberof JC
- * @param {number} x x轴的坐标
- * @param {number} y y轴的坐标
- * @param {number} width 椭圆的宽度
- * @param {number} height 椭圆的高度
- */
 function Ellipse(x, y, width, height) {
   /**
    * @member {number}
@@ -1871,10 +1980,6 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 var IDENTITY = new Matrix();
 var TEMP_MATRIX = new Matrix();
 
-/**
- *
- * @param {Array}  points  array of points
- */
 function BezierCurve(points) {
   this.points = points;
 }
@@ -1901,14 +2006,8 @@ BezierCurve.prototype.getPoint = function (t, points) {
   }
 };
 
-// SvgCurve.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // TODO: some like don`t need svg tag to wrap
-
-/**
- *
- * @param {String}  path  array of points
- */
 function SvgCurve(path) {
-  if (UTILS.isString(path)) {
+  if (Utils.isString(path)) {
     this.path = this.createPath(path);
   } else if (path.nodeName === 'path' && path.getAttribute('d')) {
     this.path = path;
@@ -2298,12 +2397,6 @@ var NURBSUtils = {
 
 };
 
-/**
- *
- * @param {Number} degree
- * @param {Array}  knots           array of reals
- * @param {Array}  controlPoints   array of Point
- */
 function NURBSCurve(degree, knots, controlPoints) {
   this.degree = degree;
   this.knots = knots;
@@ -2336,13 +2429,6 @@ NURBSCurve.prototype.getTangent = function (t) {
   return tangent;
 };
 
-/**
- * 显示对象的基类，继承至Eventer
- *
- * @class
- * @extends JC.Eventer
- * @memberof JC
- */
 function DisplayObject() {
   Eventer.call(this);
   /**
@@ -2560,21 +2646,21 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param {object} [opts] 动画配置参数
- * @param {json} [opts.from] json格式，设置对象的起始位置和起始姿态等
- * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {json} [options.from] json格式，设置对象的起始位置和起始姿态等，该项配置可选
+ * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.fromTo = function (opts, clear) {
-  return this.Animation.fromTo(opts, clear);
+DisplayObject.prototype.animate = function (options, clear) {
+  return this.Animation.animate(options, clear);
 };
 
 /**
@@ -2593,21 +2679,21 @@ DisplayObject.prototype.fromTo = function (opts, clear) {
  * });
  * ```
  *
- * @param {object} [opts] 动画配置参数
- * @param {json} [opts.to] json格式，设置对象的结束位置和结束姿态等
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.to = function (opts, clear) {
-  return this.Animation.to(opts, clear);
-};
+// DisplayObject.prototype.to = function(options, clear) {
+//   return this.Animation.to(options, clear);
+// };
 
 /* eslint max-len: "off" */
 /**
@@ -2626,21 +2712,21 @@ DisplayObject.prototype.to = function (opts, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param {object} [opts] 动画配置参数
- * @param {Curve} [opts.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
- * @param {Boolean} [opts.attachTangent] 物体是否捕获切线方向
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {Curve} [options.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.motion = function (opts, clear) {
-  return this.Animation.motion(opts, clear);
+DisplayObject.prototype.motion = function (options, clear) {
+  return this.Animation.motion(options, clear);
 };
 
 /**
@@ -2648,33 +2734,28 @@ DisplayObject.prototype.motion = function (opts, clear) {
  *
  * ```js
  * dispay.keyFrames({
- *   keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90}],
- *   keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000}],
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   ks: data.layers[0], // ae导出的动画数据
+ *   fr: 30, // 动画的帧率，默认：30fps
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinity: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
- * @param {object} [opts] 动画配置参数
- * @param {json} [opts.keys] 配置关键帧的位置、姿态
- * @param {json} [opts.keyConfig] 相邻两个关键帧之间的动画运动配置
- * @param {String} [opts.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [opts.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [opts.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [opts.alternate] 设置动画是否偶数次回返
- * @param {Number} [opts.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [opts.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [opts.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {object} [options] 动画配置参数
+ * @param {json} [options.ks] 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
+ * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
-DisplayObject.prototype.keyFrames = function (opts, clear) {
-  return this.Animation.keyFrames(opts, clear);
+DisplayObject.prototype.keyFrames = function (options, clear) {
+  return this.Animation.keyFrames(options, clear);
 };
 
 /**
@@ -2730,7 +2811,7 @@ DisplayObject.prototype.updateTransform = function () {
   var ty = void 0;
 
   if (this.skewX || this.skewY) {
-    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * UTILS.DTR, this.skewX * UTILS.DTR, this.skewY * UTILS.DTR);
+    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * Utils.DTR, this.skewX * Utils.DTR, this.skewY * Utils.DTR);
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
     wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
@@ -2742,8 +2823,8 @@ DisplayObject.prototype.updateTransform = function () {
     if (this.rotation % 360) {
       if (this.rotation !== this.rotationCache) {
         this.rotationCache = this.rotation;
-        this._sr = Math.sin(this.rotation * UTILS.DTR);
-        this._cr = Math.cos(this.rotation * UTILS.DTR);
+        this._sr = Math.sin(this.rotation * Utils.DTR);
+        this._cr = Math.cos(this.rotation * Utils.DTR);
       }
 
       a = this._cr * this.scaleX;
@@ -2836,18 +2917,6 @@ DisplayObject.prototype.contains = function (global) {
   return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
 
-/**
- * 显示对象容器，继承至DisplayObject
- *
- * ```js
- * var container = new JC.Container();
- * container.addChilds(sprite);
- * ```
- *
- * @class
- * @extends JC.DisplayObject
- * @memberof JC
- */
 function Container() {
   DisplayObject.call(this);
 
@@ -3151,16 +3220,7 @@ Container.prototype.cancle = function () {
   this.Animator.clear();
 };
 
-// TODO 继承事件对象
-/**
- * MovieClip类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [element] 动画对象 内部传入
- * @param {object} [opts] 动画配置信息 内部传入
- */
-function MovieClip(element, opts) {
+function MovieClip(element, options) {
   this.element = element;
   this.living = false;
 
@@ -3171,15 +3231,14 @@ function MovieClip(element, opts) {
   this.alternate = false;
   this.repeats = 0;
 
-  this.animations = opts.animations || {};
+  this.animations = options.animations || {};
 
   this.index = 0;
   this.preIndex = -1;
   this.direction = 1;
   this.frames = [];
   this.preFrame = null;
-  // this.sy = opts.sy || 0;
-  // this.sx = opts.sx || 0;
+
   this.fillMode = 0;
   this.fps = 16;
 
@@ -3209,7 +3268,7 @@ MovieClip.prototype.update = function (snippet) {
         this.index = 0;
       }
       // Do you need this handler???
-      // this.onUpdate&&this.onUpdate(this.index);
+      // this.onUpdate && this.onUpdate(this.index);
     } else {
       this.living = false;
       this.index = this.fillMode;
@@ -3225,7 +3284,7 @@ MovieClip.prototype.getFrame = function () {
   if (cf > 0) {
     var row = this.element.naturalWidth / this.element.frame.width >> 0;
     var lintRow = this.element.frame.x / this.element.frame.width >> 0;
-    // var lintCol = this.element.frame.y / this.element.frame.height >> 0;
+
     var mCol = (lintRow + cf) / row >> 0;
     var mRow = (lintRow + cf) % row;
     frame.x = mRow * this.element.frame.width;
@@ -3235,23 +3294,23 @@ MovieClip.prototype.getFrame = function () {
   this.preFrame = frame;
   return frame;
 };
-MovieClip.prototype.playMovie = function (opts) {
+MovieClip.prototype.playMovie = function (options) {
   this.next = null;
-  var movie = this.format(opts.movie);
-  if (!UTILS.isArray(movie)) return;
+  var movie = this.format(options.movie);
+  if (!Utils.isArray(movie)) return;
   this.frames = movie;
   this.index = 0;
   this.direction = 1;
-  this.fillMode = opts.fillMode || 0;
-  this.fps = opts.fps || this.fps;
-  this.infinity = opts.infinity || false;
-  this.alternate = opts.alternate || false;
-  this.repeats = opts.repeats || 0;
+  this.fillMode = options.fillMode || 0;
+  this.fps = options.fps || this.fps;
+  this.infinity = options.infinity || false;
+  this.alternate = options.alternate || false;
+  this.repeats = options.repeats || 0;
   this.living = true;
-  this.onCompelete = opts.onCompelete || null;
+  this.onCompelete = options.onCompelete || null;
 };
 MovieClip.prototype.format = function (movie) {
-  if (UTILS.isString(movie)) {
+  if (Utils.isString(movie)) {
     var config = this.animations[movie];
     if (config) {
       return this.format(config);
@@ -3260,9 +3319,9 @@ MovieClip.prototype.format = function (movie) {
       console.warn('%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;', 'color: #f98165; background: #cad9d5', 'color: #80a89e; background: #cad9d5');
       return false;
     }
-  } else if (UTILS.isArray(movie)) {
+  } else if (Utils.isArray(movie)) {
     return movie;
-  } else if (UTILS.isObject(movie)) {
+  } else if (Utils.isObject(movie)) {
     var arr = [];
     for (var i = movie.start; i <= movie.end; i++) {
       arr.push(i);
@@ -3270,13 +3329,13 @@ MovieClip.prototype.format = function (movie) {
     if (movie.next && this.animations[movie.next]) {
       var This = this;
       var conf = {};
-      if (UTILS.isString(movie.next) && this.animations[movie.next]) {
+      if (Utils.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
         conf.infinity = true;
-      } else if (UTILS.isObject(movie.next)) {
+      } else if (Utils.isObject(movie.next)) {
         conf = movie.next;
       }
-      if (UTILS.isString(conf.movie)) {
+      if (Utils.isString(conf.movie)) {
         this.next = function () {
           This.playMovie(conf);
         };
@@ -3300,49 +3359,22 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
   }
 });
 
-/**
- * 位图精灵图，继承至Container
- *
- * ```js
- * var loadBox = JC.loaderUtil({
- *    frames: './images/frames.png'
- * });
- * var sprite = new JC.Sprite({
- *      texture: loadBox.getById('frames'),
- *      frame: new JC.Rectangle(0, 0, w, h),
- *      width: 100,
- *      height: 100,
- *      count: 38,
- *      animations: {
- *          fall: {start: 0,end: 4,next: 'stand'},
- *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
- *          stand: {start: 10,end: 39},
- *          walk: {start: 40,end: 59,next: 'stand'}
- *      }
- * });
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- * @param {json} opts
- */
-function Sprite(opts) {
+function Sprite(options) {
   Container.call(this);
 
-  this.texture = opts.texture;
+  this.texture = options.texture;
   if (this.texture.loaded) {
-    this.upTexture(opts);
+    this.upTexture(options);
   } else {
     var This = this;
     this._ready = false;
     this.texture.on('load', function () {
-      This.upTexture(opts);
+      This.upTexture(options);
       This._ready = true;
     });
   }
 
-  this.MovieClip = new MovieClip(this, opts);
+  this.MovieClip = new MovieClip(this, options);
 }
 Sprite.prototype = Object.create(Container.prototype);
 
@@ -3351,15 +3383,15 @@ Sprite.prototype = Object.create(Container.prototype);
  *
  * @method upTexture
  * @private
- * @param {json} opts
+ * @param {json} options
  */
-Sprite.prototype.upTexture = function (opts) {
-  this.naturalWidth = opts.texture.naturalWidth;
-  this.naturalHeight = opts.texture.naturalHeight;
-  this.frame = opts.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
+Sprite.prototype.upTexture = function (options) {
+  this.naturalWidth = options.texture.naturalWidth;
+  this.naturalHeight = options.texture.naturalHeight;
+  this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
 
-  this.width = opts.width || this.frame.width || this.naturalWidth;
-  this.height = opts.height || this.frame.height || this.naturalHeight;
+  this.width = options.width || this.frame.width || this.naturalWidth;
+  this.height = options.height || this.frame.height || this.naturalHeight;
   this.regX = this.width >> 1;
   this.regY = this.height >> 1;
   var rect = new Rectangle(-this.regX, -this.regY, this.width, this.height);
@@ -3381,10 +3413,10 @@ Sprite.prototype.updateAnimation = function (snippet) {
 
 /**
  * 播放逐帧动画
- * @param {json} opts
+ * @param {json} options
  */
-Sprite.prototype.playMovie = function (opts) {
-  this.MovieClip.playMovie(opts);
+Sprite.prototype.playMovie = function (options) {
+  this.MovieClip.playMovie(options);
 };
 
 /**
@@ -3518,18 +3550,6 @@ var set$1 = function set$1(object, property, value, receiver) {
   return value;
 };
 
-/**
- * 形状对象，继承至Container
- *
- *
- * ```js
- * var graphics = new JC.Graphics();
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- */
 function Graphics() {
   Container.call(this);
   this.frameBuffer = null;
@@ -3591,39 +3611,19 @@ Graphics.prototype._drawBack = function (ctx) {
  * ```
  *
  * @param {function} fn
- * @param {object} opts
+ * @param {object} options
  */
-Graphics.prototype.drawCall = function (fn, opts) {
+Graphics.prototype.drawCall = function (fn, options) {
   if (fn === undefined) return;
-  opts = opts || {};
-  this.cache = opts.cache || false;
+  options = options || {};
+  this.cache = options.cache || false;
   this.cached = false;
   /* eslint max-len: "off" */
-  // this.session = opts.session || { bounds: { x: 0, y: 0 }, width: 100, height: 100 };
   this.draw = fn || null;
 
-  this.setBounds(opts.bounds);
+  this.setBounds(options.bounds);
 };
 
-/**
- * 文本，继承至Container
- *
- *
- * ```js
- * var text = new JC.TextFace(
- *              'JC jcc2d canvas renderer',
- *              'bold 36px Arial',
- *              '#f00'
- *            );
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- * @param {string} text
- * @param {string} font
- * @param {string} color
- */
 function TextFace(text, font, color) {
   Container.call(this);
   this.text = text.toString();
@@ -3666,12 +3666,6 @@ TextFace.prototype.renderMe = function (ctx) {
   }
 };
 
-/**
- *
- * @param {number} blurX x轴的模糊值
- * @param {number} blurY y轴的模糊值
- * @param {number} quality 模糊的质量，模糊计算会被递归多少次
- */
 function BlurFilter(blurX, blurY, quality) {
     Container.call(this);
 
@@ -4019,10 +4013,6 @@ BlurFilter.prototype._applyFilter = function (imageData) {
     return true;
 };
 
-/**
- *
- * @param {JC.Stage} stage 徐亚接入事件系统的的场景
- */
 function InteractionManager(stage) {
   Eventer.call(this);
   this.stage = stage;
@@ -4344,19 +4334,6 @@ InteractionManager.prototype.getPos = function (obj) {
   return pos;
 };
 
-/**
- * 舞台对象，继承至Eventer
- *
- *
- * ```js
- * var stage = new JC.Stage('demo_canvas','#fff');
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- * @param {json} options
- */
 function Stage(options) {
   // canvas, bgColor, resolution
   options = options || {};
@@ -4367,7 +4344,7 @@ function Stage(options) {
    *
    * @member {CANVAS}
    */
-  this.canvas = UTILS.isString(options.dom) ? document.getElementById(options.dom) : options.dom;
+  this.canvas = Utils.isString(options.dom) ? document.getElementById(options.dom) : options.dom;
 
   this.realWidth = options.width || this.canvas.width;
   this.realHeight = options.height || this.canvas.height;
@@ -4601,7 +4578,7 @@ Object.defineProperty(Stage.prototype, 'resolution', {
  * @param {number} sh canvas的style.height值，需将舞台属性autoStyle设置为true
  */
 Stage.prototype.resize = function (w, h, sw, sh) {
-  if (UTILS.isNumber(w) && UTILS.isNumber(h)) {
+  if (Utils.isNumber(w) && Utils.isNumber(h)) {
     this.realWidth = w;
     this.realHeight = h;
   } else {
@@ -4611,8 +4588,8 @@ Stage.prototype.resize = function (w, h, sw, sh) {
   this.width = this.canvas.width = w * this.resolution;
   this.height = this.canvas.height = h * this.resolution;
   if (this.autoStyle && sw && sh) {
-    this.canvas.style.width = UTILS.isString(sw) ? sw : sw + 'px';
-    this.canvas.style.height = UTILS.isString(sh) ? sh : sh + 'px';
+    this.canvas.style.width = Utils.isString(sw) ? sw : sw + 'px';
+    this.canvas.style.height = Utils.isString(sh) ? sh : sh + 'px';
   }
 };
 
@@ -4687,8 +4664,8 @@ Stage.prototype.updatePosture = function (snippet) {
   }
 };
 
-exports.TWEEN = TWEEN;
-exports.UTILS = UTILS;
+exports.Tween = Tween;
+exports.Utils = Utils;
 exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;

@@ -35,7 +35,7 @@ Rect.prototype.render = function(ctx){
     ctx.fill();
 };
 
-JC.TWEEN.extend(tween);
+JC.Tween.extend(tween);
 
 var shape = [],
     stage = new JC.Stage({
@@ -52,7 +52,7 @@ document.body.appendChild(stats.domElement);
 
 shape[0] = new JC.Graphics();
 shape[0].drawCall(new Rect('#749d9b'));
-shape[0].fromTo({
+shape[0].animate({
     from: {x: -160},
     to: {x: 160},
     ease: 'elasticIn',
@@ -60,7 +60,7 @@ shape[0].fromTo({
     infinity: true,
     alternate: true
 });
-shape[0].fromTo({
+shape[0].animate({
     from: {rotation: -180},
     to: {rotation: 0},
     ease: 'elasticOut',
@@ -72,7 +72,7 @@ DOC.adds(shape[0]);
 
 shape[1] = new JC.Graphics();
 shape[1].drawCall(new Rect('#e46d69'));
-shape[1].fromTo({
+shape[1].animate({
     from: {x: 160},
     to: {x: -160},
     ease: 'elasticIn',
@@ -80,7 +80,7 @@ shape[1].fromTo({
     infinity: true,
     alternate: true
 });
-shape[1].fromTo({
+shape[1].animate({
     from: {rotation: 180},
     to: {rotation: -0},
     ease: 'elasticOut',
@@ -92,7 +92,7 @@ DOC.adds(shape[1]);
 
 shape[2] = new JC.Graphics();
 shape[2].drawCall(new Rect('#acba9d'));
-shape[2].fromTo({
+shape[2].animate({
     from: {y: 160},
     to: {y: -160},
     ease: 'elasticIn',
@@ -100,7 +100,7 @@ shape[2].fromTo({
     infinity: true,
     alternate: true
 });
-shape[2].fromTo({
+shape[2].animate({
     from: {rotation: 180},
     to: {rotation: -0},
     ease: 'elasticOut',
@@ -112,7 +112,7 @@ DOC.adds(shape[2]);
 
 shape[3] = new JC.Graphics();
 shape[3].drawCall(new Rect('#ebca88'));
-shape[3].fromTo({
+shape[3].animate({
     from: {y: -160},
     to: {y: 160},
     ease: 'elasticIn',
@@ -120,7 +120,7 @@ shape[3].fromTo({
     infinity: true,
     alternate: true
 });
-shape[3].fromTo({
+shape[3].animate({
     from: {rotation: 180},
     to: {rotation: -0},
     ease: 'elasticOut',

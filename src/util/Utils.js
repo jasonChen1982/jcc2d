@@ -169,4 +169,58 @@ export const Utils = {
   clamp: function(x, a, b) {
     return (x < a) ? a : ((x > b) ? b : x);
   },
+
+  /**
+   * 线性插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  linear: function( x, min, max ) {
+    if ( x <= min ) return 0;
+    if ( x >= max ) return 1;
+    x = ( x - min ) / ( max - min );
+    return x;
+  },
+
+  /**
+   * 平滑插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  smoothstep: function( x, min, max ) {
+    if ( x <= min ) return 0;
+    if ( x >= max ) return 1;
+    x = ( x - min ) / ( max - min );
+    return x * x * ( 3 - 2 * x );
+  },
+
+  /**
+   * 更平滑的插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  smootherstep: function( x, min, max ) {
+    if ( x <= min ) return 0;
+    if ( x >= max ) return 1;
+    x = ( x - min ) / ( max - min );
+    return x * x * x * ( x * ( x * 6 - 15 ) + 10 );
+  },
 };

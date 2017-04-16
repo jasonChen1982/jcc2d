@@ -1,5 +1,5 @@
 
-JC.TWEEN.extend(tween);
+JC.Tween.extend(tween);
 
 window.onresize = function() {
     resize();
@@ -13,7 +13,7 @@ function NoiseLine(opts) {
     this.channle = opts.channle;
     this.SEGMENT = 8;
     this.amplitude = Math.min(w, h) / 6;
-    this.timeScale = JC.UTILS.random(0.8, 1.4);
+    this.timeScale = JC.Utils.random(0.8, 1.4);
 }
 NoiseLine.prototype.update = function(snippet) {
     var SEGMENT = this.SEGMENT,

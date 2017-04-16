@@ -71,7 +71,7 @@ loadBox.on('compelete',function(){
         infinity: true
     });
     runMan.on('click',function(){
-        var movie = JC.UTILS.random(['walk','fly','fall']);
+        var movie = JC.Utils.random(['walk','fly','fall']);
         document.querySelector('#movie').innerHTML = movie;
         runMan.playMovie({
             movie: movie,

@@ -230,7 +230,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * ```
  *
  * @param {object} [options] 动画配置参数
- * @param {json} [options.from] json格式，设置对象的起始位置和起始姿态等，该项配置可有可无
+ * @param {json} [options.from] json格式，设置对象的起始位置和起始姿态等，该项配置可选
  * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
@@ -245,38 +245,6 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
 DisplayObject.prototype.animate = function(options, clear) {
   return this.Animation.animate(options, clear);
 };
-
-/**
- * to动画，物体当前位置为动画的启始位置，只需制定动画的结束位置
- *
- * ```js
- * dispay.to({
- *   to: {x: 200},
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
- *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {object} [options] 动画配置参数
- * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
- */
-// DisplayObject.prototype.to = function(options, clear) {
-//   return this.Animation.to(options, clear);
-// };
 
 /* eslint max-len: "off" */
 /**
@@ -317,26 +285,21 @@ DisplayObject.prototype.motion = function(options, clear) {
  *
  * ```js
  * dispay.keyFrames({
- *   keys: [{x:-100,y:-200,rotation:0},{x:100,y:-200,rotation:-180},{x:-100,y:200,rotation:90}],
- *   keyConfig: [{ease:'elasticIn',duration: 1000},{ease:'backIn',duration: 1000}],
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   ks: data.layers[0], // ae导出的动画数据
+ *   fr: 30, // 动画的帧率，默认：30fps
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinity: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
  * @param {object} [options] 动画配置参数
- * @param {json} [options.keys] 配置关键帧的位置、姿态
- * @param {json} [options.keyConfig] 相邻两个关键帧之间的动画运动配置
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {json} [options.ks] 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
  * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画

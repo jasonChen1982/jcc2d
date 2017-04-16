@@ -1,6 +1,6 @@
 import {Utils} from '../util/Utils';
 
-// TODO 继承事件对象
+// TODO: 继承事件对象
 /**
  * MovieClip类型动画对象
  *
@@ -27,8 +27,7 @@ function MovieClip(element, options) {
   this.direction = 1;
   this.frames = [];
   this.preFrame = null;
-  // this.sy = options.sy || 0;
-  // this.sx = options.sx || 0;
+
   this.fillMode = 0;
   this.fps = 16;
 
@@ -58,7 +57,7 @@ MovieClip.prototype.update = function(snippet) {
         this.index = 0;
       }
       // Do you need this handler???
-      // this.onUpdate&&this.onUpdate(this.index);
+      // this.onUpdate && this.onUpdate(this.index);
     } else {
       this.living = false;
       this.index = this.fillMode;
@@ -78,7 +77,7 @@ MovieClip.prototype.getFrame = function() {
   if (cf > 0) {
     let row = this.element.naturalWidth / this.element.frame.width >> 0;
     let lintRow = this.element.frame.x / this.element.frame.width >> 0;
-    // var lintCol = this.element.frame.y / this.element.frame.height >> 0;
+
     let mCol = (lintRow + cf) / row >> 0;
     let mRow = (lintRow + cf) % row;
     frame.x = mRow * this.element.frame.width;

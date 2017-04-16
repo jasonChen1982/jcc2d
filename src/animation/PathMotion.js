@@ -36,8 +36,6 @@ PathMotion.prototype.nextPose = function() {
   const pos = this.path.getPoint(t);
   const cache = pos.clone();
 
-  // cache.x = pos.x;
-  // cache.y = pos.y;
   if (this.attachTangent) {
     _rotate = this.decomposeRotate(t);
     cache.rotation = _rotate === false ? this.preDegree : _rotate;
@@ -49,9 +47,7 @@ PathMotion.prototype.nextPose = function() {
 };
 
 PathMotion.prototype.decomposeRotate = function(t) {
-  // var p1 = pos || this.getPoint(t, this.points);
-  // var p2 = this.getPoint(t + 0.01, this.points);
-  let vector = this.path.getTangent(t); // { x: p2.x - p1.x, y: p2.y - p1.y };
+  let vector = this.path.getTangent(t);
 
   let nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
   let pi = nor > 0 ? 1 : -1;
