@@ -1,0 +1,4543 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Class: DisplayObject</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":false,"cleverLinks":false,"default":{"outputSourceFiles":true},"applicationName":"jcc2d","footer":"Made with ♥ by Jason Chen (http://www.jason82.com)","copyright":"jcc2d Copyright © 2013-2017 Jason Chen.","disqus":"","googleAnalytics":"","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    </script>
+    
+
+    
+</head>
+<body>
+<div id="wrap" class="clearfix">
+    
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">jcc2d</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="JC.Loader">
+            <span class="title">
+                <a href="JC.Loader.html">JC.Loader</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Loader.progress"><a href="JC.Loader.html#.progress">progress</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Loader.Loader#getById"><a href="JC.Loader.html#.Loader#getById">Loader#getById</a></li>
+            
+                <li data-name="JC.Loader.Loader#load"><a href="JC.Loader.html#.Loader#load">Loader#load</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Tween">
+            <span class="title">
+                <a href="JC.Tween.html">JC.Tween</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Tween.easeBoth"><a href="JC.Tween.html#.easeBoth">easeBoth</a></li>
+            
+                <li data-name="JC.Tween.easeIn"><a href="JC.Tween.html#.easeIn">easeIn</a></li>
+            
+                <li data-name="JC.Tween.easeOut"><a href="JC.Tween.html#.easeOut">easeOut</a></li>
+            
+                <li data-name="JC.Tween.extend"><a href="JC.Tween.html#.extend">extend</a></li>
+            
+                <li data-name="JC.Tween.linear"><a href="JC.Tween.html#.linear">linear</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Utils">
+            <span class="title">
+                <a href="JC.Utils.html">JC.Utils</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Utils.DTR"><a href="JC.Utils.html#.DTR">DTR</a></li>
+            
+                <li data-name="JC.Utils.RTD"><a href="JC.Utils.html#.RTD">RTD</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
+            
+                <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
+            
+                <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
+            
+                <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
+            
+                <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
+            
+                <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
+            
+                <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
+            
+                <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
+            
+                <li data-name="JC.Utils.random"><a href="JC.Utils.html#.random">random</a></li>
+            
+                <li data-name="JC.Utils.smootherstep"><a href="JC.Utils.html#.smootherstep">smootherstep</a></li>
+            
+                <li data-name="JC.Utils.smoothstep"><a href="JC.Utils.html#.smoothstep">smoothstep</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Curve">
+            <span class="title">
+                <a href="Curve.html">Curve</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FrameBuffer">
+            <span class="title">
+                <a href="FrameBuffer.html">FrameBuffer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Animate">
+            <span class="title">
+                <a href="JC.Animate.html">JC.Animate</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.AnimateRunner">
+            <span class="title">
+                <a href="JC.AnimateRunner.html">JC.AnimateRunner</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Animation">
+            <span class="title">
+                <a href="JC.Animation.html">JC.Animation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Bounds">
+            <span class="title">
+                <a href="JC.Bounds.html">JC.Bounds</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Bounds#maxX"><a href="JC.Bounds.html#maxX">maxX</a></li>
+            
+                <li data-name="JC.Bounds#maxY"><a href="JC.Bounds.html#maxY">maxY</a></li>
+            
+                <li data-name="JC.Bounds#minX"><a href="JC.Bounds.html#minX">minX</a></li>
+            
+                <li data-name="JC.Bounds#minY"><a href="JC.Bounds.html#minY">minY</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Bounds#addBounds"><a href="JC.Bounds.html#addBounds">addBounds</a></li>
+            
+                <li data-name="JC.Bounds#addPoint"><a href="JC.Bounds.html#addPoint">addPoint</a></li>
+            
+                <li data-name="JC.Bounds#addRect"><a href="JC.Bounds.html#addRect">addRect</a></li>
+            
+                <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
+            
+                <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Circle">
+            <span class="title">
+                <a href="JC.Circle.html">JC.Circle</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Circle#radius"><a href="JC.Circle.html#radius">radius</a></li>
+            
+                <li data-name="JC.Circle#x"><a href="JC.Circle.html#x">x</a></li>
+            
+                <li data-name="JC.Circle#y"><a href="JC.Circle.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Circle#clone"><a href="JC.Circle.html#clone">clone</a></li>
+            
+                <li data-name="JC.Circle#contains"><a href="JC.Circle.html#contains">contains</a></li>
+            
+                <li data-name="JC.Circle#getBounds"><a href="JC.Circle.html#getBounds">getBounds</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Container">
+            <span class="title">
+                <a href="JC.Container.html">JC.Container</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Container#alpha"><a href="JC.Container.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Container#bounds"><a href="JC.Container.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Container#buttonMode"><a href="JC.Container.html#buttonMode">buttonMode</a></li>
+            
+                <li data-name="JC.Container#childs"><a href="JC.Container.html#childs">childs</a></li>
+            
+                <li data-name="JC.Container#cursor"><a href="JC.Container.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Container#mask"><a href="JC.Container.html#mask">mask</a></li>
+            
+                <li data-name="JC.Container#passEvent"><a href="JC.Container.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Container#paused"><a href="JC.Container.html#paused">paused</a></li>
+            
+                <li data-name="JC.Container#pivotX"><a href="JC.Container.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Container#pivotY"><a href="JC.Container.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Container#rotation"><a href="JC.Container.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Container#scale"><a href="JC.Container.html#scale">scale</a></li>
+            
+                <li data-name="JC.Container#scaleX"><a href="JC.Container.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Container#scaleY"><a href="JC.Container.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Container#skewX"><a href="JC.Container.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Container#skewY"><a href="JC.Container.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Container#souldSort"><a href="JC.Container.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Container#timeScale"><a href="JC.Container.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Container#visible"><a href="JC.Container.html#visible">visible</a></li>
+            
+                <li data-name="JC.Container#x"><a href="JC.Container.html#x">x</a></li>
+            
+                <li data-name="JC.Container#y"><a href="JC.Container.html#y">y</a></li>
+            
+                <li data-name="JC.Container#zIndex"><a href="JC.Container.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Container#adds"><a href="JC.Container.html#adds">adds</a></li>
+            
+                <li data-name="JC.Container#animate"><a href="JC.Container.html#animate">animate</a></li>
+            
+                <li data-name="JC.Container#cancle"><a href="JC.Container.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.Container#contains"><a href="JC.Container.html#contains">contains</a></li>
+            
+                <li data-name="JC.Container#emit"><a href="JC.Container.html#emit">emit</a></li>
+            
+                <li data-name="JC.Container#getGlobalPos"><a href="JC.Container.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Container#keyFrames"><a href="JC.Container.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Container#motion"><a href="JC.Container.html#motion">motion</a></li>
+            
+                <li data-name="JC.Container#off"><a href="JC.Container.html#off">off</a></li>
+            
+                <li data-name="JC.Container#on"><a href="JC.Container.html#on">on</a></li>
+            
+                <li data-name="JC.Container#once"><a href="JC.Container.html#once">once</a></li>
+            
+                <li data-name="JC.Container#pause"><a href="JC.Container.html#pause">pause</a></li>
+            
+                <li data-name="JC.Container#remove"><a href="JC.Container.html#remove">remove</a></li>
+            
+                <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Container#start"><a href="JC.Container.html#start">start</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.DisplayObject">
+            <span class="title">
+                <a href="JC.DisplayObject.html">JC.DisplayObject</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.DisplayObject#alpha"><a href="JC.DisplayObject.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.DisplayObject#buttonMode"><a href="JC.DisplayObject.html#buttonMode">buttonMode</a></li>
+            
+                <li data-name="JC.DisplayObject#cursor"><a href="JC.DisplayObject.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.DisplayObject#mask"><a href="JC.DisplayObject.html#mask">mask</a></li>
+            
+                <li data-name="JC.DisplayObject#passEvent"><a href="JC.DisplayObject.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.DisplayObject#pivotX"><a href="JC.DisplayObject.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.DisplayObject#pivotY"><a href="JC.DisplayObject.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.DisplayObject#rotation"><a href="JC.DisplayObject.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.DisplayObject#scale"><a href="JC.DisplayObject.html#scale">scale</a></li>
+            
+                <li data-name="JC.DisplayObject#scaleX"><a href="JC.DisplayObject.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.DisplayObject#scaleY"><a href="JC.DisplayObject.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.DisplayObject#skewX"><a href="JC.DisplayObject.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.DisplayObject#skewY"><a href="JC.DisplayObject.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.DisplayObject#visible"><a href="JC.DisplayObject.html#visible">visible</a></li>
+            
+                <li data-name="JC.DisplayObject#x"><a href="JC.DisplayObject.html#x">x</a></li>
+            
+                <li data-name="JC.DisplayObject#y"><a href="JC.DisplayObject.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.DisplayObject#animate"><a href="JC.DisplayObject.html#animate">animate</a></li>
+            
+                <li data-name="JC.DisplayObject#contains"><a href="JC.DisplayObject.html#contains">contains</a></li>
+            
+                <li data-name="JC.DisplayObject#emit"><a href="JC.DisplayObject.html#emit">emit</a></li>
+            
+                <li data-name="JC.DisplayObject#getGlobalPos"><a href="JC.DisplayObject.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.DisplayObject#keyFrames"><a href="JC.DisplayObject.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.DisplayObject#motion"><a href="JC.DisplayObject.html#motion">motion</a></li>
+            
+                <li data-name="JC.DisplayObject#off"><a href="JC.DisplayObject.html#off">off</a></li>
+            
+                <li data-name="JC.DisplayObject#on"><a href="JC.DisplayObject.html#on">on</a></li>
+            
+                <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
+            
+                <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Ellipse">
+            <span class="title">
+                <a href="JC.Ellipse.html">JC.Ellipse</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Ellipse#height"><a href="JC.Ellipse.html#height">height</a></li>
+            
+                <li data-name="JC.Ellipse#width"><a href="JC.Ellipse.html#width">width</a></li>
+            
+                <li data-name="JC.Ellipse#x"><a href="JC.Ellipse.html#x">x</a></li>
+            
+                <li data-name="JC.Ellipse#y"><a href="JC.Ellipse.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Ellipse#clone"><a href="JC.Ellipse.html#clone">clone</a></li>
+            
+                <li data-name="JC.Ellipse#contains"><a href="JC.Ellipse.html#contains">contains</a></li>
+            
+                <li data-name="JC.Ellipse#getBounds"><a href="JC.Ellipse.html#getBounds">getBounds</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Eventer">
+            <span class="title">
+                <a href="JC.Eventer.html">JC.Eventer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Eventer#emit"><a href="JC.Eventer.html#emit">emit</a></li>
+            
+                <li data-name="JC.Eventer#off"><a href="JC.Eventer.html#off">off</a></li>
+            
+                <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
+            
+                <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Graphics">
+            <span class="title">
+                <a href="JC.Graphics.html">JC.Graphics</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Graphics#alpha"><a href="JC.Graphics.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Graphics#bounds"><a href="JC.Graphics.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Graphics#buttonMode"><a href="JC.Graphics.html#buttonMode">buttonMode</a></li>
+            
+                <li data-name="JC.Graphics#childs"><a href="JC.Graphics.html#childs">childs</a></li>
+            
+                <li data-name="JC.Graphics#cursor"><a href="JC.Graphics.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Graphics#mask"><a href="JC.Graphics.html#mask">mask</a></li>
+            
+                <li data-name="JC.Graphics#passEvent"><a href="JC.Graphics.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Graphics#paused"><a href="JC.Graphics.html#paused">paused</a></li>
+            
+                <li data-name="JC.Graphics#pivotX"><a href="JC.Graphics.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Graphics#pivotY"><a href="JC.Graphics.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Graphics#rotation"><a href="JC.Graphics.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Graphics#scale"><a href="JC.Graphics.html#scale">scale</a></li>
+            
+                <li data-name="JC.Graphics#scaleX"><a href="JC.Graphics.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Graphics#scaleY"><a href="JC.Graphics.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Graphics#skewX"><a href="JC.Graphics.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Graphics#skewY"><a href="JC.Graphics.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Graphics#souldSort"><a href="JC.Graphics.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Graphics#timeScale"><a href="JC.Graphics.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Graphics#visible"><a href="JC.Graphics.html#visible">visible</a></li>
+            
+                <li data-name="JC.Graphics#x"><a href="JC.Graphics.html#x">x</a></li>
+            
+                <li data-name="JC.Graphics#y"><a href="JC.Graphics.html#y">y</a></li>
+            
+                <li data-name="JC.Graphics#zIndex"><a href="JC.Graphics.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Graphics#adds"><a href="JC.Graphics.html#adds">adds</a></li>
+            
+                <li data-name="JC.Graphics#animate"><a href="JC.Graphics.html#animate">animate</a></li>
+            
+                <li data-name="JC.Graphics#cancle"><a href="JC.Graphics.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.Graphics#contains"><a href="JC.Graphics.html#contains">contains</a></li>
+            
+                <li data-name="JC.Graphics#drawCall"><a href="JC.Graphics.html#drawCall">drawCall</a></li>
+            
+                <li data-name="JC.Graphics#emit"><a href="JC.Graphics.html#emit">emit</a></li>
+            
+                <li data-name="JC.Graphics#getGlobalPos"><a href="JC.Graphics.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Graphics#keyFrames"><a href="JC.Graphics.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Graphics#motion"><a href="JC.Graphics.html#motion">motion</a></li>
+            
+                <li data-name="JC.Graphics#off"><a href="JC.Graphics.html#off">off</a></li>
+            
+                <li data-name="JC.Graphics#on"><a href="JC.Graphics.html#on">on</a></li>
+            
+                <li data-name="JC.Graphics#once"><a href="JC.Graphics.html#once">once</a></li>
+            
+                <li data-name="JC.Graphics#pause"><a href="JC.Graphics.html#pause">pause</a></li>
+            
+                <li data-name="JC.Graphics#remove"><a href="JC.Graphics.html#remove">remove</a></li>
+            
+                <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Graphics#start"><a href="JC.Graphics.html#start">start</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.InteractionData">
+            <span class="title">
+                <a href="JC.InteractionData.html">JC.InteractionData</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.InteractionData#cancleBubble"><a href="JC.InteractionData.html#cancleBubble">cancleBubble</a></li>
+            
+                <li data-name="JC.InteractionData#global"><a href="JC.InteractionData.html#global">global</a></li>
+            
+                <li data-name="JC.InteractionData#originalEvent"><a href="JC.InteractionData.html#originalEvent">originalEvent</a></li>
+            
+                <li data-name="JC.InteractionData#ratio"><a href="JC.InteractionData.html#ratio">ratio</a></li>
+            
+                <li data-name="JC.InteractionData#target"><a href="JC.InteractionData.html#target">target</a></li>
+            
+                <li data-name="JC.InteractionData#type"><a href="JC.InteractionData.html#type">type</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.KeyFrames">
+            <span class="title">
+                <a href="JC.KeyFrames.html">JC.KeyFrames</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Matrix">
+            <span class="title">
+                <a href="JC.Matrix.html">JC.Matrix</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Matrix#append"><a href="JC.Matrix.html#append">append</a></li>
+            
+                <li data-name="JC.Matrix#apply"><a href="JC.Matrix.html#apply">apply</a></li>
+            
+                <li data-name="JC.Matrix#applyInverse"><a href="JC.Matrix.html#applyInverse">applyInverse</a></li>
+            
+                <li data-name="JC.Matrix#fromArray"><a href="JC.Matrix.html#fromArray">fromArray</a></li>
+            
+                <li data-name="JC.Matrix#identity"><a href="JC.Matrix.html#identity">identity</a></li>
+            
+                <li data-name="JC.Matrix#rotate"><a href="JC.Matrix.html#rotate">rotate</a></li>
+            
+                <li data-name="JC.Matrix#scale"><a href="JC.Matrix.html#scale">scale</a></li>
+            
+                <li data-name="JC.Matrix#setTransform"><a href="JC.Matrix.html#setTransform">setTransform</a></li>
+            
+                <li data-name="JC.Matrix#toArray"><a href="JC.Matrix.html#toArray">toArray</a></li>
+            
+                <li data-name="JC.Matrix#translate"><a href="JC.Matrix.html#translate">translate</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.MovieClip">
+            <span class="title">
+                <a href="JC.MovieClip.html">JC.MovieClip</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.PathMotion">
+            <span class="title">
+                <a href="JC.PathMotion.html">JC.PathMotion</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Point">
+            <span class="title">
+                <a href="JC.Point.html">JC.Point</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Point#w"><a href="JC.Point.html#w">w</a></li>
+            
+                <li data-name="JC.Point#x"><a href="JC.Point.html#x">x</a></li>
+            
+                <li data-name="JC.Point#y"><a href="JC.Point.html#y">y</a></li>
+            
+                <li data-name="JC.Point#z"><a href="JC.Point.html#z">z</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Point#clone"><a href="JC.Point.html#clone">clone</a></li>
+            
+                <li data-name="JC.Point#copy"><a href="JC.Point.html#copy">copy</a></li>
+            
+                <li data-name="JC.Point#set"><a href="JC.Point.html#set">set</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Polygon">
+            <span class="title">
+                <a href="JC.Polygon.html">JC.Polygon</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Polygon#clone"><a href="JC.Polygon.html#clone">clone</a></li>
+            
+                <li data-name="JC.Polygon#contains"><a href="JC.Polygon.html#contains">contains</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Rectangle">
+            <span class="title">
+                <a href="JC.Rectangle.html">JC.Rectangle</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Rectangle.EMPTY"><a href="JC.Rectangle.html#.EMPTY">EMPTY</a></li>
+            
+                <li data-name="JC.Rectangle#height"><a href="JC.Rectangle.html#height">height</a></li>
+            
+                <li data-name="JC.Rectangle#width"><a href="JC.Rectangle.html#width">width</a></li>
+            
+                <li data-name="JC.Rectangle#x"><a href="JC.Rectangle.html#x">x</a></li>
+            
+                <li data-name="JC.Rectangle#y"><a href="JC.Rectangle.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Rectangle#clone"><a href="JC.Rectangle.html#clone">clone</a></li>
+            
+                <li data-name="JC.Rectangle#contains"><a href="JC.Rectangle.html#contains">contains</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Sprite">
+            <span class="title">
+                <a href="JC.Sprite.html">JC.Sprite</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Sprite#alpha"><a href="JC.Sprite.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Sprite#bounds"><a href="JC.Sprite.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Sprite#buttonMode"><a href="JC.Sprite.html#buttonMode">buttonMode</a></li>
+            
+                <li data-name="JC.Sprite#childs"><a href="JC.Sprite.html#childs">childs</a></li>
+            
+                <li data-name="JC.Sprite#cursor"><a href="JC.Sprite.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Sprite#mask"><a href="JC.Sprite.html#mask">mask</a></li>
+            
+                <li data-name="JC.Sprite#passEvent"><a href="JC.Sprite.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Sprite#paused"><a href="JC.Sprite.html#paused">paused</a></li>
+            
+                <li data-name="JC.Sprite#pivotX"><a href="JC.Sprite.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Sprite#pivotY"><a href="JC.Sprite.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Sprite#rotation"><a href="JC.Sprite.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Sprite#scale"><a href="JC.Sprite.html#scale">scale</a></li>
+            
+                <li data-name="JC.Sprite#scaleX"><a href="JC.Sprite.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Sprite#scaleY"><a href="JC.Sprite.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Sprite#skewX"><a href="JC.Sprite.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Sprite#skewY"><a href="JC.Sprite.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Sprite#souldSort"><a href="JC.Sprite.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Sprite#timeScale"><a href="JC.Sprite.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Sprite#visible"><a href="JC.Sprite.html#visible">visible</a></li>
+            
+                <li data-name="JC.Sprite#x"><a href="JC.Sprite.html#x">x</a></li>
+            
+                <li data-name="JC.Sprite#y"><a href="JC.Sprite.html#y">y</a></li>
+            
+                <li data-name="JC.Sprite#zIndex"><a href="JC.Sprite.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Sprite#adds"><a href="JC.Sprite.html#adds">adds</a></li>
+            
+                <li data-name="JC.Sprite#animate"><a href="JC.Sprite.html#animate">animate</a></li>
+            
+                <li data-name="JC.Sprite#cancle"><a href="JC.Sprite.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.Sprite#contains"><a href="JC.Sprite.html#contains">contains</a></li>
+            
+                <li data-name="JC.Sprite#emit"><a href="JC.Sprite.html#emit">emit</a></li>
+            
+                <li data-name="JC.Sprite#getGlobalPos"><a href="JC.Sprite.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Sprite#keyFrames"><a href="JC.Sprite.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Sprite#motion"><a href="JC.Sprite.html#motion">motion</a></li>
+            
+                <li data-name="JC.Sprite#off"><a href="JC.Sprite.html#off">off</a></li>
+            
+                <li data-name="JC.Sprite#on"><a href="JC.Sprite.html#on">on</a></li>
+            
+                <li data-name="JC.Sprite#once"><a href="JC.Sprite.html#once">once</a></li>
+            
+                <li data-name="JC.Sprite#pause"><a href="JC.Sprite.html#pause">pause</a></li>
+            
+                <li data-name="JC.Sprite#playMovie"><a href="JC.Sprite.html#playMovie">playMovie</a></li>
+            
+                <li data-name="JC.Sprite#remove"><a href="JC.Sprite.html#remove">remove</a></li>
+            
+                <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Sprite#start"><a href="JC.Sprite.html#start">start</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Stage">
+            <span class="title">
+                <a href="JC.Stage.html">JC.Stage</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Stage#_resolution"><a href="JC.Stage.html#_resolution">_resolution</a></li>
+            
+                <li data-name="JC.Stage#alpha"><a href="JC.Stage.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Stage#autoClear"><a href="JC.Stage.html#autoClear">autoClear</a></li>
+            
+                <li data-name="JC.Stage#autoStyle"><a href="JC.Stage.html#autoStyle">autoStyle</a></li>
+            
+                <li data-name="JC.Stage#autoUpdate"><a href="JC.Stage.html#autoUpdate">autoUpdate</a></li>
+            
+                <li data-name="JC.Stage#averageFps"><a href="JC.Stage.html#averageFps">averageFps</a></li>
+            
+                <li data-name="JC.Stage#bounds"><a href="JC.Stage.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Stage#buttonMode"><a href="JC.Stage.html#buttonMode">buttonMode</a></li>
+            
+                <li data-name="JC.Stage#canvas"><a href="JC.Stage.html#canvas">canvas</a></li>
+            
+                <li data-name="JC.Stage#childs"><a href="JC.Stage.html#childs">childs</a></li>
+            
+                <li data-name="JC.Stage#ctx"><a href="JC.Stage.html#ctx">ctx</a></li>
+            
+                <li data-name="JC.Stage#cursor"><a href="JC.Stage.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Stage#enableFPS"><a href="JC.Stage.html#enableFPS">enableFPS</a></li>
+            
+                <li data-name="JC.Stage#fps"><a href="JC.Stage.html#fps">fps</a></li>
+            
+                <li data-name="JC.Stage#height"><a href="JC.Stage.html#height">height</a></li>
+            
+                <li data-name="JC.Stage#interactive"><a href="JC.Stage.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.Stage#interactive"><a href="JC.Stage.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.Stage#mask"><a href="JC.Stage.html#mask">mask</a></li>
+            
+                <li data-name="JC.Stage#passEvent"><a href="JC.Stage.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Stage#paused"><a href="JC.Stage.html#paused">paused</a></li>
+            
+                <li data-name="JC.Stage#pivotX"><a href="JC.Stage.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Stage#pivotY"><a href="JC.Stage.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Stage#resolution"><a href="JC.Stage.html#resolution">resolution</a></li>
+            
+                <li data-name="JC.Stage#resolution"><a href="JC.Stage.html#resolution">resolution</a></li>
+            
+                <li data-name="JC.Stage#rotation"><a href="JC.Stage.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Stage#scale"><a href="JC.Stage.html#scale">scale</a></li>
+            
+                <li data-name="JC.Stage#scaleX"><a href="JC.Stage.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Stage#scaleY"><a href="JC.Stage.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Stage#skewX"><a href="JC.Stage.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Stage#skewY"><a href="JC.Stage.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Stage#souldSort"><a href="JC.Stage.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Stage#timeScale"><a href="JC.Stage.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Stage#visible"><a href="JC.Stage.html#visible">visible</a></li>
+            
+                <li data-name="JC.Stage#width"><a href="JC.Stage.html#width">width</a></li>
+            
+                <li data-name="JC.Stage#x"><a href="JC.Stage.html#x">x</a></li>
+            
+                <li data-name="JC.Stage#y"><a href="JC.Stage.html#y">y</a></li>
+            
+                <li data-name="JC.Stage#zIndex"><a href="JC.Stage.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Stage#adds"><a href="JC.Stage.html#adds">adds</a></li>
+            
+                <li data-name="JC.Stage#animate"><a href="JC.Stage.html#animate">animate</a></li>
+            
+                <li data-name="JC.Stage#cancle"><a href="JC.Stage.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.Stage#contains"><a href="JC.Stage.html#contains">contains</a></li>
+            
+                <li data-name="JC.Stage#emit"><a href="JC.Stage.html#emit">emit</a></li>
+            
+                <li data-name="JC.Stage#getGlobalPos"><a href="JC.Stage.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Stage#keyFrames"><a href="JC.Stage.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Stage#motion"><a href="JC.Stage.html#motion">motion</a></li>
+            
+                <li data-name="JC.Stage#off"><a href="JC.Stage.html#off">off</a></li>
+            
+                <li data-name="JC.Stage#on"><a href="JC.Stage.html#on">on</a></li>
+            
+                <li data-name="JC.Stage#once"><a href="JC.Stage.html#once">once</a></li>
+            
+                <li data-name="JC.Stage#pause"><a href="JC.Stage.html#pause">pause</a></li>
+            
+                <li data-name="JC.Stage#remove"><a href="JC.Stage.html#remove">remove</a></li>
+            
+                <li data-name="JC.Stage#removeMask"><a href="JC.Stage.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Stage#render"><a href="JC.Stage.html#render">render</a></li>
+            
+                <li data-name="JC.Stage#resize"><a href="JC.Stage.html#resize">resize</a></li>
+            
+                <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Stage#start"><a href="JC.Stage.html#start">start</a></li>
+            
+                <li data-name="JC.Stage#update"><a href="JC.Stage.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.TextFace">
+            <span class="title">
+                <a href="JC.TextFace.html">JC.TextFace</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.TextFace#alpha"><a href="JC.TextFace.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.TextFace#bounds"><a href="JC.TextFace.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.TextFace#buttonMode"><a href="JC.TextFace.html#buttonMode">buttonMode</a></li>
+            
+                <li data-name="JC.TextFace#childs"><a href="JC.TextFace.html#childs">childs</a></li>
+            
+                <li data-name="JC.TextFace#cursor"><a href="JC.TextFace.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.TextFace#mask"><a href="JC.TextFace.html#mask">mask</a></li>
+            
+                <li data-name="JC.TextFace#passEvent"><a href="JC.TextFace.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.TextFace#paused"><a href="JC.TextFace.html#paused">paused</a></li>
+            
+                <li data-name="JC.TextFace#pivotX"><a href="JC.TextFace.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.TextFace#pivotY"><a href="JC.TextFace.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.TextFace#rotation"><a href="JC.TextFace.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.TextFace#scale"><a href="JC.TextFace.html#scale">scale</a></li>
+            
+                <li data-name="JC.TextFace#scaleX"><a href="JC.TextFace.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.TextFace#scaleY"><a href="JC.TextFace.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.TextFace#skewX"><a href="JC.TextFace.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.TextFace#skewY"><a href="JC.TextFace.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.TextFace#souldSort"><a href="JC.TextFace.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.TextFace#timeScale"><a href="JC.TextFace.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.TextFace#visible"><a href="JC.TextFace.html#visible">visible</a></li>
+            
+                <li data-name="JC.TextFace#x"><a href="JC.TextFace.html#x">x</a></li>
+            
+                <li data-name="JC.TextFace#y"><a href="JC.TextFace.html#y">y</a></li>
+            
+                <li data-name="JC.TextFace#zIndex"><a href="JC.TextFace.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.TextFace#adds"><a href="JC.TextFace.html#adds">adds</a></li>
+            
+                <li data-name="JC.TextFace#animate"><a href="JC.TextFace.html#animate">animate</a></li>
+            
+                <li data-name="JC.TextFace#cancle"><a href="JC.TextFace.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.TextFace#contains"><a href="JC.TextFace.html#contains">contains</a></li>
+            
+                <li data-name="JC.TextFace#emit"><a href="JC.TextFace.html#emit">emit</a></li>
+            
+                <li data-name="JC.TextFace#getGlobalPos"><a href="JC.TextFace.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.TextFace#keyFrames"><a href="JC.TextFace.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.TextFace#motion"><a href="JC.TextFace.html#motion">motion</a></li>
+            
+                <li data-name="JC.TextFace#off"><a href="JC.TextFace.html#off">off</a></li>
+            
+                <li data-name="JC.TextFace#on"><a href="JC.TextFace.html#on">on</a></li>
+            
+                <li data-name="JC.TextFace#once"><a href="JC.TextFace.html#once">once</a></li>
+            
+                <li data-name="JC.TextFace#pause"><a href="JC.TextFace.html#pause">pause</a></li>
+            
+                <li data-name="JC.TextFace#remove"><a href="JC.TextFace.html#remove">remove</a></li>
+            
+                <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.TextFace#start"><a href="JC.TextFace.html#start">start</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Texture">
+            <span class="title">
+                <a href="JC.Texture.html">JC.Texture</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Texture#emit"><a href="JC.Texture.html#emit">emit</a></li>
+            
+                <li data-name="JC.Texture#off"><a href="JC.Texture.html#off">off</a></li>
+            
+                <li data-name="JC.Texture#on"><a href="JC.Texture.html#on">on</a></li>
+            
+                <li data-name="JC.Texture#once"><a href="JC.Texture.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Transition">
+            <span class="title">
+                <a href="JC.Transition.html">JC.Transition</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+    <div class="main">
+        <h1 class="page-title" data-filename="JC.DisplayObject.html">Class: DisplayObject</h1>
+        
+
+
+
+<section>
+    
+<header>
+    <h2>
+    DisplayObject
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="DisplayObject">
+            
+            new JC.DisplayObject<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line13">line 13</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>显示对象的基类，继承至Eventer</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+    
+    </div>
+    
+    
+        <h3 class="subsection-title">Extends</h3>
+        
+        <ul>
+            <li><a href="JC.Eventer.html">JC.Eventer</a></li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Members</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="alpha">alpha<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的透明度</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="buttonMode">buttonMode<span class="type-signature type boolean">Boolean</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>渲染对象是否具备光标样式，例如 cursor</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="cursor">cursor<span class="type-signature type boolean">Boolean</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>当渲染对象是按钮时所具备的光标样式</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="mask">mask<span class="type-signature type jc.graphics"><a href="JC.Graphics.html">JC.Graphics</a></span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>对象的遮罩层</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="passEvent">passEvent<span class="type-signature type boolean">Boolean</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>当前对象是否穿透自身的事件检测</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="pivotX">pivotX<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="pivotY">pivotY<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="rotation">rotation<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的旋转角度</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="scale">scale<span class="type-signature type number">number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>对渲染对象进行x、y轴同时缩放</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="scaleX">scaleX<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的x轴的缩放</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="scaleY">scaleY<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的y轴的缩放</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="skewX">skewX<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的x轴的斜切</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="skewY">skewY<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的y轴的斜切</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="visible">visible<span class="type-signature type boolean">Boolean</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象是否显示</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="x">x<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的x位置</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="y">y<span class="type-signature type number">Number</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>控制渲染对象的y位置</p>
+    </div>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="animate">
+            
+            animate<span class="signature">(<span class="optional">options</span>, clear)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Animate.html">JC.Animate</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line245">line 245</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>fromTo动画，指定动画的启始位置和结束位置</p>
+<pre class="prettyprint source lang-js"><code>dispay.fromTo({
+  from: {x: 100},
+  to: {x: 200},
+  ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+  repeats: 10, // 动画运动完后再重复10次
+  infinity: true, // 无限循环动画
+  alternate: true, // 偶数次的时候动画回放
+  duration: 1000, // 动画时长 ms单位 默认 300ms
+  onUpdate: function(state,rate){},
+  onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+});</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画配置参数</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>from</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">json</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>json格式，设置对象的起始位置和起始姿态等，该项配置可选</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>to</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">json</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>json格式，设置对象的结束位置和结束姿态等</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>ease</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>执行动画使用的缓动函数 默认值为 easeBoth</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeats</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画执行完成后再重复多少次，优先级没有infinity高</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>infinity</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画无限次执行，优先级高于repeats</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>alternate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画是否偶数次回返</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画执行时间 默认 300ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onUpdate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画更新时的回调函数</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onCompelete</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画结束时的回调函数，如果infinity为true该事件将不会触发</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>clear</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>是否去掉之前的动画</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="JC.Animate.html">JC.Animate</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="contains">
+            
+            contains<span class="signature">(global)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Boolean}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line474">line 474</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>检测坐标点是否在多变性内</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>global</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.Point.html">JC.Point</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Boolean
+                        
+                    
+            </td>
+            <td class="description last">是否包含该点</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="emit">
+            
+                <span class="inherited"><a href="JC.Eventer.html#emit">inherited</a></span>
+            
+            emit<span class="signature">(type, ev)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line88">line 88</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的触发事件函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>ev</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.InteractionData.html">JC.InteractionData</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="getGlobalPos">
+            
+            getGlobalPos<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{object}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line453">line 453</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>获取物体相对于canvas世界坐标系的坐标位置</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        object
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="keyFrames">
+            
+            keyFrames<span class="signature">(<span class="optional">options</span>, clear)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Animate.html">JC.Animate</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line308">line 308</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数</p>
+<pre class="prettyprint source lang-js"><code>dispay.keyFrames({
+  ks: data.layers[0], // ae导出的动画数据
+  fr: 30, // 动画的帧率，默认：30fps
+  repeats: 10, // 动画运动完后再重复10次
+  infinity: true, // 无限循环动画
+  alternate: true, // 偶数次的时候动画回放
+  onUpdate: function(state,rate){},
+  onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+});</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画配置参数</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>ks</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">json</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>配置关键帧的位置、姿态，ae导出的动画数据</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeats</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画执行完成后再重复多少次，优先级没有infinity高</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>infinity</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画无限次执行，优先级高于repeats</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>alternate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画是否偶数次回返</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onUpdate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画更新时的回调函数</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onCompelete</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画结束时的回调函数，如果infinity为true该事件将不会触发</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>clear</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>是否去掉之前的动画</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="JC.Animate.html">JC.Animate</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="motion">
+            
+            motion<span class="signature">(<span class="optional">options</span>, clear)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Animate.html">JC.Animate</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line279">line 279</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>motion动画，让物体按照设定好的曲线运动</p>
+<pre class="prettyprint source lang-js"><code>dispay.motion({
+  path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
+  attachTangent: true, // 物体是否捕获切线方向
+  ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+  repeats: 10, // 动画运动完后再重复10次
+  infinity: true, // 无限循环动画
+  alternate: true, // 偶数次的时候动画回放
+  duration: 1000, // 动画时长 ms单位 默认 300ms
+  onUpdate: function(state,rate){}, // 动画更新回调
+  onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+});</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画配置参数</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>path</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Curve.html">Curve</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>attachTangent</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>物体是否捕获切线方向</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>ease</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>执行动画使用的缓动函数 默认值为 easeBoth</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeats</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画执行完成后再重复多少次，优先级没有infinity高</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>infinity</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画无限次执行，优先级高于repeats</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>alternate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画是否偶数次回返</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画执行时间 默认 300ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onUpdate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画更新时的回调函数</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onCompelete</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画结束时的回调函数，如果infinity为true该事件将不会触发</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>clear</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>是否去掉之前的动画</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="JC.Animate.html">JC.Animate</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="off">
+            
+                <span class="inherited"><a href="JC.Eventer.html#off">inherited</a></span>
+            
+            off<span class="signature">(type, fn)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line50">line 50</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的事件解绑函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>注册时回调函数的引用</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="on">
+            
+                <span class="inherited"><a href="JC.Eventer.html#on">inherited</a></span>
+            
+            on<span class="signature">(type, fn)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line39">line 39</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的事件绑定函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>回调函数</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="once">
+            
+                <span class="inherited"><a href="JC.Eventer.html#once">inherited</a></span>
+            
+            once<span class="signature">(type, fn)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line73">line 73</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的一次性事件绑定函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>回调函数</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="removeMask">
+            
+            removeMask<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line326">line 326</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>移除对象上的遮罩</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="setArea">
+            
+            setArea<span class="signature">(shape, needless)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line463">line 463</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>设置显示对象的事件检测区域</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>shape</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.Polygon.html">JC.Polygon</a></span>
+|
+
+<span class="param-type"><a href="JC.Rectangle.html">JC.Rectangle</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>JC内置形状类型的实例</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>needless</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+        
+
+        <footer>
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Apr 17 2017 14:57:39 GMT+0800 (CST)
+        </footer>
+    </div>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/jaguar.js"></script>
+</body>
+</html>
