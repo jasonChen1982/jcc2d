@@ -24,7 +24,29 @@ A canvas 2d renderer & An awesome animator
 ## Introduction
 [main page][jcc2d]
 
-jcc2d is a lightweight canvas2d render engine and build-in an awesome animator with timeline management, support event system by default.
+jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline management, support event system by default.
+
+built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] to export keyframes data, and easy parser to jcc2d animation, just like following:
+
+```js
+
+const coin = new JC.Sprite({
+  texture: new JC.Texture('/path/coin.png'),
+});
+
+shape.keyFrames({
+    ks: data.layers[0], // bodymovin keyframes data
+    fr: 30, // frame rate
+    // infinity: true,
+    // alternate: true,
+    onUpdate() {},
+    onCompelete(info) {
+      console.log(this.element);
+    },
+});
+```
+
+
 
 ## Feature
 
@@ -33,12 +55,12 @@ Include `Stage` `Sprite` `Graphics` `Container` `BlurFilter` `TextFace` and so o
 Every display instance can easy start an animation and attach a timeline, just like following:
 
 ```javascript
-cosnt ball = new JC.Sprite({
+const ball = new JC.Sprite({
     texture: new JC.Texture('/path/xx.png'),
 });
-ball.fromTo({
-  from: {x: 100},
-  to: {x: 200},
+ball.animate({
+  from: {x: 100}, // start pose, optional
+  to: {x: 200}, // target pose
   ease: 'bounceOut', // set a timingfunction
   repeats: 10, // repeat sometimes
   delay: 1000, // delay a moment every repeat
@@ -53,14 +75,14 @@ ball.fromTo({
 
 ## Display animation property
 
-|                    type                   |         property          |
-| :---------------------------------------: | :-----------------------: |
+|                   type                   |         property          |
+| :--------------------------------------: | :-----------------------: |
 | display instance coordinate axis position |          `x` `y`          |
-|       display instance scale value        | `scale` `scaleX` `scaleY` |
-|        display instance skew value        |      `skewX` `skewY`      |
-|    display instance rotation with CCW     |        `rotation`         |
-|      display instance opacity alpha       |          `alpha`          |
-|          display instance pivot           |    ` pivotX` ` pivotY`    |
+|       display instance scale value       | `scale` `scaleX` `scaleY` |
+|       display instance skew value        |      `skewX` `skewY`      |
+|    display instance rotation with CCW    |        `rotation`         |
+|      display instance opacity alpha      |          `alpha`          |
+|          display instance pivot          |    ` pivotX` ` pivotY`    |
 
 
 
@@ -73,6 +95,10 @@ ball.fromTo({
 
 ## Examples
  [examples][examples]
+
+## Changelog
+
+[changelog][change-log]
 
 ## License
 
@@ -93,3 +119,6 @@ ball.fromTo({
 [path-motion]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_motion "path motion animation"
 [quick-start]:http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010 "quick start demo"
 [ae-export]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames "after effect export"
+[bodymovin]:https://github.com/bodymovin/bodymovin "bodymovin github"
+[bodymovin-add-on]:https://creative.adobe.com/addons/products/12557#.WPRdl1N94o8 "bodymovin add-on"
+[change-log]:https://github.com/jasonChen1982/jcc2d/blob/master/Changelog.md "change log"
