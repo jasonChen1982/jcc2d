@@ -26,15 +26,14 @@ A canvas 2d renderer & An awesome animator
 
 jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline management, support event system by default.
 
-built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] to export keyframes data, and easy parser to jcc2d animation, just like following:
+built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] to export keyframes data from [after effect][ae], and easy parser to [jcc2d][jcc2d] keyFrames, just like following:
 
 ```js
-
 const coin = new JC.Sprite({
   texture: new JC.Texture('/path/coin.png'),
 });
 
-shape.keyFrames({
+coin.keyFrames({
     ks: data.layers[0], // bodymovin keyframes data
     fr: 30, // frame rate
     // infinity: true,
@@ -46,7 +45,7 @@ shape.keyFrames({
 });
 ```
 
-
+[view demo][ae-export]
 
 ## Feature
 
@@ -58,7 +57,7 @@ Every display instance can easy start an animation and attach a timeline, just l
 const ball = new JC.Sprite({
     texture: new JC.Texture('/path/xx.png'),
 });
-ball.animate({
+const timeline = ball.animate({
   from: {x: 100}, // start pose, optional
   to: {x: 200}, // target pose
   ease: 'bounceOut', // set a timingfunction
@@ -71,6 +70,11 @@ ball.animate({
   onUpdate: function(state,rate){}, // onUpdate callback
   onCompelete: function(){ console.log('end'); } // onCompelete callback
 });
+timeline.pause();
+timeline.stop();
+timeline.cancle();
+timeline.start();
+timeline.timeScale = 0.5; // Slow motion，speed * 0.5
 ```
 
 ## Display animation property
@@ -122,3 +126,4 @@ ball.animate({
 [bodymovin]:https://github.com/bodymovin/bodymovin "bodymovin github"
 [bodymovin-add-on]:https://creative.adobe.com/addons/products/12557#.WPRdl1N94o8 "bodymovin add-on"
 [change-log]:https://github.com/jasonChen1982/jcc2d/blob/master/Changelog.md "change log"
+[ae]:http://www.adobe.com/cn/products/aftereffects.html "ae"
