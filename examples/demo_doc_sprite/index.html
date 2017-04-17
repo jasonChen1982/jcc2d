@@ -69,7 +69,7 @@ loadBox.on('compelete',function(){
     pic = new JC.Sprite({
         texture: loadBox.getById('pic')
     });
-    pic.fromTo({
+    pic.animate({
         from: {x: 500},
         to: {x: 100},
         duration: 1000,
@@ -79,7 +79,7 @@ loadBox.on('compelete',function(){
     pic2 = new JC.Sprite({
         texture: loadBox.getById('pic2')
     });
-    pic2.fromTo({
+    pic2.animate({
         from: {x: -500},
         to: {x: -100},
         duration: 1000,
@@ -97,7 +97,7 @@ loadBox.on('compelete',function(){
 pic3 = new JC.Sprite({
     texture: loadBox.getById('pic3')
 });
-pic3.to({
+pic3.animate({
     to: {rotation: 360},
     infinity: true,
     alternate: true,

@@ -5,7 +5,7 @@
  * Tween 缓动时间运动函数集合
  *
  * ```js
- * dispay.fromTo({
+ * dispay.animate({
  *   from: {x: 100},
  *   to: {x: 200},
  *   ease: 'linear' // 配置要调用的运动函数

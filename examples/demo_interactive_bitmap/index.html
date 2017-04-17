@@ -80,7 +80,7 @@ loadBox.on('compelete',function(){
         texture: loadBox.getById('pic')
     });
     pic.x = 500;
-    pic.to({
+    pic.animate({
         to: {x: 100},
         duration: 1000,
         ease: 'bounceOut'
@@ -106,7 +106,7 @@ loadBox.on('compelete',function(){
         texture: loadBox.getById('pic2')
     });
     pic2.x = -500;
-    pic2.to({
+    pic2.animate({
         to: {x: -100},
         duration: 1000,
         ease: 'bounceOut'
@@ -116,7 +116,7 @@ loadBox.on('compelete',function(){
     pic3 = new JC.Sprite({
         texture: loadBox.getById('pic3')
     });
-    pic3.to({
+    pic3.animate({
         to: {rotation: 360},
         infinity: true,
         alternate: true,

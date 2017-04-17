@@ -98,7 +98,7 @@
             circle.visible = true;
             starContainer.visible = true;
 
-            circle.fromTo({
+            circle.animate({
                 from: {
                     scale: 1,
                     alpha: 1
@@ -115,7 +115,7 @@
             }, true);
 
             starContainer.childs.forEach(function (el) {
-                el.fromTo({
+                el.animate({
                     from: {
                         x: x,
                         y: y,

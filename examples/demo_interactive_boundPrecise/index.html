@@ -102,7 +102,7 @@ loadBox.on('compelete',function(){
         texture: loadBox.getById('daisy')
     });
     pic.scaleX = pic.scaleY = 3;
-    pic.to({
+    pic.animate({
         to: {scaleX: 1,scaleY: 1},
         duration: 1000,
         ease: 'bounceOut'

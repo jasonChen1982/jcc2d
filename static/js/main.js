@@ -168,7 +168,7 @@ curvePath.drawCall(new WaveLines());
 
 rectLeftBack.drawCall(new RectBound());
 rectLeftBack.alpha = 0;
-rectLeftBack.to({
+rectLeftBack.animate({
     to: {alpha: 1},
     ease: 'easeOutStrong',
     duration: 600,
@@ -177,7 +177,7 @@ rectLeftBack.to({
     alternate: true
 });
 rectLeftFront.drawCall(new RectBound());
-rectLeftFront.to({
+rectLeftFront.animate({
     to: {y: -120},
     ease: 'easeOutStrong',
     duration: 600,
@@ -188,7 +188,7 @@ rectLeftFront.to({
 
 rectLeftFront.skewX = rectLeftBack.skewX = 30;
 bannerLeft.adds(rectLeftBack,rectLeftFront);
-bannerLeft.to({
+bannerLeft.animate({
     to: {x: -60},
     ease: 'easeBoth',
     duration: 2000,
@@ -198,7 +198,7 @@ bannerLeft.to({
 
 rectRightBack.drawCall(new RectBound());
 rectRightBack.alpha = 0;
-rectRightBack.to({
+rectRightBack.animate({
     to: {alpha: 1},
     ease: 'easeOutStrong',
     duration: 600,
@@ -207,7 +207,7 @@ rectRightBack.to({
     alternate: true
 });
 rectRightFront.drawCall(new RectBound());
-rectRightFront.to({
+rectRightFront.animate({
     to: {y: -120},
     ease: 'easeOutStrong',
     duration: 600,
@@ -219,7 +219,7 @@ rectRightFront.to({
 rectRightFront.skewX = rectRightBack.skewX = 30;
 bannerRight.rotation = 180;
 bannerRight.adds(rectRightBack,rectRightFront);
-bannerRight.to({
+bannerRight.animate({
     to: {x: w+60},
     ease: 'easeBoth',
     duration: 2000,
@@ -250,7 +250,7 @@ particleEngine.addEmitter(emiter3);
 particleDOC.adds(emiter.doc);
 particleDOC.adds(emiter2.doc);
 particleDOC.adds(emiter3.doc);
-particleDOC.to({
+particleDOC.animate({
     to: {scale: 1,alpha: 1},
     duration: 1000,
     ease: 'backOut',
@@ -339,26 +339,26 @@ function render() {
 
 function logoIn(){
     for (var i = 0; i < textDOC.length; i++) {
-        var animate = textDOC[i].to({
+        var animate = textDOC[i].animate({
             to: {y: 0, alpha: 1},
             ease: 'bounceOut',
             duration: 800,
             wait: i*100
         });
         if(i===textDOC.length-1)animate.onCompelete = function(){
-            miniText.to({
+            miniText.animate({
                 to: {y: JC.UI.RTP(.5), alpha: 1},
                 duration: 1000
             });
-            documentLink.to({
+            documentLink.animate({
                 to: {x: -JC.UI.RTP(.7), alpha: 1},
                 duration: 1000
             });
-            examplesLink.to({
+            examplesLink.animate({
                 to: {x: JC.UI.RTP(.7), alpha: 1},
                 duration: 1000
             });
-            // BG.to({
+            // BG.animate({
             //     to: {alpha: 0.5},
             //     duration: 1000
             // });

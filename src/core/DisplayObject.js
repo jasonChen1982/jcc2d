@@ -213,10 +213,10 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
 });
 
 /**
- * fromTo动画，指定动画的启始位置和结束位置
+ * animate动画，指定动画的启始位置和结束位置
  *
  * ```js
- * dispay.fromTo({
+ * dispay.animate({
  *   from: {x: 100},
  *   to: {x: 200},
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
