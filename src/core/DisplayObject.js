@@ -230,8 +230,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * ```
  *
  * @param {object} [options] 动画配置参数
- * @param {json} [options.from] json格式，设置对象的起始位置和起始姿态等，该项配置可选
- * @param {json} [options.to] json格式，设置对象的结束位置和结束姿态等
+ * @param {object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
+ * @param {object} options.to 设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
  * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
@@ -263,8 +263,8 @@ DisplayObject.prototype.animate = function(options, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param {object} [options] 动画配置参数
- * @param {Curve} [options.path] path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ * @param {object} options 动画配置参数
+ * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
@@ -296,7 +296,8 @@ DisplayObject.prototype.motion = function(options, clear) {
  * ```
  *
  * @param {object} [options] 动画配置参数
- * @param {json} [options.ks] 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
  * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返

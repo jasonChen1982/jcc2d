@@ -2580,8 +2580,8 @@
     
     
     <div class="description">
-        <p>fromTo动画，指定动画的启始位置和结束位置</p>
-<pre class="prettyprint source lang-js"><code>dispay.fromTo({
+        <p>animate动画，指定动画的启始位置和结束位置</p>
+<pre class="prettyprint source lang-js"><code>dispay.animate({
   from: {x: 100},
   to: {x: 200},
   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
@@ -2674,7 +2674,7 @@
             <td class="type">
             
                 
-<span class="param-type">json</span>
+<span class="param-type">object</span>
 
 
             
@@ -2691,7 +2691,7 @@
                         
                     
                 
-                <p>json格式，设置对象的起始位置和起始姿态等，该项配置可选</p></td>
+                <p>设置对象的起始位置和起始姿态等，该项配置可选</p></td>
         </tr>
 	
 	
@@ -2704,7 +2704,7 @@
             <td class="type">
             
                 
-<span class="param-type">json</span>
+<span class="param-type">object</span>
 
 
             
@@ -2715,13 +2715,11 @@
             <td class="description last">
                 
                     
-                        <span class="optional">optional</span>
-                    
                     
                         
                     
                 
-                <p>json格式，设置对象的结束位置和结束姿态等</p></td>
+                <p>设置对象的结束位置和结束姿态等</p></td>
         </tr>
 	
 	
@@ -3127,7 +3125,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line474">line 474</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line475">line 475</a>
         </div>
         
     </div>
@@ -3567,7 +3565,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line453">line 453</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line454">line 454</a>
         </div>
         
     </div>
@@ -3669,7 +3667,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line308">line 308</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line309">line 309</a>
         </div>
         
     </div>
@@ -3772,7 +3770,35 @@
             <td class="type">
             
                 
-<span class="param-type">json</span>
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>配置关键帧的位置、姿态，ae导出的动画数据</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fr</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
 
 
             
@@ -4057,7 +4083,7 @@
             
                 <span class="inherited"><a href="JC.DisplayObject.html#motion">inherited</a></span>
             
-            motion<span class="signature">(<span class="optional">options</span>, clear)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Animate.html">JC.Animate</a>}</span>
+            motion<span class="signature">(options, clear)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Animate.html">JC.Animate</a>}</span>
         </h4>
     
         
@@ -4131,13 +4157,6 @@
             
             <td class="description last">
                 
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
                 <p>动画配置参数</p>
                 
 
@@ -4177,8 +4196,6 @@
             
             <td class="description last">
                 
-                    
-                        <span class="optional">optional</span>
                     
                     
                         
@@ -4452,11 +4469,6 @@
             
             
             <td class="description last">
-                
-                    
-                    
-                        
-                    
                 
                 <p>是否去掉之前的动画</p></td>
         </tr>
@@ -5162,7 +5174,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line326">line 326</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line327">line 327</a>
         </div>
         
     </div>
@@ -5235,7 +5247,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line463">line 463</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line464">line 464</a>
         </div>
         
     </div>
@@ -5574,7 +5586,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Apr 17 2017 14:57:39 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Apr 17 2017 15:16:08 GMT+0800 (CST)
         </footer>
     </div>
 </div>
