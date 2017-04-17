@@ -19,6 +19,7 @@ A canvas 2d renderer & An awesome animator
 * [check eventer pointer exact polygon][event-exact-polygon]
 * [varied timingfunction supported][varied-timingfunction]
 * [path motion animation][path-motion]
+* [after effect export][ae-export]
 
 ## Introduction
 [main page][jcc2d]
@@ -91,3 +92,4 @@ ball.fromTo({
 [varied-timingfunction]:https://jasonchen1982.github.io/jcc2d/examples/#demo_timingfunction_allInOne "varied timingfunction supported"
 [path-motion]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_motion "path motion animation"
 [quick-start]:http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010 "quick start demo"
+[ae-export]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames "after effect export"

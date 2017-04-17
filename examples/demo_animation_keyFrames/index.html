@@ -57,13 +57,13 @@ shape.drawCall(new Rect('#749d9b'));
 shape.keyFrames({
     ks: data.layers[0],
     fr: 30,
-    infinity: true,
-    alternate: true,
+    // infinity: true,
+    // alternate: true,
     onCompelete(info) {
       console.log(this.element);
     }
 });
-DOC.timeScale = 0.2;
+// DOC.timeScale = 0.2;
 DOC.adds(shape);
 
 stage.adds(DOC);

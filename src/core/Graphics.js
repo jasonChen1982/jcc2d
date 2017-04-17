@@ -69,7 +69,7 @@ Graphics.prototype._drawBack = function(ctx) {
 /**
  * 图形绘制挂载函数
  *
- *```js
+ * ```js
  *  var cacheMap = new JC.Graphics();  // 创建形状绘制对象
  *
  *  cacheMap.drawCall(function(ctx){
