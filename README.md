@@ -122,7 +122,7 @@ timeline.timeScale = 0.5; // Slow motion，speed * 0.5
 [varied-timingfunction]:https://jasonchen1982.github.io/jcc2d/examples/#demo_timingfunction_allInOne "varied timingfunction supported"
 [path-motion]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_motion "path motion animation"
 [quick-start]:http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010 "quick start demo"
-[ae-export]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames "after effect export"
+[ae-export]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2 "after effect export"
 [bodymovin]:https://github.com/bodymovin/bodymovin "bodymovin github"
 [bodymovin-add-on]:https://creative.adobe.com/addons/products/12557#.WPRdl1N94o8 "bodymovin add-on"
 [change-log]:https://github.com/jasonChen1982/jcc2d/blob/master/Changelog.md "change log"

@@ -229,7 +229,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param {object} [options] 动画配置参数
+ * @param {object} options 动画配置参数
  * @param {object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
  * @param {object} options.to 设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
@@ -295,7 +295,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  * });
  * ```
  *
- * @param {object} [options] 动画配置参数
+ * @param {object} options 动画配置参数
  * @param {object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高

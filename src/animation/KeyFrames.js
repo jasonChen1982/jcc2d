@@ -38,8 +38,9 @@ function KeyFrames(options) {
   this.aks = {};
   this.fr = this.keys.fr || 30;
   this.rfr = 1000 / this.fr;
-  this.ip = this.keys.ip;
-  this.op = this.keys.op;
+  this.iip = this.keys.ip;
+  this.ip = options.ip === undefined ? this.keys.ip : options.ip;
+  this.op = options.op === undefined ? this.keys.op : options.op;
 
   this.tfs = Math.floor(this.op - this.ip);
   this.duration = this.tfs * this.rfr;
@@ -53,19 +54,35 @@ KeyFrames.prototype = Object.create(Animate.prototype);
 KeyFrames.prototype.preParser = function(keys) {
   const ks = keys.ks;
   for (const key in ks) {
-    if (ks[key] && ks[key].a) {
-      this.aks[key] = ks[key];
-      const kl = ks[key].k.length - 1;
-      const et = ks[key].k[kl].t;
-      let pPose = null;
-      this.aks[key].jcet = et * this.rfr;
-      this.aks[key].k.forEach(function(pose) {
-        if (!pose.s && !pose.e && pPose) {
-          pose.s = pPose.e;
-          pose.e = pPose.e;
+    const prop = PM[key].label;
+    const scale = PM[key].scale;
+    if (ks[key]) {
+      if (ks[key].a) {
+        this.aks[key] = ks[key];
+        const k = ks[key].k;
+        const last = k.length - 1;
+        const et = k[last].t;
+        const st = k[0].t;
+
+        this.aks[key].jcet = et * this.rfr;
+        this.aks[key].jcst = st * this.rfr;
+      } else {
+        let k = 0;
+        if (Utils.isString(prop)) {
+          if (Utils.isNumber(ks[key].k)) {
+            k = ks[key].k;
+          }
+          if (Utils.isArray(ks[key].k)) {
+            k = ks[key].k[0];
+          }
+          this.element[prop] = scale * k;
+        } else if (Utils.isArray(prop)) {
+          for (let i = 0; i < prop.length; i++) {
+            k = ks[key].k[i];
+            this.element[prop[i]] = scale * k;
+          }
         }
-        pPose = Utils.copyJSON(pose);
-      });
+      }
     }
   }
 };
@@ -73,61 +90,62 @@ KeyFrames.prototype.preParser = function(keys) {
 KeyFrames.prototype.nextPose = function() {
   let cache = {};
   /* eslint guard-for-in: "off" */
-  for (const k in this.aks) {
-    const ak = this.aks[k];
-    cache[k] = this.interpolation(k, ak);
+  for (const key in this.aks) {
+    const ak = this.aks[key];
+    cache[key] = this.interpolation(key, ak);
   }
   return cache;
 };
 
-KeyFrames.prototype.prepare = function(kk, ak) {
+KeyFrames.prototype.prepare = function(key, ak) {
   const k = ak.k;
-  const result = {};
-  let pRange = this.jcst;
-  const progress = Utils.clamp(this.progress, this.jcst, ak.jcet);
-  // let pose;
-  let range = 0;
-  for (let i = 0; i < k.length; i++) {
-    let pose = k[i];
-    range = pose.t * this.rfr;
-    result.pose = pose;
-    result.progress = progress - pRange;
-    result.range = [0, range - pRange];
-    if (this.progress > pRange && this.progress <= range) {
-      return result;
-    }
-    pRange = range;
+  const progress = Utils.clamp(this.progress, 0, ak.jcet);
+  let pkt = ak.jcst;
+  if (progress < this.iip * this.rfr) {
+    this.element.visible = false;
+  } else {
+    this.element.visible = true;
   }
-  return result;
+  if (progress < pkt) {
+    return k[0].s;
+  } else {
+    const l = k.length;
+    for (let i = 1; i < l; i++) {
+      const kt = k[i].t * this.rfr;
+      if (progress < kt) {
+        const s = k[i - 1].s;
+        const e = k[i - 1].e;
+        const value = [];
+        const rate = Utils.linear(progress, pkt, kt);
+        for (let j = 0; j < s.length; j++) {
+          const v = e[j] - s[j];
+          value[j] = s[j] + v * rate;
+        }
+        return value;
+      }
+      pkt = kt;
+    }
+    return k[l - 2].e;
+  }
 };
-KeyFrames.prototype.interpolation = function(k, ak) {
-  const info = this.prepare(k, ak);
-  if (!info.pose || !info.pose.s) return;
-  const p = Utils.linear(info.progress, info.range[0], info.range[1]);
-  const prop = PM[k].label;
-  const scale = PM[k].scale;
-  let s = 0;
-  let e = 0;
+KeyFrames.prototype.interpolation = function(key, ak) {
+  const value = this.prepare(key, ak);
   let cache = {};
+  cache[key] = value;
+  this.setValue(key, value);
+  return cache;
+};
+KeyFrames.prototype.setValue = function(key, value) {
+  const prop = PM[key].label;
+  const scale = PM[key].scale;
   if (Utils.isString(prop)) {
-    if (Utils.isNumber(info.pose.s)) {
-      e = info.pose.e;
-      s = info.pose.s;
-    }
-    if (Utils.isArray(info.pose.s)) {
-      e = info.pose.e[0];
-      s = info.pose.s[0];
-    }
-
-    cache[prop] = this.element[prop] = scale * (s + (e - s) * p);
+    this.element[prop] = scale * value[0];
   } else if (Utils.isArray(prop)) {
     for (let i = 0; i < prop.length; i++) {
-      e = info.pose.e[i];
-      s = info.pose.s[i];
-      cache[prop[i]] = this.element[prop[i]] = scale * (s + (e - s) * p);
+      const v = value[i];
+      this.element[prop[i]] = scale * v;
     }
   }
-  return cache;
 };
 
 export {KeyFrames};
