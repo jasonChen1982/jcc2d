@@ -176,6 +176,12 @@ Point.prototype.multiplyScalar = function (scalar) {
   return this;
 };
 
+/**
+ * 事件系统的事件消息对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ */
 function InteractionData() {
   /**
    * 转换到canvas坐标系统的事件触发点
@@ -649,6 +655,13 @@ var Utils = {
   }
 };
 
+/**
+ * 动画对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画配置信息
+ */
 function Animate(options) {
   this.element = options.element || {};
   this.duration = options.duration || 300;
@@ -726,6 +739,13 @@ Animate.prototype.cancle = function () {
   this.living = false;
 };
 
+/**
+ * Transition类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画所具备的特性
+ */
 function Transition(options) {
   Animate.call(this, options);
 
@@ -907,6 +927,13 @@ Curve.prototype = {
 
 };
 
+/**
+ * PathMotion类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画所具备的特性
+ */
 function PathMotion(options) {
   Animate.call(this, options);
   if (!options.path || !(options.path instanceof Curve)) {
@@ -1096,6 +1123,13 @@ KeyFrames.prototype.setValue = function (key, value) {
   }
 };
 
+/**
+ * AnimateRunner类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画配置信息
+ */
 function AnimateRunner(options) {
   Animate.call(this, options);
 
@@ -1165,6 +1199,13 @@ AnimateRunner.prototype.update = function (snippet) {
   }
 };
 
+/**
+ * Animation类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {JC.DisplayObject} element
+ */
 function Animation(element) {
   this.element = element;
   this.animates = [];
@@ -1200,6 +1241,15 @@ Animation.prototype.clear = function () {
   this.animates.length = 0;
 };
 
+/**
+ * 图片纹理类
+ *
+ * @class
+ * @memberof JC
+ * @param {string | Image} img 图片url或者图片对象.
+ * @param {Boolean} lazy 图片是否需要懒加载
+ * @extends JC.Eventer
+ */
 function Texture(img, lazy) {
   Eventer.call(this);
   this.texture = null;
@@ -1585,6 +1635,13 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 var IDENTITY = new Matrix();
 var TEMP_MATRIX = new Matrix();
 
+/**
+ * 显示对象的基类，继承至Eventer
+ *
+ * @class
+ * @extends JC.Eventer
+ * @memberof JC
+ */
 function DisplayObject() {
   Eventer.call(this);
   /**
@@ -2117,6 +2174,16 @@ Rectangle.prototype.contains = function (x, y) {
   return false;
 };
 
+/**
+ * 显示对象的包围盒子
+ *
+ * @class
+ * @param {Number} minX
+ * @param {Number} minY
+ * @param {Number} maxX
+ * @param {Number} maxY
+ * @memberof JC
+ */
 function Bounds(minX, minY, maxX, maxY) {
   /**
    * @member {number}
@@ -2246,6 +2313,18 @@ Bounds.prototype.addBounds = function (bounds) {
   this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
+/**
+ * 显示对象容器，继承至DisplayObject
+ *
+ * ```js
+ * var container = new JC.Container();
+ * container.addChilds(sprite);
+ * ```
+ *
+ * @class
+ * @extends JC.DisplayObject
+ * @memberof JC
+ */
 function Container() {
   DisplayObject.call(this);
 
@@ -2549,6 +2628,15 @@ Container.prototype.cancle = function () {
   this.Animator.clear();
 };
 
+// TODO: 继承事件对象
+/**
+ * MovieClip类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [element] 动画对象 内部传入
+ * @param {object} [options] 动画配置信息 内部传入
+ */
 function MovieClip(element, options) {
   this.element = element;
   this.living = false;
@@ -2788,6 +2876,12 @@ Sprite.prototype.renderMe = function (ctx) {
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
 };
 
+// import {Utils} from './Utils';
+
+/**
+ * 解析bodymovin从ae导出的数据
+ * @param {object} options bodymovin从ae导出的数据
+ */
 function ParserAnimation(options) {
   this.prefix = options.prefix || '';
   this.doc = new Container();
@@ -2862,6 +2956,11 @@ ParserAnimation.prototype.getAssets = function (id) {
   }
 };
 
+/**
+ * @class
+ * @memberof JC
+ * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
+ */
 function Polygon(points) {
   if (!Utils.isArray(points)) {
     points = new Array(arguments.length);
@@ -2921,6 +3020,15 @@ Polygon.prototype.contains = function (x, y) {
   return inside;
 };
 
+/**
+ * 圆形对象
+ *
+ * @class
+ * @memberof JC
+ * @param {number} x x轴的坐标
+ * @param {number} y y轴的坐标
+ * @param {number} radius 圆的半径
+ */
 function Circle(x, y, radius) {
   /**
    * @member {number}
@@ -2981,6 +3089,16 @@ Circle.prototype.getBounds = function () {
   return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
 };
 
+/**
+ * 椭圆对象
+ *
+ * @class
+ * @memberof JC
+ * @param {number} x x轴的坐标
+ * @param {number} y y轴的坐标
+ * @param {number} width 椭圆的宽度
+ * @param {number} height 椭圆的高度
+ */
 function Ellipse(x, y, width, height) {
   /**
    * @member {number}
@@ -3047,6 +3165,10 @@ Ellipse.prototype.getBounds = function () {
   return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
 };
 
+/**
+ *
+ * @param {Array}  points  array of points
+ */
 function BezierCurve(points) {
   this.points = points;
 }
@@ -3073,6 +3195,12 @@ BezierCurve.prototype.getPoint = function (t, points) {
   }
 };
 
+// SvgCurve.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // TODO: some like don`t need svg tag to wrap
+
+/**
+ *
+ * @param {String}  path  array of points
+ */
 function SvgCurve(path) {
   if (Utils.isString(path)) {
     this.path = this.createPath(path);
@@ -3464,6 +3592,12 @@ var NURBSUtils = {
 
 };
 
+/**
+ *
+ * @param {Number} degree
+ * @param {Array}  knots           array of reals
+ * @param {Array}  controlPoints   array of Point
+ */
 function NURBSCurve(degree, knots, controlPoints) {
   this.degree = degree;
   this.knots = knots;
@@ -3614,6 +3748,18 @@ var set$1 = function set$1(object, property, value, receiver) {
   return value;
 };
 
+/**
+ * 形状对象，继承至Container
+ *
+ *
+ * ```js
+ * var graphics = new JC.Graphics();
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
 function Graphics() {
   Container.call(this);
   this.frameBuffer = null;
@@ -3688,6 +3834,25 @@ Graphics.prototype.drawCall = function (fn, options) {
   this.setBounds(options.bounds);
 };
 
+/**
+ * 文本，继承至Container
+ *
+ *
+ * ```js
+ * var text = new JC.TextFace(
+ *   'JC jcc2d canvas renderer',
+ *   'bold 36px Arial',
+ *   '#f00'
+ * );
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ * @param {string} text
+ * @param {string} font
+ * @param {string} color
+ */
 function TextFace(text, font, color) {
   Container.call(this);
   this.text = text.toString();
@@ -3730,6 +3895,12 @@ TextFace.prototype.renderMe = function (ctx) {
   }
 };
 
+/**
+ *
+ * @param {number} blurX x轴的模糊值
+ * @param {number} blurY y轴的模糊值
+ * @param {number} quality 模糊的质量，模糊计算会被递归多少次
+ */
 function BlurFilter(blurX, blurY, quality) {
     Container.call(this);
 
@@ -4077,6 +4248,10 @@ BlurFilter.prototype._applyFilter = function (imageData) {
     return true;
 };
 
+/**
+ *
+ * @param {JC.Stage} stage 需要接入事件系统的的场景
+ */
 function InteractionManager(stage) {
   Eventer.call(this);
   this.stage = stage;
@@ -4398,6 +4573,22 @@ InteractionManager.prototype.getPos = function (obj) {
   return pos;
 };
 
+/* global RAF CAF */
+/* eslint new-cap: 0 */
+
+/**
+ * 舞台对象，继承至Eventer
+ *
+ *
+ * ```js
+ * var stage = new JC.Stage('demo_canvas','#fff');
+ * ```
+ *
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ * @param {json} options
+ */
 function Stage(options) {
   // canvas, bgColor, resolution
   options = options || {};
