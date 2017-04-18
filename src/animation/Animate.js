@@ -16,7 +16,7 @@ function Animate(options) {
   this.onCompelete = options.onCompelete || null;
   this.onUpdate = options.onUpdate || null;
 
-  this.infinity = options.infinity || false;
+  this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.delay = options.delay || 0;
@@ -49,7 +49,7 @@ Animate.prototype.update = function(snippet) {
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.totalTime >= this.duration) {
-    if (this.repeats > 0 || this.infinity) {
+    if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       this.delayCut = this.delay;
       this.totalTime = 0;
@@ -77,7 +77,7 @@ Animate.prototype.restart = function() {
 };
 Animate.prototype.stop = function() {
   this.repeats = 0;
-  this.infinity = false;
+  this.infinite = false;
   this.progress = this.duration;
 };
 Animate.prototype.cancle = function() {

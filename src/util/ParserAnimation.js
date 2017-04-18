@@ -14,7 +14,7 @@ function ParserAnimation(options) {
   this.keyframes = options.keyframes;
   this.ip = this.keyframes.ip;
   this.op = this.keyframes.op;
-  this.infinity = options.infinity || false;
+  this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
   this.preParser();
@@ -35,7 +35,7 @@ ParserAnimation.prototype.preParser = function() {
 };
 ParserAnimation.prototype.parser = function(doc, layers) {
   const l = layers.length;
-  const infinity = this.infinity;
+  const infinite = this.infinite;
   const alternate = this.alternate;
   const ip = this.ip;
   const op = this.op;
@@ -51,7 +51,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
         fr: this.fr,
         ip,
         op,
-        infinity,
+        infinite,
         alternate,
       });
       ani.name = layer.nm;
@@ -65,7 +65,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
         fr: this.fr,
         ip,
         op,
-        infinity,
+        infinite,
         alternate,
       });
       ddoc.name = layer.nm;

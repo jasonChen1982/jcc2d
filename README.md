@@ -36,7 +36,7 @@ const coin = new JC.Sprite({
 coin.keyFrames({
   ks: data.layers[0], // bodymovin keyframes data
   fr: 30, // frame rate
-  // infinity: true, // infinity loop
+  // infinite: true, // infinite loop
   // alternate: true, // alternate
   onUpdate() {},
   onCompelete() {
@@ -49,7 +49,7 @@ const ani = new JC.ParserAnimation({
   keyframes: data,
   // fr: 30, // frame rate
   // prefix: '', // assets url prefix
-  // infinity: true, // infinity loop
+  // infinite: true, // infinite loop
   // alternate: true, // alternate
   onUpdate() {},
   onCompelete() {
@@ -78,7 +78,7 @@ const timeline = ball.animate({
   repeats: 10, // repeat sometimes
   delay: 1000, // delay a moment every repeat
   wait: 1000, // wait a moment to start
-  infinity: true, // want infinity repeats?
+  infinite: true, // want infinite repeats?
   alternate: true, // repeats with alternate
   duration: 1000, // duration
   onUpdate: function(state,rate){}, // onUpdate callback

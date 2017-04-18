@@ -64,11 +64,11 @@ loadBox.on('compelete',function(){
             walk: {start: 40,end: 59,next: 'stand'}
         }
     });
-    runMan.playMovie({ // you can config repeats (repeat some times) or infinity (play infinite times)
+    runMan.playMovie({ // you can config repeats (repeat some times) or infinite (play infinite times)
         movie: 'stand',
         fps: 30,
         // repeats: 1,
-        infinity: true
+        infinite: true
     });
     runMan.on('click',function(){
         var movie = JC.Utils.random(['walk','fly','fall']);

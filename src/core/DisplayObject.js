@@ -221,7 +221,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  *   to: {x: 200},
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
+ *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
@@ -233,12 +233,12 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
  * @param {object} options.to 设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -256,7 +256,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
+ *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){}, // 动画更新回调
@@ -267,12 +267,12 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -288,7 +288,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  *   ks: data.layers[0], // ae导出的动画数据
  *   fr: 30, // 动画的帧率，默认：30fps
  *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
+ *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   onUpdate: function(state,rate){},
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
@@ -298,11 +298,11 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @param {object} options 动画配置参数
  * @param {object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */

@@ -173,7 +173,7 @@ rectLeftBack.animate({
     ease: 'easeOutStrong',
     duration: 600,
     delay: 1800,
-    infinity: true,
+    infinite: true,
     alternate: true
 });
 rectLeftFront.drawCall(new RectBound());
@@ -182,7 +182,7 @@ rectLeftFront.animate({
     ease: 'easeOutStrong',
     duration: 600,
     delay: 1800,
-    infinity: true,
+    infinite: true,
     alternate: true
 });
 
@@ -192,7 +192,7 @@ bannerLeft.animate({
     to: {x: -60},
     ease: 'easeBoth',
     duration: 2000,
-    infinity: true,
+    infinite: true,
     alternate: true
 });
 
@@ -203,7 +203,7 @@ rectRightBack.animate({
     ease: 'easeOutStrong',
     duration: 600,
     delay: 1800,
-    infinity: true,
+    infinite: true,
     alternate: true
 });
 rectRightFront.drawCall(new RectBound());
@@ -212,7 +212,7 @@ rectRightFront.animate({
     ease: 'easeOutStrong',
     duration: 600,
     delay: 1800,
-    infinity: true,
+    infinite: true,
     alternate: true
 });
 
@@ -223,7 +223,7 @@ bannerRight.animate({
     to: {x: w+60},
     ease: 'easeBoth',
     duration: 2000,
-    infinity: true,
+    infinite: true,
     alternate: true
 });
 

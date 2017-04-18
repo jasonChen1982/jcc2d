@@ -16,7 +16,7 @@ function MovieClip(element, options) {
   this.onCompelete = null;
   // this.onUpdate = null;
 
-  this.infinity = false;
+  this.infinite = false;
   this.alternate = false;
   this.repeats = 0;
 
@@ -47,7 +47,7 @@ MovieClip.prototype.update = function(snippet) {
     // Do you need this handler???
     // this.onUpdate&&this.onUpdate(this.index);
   } else {
-    if (this.repeats > 0 || this.infinity) {
+    if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       if (this.alternate) {
         this.direction *= -1;
@@ -96,7 +96,7 @@ MovieClip.prototype.playMovie = function(options) {
   this.direction = 1;
   this.fillMode = options.fillMode || 0;
   this.fps = options.fps || this.fps;
-  this.infinity = options.infinity || false;
+  this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
@@ -130,7 +130,7 @@ MovieClip.prototype.format = function(movie) {
       let conf = {};
       if(Utils.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
-        conf.infinity = true;
+        conf.infinite = true;
       } else if(Utils.isObject(movie.next)) {
         conf = movie.next;
       }

@@ -23,7 +23,7 @@ AnimateRunner.prototype = Object.create(Animate.prototype);
 AnimateRunner.prototype.parserRunners = function() {
   for (let i = 0; i < this.runners.length; i++) {
     const runner = this.runners[i];
-    runner.infinity = false;
+    runner.infinite = false;
     runner.alternate = false;
     runner.element = this.element;
     runner.onCompelete = this.nextRunner.bind(this);
@@ -61,7 +61,7 @@ Animate.prototype.update = function(snippet) {
   }, this.progress / this.duration);
 
   if (this.totalTime >= this.length) {
-    if (this.repeats > 0 || this.infinity) {
+    if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       this.delayCut = this.delay;
       this.totalTime = 0;
