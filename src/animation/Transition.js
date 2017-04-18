@@ -1,5 +1,6 @@
-
+import {Tween} from '../util/Tween';
 import {Animate} from './Animate';
+import {Utils} from '../util/Utils';
 
 /**
  * Transition类型动画对象
@@ -11,9 +12,32 @@ import {Animate} from './Animate';
 function Transition(options) {
   Animate.call(this, options);
 
+  if (Utils.isObject(options.from)) {
+    this.element.setProps(options.from);
+  } else {
+    options.from = {};
+    /* eslint guard-for-in: "off" */
+    for (let i in options.to) {
+      options.from[i] = this.element[i];
+    }
+  }
+  this.ease = options.ease || 'easeBoth';
   this.from = options.from;
   this.to = options.to;
 }
 Transition.prototype = Object.create(Animate.prototype);
+Transition.prototype.nextPose = function() {
+  let pose = {};
+  /* eslint guard-for-in: "off" */
+  for (let i in this.to) {
+    pose[i] = Tween[this.ease](this.progress,
+                                this.from[i],
+                                this.to[i] - this.from[i],
+                                this.duration
+                              );
+    if (this.element[i] !== undefined) this.element[i] = pose[i];
+  }
+  return pose;
+};
 
 export {Transition};

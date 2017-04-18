@@ -34,16 +34,16 @@ PathMotion.prototype.nextPose = function() {
   let _rotate = 0;
   const t = Tween[this.ease](this.progress, 0, 1, this.duration);
   const pos = this.path.getPoint(t);
-  const cache = pos.clone();
+  const pose = pos.clone();
 
   if (this.attachTangent) {
     _rotate = this.decomposeRotate(t);
-    cache.rotation = _rotate === false ? this.preDegree : _rotate;
-    cache.rotation += this._cacheRotate;
+    pose.rotation = _rotate === false ? this.preDegree : _rotate;
+    pose.rotation += this._cacheRotate;
     if (_rotate !== false) this.preDegree = _rotate;
   }
-  this.element.setProps(cache);
-  return cache;
+  this.element.setProps(pose);
+  return pose;
 };
 
 PathMotion.prototype.decomposeRotate = function(t) {

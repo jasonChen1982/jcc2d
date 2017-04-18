@@ -1,4 +1,3 @@
-import {Tween} from '../util/Tween';
 import {Utils} from '../util/Utils';
 
 /**
@@ -12,13 +11,13 @@ function Animate(options) {
   this.element = options.element || {};
   this.duration = options.duration || 300;
   this.living = true;
+  this.resident = options.resident || false;
 
   this.onCompelete = options.onCompelete || null;
   this.onUpdate = options.onUpdate || null;
 
   this.infinity = options.infinity || false;
   this.alternate = options.alternate || false;
-  this.ease = options.ease || 'easeBoth';
   this.repeats = options.repeats || 0;
   this.delay = options.delay || 0;
   this.wait = options.wait || 0;
@@ -32,15 +31,6 @@ function Animate(options) {
 
   this.paused = false;
 }
-Animate.prototype._swapEase = function() {
-  let ease = this.ease;
-  if (ease.indexOf('In') > 0) {
-    ease = ease.replace('In', 'Out');
-  } else if (ease.indexOf('Out') > 0) {
-    ease = ease.replace('Out', 'In');
-  }
-  this.ease = ease;
-};
 Animate.prototype.update = function(snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
@@ -65,7 +55,6 @@ Animate.prototype.update = function(snippet) {
       this.totalTime = 0;
       if (this.alternate) {
         this.direction *= -1;
-        this._swapEase();
       } else {
         this.direction = 1;
         this.progress = 0;
@@ -75,27 +64,20 @@ Animate.prototype.update = function(snippet) {
       if (this.onCompelete) this.onCompelete(pose);
     }
   }
+  return pose;
 };
 Animate.prototype.nextPose = function() {
-  let cache = {};
-  /* eslint guard-for-in: "off" */
-  for (let i in this.to) {
-    cache[i] = Tween[this.ease](this.progress,
-                                this.from[i],
-                                this.to[i] - this.from[i],
-                                this.duration
-                              );
-    if (this.element[i] !== undefined) this.element[i] = cache[i];
-  }
-  return cache; // this.onUpdate
+  console.warn('should be overwrite');
 };
 Animate.prototype.pause = function() {
   this.paused = true;
 };
-Animate.prototype.start = function() {
+Animate.prototype.restart = function() {
   this.paused = false;
 };
 Animate.prototype.stop = function() {
+  this.repeats = 0;
+  this.infinity = false;
   this.progress = this.duration;
 };
 Animate.prototype.cancle = function() {

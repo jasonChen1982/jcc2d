@@ -88,13 +88,13 @@ KeyFrames.prototype.preParser = function(keys) {
 };
 
 KeyFrames.prototype.nextPose = function() {
-  let cache = {};
+  let pose = {};
   /* eslint guard-for-in: "off" */
   for (const key in this.aks) {
     const ak = this.aks[key];
-    cache[key] = this.interpolation(key, ak);
+    pose[key] = this.interpolation(key, ak);
   }
-  return cache;
+  return pose;
 };
 
 KeyFrames.prototype.prepare = function(key, ak) {

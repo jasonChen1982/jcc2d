@@ -2,7 +2,6 @@ import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
 import {KeyFrames} from './KeyFrames';
 import {AnimateRunner} from './AnimateRunner';
-import {Utils} from '../util/Utils';
 /**
  * Animation类型动画对象
  *
@@ -16,20 +15,15 @@ function Animation(element) {
 }
 Animation.prototype.update = function(snippet) {
   for (let i = 0; i < this.animates.length; i++) {
-    if (!this.animates[i].living) this.animates.splice(i, 1);
+    if (
+      !this.animates[i].living
+      &&
+      !this.animates[i].resident
+    ) this.animates.splice(i, 1);
     if (this.animates[i]) this.animates[i].update(snippet);
   }
 };
 Animation.prototype.animate = function(options, clear) {
-  if (Utils.isObject(options.from)) {
-    this.element.setProps(options.from);
-  } else {
-    options.from = {};
-    /* eslint guard-for-in: "off" */
-    for (let i in options.to) {
-      options.from[i] = this.element[i];
-    }
-  }
   options.element = this.element;
   return this._addMove(new Transition(options), clear);
 };
