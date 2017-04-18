@@ -1,5 +1,13 @@
 
-v1.0.1 / 2017-03-27
+v1.1.0 / 2017-04-18
+==================
+
+  * feat: built-in engine start render loop method in Stage
+  * feat: change infinity to infinite for stay with css animation
+  * feat: add animateRunner
+  * feat(animation): finish keyframes and parserkeyframes, support after effects exported data
+
+v1.0.2 / 2017-03-27
 ==================
 
   * refactor: code style use in eslint-config-google
