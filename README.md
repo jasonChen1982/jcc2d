@@ -29,20 +29,34 @@ jcc2d is a lightweight canvas2d render engine and built-in an awesome animator w
 built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] to export keyframes data from [after effect][ae], and easy parser to [jcc2d][jcc2d] keyFrames, just like following:
 
 ```js
+// parser a single animation layer
 const coin = new JC.Sprite({
   texture: new JC.Texture('/path/coin.png'),
 });
-
 coin.keyFrames({
-    ks: data.layers[0], // bodymovin keyframes data
-    fr: 30, // frame rate
-    // infinity: true,
-    // alternate: true,
-    onUpdate() {},
-    onCompelete(info) {
-      console.log(this.element);
-    },
+  ks: data.layers[0], // bodymovin keyframes data
+  fr: 30, // frame rate
+  // infinity: true, // infinity loop
+  // alternate: true, // alternate
+  onUpdate() {},
+  onCompelete() {
+    console.log(this.element);
+  },
 });
+
+// parser all animation layer
+const ani = new JC.ParserAnimation({
+  keyframes: data,
+  // fr: 30, // frame rate
+  // prefix: '', // assets url prefix
+  // infinity: true, // infinity loop
+  // alternate: true, // alternate
+  onUpdate() {},
+  onCompelete() {
+    console.log(this.element);
+  },
+});
+
 ```
 
 [view demo][ae-export]
