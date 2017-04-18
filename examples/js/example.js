@@ -1,4 +1,3 @@
-/* global $:true, EXAMPLES:true, stroll */
 
 var list = '';
 for (var i = 0; i < EXAMPLES.length; i++) {

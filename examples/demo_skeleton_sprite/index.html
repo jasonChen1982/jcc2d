@@ -85,24 +85,24 @@ loadBox.on('compelete',function(){
     });
     arm1.x = -50;
     arm1.y = 22;
-    arm1.regX = 140;
-    arm1.regY = 102;
+    arm1.pivotX = 140;
+    arm1.pivotY = 102;
     arm1.rotation = 30;
     arm2 = new JC.Sprite({
         texture: loadBox.getById('arm2')
     });
     arm2.x = -135;
     arm2.y = -94;
-    arm2.regX = 14;
-    arm2.regY = 20;
+    arm2.pivotX = 14;
+    arm2.pivotY = 20;
     arm1.adds(arm2);
     hand = new JC.Sprite({
         texture: loadBox.getById('hand')
     });
     hand.x = 12;
     hand.y = 88;
-    hand.regX = 4;
-    hand.regY = 41;
+    hand.pivotX = 4;
+    hand.pivotY = 41;
     arm2.adds(hand);
     bodyDoc.adds(arm1,body,wheels);
     DOC.adds(bodyDoc);

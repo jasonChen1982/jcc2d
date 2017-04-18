@@ -67,8 +67,8 @@ Sprite.prototype.upTexture = function(options) {
 
   this.width = options.width || this.frame.width || this.naturalWidth;
   this.height = options.height || this.frame.height || this.naturalHeight;
-  // this.regX = this.width >> 1;
-  // this.regY = this.height >> 1;
+  // this.pivotX = this.width >> 1;
+  // this.pivotY = this.height >> 1;
   let rect = new Rectangle(0, 0, this.width, this.height);
   this._bounds.addRect(rect);
   this.setArea(rect, true);

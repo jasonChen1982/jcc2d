@@ -22,6 +22,7 @@ function PathMotion(options) {
   }
 
   this.path = options.path;
+  this.ease = options.ease || 'easeBoth';
   this.attachTangent = options.attachTangent || false;
   this._cacheRotate = this.element.rotation;
   let radian = this._cacheRotate * Utils.DTR;

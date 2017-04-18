@@ -69,6 +69,8 @@ loadBox.on('compelete',function(){
     pic = new JC.Sprite({
         texture: loadBox.getById('pic')
     });
+    pic.pivotX = pic.width >> 1;
+    pic.pivotY = pic.height >> 1;
     pic.animate({
         from: {x: 500},
         to: {x: 100},
@@ -79,12 +81,29 @@ loadBox.on('compelete',function(){
     pic2 = new JC.Sprite({
         texture: loadBox.getById('pic2')
     });
+    pic2.pivotX = pic2.width >> 1;
+    pic2.pivotY = pic2.height >> 1;
     pic2.animate({
         from: {x: -500},
         to: {x: -100},
         duration: 1000,
         ease: 'bounceOut'
     });
+
+
+    pic3 = new JC.Sprite({
+        texture: loadBox.getById('pic3')
+    });
+    pic3.pivotX = pic3.width >> 1;
+    pic3.pivotY = pic3.height >> 1;
+    pic3.animate({
+        to: {rotation: 360},
+        infinite: true,
+        alternate: true,
+        delay: 2000,
+        duration: 1000
+    });
+    DOC.adds(pic3);
 
 
     DOC.adds(pic2,pic);
@@ -94,17 +113,6 @@ loadBox.on('compelete',function(){
     render();
 });
 
-pic3 = new JC.Sprite({
-    texture: loadBox.getById('pic3')
-});
-pic3.animate({
-    to: {rotation: 360},
-    infinite: true,
-    alternate: true,
-    delay: 2000,
-    duration: 1000
-});
-DOC.adds(pic3);
 
 function render(){
     RAF(render);

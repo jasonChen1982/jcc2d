@@ -97,8 +97,7 @@ loadBox.on('compelete',function(){
         ctx.arc(0,0,10,0,Math.PI*2);
         ctx.fill();
     });
-    arm1.x = -82;
-    arm1.y = -100;
+    arm1.x = 95;
     arm1.rotation = 80;
 
     arm2 = new JC.Graphics();
@@ -215,6 +214,8 @@ loadBox.on('compelete',function(){
     body = new JC.Sprite({
         texture: loadBox.getById('body')
     });
+    body.pivotX = body.width >> 1;
+    body.pivotY = body.height >> 1;
 
     ground = new JC.Graphics();
     ground.drawCall(function(ctx){

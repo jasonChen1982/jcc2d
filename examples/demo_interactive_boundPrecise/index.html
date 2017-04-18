@@ -101,6 +101,8 @@ loadBox.on('compelete',function(){
     pic = new JC.Sprite({
         texture: loadBox.getById('daisy')
     });
+    pic.pivotX = pic.width >> 1;
+    pic.pivotY = pic.height >> 1;
     pic.scaleX = pic.scaleY = 3;
     pic.animate({
         to: {scaleX: 1,scaleY: 1},

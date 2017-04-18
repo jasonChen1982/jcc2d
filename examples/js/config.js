@@ -87,9 +87,14 @@ var EXAMPLES = [
         link: 'demo_animation_animate_2'
     },
     {
-        title: 'keyframes动画',
+        title: 'AE导出的动画片段',
         type: 'demo',
         link: 'demo_animation_keyFrames'
+    },
+    {
+        title: 'AE导出的完整动画',
+        type: 'demo',
+        link: 'demo_animation_keyFrames2'
     },
     {
         title: '沿着曲线运动的动画',

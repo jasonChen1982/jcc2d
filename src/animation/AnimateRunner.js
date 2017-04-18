@@ -43,7 +43,7 @@ AnimateRunner.prototype.nextRunner = function() {
 AnimateRunner.prototype.nextPose = function(snippetCache) {
   return this.queues[this.cursor].update(snippetCache);
 };
-Animate.prototype.update = function(snippet) {
+AnimateRunner.prototype.update = function(snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
     return;

@@ -73,6 +73,8 @@ loadBox.on('compelete',function(){
     pic = new JC.Sprite({
         texture: loadBox.getById('pic')
     });
+    pic.pivotX = pic.width >> 1;
+    pic.pivotY = pic.height >> 1;
 
     blurPass = new JC.BlurFilter(0,0,1);
     // blurPass.autoUpdateBuffer = true;

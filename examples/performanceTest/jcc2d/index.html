@@ -8,6 +8,9 @@
 	<style type="text/css">
     * {padding:0;margin:0;}
     body {overflow: hidden;}
+    #demo_canvas {
+      width: 100%;
+    }
     </style>
 </head>
 <body>
@@ -26,7 +29,8 @@ window.onresize = function(){
 var w = window.innerWidth,
     h = window.innerHeight,
     stage = new JC.Stage({
-        dom: 'demo_canvas'
+        dom: 'demo_canvas',
+        resolution: window.devicePixelRatio,
     }),
     DOC = new JC.Container();
 DOC.x = w/2;
@@ -44,10 +48,13 @@ var loadBox = JC.loaderUtil({
 
 resize();
 
-for (var i = 0; i < 300; i++) {
+loadBox.on('compelete', function() {
+  for (var i = 0; i < 300; i++) {
     var el = new JC.Sprite({
-        texture: loadBox.getById('pic'),
+      texture: loadBox.getById('pic'),
     });
+    el.pivotX = el.width >> 1;
+    el.pivotY = el.height >> 1;
     el.x = (Math.random()-0.5)*2*w;
     el.y = (Math.random()-0.5)*2*h;
     el.animate({
@@ -57,7 +64,8 @@ for (var i = 0; i < 300; i++) {
         duration: 2e3+Math.random()*1e3
     });
     DOC.adds(el);
-}
+  }
+})
 stage.adds(DOC);
 
 render();

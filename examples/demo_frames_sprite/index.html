@@ -55,8 +55,6 @@ loadBox.on('compelete',function(){
     runMan = new JC.Sprite({
         texture: loadBox.getById('dragon'),
         frame: new JC.Rectangle(0, 0, 210, 231),
-        width: 420,
-        height: 462,
         animations: {
             fall: {start: 0,end: 4,next: 'stand'},
             fly: {start: 5,end: 9,next: 'stand'},
@@ -64,6 +62,8 @@ loadBox.on('compelete',function(){
             walk: {start: 40,end: 59,next: 'stand'}
         }
     });
+    runMan.pivotX = runMan.width >> 1;
+    runMan.pivotY = runMan.height >> 1;
     runMan.playMovie({ // you can config repeats (repeat some times) or infinite (play infinite times)
         movie: 'stand',
         fps: 30,

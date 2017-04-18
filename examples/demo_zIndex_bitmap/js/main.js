@@ -95,6 +95,8 @@ Sphere.prototype.createVertex = function(parent, imgs) {
             var shape = new JC.Sprite({
                 texture: loadBox.getById(JC.Utils.random(imgs))
             });
+            shape.pivotX = shape.width >> 1;
+            shape.pivotY = shape.height >> 1;
 
             shape.x      = Math.sin(degX) * Math.sin(degY) * this.radius,
             shape.y      = Math.cos(degX) * this.radius,

@@ -352,8 +352,9 @@ DisplayObject.prototype.setProps = function(props) {
  * @private
  */
 DisplayObject.prototype.updateTransform = function() {
-  let pt = this.parent.worldTransform || IDENTITY;
+  let pt = (this.parent && this.parent.worldTransform) || IDENTITY;
   let wt = this.worldTransform;
+  const worldAlpha = (this.parent && this.parent.worldAlpha) || 1;
 
   let a;
   let b;
@@ -421,7 +422,7 @@ DisplayObject.prototype.updateTransform = function() {
       wt.ty = tx * pt.b + ty * pt.d + pt.ty;
     }
   }
-  this.worldAlpha = this.alpha * this.parent.worldAlpha;
+  this.worldAlpha = this.alpha * worldAlpha;
 };
 
 /**

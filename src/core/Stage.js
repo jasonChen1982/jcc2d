@@ -295,7 +295,7 @@ Stage.prototype.render = function() {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
-  if (this.autoUpdate) this.updatePosture();
+  if (this.autoUpdate) this.updatePosture(this.snippet);
 
   for (let i = 0, l = this.childs.length; i < l; i++) {
     let child = this.childs[i];

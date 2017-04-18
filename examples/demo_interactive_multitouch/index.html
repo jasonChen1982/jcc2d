@@ -72,6 +72,8 @@ loadBox.on('compelete',function() {
         materialSprites[i] = new JC.MaterialSprite({
             texture: loadBox.getById('woman')
         });
+        materialSprites[i].pivotX = materialSprites[i].width >> 1;
+        materialSprites[i].pivotY = materialSprites[i].height >> 1;
         materialSprites[i].name = 'pic'+i;
         materialSprites[i].x = w*(Math.random()-0.5);
         materialSprites[i].scale = 0.25;
@@ -81,7 +83,7 @@ loadBox.on('compelete',function() {
                 y: -400
             },
             to: {
-                y: h/2-materialSprites[i].regY*materialSprites[i].scale
+                y: h/2-materialSprites[i].pivotY * materialSprites[i].scale
             },
             duration: 1000,
             ease: 'bounceOut'
