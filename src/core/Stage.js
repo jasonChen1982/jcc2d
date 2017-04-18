@@ -3,6 +3,9 @@ import {Container} from './Container';
 import {InteractionManager} from '../eventer/InteractionManager';
 import {Utils} from '../util/Utils';
 
+/* global RAF CAF */
+/* eslint new-cap: 0 */
+
 /**
  * 舞台对象，继承至Eventer
  *
@@ -247,7 +250,7 @@ Object.defineProperty(Stage.prototype, 'resolution', {
   set: function(value) {
     if (this._resolution !== value) {
       this._resolution = value;
-      this.worldTransform.identity().scale(value, value);
+      this.scale = value;
       this.resize();
     }
   },
@@ -288,17 +291,11 @@ Stage.prototype.render = function() {
 
   this.timeline();
 
-  if (this.autoUpdate) this.update();
-
-  this.ctx.setTransform(
-    this.worldTransform.a,
-    this.worldTransform.b,
-    this.worldTransform.c,
-    this.worldTransform.d,
-    this.worldTransform.tx,
-    this.worldTransform.ty
-  );
-  if (this.autoClear) this.ctx.clearRect(0, 0, this.width, this.height);
+  if (this.autoClear) {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+  if (this.autoUpdate) this.updatePosture();
 
   for (let i = 0, l = this.childs.length; i < l; i++) {
     let child = this.childs[i];
@@ -314,9 +311,10 @@ Stage.prototype.render = function() {
  *
  *
  */
-Stage.prototype.update = function() {
-  this.updatePosture(this.timeScale * this.snippet);
-};
+// Stage.prototype.update = function() {
+//   this.updateTransform();
+//   this.updatePosture(this.timeScale * this.snippet);
+// };
 
 /**
  * 引擎的时间轴
@@ -349,11 +347,49 @@ Stage.prototype.timeline = function() {
  * @private
  * @param {number} snippet
  */
-Stage.prototype.updatePosture = function(snippet) {
-  for (let i = 0, l = this.childs.length; i < l; i++) {
-    let child = this.childs[i];
-    child.updatePosture(snippet);
+// Stage.prototype.updatePosture = function(snippet) {
+//   for (let i = 0, l = this.childs.length; i < l; i++) {
+//     let child = this.childs[i];
+//     child.updatePosture(snippet);
+//   }
+// };
+
+/**
+ * 启动渲染引擎
+ *
+ * @method startEngine
+ */
+Stage.prototype.startEngine = function() {
+  if (this.inRender) return;
+  this.inRender = true;
+  this.animate();
+};
+
+/**
+ * 关闭渲染引擎
+ *
+ * @method stopEngine
+ */
+Stage.prototype.stopEngine = function() {
+  CAF(this.loop);
+  this.inRender = false;
+};
+
+/**
+ * 更新场景内物体的姿态
+ *
+ * @method stopEngine
+ */
+Stage.prototype.stopEngine = function() {
+  const This = this;
+  /**
+   * render loop
+   */
+  function render() {
+    This.stage.render();
+    This.loop = RAF(render);
   }
+  render();
 };
 
 export {Stage};

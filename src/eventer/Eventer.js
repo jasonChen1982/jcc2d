@@ -6,22 +6,6 @@
  */
 function Eventer() {
   /**
-   * 标记当前对象是否为touchstart触发状态
-   *
-   * @member {Boolean}
-   * @private
-   */
-  // this.touchstarted = false;
-
-  /**
-   * 标记当前对象是否为mousedown触发状态
-   *
-   * @member {Boolean}
-   * @private
-   */
-  // this.mouseDowned = false;
-
-  /**
    * 事件监听列表
    *
    * @member {Object}

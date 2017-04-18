@@ -305,7 +305,7 @@ Container.prototype.pause = function() {
  *
  *
  */
-Container.prototype.start = function() {
+Container.prototype.restart = function() {
   this.paused = false;
 };
 

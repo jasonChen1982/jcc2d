@@ -7,10 +7,10 @@ import {Container} from './Container';
  *
  * ```js
  * var text = new JC.TextFace(
- *              'JC jcc2d canvas renderer',
- *              'bold 36px Arial',
- *              '#f00'
- *            );
+ *   'JC jcc2d canvas renderer',
+ *   'bold 36px Arial',
+ *   '#f00'
+ * );
  * ```
  *
  * @class
@@ -36,7 +36,7 @@ function TextFace(text, font, color) {
   this.US = false; // use stroke
   this.UF = true; // use fill
 
-    // ctx.measureText(str) 返回指定文本的宽度
+  // ctx.measureText(str) 返回指定文本的宽度
 }
 TextFace.prototype = Object.create( Container.prototype );
 

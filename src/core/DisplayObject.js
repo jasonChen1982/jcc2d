@@ -1,4 +1,4 @@
-import {Matrix, TEMP_MATRIX} from '../math/Matrix';
+import {Matrix, TEMP_MATRIX, IDENTITY} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
 import {Animation} from '../animation/Animation';
@@ -352,7 +352,7 @@ DisplayObject.prototype.setProps = function(props) {
  * @private
  */
 DisplayObject.prototype.updateTransform = function() {
-  let pt = this.parent.worldTransform;
+  let pt = this.parent.worldTransform || IDENTITY;
   let wt = this.worldTransform;
 
   let a;

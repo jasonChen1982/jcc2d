@@ -4,7 +4,7 @@ import {Point} from '../math/Point';
 
 /**
  *
- * @param {JC.Stage} stage 徐亚接入事件系统的的场景
+ * @param {JC.Stage} stage 需要接入事件系统的的场景
  */
 function InteractionManager(stage) {
   Eventer.call(this);
