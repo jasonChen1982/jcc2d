@@ -6,7 +6,7 @@
 
 A canvas 2d renderer & An awesome animator
 ---
-[![main page][main-page]][jcc2d]
+<p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page"><img src="https://jasonchen1982.github.io/jcc2d/static/images/main-page.png" width="100%" alt="main page" title="main page"></a></p>
 
 ## Show case
 * [refactor usopen-sessions main page][jcc2d]

@@ -1323,7 +1323,8 @@
 
     <section>
         <article class="readme"><h1>jcc2d</h1><p><a target="_blank" href="https://travis-ci.org/jasonChen1982/jcc2d"><img src="https://img.shields.io/travis/jasonChen1982/jcc2d.svg?style=flat-square" alt="Build Status"></a><br><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/"><img src="https://img.shields.io/npm/v/jcc2d.svg?style=flat-square" alt="npm"></a><br><a target="_blank" href="https://google.github.io/styleguide/jsguide.html"><img src="https://img.shields.io/badge/code_style-google-brightgreen.svg" alt="javascript style guide"></a></p>
-<h2>A canvas 2d renderer &amp; An awesome animator</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page"><img src="https://jasonchen1982.github.io/jcc2d/static/images/main-page.png" alt="main page" title="main page"></a></p>
+<h2>A canvas 2d renderer &amp; An awesome animator</h2><p><a target="_blank" target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page"><img src="https://jasonchen1982.github.io/jcc2d/static/images/main-page.png" width="100%" alt="main page" title="main page"></a></p>
+
 <h2>Show case</h2><ul>
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">refactor usopen-sessions main page</a></li>
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/" title="Particle effect">particle effect</a></li>
@@ -1335,25 +1336,38 @@
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_interactive_boundPrecise" title="check eventer pointer exact polygon">check eventer pointer exact polygon</a></li>
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_timingfunction_allInOne" title="varied timingfunction supported">varied timingfunction supported</a></li>
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_motion" title="path motion animation">path motion animation</a></li>
-<li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames" title="after effect export">after effect export</a></li>
+<li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">after effect export</a></li>
 </ul>
 <h2>Introduction</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">main page</a></p>
 <p>jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline management, support event system by default.</p>
 <p>built-in support <a target="_blank" href="https://github.com/bodymovin/bodymovin" title="bodymovin github">bodymovin</a> keyframes data, use <a target="_blank" href="https://creative.adobe.com/addons/products/12557#.WPRdl1N94o8" title="bodymovin add-on">bodymovin add-on</a> to export keyframes data from <a target="_blank" href="http://www.adobe.com/cn/products/aftereffects.html" title="ae">after effect</a>, and easy parser to <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">jcc2d</a> keyFrames, just like following:</p>
-<pre class="prettyprint source lang-js"><code>const coin = new JC.Sprite({
+<pre class="prettyprint source lang-js"><code>// parser a single animation layer
+const coin = new JC.Sprite({
   texture: new JC.Texture('/path/coin.png'),
 });
-
 coin.keyFrames({
-    ks: data.layers[0], // bodymovin keyframes data
-    fr: 30, // frame rate
-    // infinity: true,
-    // alternate: true,
-    onUpdate() {},
-    onCompelete(info) {
-      console.log(this.element);
-    },
-});</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames" title="after effect export">view demo</a></p>
+  ks: data.layers[0], // bodymovin keyframes data
+  fr: 30, // frame rate
+  // infinity: true, // infinity loop
+  // alternate: true, // alternate
+  onUpdate() {},
+  onCompelete() {
+    console.log(this.element);
+  },
+});
+
+// parser all animation layer
+const ani = new JC.ParserAnimation({
+  keyframes: data,
+  // fr: 30, // frame rate
+  // prefix: '', // assets url prefix
+  // infinity: true, // infinity loop
+  // alternate: true, // alternate
+  onUpdate() {},
+  onCompelete() {
+    console.log(this.element);
+  },
+});</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">view demo</a></p>
 <h2>Feature</h2><p>Include <code>Stage</code> <code>Sprite</code> <code>Graphics</code> <code>Container</code> <code>BlurFilter</code> <code>TextFace</code> and so on.</p>
 <p>Every display instance can easy start an animation and attach a timeline, just like following:</p>
 <pre class="prettyprint source lang-javascript"><code>const ball = new JC.Sprite({
@@ -1425,7 +1439,7 @@ timeline.timeScale = 0.5; // Slow motion，speed * 0.5</code></pre><h2>Display a
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Apr 17 2017 15:16:08 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 18 2017 11:07:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>
