@@ -72,7 +72,7 @@ WaveLines.prototype.render = function(ctx) {
 
 
 function RectBound(){
-    this.halfW = w;
+    this.width = 400;
 }
 RectBound.prototype.render = function(ctx) {
     var parentAlpha = ctx.globalAlpha;
@@ -82,20 +82,20 @@ RectBound.prototype.render = function(ctx) {
     ctx.beginPath();
     ctx.fillStyle = '#d9182d';
     ctx.globalAlpha = 0.5*parentAlpha;
-    ctx.fillRect(280-this.halfW,-h,this.halfW,h);
+    ctx.fillRect(280-this.width,-h,this.width,h);
 
     ctx.beginPath();
     ctx.globalAlpha = 1*parentAlpha;
-    ctx.fillRect(330-this.halfW,-h,this.halfW,h+50);
+    ctx.fillRect(330-this.width,-h,this.width,h+50);
 
     ctx.beginPath();
     ctx.fillStyle = '#00b2ef';
     ctx.globalAlpha = 0.5*parentAlpha;
-    ctx.fillRect(-this.halfW,-h,this.halfW,h*2);
+    ctx.fillRect(-this.width,-h,this.width,h*2);
 
     ctx.beginPath();
     ctx.globalAlpha = 0.5*parentAlpha;
-    ctx.fillRect(180-this.halfW,-h,this.halfW,h*2);
+    ctx.fillRect(180-this.width,-h,this.width,h*2);
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
 
@@ -147,7 +147,8 @@ var w = window.innerWidth,
     rectRightBack = new JC.Graphics(),
     rectRightFront = new JC.Graphics(),
     stage = new JC.Stage({
-        dom: 'line-canvas'
+        dom: 'line-canvas',
+        resolution: window.devicePixelRatio,
     }),
     BG = new JC.Container(),
     DOC = new JC.Container(),
