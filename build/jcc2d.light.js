@@ -1,7 +1,7 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (factory((global.JC = global.JC || {})));
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (factory((global.JC = global.JC || {})));
 }(this, (function (exports) { 'use strict';
 
 (function () {
@@ -1422,6 +1422,219 @@ var loaderUtil = function loaderUtil(srcMap) {
 };
 
 /**
+ * 矩形类
+ *
+ * @class
+ * @memberof JC
+ * @param {number} x 左上角的x坐标
+ * @param {number} y 左上角的y坐标
+ * @param {number} width 矩形的宽度
+ * @param {number} height 矩形的高度
+ */
+function Rectangle(x, y, width, height) {
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.x = x || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.y = y || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.width = width || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.height = height || 0;
+}
+
+/**
+ * 空矩形对象
+ *
+ * @static
+ * @constant
+ */
+Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
+
+/**
+ * 克隆一个与该举行对象同样属性的矩形
+ *
+ * @return {PIXI.Rectangle} 克隆出的矩形
+ */
+Rectangle.prototype.clone = function () {
+  return new Rectangle(this.x, this.y, this.width, this.height);
+};
+
+/**
+ * 检查坐标点是否在矩形区域内
+ *
+ * @param {number} x 坐标点的x轴位置
+ * @param {number} y 坐标点的y轴位置
+ * @return {boolean} 坐标点是否在矩形区域内
+ */
+Rectangle.prototype.contains = function (x, y) {
+  if (this.width <= 0 || this.height <= 0) {
+    return false;
+  }
+
+  if (x >= this.x && x < this.x + this.width) {
+    if (y >= this.y && y < this.y + this.height) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * 显示对象的包围盒子
+ *
+ * @class
+ * @param {Number} minX
+ * @param {Number} minY
+ * @param {Number} maxX
+ * @param {Number} maxY
+ * @memberof JC
+ */
+function Bounds(minX, minY, maxX, maxY) {
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.minX = minX || Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.minY = minY || Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.maxX = maxX || -Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.maxY = maxY || -Infinity;
+
+  this.rect = null;
+}
+
+Bounds.prototype.isEmpty = function () {
+  return this.minX > this.maxX || this.minY > this.maxY;
+};
+
+Bounds.prototype.clear = function () {
+  // this.updateID++;
+
+  this.minX = Infinity;
+  this.minY = Infinity;
+  this.maxX = -Infinity;
+  this.maxY = -Infinity;
+};
+
+/**
+ * 将包围盒子转换成矩形描述
+ *
+ * @param {JC.Rectangle} rect 待转换的矩形
+ * @return {JC.Rectangle}
+ */
+Bounds.prototype.getRectangle = function (rect) {
+  if (this.isEmpty()) {
+    return Rectangle.EMPTY;
+  }
+
+  rect = rect || new Rectangle(0, 0, 1, 1);
+
+  rect.x = this.minX;
+  rect.y = this.minY;
+  rect.width = this.maxX - this.minX;
+  rect.height = this.maxY - this.minY;
+
+  return rect;
+};
+
+/**
+ * 往包围盒增加外部顶点，更新包围盒区域
+ *
+ * @param {JC.Point} point
+ */
+Bounds.prototype.addPoint = function (point) {
+  this.minX = Math.min(this.minX, point.x);
+  this.maxX = Math.max(this.maxX, point.x);
+  this.minY = Math.min(this.minY, point.y);
+  this.maxY = Math.max(this.maxY, point.y);
+};
+
+/**
+ * 往包围盒增加矩形区域，更新包围盒区域
+ *
+ * @param {JC.Rectangle} rect
+ */
+Bounds.prototype.addRect = function (rect) {
+  this.minX = rect.x;
+  this.maxX = rect.width + rect.x;
+  this.minY = rect.y;
+  this.maxY = rect.height + rect.y;
+};
+
+/**
+ * 往包围盒增加顶点数组，更新包围盒区域
+ *
+ * @param {Array} vertices
+ */
+Bounds.prototype.addVert = function (vertices) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
+
+  for (var i = 0; i < vertices.length; i += 2) {
+    var x = vertices[i];
+    var y = vertices[i + 1];
+    minX = x < minX ? x : minX;
+    minY = y < minY ? y : minY;
+    maxX = x > maxX ? x : maxX;
+    maxY = y > maxY ? y : maxY;
+  }
+
+  this.minX = minX;
+  this.minY = minY;
+  this.maxX = maxX;
+  this.maxY = maxY;
+};
+
+/**
+ * 往包围盒增加包围盒，更新包围盒区域
+ *
+ * @param {JC.Bounds} bounds
+ */
+Bounds.prototype.addBounds = function (bounds) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
+
+  this.minX = bounds.minX < minX ? bounds.minX : minX;
+  this.minY = bounds.minY < minY ? bounds.minY : minY;
+  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
+  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
+};
+
+/**
  * 矩阵对象，用来描述和记录对象的tansform 状态信息
  *
  * @class
@@ -2101,219 +2314,6 @@ DisplayObject.prototype.contains = function (global) {
 };
 
 /**
- * 矩形类
- *
- * @class
- * @memberof JC
- * @param {number} x 左上角的x坐标
- * @param {number} y 左上角的y坐标
- * @param {number} width 矩形的宽度
- * @param {number} height 矩形的高度
- */
-function Rectangle(x, y, width, height) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.width = width || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.height = height || 0;
-}
-
-/**
- * 空矩形对象
- *
- * @static
- * @constant
- */
-Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
-
-/**
- * 克隆一个与该举行对象同样属性的矩形
- *
- * @return {PIXI.Rectangle} 克隆出的矩形
- */
-Rectangle.prototype.clone = function () {
-  return new Rectangle(this.x, this.y, this.width, this.height);
-};
-
-/**
- * 检查坐标点是否在矩形区域内
- *
- * @param {number} x 坐标点的x轴位置
- * @param {number} y 坐标点的y轴位置
- * @return {boolean} 坐标点是否在矩形区域内
- */
-Rectangle.prototype.contains = function (x, y) {
-  if (this.width <= 0 || this.height <= 0) {
-    return false;
-  }
-
-  if (x >= this.x && x < this.x + this.width) {
-    if (y >= this.y && y < this.y + this.height) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-/**
- * 显示对象的包围盒子
- *
- * @class
- * @param {Number} minX
- * @param {Number} minY
- * @param {Number} maxX
- * @param {Number} maxY
- * @memberof JC
- */
-function Bounds(minX, minY, maxX, maxY) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minX = minX || Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minY = minY || Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxX = maxX || -Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxY = maxY || -Infinity;
-
-  this.rect = null;
-}
-
-Bounds.prototype.isEmpty = function () {
-  return this.minX > this.maxX || this.minY > this.maxY;
-};
-
-Bounds.prototype.clear = function () {
-  // this.updateID++;
-
-  this.minX = Infinity;
-  this.minY = Infinity;
-  this.maxX = -Infinity;
-  this.maxY = -Infinity;
-};
-
-/**
- * 将包围盒子转换成矩形描述
- *
- * @param {JC.Rectangle} rect 待转换的矩形
- * @return {JC.Rectangle}
- */
-Bounds.prototype.getRectangle = function (rect) {
-  if (this.isEmpty()) {
-    return Rectangle.EMPTY;
-  }
-
-  rect = rect || new Rectangle(0, 0, 1, 1);
-
-  rect.x = this.minX;
-  rect.y = this.minY;
-  rect.width = this.maxX - this.minX;
-  rect.height = this.maxY - this.minY;
-
-  return rect;
-};
-
-/**
- * 往包围盒增加外部顶点，更新包围盒区域
- *
- * @param {JC.Point} point
- */
-Bounds.prototype.addPoint = function (point) {
-  this.minX = Math.min(this.minX, point.x);
-  this.maxX = Math.max(this.maxX, point.x);
-  this.minY = Math.min(this.minY, point.y);
-  this.maxY = Math.max(this.maxY, point.y);
-};
-
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param {JC.Rectangle} rect
- */
-Bounds.prototype.addRect = function (rect) {
-  this.minX = rect.x;
-  this.maxX = rect.width + rect.x;
-  this.minY = rect.y;
-  this.maxY = rect.height + rect.y;
-};
-
-/**
- * 往包围盒增加顶点数组，更新包围盒区域
- *
- * @param {Array} vertices
- */
-Bounds.prototype.addVert = function (vertices) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  for (var i = 0; i < vertices.length; i += 2) {
-    var x = vertices[i];
-    var y = vertices[i + 1];
-    minX = x < minX ? x : minX;
-    minY = y < minY ? y : minY;
-    maxX = x > maxX ? x : maxX;
-    maxY = y > maxY ? y : maxY;
-  }
-
-  this.minX = minX;
-  this.minY = minY;
-  this.maxX = maxX;
-  this.maxY = maxY;
-};
-
-/**
- * 往包围盒增加包围盒，更新包围盒区域
- *
- * @param {JC.Bounds} bounds
- */
-Bounds.prototype.addBounds = function (bounds) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  this.minX = bounds.minX < minX ? bounds.minX : minX;
-  this.minY = bounds.minY < minY ? bounds.minY : minY;
-  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
-  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
-};
-
-/**
  * 显示对象容器，继承至DisplayObject
  *
  * ```js
@@ -2876,760 +2876,6 @@ Sprite.prototype.renderMe = function (ctx) {
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
 };
 
-// import {Utils} from './Utils';
-
-/**
- * 解析bodymovin从ae导出的数据
- * @param {object} options bodymovin从ae导出的数据
- */
-function ParserAnimation(options) {
-  this.prefix = options.prefix || '';
-  this.doc = new Container();
-  this.fr = options.fr || options.keyframes.fr;
-  this.keyframes = options.keyframes;
-  this.ip = this.keyframes.ip;
-  this.op = this.keyframes.op;
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.assetBox = null;
-  this.preParser();
-  this.parser(this.doc, this.keyframes.layers);
-}
-ParserAnimation.prototype.preParser = function () {
-  var assets = this.keyframes.assets;
-  var sourceMap = {};
-  for (var i = 0; i < assets.length; i++) {
-    var id = assets[i].id;
-    var u = assets[i].u;
-    var p = assets[i].p;
-    if (u && p) {
-      sourceMap[id] = u + p;
-    }
-  }
-  this.assetBox = loaderUtil(sourceMap);
-};
-ParserAnimation.prototype.parser = function (doc, layers) {
-  var l = layers.length;
-  var infinite = this.infinite;
-  var alternate = this.alternate;
-  var ip = this.ip;
-  var op = this.op;
-  for (var i = l - 1; i >= 0; i--) {
-    var layer = layers[i];
-    if (layer.ty === 2) {
-      var id = this.getAssets(layer.refId).id;
-      var ani = new Sprite({
-        texture: this.assetBox.getById(id)
-      });
-      ani.keyFrames({
-        ks: layer,
-        fr: this.fr,
-        ip: ip,
-        op: op,
-        infinite: infinite,
-        alternate: alternate
-      });
-      ani.name = layer.nm;
-      doc.adds(ani);
-    }
-    if (layer.ty === 0) {
-      var ddoc = new Container();
-      var llayers = this.getAssets(layer.refId).layers;
-      ddoc.keyFrames({
-        ks: layer,
-        fr: this.fr,
-        ip: ip,
-        op: op,
-        infinite: infinite,
-        alternate: alternate
-      });
-      ddoc.name = layer.nm;
-      doc.adds(ddoc);
-      this.parser(ddoc, llayers);
-    }
-  }
-};
-ParserAnimation.prototype.getAssets = function (id) {
-  var assets = this.keyframes.assets;
-  for (var i = 0; i < assets.length; i++) {
-    if (id === assets[i].id) return assets[i];
-  }
-};
-
-/**
- * @class
- * @memberof JC
- * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
- */
-function Polygon(points) {
-  if (!Utils.isArray(points)) {
-    points = new Array(arguments.length);
-    /* eslint-disable */
-    for (var a = 0; a < points.length; ++a) {
-      points[a] = arguments[a];
-    }
-  }
-
-  if (points[0] instanceof Point) {
-    var p = [];
-    for (var i = 0, il = points.length; i < il; i++) {
-      p.push(points[i].x, points[i].y);
-    }
-
-    points = p;
-  }
-
-  this.closed = true;
-
-  this.points = points;
-}
-
-/**
- * 克隆一个属性相同的多边型对象
- *
- * @return {PIXI.Polygon} 克隆的对象
- */
-Polygon.prototype.clone = function () {
-  return new Polygon(this.points.slice());
-};
-
-/**
- * 检查坐标点是否在多边形内部
- *
- * @param {number} x 坐标点的x轴坐标
- * @param {number} y 坐标点的y轴坐标
- * @return {boolean} 是否在多边形内部
- */
-Polygon.prototype.contains = function (x, y) {
-  var inside = false;
-
-  var length = this.points.length / 2;
-
-  for (var i = 0, j = length - 1; i < length; j = i++) {
-    var xi = this.points[i * 2];
-    var yi = this.points[i * 2 + 1];
-    var xj = this.points[j * 2];
-    var yj = this.points[j * 2 + 1];
-    var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
-
-    if (intersect) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-};
-
-/**
- * 圆形对象
- *
- * @class
- * @memberof JC
- * @param {number} x x轴的坐标
- * @param {number} y y轴的坐标
- * @param {number} radius 圆的半径
- */
-function Circle(x, y, radius) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.radius = radius || 0;
-}
-
-/**
- * 克隆一个该圆对象
- *
- * @return {PIXI.Circle} 克隆出来的圆对象
- */
-Circle.prototype.clone = function () {
-  return new Circle(this.x, this.y, this.radius);
-};
-
-/**
- * 检测坐标点是否在园内
- *
- * @param {number} x 坐标点的x轴坐标
- * @param {number} y 坐标点的y轴坐标
- * @return {boolean} 坐标点是否在园内
- */
-Circle.prototype.contains = function (x, y) {
-  if (this.radius <= 0) {
-    return false;
-  }
-
-  var dx = this.x - x;
-  var dy = this.y - y;
-  var r2 = this.radius * this.radius;
-
-  dx *= dx;
-  dy *= dy;
-
-  return dx + dy <= r2;
-};
-
-/**
-* 返回对象所占的矩形区域
-*
-* @return {PIXI.Rectangle} 矩形对象
-*/
-Circle.prototype.getBounds = function () {
-  return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-};
-
-/**
- * 椭圆对象
- *
- * @class
- * @memberof JC
- * @param {number} x x轴的坐标
- * @param {number} y y轴的坐标
- * @param {number} width 椭圆的宽度
- * @param {number} height 椭圆的高度
- */
-function Ellipse(x, y, width, height) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.width = width || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.height = height || 0;
-}
-
-/**
- * 克隆一个该椭圆对象
- *
- * @return {PIXI.Ellipse} 克隆出来的椭圆对象
- */
-Ellipse.prototype.clone = function () {
-  return new Ellipse(this.x, this.y, this.width, this.height);
-};
-
-/**
- * 检测坐标点是否在椭园内
- *
- * @param {number} x 坐标点的x轴坐标
- * @param {number} y 坐标点的y轴坐标
- * @return {boolean} 坐标点是否在椭园内
- */
-Ellipse.prototype.contains = function (x, y) {
-  if (this.width <= 0 || this.height <= 0) {
-    return false;
-  }
-
-  // normalize the coords to an ellipse with center 0,0
-  var normx = (x - this.x) / this.width;
-  var normy = (y - this.y) / this.height;
-
-  normx *= normx;
-  normy *= normy;
-
-  return normx + normy <= 1;
-};
-
-/**
- * 返回对象所占的矩形区域
- *
- * @return {PIXI.Rectangle} 矩形对象
- */
-Ellipse.prototype.getBounds = function () {
-  return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
-};
-
-/**
- *
- * @param {Array}  points  array of points
- */
-function BezierCurve(points) {
-  this.points = points;
-}
-
-BezierCurve.prototype = Object.create(Curve.prototype);
-
-BezierCurve.prototype.getPoint = function (t, points) {
-  var a = points || this.points;
-  var len = a.length;
-  var rT = 1 - t;
-  var l = a.slice(0, len - 1);
-  var r = a.slice(1);
-  var oP = new Point();
-  if (len > 3) {
-    var oL = this.getPoint(t, l);
-    var oR = this.getPoint(t, r);
-    oP.x = rT * oL.x + t * oR.x;
-    oP.y = rT * oL.y + t * oR.y;
-    return oP;
-  } else {
-    oP.x = rT * rT * points[0].x + 2 * t * rT * points[1].x + t * t * points[2].x;
-    oP.y = rT * rT * points[0].y + 2 * t * rT * points[1].y + t * t * points[2].y;
-    return oP;
-  }
-};
-
-// SvgCurve.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // TODO: some like don`t need svg tag to wrap
-
-/**
- *
- * @param {String}  path  array of points
- */
-function SvgCurve(path) {
-  if (Utils.isString(path)) {
-    this.path = this.createPath(path);
-  } else if (path.nodeName === 'path' && path.getAttribute('d')) {
-    this.path = path;
-  } else {
-    /* eslint max-len: "off" */
-    console.warn('%c JC.SvgCurve warn %c: SvgCurve just accept <path d="M10 10"> element or "M10 10" string but found %c' + path + '%c', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;', 'color: #f98165; background: #cad9d5', 'color: #80a89e; background: #cad9d5');
-  }
-  this.totalLength = this.path.getTotalLength();
-}
-
-SvgCurve.prototype = Object.create(Curve.prototype);
-
-SvgCurve.prototype.createPath = function (d) {
-  var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  return p.setAttribute(d);
-};
-
-SvgCurve.prototype.getPoint = function (t) {
-  var point = this.path.getPointAtLength(t * this.totalLength);
-  return new Point(point.x, point.y);
-};
-
-var NURBSUtils = {
-
-  /**
-   * Finds knot vector span.
-   * @param {number} p degree
-   * @param {number} u parametric value
-   * @param {number} U knot vector
-   * @return {number} span
-   */
-  findSpan: function findSpan(p, u, U) {
-    var n = U.length - p - 1;
-
-    if (u >= U[n]) {
-      return n - 1;
-    }
-
-    if (u <= U[p]) {
-      return p;
-    }
-
-    var low = p;
-    var high = n;
-    var mid = Math.floor((low + high) / 2);
-
-    while (u < U[mid] || u >= U[mid + 1]) {
-      if (u < U[mid]) {
-        high = mid;
-      } else {
-        low = mid;
-      }
-
-      mid = Math.floor((low + high) / 2);
-    }
-
-    return mid;
-  },
-
-  /**
-   * Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
-   * @param {number} span span in which u lies
-   * @param {number} u parametric point
-   * @param {number} p degree
-   * @param {number} U knot vector
-   * @return {array} array[p+1] with basis functions values.
-   */
-  calcBasisFunctions: function calcBasisFunctions(span, u, p, U) {
-    var N = [];
-    var left = [];
-    var right = [];
-    N[0] = 1.0;
-
-    for (var j = 1; j <= p; ++j) {
-      left[j] = u - U[span + 1 - j];
-      right[j] = U[span + j] - u;
-
-      var saved = 0.0;
-
-      for (var r = 0; r < j; ++r) {
-        var rv = right[r + 1];
-        var lv = left[j - r];
-        var temp = N[r] / (rv + lv);
-        N[r] = saved + rv * temp;
-        saved = lv * temp;
-      }
-
-      N[j] = saved;
-    }
-
-    return N;
-  },
-
-  /**
-   * Calculate B-Spline curve points. See The NURBS Book, page 82
-   * @param {number} p degree of B-Spline
-   * @param {vector} U knot vector
-   * @param {vector} P control points (x, y, z, w)
-   * @param {vector} u parametric point
-   * @return {point} point for given u
-  */
-  calcBSplinePoint: function calcBSplinePoint(p, U, P, u) {
-    var span = this.findSpan(p, u, U);
-    var N = this.calcBasisFunctions(span, u, p, U);
-    var C = new Point(0, 0, 0, 0);
-
-    for (var j = 0; j <= p; ++j) {
-      var point = P[span - p + j];
-      var Nj = N[j];
-      var wNj = point.w * Nj;
-      C.x += point.x * wNj;
-      C.y += point.y * wNj;
-      C.z += point.z * wNj;
-      C.w += point.w * Nj;
-    }
-
-    return C;
-  },
-
-  /**
-   * Calculate basis functions derivatives.
-   * See The NURBS Book, page 72, algorithm A2.3.
-   * @param {number} span span in which u lies
-   * @param {number} u    parametric point
-   * @param {number} p    degree
-   * @param {number} n    number of derivatives to calculate
-   * @param {number} U    knot vector
-   * @return {array} ders
-   */
-  calcBasisFunctionDerivatives: function calcBasisFunctionDerivatives(span, u, p, n, U) {
-    var zeroArr = [];
-    var i = 0;
-    for (i = 0; i <= p; ++i) {
-      zeroArr[i] = 0.0;
-    }var ders = [];
-    for (i = 0; i <= n; ++i) {
-      ders[i] = zeroArr.slice(0);
-    }var ndu = [];
-    for (i = 0; i <= p; ++i) {
-      ndu[i] = zeroArr.slice(0);
-    }ndu[0][0] = 1.0;
-
-    var left = zeroArr.slice(0);
-    var right = zeroArr.slice(0);
-    var j = 1;
-    var r = 0;
-    var k = 1;
-
-    for (j = 1; j <= p; ++j) {
-      left[j] = u - U[span + 1 - j];
-      right[j] = U[span + j] - u;
-
-      var saved = 0.0;
-      for (r = 0; r < j; ++r) {
-        var rv = right[r + 1];
-        var lv = left[j - r];
-        ndu[j][r] = rv + lv;
-
-        var temp = ndu[r][j - 1] / ndu[j][r];
-        ndu[r][j] = saved + rv * temp;
-        saved = lv * temp;
-      }
-
-      ndu[j][j] = saved;
-    }
-
-    for (j = 0; j <= p; ++j) {
-      ders[0][j] = ndu[j][p];
-    }
-
-    for (r = 0; r <= p; ++r) {
-      var s1 = 0;
-      var s2 = 1;
-
-      var a = [];
-      for (i = 0; i <= p; ++i) {
-        a[i] = zeroArr.slice(0);
-      }
-      a[0][0] = 1.0;
-
-      for (k = 1; k <= n; ++k) {
-        var d = 0.0;
-        var rk = r - k;
-        var pk = p - k;
-
-        if (r >= k) {
-          a[s2][0] = a[s1][0] / ndu[pk + 1][rk];
-          d = a[s2][0] * ndu[rk][pk];
-        }
-
-        var j1 = rk >= -1 ? 1 : -rk;
-        var j2 = r - 1 <= pk ? k - 1 : p - r;
-
-        for (j = j1; j <= j2; ++j) {
-          a[s2][j] = (a[s1][j] - a[s1][j - 1]) / ndu[pk + 1][rk + j];
-          d += a[s2][j] * ndu[rk + j][pk];
-        }
-
-        if (r <= pk) {
-          a[s2][k] = -a[s1][k - 1] / ndu[pk + 1][r];
-          d += a[s2][k] * ndu[r][pk];
-        }
-
-        ders[k][r] = d;
-
-        j = s1;
-        s1 = s2;
-        s2 = j;
-      }
-    }
-
-    r = p;
-
-    for (k = 1; k <= n; ++k) {
-      for (j = 0; j <= p; ++j) {
-        ders[k][j] *= r;
-      }
-      r *= p - k;
-    }
-
-    return ders;
-  },
-
-  /**
-   * Calculate derivatives of a B-Spline.
-   * See The NURBS Book, page 93, algorithm A3.2.
-   * @param {number} p   degree
-   * @param {number} U   knot vector
-   * @param {number} P   control points
-   * @param {number} u   Parametric points
-   * @param {number} nd  number of derivatives
-   * @return {array} array[d+1] with derivatives
-   */
-  calcBSplineDerivatives: function calcBSplineDerivatives(p, U, P, u, nd) {
-    var du = nd < p ? nd : p;
-    var CK = [];
-    var span = this.findSpan(p, u, U);
-    var nders = this.calcBasisFunctionDerivatives(span, u, p, du, U);
-    var Pw = [];
-    var point = void 0;
-    var i = 0;
-    var k = 0;
-
-    for (; i < P.length; ++i) {
-      point = P[i].clone();
-      var w = point.w;
-
-      point.x *= w;
-      point.y *= w;
-      point.z *= w;
-
-      Pw[i] = point;
-    }
-    for (; k <= du; ++k) {
-      point = Pw[span - p].clone().multiplyScalar(nders[k][0]);
-
-      for (var j = 1; j <= p; ++j) {
-        point.add(Pw[span - p + j].clone().multiplyScalar(nders[k][j]));
-      }
-
-      CK[k] = point;
-    }
-
-    for (k = du + 1; k <= nd + 1; ++k) {
-      CK[k] = new Point(0, 0, 0);
-    }
-
-    return CK;
-  },
-
-  /*
-  Calculate "K over I"
-   returns k!/(i!(k-i)!)
-  */
-  calcKoverI: function calcKoverI(k, i) {
-    var nom = 1;
-    var j = 2;
-
-    for (j = 2; j <= k; ++j) {
-      nom *= j;
-    }
-
-    var denom = 1;
-
-    for (j = 2; j <= i; ++j) {
-      denom *= j;
-    }
-
-    for (j = 2; j <= k - i; ++j) {
-      denom *= j;
-    }
-
-    return nom / denom;
-  },
-
-  /**
-   * Calculate derivatives (0-nd) of rational curve.
-   * See The NURBS Book, page 127, algorithm A4.2.
-   * @param {array} Pders result of function calcBSplineDerivatives
-   * @return {array} with derivatives for rational curve.
-   */
-  calcRationalCurveDerivatives: function calcRationalCurveDerivatives(Pders) {
-    var nd = Pders.length;
-    var Aders = [];
-    var wders = [];
-    var i = 0;
-
-    for (i = 0; i < nd; ++i) {
-      var point = Pders[i];
-      Aders[i] = new Point(point.x, point.y, point.z);
-      wders[i] = point.w;
-    }
-
-    var CK = [];
-
-    for (var k = 0; k < nd; ++k) {
-      var v = Aders[k].clone();
-
-      for (i = 1; i <= k; ++i) {
-        v.sub(CK[k - i].clone().multiplyScalar(this.calcKoverI(k, i) * wders[i]));
-      }
-
-      CK[k] = v.divideScalar(wders[0]);
-    }
-
-    return CK;
-  },
-
-  /**
-   * Calculate NURBS curve derivatives.
-   * See The NURBS Book, page 127, algorithm A4.2.
-   * @param {number} p  degree
-   * @param {number} U  knot vector
-   * @param {number} P  control points in homogeneous space
-   * @param {number} u  parametric points
-   * @param {number} nd number of derivatives
-   * @return {array} returns array with derivatives.
-   */
-  calcNURBSDerivatives: function calcNURBSDerivatives(p, U, P, u, nd) {
-    var Pders = this.calcBSplineDerivatives(p, U, P, u, nd);
-    return this.calcRationalCurveDerivatives(Pders);
-  },
-
-  /**
-   * Calculate rational B-Spline surface point.
-   * See The NURBS Book, page 134, algorithm A4.3.
-   * @param {number} p degrees of B-Spline surface
-   * @param {number} q degrees of B-Spline surface
-   *
-   * @param {number} U knot vectors
-   * @param {number} V knot vectors
-   *
-   * @param {number} P control points (x, y, z, w)
-   *
-   * @param {number} u parametric values
-   * @param {number} v parametric values
-   * @return {JC.Point} point for given (u, v)
-   */
-  calcSurfacePoint: function calcSurfacePoint(p, q, U, V, P, u, v) {
-    var uspan = this.findSpan(p, u, U);
-    var vspan = this.findSpan(q, v, V);
-    var Nu = this.calcBasisFunctions(uspan, u, p, U);
-    var Nv = this.calcBasisFunctions(vspan, v, q, V);
-    var temp = [];
-    var l = 0;
-
-    for (; l <= q; ++l) {
-      temp[l] = new Point(0, 0, 0, 0);
-      for (var k = 0; k <= p; ++k) {
-        var point = P[uspan - p + k][vspan - q + l].clone();
-        var w = point.w;
-        point.x *= w;
-        point.y *= w;
-        point.z *= w;
-        temp[l].add(point.multiplyScalar(Nu[k]));
-      }
-    }
-
-    var Sw = new Point(0, 0, 0, 0);
-    for (l = 0; l <= q; ++l) {
-      Sw.add(temp[l].multiplyScalar(Nv[l]));
-    }
-
-    Sw.divideScalar(Sw.w);
-    return new Point(Sw.x, Sw.y, Sw.z);
-  }
-
-};
-
-/**
- *
- * @param {Number} degree
- * @param {Array}  knots           array of reals
- * @param {Array}  controlPoints   array of Point
- */
-function NURBSCurve(degree, knots, controlPoints) {
-  this.degree = degree;
-  this.knots = knots;
-  this.controlPoints = controlPoints; // [];
-}
-
-NURBSCurve.prototype = Object.create(Curve.prototype);
-NURBSCurve.prototype.constructor = NURBSCurve;
-
-NURBSCurve.prototype.getPoint = function (t) {
-  var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]); // linear mapping t->u
-
-  // following results in (wx, wy, wz, w) homogeneous point
-  var hpoint = NURBSUtils.calcBSplinePoint(this.degree, this.knots, this.controlPoints, u);
-
-  if (hpoint.w !== 1.0) {
-    // project to 3D space: (wx, wy, wz, w) -> (x, y, z, 1)
-    hpoint.divideScalar(hpoint.w);
-  }
-
-  return new Point(hpoint.x, hpoint.y, hpoint.z);
-};
-
-NURBSCurve.prototype.getTangent = function (t) {
-  var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]);
-  var ders = NURBSUtils.calcNURBSDerivatives(this.degree, this.knots, this.controlPoints, u, 1);
-  var tangent = ders[1].clone();
-  tangent.normalize();
-
-  return tangent;
-};
-
 /**
  * @class
  */
@@ -3832,420 +3078,6 @@ Graphics.prototype.drawCall = function (fn, options) {
   this.draw = fn || null;
 
   this.setBounds(options.bounds);
-};
-
-/**
- * 文本，继承至Container
- *
- *
- * ```js
- * var text = new JC.TextFace(
- *   'JC jcc2d canvas renderer',
- *   'bold 36px Arial',
- *   '#f00'
- * );
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- * @param {string} text
- * @param {string} font
- * @param {string} color
- */
-function TextFace(text, font, color) {
-  Container.call(this);
-  this.text = text.toString();
-  this.font = font || 'bold 12px Arial';
-  this.color = color || '#000000';
-
-  this.textAlign = 'center'; // start left center end right
-  this.textBaseline = 'middle'; // top bottom middle alphabetic hanging
-
-
-  this.outline = 0;
-  this.lineWidth = 1;
-
-  this.US = false; // use stroke
-  this.UF = true; // use fill
-
-  // ctx.measureText(str) 返回指定文本的宽度
-}
-TextFace.prototype = Object.create(Container.prototype);
-
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @method updateMe
- * @private
- * @param {context} ctx
- */
-TextFace.prototype.renderMe = function (ctx) {
-  ctx.font = this.font;
-  ctx.textAlign = this.textAlign;
-  ctx.textBaseline = this.textBaseline;
-  if (this.UF) {
-    ctx.fillStyle = this.color;
-    ctx.fillText(this.text, 0, 0);
-  }
-  if (this.US) {
-    ctx.lineWidth = this.lineWidth;
-    ctx.strokeStyle = this.color;
-    ctx.strokeText(this.text, 0, 0);
-  }
-};
-
-/**
- *
- * @param {number} blurX x轴的模糊值
- * @param {number} blurY y轴的模糊值
- * @param {number} quality 模糊的质量，模糊计算会被递归多少次
- */
-function BlurFilter(blurX, blurY, quality) {
-    Container.call(this);
-
-    if (isNaN(blurX) || blurX < 0) blurX = 0;
-    if (isNaN(blurY) || blurY < 0) blurY = 0;
-    if (isNaN(quality) || quality < 1) quality = 1;
-
-    this.frameBuffer = new FrameBuffer();
-
-    /**
-     * x轴的模糊值
-     * @property blurX
-     * @default 0
-     * @type Number
-     **/
-    this.blurX = blurX | 0;
-
-    /**
-     * y轴的模糊值
-     * @property blurY
-     * @default 0
-     * @type Number
-     **/
-    this.blurY = blurY | 0;
-
-    /**
-     * 模糊的质量，模糊计算会被递归多少次
-     * @property quality
-     * @default 1
-     * @type Number
-     **/
-    this.quality = quality | 0;
-
-    /**
-     * 下一帧的图像需要更新
-     * @property needUpdateBuffer
-     * @default false
-     * @type Boolean
-     **/
-    this.needUpdateBuffer = true;
-
-    /**
-     * 每一帧渲染都重新绘制
-     * @property autoUpdateBuffer
-     * @default false
-     * @type Boolean
-     **/
-    this.autoUpdateBuffer = false;
-
-    /**
-     * 时候给帧缓冲区加padding
-     * @property padding
-     * @default false
-     * @type Boolean
-     **/
-    this.padding = false;
-}
-BlurFilter.prototype = Object.create(Container.prototype);
-
-/**
- * 对渲染对象进行x、y轴同时设置模糊半径
- *
- * @member {number}
- * @name blur
- * @memberof JC.BlurFilter#
- */
-Object.defineProperty(BlurFilter.prototype, 'blur', {
-    get: function get() {
-        return this.blurX;
-    },
-    set: function set(blur) {
-        this.blurX = this.blurY = blur;
-    }
-});
-
-BlurFilter.prototype.updatePosture = function (snippet) {
-    if (!this._ready) return;
-    if (this.souldSort) this._sortList();
-    snippet = this.timeScale * snippet;
-    if (!this.paused) this.updateAnimation(snippet);
-
-    this.updateTransform();
-
-    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-        this.cacheMatrix = this.worldTransform;
-        this.worldTransform = __tmpMatrix.identity();
-        this._upc(snippet);
-
-        this.calculateBounds();
-        this.__o = this.bounds.getRectangle();
-        this.__o.px = this.__o.py = 0;
-        if (this.padding) {
-            this.__o.px = this.blurX;
-            this.__o.py = this.blurY;
-        }
-        this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
-        this._upc(0);
-
-        this.worldTransform = this.cacheMatrix;
-    } else {
-        this._upc(snippet);
-    }
-};
-
-BlurFilter.prototype._upc = function (snippet) {
-    for (var i = 0, l = this.childs.length; i < l; i++) {
-        var child = this.childs[i];
-        child.updatePosture(snippet);
-    }
-};
-
-BlurFilter.prototype.render = function (ctx) {
-    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-        var i = 0;
-        var l = this.childs.length;
-        var child = null;
-
-        this.frameBuffer.clear();
-        this.frameBuffer.setSize(this.__o);
-        for (i = 0; i < l; i++) {
-            child = this.childs[i];
-            if (!child.isVisible() || !child._ready) continue;
-            child.render(this.frameBuffer.ctx);
-        }
-        this._applyFilter(this.frameBuffer.getBuffer());
-
-        this.needUpdateBuffer = false;
-    }
-    this.renderMe(ctx, this.__o.x - this.__o.px, this.__o.y - this.__o.py, this.frameBuffer.width, this.frameBuffer.height);
-};
-
-BlurFilter.prototype.renderMe = function (ctx, x, y, w, h) {
-    this.setTransform(ctx);
-    ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
-};
-
-var __tmpMatrix = new Matrix();
-
-/* eslint max-len: "off" */
-var MUL_TABLE = [1, 171, 205, 293, 57, 373, 79, 137, 241, 27, 391, 357, 41, 19, 283, 265, 497, 469, 443, 421, 25, 191, 365, 349, 335, 161, 155, 149, 9, 278, 269, 261, 505, 245, 475, 231, 449, 437, 213, 415, 405, 395, 193, 377, 369, 361, 353, 345, 169, 331, 325, 319, 313, 307, 301, 37, 145, 285, 281, 69, 271, 267, 263, 259, 509, 501, 493, 243, 479, 118, 465, 459, 113, 446, 55, 435, 429, 423, 209, 413, 51, 403, 199, 393, 97, 3, 379, 375, 371, 367, 363, 359, 355, 351, 347, 43, 85, 337, 333, 165, 327, 323, 5, 317, 157, 311, 77, 305, 303, 75, 297, 294, 73, 289, 287, 71, 141, 279, 277, 275, 68, 135, 67, 133, 33, 262, 260, 129, 511, 507, 503, 499, 495, 491, 61, 121, 481, 477, 237, 235, 467, 232, 115, 457, 227, 451, 7, 445, 221, 439, 218, 433, 215, 427, 425, 211, 419, 417, 207, 411, 409, 203, 202, 401, 399, 396, 197, 49, 389, 387, 385, 383, 95, 189, 47, 187, 93, 185, 23, 183, 91, 181, 45, 179, 89, 177, 11, 175, 87, 173, 345, 343, 341, 339, 337, 21, 167, 83, 331, 329, 327, 163, 81, 323, 321, 319, 159, 79, 315, 313, 39, 155, 309, 307, 153, 305, 303, 151, 75, 299, 149, 37, 295, 147, 73, 291, 145, 289, 287, 143, 285, 71, 141, 281, 35, 279, 139, 69, 275, 137, 273, 17, 271, 135, 269, 267, 133, 265, 33, 263, 131, 261, 130, 259, 129, 257, 1];
-
-var SHG_TABLE = [0, 9, 10, 11, 9, 12, 10, 11, 12, 9, 13, 13, 10, 9, 13, 13, 14, 14, 14, 14, 10, 13, 14, 14, 14, 13, 13, 13, 9, 14, 14, 14, 15, 14, 15, 14, 15, 15, 14, 15, 15, 15, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15, 15, 15, 12, 14, 15, 15, 13, 15, 15, 15, 15, 16, 16, 16, 15, 16, 14, 16, 16, 14, 16, 13, 16, 16, 16, 15, 16, 13, 16, 15, 16, 14, 9, 16, 16, 16, 16, 16, 16, 16, 16, 16, 13, 14, 16, 16, 15, 16, 16, 10, 16, 15, 16, 14, 16, 16, 14, 16, 16, 14, 16, 16, 14, 15, 16, 16, 16, 14, 15, 14, 15, 13, 16, 16, 15, 17, 17, 17, 17, 17, 17, 14, 15, 17, 17, 16, 16, 17, 16, 15, 17, 16, 17, 11, 17, 16, 17, 16, 17, 16, 17, 17, 16, 17, 17, 16, 17, 17, 16, 16, 17, 17, 17, 16, 14, 17, 17, 17, 17, 15, 16, 14, 16, 15, 16, 13, 16, 15, 16, 14, 16, 15, 16, 12, 16, 15, 16, 17, 17, 17, 17, 17, 13, 16, 15, 17, 17, 17, 16, 15, 17, 17, 17, 16, 15, 17, 17, 14, 16, 17, 17, 16, 17, 17, 16, 15, 17, 16, 14, 17, 16, 15, 17, 16, 17, 17, 16, 17, 15, 16, 17, 14, 17, 16, 15, 17, 16, 17, 13, 17, 16, 17, 17, 16, 17, 14, 17, 16, 17, 16, 17, 16, 17, 9];
-
-/* eslint-disable */
-BlurFilter.prototype._applyFilter = function (imageData) {
-
-    var radiusX = this.blurX >> 1;
-    if (isNaN(radiusX) || radiusX < 0) return false;
-    var radiusY = this.blurY >> 1;
-    if (isNaN(radiusY) || radiusY < 0) return false;
-    if (radiusX == 0 && radiusY == 0) return false;
-
-    var iterations = this.quality;
-    if (isNaN(iterations) || iterations < 1) iterations = 1;
-    iterations |= 0;
-    if (iterations > 3) iterations = 3;
-    if (iterations < 1) iterations = 1;
-
-    var px = imageData.data;
-    var x = 0,
-        y = 0,
-        i = 0,
-        p = 0,
-        yp = 0,
-        yi = 0,
-        yw = 0,
-        r = 0,
-        g = 0,
-        b = 0,
-        a = 0,
-        pr = 0,
-        pg = 0,
-        pb = 0,
-        pa = 0;
-
-    var divx = radiusX + radiusX + 1 | 0;
-    var divy = radiusY + radiusY + 1 | 0;
-    var w = imageData.width | 0;
-    var h = imageData.height | 0;
-
-    var w1 = w - 1 | 0;
-    var h1 = h - 1 | 0;
-    var rxp1 = radiusX + 1 | 0;
-    var ryp1 = radiusY + 1 | 0;
-
-    var ssx = { r: 0, b: 0, g: 0, a: 0 };
-    var sx = ssx;
-    for (i = 1; i < divx; i++) {
-        sx = sx.n = { r: 0, b: 0, g: 0, a: 0 };
-    }
-    sx.n = ssx;
-
-    var ssy = { r: 0, b: 0, g: 0, a: 0 };
-    var sy = ssy;
-    for (i = 1; i < divy; i++) {
-        sy = sy.n = { r: 0, b: 0, g: 0, a: 0 };
-    }
-    sy.n = ssy;
-
-    var si = null;
-
-    var mtx = MUL_TABLE[radiusX] | 0;
-    var stx = SHG_TABLE[radiusX] | 0;
-    var mty = MUL_TABLE[radiusY] | 0;
-    var sty = SHG_TABLE[radiusY] | 0;
-
-    while (iterations-- > 0) {
-
-        yw = yi = 0;
-        var ms = mtx;
-        var ss = stx;
-        for (y = h; --y > -1;) {
-            r = rxp1 * (pr = px[yi | 0]);
-            g = rxp1 * (pg = px[yi + 1 | 0]);
-            b = rxp1 * (pb = px[yi + 2 | 0]);
-            a = rxp1 * (pa = px[yi + 3 | 0]);
-
-            sx = ssx;
-
-            for (i = rxp1; --i > -1;) {
-                sx.r = pr;
-                sx.g = pg;
-                sx.b = pb;
-                sx.a = pa;
-                sx = sx.n;
-            }
-
-            for (i = 1; i < rxp1; i++) {
-                p = yi + ((w1 < i ? w1 : i) << 2) | 0;
-                r += sx.r = px[p];
-                g += sx.g = px[p + 1];
-                b += sx.b = px[p + 2];
-                a += sx.a = px[p + 3];
-
-                sx = sx.n;
-            }
-
-            si = ssx;
-            for (x = 0; x < w; x++) {
-                px[yi++] = r * ms >>> ss;
-                px[yi++] = g * ms >>> ss;
-                px[yi++] = b * ms >>> ss;
-                px[yi++] = a * ms >>> ss;
-
-                p = yw + ((p = x + radiusX + 1) < w1 ? p : w1) << 2;
-
-                r -= si.r - (si.r = px[p]);
-                g -= si.g - (si.g = px[p + 1]);
-                b -= si.b - (si.b = px[p + 2]);
-                a -= si.a - (si.a = px[p + 3]);
-
-                si = si.n;
-            }
-            yw += w;
-        }
-
-        ms = mty;
-        ss = sty;
-        for (x = 0; x < w; x++) {
-            yi = x << 2 | 0;
-
-            r = ryp1 * (pr = px[yi]) | 0;
-            g = ryp1 * (pg = px[yi + 1 | 0]) | 0;
-            b = ryp1 * (pb = px[yi + 2 | 0]) | 0;
-            a = ryp1 * (pa = px[yi + 3 | 0]) | 0;
-
-            sy = ssy;
-            for (i = 0; i < ryp1; i++) {
-                sy.r = pr;
-                sy.g = pg;
-                sy.b = pb;
-                sy.a = pa;
-                sy = sy.n;
-            }
-
-            yp = w;
-
-            for (i = 1; i <= radiusY; i++) {
-                yi = yp + x << 2;
-
-                r += sy.r = px[yi];
-                g += sy.g = px[yi + 1];
-                b += sy.b = px[yi + 2];
-                a += sy.a = px[yi + 3];
-
-                sy = sy.n;
-
-                if (i < h1) {
-                    yp += w;
-                }
-            }
-
-            yi = x;
-            si = ssy;
-            if (iterations > 0) {
-                for (y = 0; y < h; y++) {
-                    p = yi << 2;
-                    px[p + 3] = pa = a * ms >>> ss;
-                    if (pa > 0) {
-                        px[p] = r * ms >>> ss;
-                        px[p + 1] = g * ms >>> ss;
-                        px[p + 2] = b * ms >>> ss;
-                    } else {
-                        px[p] = px[p + 1] = px[p + 2] = 0;
-                    }
-
-                    p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
-
-                    r -= si.r - (si.r = px[p]);
-                    g -= si.g - (si.g = px[p + 1]);
-                    b -= si.b - (si.b = px[p + 2]);
-                    a -= si.a - (si.a = px[p + 3]);
-
-                    si = si.n;
-
-                    yi += w;
-                }
-            } else {
-                for (y = 0; y < h; y++) {
-                    p = yi << 2;
-                    px[p + 3] = pa = a * ms >>> ss;
-                    if (pa > 0) {
-                        pa = 255 / pa;
-                        px[p] = (r * ms >>> ss) * pa;
-                        px[p + 1] = (g * ms >>> ss) * pa;
-                        px[p + 2] = (b * ms >>> ss) * pa;
-                    } else {
-                        px[p] = px[p + 1] = px[p + 2] = 0;
-                    }
-
-                    p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
-
-                    r -= si.r - (si.r = px[p]);
-                    g -= si.g - (si.g = px[p + 1]);
-                    b -= si.b - (si.b = px[p + 2]);
-                    a -= si.a - (si.a = px[p + 3]);
-
-                    si = si.n;
-
-                    yi += w;
-                }
-            }
-        }
-    }
-    return true;
 };
 
 /**
@@ -4964,28 +3796,18 @@ exports.Utils = Utils;
 exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;
-exports.ParserAnimation = ParserAnimation;
 exports.Bounds = Bounds;
-exports.Point = Point;
 exports.Rectangle = Rectangle;
-exports.Polygon = Polygon;
-exports.Circle = Circle;
-exports.Ellipse = Ellipse;
 exports.Matrix = Matrix;
 exports.IDENTITY = IDENTITY;
 exports.TEMP_MATRIX = TEMP_MATRIX;
-exports.BezierCurve = BezierCurve;
-exports.SvgCurve = SvgCurve;
-exports.NURBSCurve = NURBSCurve;
 exports.DisplayObject = DisplayObject;
 exports.Container = Container;
 exports.Sprite = Sprite;
 exports.Graphics = Graphics;
-exports.TextFace = TextFace;
-exports.BlurFilter = BlurFilter;
 exports.Stage = Stage;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
-//# sourceMappingURL=jcc2d.js.map
+//# sourceMappingURL=jcc2d.light.js.map

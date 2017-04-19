@@ -3,15 +3,13 @@ import {Point} from './Point';
 
 let NURBSUtils = {
 
-  /*
-  Finds knot vector span.
-
-  p : degree
-  u : parametric value
-  U : knot vector
-
-  returns the span
-  */
+  /**
+   * Finds knot vector span.
+   * @param {number} p degree
+   * @param {number} u parametric value
+   * @param {number} U knot vector
+   * @return {number} span
+   */
   findSpan: function( p, u, U ) {
     let n = U.length - p - 1;
 
@@ -41,16 +39,14 @@ let NURBSUtils = {
   },
 
 
-  /*
-  Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
-
-  span : span in which u lies
-  u    : parametric point
-  p    : degree
-  U    : knot vector
-
-  returns array[p+1] with basis functions values.
-  */
+  /**
+   * Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
+   * @param {number} span span in which u lies
+   * @param {number} u parametric point
+   * @param {number} p degree
+   * @param {number} U knot vector
+   * @return {array} array[p+1] with basis functions values.
+   */
   calcBasisFunctions: function( span, u, p, U ) {
     let N = [];
     let left = [];
@@ -78,15 +74,13 @@ let NURBSUtils = {
   },
 
 
-  /*
-  Calculate B-Spline curve points. See The NURBS Book, page 82, algorithm A3.1.
-
-  p : degree of B-Spline
-  U : knot vector
-  P : control points (x, y, z, w)
-  u : parametric point
-
-  returns point for given u
+  /**
+   * Calculate B-Spline curve points. See The NURBS Book, page 82
+   * @param {number} p degree of B-Spline
+   * @param {vector} U knot vector
+   * @param {vector} P control points (x, y, z, w)
+   * @param {vector} u parametric point
+   * @return {point} point for given u
   */
   calcBSplinePoint: function( p, U, P, u ) {
     let span = this.findSpan( p, u, U );
@@ -219,10 +213,10 @@ let NURBSUtils = {
    * Calculate derivatives of a B-Spline.
    * See The NURBS Book, page 93, algorithm A3.2.
    * @param {number} p   degree
-   * @param {number} U  : knot vector
-   * @param {number} P  : control points
-   * @param {number} u  : Parametric points
-   * @param {number} nd : number of derivatives
+   * @param {number} U   knot vector
+   * @param {number} P   control points
+   * @param {number} u   Parametric points
+   * @param {number} nd  number of derivatives
    * @return {array} array[d+1] with derivatives
    */
   calcBSplineDerivatives: function( p, U, P, u, nd ) {

@@ -13,9 +13,9 @@
     "src"
   ],
   "scripts": {
-    "release": "npm run build && gulp release",
-    "build": "rollup -c",
-    "watch": "rollup -c -w",
+    "release": "gulp release",
+    "build": "gulp build",
+    "watch": "gulp build --watch",
     "preversion": "npm run release && git add -A && git commit -m 'release: release new version'",
     "patch": "npm version patch --force -m 'release: v%s'",
     "postversion": "git push github-origin master && git push github-origin v$npm_package_version",
@@ -50,6 +50,7 @@
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-latest": "^6.24.0",
     "chai": "^3.2.0",
+    "chalk": "^1.1.3",
     "eslint": "^3.8.1",
     "eslint-config-google": "^0.7.1",
     "gulp": "^3.9.1",
@@ -64,10 +65,11 @@
     "karma-mocha": "^1.3.0",
     "karma-phantomjs-launcher": "^1.0.4",
     "mocha": "^3.1.0",
-    "rollup": "^0.36.3",
+    "rollup": "^0.36.4",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-watch": "^2.5.0",
-    "validate-commit-msg": "^2.11.1"
+    "validate-commit-msg": "^2.11.1",
+    "yargs": "^7.1.0"
   },
   "dependencies": {},
   "config": {
