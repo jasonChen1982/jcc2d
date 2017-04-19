@@ -35,6 +35,90 @@
 })();
 
 /**
+ * jcc2d的事件对象的类
+ *
+ * @class
+ * @memberof JC
+ */
+function Eventer() {
+  /**
+   * 事件监听列表
+   *
+   * @member {Object}
+   * @private
+   */
+  this.listeners = {};
+}
+
+/**
+ * 事件对象的事件绑定函数
+ *
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
+ */
+Eventer.prototype.on = function (type, fn) {
+  this.listeners[type] = this.listeners[type] || [];
+  this.listeners[type].push(fn);
+};
+
+/**
+ * 事件对象的事件解绑函数
+ *
+ * @param {String} type 事件类型
+ * @param {Function} fn 注册时回调函数的引用
+ */
+Eventer.prototype.off = function (type, fn) {
+  var ears = this.listeners;
+  var cbs = ears[type];
+  var i = ears[type].length;
+  if (cbs && i > 0) {
+    if (fn) {
+      while (i--) {
+        if (cbs[i] === fn) {
+          cbs.splice(i, 1);
+        }
+      }
+    } else {
+      cbs.length = 0;
+    }
+  }
+};
+
+/**
+ * 事件对象的一次性事件绑定函数
+ *
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
+ */
+Eventer.prototype.once = function (type, fn) {
+  var This = this;
+  var cb = function cb(ev) {
+    if (fn) fn(ev);
+    This.off(type, cb);
+  };
+  this.on(type, cb);
+};
+
+/**
+ * 事件对象的触发事件函数
+ *
+ * @param {String} type 事件类型
+ * @param {JC.InteractionData} ev 事件类型
+ */
+Eventer.prototype.emit = function (type, ev) {
+  if (this.listeners === undefined) return;
+  var ears = this.listeners;
+  var cbs = ears[type];
+  if (cbs !== undefined) {
+    var length = cbs.length;
+    var i = void 0;
+    for (i = 0; i < length; i++) {
+      cbs[i].call(this, ev);
+    }
+  }
+};
+
+/**
  * 二维空间内坐标点类
  *
  * @class
@@ -243,90 +327,6 @@ InteractionData.prototype.clone = function () {
     evd.global = this.global.clone();
   }
   return evd;
-};
-
-/**
- * jcc2d的事件对象的类
- *
- * @class
- * @memberof JC
- */
-function Eventer() {
-  /**
-   * 事件监听列表
-   *
-   * @member {Object}
-   * @private
-   */
-  this.listeners = {};
-}
-
-/**
- * 事件对象的事件绑定函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 回调函数
- */
-Eventer.prototype.on = function (type, fn) {
-  this.listeners[type] = this.listeners[type] || [];
-  this.listeners[type].push(fn);
-};
-
-/**
- * 事件对象的事件解绑函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 注册时回调函数的引用
- */
-Eventer.prototype.off = function (type, fn) {
-  var ears = this.listeners;
-  var cbs = ears[type];
-  var i = ears[type].length;
-  if (cbs && i > 0) {
-    if (fn) {
-      while (i--) {
-        if (cbs[i] === fn) {
-          cbs.splice(i, 1);
-        }
-      }
-    } else {
-      cbs.length = 0;
-    }
-  }
-};
-
-/**
- * 事件对象的一次性事件绑定函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 回调函数
- */
-Eventer.prototype.once = function (type, fn) {
-  var This = this;
-  var cb = function cb(ev) {
-    if (fn) fn(ev);
-    This.off(type, cb);
-  };
-  this.on(type, cb);
-};
-
-/**
- * 事件对象的触发事件函数
- *
- * @param {String} type 事件类型
- * @param {JC.InteractionData} ev 事件类型
- */
-Eventer.prototype.emit = function (type, ev) {
-  if (this.listeners === undefined) return;
-  var ears = this.listeners;
-  var cbs = ears[type];
-  if (cbs !== undefined) {
-    var length = cbs.length;
-    var i = void 0;
-    for (i = 0; i < length; i++) {
-      cbs[i].call(this, ev);
-    }
-  }
 };
 
 /* eslint no-cond-assign: "off" */

@@ -35,6 +35,90 @@
 })();
 
 /**
+ * jcc2d的事件对象的类
+ *
+ * @class
+ * @memberof JC
+ */
+function Eventer() {
+  /**
+   * 事件监听列表
+   *
+   * @member {Object}
+   * @private
+   */
+  this.listeners = {};
+}
+
+/**
+ * 事件对象的事件绑定函数
+ *
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
+ */
+Eventer.prototype.on = function (type, fn) {
+  this.listeners[type] = this.listeners[type] || [];
+  this.listeners[type].push(fn);
+};
+
+/**
+ * 事件对象的事件解绑函数
+ *
+ * @param {String} type 事件类型
+ * @param {Function} fn 注册时回调函数的引用
+ */
+Eventer.prototype.off = function (type, fn) {
+  var ears = this.listeners;
+  var cbs = ears[type];
+  var i = ears[type].length;
+  if (cbs && i > 0) {
+    if (fn) {
+      while (i--) {
+        if (cbs[i] === fn) {
+          cbs.splice(i, 1);
+        }
+      }
+    } else {
+      cbs.length = 0;
+    }
+  }
+};
+
+/**
+ * 事件对象的一次性事件绑定函数
+ *
+ * @param {String} type 事件类型
+ * @param {Function} fn 回调函数
+ */
+Eventer.prototype.once = function (type, fn) {
+  var This = this;
+  var cb = function cb(ev) {
+    if (fn) fn(ev);
+    This.off(type, cb);
+  };
+  this.on(type, cb);
+};
+
+/**
+ * 事件对象的触发事件函数
+ *
+ * @param {String} type 事件类型
+ * @param {JC.InteractionData} ev 事件类型
+ */
+Eventer.prototype.emit = function (type, ev) {
+  if (this.listeners === undefined) return;
+  var ears = this.listeners;
+  var cbs = ears[type];
+  if (cbs !== undefined) {
+    var length = cbs.length;
+    var i = void 0;
+    for (i = 0; i < length; i++) {
+      cbs[i].call(this, ev);
+    }
+  }
+};
+
+/**
  * 二维空间内坐标点类
  *
  * @class
@@ -243,90 +327,6 @@ InteractionData.prototype.clone = function () {
     evd.global = this.global.clone();
   }
   return evd;
-};
-
-/**
- * jcc2d的事件对象的类
- *
- * @class
- * @memberof JC
- */
-function Eventer() {
-  /**
-   * 事件监听列表
-   *
-   * @member {Object}
-   * @private
-   */
-  this.listeners = {};
-}
-
-/**
- * 事件对象的事件绑定函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 回调函数
- */
-Eventer.prototype.on = function (type, fn) {
-  this.listeners[type] = this.listeners[type] || [];
-  this.listeners[type].push(fn);
-};
-
-/**
- * 事件对象的事件解绑函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 注册时回调函数的引用
- */
-Eventer.prototype.off = function (type, fn) {
-  var ears = this.listeners;
-  var cbs = ears[type];
-  var i = ears[type].length;
-  if (cbs && i > 0) {
-    if (fn) {
-      while (i--) {
-        if (cbs[i] === fn) {
-          cbs.splice(i, 1);
-        }
-      }
-    } else {
-      cbs.length = 0;
-    }
-  }
-};
-
-/**
- * 事件对象的一次性事件绑定函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 回调函数
- */
-Eventer.prototype.once = function (type, fn) {
-  var This = this;
-  var cb = function cb(ev) {
-    if (fn) fn(ev);
-    This.off(type, cb);
-  };
-  this.on(type, cb);
-};
-
-/**
- * 事件对象的触发事件函数
- *
- * @param {String} type 事件类型
- * @param {JC.InteractionData} ev 事件类型
- */
-Eventer.prototype.emit = function (type, ev) {
-  if (this.listeners === undefined) return;
-  var ears = this.listeners;
-  var cbs = ears[type];
-  if (cbs !== undefined) {
-    var length = cbs.length;
-    var i = void 0;
-    for (i = 0; i < length; i++) {
-      cbs[i].call(this, ev);
-    }
-  }
 };
 
 /* eslint no-cond-assign: "off" */
@@ -1422,219 +1422,6 @@ var loaderUtil = function loaderUtil(srcMap) {
 };
 
 /**
- * 矩形类
- *
- * @class
- * @memberof JC
- * @param {number} x 左上角的x坐标
- * @param {number} y 左上角的y坐标
- * @param {number} width 矩形的宽度
- * @param {number} height 矩形的高度
- */
-function Rectangle(x, y, width, height) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.width = width || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.height = height || 0;
-}
-
-/**
- * 空矩形对象
- *
- * @static
- * @constant
- */
-Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
-
-/**
- * 克隆一个与该举行对象同样属性的矩形
- *
- * @return {PIXI.Rectangle} 克隆出的矩形
- */
-Rectangle.prototype.clone = function () {
-  return new Rectangle(this.x, this.y, this.width, this.height);
-};
-
-/**
- * 检查坐标点是否在矩形区域内
- *
- * @param {number} x 坐标点的x轴位置
- * @param {number} y 坐标点的y轴位置
- * @return {boolean} 坐标点是否在矩形区域内
- */
-Rectangle.prototype.contains = function (x, y) {
-  if (this.width <= 0 || this.height <= 0) {
-    return false;
-  }
-
-  if (x >= this.x && x < this.x + this.width) {
-    if (y >= this.y && y < this.y + this.height) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-/**
- * 显示对象的包围盒子
- *
- * @class
- * @param {Number} minX
- * @param {Number} minY
- * @param {Number} maxX
- * @param {Number} maxY
- * @memberof JC
- */
-function Bounds(minX, minY, maxX, maxY) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minX = minX || Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minY = minY || Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxX = maxX || -Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxY = maxY || -Infinity;
-
-  this.rect = null;
-}
-
-Bounds.prototype.isEmpty = function () {
-  return this.minX > this.maxX || this.minY > this.maxY;
-};
-
-Bounds.prototype.clear = function () {
-  // this.updateID++;
-
-  this.minX = Infinity;
-  this.minY = Infinity;
-  this.maxX = -Infinity;
-  this.maxY = -Infinity;
-};
-
-/**
- * 将包围盒子转换成矩形描述
- *
- * @param {JC.Rectangle} rect 待转换的矩形
- * @return {JC.Rectangle}
- */
-Bounds.prototype.getRectangle = function (rect) {
-  if (this.isEmpty()) {
-    return Rectangle.EMPTY;
-  }
-
-  rect = rect || new Rectangle(0, 0, 1, 1);
-
-  rect.x = this.minX;
-  rect.y = this.minY;
-  rect.width = this.maxX - this.minX;
-  rect.height = this.maxY - this.minY;
-
-  return rect;
-};
-
-/**
- * 往包围盒增加外部顶点，更新包围盒区域
- *
- * @param {JC.Point} point
- */
-Bounds.prototype.addPoint = function (point) {
-  this.minX = Math.min(this.minX, point.x);
-  this.maxX = Math.max(this.maxX, point.x);
-  this.minY = Math.min(this.minY, point.y);
-  this.maxY = Math.max(this.maxY, point.y);
-};
-
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param {JC.Rectangle} rect
- */
-Bounds.prototype.addRect = function (rect) {
-  this.minX = rect.x;
-  this.maxX = rect.width + rect.x;
-  this.minY = rect.y;
-  this.maxY = rect.height + rect.y;
-};
-
-/**
- * 往包围盒增加顶点数组，更新包围盒区域
- *
- * @param {Array} vertices
- */
-Bounds.prototype.addVert = function (vertices) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  for (var i = 0; i < vertices.length; i += 2) {
-    var x = vertices[i];
-    var y = vertices[i + 1];
-    minX = x < minX ? x : minX;
-    minY = y < minY ? y : minY;
-    maxX = x > maxX ? x : maxX;
-    maxY = y > maxY ? y : maxY;
-  }
-
-  this.minX = minX;
-  this.minY = minY;
-  this.maxX = maxX;
-  this.maxY = maxY;
-};
-
-/**
- * 往包围盒增加包围盒，更新包围盒区域
- *
- * @param {JC.Bounds} bounds
- */
-Bounds.prototype.addBounds = function (bounds) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  this.minX = bounds.minX < minX ? bounds.minX : minX;
-  this.minY = bounds.minY < minY ? bounds.minY : minY;
-  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
-  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
-};
-
-/**
  * 矩阵对象，用来描述和记录对象的tansform 状态信息
  *
  * @class
@@ -2314,6 +2101,219 @@ DisplayObject.prototype.contains = function (global) {
 };
 
 /**
+ * 矩形类
+ *
+ * @class
+ * @memberof JC
+ * @param {number} x 左上角的x坐标
+ * @param {number} y 左上角的y坐标
+ * @param {number} width 矩形的宽度
+ * @param {number} height 矩形的高度
+ */
+function Rectangle(x, y, width, height) {
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.x = x || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.y = y || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.width = width || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.height = height || 0;
+}
+
+/**
+ * 空矩形对象
+ *
+ * @static
+ * @constant
+ */
+Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
+
+/**
+ * 克隆一个与该举行对象同样属性的矩形
+ *
+ * @return {PIXI.Rectangle} 克隆出的矩形
+ */
+Rectangle.prototype.clone = function () {
+  return new Rectangle(this.x, this.y, this.width, this.height);
+};
+
+/**
+ * 检查坐标点是否在矩形区域内
+ *
+ * @param {number} x 坐标点的x轴位置
+ * @param {number} y 坐标点的y轴位置
+ * @return {boolean} 坐标点是否在矩形区域内
+ */
+Rectangle.prototype.contains = function (x, y) {
+  if (this.width <= 0 || this.height <= 0) {
+    return false;
+  }
+
+  if (x >= this.x && x < this.x + this.width) {
+    if (y >= this.y && y < this.y + this.height) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * 显示对象的包围盒子
+ *
+ * @class
+ * @param {Number} minX
+ * @param {Number} minY
+ * @param {Number} maxX
+ * @param {Number} maxY
+ * @memberof JC
+ */
+function Bounds(minX, minY, maxX, maxY) {
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.minX = minX || Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.minY = minY || Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.maxX = maxX || -Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.maxY = maxY || -Infinity;
+
+  this.rect = null;
+}
+
+Bounds.prototype.isEmpty = function () {
+  return this.minX > this.maxX || this.minY > this.maxY;
+};
+
+Bounds.prototype.clear = function () {
+  // this.updateID++;
+
+  this.minX = Infinity;
+  this.minY = Infinity;
+  this.maxX = -Infinity;
+  this.maxY = -Infinity;
+};
+
+/**
+ * 将包围盒子转换成矩形描述
+ *
+ * @param {JC.Rectangle} rect 待转换的矩形
+ * @return {JC.Rectangle}
+ */
+Bounds.prototype.getRectangle = function (rect) {
+  if (this.isEmpty()) {
+    return Rectangle.EMPTY;
+  }
+
+  rect = rect || new Rectangle(0, 0, 1, 1);
+
+  rect.x = this.minX;
+  rect.y = this.minY;
+  rect.width = this.maxX - this.minX;
+  rect.height = this.maxY - this.minY;
+
+  return rect;
+};
+
+/**
+ * 往包围盒增加外部顶点，更新包围盒区域
+ *
+ * @param {JC.Point} point
+ */
+Bounds.prototype.addPoint = function (point) {
+  this.minX = Math.min(this.minX, point.x);
+  this.maxX = Math.max(this.maxX, point.x);
+  this.minY = Math.min(this.minY, point.y);
+  this.maxY = Math.max(this.maxY, point.y);
+};
+
+/**
+ * 往包围盒增加矩形区域，更新包围盒区域
+ *
+ * @param {JC.Rectangle} rect
+ */
+Bounds.prototype.addRect = function (rect) {
+  this.minX = rect.x;
+  this.maxX = rect.width + rect.x;
+  this.minY = rect.y;
+  this.maxY = rect.height + rect.y;
+};
+
+/**
+ * 往包围盒增加顶点数组，更新包围盒区域
+ *
+ * @param {Array} vertices
+ */
+Bounds.prototype.addVert = function (vertices) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
+
+  for (var i = 0; i < vertices.length; i += 2) {
+    var x = vertices[i];
+    var y = vertices[i + 1];
+    minX = x < minX ? x : minX;
+    minY = y < minY ? y : minY;
+    maxX = x > maxX ? x : maxX;
+    maxY = y > maxY ? y : maxY;
+  }
+
+  this.minX = minX;
+  this.minY = minY;
+  this.maxX = maxX;
+  this.maxY = maxY;
+};
+
+/**
+ * 往包围盒增加包围盒，更新包围盒区域
+ *
+ * @param {JC.Bounds} bounds
+ */
+Bounds.prototype.addBounds = function (bounds) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
+
+  this.minX = bounds.minX < minX ? bounds.minX : minX;
+  this.minY = bounds.minY < minY ? bounds.minY : minY;
+  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
+  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
+};
+
+/**
  * 显示对象容器，继承至DisplayObject
  *
  * ```js
@@ -2874,6 +2874,86 @@ Sprite.prototype.renderMe = function (ctx) {
   if (!this._ready) return;
   var frame = this.MovieClip.getFrame();
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
+};
+
+// import {Utils} from './Utils';
+
+/**
+ * 解析bodymovin从ae导出的数据
+ * @param {object} options bodymovin从ae导出的数据
+ */
+function ParserAnimation(options) {
+  this.prefix = options.prefix || '';
+  this.doc = new Container();
+  this.fr = options.fr || options.keyframes.fr;
+  this.keyframes = options.keyframes;
+  this.ip = this.keyframes.ip;
+  this.op = this.keyframes.op;
+  this.infinite = options.infinite || false;
+  this.alternate = options.alternate || false;
+  this.assetBox = null;
+  this.preParser();
+  this.parser(this.doc, this.keyframes.layers);
+}
+ParserAnimation.prototype.preParser = function () {
+  var assets = this.keyframes.assets;
+  var sourceMap = {};
+  for (var i = 0; i < assets.length; i++) {
+    var id = assets[i].id;
+    var u = assets[i].u;
+    var p = assets[i].p;
+    if (u && p) {
+      sourceMap[id] = u + p;
+    }
+  }
+  this.assetBox = loaderUtil(sourceMap);
+};
+ParserAnimation.prototype.parser = function (doc, layers) {
+  var l = layers.length;
+  var infinite = this.infinite;
+  var alternate = this.alternate;
+  var ip = this.ip;
+  var op = this.op;
+  for (var i = l - 1; i >= 0; i--) {
+    var layer = layers[i];
+    if (layer.ty === 2) {
+      var id = this.getAssets(layer.refId).id;
+      var ani = new Sprite({
+        texture: this.assetBox.getById(id)
+      });
+      ani.keyFrames({
+        ks: layer,
+        fr: this.fr,
+        ip: ip,
+        op: op,
+        infinite: infinite,
+        alternate: alternate
+      });
+      ani.name = layer.nm;
+      doc.adds(ani);
+    }
+    if (layer.ty === 0) {
+      var ddoc = new Container();
+      var llayers = this.getAssets(layer.refId).layers;
+      ddoc.keyFrames({
+        ks: layer,
+        fr: this.fr,
+        ip: ip,
+        op: op,
+        infinite: infinite,
+        alternate: alternate
+      });
+      ddoc.name = layer.nm;
+      doc.adds(ddoc);
+      this.parser(ddoc, llayers);
+    }
+  }
+};
+ParserAnimation.prototype.getAssets = function (id) {
+  var assets = this.keyframes.assets;
+  for (var i = 0; i < assets.length; i++) {
+    if (id === assets[i].id) return assets[i];
+  }
 };
 
 /**
@@ -3796,7 +3876,9 @@ exports.Utils = Utils;
 exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;
+exports.ParserAnimation = ParserAnimation;
 exports.Bounds = Bounds;
+exports.Point = Point;
 exports.Rectangle = Rectangle;
 exports.Matrix = Matrix;
 exports.IDENTITY = IDENTITY;
