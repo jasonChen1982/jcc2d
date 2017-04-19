@@ -5,7 +5,6 @@ const sourcemaps = require('gulp-sourcemaps');
 const rename = require('gulp-rename');
 const rollup = require('rollup');
 const babel = require('rollup-plugin-babel');
-const pkg = require('./package.json');
 const chalk = require('chalk');
 const yargs = require('yargs');
 

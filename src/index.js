@@ -1,9 +1,9 @@
 
 import './util/Raf';
-import './eventer/InteractionData';
 import './eventer/Eventer';
-
+import './eventer/InteractionData';
 import './animation/Animation';
+
 export {Tween} from './util/Tween';
 export {Utils} from './util/Utils';
 export {Texture, Loader, loaderUtil} from './util/Loader';
