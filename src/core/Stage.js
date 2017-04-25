@@ -307,16 +307,6 @@ Stage.prototype.render = function() {
 };
 
 /**
- * 更新场景内物体状态
- *
- *
- */
-// Stage.prototype.update = function() {
-//   this.updateTransform();
-//   this.updatePosture(this.timeScale * this.snippet);
-// };
-
-/**
  * 引擎的时间轴
  *
  * @method timeline
@@ -340,21 +330,6 @@ Stage.prototype.timeline = function() {
 };
 
 /**
- * 更新场景内物体的姿态
- *
- *
- * @method updatePosture
- * @private
- * @param {number} snippet
- */
-// Stage.prototype.updatePosture = function(snippet) {
-//   for (let i = 0, l = this.childs.length; i < l; i++) {
-//     let child = this.childs[i];
-//     child.updatePosture(snippet);
-//   }
-// };
-
-/**
  * 启动渲染引擎
  *
  * @method startEngine
@@ -362,7 +337,7 @@ Stage.prototype.timeline = function() {
 Stage.prototype.startEngine = function() {
   if (this.inRender) return;
   this.inRender = true;
-  this.animate();
+  this.renderer();
 };
 
 /**
@@ -376,11 +351,11 @@ Stage.prototype.stopEngine = function() {
 };
 
 /**
- * 更新场景内物体的姿态
+ * 渲染循环
  *
- * @method stopEngine
+ * @method renderer
  */
-Stage.prototype.stopEngine = function() {
+Stage.prototype.renderer = function() {
   const This = this;
   /**
    * render loop
