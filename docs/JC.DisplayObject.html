@@ -420,11 +420,11 @@
             
                 <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Container#start"><a href="JC.Container.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -666,11 +666,11 @@
             
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Graphics#start"><a href="JC.Graphics.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -999,11 +999,11 @@
             
                 <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Sprite#start"><a href="JC.Sprite.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1134,13 +1134,11 @@
             
                 <li data-name="JC.Stage#resize"><a href="JC.Stage.html#resize">resize</a></li>
             
+                <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Stage#start"><a href="JC.Stage.html#start">start</a></li>
-            
-                <li data-name="JC.Stage#update"><a href="JC.Stage.html#update">update</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,11 +1235,11 @@
             
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.TextFace#start"><a href="JC.TextFace.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2165,7 +2163,7 @@
   to: {x: 200},
   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
   repeats: 10, // 动画运动完后再重复10次
-  infinity: true, // 无限循环动画
+  infinite: true, // 无限循环动画
   alternate: true, // 偶数次的时候动画回放
   duration: 1000, // 动画时长 ms单位 默认 300ms
   onUpdate: function(state,rate){},
@@ -2351,14 +2349,14 @@
                         
                     
                 
-                <p>设置动画执行完成后再重复多少次，优先级没有infinity高</p></td>
+                <p>设置动画执行完成后再重复多少次，优先级没有infinite高</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>infinity</code></td>
+                <td class="name"><code>infinite</code></td>
             
             
             <td class="type">
@@ -2501,7 +2499,7 @@
                         
                     
                 
-                <p>设置动画结束时的回调函数，如果infinity为true该事件将不会触发</p></td>
+                <p>设置动画结束时的回调函数，如果infinite为true该事件将不会触发</p></td>
         </tr>
 	
 	
@@ -2617,7 +2615,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line475">line 475</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line476">line 476</a>
         </div>
         
     </div>
@@ -2764,7 +2762,7 @@
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line88">line 88</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line72">line 72</a>
         </div>
         
     </div>
@@ -2903,7 +2901,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line454">line 454</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line455">line 455</a>
         </div>
         
     </div>
@@ -3019,7 +3017,7 @@
   ks: data.layers[0], // ae导出的动画数据
   fr: 30, // 动画的帧率，默认：30fps
   repeats: 10, // 动画运动完后再重复10次
-  infinity: true, // 无限循环动画
+  infinite: true, // 无限循环动画
   alternate: true, // 偶数次的时候动画回放
   onUpdate: function(state,rate){},
   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
@@ -3174,14 +3172,14 @@
                         
                     
                 
-                <p>设置动画执行完成后再重复多少次，优先级没有infinity高</p></td>
+                <p>设置动画执行完成后再重复多少次，优先级没有infinite高</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>infinity</code></td>
+                <td class="name"><code>infinite</code></td>
             
             
             <td class="type">
@@ -3294,7 +3292,7 @@
                         
                     
                 
-                <p>设置动画结束时的回调函数，如果infinity为true该事件将不会触发</p></td>
+                <p>设置动画结束时的回调函数，如果infinite为true该事件将不会触发</p></td>
         </tr>
 	
 	
@@ -3427,7 +3425,7 @@
   attachTangent: true, // 物体是否捕获切线方向
   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
   repeats: 10, // 动画运动完后再重复10次
-  infinity: true, // 无限循环动画
+  infinite: true, // 无限循环动画
   alternate: true, // 偶数次的时候动画回放
   duration: 1000, // 动画时长 ms单位 默认 300ms
   onUpdate: function(state,rate){}, // 动画更新回调
@@ -3613,14 +3611,14 @@
                         
                     
                 
-                <p>设置动画执行完成后再重复多少次，优先级没有infinity高</p></td>
+                <p>设置动画执行完成后再重复多少次，优先级没有infinite高</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>infinity</code></td>
+                <td class="name"><code>infinite</code></td>
             
             
             <td class="type">
@@ -3763,7 +3761,7 @@
                         
                     
                 
-                <p>设置动画结束时的回调函数，如果infinity为true该事件将不会触发</p></td>
+                <p>设置动画结束时的回调函数，如果infinite为true该事件将不会触发</p></td>
         </tr>
 	
 	
@@ -3881,7 +3879,7 @@
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line50">line 50</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line34">line 34</a>
         </div>
         
     </div>
@@ -4022,7 +4020,7 @@
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line39">line 39</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line23">line 23</a>
         </div>
         
     </div>
@@ -4163,7 +4161,7 @@
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line73">line 73</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line57">line 57</a>
         </div>
         
     </div>
@@ -4373,7 +4371,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line464">line 464</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line465">line 465</a>
         </div>
         
     </div>
@@ -4521,7 +4519,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 18 2017 11:07:10 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:35:56 GMT+0800 (CST)
         </footer>
     </div>
 </div>

@@ -420,11 +420,11 @@
             
                 <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Container#start"><a href="JC.Container.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -666,11 +666,11 @@
             
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Graphics#start"><a href="JC.Graphics.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -999,11 +999,11 @@
             
                 <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Sprite#start"><a href="JC.Sprite.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1134,13 +1134,11 @@
             
                 <li data-name="JC.Stage#resize"><a href="JC.Stage.html#resize">resize</a></li>
             
+                <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Stage#start"><a href="JC.Stage.html#start">start</a></li>
-            
-                <li data-name="JC.Stage#update"><a href="JC.Stage.html#update">update</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,11 +1235,11 @@
             
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.TextFace#start"><a href="JC.TextFace.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1325,7 +1323,7 @@ function MovieClip(element, options) {
   this.onCompelete = null;
   // this.onUpdate = null;
 
-  this.infinity = false;
+  this.infinite = false;
   this.alternate = false;
   this.repeats = 0;
 
@@ -1356,7 +1354,7 @@ MovieClip.prototype.update = function(snippet) {
     // Do you need this handler???
     // this.onUpdate&amp;&amp;this.onUpdate(this.index);
   } else {
-    if (this.repeats > 0 || this.infinity) {
+    if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       if (this.alternate) {
         this.direction *= -1;
@@ -1405,7 +1403,7 @@ MovieClip.prototype.playMovie = function(options) {
   this.direction = 1;
   this.fillMode = options.fillMode || 0;
   this.fps = options.fps || this.fps;
-  this.infinity = options.infinity || false;
+  this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
@@ -1439,7 +1437,7 @@ MovieClip.prototype.format = function(movie) {
       let conf = {};
       if(Utils.isString(movie.next) &amp;&amp; this.animations[movie.next]) {
         conf.movie = movie.next;
-        conf.infinity = true;
+        conf.infinite = true;
       } else if(Utils.isObject(movie.next)) {
         conf = movie.next;
       }
@@ -1480,7 +1478,7 @@ export {MovieClip};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 18 2017 11:07:10 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:35:56 GMT+0800 (CST)
         </footer>
     </div>
 </div>

@@ -420,11 +420,11 @@
             
                 <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Container#start"><a href="JC.Container.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -666,11 +666,11 @@
             
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Graphics#start"><a href="JC.Graphics.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -999,11 +999,11 @@
             
                 <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Sprite#start"><a href="JC.Sprite.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1134,13 +1134,11 @@
             
                 <li data-name="JC.Stage#resize"><a href="JC.Stage.html#resize">resize</a></li>
             
+                <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Stage#start"><a href="JC.Stage.html#start">start</a></li>
-            
-                <li data-name="JC.Stage#update"><a href="JC.Stage.html#update">update</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,11 +1235,11 @@
             
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.TextFace#start"><a href="JC.TextFace.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1308,7 +1306,9 @@
     <section>
         <article>
             <pre id="source-code" class="prettyprint source linenums"><code>import {Animate} from './Animate';
-import {Utils} from '../util/Utils';
+import {Transition} from './Transition';
+import {PathMotion} from './PathMotion';
+
 /**
  * AnimateRunner类型动画对象
  *
@@ -1319,27 +1319,36 @@ import {Utils} from '../util/Utils';
 function AnimateRunner(options) {
   Animate.call(this, options);
 
-  this._runners = options.runners;
-  this._runnerIndex = 0;
-  this._cursor = 1;
-  this._runnerConfig = options.runnersConfig;
+  this.runners = options.runners;
+  this.cursor = 0;
+  this.queues = [];
 
-  this.configRunner();
+  this.parserRunners();
+  this.length = this.queues.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
-AnimateRunner.prototype.configRunner = function() {
-  this.from = this._runners[this._runnerIndex];
-  this._runnerIndex += this._cursor;
-  this.to = this._runners[this._runnerIndex];
-  let config = this._runnerConfig[
-                 Math.min(
-                   this._runnerIndex,
-                   this._runnerIndex - this._cursor
-                 )
-               ]||{};
-  this.ease = config.ease || this.ease;
-  this.duration = config.duration || this.duration;
-  this.progress = 0;
+AnimateRunner.prototype.parserRunners = function() {
+  for (let i = 0; i &lt; this.runners.length; i++) {
+    const runner = this.runners[i];
+    runner.infinite = false;
+    runner.alternate = false;
+    runner.element = this.element;
+    runner.onCompelete = this.nextRunner.bind(this);
+    let animate = null;
+    if (runner.path) {
+      animate = new PathMotion(runner);
+    } else if (runner.to) {
+      animate = new Transition(runner);
+    }
+    if (animate !== null) this.queues.push(animate);
+  }
+};
+AnimateRunner.prototype.nextRunner = function() {
+  this.cursor += this.direction;
+  this.totalTime++;
+};
+AnimateRunner.prototype.nextPose = function(snippetCache) {
+  return this.queues[this.cursor].update(snippetCache);
 };
 AnimateRunner.prototype.update = function(snippet) {
   if (this.wait > 0) {
@@ -1351,40 +1360,31 @@ AnimateRunner.prototype.update = function(snippet) {
     return;
   }
 
-  let snippetCache = this.direction * this.timeScale * snippet;
-  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
-  this.totalTime += Math.abs(snippetCache);
+  const cc = this.cursor;
 
-  let pose = this.nextPose();
-  if (this.onUpdate) {
-    this.onUpdate(pose,
-      this.progress / this.duration,
-      this._runnerIndex
-    );
-  }
+  let pose = this.nextPose(this.direction * this.timeScale * snippet);
+  if (this.onUpdate) this.onUpdate({
+    index: cc, pose: pose,
+  }, this.progress / this.duration);
 
-  if (this.totalTime >= this.duration) {
-    this.totalTime = 0;
-    if (this._runnerIndex &lt; this._runners.length - 1 &amp;&amp; this._runnerIndex > 0) {
-      this.configRunner();
-    } else {
-      if (this.repeats > 0 || this.infinity) {
-        if (this.repeats > 0) --this.repeats;
-        this.delayCut = this.delay;
-        if (this.alternate) {
-          this._cursor *= -1;
-        } else {
-          this._cursor = 1;
-          this._runnerIndex = 0;
-        }
-        this.configRunner();
+  if (this.totalTime >= this.length) {
+    if (this.repeats > 0 || this.infinite) {
+      if (this.repeats > 0) --this.repeats;
+      this.delayCut = this.delay;
+      this.totalTime = 0;
+      if (this.alternate) {
+        this.direction *= -1;
       } else {
-        this.living = false;
-        if (this.onCompelete) this.onCompelete();
+        this.direction = 1;
+        this.cursor = 0;
       }
+    } else {
+      this.living = false;
+      if (this.onCompelete) this.onCompelete(pose);
     }
   }
 };
+
 
 export {AnimateRunner};
 </code></pre>
@@ -1399,7 +1399,7 @@ export {AnimateRunner};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 18 2017 11:07:10 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:35:56 GMT+0800 (CST)
         </footer>
     </div>
 </div>

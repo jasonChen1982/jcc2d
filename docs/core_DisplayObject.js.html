@@ -420,11 +420,11 @@
             
                 <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Container#start"><a href="JC.Container.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -666,11 +666,11 @@
             
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Graphics#start"><a href="JC.Graphics.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -999,11 +999,11 @@
             
                 <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Sprite#start"><a href="JC.Sprite.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1134,13 +1134,11 @@
             
                 <li data-name="JC.Stage#resize"><a href="JC.Stage.html#resize">resize</a></li>
             
+                <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Stage#start"><a href="JC.Stage.html#start">start</a></li>
-            
-                <li data-name="JC.Stage#update"><a href="JC.Stage.html#update">update</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,11 +1235,11 @@
             
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.TextFace#start"><a href="JC.TextFace.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1307,7 +1305,7 @@
     
     <section>
         <article>
-            <pre id="source-code" class="prettyprint source linenums"><code>import {Matrix, TEMP_MATRIX} from '../math/Matrix';
+            <pre id="source-code" class="prettyprint source linenums"><code>import {Matrix, TEMP_MATRIX, IDENTITY} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
 import {Animation} from '../animation/Animation';
@@ -1530,7 +1528,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  *   to: {x: 200},
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
+ *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
@@ -1542,12 +1540,12 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
  * @param {object} options.to 设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -1565,7 +1563,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
  *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
+ *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){}, // 动画更新回调
@@ -1576,12 +1574,12 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -1597,7 +1595,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  *   ks: data.layers[0], // ae导出的动画数据
  *   fr: 30, // 动画的帧率，默认：30fps
  *   repeats: 10, // 动画运动完后再重复10次
- *   infinity: true, // 无限循环动画
+ *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   onUpdate: function(state,rate){},
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
@@ -1607,11 +1605,11 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @param {object} options 动画配置参数
  * @param {object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinity高
- * @param {Boolean} [options.infinity] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinity为true该事件将不会触发
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -1661,8 +1659,9 @@ DisplayObject.prototype.setProps = function(props) {
  * @private
  */
 DisplayObject.prototype.updateTransform = function() {
-  let pt = this.parent.worldTransform;
+  let pt = (this.parent &amp;&amp; this.parent.worldTransform) || IDENTITY;
   let wt = this.worldTransform;
+  const worldAlpha = (this.parent &amp;&amp; this.parent.worldAlpha) || 1;
 
   let a;
   let b;
@@ -1730,7 +1729,7 @@ DisplayObject.prototype.updateTransform = function() {
       wt.ty = tx * pt.b + ty * pt.d + pt.ty;
     }
   }
-  this.worldAlpha = this.alpha * this.parent.worldAlpha;
+  this.worldAlpha = this.alpha * worldAlpha;
 };
 
 /**
@@ -1801,7 +1800,7 @@ export {DisplayObject};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 18 2017 11:07:10 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:35:56 GMT+0800 (CST)
         </footer>
     </div>
 </div>

@@ -420,11 +420,11 @@
             
                 <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Container#start"><a href="JC.Container.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -666,11 +666,11 @@
             
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Graphics#start"><a href="JC.Graphics.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -999,11 +999,11 @@
             
                 <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Sprite#start"><a href="JC.Sprite.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1134,13 +1134,11 @@
             
                 <li data-name="JC.Stage#resize"><a href="JC.Stage.html#resize">resize</a></li>
             
+                <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.Stage#start"><a href="JC.Stage.html#start">start</a></li>
-            
-                <li data-name="JC.Stage#update"><a href="JC.Stage.html#update">update</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,11 +1235,11 @@
             
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
+                <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
-            
-                <li data-name="JC.TextFace#start"><a href="JC.TextFace.html#start">start</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1311,6 +1309,9 @@
 import {Container} from './Container';
 import {InteractionManager} from '../eventer/InteractionManager';
 import {Utils} from '../util/Utils';
+
+/* global RAF CAF */
+/* eslint new-cap: 0 */
 
 /**
  * 舞台对象，继承至Eventer
@@ -1556,7 +1557,7 @@ Object.defineProperty(Stage.prototype, 'resolution', {
   set: function(value) {
     if (this._resolution !== value) {
       this._resolution = value;
-      this.worldTransform.identity().scale(value, value);
+      this.scale = value;
       this.resize();
     }
   },
@@ -1597,17 +1598,11 @@ Stage.prototype.render = function() {
 
   this.timeline();
 
-  if (this.autoUpdate) this.update();
-
-  this.ctx.setTransform(
-    this.worldTransform.a,
-    this.worldTransform.b,
-    this.worldTransform.c,
-    this.worldTransform.d,
-    this.worldTransform.tx,
-    this.worldTransform.ty
-  );
-  if (this.autoClear) this.ctx.clearRect(0, 0, this.width, this.height);
+  if (this.autoClear) {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+  if (this.autoUpdate) this.updatePosture(this.snippet);
 
   for (let i = 0, l = this.childs.length; i &lt; l; i++) {
     let child = this.childs[i];
@@ -1623,9 +1618,10 @@ Stage.prototype.render = function() {
  *
  *
  */
-Stage.prototype.update = function() {
-  this.updatePosture(this.timeScale * this.snippet);
-};
+// Stage.prototype.update = function() {
+//   this.updateTransform();
+//   this.updatePosture(this.timeScale * this.snippet);
+// };
 
 /**
  * 引擎的时间轴
@@ -1658,11 +1654,49 @@ Stage.prototype.timeline = function() {
  * @private
  * @param {number} snippet
  */
-Stage.prototype.updatePosture = function(snippet) {
-  for (let i = 0, l = this.childs.length; i &lt; l; i++) {
-    let child = this.childs[i];
-    child.updatePosture(snippet);
+// Stage.prototype.updatePosture = function(snippet) {
+//   for (let i = 0, l = this.childs.length; i &lt; l; i++) {
+//     let child = this.childs[i];
+//     child.updatePosture(snippet);
+//   }
+// };
+
+/**
+ * 启动渲染引擎
+ *
+ * @method startEngine
+ */
+Stage.prototype.startEngine = function() {
+  if (this.inRender) return;
+  this.inRender = true;
+  this.animate();
+};
+
+/**
+ * 关闭渲染引擎
+ *
+ * @method stopEngine
+ */
+Stage.prototype.stopEngine = function() {
+  CAF(this.loop);
+  this.inRender = false;
+};
+
+/**
+ * 更新场景内物体的姿态
+ *
+ * @method stopEngine
+ */
+Stage.prototype.stopEngine = function() {
+  const This = this;
+  /**
+   * render loop
+   */
+  function render() {
+    This.stage.render();
+    This.loop = RAF(render);
   }
+  render();
 };
 
 export {Stage};
@@ -1678,7 +1712,7 @@ export {Stage};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 18 2017 11:07:10 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:35:56 GMT+0800 (CST)
         </footer>
     </div>
 </div>
