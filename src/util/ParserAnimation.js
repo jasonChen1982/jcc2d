@@ -20,6 +20,10 @@ function ParserAnimation(options) {
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
+/**
+ * @param {array} assets
+ * @param {array} layers
+ */
 ParserAnimation.prototype.preParser = function(assets, layers) {
   const sourceMap = {};
   let i = 0;
