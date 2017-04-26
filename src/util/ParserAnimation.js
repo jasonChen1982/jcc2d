@@ -17,19 +17,25 @@ function ParserAnimation(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
-  this.preParser();
+  this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
-ParserAnimation.prototype.preParser = function() {
-  const assets = this.keyframes.assets;
+ParserAnimation.prototype.preParser = function(assets, layers) {
   const sourceMap = {};
-  for (let i = 0; i < assets.length; i++) {
+  let i = 0;
+  const l = layers.length;
+  for (i = 0; i < assets.length; i++) {
     const id = assets[i].id;
     const u = assets[i].u;
     const p = assets[i].p;
     if (u && p) {
       sourceMap[id] = u + p;
     }
+  }
+  for (i = l - 1; i >= 0; i--) {
+    const layer = layers[i];
+    this.ip = Math.min(this.ip, layer.ip);
+    this.op = Math.max(this.op, layer.op);
   }
   this.assetBox = loaderUtil(sourceMap);
 };

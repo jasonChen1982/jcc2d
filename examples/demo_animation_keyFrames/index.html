@@ -67,15 +67,19 @@ DOC.timeScale = 0.2;
 DOC.adds(shape);
 
 stage.adds(DOC);
+stage.startEngine();
 
-function render(){
-    RAF(render);
 
-    stage.render();
-
-    stats.update();
-}
-render();
+/**
+ * 帧率监控工具
+ */
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
+stage.on('postrender', function() {
+  stats.update();
+})
 
 
 </script>

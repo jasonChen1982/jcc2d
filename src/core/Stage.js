@@ -361,7 +361,7 @@ Stage.prototype.renderer = function() {
    * render loop
    */
   function render() {
-    This.stage.render();
+    This.render();
     This.loop = RAF(render);
   }
   render();

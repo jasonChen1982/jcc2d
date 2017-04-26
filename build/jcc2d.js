@@ -2892,19 +2892,25 @@ function ParserAnimation(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
-  this.preParser();
+  this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
-ParserAnimation.prototype.preParser = function () {
-  var assets = this.keyframes.assets;
+ParserAnimation.prototype.preParser = function (assets, layers) {
   var sourceMap = {};
-  for (var i = 0; i < assets.length; i++) {
+  var i = 0;
+  var l = layers.length;
+  for (i = 0; i < assets.length; i++) {
     var id = assets[i].id;
     var u = assets[i].u;
     var p = assets[i].p;
     if (u && p) {
       sourceMap[id] = u + p;
     }
+  }
+  for (i = l - 1; i >= 0; i--) {
+    var layer = layers[i];
+    this.ip = Math.min(this.ip, layer.ip);
+    this.op = Math.max(this.op, layer.op);
   }
   this.assetBox = loaderUtil(sourceMap);
 };
@@ -4874,16 +4880,6 @@ Stage.prototype.render = function () {
 };
 
 /**
- * 更新场景内物体状态
- *
- *
- */
-// Stage.prototype.update = function() {
-//   this.updateTransform();
-//   this.updatePosture(this.timeScale * this.snippet);
-// };
-
-/**
  * 引擎的时间轴
  *
  * @method timeline
@@ -4907,21 +4903,6 @@ Stage.prototype.timeline = function () {
 };
 
 /**
- * 更新场景内物体的姿态
- *
- *
- * @method updatePosture
- * @private
- * @param {number} snippet
- */
-// Stage.prototype.updatePosture = function(snippet) {
-//   for (let i = 0, l = this.childs.length; i < l; i++) {
-//     let child = this.childs[i];
-//     child.updatePosture(snippet);
-//   }
-// };
-
-/**
  * 启动渲染引擎
  *
  * @method startEngine
@@ -4929,7 +4910,7 @@ Stage.prototype.timeline = function () {
 Stage.prototype.startEngine = function () {
   if (this.inRender) return;
   this.inRender = true;
-  this.animate();
+  this.renderer();
 };
 
 /**
@@ -4943,17 +4924,17 @@ Stage.prototype.stopEngine = function () {
 };
 
 /**
- * 更新场景内物体的姿态
+ * 渲染循环
  *
- * @method stopEngine
+ * @method renderer
  */
-Stage.prototype.stopEngine = function () {
+Stage.prototype.renderer = function () {
   var This = this;
   /**
    * render loop
    */
   function render() {
-    This.stage.render();
+    This.render();
     This.loop = RAF(render);
   }
   render();
