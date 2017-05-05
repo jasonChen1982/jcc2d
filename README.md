@@ -85,9 +85,9 @@ const timeline = ball.animate({
   onCompelete: function(){ console.log('end'); } // onCompelete callback
 });
 timeline.pause(); // pause animation progress
+timeline.restart(); // restart animation progress, use with pause
 timeline.stop(); // stop animation to end, will trigger onCompelete callback
 timeline.cancle(); // cancle animation right now, will not trigger onCompelete callback
-timeline.restart(); // restart animation progress, use with pause
 timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed * 0.5
 ```
 
