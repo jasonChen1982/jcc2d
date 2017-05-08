@@ -26,12 +26,12 @@ BezierCurve.prototype.getPoint = function(t, points) {
     oP.y = rT * oL.y + t * oR.y;
     return oP;
   } else {
-    oP.x = rT * rT * points[0].x
-      + 2 * t * rT * points[1].x
-          + t * t * points[2].x;
-    oP.y = rT * rT * points[0].y
-      + 2 * t * rT * points[1].y
-          + t * t * points[2].y;
+    oP.x = rT * rT * a[0].x
+      + 2 * t * rT * a[1].x
+          + t * t * a[2].x;
+    oP.y = rT * rT * a[0].y
+      + 2 * t * rT * a[1].y
+          + t * t * a[2].y;
     return oP;
   }
 };
