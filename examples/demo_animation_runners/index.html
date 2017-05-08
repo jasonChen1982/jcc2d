@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+	<title>JC_demo</title>
+	<style type="text/css">
+    * {padding:0;margin:0;}
+    body {overflow: hidden;background-color: #000;}
+    #demo_canvas {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 320px;
+        height: 450px;
+        margin: -225px 0 0 -160px;
+    }
+    </style>
+</head>
+<body>
+<canvas id="demo_canvas" width="640" height="900"></canvas>
+
+<script type="text/javascript" src="../../build/jcc2d.js"></script>
+<script type="text/javascript" src="../libs/util/tween.js"></script>
+<script type="text/javascript" src="../libs/stats.min.js"></script>
+<script type="text/javascript" src="./js/data.js"></script>
+<script type="text/javascript">
+
+var stage = new JC.Stage({
+  dom: 'demo_canvas'
+});
+DOC = new JC.Container();
+DOC.x = window.innerWidth >> 1;
+DOC.y = window.innerHeight >> 1;
+
+function Rect(color){
+    this.color = color||'#749d9b';
+}
+Rect.prototype.render = function(ctx){
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
+    ctx.fillRect(0,0,60,10);
+    ctx.fill();
+};
+
+JC.Tween.extend(tween);
+
+var shape = new JC.Graphics();
+shape.drawCall(new Rect('#fff'));
+shape.runners({
+    runners: [
+      { to: { x: 100, y: 200 }, duration: 1000, repeats: 4, alternate: true },
+      { to: { x: -30, y: 500 }, duration: 1000 },
+      { to: { x: -200, y: 200 }, duration: 1000 },
+      { to: { x: 10, y: 20 }, duration: 1000 },
+    ],
+    infinite: true,
+    onCompelete(info) {
+      console.log(this.element);
+    }
+});
+DOC.adds(shape);
+
+stage.adds(DOC);
+stage.startEngine();
+
+
+/**
+ * 帧率监控工具
+ */
+var stats = new Stats();
+stats.domElement.style.position = 'absolute';
+stats.domElement.style.top = '0px';
+document.body.appendChild(stats.domElement);
+stage.on('postrender', function() {
+  stats.update();
+})
+
+
+</script>
+</body>
+</html>

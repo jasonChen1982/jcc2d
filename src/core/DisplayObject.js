@@ -237,6 +237,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -271,6 +273,8 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -301,6 +305,8 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -308,6 +314,36 @@ DisplayObject.prototype.motion = function(options, clear) {
  */
 DisplayObject.prototype.keyFrames = function(options, clear) {
   return this.Animation.keyFrames(options, clear);
+};
+
+/**
+ * runners动画，多个复合动画的组合形式
+ *
+ * ```js
+ * dispay.runners({
+ *   runners: [], // ae导出的动画数据
+ *   delay: 1000, // ae导出的动画数据
+ *   wait: 100, // ae导出的动画数据
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param {object} options 动画配置参数
+ * @param {object} options.runners 各个拆分动画
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.runners = function(options, clear) {
+  return this.Animation.runners(options, clear);
 };
 
 /**
@@ -365,16 +401,16 @@ DisplayObject.prototype.updateTransform = function() {
 
   if (this.skewX || this.skewY) {
     TEMP_MATRIX.setTransform(
-            this.x,
-            this.y,
-            this.pivotX,
-            this.pivotY,
-            this.scaleX,
-            this.scaleY,
-            this.rotation * Utils.DTR,
-            this.skewX * Utils.DTR,
-            this.skewY * Utils.DTR
-        );
+      this.x,
+      this.y,
+      this.pivotX,
+      this.pivotY,
+      this.scaleX,
+      this.scaleY,
+      this.rotation * Utils.DTR,
+      this.skewX * Utils.DTR,
+      this.skewY * Utils.DTR
+    );
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
     wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;

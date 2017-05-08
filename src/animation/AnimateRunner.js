@@ -15,32 +15,35 @@ function AnimateRunner(options) {
   this.runners = options.runners;
   this.cursor = 0;
   this.queues = [];
+  this.alternate = false;
 
-  this.parserRunners();
-  this.length = this.queues.length;
+  // this.parserRunners();
+  this.length = this.runners.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
-AnimateRunner.prototype.parserRunners = function() {
-  for (let i = 0; i < this.runners.length; i++) {
-    const runner = this.runners[i];
-    runner.infinite = false;
-    runner.alternate = false;
-    runner.element = this.element;
-    runner.onCompelete = this.nextRunner.bind(this);
-    let animate = null;
-    if (runner.path) {
-      animate = new PathMotion(runner);
-    } else if (runner.to) {
-      animate = new Transition(runner);
-    }
-    if (animate !== null) this.queues.push(animate);
-  }
-};
 AnimateRunner.prototype.nextRunner = function() {
+  this.queues[this.cursor].init();
   this.cursor += this.direction;
   this.totalTime++;
 };
+AnimateRunner.prototype.initRunner = function() {
+  const runner = this.runners[this.cursor];
+  runner.infinite = false;
+  runner.resident = true;
+  runner.element = this.element;
+  runner.onCompelete = this.nextRunner.bind(this);
+  let animate = null;
+  if (runner.path) {
+    animate = new PathMotion(runner);
+  } else if (runner.to) {
+    animate = new Transition(runner);
+  }
+  if (animate !== null) this.queues.push(animate);
+};
 AnimateRunner.prototype.nextPose = function(snippetCache) {
+  if (!this.queues[this.cursor] && this.runners[this.cursor]) {
+    this.initRunner();
+  }
   return this.queues[this.cursor].update(snippetCache);
 };
 AnimateRunner.prototype.update = function(snippet) {
@@ -64,17 +67,13 @@ AnimateRunner.prototype.update = function(snippet) {
     if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       this.delayCut = this.delay;
-      this.totalTime = 0;
-      if (this.alternate) {
-        this.direction *= -1;
-      } else {
-        this.direction = 1;
-        this.cursor = 0;
-      }
+      this.direction = 1;
+      this.cursor = 0;
     } else {
-      this.living = false;
+      if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
+    this.totalTime = 0;
   }
 };
 

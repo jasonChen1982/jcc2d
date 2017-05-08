@@ -19,9 +19,10 @@ function Animate(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
+  this.repeatsCut = this.repeats;
   this.delay = options.delay || 0;
-  this.wait = options.wait || 0;
   this.delayCut = this.delay;
+  this.wait = options.wait || 0;
   this.progress = 0;
   this.direction = 1;
 
@@ -32,16 +33,16 @@ function Animate(options) {
   this.paused = false;
 }
 Animate.prototype.update = function(snippet) {
+  let snippetCache = this.direction * this.timeScale * snippet;
   if (this.wait > 0) {
-    this.wait -= Math.abs(snippet);
+    this.wait -= Math.abs(snippetCache);
     return;
   }
   if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+    if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
     return;
   }
 
-  let snippetCache = this.direction * this.timeScale * snippet;
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
@@ -49,10 +50,9 @@ Animate.prototype.update = function(snippet) {
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.totalTime >= this.duration) {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
+    if (this.repeatsCut > 0 || this.infinite) {
+      if (this.repeatsCut > 0) --this.repeatsCut;
       this.delayCut = this.delay;
-      this.totalTime = 0;
       if (this.alternate) {
         this.direction *= -1;
       } else {
@@ -60,11 +60,17 @@ Animate.prototype.update = function(snippet) {
         this.progress = 0;
       }
     } else {
-      this.living = false;
+      if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
+    this.totalTime = 0;
   }
   return pose;
+};
+Animate.prototype.init = function() {
+  this.direction = 1;
+  this.progress = 0;
+  this.repeatsCut = this.repeats;
 };
 Animate.prototype.nextPose = function() {
   console.warn('should be overwrite');

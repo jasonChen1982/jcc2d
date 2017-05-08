@@ -674,9 +674,10 @@ function Animate(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
+  this.repeatsCut = this.repeats;
   this.delay = options.delay || 0;
-  this.wait = options.wait || 0;
   this.delayCut = this.delay;
+  this.wait = options.wait || 0;
   this.progress = 0;
   this.direction = 1;
 
@@ -687,16 +688,16 @@ function Animate(options) {
   this.paused = false;
 }
 Animate.prototype.update = function (snippet) {
+  var snippetCache = this.direction * this.timeScale * snippet;
   if (this.wait > 0) {
-    this.wait -= Math.abs(snippet);
+    this.wait -= Math.abs(snippetCache);
     return;
   }
   if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+    if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
     return;
   }
 
-  var snippetCache = this.direction * this.timeScale * snippet;
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
@@ -704,10 +705,9 @@ Animate.prototype.update = function (snippet) {
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.totalTime >= this.duration) {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
+    if (this.repeatsCut > 0 || this.infinite) {
+      if (this.repeatsCut > 0) --this.repeatsCut;
       this.delayCut = this.delay;
-      this.totalTime = 0;
       if (this.alternate) {
         this.direction *= -1;
       } else {
@@ -715,11 +715,17 @@ Animate.prototype.update = function (snippet) {
         this.progress = 0;
       }
     } else {
-      this.living = false;
+      if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
+    this.totalTime = 0;
   }
   return pose;
+};
+Animate.prototype.init = function () {
+  this.direction = 1;
+  this.progress = 0;
+  this.repeatsCut = this.repeats;
 };
 Animate.prototype.nextPose = function () {
   console.warn('should be overwrite');
@@ -1136,32 +1142,35 @@ function AnimateRunner(options) {
   this.runners = options.runners;
   this.cursor = 0;
   this.queues = [];
+  this.alternate = false;
 
-  this.parserRunners();
-  this.length = this.queues.length;
+  // this.parserRunners();
+  this.length = this.runners.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
-AnimateRunner.prototype.parserRunners = function () {
-  for (var i = 0; i < this.runners.length; i++) {
-    var runner = this.runners[i];
-    runner.infinite = false;
-    runner.alternate = false;
-    runner.element = this.element;
-    runner.onCompelete = this.nextRunner.bind(this);
-    var animate = null;
-    if (runner.path) {
-      animate = new PathMotion(runner);
-    } else if (runner.to) {
-      animate = new Transition(runner);
-    }
-    if (animate !== null) this.queues.push(animate);
-  }
-};
 AnimateRunner.prototype.nextRunner = function () {
+  this.queues[this.cursor].init();
   this.cursor += this.direction;
   this.totalTime++;
 };
+AnimateRunner.prototype.initRunner = function () {
+  var runner = this.runners[this.cursor];
+  runner.infinite = false;
+  runner.resident = true;
+  runner.element = this.element;
+  runner.onCompelete = this.nextRunner.bind(this);
+  var animate = null;
+  if (runner.path) {
+    animate = new PathMotion(runner);
+  } else if (runner.to) {
+    animate = new Transition(runner);
+  }
+  if (animate !== null) this.queues.push(animate);
+};
 AnimateRunner.prototype.nextPose = function (snippetCache) {
+  if (!this.queues[this.cursor] && this.runners[this.cursor]) {
+    this.initRunner();
+  }
   return this.queues[this.cursor].update(snippetCache);
 };
 AnimateRunner.prototype.update = function (snippet) {
@@ -1185,17 +1194,13 @@ AnimateRunner.prototype.update = function (snippet) {
     if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       this.delayCut = this.delay;
-      this.totalTime = 0;
-      if (this.alternate) {
-        this.direction *= -1;
-      } else {
-        this.direction = 1;
-        this.cursor = 0;
-      }
+      this.direction = 1;
+      this.cursor = 0;
     } else {
-      this.living = false;
+      if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
+    this.totalTime = 0;
   }
 };
 
@@ -1867,6 +1872,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -1901,6 +1908,8 @@ DisplayObject.prototype.animate = function (options, clear) {
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -1931,6 +1940,8 @@ DisplayObject.prototype.motion = function (options, clear) {
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -1938,6 +1949,36 @@ DisplayObject.prototype.motion = function (options, clear) {
  */
 DisplayObject.prototype.keyFrames = function (options, clear) {
   return this.Animation.keyFrames(options, clear);
+};
+
+/**
+ * runners动画，多个复合动画的组合形式
+ *
+ * ```js
+ * dispay.runners({
+ *   runners: [], // ae导出的动画数据
+ *   delay: 1000, // ae导出的动画数据
+ *   wait: 100, // ae导出的动画数据
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param {object} options 动画配置参数
+ * @param {object} options.runners 各个拆分动画
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.runners = function (options, clear) {
+  return this.Animation.runners(options, clear);
 };
 
 /**

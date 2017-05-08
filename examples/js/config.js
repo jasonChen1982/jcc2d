@@ -87,6 +87,11 @@ var EXAMPLES = [
         link: 'demo_animation_animate_2'
     },
     {
+        title: 'runners动画',
+        type: 'demo',
+        link: 'demo_animation_runners'
+    },
+    {
         title: 'AE导出的动画片段',
         type: 'demo',
         link: 'demo_animation_keyFrames'
