@@ -1,4 +1,25 @@
 
+v1.1.4 / 2017-05-09
+==================
+
+  * fix(BezierCurve): getPoint when not call recursive, correct points
+
+v1.1.3 / 2017-05-08
+==================
+
+  * feat: finish runners and adjust jsdoc
+
+v1.1.2 / 2017-04-26
+==================
+
+  * feat: stage.startEngine
+  * fix: per-check keyframes total time
+
+v1.1.1 / 2017-04-19
+==================
+
+  * feat: add jcc2d.light.js
+
 v1.1.0 / 2017-04-18
 ==================
 
