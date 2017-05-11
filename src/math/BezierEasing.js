@@ -139,8 +139,7 @@ function BezierEasing(mX1, mY1, mX2, mY2) {
   this.mX2 = mX2;
   this.mY2 = mY2;
   this.sampleValues = float32ArraySupported ?
-  new Float32Array(kSplineTableSize)
-  :
+  new Float32Array(kSplineTableSize):
   new Array(kSplineTableSize);
 
   this._preCompute();
@@ -174,8 +173,7 @@ BezierEasing.prototype._getTForX = function(aX) {
   --currentSample;
 
   // Interpolate to provide an initial guess for t
-  let dist = (aX - this.sampleValues[currentSample])
-  /
+  let dist = (aX - this.sampleValues[currentSample]) /
   (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
   let guessForT = intervalStart + dist * kSampleStepSize;
 
