@@ -193,6 +193,12 @@ BezierEasing.prototype._getTForX = function(aX) {
   }
 };
 
+/**
+ * 通过x轴近似获取y的值
+ *
+ * @param {number} x x轴的偏移量
+ * @return {number} y 与输入值x对应的y值
+ */
 BezierEasing.prototype.get = function(x) {
   if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
   if (x === 0) {
