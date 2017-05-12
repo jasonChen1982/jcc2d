@@ -54,6 +54,7 @@ Texture.prototype.load = function(img) {
   this.hadload = true;
   img = img || this.src;
   if (Utils.isString(img)) {
+    // TODO: 不默认配置跨域配置
     this.texture.crossOrigin = '';
     this.texture.src = img;
     this.texture.onload = function() {

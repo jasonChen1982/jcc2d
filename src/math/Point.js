@@ -128,6 +128,16 @@ Point.prototype.divideScalar = function( scalar ) {
   return this.multiplyScalar( 1 / scalar );
 };
 
+Point.prototype.distanceTo = function( v ) {
+  return Math.sqrt( this.distanceToSquared( v ) );
+};
+
+Point.prototype.distanceToSquared = function( v ) {
+  const dx = this.x - v.x;
+  const dy = this.y - v.y;
+  const dz = this.z - v.z;
+  return dx * dx + dy * dy + dz * dz;
+};
 
 Point.prototype.multiplyScalar = function( scalar ) {
   if ( isFinite( scalar ) ) {

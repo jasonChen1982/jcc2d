@@ -25,6 +25,34 @@ const PM = {
 };
 
 /**
+ * 判断数值是否在(min, max]区间内
+ * @param {number} v   待比较的值
+ * @param {number} min 最小区间
+ * @param {number} max 最大区间
+ * @return {boolean} 是否在(min, max]区间内
+ */
+function inRange(v, min, max) {
+  return v > min && v <= max;
+}
+
+/**
+ * 判断当前进度在哪一帧内
+ * @param {array} steps 帧数组
+ * @param {number} progress 当前进度
+ * @param {number} rfr 每一帧的时间
+ * @return {number} 当前进度停留在第几帧
+ */
+function findStep(steps, progress, rfr) {
+  const last = steps.length - 1;
+  for (let i = 0; i < last; i++) {
+    const step = steps[i];
+    if (inRange(progress, step.t * rfr, step.jcet * rfr)) {
+      return i;
+    }
+  }
+}
+
+/**
  * KeyFrames类型动画对象
  *
  * @class
@@ -45,7 +73,9 @@ function KeyFrames(options) {
   this.tfs = Math.floor(this.op - this.ip);
   this.duration = this.tfs * this.rfr;
 
-  this.jcst = this.ip * this.rfr;
+  // this.jcst = this.ip;
+
+  this.keyState = {};
 
   this.preParser(Utils.copyJSON(options.ks));
 }
@@ -54,35 +84,46 @@ KeyFrames.prototype = Object.create(Animate.prototype);
 KeyFrames.prototype.preParser = function(keys) {
   const ks = keys.ks;
   for (const key in ks) {
-    const prop = PM[key].label;
-    const scale = PM[key].scale;
-    if (ks[key]) {
-      if (ks[key].a) {
-        this.aks[key] = ks[key];
-        const k = ks[key].k;
-        const last = k.length - 1;
-        const et = k[last].t;
-        const st = k[0].t;
+    if (ks[key].a) {
+      this.prepareDynamic(ks, key);
+    } else {
+      this.prepareStatic(ks, key);
+    }
+  }
+};
+KeyFrames.prototype.prepareDynamic = function(ks, key) {
+  this.aks[key] = ks[key];
+  const k = ks[key].k;
+  const et = k[k.length - 1].t;
+  const st = k[0].t;
 
-        this.aks[key].jcet = et * this.rfr;
-        this.aks[key].jcst = st * this.rfr;
-      } else {
-        let k = 0;
-        if (Utils.isString(prop)) {
-          if (Utils.isNumber(ks[key].k)) {
-            k = ks[key].k;
-          }
-          if (Utils.isArray(ks[key].k)) {
-            k = ks[key].k[0];
-          }
-          this.element[prop] = scale * k;
-        } else if (Utils.isArray(prop)) {
-          for (let i = 0; i < prop.length; i++) {
-            k = ks[key].k[i];
-            this.element[prop[i]] = scale * k;
-          }
-        }
-      }
+  this.aks[key].jcet = et;
+  this.aks[key].jcst = st;
+  for (let i = 0; i < k.length; i++) {
+    const now = k[i];
+    const next = k[i + 1];
+    if (next) {
+      now.jcet = next.t;
+    }
+  }
+};
+
+KeyFrames.prototype.prepareStatic = function(ks, key) {
+  const prop = PM[key].label;
+  const scale = PM[key].scale;
+  let k = 0;
+  if (Utils.isString(prop)) {
+    if (Utils.isNumber(ks[key].k)) {
+      k = ks[key].k;
+    }
+    if (Utils.isArray(ks[key].k)) {
+      k = ks[key].k[0];
+    }
+    this.element[prop] = scale * k;
+  } else if (Utils.isArray(prop)) {
+    for (let i = 0; i < prop.length; i++) {
+      k = ks[key].k[i];
+      this.element[prop[i]] = scale * k;
     }
   }
 };
@@ -99,41 +140,50 @@ KeyFrames.prototype.nextPose = function() {
 
 KeyFrames.prototype.prepare = function(key, ak) {
   const k = ak.k;
-  const progress = Utils.clamp(this.progress, 0, ak.jcet);
-  let pkt = ak.jcst;
-  if (progress < this.iip * this.rfr) {
-    this.element.visible = false;
-  } else {
-    this.element.visible = true;
-  }
-  if (progress < pkt) {
+  const rfr = this.rfr;
+  const progress = Utils.clamp(this.progress, 0, ak.jcet * rfr);
+  let skt = ak.jcst * rfr;
+  let ekt = ak.jcet * rfr;
+  const last = k.length - 2;
+  const invisible = progress < this.iip * rfr;
+  if (invisible === this.element.visible) this.element.visible = !invisible;
+
+  if (progress <= skt) {
     return k[0].s;
+  } else if (progress >= ekt) {
+    return k[last].e;
   } else {
-    const l = k.length;
-    for (let i = 1; i < l; i++) {
-      const kt = k[i].t * this.rfr;
-      if (progress < kt) {
-        const s = k[i - 1].s;
-        const e = k[i - 1].e;
-        const value = [];
-        const rate = Utils.linear(progress, pkt, kt);
-        for (let j = 0; j < s.length; j++) {
-          const v = e[j] - s[j];
-          value[j] = s[j] + v * rate;
-        }
-        return value;
-      }
-      pkt = kt;
+    let ck = this.keyState[key];
+    if (
+      !Utils.isNumber(ck)
+      ||
+      !inRange(progress, k[ck].t * rfr, k[ck].jcet * rfr)
+    ) {
+      ck = this.keyState[key] = findStep(k, progress, rfr);
     }
-    return k[l - 2].e;
+    return k[ck].getEasing(progress, rfr);
+    // for (let i = 1; i < l; i++) {
+    //   const kt = k[i].t * rfr;
+    //   if (progress < kt) {
+    //     const s = k[i - 1].s;
+    //     const e = k[i - 1].e;
+    //     const value = [];
+    //     const rate = Utils.linear(progress, skt, kt);
+    //     for (let j = 0; j < s.length; j++) {
+    //       const v = e[j] - s[j];
+    //       value[j] = s[j] + v * rate;
+    //     }
+    //     return value;
+    //   }
+    //   skt = kt;
+    // }
+    // return k[l - 2].e;
   }
 };
 KeyFrames.prototype.interpolation = function(key, ak) {
   const value = this.prepare(key, ak);
-  let cache = {};
-  cache[key] = value;
   this.setValue(key, value);
-  return cache;
+  return value;
 };
 KeyFrames.prototype.setValue = function(key, value) {
   const prop = PM[key].label;
