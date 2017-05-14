@@ -1,6 +1,9 @@
 
 import {Animate} from './Animate';
+import {BezierCurve} from '../math/BezierCurve';
+import {Point} from '../math/Point';
 import {Utils} from '../util/Utils';
+import {prepareEaseing, getEaseing, getEaseingPath} from '../util/Easeing';
 const PM = {
   o: {
     label: 'alpha',
@@ -104,6 +107,22 @@ KeyFrames.prototype.prepareDynamic = function(ks, key) {
     const next = k[i + 1];
     if (next) {
       now.jcet = next.t;
+      if (Utils.isString(now.n) && now.ti && now.to) {
+        prepareEaseing(now.o.x, now.o.y, now.i.x, now.i.y);
+        const s = new Point(now.s[0], now.s[1]);
+        const e = new Point(now.e[0], now.e[1]);
+        const ti = new Point(now.ti[0], now.ti[1]);
+        const to = new Point(now.to[0], now.to[1]);
+        const c1 = new Point(now.s[0], now.s[1]);
+        const c2 = new Point(now.e[0], now.e[1]);
+        now.curve = new BezierCurve([s, c1.add(ti), c2.add(to), e]);
+        // now.jcl = now.curve.getLength();
+      } else {
+        for (let i = 0; i < now.n.length; i++) {
+          prepareEaseing(now.o.x[i], now.o.y[i], now.i.x[i], now.i.y[i]);
+        }
+      }
+      // now.ease = new
     }
   }
 };
@@ -161,23 +180,13 @@ KeyFrames.prototype.prepare = function(key, ak) {
     ) {
       ck = this.keyState[key] = findStep(k, progress, rfr);
     }
-    return k[ck].getEasing(progress, rfr);
-    // for (let i = 1; i < l; i++) {
-    //   const kt = k[i].t * rfr;
-    //   if (progress < kt) {
-    //     const s = k[i - 1].s;
-    //     const e = k[i - 1].e;
-    //     const value = [];
-    //     const rate = Utils.linear(progress, skt, kt);
-    //     for (let j = 0; j < s.length; j++) {
-    //       const v = e[j] - s[j];
-    //       value[j] = s[j] + v * rate;
-    //     }
-    //     return value;
-    //   }
-    //   skt = kt;
-    // }
-    // return k[l - 2].e;
+    const frame = k[ck];
+    const rate = (progress / rfr - frame.t) / (frame.jcet - frame.t);
+    if (frame.curve) {
+      return getEaseingPath(frame.curve, frame.n, rate);
+    } else {
+      return getEaseing(frame.s, frame.e, frame.n, rate);
+    }
   }
 };
 KeyFrames.prototype.interpolation = function(key, ak) {
@@ -196,6 +205,7 @@ KeyFrames.prototype.setValue = function(key, value) {
       this.element[prop[i]] = scale * v;
     }
   }
+  // console.log(this.element.alpha);
 };
 
 export {KeyFrames};

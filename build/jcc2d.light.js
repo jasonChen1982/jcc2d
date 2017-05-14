@@ -245,6 +245,17 @@ Point.prototype.divideScalar = function (scalar) {
   return this.multiplyScalar(1 / scalar);
 };
 
+Point.prototype.distanceTo = function (v) {
+  return Math.sqrt(this.distanceToSquared(v));
+};
+
+Point.prototype.distanceToSquared = function (v) {
+  var dx = this.x - v.x;
+  var dy = this.y - v.y;
+  var dz = this.z - v.z;
+  return dx * dx + dy * dy + dz * dz;
+};
+
 Point.prototype.multiplyScalar = function (scalar) {
   if (isFinite(scalar)) {
     this.x *= scalar;
@@ -982,6 +993,277 @@ PathMotion.prototype.decomposeRotate = function (t) {
   return pi * Math.acos(cos) * Utils.RTD;
 };
 
+/**
+ *
+ * @param {Array}  points  array of points
+ */
+function BezierCurve(points) {
+  this.points = points;
+}
+
+BezierCurve.prototype = Object.create(Curve.prototype);
+
+BezierCurve.prototype.getPoint = function (t, points) {
+  var a = points || this.points;
+  var len = a.length;
+  var rT = 1 - t;
+  var l = a.slice(0, len - 1);
+  var r = a.slice(1);
+  var oP = new Point();
+  if (len > 3) {
+    var oL = this.getPoint(t, l);
+    var oR = this.getPoint(t, r);
+    oP.x = rT * oL.x + t * oR.x;
+    oP.y = rT * oL.y + t * oR.y;
+    return oP;
+  } else {
+    oP.x = rT * rT * a[0].x + 2 * t * rT * a[1].x + t * t * a[2].x;
+    oP.y = rT * rT * a[0].y + 2 * t * rT * a[1].y + t * t * a[2].y;
+    return oP;
+  }
+};
+
+/**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+
+var NEWTON_ITERATIONS = 4;
+var NEWTON_MIN_SLOPE = 0.001;
+var SUBDIVISION_PRECISION = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS = 10;
+
+var kSplineTableSize = 11;
+var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+
+var float32ArraySupported = typeof Float32Array === 'function';
+
+/* eslint new-cap: 0 */
+
+/**
+ * 公因式A
+ *
+ * @param {number} aA1 控制分量
+ * @param {number} aA2 控制分量
+ * @return {number} 整个公式中的A公因式的值
+ */
+function A(aA1, aA2) {
+  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
+}
+
+/**
+ * 公因式B
+ *
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 整个公式中的B公因式的值
+ */
+function B(aA1, aA2) {
+  return 3.0 * aA2 - 6.0 * aA1;
+}
+
+/**
+ * 公因式C
+ *
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 整个公式中的C公因式的值
+ */
+function C(aA1) {
+  return 3.0 * aA1;
+}
+
+/**
+ * 获取aT处的值
+ *
+ * @param {number} aT 三次贝塞尔曲线的t自变量
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 三次贝塞尔公式的因变量
+ */
+function calcBezier(aT, aA1, aA2) {
+  return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+}
+
+/**
+ * 获取aT处的斜率
+ * @param {number} aT 三次贝塞尔曲线的t自变量
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 三次贝塞尔公式的导数
+ */
+function getSlope(aT, aA1, aA2) {
+  return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+}
+
+/**
+ *
+ * @param {number} aX
+ * @param {number} aA
+ * @param {number} aB
+ * @param {number} mX1
+ * @param {number} mX2
+ * @return {number} 三次贝塞尔公式的导数
+ */
+function binarySubdivide(aX, aA, aB, mX1, mX2) {
+  var currentX = void 0;
+  var currentT = void 0;
+  var i = 0;
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+  return currentT;
+}
+
+/**
+ * 牛顿迭代算法，进一步的获取精确的T值
+ * @param {number} aX
+ * @param {number} aGuessT
+ * @param {number} mX1
+ * @param {number} mX2
+ * @return {number} 获取更精确的T值
+ */
+function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
+  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+    var currentSlope = getSlope(aGuessT, mX1, mX2);
+    if (currentSlope === 0.0) {
+      return aGuessT;
+    }
+    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+    aGuessT -= currentX / currentSlope;
+  }
+  return aGuessT;
+}
+
+/**
+ * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
+ *
+ * @param {number} mX1 控制点1的x分量
+ * @param {number} mY1 控制点1的y分量
+ * @param {number} mX2 控制点2的x分量
+ * @param {number} mY2 控制点2的y分量
+ */
+function BezierEasing(mX1, mY1, mX2, mY2) {
+  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+  this.mX1 = mX1;
+  this.mY1 = mY1;
+  this.mX2 = mX2;
+  this.mY2 = mY2;
+  this.sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+
+  this._preCompute();
+}
+
+BezierEasing.prototype._preCompute = function () {
+  // Precompute samples table
+  if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
+    for (var i = 0; i < kSplineTableSize; ++i) {
+      this.sampleValues[i] = calcBezier(i * kSampleStepSize, this.mX1, this.mX2);
+    }
+  }
+};
+
+BezierEasing.prototype._getTForX = function (aX) {
+  var intervalStart = 0.0;
+  var currentSample = 1;
+  var lastSample = kSplineTableSize - 1;
+
+  for (; currentSample !== lastSample && this.sampleValues[currentSample] <= aX; ++currentSample) {
+    intervalStart += kSampleStepSize;
+  }
+  --currentSample;
+
+  // Interpolate to provide an initial guess for t
+  var dist = (aX - this.sampleValues[currentSample]) / (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
+  var guessForT = intervalStart + dist * kSampleStepSize;
+
+  var initialSlope = getSlope(guessForT, this.mX1, this.mX2);
+  if (initialSlope >= NEWTON_MIN_SLOPE) {
+    return newtonRaphsonIterate(aX, guessForT, this.mX1, this.mX2);
+  } else if (initialSlope === 0.0) {
+    return guessForT;
+  } else {
+    return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, this.mX1, this.mX2);
+  }
+};
+
+/**
+ * 通过x轴近似获取y的值
+ *
+ * @param {number} x x轴的偏移量
+ * @return {number} y 与输入值x对应的y值
+ */
+BezierEasing.prototype.get = function (x) {
+  if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
+  if (x === 0) {
+    return 0;
+  }
+  if (x === 1) {
+    return 1;
+  }
+  return calcBezier(this._getTForX(x), this.mY1, this.mY2);
+};
+
+var bezierPoor = {};
+
+/**
+ * 准备好贝塞尔曲线
+ * @param {number} mX1 控制点1的x分量
+ * @param {number} mY1 控制点1的y分量
+ * @param {number} mX2 控制点2的x分量
+ * @param {number} mY2 控制点2的y分量
+ * @param {string} nm 控制点命名
+ * @return {BezierEasing}
+ */
+function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
+  var str = nm || [mX2, mY2, mX1, mY1].join('_').replace(/\./g, 'p');
+  if (bezierPoor[str]) {
+    return bezierPoor[str];
+  }
+  var bezEasing = new BezierEasing(mX1, mY1, mX2, mY2);
+  bezierPoor[str] = bezEasing;
+}
+
+/**
+ * 根据进度获取到普通插值
+ * @param {number} s  插值起始端点
+ * @param {number} e  插值结束端点
+ * @param {array}  nm 贝塞尔曲线的名字
+ * @param {number} p  插值进度
+ * @return {array}
+ */
+function getEaseing(s, e, nm, p) {
+  var value = [];
+  for (var i = 0; i < s.length; i++) {
+    var rate = bezierPoor[nm[i]].get(p);
+    var v = e[i] - s[i];
+    value[i] = s[i] + v * rate;
+  }
+  return value;
+}
+
+/**
+ *
+ * @param {BezierCurve} curve
+ * @param {string} nm
+ * @param {number} p
+ * @return {Point}
+ */
+function getEaseingPath(curve, nm, p) {
+  var rate = bezierPoor[nm].get(p);
+  var point = curve.getPointAt(rate);
+  return [point.x, point.y, point.z];
+}
+
 var PM = {
   o: {
     label: 'alpha',
@@ -1006,6 +1288,34 @@ var PM = {
 };
 
 /**
+ * 判断数值是否在(min, max]区间内
+ * @param {number} v   待比较的值
+ * @param {number} min 最小区间
+ * @param {number} max 最大区间
+ * @return {boolean} 是否在(min, max]区间内
+ */
+function inRange(v, min, max) {
+  return v > min && v <= max;
+}
+
+/**
+ * 判断当前进度在哪一帧内
+ * @param {array} steps 帧数组
+ * @param {number} progress 当前进度
+ * @param {number} rfr 每一帧的时间
+ * @return {number} 当前进度停留在第几帧
+ */
+function findStep(steps, progress, rfr) {
+  var last = steps.length - 1;
+  for (var i = 0; i < last; i++) {
+    var step = steps[i];
+    if (inRange(progress, step.t * rfr, step.jcet * rfr)) {
+      return i;
+    }
+  }
+}
+
+/**
  * KeyFrames类型动画对象
  *
  * @class
@@ -1026,7 +1336,9 @@ function KeyFrames(options) {
   this.tfs = Math.floor(this.op - this.ip);
   this.duration = this.tfs * this.rfr;
 
-  this.jcst = this.ip * this.rfr;
+  // this.jcst = this.ip;
+
+  this.keyState = {};
 
   this.preParser(Utils.copyJSON(options.ks));
 }
@@ -1035,35 +1347,62 @@ KeyFrames.prototype = Object.create(Animate.prototype);
 KeyFrames.prototype.preParser = function (keys) {
   var ks = keys.ks;
   for (var key in ks) {
-    var prop = PM[key].label;
-    var scale = PM[key].scale;
-    if (ks[key]) {
-      if (ks[key].a) {
-        this.aks[key] = ks[key];
-        var k = ks[key].k;
-        var last = k.length - 1;
-        var et = k[last].t;
-        var st = k[0].t;
+    if (ks[key].a) {
+      this.prepareDynamic(ks, key);
+    } else {
+      this.prepareStatic(ks, key);
+    }
+  }
+};
+KeyFrames.prototype.prepareDynamic = function (ks, key) {
+  this.aks[key] = ks[key];
+  var k = ks[key].k;
+  var et = k[k.length - 1].t;
+  var st = k[0].t;
 
-        this.aks[key].jcet = et * this.rfr;
-        this.aks[key].jcst = st * this.rfr;
+  this.aks[key].jcet = et;
+  this.aks[key].jcst = st;
+  for (var i = 0; i < k.length; i++) {
+    var now = k[i];
+    var next = k[i + 1];
+    if (next) {
+      now.jcet = next.t;
+      if (Utils.isString(now.n) && now.ti && now.to) {
+        prepareEaseing(now.o.x, now.o.y, now.i.x, now.i.y);
+        var s = new Point(now.s[0], now.s[1]);
+        var e = new Point(now.e[0], now.e[1]);
+        var ti = new Point(now.ti[0], now.ti[1]);
+        var to = new Point(now.to[0], now.to[1]);
+        var c1 = new Point(now.s[0], now.s[1]);
+        var c2 = new Point(now.e[0], now.e[1]);
+        now.curve = new BezierCurve([s, c1.add(ti), c2.add(to), e]);
+        // now.jcl = now.curve.getLength();
       } else {
-        var _k = 0;
-        if (Utils.isString(prop)) {
-          if (Utils.isNumber(ks[key].k)) {
-            _k = ks[key].k;
-          }
-          if (Utils.isArray(ks[key].k)) {
-            _k = ks[key].k[0];
-          }
-          this.element[prop] = scale * _k;
-        } else if (Utils.isArray(prop)) {
-          for (var i = 0; i < prop.length; i++) {
-            _k = ks[key].k[i];
-            this.element[prop[i]] = scale * _k;
-          }
+        for (var _i = 0; _i < now.n.length; _i++) {
+          prepareEaseing(now.o.x[_i], now.o.y[_i], now.i.x[_i], now.i.y[_i]);
         }
       }
+      // now.ease = new
+    }
+  }
+};
+
+KeyFrames.prototype.prepareStatic = function (ks, key) {
+  var prop = PM[key].label;
+  var scale = PM[key].scale;
+  var k = 0;
+  if (Utils.isString(prop)) {
+    if (Utils.isNumber(ks[key].k)) {
+      k = ks[key].k;
+    }
+    if (Utils.isArray(ks[key].k)) {
+      k = ks[key].k[0];
+    }
+    this.element[prop] = scale * k;
+  } else if (Utils.isArray(prop)) {
+    for (var i = 0; i < prop.length; i++) {
+      k = ks[key].k[i];
+      this.element[prop[i]] = scale * k;
     }
   }
 };
@@ -1080,41 +1419,36 @@ KeyFrames.prototype.nextPose = function () {
 
 KeyFrames.prototype.prepare = function (key, ak) {
   var k = ak.k;
-  var progress = Utils.clamp(this.progress, 0, ak.jcet);
-  var pkt = ak.jcst;
-  if (progress < this.iip * this.rfr) {
-    this.element.visible = false;
-  } else {
-    this.element.visible = true;
-  }
-  if (progress < pkt) {
+  var rfr = this.rfr;
+  var progress = Utils.clamp(this.progress, 0, ak.jcet * rfr);
+  var skt = ak.jcst * rfr;
+  var ekt = ak.jcet * rfr;
+  var last = k.length - 2;
+  var invisible = progress < this.iip * rfr;
+  if (invisible === this.element.visible) this.element.visible = !invisible;
+
+  if (progress <= skt) {
     return k[0].s;
+  } else if (progress >= ekt) {
+    return k[last].e;
   } else {
-    var l = k.length;
-    for (var i = 1; i < l; i++) {
-      var kt = k[i].t * this.rfr;
-      if (progress < kt) {
-        var s = k[i - 1].s;
-        var e = k[i - 1].e;
-        var value = [];
-        var rate = Utils.linear(progress, pkt, kt);
-        for (var j = 0; j < s.length; j++) {
-          var v = e[j] - s[j];
-          value[j] = s[j] + v * rate;
-        }
-        return value;
-      }
-      pkt = kt;
+    var ck = this.keyState[key];
+    if (!Utils.isNumber(ck) || !inRange(progress, k[ck].t * rfr, k[ck].jcet * rfr)) {
+      ck = this.keyState[key] = findStep(k, progress, rfr);
     }
-    return k[l - 2].e;
+    var frame = k[ck];
+    var rate = (progress / rfr - frame.t) / (frame.jcet - frame.t);
+    if (frame.curve) {
+      return getEaseingPath(frame.curve, frame.n, rate);
+    } else {
+      return getEaseing(frame.s, frame.e, frame.n, rate);
+    }
   }
 };
 KeyFrames.prototype.interpolation = function (key, ak) {
   var value = this.prepare(key, ak);
-  var cache = {};
-  cache[key] = value;
   this.setValue(key, value);
-  return cache;
+  return value;
 };
 KeyFrames.prototype.setValue = function (key, value) {
   var prop = PM[key].label;
@@ -1127,6 +1461,7 @@ KeyFrames.prototype.setValue = function (key, value) {
       this.element[prop[i]] = scale * v;
     }
   }
+  // console.log(this.element.alpha);
 };
 
 /**
@@ -1299,6 +1634,7 @@ Texture.prototype.load = function (img) {
   this.hadload = true;
   img = img || this.src;
   if (Utils.isString(img)) {
+    // TODO: 不默认配置跨域配置
     this.texture.crossOrigin = '';
     this.texture.src = img;
     this.texture.onload = function () {
