@@ -1,4 +1,10 @@
 
+v1.1.5 / 2017-05-14
+==================
+
+  * feat(keyframes): add fully easing for keyframes
+  * feat: add some helper function
+
 v1.1.4 / 2017-05-09
 ==================
 
