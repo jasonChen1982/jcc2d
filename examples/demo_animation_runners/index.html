@@ -62,8 +62,8 @@ FlyCoins.prototype.init = function() {
     var p = new JC.Point(Math.cos(rad) * this.radius, Math.sin(rad) * this.radius);
     this.blinkPoints.push(p);
   }
-  for (let i = 0; i < this.blinksNum; i++) {
-    const blink = new JC.Graphics();
+  for (var i = 0; i < this.blinksNum; i++) {
+    var blink = new JC.Graphics();
     blink.drawCall(new Cricle(8));
     this.blinks.adds(blink);
   }

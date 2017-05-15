@@ -17,7 +17,7 @@ export {Rectangle} from './math/Rectangle';
 // export {Ellipse} from './math/Ellipse';
 export {Matrix, IDENTITY, TEMP_MATRIX} from './math/Matrix';
 
-// export {BezierCurve} from './math/BezierCurve';
+export {BezierCurve} from './math/BezierCurve';
 // export {SvgCurve} from './math/SvgCurve';
 // export {NURBSCurve} from './math/NURBSCurve';
 

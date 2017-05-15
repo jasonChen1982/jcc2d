@@ -11,6 +11,7 @@ import {Matrix} from '../math/Matrix';
 function BlurFilter(blurX, blurY, quality) {
   Container.call(this);
 
+  // TODO: use Utils.isNumber displace isNaN
   if (isNaN(blurX) || blurX < 0) blurX = 0;
   if (isNaN(blurY) || blurY < 0) blurY = 0;
   if (isNaN(quality) || quality < 1) quality = 1;
