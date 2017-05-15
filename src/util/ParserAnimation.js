@@ -30,10 +30,15 @@ ParserAnimation.prototype.preParser = function(assets, layers) {
   const l = layers.length;
   for (i = 0; i < assets.length; i++) {
     const id = assets[i].id;
+    const up = assets[i].up;
     const u = assets[i].u;
     const p = assets[i].p;
-    if (u && p) {
+    if (up) {
+      sourceMap[id] = up;
+    } else if (u && p) {
       sourceMap[id] = u + p;
+    } else {
+      console.error('can not get asset url');
     }
   }
   for (i = l - 1; i >= 0; i--) {
