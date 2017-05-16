@@ -3282,10 +3282,15 @@ ParserAnimation.prototype.preParser = function (assets, layers) {
   var l = layers.length;
   for (i = 0; i < assets.length; i++) {
     var id = assets[i].id;
+    var up = assets[i].up;
     var u = assets[i].u;
     var p = assets[i].p;
-    if (u && p) {
+    if (up) {
+      sourceMap[id] = up;
+    } else if (u && p) {
       sourceMap[id] = u + p;
+    } else {
+      console.error('can not get asset url');
     }
   }
   for (i = l - 1; i >= 0; i--) {
@@ -4245,6 +4250,7 @@ exports.Rectangle = Rectangle;
 exports.Matrix = Matrix;
 exports.IDENTITY = IDENTITY;
 exports.TEMP_MATRIX = TEMP_MATRIX;
+exports.BezierCurve = BezierCurve;
 exports.DisplayObject = DisplayObject;
 exports.Container = Container;
 exports.Sprite = Sprite;

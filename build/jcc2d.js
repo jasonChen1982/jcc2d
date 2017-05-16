@@ -3282,10 +3282,15 @@ ParserAnimation.prototype.preParser = function (assets, layers) {
   var l = layers.length;
   for (i = 0; i < assets.length; i++) {
     var id = assets[i].id;
+    var up = assets[i].up;
     var u = assets[i].u;
     var p = assets[i].p;
-    if (u && p) {
+    if (up) {
+      sourceMap[id] = up;
+    } else if (u && p) {
       sourceMap[id] = u + p;
+    } else {
+      console.error('can not get asset url');
     }
   }
   for (i = l - 1; i >= 0; i--) {
@@ -4261,6 +4266,7 @@ TextFace.prototype.renderMe = function (ctx) {
 function BlurFilter(blurX, blurY, quality) {
     Container.call(this);
 
+    // TODO: use Utils.isNumber displace isNaN
     if (isNaN(blurX) || blurX < 0) blurX = 0;
     if (isNaN(blurY) || blurY < 0) blurY = 0;
     if (isNaN(quality) || quality < 1) quality = 1;
