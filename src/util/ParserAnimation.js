@@ -37,7 +37,7 @@ ParserAnimation.prototype.preParser = function(assets, layers) {
       sourceMap[id] = up;
     } else if (u && p) {
       sourceMap[id] = u + p;
-    } else {
+    } else if (!assets[i].layers) {
       console.error('can not get asset url');
     }
   }
