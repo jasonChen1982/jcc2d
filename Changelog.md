@@ -1,4 +1,9 @@
 
+v1.1.7 / 2017-05-16
+==================
+
+  * fix: should not log error when asset type was component
+
 v1.1.6 / 2017-05-16
 ==================
 
