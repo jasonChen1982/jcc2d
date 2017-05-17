@@ -106,13 +106,54 @@ timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed 
 
 
 ## Quick Start
-[runing man][quick-start]
+
+`jcc2d` was so easy to use, you just need `new` a `Stage` instance and appoint a `canvas` dom, then you can add every display object into `stage`.
+
+```js
+const stage = new JC.Stage({
+  dom: 'canvas-stage',
+  resolution: 1, // was normal
+});
+const coin = new JC.Sprite({
+  texture: new JC.Texture('/path/coin.png'),
+});
+stage.adds(coin);
+stage.startEngine(); // the coin would be render
+```
+
+`jcc2d` built-in support `timeline` animation , you can start multiple animation. let｀s use `coin` to show.
+
+```js
+/* start a animate */
+coin.animate({
+  from: {},
+  to: {},
+  ...
+});
+
+/* start a motion */
+coin.motion({
+  path: new JC.BezierCurve([...]), // coin will move along thie path
+  ...
+});
+
+/* start a motion */
+coin.runners({             // combination multiple animation and run one by one
+  runners: [
+    {from: {}, to: {}, ease: 'ease', ...},
+    {path: new JC.BezierCurve([...]), ease: 'ease', ...},
+    {to: {}, ease: 'ease', ...},
+  ]
+});
+```
+
+and more infor please found in [documentation][documentation], or quick start a living edit in web [runing man][quick-start].
 
 ## Documentation
- [documentation][documentation]
+[documentation][documentation]
 
 ## Examples
- [examples][examples]
+[examples][examples]
 
 ## Changelog
 
