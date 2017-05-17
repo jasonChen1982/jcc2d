@@ -121,19 +121,19 @@ stage.adds(coin);
 stage.startEngine(); // the coin would be render
 ```
 
-`jcc2d` built-in support `timeline` animation , you can start multiple animation. let｀s use `coin` to show.
+`jcc2d` built-in support `timeline` animation , you can start multiple animation. let's use `coin` to show.
 
 ```js
 /* start a animate */
 coin.animate({
-  from: {},
-  to: {},
+  from: { x: 100, rotation: 0 },
+  to: { x: 300, rotation: 360 },
   ...
 });
 
 /* start a motion */
 coin.motion({
-  path: new JC.BezierCurve([...]), // coin will move along thie path
+  path: new JC.BezierCurve([...]), // coin will move along with this path
   ...
 });
 
@@ -143,11 +143,12 @@ coin.runners({             // combination multiple animation and run one by one
     {from: {}, to: {}, ease: 'ease', ...},
     {path: new JC.BezierCurve([...]), ease: 'ease', ...},
     {to: {}, ease: 'ease', ...},
-  ]
+  ],
+  ...
 });
 ```
 
-and more infor please found in [documentation][documentation], or quick start a living edit in web [runing man][quick-start].
+and more information please found in [documentation][documentation], or quick start a living edit in web [runing man][quick-start].
 
 ## Documentation
 [documentation][documentation]
