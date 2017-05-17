@@ -24,9 +24,9 @@ A canvas 2d renderer & An awesome animator
 ## Introduction
 [main page][jcc2d]
 
-jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline management, support event system by default.
+jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline manager, of course support event system by default.
 
-built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] to export keyframes data from [after effect][ae], and easy parser to [jcc2d][jcc2d] keyFrames, just like following:
+built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] exported keyframes data from [after effect][ae], and easy parser to [jcc2d][jcc2d] keyFrames animation, just like following:
 
 ```js
 // parser a single animation layer
@@ -63,7 +63,7 @@ const ani = new JC.ParserAnimation({
 
 ## Feature
 
-Include `Stage` `Sprite` `Graphics` `Container` `BlurFilter` `TextFace` and so on.
+`jcc2d` Include `Stage` `Sprite` `Graphics` `Container` `BlurFilter` `TextFace` and so on.
 
 Every display instance can easy start an animation and attach a timeline, just like following:
 
@@ -128,13 +128,13 @@ stage.startEngine(); // the coin would be render
 coin.animate({
   from: { x: 100, rotation: 0 },
   to: { x: 300, rotation: 360 },
-  ...
+  ...       // other options
 });
 
 /* start a motion */
 coin.motion({
   path: new JC.BezierCurve([...]), // coin will move along with this path
-  ...
+  ...       // other options
 });
 
 /* start a motion */
@@ -144,11 +144,11 @@ coin.runners({             // combination multiple animation and run one by one
     {path: new JC.BezierCurve([...]), ease: 'ease', ...},
     {to: {}, ease: 'ease', ...},
   ],
-  ...
+  ...       // other options
 });
 ```
 
-and more information please found in [documentation][documentation], or quick start a living edit in web [runing man][quick-start].
+would like to know more information please look in [documentation][documentation], or quick start a living edit in web [runing man][quick-start].
 
 ## Documentation
 [documentation][documentation]
