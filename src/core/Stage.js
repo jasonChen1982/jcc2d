@@ -15,6 +15,7 @@ import {Utils} from '../util/Utils';
  *   dom: 'canvas-dom', // 格式可以是 .canvas-dom 或者 ＃canvas-dom 或者 canvas-dom
  *   resolution: 1, // 分辨率
  *   interactive: true, // 是否可交互
+ *   enableFPS: true, // 是否记录帧率
  *   bgColor: ‘rgba(0,0,0,0.4)’, // 背景色
  * });
  * ```
@@ -26,6 +27,7 @@ import {Utils} from '../util/Utils';
  * @param {string} options.dom 舞台要附着的`canvas`元素
  * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
  * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
+ * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
  * @param {string} [options.bgColor] 设置舞台的背景颜色，`默认为` ‘transparent’
  * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
  * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
@@ -93,6 +95,7 @@ function Stage(options) {
    * 场景分辨率
    *
    * @member {Number}
+   * @private
    */
   this._resolution = 0;
 
@@ -100,6 +103,7 @@ function Stage(options) {
    * 场景分辨率
    *
    * @member {Number}
+   * @private
    */
   this.resolution = options.resolution || 1;
 
@@ -163,10 +167,18 @@ function Stage(options) {
    *
    * @member {Boolean}
    */
-  this.enableFPS = true;
+  this.enableFPS = Utils.isBoolean(options.enableFPS) ?
+  options.enableFPS :
+  true;
 
   this.interactionManager = new InteractionManager(this);
 
+  /**
+   * 舞台是否可交互
+   *
+   * @member {boolean}
+   * @private
+   */
   this._interactive = false;
 
 
@@ -192,41 +204,24 @@ function Stage(options) {
 Stage.prototype = Object.create(Container.prototype);
 
 Stage.prototype.proxyOn = function() {
-  let This = this;
-  this.interactionManager.on('click', function(ev) {
-    This.emit('click', ev);
-  });
-
-  this.interactionManager.on('mousemove', function(ev) {
-    This.emit('mousemove', ev);
-  });
-
-  this.interactionManager.on('mousedown', function(ev) {
-    This.emit('mousedown', ev);
-  });
-
-  this.interactionManager.on('mouseout', function(ev) {
-    This.emit('mouseout', ev);
-  });
-
-  this.interactionManager.on('mouseover', function(ev) {
-    This.emit('mouseover', ev);
-  });
-
-  this.interactionManager.on('touchstart', function(ev) {
-    This.emit('touchstart', ev);
-  });
-
-  this.interactionManager.on('touchend', function(ev) {
-    This.emit('touchend', ev);
-  });
-
-  this.interactionManager.on('touchmove', function(ev) {
-    This.emit('touchmove', ev);
-  });
-
-  this.interactionManager.on('mouseup', function(ev) {
-    This.emit('mouseup', ev);
+  const This = this;
+  const EventList = [
+    'click',
+    'mousemove',
+    'mousedown',
+    'mouseout',
+    'mouseover',
+    'touchstart',
+    'touchend',
+    'touchmove',
+    'mouseup',
+  ];
+  EventList.forEach(function(it) {
+    This.interactionManager.on(it, (function(it) {
+      return function(ev) {
+        This.emit(it, ev);
+      };
+    })(it));
   });
 };
 
