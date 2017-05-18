@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: core/Container.js</title>
+    <title>Source: math/BezierEasing.js</title>
     
     
     
@@ -1318,334 +1318,227 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="core_Container.js.html">Source: core/Container.js</h1>
+        <h1 class="page-title" data-filename="math_BezierEasing.js.html">Source: math/BezierEasing.js</h1>
         
 
 
     
     <section>
         <article>
-            <pre id="source-code" class="prettyprint source linenums"><code>import {DisplayObject} from './DisplayObject';
-import {Bounds} from '../math/Bounds';
+            <pre id="source-code" class="prettyprint source linenums"><code>/**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+
+const NEWTON_ITERATIONS = 4;
+const NEWTON_MIN_SLOPE = 0.001;
+const SUBDIVISION_PRECISION = 0.0000001;
+const SUBDIVISION_MAX_ITERATIONS = 10;
+
+
+let kSplineTableSize = 11;
+let kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+
+let float32ArraySupported = typeof Float32Array === 'function';
+
+/* eslint new-cap: 0 */
 
 /**
- * 显示对象容器，继承至DisplayObject
+ * 公因式A
  *
- * ```js
- * var container = new JC.Container();
- * container.addChilds(sprite);
- * ```
- *
- * @class
- * @extends JC.DisplayObject
- * @memberof JC
+ * @param {number} aA1 控制分量
+ * @param {number} aA2 控制分量
+ * @return {number} 整个公式中的A公因式的值
  */
-function Container() {
-  DisplayObject.call(this);
-
-  /**
-   * 渲染对象的列表
-   *
-   * @member {Array}
-   */
-  this.childs = [];
-
-  /**
-   * 自身及后代动画的缩放比例
-   *
-   * @member {Number}
-   */
-  this.timeScale = 1;
-
-  /**
-   * 是否暂停自身的动画
-   *
-   * @member {Boolean}
-   */
-  this.paused = false;
-
-  /**
-   * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
-   *
-   * @member {Number}
-   * @private
-   */
-  this._zIndex = 0;
-
-  /**
-   * 强制该对象在渲染子集之前为他们排序
-   *
-   * @member {Boolean}
-   */
-  this.souldSort = false;
-
-  /**
-   * 强制该对象在渲染子集之前为他们排序
-   *
-   * @member {JC.Bounds}
-   */
-  this.bounds = new Bounds();
-
-  /**
-   * 显示对象内部表示的边界
-   *
-   * @member {JC.Bounds}
-   * @private
-   */
-  this._bounds = new Bounds();
-
-  this.vertexData = new Float32Array(8);
+function A(aA1, aA2) {
+  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
 }
-Container.prototype = Object.create(DisplayObject.prototype);
 
 /**
- * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+ * 公因式B
  *
- * @member {number}
- * @name zIndex
- * @memberof JC.Container#
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 整个公式中的B公因式的值
  */
-Object.defineProperty(Container.prototype, 'zIndex', {
-  get: function() {
-    return this._zIndex;
-  },
-  set: function(zIndex) {
-    if (this._zIndex !== zIndex) {
-      this._zIndex = zIndex;
-      if (this.parent) {
-        this.parent.souldSort = true;
-      }
-    }
-  },
-});
+function B(aA1, aA2) {
+  return 3.0 * aA2 - 6.0 * aA1;
+}
 
 /**
- * 对自身子集进行zIndex排序
+ * 公因式C
  *
- * @method _sortList
- * @private
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 整个公式中的C公因式的值
  */
-Container.prototype._sortList = function() {
-  this.childs.sort(function(a, b) {
-    if (a.zIndex > b.zIndex) {
-      return 1;
+function C(aA1) {
+  return 3.0 * aA1;
+}
+
+/**
+ * 获取aT处的值
+ *
+ * @param {number} aT 三次贝塞尔曲线的t自变量
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 三次贝塞尔公式的因变量
+ */
+function calcBezier(aT, aA1, aA2) {
+  return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+}
+
+/**
+ * 获取aT处的斜率
+ * @param {number} aT 三次贝塞尔曲线的t自变量
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 三次贝塞尔公式的导数
+ */
+function getSlope(aT, aA1, aA2) {
+  return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+}
+
+/**
+ *
+ * @param {number} aX
+ * @param {number} aA
+ * @param {number} aB
+ * @param {number} mX1
+ * @param {number} mX2
+ * @return {number} 三次贝塞尔公式的导数
+ */
+function binarySubdivide(aX, aA, aB, mX1, mX2) {
+  let currentX;
+  let currentT;
+  let i = 0;
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
     }
-    if (a.zIndex &lt; b.zIndex) {
-      return -1;
+  } while (
+    Math.abs(currentX) > SUBDIVISION_PRECISION
+    &amp;&amp;
+    ++i &lt; SUBDIVISION_MAX_ITERATIONS
+  );
+  return currentT;
+}
+
+/**
+ * 牛顿迭代算法，进一步的获取精确的T值
+ * @param {number} aX
+ * @param {number} aGuessT
+ * @param {number} mX1
+ * @param {number} mX2
+ * @return {number} 获取更精确的T值
+ */
+function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
+  for (let i = 0; i &lt; NEWTON_ITERATIONS; ++i) {
+    let currentSlope = getSlope(aGuessT, mX1, mX2);
+    if (currentSlope === 0.0) {
+      return aGuessT;
     }
-    return 0;
-  });
-  this.souldSort = false;
+    let currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+    aGuessT -= currentX / currentSlope;
+  }
+  return aGuessT;
+}
+
+/**
+ * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
+ *
+ * @param {number} mX1 控制点1的x分量
+ * @param {number} mY1 控制点1的y分量
+ * @param {number} mX2 控制点2的x分量
+ * @param {number} mY2 控制点2的y分量
+ */
+function BezierEasing(mX1, mY1, mX2, mY2) {
+  if (!(0 &lt;= mX1 &amp;&amp; mX1 &lt;= 1 &amp;&amp; 0 &lt;= mX2 &amp;&amp; mX2 &lt;= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+  this.mX1 = mX1;
+  this.mY1 = mY1;
+  this.mX2 = mX2;
+  this.mY2 = mY2;
+  this.sampleValues = float32ArraySupported ?
+  new Float32Array(kSplineTableSize):
+  new Array(kSplineTableSize);
+
+  this._preCompute();
+}
+
+BezierEasing.prototype._preCompute = function() {
+  // Precompute samples table
+  if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
+    for (let i = 0; i &lt; kSplineTableSize; ++i) {
+      this.sampleValues[i] = calcBezier(
+        i * kSampleStepSize,
+        this.mX1,
+        this.mX2
+      );
+    }
+  }
 };
 
-/**
- * 向容器添加一个物体
- *
- * ```js
- * container.adds(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param {JC.Container} object
- * @return {JC.Container}
- */
-Container.prototype.adds = function(object) {
-  /* eslint prefer-rest-params: "off" */
-  if (arguments.length > 1) {
-    for (let i = 0; i &lt; arguments.length; i++) {
-      this.adds(arguments[i]);
-    }
-    return this;
+BezierEasing.prototype._getTForX = function(aX) {
+  let intervalStart = 0.0;
+  let currentSample = 1;
+  let lastSample = kSplineTableSize - 1;
+
+  for (
+    ;
+    currentSample !== lastSample &amp;&amp; this.sampleValues[currentSample] &lt;= aX;
+    ++currentSample
+  ) {
+    intervalStart += kSampleStepSize;
   }
-  if (object === this) {
-    console.error('adds: object can\'t be added as a child of itself.', object);
-    return this;
-  }
-  if ((object &amp;&amp; object instanceof Container)) {
-    if (object.parent !== null) {
-      object.parent.remove(object);
-    }
-    object.parent = this;
-    this.childs.push(object);
-    if (object.zIndex !== 0) this.souldSort = true;
+  --currentSample;
+
+  // Interpolate to provide an initial guess for t
+  let dist = (aX - this.sampleValues[currentSample]) /
+  (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
+  let guessForT = intervalStart + dist * kSampleStepSize;
+
+  let initialSlope = getSlope(guessForT, this.mX1, this.mX2);
+  if (initialSlope >= NEWTON_MIN_SLOPE) {
+    return newtonRaphsonIterate(aX, guessForT, this.mX1, this.mX2);
+  } else if (initialSlope === 0.0) {
+    return guessForT;
   } else {
-    console.error('adds: object not an instance of Container', object);
-  }
-  return this;
-};
-
-/**
- * 从容器移除一个物体
- *
- * ```js
- * container.remove(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param {JC.Container} object
- */
-Container.prototype.remove = function(object) {
-  if (arguments.length > 1) {
-    for (let i = 0; i &lt; arguments.length; i++) {
-      this.remove(arguments[i]);
-    }
-  }
-  let index = this.childs.indexOf(object);
-  if (index !== -1) {
-    object.parent = null;
-    this.childs.splice(index, 1);
+    return binarySubdivide(
+      aX,
+      intervalStart,
+      intervalStart + kSampleStepSize,
+      this.mX1,
+      this.mX2
+    );
   }
 };
 
 /**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ * 通过x轴近似获取y的值
  *
- * @param {Number} snippet
- * @private
+ * @param {number} x x轴的偏移量
+ * @return {number} y 与输入值x对应的y值
  */
-Container.prototype.updatePosture = function(snippet) {
-  if (!this._ready) return;
-  if (this.souldSort) this._sortList();
-  snippet = this.timeScale * snippet;
-  if (!this.paused) this.updateAnimation(snippet);
-  this.updateTransform();
-    // if (this.childs.length > 0) this.updateChilds(snippet);
-  for (let i = 0, l = this.childs.length; i &lt; l; i++) {
-    let child = this.childs[i];
-    child.updatePosture(snippet);
+BezierEasing.prototype.get = function(x) {
+  if (this.mX1 === this.mY1 &amp;&amp; this.mX2 === this.mY2) return x;
+  if (x === 0) {
+    return 0;
   }
-};
-
-/**
- * 渲染自己并触发后代渲染
- * @param {context} ctx
- * @private
- */
-Container.prototype.render = function(ctx) {
-  ctx.save();
-  this.setTransform(ctx);
-  if (this.mask) this.mask.render(ctx);
-  this.renderMe(ctx);
-    // if (this.childs.length > 0) this.renderChilds(ctx);
-  for (let i = 0, l = this.childs.length; i &lt; l; i++) {
-    let child = this.childs[i];
-    if (!child.isVisible() || !child._ready) continue;
-    child.render(ctx);
+  if (x === 1) {
+    return 1;
   }
-  ctx.restore();
+  return calcBezier(this._getTForX(x), this.mY1, this.mY2);
 };
 
-/**
- * 渲染自己
- * @private
- * @return {Boolean} 是否渲染
- */
-Container.prototype.renderMe = function() {
-  return true;
-};
+export {BezierEasing};
 
-Container.prototype.calculateVertices = function() {
-  let wt = this.worldTransform;
-  let a = wt.a;
-  let b = wt.b;
-  let c = wt.c;
-  let d = wt.d;
-  let tx = wt.tx;
-  let ty = wt.ty;
-  let vertexData = this.vertexData;
-  let w0;
-  let w1;
-  let h0;
-  let h1;
-
-  w0 = this._bounds.minX;
-  w1 = this._bounds.maxX;
-
-  h0 = this._bounds.minY;
-  h1 = this._bounds.maxY;
-
-  // xy
-  vertexData[0] = a * w1 + c * h1 + tx;
-  vertexData[1] = d * h1 + b * w1 + ty;
-
-  // xy
-  vertexData[2] = a * w0 + c * h1 + tx;
-  vertexData[3] = d * h1 + b * w0 + ty;
-
-  // xy
-  vertexData[4] = a * w0 + c * h0 + tx;
-  vertexData[5] = d * h0 + b * w0 + ty;
-
-  // xy
-  vertexData[6] = a * w1 + c * h0 + tx;
-  vertexData[7] = d * h0 + b * w1 + ty;
-};
-
-
-/**
- * 计算包围盒子
- *
- * @method calculateBounds
- */
-Container.prototype.calculateBounds = function() {
-  this.bounds.clear();
-  if(!this.visible) {
-    return;
-  }
-  this._calculateBounds();
-
-  for (let i = 0; i &lt; this.childs.length; i++) {
-    let child = this.childs[i];
-
-    child.calculateBounds();
-
-    this.bounds.addBounds(child.bounds);
-  }
-  // this._boundsID = this._lastBoundsID;
-};
-
-Container.prototype._calculateBounds = function() {
-  this.calculateVertices();
-  this.bounds.addVert(this.vertexData);
-};
-
-
-/**
- * 设置渲染物体的包围盒
- * @param {JC.Bounds} bounds
- */
-Container.prototype.setBounds = function(bounds) {
-  if (bounds instanceof Bounds) {
-    this._bounds = bounds;
-  }
-};
-
-/**
- * 暂停自身的动画进度
- *
- *
- */
-Container.prototype.pause = function() {
-  this.paused = true;
-};
-
-/**
- * 恢复自身的动画进度
- *
- *
- */
-Container.prototype.restart = function() {
-  this.paused = false;
-};
-
-/**
- * 取消自身的所有动画
- *
- *
- */
-Container.prototype.cancle = function() {
-  this.Animator.clear();
-};
-
-export {Container};
 </code></pre>
         </article>
     </section>

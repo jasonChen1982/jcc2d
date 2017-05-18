@@ -138,6 +138,8 @@
             
                 <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
             
+                <li data-name="JC.Utils.isBoolean"><a href="JC.Utils.html#.isBoolean">isBoolean</a></li>
+            
                 <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
             
                 <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
@@ -145,6 +147,8 @@
                 <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
             
                 <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.isUndefined"><a href="JC.Utils.html#.isUndefined">isUndefined</a></li>
             
                 <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
             
@@ -422,6 +426,8 @@
             
                 <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
             
+                <li data-name="JC.Container#runners"><a href="JC.Container.html#runners">runners</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
@@ -500,6 +506,8 @@
                 <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
             
                 <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#runners"><a href="JC.DisplayObject.html#runners">runners</a></li>
             
                 <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
             
@@ -667,6 +675,8 @@
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
+                <li data-name="JC.Graphics#runners"><a href="JC.Graphics.html#runners">runners</a></li>
             
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
@@ -1001,6 +1011,8 @@
             
                 <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
             
+                <li data-name="JC.Sprite#runners"><a href="JC.Sprite.html#runners">runners</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
@@ -1136,9 +1148,15 @@
             
                 <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
             
+                <li data-name="JC.Stage#runners"><a href="JC.Stage.html#runners">runners</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Stage#startEngine"><a href="JC.Stage.html#startEngine">startEngine</a></li>
+            
+                <li data-name="JC.Stage#stopEngine"><a href="JC.Stage.html#stopEngine">stopEngine</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1236,6 +1254,8 @@
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
+                <li data-name="JC.TextFace#runners"><a href="JC.TextFace.html#runners">runners</a></li>
             
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
@@ -1544,6 +1564,8 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -1578,6 +1600,8 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
  * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -1608,6 +1632,8 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -1615,6 +1641,36 @@ DisplayObject.prototype.motion = function(options, clear) {
  */
 DisplayObject.prototype.keyFrames = function(options, clear) {
   return this.Animation.keyFrames(options, clear);
+};
+
+/**
+ * runners动画，多个复合动画的组合形式
+ *
+ * ```js
+ * dispay.runners({
+ *   runners: [], // ae导出的动画数据
+ *   delay: 1000, // ae导出的动画数据
+ *   wait: 100, // ae导出的动画数据
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   onUpdate: function(state,rate){},
+ *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param {object} options 动画配置参数
+ * @param {object} options.runners 各个拆分动画
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.runners = function(options, clear) {
+  return this.Animation.runners(options, clear);
 };
 
 /**
@@ -1672,16 +1728,16 @@ DisplayObject.prototype.updateTransform = function() {
 
   if (this.skewX || this.skewY) {
     TEMP_MATRIX.setTransform(
-            this.x,
-            this.y,
-            this.pivotX,
-            this.pivotY,
-            this.scaleX,
-            this.scaleY,
-            this.rotation * Utils.DTR,
-            this.skewX * Utils.DTR,
-            this.skewY * Utils.DTR
-        );
+      this.x,
+      this.y,
+      this.pivotX,
+      this.pivotY,
+      this.scaleX,
+      this.scaleY,
+      this.rotation * Utils.DTR,
+      this.skewX * Utils.DTR,
+      this.skewY * Utils.DTR
+    );
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
     wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
@@ -1800,7 +1856,7 @@ export {DisplayObject};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:52:13 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu May 18 2017 16:35:11 GMT+0800 (CST)
         </footer>
     </div>
 </div>

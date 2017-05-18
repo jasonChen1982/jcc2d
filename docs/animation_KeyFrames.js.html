@@ -138,6 +138,8 @@
             
                 <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
             
+                <li data-name="JC.Utils.isBoolean"><a href="JC.Utils.html#.isBoolean">isBoolean</a></li>
+            
                 <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
             
                 <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
@@ -145,6 +147,8 @@
                 <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
             
                 <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.isUndefined"><a href="JC.Utils.html#.isUndefined">isUndefined</a></li>
             
                 <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
             
@@ -422,6 +426,8 @@
             
                 <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
             
+                <li data-name="JC.Container#runners"><a href="JC.Container.html#runners">runners</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
@@ -500,6 +506,8 @@
                 <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
             
                 <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#runners"><a href="JC.DisplayObject.html#runners">runners</a></li>
             
                 <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
             
@@ -667,6 +675,8 @@
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
+                <li data-name="JC.Graphics#runners"><a href="JC.Graphics.html#runners">runners</a></li>
             
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
@@ -1001,6 +1011,8 @@
             
                 <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
             
+                <li data-name="JC.Sprite#runners"><a href="JC.Sprite.html#runners">runners</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
@@ -1136,9 +1148,15 @@
             
                 <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
             
+                <li data-name="JC.Stage#runners"><a href="JC.Stage.html#runners">runners</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Stage#startEngine"><a href="JC.Stage.html#startEngine">startEngine</a></li>
+            
+                <li data-name="JC.Stage#stopEngine"><a href="JC.Stage.html#stopEngine">stopEngine</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,6 +1255,8 @@
             
                 <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
             
+                <li data-name="JC.TextFace#runners"><a href="JC.TextFace.html#runners">runners</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
@@ -1307,7 +1327,10 @@
         <article>
             <pre id="source-code" class="prettyprint source linenums"><code>
 import {Animate} from './Animate';
+import {BezierCurve} from '../math/BezierCurve';
+import {Point} from '../math/Point';
 import {Utils} from '../util/Utils';
+import {prepareEaseing, getEaseing, getEaseingPath} from '../util/Easeing';
 const PM = {
   o: {
     label: 'alpha',
@@ -1332,6 +1355,34 @@ const PM = {
 };
 
 /**
+ * 判断数值是否在(min, max]区间内
+ * @param {number} v   待比较的值
+ * @param {number} min 最小区间
+ * @param {number} max 最大区间
+ * @return {boolean} 是否在(min, max]区间内
+ */
+function inRange(v, min, max) {
+  return v > min &amp;&amp; v &lt;= max;
+}
+
+/**
+ * 判断当前进度在哪一帧内
+ * @param {array} steps 帧数组
+ * @param {number} progress 当前进度
+ * @param {number} rfr 每一帧的时间
+ * @return {number} 当前进度停留在第几帧
+ */
+function findStep(steps, progress, rfr) {
+  const last = steps.length - 1;
+  for (let i = 0; i &lt; last; i++) {
+    const step = steps[i];
+    if (inRange(progress, step.t * rfr, step.jcet * rfr)) {
+      return i;
+    }
+  }
+}
+
+/**
  * KeyFrames类型动画对象
  *
  * @class
@@ -1352,7 +1403,9 @@ function KeyFrames(options) {
   this.tfs = Math.floor(this.op - this.ip);
   this.duration = this.tfs * this.rfr;
 
-  this.jcst = this.ip * this.rfr;
+  // this.jcst = this.ip;
+
+  this.keyState = {};
 
   this.preParser(Utils.copyJSON(options.ks));
 }
@@ -1361,35 +1414,62 @@ KeyFrames.prototype = Object.create(Animate.prototype);
 KeyFrames.prototype.preParser = function(keys) {
   const ks = keys.ks;
   for (const key in ks) {
-    const prop = PM[key].label;
-    const scale = PM[key].scale;
-    if (ks[key]) {
-      if (ks[key].a) {
-        this.aks[key] = ks[key];
-        const k = ks[key].k;
-        const last = k.length - 1;
-        const et = k[last].t;
-        const st = k[0].t;
+    if (ks[key].a) {
+      this.prepareDynamic(ks, key);
+    } else {
+      this.prepareStatic(ks, key);
+    }
+  }
+};
+KeyFrames.prototype.prepareDynamic = function(ks, key) {
+  this.aks[key] = ks[key];
+  const k = ks[key].k;
+  const et = k[k.length - 1].t;
+  const st = k[0].t;
 
-        this.aks[key].jcet = et * this.rfr;
-        this.aks[key].jcst = st * this.rfr;
+  this.aks[key].jcet = et;
+  this.aks[key].jcst = st;
+  for (let i = 0; i &lt; k.length; i++) {
+    const now = k[i];
+    const next = k[i + 1];
+    if (next) {
+      now.jcet = next.t;
+      if (Utils.isString(now.n) &amp;&amp; now.ti &amp;&amp; now.to) {
+        prepareEaseing(now.o.x, now.o.y, now.i.x, now.i.y);
+        const s = new Point(now.s[0], now.s[1]);
+        const e = new Point(now.e[0], now.e[1]);
+        const ti = new Point(now.ti[0], now.ti[1]);
+        const to = new Point(now.to[0], now.to[1]);
+        const c1 = new Point(now.s[0], now.s[1]);
+        const c2 = new Point(now.e[0], now.e[1]);
+        now.curve = new BezierCurve([s, c1.add(ti), c2.add(to), e]);
+        // now.jcl = now.curve.getLength();
       } else {
-        let k = 0;
-        if (Utils.isString(prop)) {
-          if (Utils.isNumber(ks[key].k)) {
-            k = ks[key].k;
-          }
-          if (Utils.isArray(ks[key].k)) {
-            k = ks[key].k[0];
-          }
-          this.element[prop] = scale * k;
-        } else if (Utils.isArray(prop)) {
-          for (let i = 0; i &lt; prop.length; i++) {
-            k = ks[key].k[i];
-            this.element[prop[i]] = scale * k;
-          }
+        for (let i = 0; i &lt; now.n.length; i++) {
+          prepareEaseing(now.o.x[i], now.o.y[i], now.i.x[i], now.i.y[i]);
         }
       }
+      // now.ease = new
+    }
+  }
+};
+
+KeyFrames.prototype.prepareStatic = function(ks, key) {
+  const prop = PM[key].label;
+  const scale = PM[key].scale;
+  let k = 0;
+  if (Utils.isString(prop)) {
+    if (Utils.isNumber(ks[key].k)) {
+      k = ks[key].k;
+    }
+    if (Utils.isArray(ks[key].k)) {
+      k = ks[key].k[0];
+    }
+    this.element[prop] = scale * k;
+  } else if (Utils.isArray(prop)) {
+    for (let i = 0; i &lt; prop.length; i++) {
+      k = ks[key].k[i];
+      this.element[prop[i]] = scale * k;
     }
   }
 };
@@ -1406,41 +1486,40 @@ KeyFrames.prototype.nextPose = function() {
 
 KeyFrames.prototype.prepare = function(key, ak) {
   const k = ak.k;
-  const progress = Utils.clamp(this.progress, 0, ak.jcet);
-  let pkt = ak.jcst;
-  if (progress &lt; this.iip * this.rfr) {
-    this.element.visible = false;
-  } else {
-    this.element.visible = true;
-  }
-  if (progress &lt; pkt) {
+  const rfr = this.rfr;
+  const progress = Utils.clamp(this.progress, 0, ak.jcet * rfr);
+  let skt = ak.jcst * rfr;
+  let ekt = ak.jcet * rfr;
+  const last = k.length - 2;
+  const invisible = progress &lt; this.iip * rfr;
+  if (invisible === this.element.visible) this.element.visible = !invisible;
+
+  if (progress &lt;= skt) {
     return k[0].s;
+  } else if (progress >= ekt) {
+    return k[last].e;
   } else {
-    const l = k.length;
-    for (let i = 1; i &lt; l; i++) {
-      const kt = k[i].t * this.rfr;
-      if (progress &lt; kt) {
-        const s = k[i - 1].s;
-        const e = k[i - 1].e;
-        const value = [];
-        const rate = Utils.linear(progress, pkt, kt);
-        for (let j = 0; j &lt; s.length; j++) {
-          const v = e[j] - s[j];
-          value[j] = s[j] + v * rate;
-        }
-        return value;
-      }
-      pkt = kt;
+    let ck = this.keyState[key];
+    if (
+      !Utils.isNumber(ck)
+      ||
+      !inRange(progress, k[ck].t * rfr, k[ck].jcet * rfr)
+    ) {
+      ck = this.keyState[key] = findStep(k, progress, rfr);
     }
-    return k[l - 2].e;
+    const frame = k[ck];
+    const rate = (progress / rfr - frame.t) / (frame.jcet - frame.t);
+    if (frame.curve) {
+      return getEaseingPath(frame.curve, frame.n, rate);
+    } else {
+      return getEaseing(frame.s, frame.e, frame.n, rate);
+    }
   }
 };
 KeyFrames.prototype.interpolation = function(key, ak) {
   const value = this.prepare(key, ak);
-  let cache = {};
-  cache[key] = value;
   this.setValue(key, value);
-  return cache;
+  return value;
 };
 KeyFrames.prototype.setValue = function(key, value) {
   const prop = PM[key].label;
@@ -1453,6 +1532,7 @@ KeyFrames.prototype.setValue = function(key, value) {
       this.element[prop[i]] = scale * v;
     }
   }
+  // console.log(this.element.alpha);
 };
 
 export {KeyFrames};
@@ -1468,7 +1548,7 @@ export {KeyFrames};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:52:13 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu May 18 2017 16:35:11 GMT+0800 (CST)
         </footer>
     </div>
 </div>

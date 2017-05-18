@@ -138,6 +138,8 @@
             
                 <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
             
+                <li data-name="JC.Utils.isBoolean"><a href="JC.Utils.html#.isBoolean">isBoolean</a></li>
+            
                 <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
             
                 <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
@@ -145,6 +147,8 @@
                 <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
             
                 <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.isUndefined"><a href="JC.Utils.html#.isUndefined">isUndefined</a></li>
             
                 <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
             
@@ -422,6 +426,8 @@
             
                 <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
             
+                <li data-name="JC.Container#runners"><a href="JC.Container.html#runners">runners</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
@@ -500,6 +506,8 @@
                 <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
             
                 <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#runners"><a href="JC.DisplayObject.html#runners">runners</a></li>
             
                 <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
             
@@ -667,6 +675,8 @@
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
+                <li data-name="JC.Graphics#runners"><a href="JC.Graphics.html#runners">runners</a></li>
             
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
@@ -1001,6 +1011,8 @@
             
                 <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
             
+                <li data-name="JC.Sprite#runners"><a href="JC.Sprite.html#runners">runners</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
@@ -1136,9 +1148,15 @@
             
                 <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
             
+                <li data-name="JC.Stage#runners"><a href="JC.Stage.html#runners">runners</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Stage#startEngine"><a href="JC.Stage.html#startEngine">startEngine</a></li>
+            
+                <li data-name="JC.Stage#stopEngine"><a href="JC.Stage.html#stopEngine">stopEngine</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1236,6 +1254,8 @@
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
+                <li data-name="JC.TextFace#runners"><a href="JC.TextFace.html#runners">runners</a></li>
             
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
@@ -2567,7 +2587,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line245">line 245</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line247">line 247</a>
         </div>
         
     </div>
@@ -2867,6 +2887,66 @@
 	
         <tr>
             
+                <td class="name"><code>wait</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画不会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画也会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>onUpdate</code></td>
             
             
@@ -3111,7 +3191,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line476">line 476</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line512">line 512</a>
         </div>
         
     </div>
@@ -3551,7 +3631,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line455">line 455</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line491">line 491</a>
         </div>
         
     </div>
@@ -3653,7 +3733,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line309">line 309</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line315">line 315</a>
         </div>
         
     </div>
@@ -3891,6 +3971,66 @@
 	
         <tr>
             
+                <td class="name"><code>wait</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画不会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画也会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>onUpdate</code></td>
             
             
@@ -4062,7 +4202,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line279">line 279</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line283">line 283</a>
         </div>
         
     </div>
@@ -4356,6 +4496,66 @@
                     
                 
                 <p>设置动画执行时间 默认 300ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wait</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画不会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画也会生效 默认 0ms</p></td>
         </tr>
 	
 	
@@ -5148,7 +5348,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line327">line 327</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line363">line 363</a>
         </div>
         
     </div>
@@ -5285,6 +5485,415 @@
             
 <dt>
     <div class="nameContainer inherited">
+        <h4 class="name" id="runners">
+            
+                <span class="inherited"><a href="JC.DisplayObject.html#runners">inherited</a></span>
+            
+            runners<span class="signature">(options, clear)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="JC.Animate.html">JC.Animate</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line345">line 345</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>runners动画，多个复合动画的组合形式</p>
+<pre class="prettyprint source lang-js"><code>dispay.runners({
+  runners: [], // ae导出的动画数据
+  delay: 1000, // ae导出的动画数据
+  wait: 100, // ae导出的动画数据
+  repeats: 10, // 动画运动完后再重复10次
+  infinite: true, // 无限循环动画
+  onUpdate: function(state,rate){},
+  onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+});</code></pre>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>动画配置参数</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>runners</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>各个拆分动画</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeats</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画执行完成后再重复多少次，优先级没有infinite高</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>infinite</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画无限次执行，优先级高于repeats</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wait</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画不会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>delay</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画延迟时间，在重复动画也会生效 默认 0ms</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onUpdate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画更新时的回调函数</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>onCompelete</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>设置动画结束时的回调函数，如果infinite为true该事件将不会触发</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>clear</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>是否去掉之前的动画</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="JC.Animate.html">JC.Animate</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
         <h4 class="name" id="setArea">
             
                 <span class="inherited"><a href="JC.DisplayObject.html#setArea">inherited</a></span>
@@ -5294,7 +5903,7 @@
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line465">line 465</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line501">line 501</a>
         </div>
         
     </div>
@@ -5560,7 +6169,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:52:13 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu May 18 2017 16:35:12 GMT+0800 (CST)
         </footer>
     </div>
 </div>

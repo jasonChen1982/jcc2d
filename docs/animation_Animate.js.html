@@ -138,6 +138,8 @@
             
                 <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
             
+                <li data-name="JC.Utils.isBoolean"><a href="JC.Utils.html#.isBoolean">isBoolean</a></li>
+            
                 <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
             
                 <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
@@ -145,6 +147,8 @@
                 <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
             
                 <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.isUndefined"><a href="JC.Utils.html#.isUndefined">isUndefined</a></li>
             
                 <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
             
@@ -422,6 +426,8 @@
             
                 <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
             
+                <li data-name="JC.Container#runners"><a href="JC.Container.html#runners">runners</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
@@ -500,6 +506,8 @@
                 <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
             
                 <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#runners"><a href="JC.DisplayObject.html#runners">runners</a></li>
             
                 <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
             
@@ -667,6 +675,8 @@
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
+                <li data-name="JC.Graphics#runners"><a href="JC.Graphics.html#runners">runners</a></li>
             
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
@@ -1001,6 +1011,8 @@
             
                 <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
             
+                <li data-name="JC.Sprite#runners"><a href="JC.Sprite.html#runners">runners</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
@@ -1136,9 +1148,15 @@
             
                 <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
             
+                <li data-name="JC.Stage#runners"><a href="JC.Stage.html#runners">runners</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Stage#startEngine"><a href="JC.Stage.html#startEngine">startEngine</a></li>
+            
+                <li data-name="JC.Stage#stopEngine"><a href="JC.Stage.html#stopEngine">stopEngine</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1237,6 +1255,8 @@
             
                 <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
             
+                <li data-name="JC.TextFace#runners"><a href="JC.TextFace.html#runners">runners</a></li>
+            
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
                 <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
@@ -1326,9 +1346,10 @@ function Animate(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
+  this.repeatsCut = this.repeats;
   this.delay = options.delay || 0;
-  this.wait = options.wait || 0;
   this.delayCut = this.delay;
+  this.wait = options.wait || 0;
   this.progress = 0;
   this.direction = 1;
 
@@ -1339,16 +1360,16 @@ function Animate(options) {
   this.paused = false;
 }
 Animate.prototype.update = function(snippet) {
+  let snippetCache = this.direction * this.timeScale * snippet;
   if (this.wait > 0) {
-    this.wait -= Math.abs(snippet);
+    this.wait -= Math.abs(snippetCache);
     return;
   }
   if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+    if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
     return;
   }
 
-  let snippetCache = this.direction * this.timeScale * snippet;
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
   this.totalTime += Math.abs(snippetCache);
 
@@ -1356,10 +1377,9 @@ Animate.prototype.update = function(snippet) {
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.totalTime >= this.duration) {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
+    if (this.repeatsCut > 0 || this.infinite) {
+      if (this.repeatsCut > 0) --this.repeatsCut;
       this.delayCut = this.delay;
-      this.totalTime = 0;
       if (this.alternate) {
         this.direction *= -1;
       } else {
@@ -1367,11 +1387,17 @@ Animate.prototype.update = function(snippet) {
         this.progress = 0;
       }
     } else {
-      this.living = false;
+      if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
+    this.totalTime = 0;
   }
   return pose;
+};
+Animate.prototype.init = function() {
+  this.direction = 1;
+  this.progress = 0;
+  this.repeatsCut = this.repeats;
 };
 Animate.prototype.nextPose = function() {
   console.warn('should be overwrite');
@@ -1404,7 +1430,7 @@ export {Animate};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:52:13 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu May 18 2017 16:35:11 GMT+0800 (CST)
         </footer>
     </div>
 </div>

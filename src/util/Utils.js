@@ -54,8 +54,8 @@ export const Utils = {
    */
   isArray: (function() {
     let ks = _rt([]);
-    return function(object) {
-      return _rt(object) === ks;
+    return function(variable) {
+      return _rt(variable) === ks;
     };
   })(),
 
@@ -70,8 +70,8 @@ export const Utils = {
    */
   isObject: (function() {
     let ks = _rt({});
-    return function(object) {
-      return _rt(object) === ks;
+    return function(variable) {
+      return _rt(variable) === ks;
     };
   })(),
 
@@ -86,8 +86,8 @@ export const Utils = {
    */
   isString: (function() {
     let ks = _rt('s');
-    return function(object) {
-      return _rt(object) === ks;
+    return function(variable) {
+      return _rt(variable) === ks;
     };
   })(),
 
@@ -102,8 +102,8 @@ export const Utils = {
    */
   isNumber: (function() {
     let ks = _rt(1);
-    return function(object) {
-      return _rt(object) === ks;
+    return function(variable) {
+      return _rt(variable) === ks;
     };
   })(),
 
@@ -118,8 +118,38 @@ export const Utils = {
    */
   isFunction: (function() {
     let ks = _rt(function() {});
-    return function(object) {
-      return _rt(object) === ks;
+    return function(variable) {
+      return _rt(variable) === ks;
+    };
+  })(),
+
+
+  /**
+   * 判断变量是否为undefined
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isUndefined: function(variable) {
+    return typeof variable === 'undefined';
+  },
+
+  /**
+   * 判断变量是否为布尔型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isBoolean: (function() {
+    let ks = _rt(true);
+    return function(variable) {
+      return _rt(variable) === ks;
     };
   })(),
 

@@ -138,6 +138,8 @@
             
                 <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
             
+                <li data-name="JC.Utils.isBoolean"><a href="JC.Utils.html#.isBoolean">isBoolean</a></li>
+            
                 <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
             
                 <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
@@ -145,6 +147,8 @@
                 <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
             
                 <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.isUndefined"><a href="JC.Utils.html#.isUndefined">isUndefined</a></li>
             
                 <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
             
@@ -422,6 +426,8 @@
             
                 <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
             
+                <li data-name="JC.Container#runners"><a href="JC.Container.html#runners">runners</a></li>
+            
                 <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
@@ -500,6 +506,8 @@
                 <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
             
                 <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#runners"><a href="JC.DisplayObject.html#runners">runners</a></li>
             
                 <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
             
@@ -667,6 +675,8 @@
                 <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
+                <li data-name="JC.Graphics#runners"><a href="JC.Graphics.html#runners">runners</a></li>
             
                 <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
             
@@ -1001,6 +1011,8 @@
             
                 <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
             
+                <li data-name="JC.Sprite#runners"><a href="JC.Sprite.html#runners">runners</a></li>
+            
                 <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
@@ -1136,9 +1148,15 @@
             
                 <li data-name="JC.Stage#restart"><a href="JC.Stage.html#restart">restart</a></li>
             
+                <li data-name="JC.Stage#runners"><a href="JC.Stage.html#runners">runners</a></li>
+            
                 <li data-name="JC.Stage#setArea"><a href="JC.Stage.html#setArea">setArea</a></li>
             
                 <li data-name="JC.Stage#setBounds"><a href="JC.Stage.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Stage#startEngine"><a href="JC.Stage.html#startEngine">startEngine</a></li>
+            
+                <li data-name="JC.Stage#stopEngine"><a href="JC.Stage.html#stopEngine">stopEngine</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1236,6 +1254,8 @@
                 <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
             
                 <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
+                <li data-name="JC.TextFace#runners"><a href="JC.TextFace.html#runners">runners</a></li>
             
                 <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
             
@@ -1337,8 +1357,8 @@
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">after effect export</a></li>
 </ul>
 <h2>Introduction</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">main page</a></p>
-<p>jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline management, support event system by default.</p>
-<p>built-in support <a target="_blank" href="https://github.com/bodymovin/bodymovin" title="bodymovin github">bodymovin</a> keyframes data, use <a target="_blank" href="https://creative.adobe.com/addons/products/12557#.WPRdl1N94o8" title="bodymovin add-on">bodymovin add-on</a> to export keyframes data from <a target="_blank" href="http://www.adobe.com/cn/products/aftereffects.html" title="ae">after effect</a>, and easy parser to <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">jcc2d</a> keyFrames, just like following:</p>
+<p>jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline manager, of course support event system by default.</p>
+<p>built-in support <a target="_blank" href="https://github.com/bodymovin/bodymovin" title="bodymovin github">bodymovin</a> keyframes data, use <a target="_blank" href="https://creative.adobe.com/addons/products/12557#.WPRdl1N94o8" title="bodymovin add-on">bodymovin add-on</a> exported keyframes data from <a target="_blank" href="http://www.adobe.com/cn/products/aftereffects.html" title="ae">after effect</a>, and easy parser to <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">jcc2d</a> keyFrames animation, just like following:</p>
 <pre class="prettyprint source lang-js"><code>// parser a single animation layer
 const coin = new JC.Sprite({
   texture: new JC.Texture('/path/coin.png'),
@@ -1354,7 +1374,7 @@ coin.keyFrames({
   },
 });
 
-// parser all animation layer
+// parser all animation layers
 const ani = new JC.ParserAnimation({
   keyframes: data,
   // fr: 30, // frame rate
@@ -1366,7 +1386,7 @@ const ani = new JC.ParserAnimation({
     console.log(this.element);
   },
 });</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">view demo</a></p>
-<h2>Feature</h2><p>Include <code>Stage</code> <code>Sprite</code> <code>Graphics</code> <code>Container</code> <code>BlurFilter</code> <code>TextFace</code> and so on.</p>
+<h2>Feature</h2><p><code>jcc2d</code> Include <code>Stage</code> <code>Sprite</code> <code>Graphics</code> <code>Container</code> <code>BlurFilter</code> <code>TextFace</code> and so on.</p>
 <p>Every display instance can easy start an animation and attach a timeline, just like following:</p>
 <pre class="prettyprint source lang-javascript"><code>const ball = new JC.Sprite({
     texture: new JC.Texture('/path/xx.png'),
@@ -1384,11 +1404,11 @@ const timeline = ball.animate({
   onUpdate: function(state,rate){}, // onUpdate callback
   onCompelete: function(){ console.log('end'); } // onCompelete callback
 });
-timeline.pause();
-timeline.stop();
-timeline.cancle();
-timeline.start();
-timeline.timeScale = 0.5; // Slow motion，speed * 0.5</code></pre><h2>Display animation property</h2><table>
+timeline.pause(); // pause animation progress
+timeline.restart(); // restart animation progress, use with pause
+timeline.stop(); // stop animation to end, will trigger onCompelete callback
+timeline.cancle(); // cancle animation right now, will not trigger onCompelete callback
+timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed * 0.5</code></pre><h2>Display animation property</h2><table>
 <thead>
 <tr>
 <th style="text-align:center">type</th>
@@ -1422,9 +1442,40 @@ timeline.timeScale = 0.5; // Slow motion，speed * 0.5</code></pre><h2>Display a
 </tr>
 </tbody>
 </table>
-<h2>Quick Start</h2><p><a target="_blank" href="http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010" title="quick start demo">runing man</a></p>
-<h2>Documentation</h2><p> <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a></p>
-<h2>Examples</h2><p> <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples" title="jcc2d examples page">examples</a></p>
+<h2>Quick Start</h2><p><code>jcc2d</code> was so easy to use, you just need <code>new</code> a <code>Stage</code> instance and appoint a <code>canvas</code> dom, then you can add every display object into <code>stage</code>.</p>
+<pre class="prettyprint source lang-js"><code>const stage = new JC.Stage({
+  dom: 'canvas-stage',
+  resolution: 1, // was normal
+});
+const coin = new JC.Sprite({
+  texture: new JC.Texture('/path/coin.png'),
+});
+stage.adds(coin);
+stage.startEngine(); // the coin would be render</code></pre><p><code>jcc2d</code> built-in support <code>timeline</code> animation , you can start multiple animation. let's use <code>coin</code> to show.</p>
+<pre class="prettyprint source lang-js"><code>/* start a animate */
+coin.animate({
+  from: { x: 100, rotation: 0 },
+  to: { x: 300, rotation: 360 },
+  ...       // other options
+});
+
+/* start a motion */
+coin.motion({
+  path: new JC.BezierCurve([...]), // coin will move along with this path
+  ...       // other options
+});
+
+/* start a motion */
+coin.runners({             // combination multiple animation and run one by one
+  runners: [
+    {from: {}, to: {}, ease: 'ease', ...},
+    {path: new JC.BezierCurve([...]), ease: 'ease', ...},
+    {to: {}, ease: 'ease', ...},
+  ],
+  ...       // other options
+});</code></pre><p>would like to know more information please look in <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a>, or quick start a living edit in web <a target="_blank" href="http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010" title="quick start demo">runing man</a>.</p>
+<h2>Documentation</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a></p>
+<h2>Examples</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples" title="jcc2d examples page">examples</a></p>
 <h2>Changelog</h2><p><a target="_blank" href="https://github.com/jasonChen1982/jcc2d/blob/master/Changelog.md" title="change log">changelog</a></p>
 <h2>License</h2><p><a target="_blank" href="http://opensource.org/licenses/MIT">MIT</a></p></article>
     </section>
@@ -1437,7 +1488,7 @@ timeline.timeScale = 0.5; // Slow motion，speed * 0.5</code></pre><h2>Display a
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Tue Apr 25 2017 19:52:13 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Thu May 18 2017 16:35:12 GMT+0800 (CST)
         </footer>
     </div>
 </div>
