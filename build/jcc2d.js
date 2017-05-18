@@ -497,8 +497,8 @@ var Utils = {
    */
   isArray: function () {
     var ks = _rt([]);
-    return function (object) {
-      return _rt(object) === ks;
+    return function (variable) {
+      return _rt(variable) === ks;
     };
   }(),
 
@@ -513,8 +513,8 @@ var Utils = {
    */
   isObject: function () {
     var ks = _rt({});
-    return function (object) {
-      return _rt(object) === ks;
+    return function (variable) {
+      return _rt(variable) === ks;
     };
   }(),
 
@@ -529,8 +529,8 @@ var Utils = {
    */
   isString: function () {
     var ks = _rt('s');
-    return function (object) {
-      return _rt(object) === ks;
+    return function (variable) {
+      return _rt(variable) === ks;
     };
   }(),
 
@@ -545,8 +545,8 @@ var Utils = {
    */
   isNumber: function () {
     var ks = _rt(1);
-    return function (object) {
-      return _rt(object) === ks;
+    return function (variable) {
+      return _rt(variable) === ks;
     };
   }(),
 
@@ -561,8 +561,37 @@ var Utils = {
    */
   isFunction: function () {
     var ks = _rt(function () {});
-    return function (object) {
-      return _rt(object) === ks;
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为undefined
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isUndefined: function isUndefined(variable) {
+    return typeof variable === 'undefined';
+  },
+
+  /**
+   * 判断变量是否为布尔型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isBoolean: function () {
+    var ks = _rt(true);
+    return function (variable) {
+      return _rt(variable) === ks;
     };
   }(),
 
@@ -4944,16 +4973,26 @@ InteractionManager.prototype.getPos = function (obj) {
  *
  *
  * ```js
- * var stage = new JC.Stage('demo_canvas','#fff');
+ * var stage = new JC.Stage({
+ *   dom: 'canvas-dom', // 格式可以是 .canvas-dom 或者 ＃canvas-dom 或者 canvas-dom
+ *   resolution: 1, // 分辨率
+ *   interactive: true, // 是否可交互
+ *   bgColor: ‘rgba(0,0,0,0.4)’, // 背景色
+ * });
  * ```
  *
  * @class
  * @extends JC.Container
  * @memberof JC
- * @param {json} options
+ * @param {object} options 舞台的配置项
+ * @param {string} options.dom 舞台要附着的`canvas`元素
+ * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
+ * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
+ * @param {string} [options.bgColor] 设置舞台的背景颜色，`默认为` ‘transparent’
+ * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
+ * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
  */
 function Stage(options) {
-  // canvas, bgColor, resolution
   options = options || {};
   Container.call(this);
 
@@ -4962,7 +5001,7 @@ function Stage(options) {
    *
    * @member {CANVAS}
    */
-  this.canvas = Utils.isString(options.dom) ? document.getElementById(options.dom) : options.dom;
+  this.canvas = Utils.isString(options.dom) ? document.getElementById(options.dom) || document.querySelector(options.dom) : options.dom;
 
   this.realWidth = options.width || this.canvas.width;
   this.realHeight = options.height || this.canvas.height;
@@ -5102,7 +5141,7 @@ function Stage(options) {
    *
    * @member {Boolean}
    */
-  this.interactive = true;
+  this.interactive = Utils.isBoolean(options.interactive) ? options.interactive : true;
 
   this.proxyOn();
 }
@@ -5148,47 +5187,7 @@ Stage.prototype.proxyOn = function () {
 };
 
 /**
- * 标记场景是否可交互，涉及到是否进行事件检测
- *
- * @member {Boolean}
- * @name interactive
- * @memberof JC.Stage#
- */
-Object.defineProperty(Stage.prototype, 'interactive', {
-  get: function get() {
-    return this._interactive;
-  },
-  set: function set(value) {
-    if (this._interactive !== value) {
-      this._interactive = value;
-      this.interactiveOnChange();
-    }
-  }
-});
-
-/**
- * 场景设置分辨率
- *
- * @member {Number}
- * @name resolution
- * @memberof JC.Stage#
- */
-Object.defineProperty(Stage.prototype, 'resolution', {
-  get: function get() {
-    return this._resolution;
-  },
-  set: function set(value) {
-    if (this._resolution !== value) {
-      this._resolution = value;
-      this.scale = value;
-      this.resize();
-    }
-  }
-});
-
-/**
  * 舞台尺寸设置
- *
  *
  * @param {number} w canvas的width值
  * @param {number} h canvas的height值
@@ -5213,8 +5212,6 @@ Stage.prototype.resize = function (w, h, sw, sh) {
 
 /**
  * 渲染舞台内的所有可见渲染对象
- *
- *
  */
 Stage.prototype.render = function () {
   this.emit('prerender');
@@ -5260,9 +5257,7 @@ Stage.prototype.timeline = function () {
 };
 
 /**
- * 启动渲染引擎
- *
- * @method startEngine
+ * 启动渲染引擎的渲染循环
  */
 Stage.prototype.startEngine = function () {
   if (this.inRender) return;
@@ -5271,9 +5266,7 @@ Stage.prototype.startEngine = function () {
 };
 
 /**
- * 关闭渲染引擎
- *
- * @method stopEngine
+ * 关闭渲染引擎的渲染循环
  */
 Stage.prototype.stopEngine = function () {
   CAF(this.loop);
@@ -5296,6 +5289,45 @@ Stage.prototype.renderer = function () {
   }
   render();
 };
+
+/**
+ * 标记场景是否可交互，涉及到是否进行事件检测
+ *
+ * @member {Boolean}
+ * @name interactive
+ * @memberof JC.Stage#
+ */
+Object.defineProperty(Stage.prototype, 'interactive', {
+  get: function get() {
+    return this._interactive;
+  },
+  set: function set(value) {
+    if (this._interactive !== value) {
+      this._interactive = value;
+      this.interactiveOnChange();
+    }
+  }
+});
+
+/**
+ * 场景设置分辨率
+ *
+ * @member {Number}
+ * @name resolution
+ * @memberof JC.Stage#
+ */
+Object.defineProperty(Stage.prototype, 'resolution', {
+  get: function get() {
+    return this._resolution;
+  },
+  set: function set(value) {
+    if (this._resolution !== value) {
+      this._resolution = value;
+      this.scale = value;
+      this.resize();
+    }
+  }
+});
 
 exports.Tween = Tween;
 exports.Utils = Utils;
