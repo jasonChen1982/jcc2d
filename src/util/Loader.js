@@ -111,7 +111,6 @@ Loader.prototype = Object.create(Eventer.prototype);
  * });
  * ```
  *
- * @memberof JC.Loader
  * @param {object} srcMap 配置了key－value的json格式数据
  * @return {JC.Loader} 返回本实例对象
  */
@@ -153,7 +152,6 @@ Loader.prototype.load = function(srcMap) {
  * var texture = loadBox.getById('id');
  * ```
  *
- * @memberof JC.Loader
  * @param {string} id 之前加载时配置的key值
  * @return {JC.Texture} 包装出来的JC.Texture对象
  */
