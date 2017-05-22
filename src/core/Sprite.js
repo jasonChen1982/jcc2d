@@ -58,17 +58,17 @@ Sprite.prototype = Object.create(Container.prototype);
 Sprite.prototype.upTexture = function(options) {
   this.naturalWidth = options.texture.naturalWidth;
   this.naturalHeight = options.texture.naturalHeight;
-  this.frame = options.frame || new Rectangle(
-                                0,
-                                0,
-                                this.naturalWidth,
-                                this.naturalHeight
-                              );
+  this.frame = options.frame ||
+  new Rectangle(
+    0,
+    0,
+    this.naturalWidth,
+    this.naturalHeight
+  );
 
   this.width = options.width || this.frame.width || this.naturalWidth;
   this.height = options.height || this.frame.height || this.naturalHeight;
-  // this.pivotX = this.width >> 1;
-  // this.pivotY = this.height >> 1;
+
   let rect = new Rectangle(0, 0, this.width, this.height);
   this._bounds.addRect(rect);
   this.setArea(rect, true);

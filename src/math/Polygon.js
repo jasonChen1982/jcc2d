@@ -55,9 +55,8 @@ Polygon.prototype.contains = function(x, y) {
     let yi = this.points[i * 2 + 1];
     let xj = this.points[j * 2];
     let yj = this.points[j * 2 + 1];
-    let intersect = ((yi > y) !== (yj > y))
-                    &&
-                    (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    let intersect = ((yi > y) !== (yj > y)) &&
+    (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
 
     if (intersect) {
       inside = !inside;

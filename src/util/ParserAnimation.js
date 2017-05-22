@@ -1,11 +1,17 @@
 import {Sprite} from '../core/Sprite';
 import {Container} from '../core/Container';
 import {loaderUtil} from './Loader';
-// import {Utils} from './Utils';
 
 /**
  * 解析bodymovin从ae导出的数据
- * @param {object} options bodymovin从ae导出的数据
+ * @class
+ * @memberof JC
+ * @param {object} options 动画配置
+ * @param {object} [options.keyframes] bodymovin从ae导出的动画数据
+ * @param {string} [options.prefix] 导出资源的前缀
+ * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
+ * @param {boolean} [options.infinite] 动画是否无限循环
+ * @param {boolean} [options.alternate] 动画是否交替播放
  */
 function ParserAnimation(options) {
   this.prefix = options.prefix || '';
@@ -20,9 +26,11 @@ function ParserAnimation(options) {
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
+
 /**
- * @param {array} assets
- * @param {array} layers
+ * @private
+ * @param {array} assets 资源数组
+ * @param {array} layers 图层数组
  */
 ParserAnimation.prototype.preParser = function(assets, layers) {
   const sourceMap = {};
@@ -48,6 +56,12 @@ ParserAnimation.prototype.preParser = function(assets, layers) {
   }
   this.assetBox = loaderUtil(sourceMap);
 };
+
+/**
+ * @private
+ * @param {JC.Container} doc 动画元素的渲染组
+ * @param {array} layers 图层数组
+ */
 ParserAnimation.prototype.parser = function(doc, layers) {
   const l = layers.length;
   const infinite = this.infinite;
@@ -89,6 +103,12 @@ ParserAnimation.prototype.parser = function(doc, layers) {
     }
   }
 };
+
+/**
+ * @private
+ * @param {string} id 资源的refid
+ * @return {object} 资源配置
+ */
 ParserAnimation.prototype.getAssets = function(id) {
   const assets = this.keyframes.assets;
   for (let i = 0; i < assets.length; i++) {

@@ -27,7 +27,7 @@ NURBSCurve.prototype.getPoint = function( t ) {
             this.knots[this.knots.length - 1]
             -
             this.knots[0]
-            ); // linear mapping t->u
+          ); // linear mapping t->u
 
   // following results in (wx, wy, wz, w) homogeneous point
   let hpoint = NURBSUtils.calcBSplinePoint(
@@ -53,7 +53,7 @@ NURBSCurve.prototype.getTangent = function( t ) {
             this.knots[this.knots.length - 1]
             -
             this.knots[0]
-            );
+          );
   let ders = NURBSUtils.calcNURBSDerivatives(
     this.degree,
     this.knots,

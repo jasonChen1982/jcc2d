@@ -71,7 +71,7 @@ Point.prototype.set = function( x, y, z, w ) {
 /* eslint max-len: "off" */
 Point.prototype.add = function( v, w ) {
   if ( w !== undefined ) {
-    console.warn( 'JC.Point: .add() now only accepts one argument. Use .addVectors( a, b ) instead.' );
+    console.warn( 'Use .addVectors( a, b ) instead.' );
     return this.addVectors( v, w );
   }
   this.x += v.x;
@@ -92,7 +92,7 @@ Point.prototype.addVectors = function( a, b ) {
 
 Point.prototype.sub = function( v, w ) {
   if ( w !== undefined ) {
-    console.warn( 'JC.Point: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.' );
+    console.warn( 'Use .subVectors( a, b ) instead.' );
     return this.subVectors( v, w );
   }
   this.x -= v.x;

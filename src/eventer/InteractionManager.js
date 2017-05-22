@@ -3,7 +3,6 @@ import {InteractionData} from './InteractionData';
 import {Point} from '../math/Point';
 
 /**
- *
  * @param {JC.Stage} stage 需要接入事件系统的的场景
  */
 function InteractionManager(stage) {
@@ -150,7 +149,6 @@ InteractionManager.prototype.processMouseDown = function(
   hit
 ) {
   if (hit) {
-        // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
@@ -171,15 +169,11 @@ InteractionManager.prototype.processClick = function(
   hit
 ) {
   if (hit) {
-        // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
 
 InteractionManager.prototype.onMouseUp = function(event) {
-    // if (this.autoPreventDefault) {
-    //     event.preventDefault();
-    // }
   let eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseUp, true);
 
@@ -192,7 +186,6 @@ InteractionManager.prototype.processMouseUp = function(
   hit
 ) {
   if (hit) {
-        // displayObject._mousedowned = false;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
@@ -210,10 +203,6 @@ InteractionManager.prototype.onMouseOver = function(event) {
 };
 
 InteractionManager.prototype.onTouchStart = function(event) {
-    // if (this.autoPreventDefault) {
-        // event.preventDefault();
-    // }
-    // console.log(event);
   let eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchStart, true);
 
@@ -232,9 +221,6 @@ InteractionManager.prototype.processTouchStart = function(
 };
 
 InteractionManager.prototype.onTouchEnd = function(event) {
-    // if (this.autoPreventDefault) {
-        // event.preventDefault();
-    // }
   let eventd = this.fixCoord(event);
   this.processInteractive(
     this.stage,

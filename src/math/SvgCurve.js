@@ -17,11 +17,7 @@ function SvgCurve( path ) {
   } else {
     /* eslint max-len: "off" */
     console.warn(
-      '%c JC.SvgCurve warn %c: SvgCurve just accept <path d="M10 10"> element or "M10 10" string but found %c' + path + '%c',
-      'color: #f98165; background: #80a89e',
-      'color: #80a89e; background: #cad9d5;',
-      'color: #f98165; background: #cad9d5',
-      'color: #80a89e; background: #cad9d5'
+      'path just accept <path d="M10 10"> element or "M10 10" string but found ' + path
     );
   }
   this.totalLength = this.path.getTotalLength();
