@@ -93,9 +93,9 @@ export const Tween = {
    * @memberof JC.Tween
    */
   extend: function(options) {
-    if(!options)return;
-    for(let key in options) {
-      if(key!=='extend'&&options[key])this[key]=options[key];
+    if (!options) return;
+    for (let key in options) {
+      if (key!=='extend'&&options[key]) this[key] = options[key];
     }
   },
 };
