@@ -1,5 +1,8 @@
 
 import {Container} from './Container';
+import {Utils} from '../util/Utils';
+
+/* eslint max-len: 0 */
 
 /**
  * 文本，继承至Container
@@ -17,26 +20,49 @@ import {Container} from './Container';
  * @extends JC.Container
  * @memberof JC
  * @param {string} text
- * @param {string} font
- * @param {string} color
+ * @param {object} style
+ * @param {string} [style.fontSize] 文字的字号
+ * @param {string} [style.fontFamily] 文字的字体
+ * @param {string} [style.fontStyle] 文字的 style ('normal', 'italic' or 'oblique')
+ * @param {string} [style.fontWeight] 文字的 weight ('normal', 'bold', 'bolder', 'lighter' and '100', '200', '300', '400', '500', '600', '700', 800' or '900')
+ * @param {boolean} [style.fill] 文字填充模式 默认为: ture
+ * @param {string} [style.fillColor] 文字填充的颜色
+ * @param {boolean} [style.stroke] 文字描边模式 默认为: false
+ * @param {string} [style.strokeColor] 文字描边的颜色
+ * @param {number} [style.lineWidth] 文字描边的宽度
+ * @param {string} [style.textAlign] 文字的水平对齐方式 默认值: 'center' (top|bottom|middle|alphabetic|hanging)
+ * @param {string} [style.textBaseline] 文字的垂直对齐方式 默认值: 'middle' (top|bottom|middle|alphabetic|hanging)
  */
-function TextFace(text, font, color) {
+function TextFace(text, style) {
   Container.call( this );
   this.text = text.toString();
-  this.font = font || 'bold 12px Arial';
-  this.color = color || '#000000';
 
-  this.textAlign = 'center'; // start left center end right
-  this.textBaseline = 'middle'; // top bottom middle alphabetic hanging
+  // ctx.font 缩写的顺序 fontStyle + fontVariant + fontWeight + fontSizeString + fontFamily
+  this.fontStyle = style.fontStyle || 'normal';
+  this.fontWeight = style.fontWeight || 'normal';
+  this.fontSize = style.fontSize || '12px';
+  this.fontFamily = style.fontFamily || 'Arial';
 
+  this.fillColor = style.fillColor || 'black';
+  this.strokeColor = style.strokeColor || 'red';
 
-  this.outline = 0;
-  this.lineWidth = 1;
+  // 对齐方式
+  this.textAlign = style.textAlign || 'center';
+  this.textBaseline = style.textBaseline || 'middle';
 
-  this.US = false; // use stroke
-  this.UF = true; // use fill
+  this.lineWidth = Utils.isNumber(style.lineWidth) ?
+  style.lineWidth :
+  1;
 
-  // ctx.measureText(str) 返回指定文本的宽度
+  this.stroke = Utils.isBoolean(style.stroke) ?
+  style.stroke :
+  false;
+
+  this.fill = Utils.isBoolean(style.fill) ?
+  style.fill :
+  true;
+
+  // ctx.measureText(str); // 返回指定文本的宽度
 }
 TextFace.prototype = Object.create( Container.prototype );
 
@@ -48,16 +74,16 @@ TextFace.prototype = Object.create( Container.prototype );
  * @param {context} ctx
  */
 TextFace.prototype.renderMe = function(ctx) {
-  ctx.font = this.font;
+  ctx.font = this.fontStyle + ' ' + this.fontWeight + ' ' + this.fontSize + ' ' + this.fontFamily;
   ctx.textAlign = this.textAlign;
   ctx.textBaseline = this.textBaseline;
-  if(this.UF) {
-    ctx.fillStyle = this.color;
+  if(this.fill) {
+    ctx.fillStyle = this.fillColor;
     ctx.fillText(this.text, 0, 0);
   }
-  if(this.US) {
+  if(this.stroke) {
     ctx.lineWidth = this.lineWidth;
-    ctx.strokeStyle = this.color;
+    ctx.strokeStyle = this.strokeColor;
     ctx.strokeText(this.text, 0, 0);
   }
 };
