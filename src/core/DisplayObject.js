@@ -216,7 +216,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * animate动画，指定动画的启始位置和结束位置
  *
  * ```js
- * dispay.animate({
+ * display.animate({
  *   from: {x: 100},
  *   to: {x: 200},
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
@@ -253,7 +253,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * motion动画，让物体按照设定好的曲线运动
  *
  * ```js
- * dispay.motion({
+ * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
@@ -288,7 +288,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
  *
  * ```js
- * dispay.keyFrames({
+ * display.keyFrames({
  *   ks: data.layers[0], // ae导出的动画数据
  *   fr: 30, // 动画的帧率，默认：30fps
  *   repeats: 10, // 动画运动完后再重复10次
@@ -320,7 +320,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * runners动画，多个复合动画的组合形式
  *
  * ```js
- * dispay.runners({
+ * display.runners({
  *   runners: [], // ae导出的动画数据
  *   delay: 1000, // ae导出的动画数据
  *   wait: 100, // ae导出的动画数据

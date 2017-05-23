@@ -6,7 +6,7 @@ import {Bounds} from '../math/Bounds';
  *
  * ```js
  * var container = new JC.Container();
- * container.addChilds(sprite);
+ * container.adds(sprite);
  * ```
  *
  * @class
@@ -180,7 +180,7 @@ Container.prototype.updatePosture = function(snippet) {
   snippet = this.timeScale * snippet;
   if (!this.paused) this.updateAnimation(snippet);
   this.updateTransform();
-    // if (this.childs.length > 0) this.updateChilds(snippet);
+
   for (let i = 0, l = this.childs.length; i < l; i++) {
     let child = this.childs[i];
     child.updatePosture(snippet);
@@ -197,7 +197,7 @@ Container.prototype.render = function(ctx) {
   this.setTransform(ctx);
   if (this.mask) this.mask.render(ctx);
   this.renderMe(ctx);
-    // if (this.childs.length > 0) this.renderChilds(ctx);
+
   for (let i = 0, l = this.childs.length; i < l; i++) {
     let child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
@@ -272,7 +272,6 @@ Container.prototype.calculateBounds = function() {
 
     this.bounds.addBounds(child.bounds);
   }
-  // this._boundsID = this._lastBoundsID;
 };
 
 Container.prototype._calculateBounds = function() {
@@ -293,8 +292,6 @@ Container.prototype.setBounds = function(bounds) {
 
 /**
  * 暂停自身的动画进度
- *
- *
  */
 Container.prototype.pause = function() {
   this.paused = true;
@@ -302,8 +299,6 @@ Container.prototype.pause = function() {
 
 /**
  * 恢复自身的动画进度
- *
- *
  */
 Container.prototype.restart = function() {
   this.paused = false;
@@ -311,8 +306,6 @@ Container.prototype.restart = function() {
 
 /**
  * 取消自身的所有动画
- *
- *
  */
 Container.prototype.cancle = function() {
   this.Animator.clear();

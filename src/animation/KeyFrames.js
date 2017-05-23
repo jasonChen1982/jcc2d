@@ -76,8 +76,6 @@ function KeyFrames(options) {
   this.tfs = Math.floor(this.op - this.ip);
   this.duration = this.tfs * this.rfr;
 
-  // this.jcst = this.ip;
-
   this.keyState = {};
 
   this.preParser(Utils.copyJSON(options.ks));
@@ -116,13 +114,11 @@ KeyFrames.prototype.prepareDynamic = function(ks, key) {
         const c1 = new Point(now.s[0], now.s[1]);
         const c2 = new Point(now.e[0], now.e[1]);
         now.curve = new BezierCurve([s, c1.add(ti), c2.add(to), e]);
-        // now.jcl = now.curve.getLength();
       } else {
         for (let i = 0; i < now.n.length; i++) {
           prepareEaseing(now.o.x[i], now.o.y[i], now.i.x[i], now.i.y[i]);
         }
       }
-      // now.ease = new
     }
   }
 };
@@ -205,7 +201,6 @@ KeyFrames.prototype.setValue = function(key, value) {
       this.element[prop[i]] = scale * v;
     }
   }
-  // console.log(this.element.alpha);
 };
 
 export {KeyFrames};
