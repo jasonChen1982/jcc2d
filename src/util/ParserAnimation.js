@@ -10,6 +10,7 @@ import {loaderUtil} from './Loader';
  * @param {object} [options.keyframes] bodymovin从ae导出的动画数据
  * @param {string} [options.prefix] 导出资源的前缀
  * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
+ * @param {number} [options.repeats] 动画是否无限循环
  * @param {boolean} [options.infinite] 动画是否无限循环
  * @param {boolean} [options.alternate] 动画是否交替播放
  */
@@ -20,6 +21,7 @@ function ParserAnimation(options) {
   this.keyframes = options.keyframes;
   this.ip = this.keyframes.ip;
   this.op = this.keyframes.op;
+  this.repeats = options.repeats || 0;
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
@@ -64,6 +66,7 @@ ParserAnimation.prototype.preParser = function(assets, layers) {
  */
 ParserAnimation.prototype.parser = function(doc, layers) {
   const l = layers.length;
+  const repeats = this.repeats;
   const infinite = this.infinite;
   const alternate = this.alternate;
   const ip = this.ip;
@@ -80,6 +83,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
         fr: this.fr,
         ip,
         op,
+        repeats,
         infinite,
         alternate,
       });
@@ -94,6 +98,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
         fr: this.fr,
         ip,
         op,
+        repeats,
         infinite,
         alternate,
       });
@@ -114,6 +119,14 @@ ParserAnimation.prototype.getAssets = function(id) {
   for (let i = 0; i < assets.length; i++) {
     if (id === assets[i].id) return assets[i];
   }
+};
+
+/**
+ * 设置动画播放速度
+ * @param {number} speed
+ */
+ParserAnimation.prototype.setSpeed = function(speed) {
+  this.doc.timeScale = speed;
 };
 
 export {ParserAnimation};
