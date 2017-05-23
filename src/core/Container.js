@@ -53,7 +53,7 @@ function Container() {
   this.souldSort = false;
 
   /**
-   * 强制该对象在渲染子集之前为他们排序
+   * 显示对象的包围盒
    *
    * @member {JC.Bounds}
    */
