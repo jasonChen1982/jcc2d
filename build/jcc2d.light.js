@@ -191,7 +191,7 @@ Point.prototype.set = function (x, y, z, w) {
 /* eslint max-len: "off" */
 Point.prototype.add = function (v, w) {
   if (w !== undefined) {
-    console.warn('JC.Point: .add() now only accepts one argument. Use .addVectors( a, b ) instead.');
+    console.warn('Use .addVectors( a, b ) instead.');
     return this.addVectors(v, w);
   }
   this.x += v.x;
@@ -211,7 +211,7 @@ Point.prototype.addVectors = function (a, b) {
 
 Point.prototype.sub = function (v, w) {
   if (w !== undefined) {
-    console.warn('JC.Point: .sub() now only accepts one argument. Use .subVectors( a, b ) instead.');
+    console.warn('Use .subVectors( a, b ) instead.');
     return this.subVectors(v, w);
   }
   this.x -= v.x;
@@ -1716,7 +1716,6 @@ Loader.prototype = Object.create(Eventer.prototype);
  * });
  * ```
  *
- * @memberof JC.Loader
  * @param {object} srcMap 配置了key－value的json格式数据
  * @return {JC.Loader} 返回本实例对象
  */
@@ -1758,7 +1757,6 @@ Loader.prototype.load = function (srcMap) {
  * var texture = loadBox.getById('id');
  * ```
  *
- * @memberof JC.Loader
  * @param {string} id 之前加载时配置的key值
  * @return {JC.Texture} 包装出来的JC.Texture对象
  */
@@ -3242,8 +3240,7 @@ Sprite.prototype.upTexture = function (options) {
 
   this.width = options.width || this.frame.width || this.naturalWidth;
   this.height = options.height || this.frame.height || this.naturalHeight;
-  // this.pivotX = this.width >> 1;
-  // this.pivotY = this.height >> 1;
+
   var rect = new Rectangle(0, 0, this.width, this.height);
   this._bounds.addRect(rect);
   this.setArea(rect, true);
@@ -3282,11 +3279,17 @@ Sprite.prototype.renderMe = function (ctx) {
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
 };
 
-// import {Utils} from './Utils';
-
 /**
  * 解析bodymovin从ae导出的数据
- * @param {object} options bodymovin从ae导出的数据
+ * @class
+ * @memberof JC
+ * @param {object} options 动画配置
+ * @param {object} [options.keyframes] bodymovin从ae导出的动画数据
+ * @param {string} [options.prefix] 导出资源的前缀
+ * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
+ * @param {number} [options.repeats] 动画是否无限循环
+ * @param {boolean} [options.infinite] 动画是否无限循环
+ * @param {boolean} [options.alternate] 动画是否交替播放
  */
 function ParserAnimation(options) {
   this.prefix = options.prefix || '';
@@ -3295,15 +3298,18 @@ function ParserAnimation(options) {
   this.keyframes = options.keyframes;
   this.ip = this.keyframes.ip;
   this.op = this.keyframes.op;
+  this.repeats = options.repeats || 0;
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
+
 /**
- * @param {array} assets
- * @param {array} layers
+ * @private
+ * @param {array} assets 资源数组
+ * @param {array} layers 图层数组
  */
 ParserAnimation.prototype.preParser = function (assets, layers) {
   var sourceMap = {};
@@ -3329,8 +3335,15 @@ ParserAnimation.prototype.preParser = function (assets, layers) {
   }
   this.assetBox = loaderUtil(sourceMap);
 };
+
+/**
+ * @private
+ * @param {JC.Container} doc 动画元素的渲染组
+ * @param {array} layers 图层数组
+ */
 ParserAnimation.prototype.parser = function (doc, layers) {
   var l = layers.length;
+  var repeats = this.repeats;
   var infinite = this.infinite;
   var alternate = this.alternate;
   var ip = this.ip;
@@ -3347,6 +3360,7 @@ ParserAnimation.prototype.parser = function (doc, layers) {
         fr: this.fr,
         ip: ip,
         op: op,
+        repeats: repeats,
         infinite: infinite,
         alternate: alternate
       });
@@ -3361,6 +3375,7 @@ ParserAnimation.prototype.parser = function (doc, layers) {
         fr: this.fr,
         ip: ip,
         op: op,
+        repeats: repeats,
         infinite: infinite,
         alternate: alternate
       });
@@ -3370,11 +3385,25 @@ ParserAnimation.prototype.parser = function (doc, layers) {
     }
   }
 };
+
+/**
+ * @private
+ * @param {string} id 资源的refid
+ * @return {object} 资源配置
+ */
 ParserAnimation.prototype.getAssets = function (id) {
   var assets = this.keyframes.assets;
   for (var i = 0; i < assets.length; i++) {
     if (id === assets[i].id) return assets[i];
   }
+};
+
+/**
+ * 设置动画播放速度
+ * @param {number} speed
+ */
+ParserAnimation.prototype.setSpeed = function (speed) {
+  this.doc.timeScale = speed;
 };
 
 /**
@@ -3582,7 +3611,6 @@ Graphics.prototype.drawCall = function (fn, options) {
 };
 
 /**
- *
  * @param {JC.Stage} stage 需要接入事件系统的的场景
  */
 function InteractionManager(stage) {
@@ -3717,7 +3745,6 @@ InteractionManager.prototype.onMouseDown = function (event) {
 
 InteractionManager.prototype.processMouseDown = function (displayObject, event, hit) {
   if (hit) {
-    // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
@@ -3734,15 +3761,11 @@ InteractionManager.prototype.onClick = function (event) {
 
 InteractionManager.prototype.processClick = function (displayObject, event, hit) {
   if (hit) {
-    // displayObject._mousedowned = true;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
 
 InteractionManager.prototype.onMouseUp = function (event) {
-  // if (this.autoPreventDefault) {
-  //     event.preventDefault();
-  // }
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseUp, true);
 
@@ -3751,7 +3774,6 @@ InteractionManager.prototype.onMouseUp = function (event) {
 
 InteractionManager.prototype.processMouseUp = function (displayObject, event, hit) {
   if (hit) {
-    // displayObject._mousedowned = false;
     this.dispatchEvent(displayObject, event.type, event);
   }
 };
@@ -3769,10 +3791,6 @@ InteractionManager.prototype.onMouseOver = function (event) {
 };
 
 InteractionManager.prototype.onTouchStart = function (event) {
-  // if (this.autoPreventDefault) {
-  // event.preventDefault();
-  // }
-  // console.log(event);
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchStart, true);
 
@@ -3787,9 +3805,6 @@ InteractionManager.prototype.processTouchStart = function (displayObject, event,
 };
 
 InteractionManager.prototype.onTouchEnd = function (event) {
-  // if (this.autoPreventDefault) {
-  // event.preventDefault();
-  // }
   var eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchEnd, this.strictMode);
 
