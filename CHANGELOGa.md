@@ -1,3 +1,17 @@
+# Change Log
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="1.2.0-alpha.0"></a>
+# [1.2.0-alpha.0](https://github.com/jasonChen1982/jcc2d/compare/v1.1.10...v1.2.0-alpha.0) (2017-05-25)
+
+
+### Features
+
+* enhance Graphics and Textface ([35d7b2c](https://github.com/jasonChen1982/jcc2d/commit/35d7b2c))
+
+
+
 
 v1.1.7 / 2017-05-16
 ==================
