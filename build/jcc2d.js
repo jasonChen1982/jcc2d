@@ -1365,8 +1365,6 @@ function KeyFrames(options) {
   this.tfs = Math.floor(this.op - this.ip);
   this.duration = this.tfs * this.rfr;
 
-  // this.jcst = this.ip;
-
   this.keyState = {};
 
   this.preParser(Utils.copyJSON(options.ks));
@@ -1405,13 +1403,11 @@ KeyFrames.prototype.prepareDynamic = function (ks, key) {
         var c1 = new Point(now.s[0], now.s[1]);
         var c2 = new Point(now.e[0], now.e[1]);
         now.curve = new BezierCurve([s, c1.add(ti), c2.add(to), e]);
-        // now.jcl = now.curve.getLength();
       } else {
         for (var _i = 0; _i < now.n.length; _i++) {
           prepareEaseing(now.o.x[_i], now.o.y[_i], now.i.x[_i], now.i.y[_i]);
         }
       }
-      // now.ease = new
     }
   }
 };
@@ -1490,7 +1486,6 @@ KeyFrames.prototype.setValue = function (key, value) {
       this.element[prop[i]] = scale * v;
     }
   }
-  // console.log(this.element.alpha);
 };
 
 /**
@@ -2214,7 +2209,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * animate动画，指定动画的启始位置和结束位置
  *
  * ```js
- * dispay.animate({
+ * display.animate({
  *   from: {x: 100},
  *   to: {x: 200},
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
@@ -2251,7 +2246,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  * motion动画，让物体按照设定好的曲线运动
  *
  * ```js
- * dispay.motion({
+ * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
  *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
@@ -2286,7 +2281,7 @@ DisplayObject.prototype.motion = function (options, clear) {
  * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
  *
  * ```js
- * dispay.keyFrames({
+ * display.keyFrames({
  *   ks: data.layers[0], // ae导出的动画数据
  *   fr: 30, // 动画的帧率，默认：30fps
  *   repeats: 10, // 动画运动完后再重复10次
@@ -2318,7 +2313,7 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  * runners动画，多个复合动画的组合形式
  *
  * ```js
- * dispay.runners({
+ * display.runners({
  *   runners: [], // ae导出的动画数据
  *   delay: 1000, // ae导出的动画数据
  *   wait: 100, // ae导出的动画数据
@@ -2722,7 +2717,7 @@ Bounds.prototype.addBounds = function (bounds) {
  *
  * ```js
  * var container = new JC.Container();
- * container.addChilds(sprite);
+ * container.adds(sprite);
  * ```
  *
  * @class
@@ -2769,7 +2764,7 @@ function Container() {
   this.souldSort = false;
 
   /**
-   * 强制该对象在渲染子集之前为他们排序
+   * 显示对象的包围盒
    *
    * @member {JC.Bounds}
    */
@@ -2896,7 +2891,7 @@ Container.prototype.updatePosture = function (snippet) {
   snippet = this.timeScale * snippet;
   if (!this.paused) this.updateAnimation(snippet);
   this.updateTransform();
-  // if (this.childs.length > 0) this.updateChilds(snippet);
+
   for (var i = 0, l = this.childs.length; i < l; i++) {
     var child = this.childs[i];
     child.updatePosture(snippet);
@@ -2913,7 +2908,7 @@ Container.prototype.render = function (ctx) {
   this.setTransform(ctx);
   if (this.mask) this.mask.render(ctx);
   this.renderMe(ctx);
-  // if (this.childs.length > 0) this.renderChilds(ctx);
+
   for (var i = 0, l = this.childs.length; i < l; i++) {
     var child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
@@ -2987,7 +2982,6 @@ Container.prototype.calculateBounds = function () {
 
     this.bounds.addBounds(child.bounds);
   }
-  // this._boundsID = this._lastBoundsID;
 };
 
 Container.prototype._calculateBounds = function () {
@@ -3007,8 +3001,6 @@ Container.prototype.setBounds = function (bounds) {
 
 /**
  * 暂停自身的动画进度
- *
- *
  */
 Container.prototype.pause = function () {
   this.paused = true;
@@ -3016,8 +3008,6 @@ Container.prototype.pause = function () {
 
 /**
  * 恢复自身的动画进度
- *
- *
  */
 Container.prototype.restart = function () {
   this.paused = false;
@@ -3025,8 +3015,6 @@ Container.prototype.restart = function () {
 
 /**
  * 取消自身的所有动画
- *
- *
  */
 Container.prototype.cancle = function () {
   this.Animator.clear();
@@ -4079,109 +4067,61 @@ FrameBuffer.prototype.putBuffer = function () {
 };
 FrameBuffer.prototype.createBuffer = function () {};
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
+var FUNCTION = 'fn';
+var INSTANCE = 'in';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var get$1 = function get$1(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get$1(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var set$1 = function set$1(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set$1(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
+/* eslint max-len: 0 */
 
 /**
  * 形状对象，继承至Container
  *
  *
  * ```js
- * var graphics = new JC.Graphics();
+ * const options = {
+ *   cache: true,
+ *   bounds: new JC.Bounds(-50, -50, 50, 50)
+ * };
+ * function drawRect(ctx) {
+ *  ctx.fillStyle = 'red';
+ *  ctx.fillRect(-10, -10, 10, 10);
+ * }
+ *
+ * function Cricle(options) {
+ *   this.radius = options.radius || 0;
+ *   this.color = options.color || '#3a3cfd';
+ * }
+ * Cricle.prototype.render = function(ctx) {
+ *   ctx.beginPath();
+ *   ctx.fillStyle = this.color;
+ *   ctx.arc(0, 0, this.radius, 0, Math.PI * 2, true);
+ *   ctx.closePath();
+ *   ctx.fill();
+ * }
+ *
+ * const rect = new JC.Graphics(drawRect);
+ * const cricle = new JC.Graphics(new Cricle());
+ *
  * ```
  *
  * @class
  * @extends JC.Container
  * @memberof JC
+ * @param {function|object} mesh 绘制对象，可以是函数，也可以是带有render方法的对象，绘制时会将当前绘图环境传递给它
+ * @param {object} options 绘制对象
+ * @param {boolean} [options.cache] 是否缓存改绘制对象，加入绘制对象非常复杂并后续无需更新时设置为 true 可以优化性能
+ * @param {JC.Bounds} [options.bounds] 绘制对象的包围盒，在需要缓存时需要手动设置
  */
-function Graphics() {
+function Graphics(mesh, options) {
   Container.call(this);
+  options = options || {};
+  this.mesh = mesh;
+  this.meshType = Utils.isFunction(mesh) ? FUNCTION : Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
+  if (this.meshType === '') throw new Error('不支持的绘制对象');
+
+  this.cache = options.cache || false;
+  this.cached = false;
+  this.setBounds(options.bounds);
+
   this.frameBuffer = null;
 }
 Graphics.prototype = Object.create(Container.prototype);
@@ -4193,7 +4133,7 @@ Graphics.prototype = Object.create(Container.prototype);
  * @private
  */
 Graphics.prototype.renderMe = function (ctx) {
-  if (!this.draw) return;
+  if (!this.meshType) return;
   if (this.cached || this.cache) {
     if (this.cache) {
       if (this.frameBuffer === null) this.frameBuffer = new FrameBuffer();
@@ -4214,45 +4154,22 @@ Graphics.prototype.renderMe = function (ctx) {
     this._drawBack(ctx);
   }
 };
+
+/**
+ * 调用绘制函数
+ *
+ * @param {context} ctx
+ * @private
+ */
 Graphics.prototype._drawBack = function (ctx) {
-  if (typeof this.draw === 'function') {
-    this.draw(ctx);
-  } else if (_typeof(this.draw) === 'object' && typeof this.draw.render === 'function') {
-    this.draw.render(ctx);
+  if (this.meshType === FUNCTION) {
+    this.mesh(ctx);
+  } else if (this.meshType === INSTANCE) {
+    this.mesh.render(ctx);
   }
 };
-/**
- * 图形绘制挂载函数
- *
- * ```js
- *  var cacheMap = new JC.Graphics();  // 创建形状绘制对象
- *
- *  cacheMap.drawCall(function(ctx){
- *      for(var i = 50;i>0;i--){
- *          ctx.strokeStyle = COLOURS[i%COLOURS.length];
- *          ctx.beginPath();
- *          ctx.arc( 0, 0, i, 0, Math.PI*2 );
- *          ctx.stroke();
- *      }
- *  },{
- *      cache: true,
- *      bounds: new JC.Bounds(-50, -50, 50, 50)
- *  });
- * ```
- *
- * @param {function} fn
- * @param {object} options
- */
-Graphics.prototype.drawCall = function (fn, options) {
-  if (fn === undefined) return;
-  options = options || {};
-  this.cache = options.cache || false;
-  this.cached = false;
-  /* eslint max-len: "off" */
-  this.draw = fn || null;
 
-  this.setBounds(options.bounds);
-};
+/* eslint max-len: 0 */
 
 /**
  * 文本，继承至Container
@@ -4270,26 +4187,43 @@ Graphics.prototype.drawCall = function (fn, options) {
  * @extends JC.Container
  * @memberof JC
  * @param {string} text
- * @param {string} font
- * @param {string} color
+ * @param {object} style
+ * @param {string} [style.fontSize] 文字的字号
+ * @param {string} [style.fontFamily] 文字的字体
+ * @param {string} [style.fontStyle] 文字的 style ('normal', 'italic' or 'oblique')
+ * @param {string} [style.fontWeight] 文字的 weight ('normal', 'bold', 'bolder', 'lighter' and '100', '200', '300', '400', '500', '600', '700', 800' or '900')
+ * @param {boolean} [style.fill] 文字填充模式 默认为: ture
+ * @param {string} [style.fillColor] 文字填充的颜色
+ * @param {boolean} [style.stroke] 文字描边模式 默认为: false
+ * @param {string} [style.strokeColor] 文字描边的颜色
+ * @param {number} [style.lineWidth] 文字描边的宽度
+ * @param {string} [style.textAlign] 文字的水平对齐方式 默认值: 'center' (top|bottom|middle|alphabetic|hanging)
+ * @param {string} [style.textBaseline] 文字的垂直对齐方式 默认值: 'middle' (top|bottom|middle|alphabetic|hanging)
  */
-function TextFace(text, font, color) {
+function TextFace(text, style) {
   Container.call(this);
   this.text = text.toString();
-  this.font = font || 'bold 12px Arial';
-  this.color = color || '#000000';
 
-  this.textAlign = 'center'; // start left center end right
-  this.textBaseline = 'middle'; // top bottom middle alphabetic hanging
+  // ctx.font 缩写的顺序 fontStyle + fontVariant + fontWeight + fontSizeString + fontFamily
+  this.fontStyle = style.fontStyle || 'normal';
+  this.fontWeight = style.fontWeight || 'normal';
+  this.fontSize = style.fontSize || '12px';
+  this.fontFamily = style.fontFamily || 'Arial';
 
+  this.fillColor = style.fillColor || 'black';
+  this.strokeColor = style.strokeColor || 'red';
 
-  this.outline = 0;
-  this.lineWidth = 1;
+  // 对齐方式
+  this.textAlign = style.textAlign || 'center';
+  this.textBaseline = style.textBaseline || 'middle';
 
-  this.US = false; // use stroke
-  this.UF = true; // use fill
+  this.lineWidth = Utils.isNumber(style.lineWidth) ? style.lineWidth : 1;
 
-  // ctx.measureText(str) 返回指定文本的宽度
+  this.stroke = Utils.isBoolean(style.stroke) ? style.stroke : false;
+
+  this.fill = Utils.isBoolean(style.fill) ? style.fill : true;
+
+  // ctx.measureText(str); // 返回指定文本的宽度
 }
 TextFace.prototype = Object.create(Container.prototype);
 
@@ -4301,16 +4235,16 @@ TextFace.prototype = Object.create(Container.prototype);
  * @param {context} ctx
  */
 TextFace.prototype.renderMe = function (ctx) {
-  ctx.font = this.font;
+  ctx.font = this.fontStyle + ' ' + this.fontWeight + ' ' + this.fontSize + ' ' + this.fontFamily;
   ctx.textAlign = this.textAlign;
   ctx.textBaseline = this.textBaseline;
-  if (this.UF) {
-    ctx.fillStyle = this.color;
+  if (this.fill) {
+    ctx.fillStyle = this.fillColor;
     ctx.fillText(this.text, 0, 0);
   }
-  if (this.US) {
+  if (this.stroke) {
     ctx.lineWidth = this.lineWidth;
-    ctx.strokeStyle = this.color;
+    ctx.strokeStyle = this.strokeColor;
     ctx.strokeText(this.text, 0, 0);
   }
 };

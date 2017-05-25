@@ -1,6 +1,6 @@
 {
   "name": "jcc2d",
-  "version": "1.2.0-alpha.0",
+  "version": "1.1.10",
   "description": "a light weight canvas 2d render & an awesome animator",
   "main": "build/jcc2d.min.js",
   "directories": {
@@ -16,9 +16,9 @@
     "release": "gulp release",
     "build": "gulp build",
     "watch": "gulp build --watch",
-    "preversion": "npm run release && git add -A && git commit -m 'release: release new version'",
-    "versions": "standard-version -m 'chore(release): v%s'",
-    "postversion": "git push origin master && git push origin v$npm_package_version && npm publish",
+    "prever": "npm run release && git add -A && git commit -m 'release: release new version'",
+    "ver": "standard-version -m 'chore(release): v%s'",
+    "postver": "git push origin master && git push origin v$npm_package_version && npm publish",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "karma start",
     "lint": "eslint .",
