@@ -1,3 +1,6 @@
+
+/* eslint max-len: "off" */
+
 /**
  * 二维空间内坐标点类
  *
@@ -68,7 +71,7 @@ Point.prototype.set = function( x, y, z, w ) {
   this.w = w;
   return this;
 };
-/* eslint max-len: "off" */
+
 Point.prototype.add = function( v, w ) {
   if ( w !== undefined ) {
     console.warn( 'Use .addVectors( a, b ) instead.' );
@@ -102,7 +105,6 @@ Point.prototype.sub = function( v, w ) {
   return this;
 };
 
-
 Point.prototype.subVectors = function( a, b ) {
   this.x = a.x - b.x;
   this.y = a.y - b.y;
@@ -110,7 +112,6 @@ Point.prototype.subVectors = function( a, b ) {
   this.w = a.w - b.w;
   return this;
 };
-
 
 Point.prototype.lengthSq = function() {
   return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
@@ -153,5 +154,38 @@ Point.prototype.multiplyScalar = function( scalar ) {
   }
   return this;
 };
+
+JC.Point.prototype.cross = function(v, w) {
+  if (w !== undefined) {
+    console.warn('Use .crossVectors( a, b ) instead.');
+    return this.crossVectors(v, w);
+  }
+
+  const x = this.x;
+  const y = this.y;
+  const z = this.z;
+
+  this.x = y * v.z - z * v.y;
+  this.y = z * v.x - x * v.z;
+  this.z = x * v.y - y * v.x;
+
+  return this;
+};
+
+JC.Point.prototype.crossVectors = function(a, b) {
+  const ax = a.x;
+  const ay = a.y;
+  const az = a.z;
+  const bx = b.x;
+  const by = b.y;
+  const bz = b.z;
+
+  this.x = ay * bz - az * by;
+  this.y = az * bx - ax * bz;
+  this.z = ax * by - ay * bx;
+
+  return this;
+};
+
 
 export {Point};

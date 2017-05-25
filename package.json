@@ -18,14 +18,13 @@
     "watch": "gulp build --watch",
     "prever": "npm run release && git add -A && git commit -m 'release: release new version'",
     "ver": "standard-version -m 'chore(release): v%s'",
-    "postver": "git push origin master && git push origin v$npm_package_version && npm publish",
+    "postver": "git push --follow-tags origin master && npm publish",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "karma start",
     "lint": "eslint .",
     "fix": "eslint --fix ./src",
     "precommit": "npm run lint",
-    "commitmsg": "validate-commit-msg",
-    "changelog": "git changelog"
+    "commitmsg": "validate-commit-msg"
   },
   "keywords": [
     "canvas",
