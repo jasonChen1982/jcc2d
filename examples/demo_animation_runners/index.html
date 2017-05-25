@@ -92,7 +92,7 @@ FlyCoins.prototype.fly = function() {
     ]);
     coin.runners({
       runners: [
-        { form: {scale: 0}, to: { scale: 1.2 }, duration: 80 },
+        { from: {scale: 0}, to: { scale: 1.2 }, duration: 80 },
         { to: { scale: 1 }, duration: 80 },
         { path: path, wait: 280, duration: 520, ease: 'backIn' },
         { to: { scale: 0 }, duration: 120, ease: 'linear' },
@@ -115,7 +115,7 @@ FlyCoins.prototype.blinksCoin = function() {
     var y = t.y;
     blink.runners({
       runners: [
-        { form: { x: 0, y: 0, scale: 0 }, to: { x: x, y: y, scale: 1 }, duration: 240, ease: 'linear' },
+        { from: { x: 0, y: 0, scale: 0 }, to: { x: x, y: y, scale: 1 }, duration: 240, ease: 'linear' },
         { to: { x: x * 1.05, y: y * 1.05 }, duration: 40, ease: 'linear' },
         { to: { scale: 0 }, duration: 120, ease: 'linear' },
       ],
