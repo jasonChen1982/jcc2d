@@ -17,8 +17,8 @@
     "build": "gulp build",
     "watch": "gulp build --watch",
     "preversion": "npm run release && git add -A && git commit -m 'release: release new version'",
-    "patch": "npm version patch --force -m 'release: v%s'",
-    "postversion": "git push github-origin master && git push github-origin v$npm_package_version",
+    "versions": "standard-version -m 'release: v%s'",
+    "postversion": "git push origin master && git push origin v$npm_package_version && npm publish",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
     "test": "karma start",
     "lint": "eslint .",
@@ -68,6 +68,7 @@
     "rollup": "^0.36.4",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-watch": "^2.5.0",
+    "standard-version": "^4.0.0",
     "validate-commit-msg": "^2.11.1",
     "yargs": "^7.1.0"
   },
