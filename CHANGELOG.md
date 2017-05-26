@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.2"></a>
+## [1.2.2](https://github.com/jasonChen1982/jcc2d/compare/v1.2.1...v1.2.2) (2017-05-26)
+
+
+### Bug Fixes
+
+* **container:** fix sort fn ([83addaf](https://github.com/jasonChen1982/jcc2d/commit/83addaf))
+
+
+
 <a name="1.2.1"></a>
 ## [1.2.1](https://github.com/jasonChen1982/jcc2d/compare/v1.2.0...v1.2.1) (2017-05-26)
 
