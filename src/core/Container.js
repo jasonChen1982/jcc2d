@@ -1,3 +1,6 @@
+
+/* eslint prefer-rest-params: 0 */
+
 import {DisplayObject} from './DisplayObject';
 import {Bounds} from '../math/Bounds';
 
@@ -10,8 +13,8 @@ import {Bounds} from '../math/Bounds';
  * ```
  *
  * @class
- * @extends JC.DisplayObject
  * @memberof JC
+ * @extends JC.DisplayObject
  */
 function Container() {
   DisplayObject.call(this);
@@ -40,8 +43,8 @@ function Container() {
   /**
    * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
    *
-   * @member {Number}
    * @private
+   * @member {Number}
    */
   this._zIndex = 0;
 
@@ -62,8 +65,8 @@ function Container() {
   /**
    * 显示对象内部表示的边界
    *
-   * @member {JC.Bounds}
    * @private
+   * @member {JC.Bounds}
    */
   this._bounds = new Bounds();
 
@@ -74,8 +77,8 @@ Container.prototype = Object.create(DisplayObject.prototype);
 /**
  * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
  *
- * @member {number}
  * @name zIndex
+ * @member {number}
  * @memberof JC.Container#
  */
 Object.defineProperty(Container.prototype, 'zIndex', {
@@ -95,8 +98,8 @@ Object.defineProperty(Container.prototype, 'zIndex', {
 /**
  * 对自身子集进行zIndex排序
  *
- * @method _sortList
  * @private
+ * @method _sortList
  */
 Container.prototype._sortList = function() {
   this.childs.sort(function(a, b) {
@@ -122,7 +125,6 @@ Container.prototype._sortList = function() {
  * @return {JC.Container}
  */
 Container.prototype.adds = function(object) {
-  /* eslint prefer-rest-params: "off" */
   if (arguments.length > 1) {
     for (let i = 0; i < arguments.length; i++) {
       this.adds(arguments[i]);
@@ -131,7 +133,6 @@ Container.prototype.adds = function(object) {
   }
   if (object === this) {
     console.error('adds: object can\'t be added as a child of itself.', object);
-    return this;
   }
   if ((object && object instanceof Container)) {
     if (object.parent !== null) {
@@ -161,7 +162,7 @@ Container.prototype.remove = function(object) {
       this.remove(arguments[i]);
     }
   }
-  let index = this.childs.indexOf(object);
+  const index = this.childs.indexOf(object);
   if (index !== -1) {
     object.parent = null;
     this.childs.splice(index, 1);
@@ -171,8 +172,8 @@ Container.prototype.remove = function(object) {
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
  *
- * @param {Number} snippet
  * @private
+ * @param {Number} snippet
  */
 Container.prototype.updatePosture = function(snippet) {
   if (!this._ready) return;
@@ -182,7 +183,7 @@ Container.prototype.updatePosture = function(snippet) {
   this.updateTransform();
 
   for (let i = 0, l = this.childs.length; i < l; i++) {
-    let child = this.childs[i];
+    const child = this.childs[i];
     child.updatePosture(snippet);
   }
 };
@@ -199,7 +200,7 @@ Container.prototype.render = function(ctx) {
   this.renderMe(ctx);
 
   for (let i = 0, l = this.childs.length; i < l; i++) {
-    let child = this.childs[i];
+    const child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
     child.render(ctx);
   }
@@ -209,21 +210,25 @@ Container.prototype.render = function(ctx) {
 /**
  * 渲染自己
  * @private
- * @return {Boolean} 是否渲染
+ * @return {boolean} 是否渲染
  */
 Container.prototype.renderMe = function() {
   return true;
 };
 
+/**
+ * 计算自己的包围盒
+ * @private
+ */
 Container.prototype.calculateVertices = function() {
-  let wt = this.worldTransform;
-  let a = wt.a;
-  let b = wt.b;
-  let c = wt.c;
-  let d = wt.d;
-  let tx = wt.tx;
-  let ty = wt.ty;
-  let vertexData = this.vertexData;
+  const wt = this.worldTransform;
+  const a = wt.a;
+  const b = wt.b;
+  const c = wt.c;
+  const d = wt.d;
+  const tx = wt.tx;
+  const ty = wt.ty;
+  const vertexData = this.vertexData;
   let w0;
   let w1;
   let h0;
@@ -266,7 +271,7 @@ Container.prototype.calculateBounds = function() {
   this._calculateBounds();
 
   for (let i = 0; i < this.childs.length; i++) {
-    let child = this.childs[i];
+    const child = this.childs[i];
 
     child.calculateBounds();
 
@@ -308,7 +313,24 @@ Container.prototype.restart = function() {
  * 取消自身的所有动画
  */
 Container.prototype.cancle = function() {
-  this.Animator.clear();
+  this.Animation.clear();
+};
+
+/**
+ * 停止掉自身的所有动画，并将状态保留在所以的结束点
+ */
+Container.prototype.stop = function() {
+  this.Animation.animates.forEach(function(it) {
+    it.stop();
+  });
+};
+
+/**
+ * 设置自身及子节点的动画速度
+ * @param {number} speed 设置的速率值
+ */
+Container.prototype.setSpeed = function(speed) {
+  this.timeScale = speed;
 };
 
 export {Container};

@@ -748,18 +748,26 @@ function Animate(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
-  this.repeatsCut = this.repeats;
   this.delay = options.delay || 0;
-  this.delayCut = this.delay;
   this.wait = options.wait || 0;
-  this.waitCut = this.wait;
-  this.progress = 0;
-  this.direction = 1;
+  this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
 
-  this.timeScale = options.timeScale || 1;
+  // this.repeatsCut = this.repeats;
+  // this.delayCut = this.delay;
+  // this.waitCut = this.wait;
+  // this.progress = 0;
+  // this.direction = 1;
+  this.init();
 
   this.paused = false;
 }
+
+/**
+ * 更新动画
+ * @private
+ * @param {number} snippet 时间片段
+ * @return {object}
+ */
 Animate.prototype.update = function (snippet) {
   var snippetCache = this.direction * this.timeScale * snippet;
   if (this.waitCut > 0) {
@@ -793,11 +801,22 @@ Animate.prototype.update = function (snippet) {
   }
   return pose;
 };
+
+/**
+ * 检查动画是否到了边缘
+ * @private
+ * @return {boolean}
+ */
 Animate.prototype.spill = function () {
   var bottomSpill = this.progress <= 0 && this.direction === -1;
   var topSpill = this.progress >= this.duration && this.direction === 1;
   return bottomSpill || topSpill;
 };
+
+/**
+ * 初始化动画状态
+ * @private
+ */
 Animate.prototype.init = function () {
   this.direction = 1;
   this.progress = 0;
@@ -805,20 +824,49 @@ Animate.prototype.init = function () {
   this.delayCut = this.delay;
   this.waitCut = this.wait;
 };
+
+/**
+ * 下一帧的数据
+ * @private
+ */
 Animate.prototype.nextPose = function () {
   console.warn('should be overwrite');
 };
+
+/**
+ * 暂停动画
+ */
 Animate.prototype.pause = function () {
   this.paused = true;
 };
+
+/**
+ * 恢复动画
+ */
 Animate.prototype.restart = function () {
   this.paused = false;
 };
+
+/**
+ * 停止动画，并把状态置为最后一帧，会触发事件
+ */
 Animate.prototype.stop = function () {
   this.repeats = 0;
   this.infinite = false;
   this.progress = this.duration;
 };
+
+/**
+ * 设置动画的速率
+ * @param {number} speed
+ */
+Animate.prototype.setSpeed = function (speed) {
+  this.timeScale = speed;
+};
+
+/**
+ * 取消动画，不会触发事件
+ */
 Animate.prototype.cancle = function () {
   this.living = false;
 };
@@ -848,6 +896,12 @@ function Transition(options) {
   this.to = options.to;
 }
 Transition.prototype = Object.create(Animate.prototype);
+
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
 Transition.prototype.nextPose = function () {
   var pose = {};
   for (var i in this.to) {
@@ -1034,6 +1088,11 @@ function PathMotion(options) {
 
 PathMotion.prototype = Object.create(Animate.prototype);
 
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
 PathMotion.prototype.nextPose = function () {
   var _rotate = 0;
   var t = Tween[this.ease](this.progress, 0, 1, this.duration);
@@ -1050,6 +1109,12 @@ PathMotion.prototype.nextPose = function () {
   return pose;
 };
 
+/**
+ * 解算旋转角度
+ * @private
+ * @param {number} t 当前进度, 区间[0, 1]
+ * @return {number}
+ */
 PathMotion.prototype.decomposeRotate = function (t) {
   var vector = this.path.getTangent(t);
 
@@ -1411,6 +1476,11 @@ function KeyFrames(options) {
 }
 KeyFrames.prototype = Object.create(Animate.prototype);
 
+/**
+ * 预解析关键帧
+ * @private
+ * @param {object} keys 关键帧配置
+ */
 KeyFrames.prototype.preParser = function (keys) {
   var ks = keys.ks;
   for (var key in ks) {
@@ -1421,6 +1491,13 @@ KeyFrames.prototype.preParser = function (keys) {
     }
   }
 };
+
+/**
+ * 预解析动态属性的关键帧
+ * @private
+ * @param {object} ks 关键帧配置
+ * @param {string} key 所属的属性
+ */
 KeyFrames.prototype.prepareDynamic = function (ks, key) {
   this.aks[key] = ks[key];
   var k = ks[key].k;
@@ -1452,6 +1529,12 @@ KeyFrames.prototype.prepareDynamic = function (ks, key) {
   }
 };
 
+/**
+ * 预解析静态属性的关键帧
+ * @private
+ * @param {object} ks 关键帧配置
+ * @param {string} key 所属的属性
+ */
 KeyFrames.prototype.prepareStatic = function (ks, key) {
   var prop = PM[key].label;
   var scale = PM[key].scale;
@@ -1472,6 +1555,11 @@ KeyFrames.prototype.prepareStatic = function (ks, key) {
   }
 };
 
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
 KeyFrames.prototype.nextPose = function () {
   var pose = {};
   for (var key in this.aks) {
@@ -1481,6 +1569,13 @@ KeyFrames.prototype.nextPose = function () {
   return pose;
 };
 
+/**
+ * 预计算关键帧属性值
+ * @private
+ * @param {string} key 关键帧配置
+ * @param {object} ak 所属的属性
+ * @return {array}
+ */
 KeyFrames.prototype.prepare = function (key, ak) {
   var k = ak.k;
   var rfr = this.rfr;
@@ -1509,11 +1604,26 @@ KeyFrames.prototype.prepare = function (key, ak) {
     }
   }
 };
+
+/**
+ * 进行插值计算
+ * @private
+ * @param {string} key 属性
+ * @param {object} ak 属性配置
+ * @return {array}
+ */
 KeyFrames.prototype.interpolation = function (key, ak) {
   var value = this.prepare(key, ak);
   this.setValue(key, value);
   return value;
 };
+
+/**
+ * 更新元素的属性值
+ * @private
+ * @param {string} key 属性
+ * @param {array} value 属性值
+ */
 KeyFrames.prototype.setValue = function (key, value) {
   var prop = PM[key].label;
   var scale = PM[key].scale;
@@ -1528,7 +1638,7 @@ KeyFrames.prototype.setValue = function (key, value) {
 };
 
 /**
- * AnimateRunner类型动画对象
+ * AnimateRunner类型动画类
  *
  * @class
  * @memberof JC
@@ -1545,10 +1655,20 @@ function AnimateRunner(options) {
   this.length = this.runners.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
+
+/**
+ * 更新下一个`runner`
+ * @private
+ */
 AnimateRunner.prototype.nextRunner = function () {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
 };
+
+/**
+ * 初始化当前`runner`
+ * @private
+ */
 AnimateRunner.prototype.initRunner = function () {
   var runner = this.runners[this.cursor];
   runner.infinite = false;
@@ -1563,12 +1683,26 @@ AnimateRunner.prototype.initRunner = function () {
   }
   if (animate !== null) this.queues.push(animate);
 };
+
+/**
+ * 下一帧的状态
+ * @private
+ * @param {number} snippetCache 时间片段
+ * @return {object}
+ */
 AnimateRunner.prototype.nextPose = function (snippetCache) {
   if (!this.queues[this.cursor] && this.runners[this.cursor]) {
     this.initRunner();
   }
   return this.queues[this.cursor].update(snippetCache);
 };
+
+/**
+ * 更新动画数据
+ * @private
+ * @param {number} snippet 时间片段
+ * @return {object}
+ */
 AnimateRunner.prototype.update = function (snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
@@ -1597,7 +1731,14 @@ AnimateRunner.prototype.update = function (snippet) {
       if (this.onCompelete) this.onCompelete(pose);
     }
   }
+  return pose;
 };
+
+/**
+ * 检查动画是否到了边缘
+ * @private
+ * @return {boolean}
+ */
 AnimateRunner.prototype.spill = function () {
   var bottomSpill = this.cursor <= 0 && this.direction === -1;
   var topSpill = this.cursor >= this.length && this.direction === 1;
@@ -1605,7 +1746,7 @@ AnimateRunner.prototype.spill = function () {
 };
 
 /**
- * Animation类型动画对象
+ * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
  *
  * @class
  * @memberof JC
@@ -1615,36 +1756,92 @@ function Animation(element) {
   this.element = element;
   this.animates = [];
 }
+
+/**
+ * 更新动画数据
+ * @private
+ * @param {number} snippet 时间片段
+ */
 Animation.prototype.update = function (snippet) {
   for (var i = 0; i < this.animates.length; i++) {
     if (!this.animates[i].living && !this.animates[i].resident) this.animates.splice(i, 1);
     if (this.animates[i]) this.animates[i].update(snippet);
   }
 };
+
+/**
+ * 创建一个`animate`动画
+ * @private
+ * @param {object} options 动画配置
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.Transition}
+ */
 Animation.prototype.animate = function (options, clear) {
   options.element = this.element;
   return this._addMove(new Transition(options), clear);
 };
+
+/**
+ * 创建一个`motion`动画
+ * @private
+ * @param {object} options 动画配置
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.PathMotion}
+ */
 Animation.prototype.motion = function (options, clear) {
   options.element = this.element;
   return this._addMove(new PathMotion(options), clear);
 };
+
+/**
+ * 创建一个`runners`动画
+ * @private
+ * @param {object} options 动画配置
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.AnimateRunner}
+ */
 Animation.prototype.runners = function (options, clear) {
   options.element = this.element;
   return this._addMove(new AnimateRunner(options), clear);
 };
+
+/**
+ * 创建一个`keyFrames`动画
+ * @private
+ * @param {object} options 动画配置
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.KeyFrames}
+ */
 Animation.prototype.keyFrames = function (options, clear) {
   options.element = this.element;
   return this._addMove(new KeyFrames(options), clear);
 };
+
+/**
+ * 添加到动画队列
+ * @private
+ * @param {object} animate 创建出来的动画对象
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.KeyFrames|JC.AnimateRunner|JC.PathMotion|JC.Transition}
+ */
 Animation.prototype._addMove = function (animate, clear) {
   if (clear) this.clear();
   this.animates.push(animate);
   return animate;
 };
+
+/**
+ * 清除动画队列
+ * @private
+ */
 Animation.prototype.clear = function () {
   this.animates.length = 0;
 };
+
+/* eslint guard-for-in: "off" */
+
+var URL = 'url';
+var IMG = 'img';
 
 /**
  * 图片纹理类
@@ -1652,11 +1849,19 @@ Animation.prototype.clear = function () {
  * @class
  * @memberof JC
  * @param {string | Image} img 图片url或者图片对象.
- * @param {Boolean} lazy 图片是否需要懒加载
+ * @param {object} options 图片配置
+ * @param {boolean} [options.lazy] 图片是否需要懒加载
+ * @param {string} [options.crossOrigin] 图片是否配置跨域
  * @extends JC.Eventer
  */
-function Texture(img, lazy) {
+function Texture(img, options) {
   Eventer.call(this);
+  options = options || {};
+
+  var isImg = img instanceof Image || img.nodeName === 'IMG';
+  this.type = Utils.isString(img) ? URL : isImg ? IMG : console.warn('not support asset');
+
+  this.crossOrigin = options.crossOrigin;
   this.texture = null;
   this.width = 0;
   this.height = 0;
@@ -1665,8 +1870,10 @@ function Texture(img, lazy) {
   this.loaded = false;
   this.hadload = false;
   this.src = img;
+
   this.resole(img);
-  if (!lazy || !Utils.isString(img)) this.load(img);
+
+  if (!options.lazy || this.type === IMG) this.load(img);
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
@@ -1678,12 +1885,15 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.resole = function (img) {
-  if (Utils.isString(img)) {
+  var This = this;
+  if (this.type === URL) {
     this.texture = new Image();
-  }
-  if (img instanceof Image || img.nodeName === 'IMG') {
+  } else if (this.type === IMG) {
     this.texture = img;
   }
+  this.on('load', function () {
+    This.update();
+  });
 };
 
 /**
@@ -1695,33 +1905,48 @@ Texture.prototype.resole = function (img) {
  */
 Texture.prototype.load = function (img) {
   if (this.hadload) return;
-  var This = this;
   this.hadload = true;
   img = img || this.src;
-  if (Utils.isString(img)) {
-    // TODO: 不默认配置跨域配置
-    this.texture.crossOrigin = '';
-    this.texture.src = img;
-    this.texture.onload = function () {
-      This.loaded = true;
-      This.emit('load');
-    };
-    this.texture.onerror = function () {
-      This.emit('error');
-    };
-    this.on('load', function () {
-      This.width = This.texture.width;
-      This.height = This.texture.height;
-      This.naturalWidth = This.texture.naturalWidth;
-      This.naturalHeight = This.texture.naturalHeight;
-    });
+  if (this.type === URL) {
+    this.fromURL(img);
+  } else if (this.type === IMG) {
+    if (this.texture.naturalWidth > 0 && this.texture.naturalHeight > 0) {
+      this.loaded = true;
+      this.update();
+    } else {
+      this.fromIMG(img);
+    }
   }
-  if ((img instanceof Image || img.nodeName === 'IMG') && img.naturalWidth * img.naturalHeight > 0) {
-    this.width = img.width;
-    this.height = img.height;
-    this.naturalWidth = img.naturalWidth;
-    this.naturalHeight = img.naturalHeight;
+};
+
+Texture.prototype.fromURL = function (url) {
+  if (!Utils.isUndefined(this.crossOrigin)) {
+    this.texture.crossOrigin = this.crossOrigin;
   }
+  this.listen(this.texture);
+  this.texture.src = url;
+};
+
+Texture.prototype.fromIMG = function (img) {
+  this.listen(img);
+};
+
+Texture.prototype.listen = function (img) {
+  var This = this;
+  img.addEventListener('load', function () {
+    This.loaded = true;
+    This.emit('load');
+  });
+  img.addEventListener('error', function () {
+    This.emit('error');
+  });
+};
+
+Texture.prototype.update = function () {
+  this.width = this.texture.width;
+  this.height = this.texture.height;
+  this.naturalWidth = this.texture.naturalWidth;
+  this.naturalHeight = this.texture.naturalHeight;
 };
 
 /**
@@ -1761,7 +1986,6 @@ Loader.prototype.load = function (srcMap) {
   this._failed = 0;
   this._received = 0;
 
-  /* eslint guard-for-in: "off" */
   for (var src in srcMap) {
     this._total++;
     this.textures[src] = new Texture(srcMap[src]);
@@ -2039,20 +2263,22 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 var IDENTITY = new Matrix();
 var TEMP_MATRIX = new Matrix();
 
+/* eslint max-len: "off" */
+
 /**
  * 显示对象的基类，继承至Eventer
  *
  * @class
- * @extends JC.Eventer
  * @memberof JC
+ * @extends JC.Eventer
  */
 function DisplayObject() {
   Eventer.call(this);
   /**
    * 标记渲染对象是否就绪
    *
-   * @member {Boolean}
    * @private
+   * @member {Boolean}
    */
   this._ready = true;
 
@@ -2066,8 +2292,8 @@ function DisplayObject() {
   /**
    * 世界透明度
    *
-   * @member {Number}
    * @private
+   * @member {Number}
    */
   this.worldAlpha = 1;
 
@@ -2154,24 +2380,24 @@ function DisplayObject() {
   /**
    * 当前对象的直接父级
    *
-   * @member {JC.Container}
    * @private
+   * @member {JC.Container}
    */
   this.parent = null;
 
   /**
    * 当前对象所应用的矩阵状态
    *
-   * @member {JC.Matrix}
    * @private
+   * @member {JC.Matrix}
    */
   this.worldTransform = new Matrix();
 
   /**
    * 当前对象的事件管家
    *
-   * @member {JC.Eventer}
    * @private
+   * @member {JC.Eventer}
    */
   // this.event = new Eventer();
 
@@ -2185,32 +2411,32 @@ function DisplayObject() {
   /**
    * 当前对象的事件检测边界
    *
-   * @member {JC.Shape}
    * @private
+   * @member {JC.Shape}
    */
   this.eventArea = null;
 
   /**
    * 当前对象的动画管家
    *
-   * @member {Array}
    * @private
+   * @member {Array}
    */
   this.Animation = new Animation(this);
 
   /**
    * 标记当前对象是否为touchstart触发状态
    *
-   * @member {Boolean}
    * @private
+   * @member {Boolean}
    */
   this._touchstarted = false;
 
   /**
    * 标记当前对象是否为mousedown触发状态
    *
-   * @member {Boolean}
    * @private
+   * @member {Boolean}
    */
   this._mousedowned = false;
 
@@ -2233,8 +2459,8 @@ DisplayObject.prototype = Object.create(Eventer.prototype);
 /**
  * 对渲染对象进行x、y轴同时缩放
  *
- * @member {number}
  * @name scale
+ * @member {number}
  * @memberof JC.DisplayObject#
  */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
@@ -2282,7 +2508,6 @@ DisplayObject.prototype.animate = function (options, clear) {
   return this.Animation.animate(options, clear);
 };
 
-/* eslint max-len: "off" */
 /**
  * motion动画，让物体按照设定好的曲线运动
  *
@@ -2351,7 +2576,7 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
 };
 
 /**
- * runners动画，多个复合动画的组合形式
+ * runners动画，多个复合动画的组合形式，不支持`alternate`
  *
  * ```js
  * display.runners({
@@ -2383,7 +2608,6 @@ DisplayObject.prototype.runners = function (options, clear) {
 /**
  * 检查对象是否可见
  *
- * @method isVisible
  * @return {Boolean} 对象是否可见
  */
 DisplayObject.prototype.isVisible = function () {
@@ -2392,7 +2616,6 @@ DisplayObject.prototype.isVisible = function () {
 
 /**
  * 移除对象上的遮罩
- *
  */
 DisplayObject.prototype.removeMask = function () {
   this.mask = null;
@@ -2401,8 +2624,8 @@ DisplayObject.prototype.removeMask = function () {
 /**
  * 设置对象上的属性值
  *
- * @param {json} props
  * @private
+ * @param {json} props
  */
 DisplayObject.prototype.setProps = function (props) {
   if (props === undefined) return;
@@ -2418,8 +2641,8 @@ DisplayObject.prototype.setProps = function (props) {
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateTransform
  * @private
+ * @method updateTransform
  */
 DisplayObject.prototype.updateTransform = function () {
   var pt = this.parent && this.parent.worldTransform || IDENTITY;
@@ -2488,8 +2711,8 @@ DisplayObject.prototype.updateTransform = function () {
 /**
  * 更新对象本身的动画
  *
- * @param {Number} snippet
  * @private
+ * @param {Number} snippet
  */
 DisplayObject.prototype.updateAnimation = function (snippet) {
   this.Animation.update(snippet);
@@ -2498,8 +2721,8 @@ DisplayObject.prototype.updateAnimation = function (snippet) {
 /**
  * 设置矩阵和透明度到当前绘图上下文
  *
- * @param {context} ctx
  * @private
+ * @param {context} ctx
  */
 DisplayObject.prototype.setTransform = function (ctx) {
   var matrix = this.worldTransform;
@@ -2753,6 +2976,8 @@ Bounds.prototype.addBounds = function (bounds) {
   this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
+/* eslint prefer-rest-params: 0 */
+
 /**
  * 显示对象容器，继承至DisplayObject
  *
@@ -2762,8 +2987,8 @@ Bounds.prototype.addBounds = function (bounds) {
  * ```
  *
  * @class
- * @extends JC.DisplayObject
  * @memberof JC
+ * @extends JC.DisplayObject
  */
 function Container() {
   DisplayObject.call(this);
@@ -2792,8 +3017,8 @@ function Container() {
   /**
    * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
    *
-   * @member {Number}
    * @private
+   * @member {Number}
    */
   this._zIndex = 0;
 
@@ -2814,8 +3039,8 @@ function Container() {
   /**
    * 显示对象内部表示的边界
    *
-   * @member {JC.Bounds}
    * @private
+   * @member {JC.Bounds}
    */
   this._bounds = new Bounds();
 
@@ -2826,8 +3051,8 @@ Container.prototype = Object.create(DisplayObject.prototype);
 /**
  * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
  *
- * @member {number}
  * @name zIndex
+ * @member {number}
  * @memberof JC.Container#
  */
 Object.defineProperty(Container.prototype, 'zIndex', {
@@ -2847,8 +3072,8 @@ Object.defineProperty(Container.prototype, 'zIndex', {
 /**
  * 对自身子集进行zIndex排序
  *
- * @method _sortList
  * @private
+ * @method _sortList
  */
 Container.prototype._sortList = function () {
   this.childs.sort(function (a, b) {
@@ -2874,7 +3099,6 @@ Container.prototype._sortList = function () {
  * @return {JC.Container}
  */
 Container.prototype.adds = function (object) {
-  /* eslint prefer-rest-params: "off" */
   if (arguments.length > 1) {
     for (var i = 0; i < arguments.length; i++) {
       this.adds(arguments[i]);
@@ -2883,7 +3107,6 @@ Container.prototype.adds = function (object) {
   }
   if (object === this) {
     console.error('adds: object can\'t be added as a child of itself.', object);
-    return this;
   }
   if (object && object instanceof Container) {
     if (object.parent !== null) {
@@ -2923,8 +3146,8 @@ Container.prototype.remove = function (object) {
 /**
  * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
  *
- * @param {Number} snippet
  * @private
+ * @param {Number} snippet
  */
 Container.prototype.updatePosture = function (snippet) {
   if (!this._ready) return;
@@ -2961,12 +3184,16 @@ Container.prototype.render = function (ctx) {
 /**
  * 渲染自己
  * @private
- * @return {Boolean} 是否渲染
+ * @return {boolean} 是否渲染
  */
 Container.prototype.renderMe = function () {
   return true;
 };
 
+/**
+ * 计算自己的包围盒
+ * @private
+ */
 Container.prototype.calculateVertices = function () {
   var wt = this.worldTransform;
   var a = wt.a;
@@ -3058,7 +3285,24 @@ Container.prototype.restart = function () {
  * 取消自身的所有动画
  */
 Container.prototype.cancle = function () {
-  this.Animator.clear();
+  this.Animation.clear();
+};
+
+/**
+ * 停止掉自身的所有动画，并将状态保留在所以的结束点
+ */
+Container.prototype.stop = function () {
+  this.Animation.animates.forEach(function (it) {
+    it.stop();
+  });
+};
+
+/**
+ * 设置自身及子节点的动画速度
+ * @param {number} speed 设置的速率值
+ */
+Container.prototype.setSpeed = function (speed) {
+  this.timeScale = speed;
 };
 
 /* eslint max-len: "off" */
@@ -3100,6 +3344,12 @@ function MovieClip(element, options) {
   this.pt = 0;
   this.nt = 0;
 }
+
+/**
+ * 更新动画
+ * @private
+ * @param {number} snippet 时间片段
+ */
 MovieClip.prototype.update = function (snippet) {
   if (this.paused || !this.living) return;
   this.nt += snippet;
@@ -3130,6 +3380,12 @@ MovieClip.prototype.update = function (snippet) {
     }
   }
 };
+
+/**
+ * 获取帧位置
+ * @private
+ * @return {JC.Rectangle}
+ */
 MovieClip.prototype.getFrame = function () {
   if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
   var frame = this.element.frame.clone();
@@ -3147,6 +3403,11 @@ MovieClip.prototype.getFrame = function () {
   this.preFrame = frame;
   return frame;
 };
+
+/**
+ * 播放逐帧
+ * @param {object} options 播放配置
+ */
 MovieClip.prototype.playMovie = function (options) {
   this.next = null;
   var movie = this.format(options.movie);
@@ -3162,6 +3423,13 @@ MovieClip.prototype.playMovie = function (options) {
   this.living = true;
   this.onCompelete = options.onCompelete || null;
 };
+
+/**
+ * 格式化逐帧信息
+ * @private
+ * @param {string|array|object} movie 逐帧信息
+ * @return {array}
+ */
 MovieClip.prototype.format = function (movie) {
   if (Utils.isString(movie)) {
     var config = this.animations[movie];
@@ -3196,15 +3464,32 @@ MovieClip.prototype.format = function (movie) {
     return arr;
   }
 };
+
+/**
+ * 暂停逐帧
+ */
 MovieClip.prototype.pause = function () {
   this.paused = true;
 };
-MovieClip.prototype.start = function () {
+
+/**
+ * 恢复播放逐帧
+ */
+MovieClip.prototype.restart = function () {
   this.paused = false;
 };
+
+/**
+ * 取消逐帧
+ */
 MovieClip.prototype.cancle = function () {
   this.living = false;
 };
+
+/**
+ * 帧间隔
+ * @private
+ */
 Object.defineProperty(MovieClip.prototype, 'interval', {
   get: function get() {
     return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
@@ -3234,8 +3519,8 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  * ```
  *
  * @class
- * @extends JC.Container
  * @memberof JC
+ * @extends JC.Container
  * @param {json} options
  */
 function Sprite(options) {
@@ -3260,7 +3545,6 @@ Sprite.prototype = Object.create(Container.prototype);
 /**
  * 更新纹理对象
  *
- * @method upTexture
  * @private
  * @param {json} options
  */
@@ -3269,8 +3553,8 @@ Sprite.prototype.upTexture = function (options) {
   this.naturalHeight = options.texture.naturalHeight;
   this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
 
-  this.width = options.width || this.frame.width || this.naturalWidth;
-  this.height = options.height || this.frame.height || this.naturalHeight;
+  this.width = options.width || this.frame.width;
+  this.height = options.height || this.frame.height;
 
   var rect = new Rectangle(0, 0, this.width, this.height);
   this._bounds.addRect(rect);
@@ -3280,7 +3564,6 @@ Sprite.prototype.upTexture = function (options) {
 /**
  * 更新对象的动画姿态
  *
- * @method updateAnimation
  * @private
  * @param {number} snippet
  */
@@ -3300,7 +3583,6 @@ Sprite.prototype.playMovie = function (options) {
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateMe
  * @private
  * @param {context} ctx
  */
@@ -3333,6 +3615,7 @@ function ParserAnimation(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
+  this.timeline = [];
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
@@ -3386,7 +3669,7 @@ ParserAnimation.prototype.parser = function (doc, layers) {
       var ani = new Sprite({
         texture: this.assetBox.getById(id)
       });
-      ani.keyFrames({
+      this.timeline.push(ani.keyFrames({
         ks: layer,
         fr: this.fr,
         ip: ip,
@@ -3394,14 +3677,14 @@ ParserAnimation.prototype.parser = function (doc, layers) {
         repeats: repeats,
         infinite: infinite,
         alternate: alternate
-      });
+      }));
       ani.name = layer.nm;
       doc.adds(ani);
     }
     if (layer.ty === 0) {
       var ddoc = new Container();
       var llayers = this.getAssets(layer.refId).layers;
-      ddoc.keyFrames({
+      this.timeline.push(ddoc.keyFrames({
         ks: layer,
         fr: this.fr,
         ip: ip,
@@ -3409,7 +3692,7 @@ ParserAnimation.prototype.parser = function (doc, layers) {
         repeats: repeats,
         infinite: infinite,
         alternate: alternate
-      });
+      }));
       ddoc.name = layer.nm;
       doc.adds(ddoc);
       this.parser(ddoc, llayers);
@@ -3435,6 +3718,42 @@ ParserAnimation.prototype.getAssets = function (id) {
  */
 ParserAnimation.prototype.setSpeed = function (speed) {
   this.doc.timeScale = speed;
+};
+
+/**
+ * 暂停播放动画
+ */
+ParserAnimation.prototype.pause = function () {
+  this.timeline.forEach(function (it) {
+    it.pause();
+  });
+};
+
+/**
+ * 恢复播放动画
+ */
+ParserAnimation.prototype.restart = function () {
+  this.timeline.forEach(function (it) {
+    it.restart();
+  });
+};
+
+/**
+ * 停止播放动画
+ */
+ParserAnimation.prototype.stop = function () {
+  this.timeline.forEach(function (it) {
+    it.stop();
+  });
+};
+
+/**
+ * 取消播放动画
+ */
+ParserAnimation.prototype.cancle = function () {
+  this.timeline.forEach(function (it) {
+    it.cancle();
+  });
 };
 
 /**
@@ -3503,8 +3822,8 @@ var INSTANCE = 'in';
  * ```
  *
  * @class
- * @extends JC.Container
  * @memberof JC
+ * @extends JC.Container
  * @param {function|object} mesh 绘制对象，可以是函数，也可以是带有render方法的对象，绘制时会将当前绘图环境传递给它
  * @param {object} options 绘制对象
  * @param {boolean} [options.cache] 是否缓存改绘制对象，加入绘制对象非常复杂并后续无需更新时设置为 true 可以优化性能
@@ -3528,8 +3847,8 @@ Graphics.prototype = Object.create(Container.prototype);
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @param {context} ctx
  * @private
+ * @param {context} ctx
  */
 Graphics.prototype.renderMe = function (ctx) {
   if (!this.meshType) return;
@@ -3557,8 +3876,8 @@ Graphics.prototype.renderMe = function (ctx) {
 /**
  * 调用绘制函数
  *
- * @param {context} ctx
  * @private
+ * @param {context} ctx
  */
 Graphics.prototype._drawBack = function (ctx) {
   if (this.meshType === FUNCTION) {

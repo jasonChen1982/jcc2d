@@ -265,7 +265,7 @@ Stage.prototype.render = function() {
   if (this.autoUpdate) this.updatePosture(this.snippet);
 
   for (let i = 0, l = this.childs.length; i < l; i++) {
-    let child = this.childs[i];
+    const child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
     child.render(this.ctx);
   }

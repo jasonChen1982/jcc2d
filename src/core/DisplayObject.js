@@ -1,3 +1,6 @@
+
+/* eslint max-len: "off" */
+
 import {Matrix, TEMP_MATRIX, IDENTITY} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
@@ -7,16 +10,16 @@ import {Utils} from '../util/Utils';
  * 显示对象的基类，继承至Eventer
  *
  * @class
- * @extends JC.Eventer
  * @memberof JC
+ * @extends JC.Eventer
  */
 function DisplayObject() {
   Eventer.call(this);
   /**
    * 标记渲染对象是否就绪
    *
-   * @member {Boolean}
    * @private
+   * @member {Boolean}
    */
   this._ready = true;
 
@@ -30,8 +33,8 @@ function DisplayObject() {
   /**
    * 世界透明度
    *
-   * @member {Number}
    * @private
+   * @member {Number}
    */
   this.worldAlpha = 1;
 
@@ -118,24 +121,24 @@ function DisplayObject() {
   /**
    * 当前对象的直接父级
    *
-   * @member {JC.Container}
    * @private
+   * @member {JC.Container}
    */
   this.parent = null;
 
   /**
    * 当前对象所应用的矩阵状态
    *
-   * @member {JC.Matrix}
    * @private
+   * @member {JC.Matrix}
    */
   this.worldTransform = new Matrix();
 
   /**
    * 当前对象的事件管家
    *
-   * @member {JC.Eventer}
    * @private
+   * @member {JC.Eventer}
    */
   // this.event = new Eventer();
 
@@ -149,8 +152,8 @@ function DisplayObject() {
   /**
    * 当前对象的事件检测边界
    *
-   * @member {JC.Shape}
    * @private
+   * @member {JC.Shape}
    */
   this.eventArea = null;
 
@@ -158,8 +161,8 @@ function DisplayObject() {
   /**
    * 当前对象的动画管家
    *
-   * @member {Array}
    * @private
+   * @member {Array}
    */
   this.Animation = new Animation(this);
 
@@ -167,16 +170,16 @@ function DisplayObject() {
   /**
    * 标记当前对象是否为touchstart触发状态
    *
-   * @member {Boolean}
    * @private
+   * @member {Boolean}
    */
   this._touchstarted = false;
 
   /**
    * 标记当前对象是否为mousedown触发状态
    *
-   * @member {Boolean}
    * @private
+   * @member {Boolean}
    */
   this._mousedowned = false;
 
@@ -199,8 +202,8 @@ DisplayObject.prototype = Object.create(Eventer.prototype);
 /**
  * 对渲染对象进行x、y轴同时缩放
  *
- * @member {number}
  * @name scale
+ * @member {number}
  * @memberof JC.DisplayObject#
  */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
@@ -248,7 +251,6 @@ DisplayObject.prototype.animate = function(options, clear) {
   return this.Animation.animate(options, clear);
 };
 
-/* eslint max-len: "off" */
 /**
  * motion动画，让物体按照设定好的曲线运动
  *
@@ -317,7 +319,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
 };
 
 /**
- * runners动画，多个复合动画的组合形式
+ * runners动画，多个复合动画的组合形式，不支持`alternate`
  *
  * ```js
  * display.runners({
@@ -349,7 +351,6 @@ DisplayObject.prototype.runners = function(options, clear) {
 /**
  * 检查对象是否可见
  *
- * @method isVisible
  * @return {Boolean} 对象是否可见
  */
 DisplayObject.prototype.isVisible = function() {
@@ -358,7 +359,6 @@ DisplayObject.prototype.isVisible = function() {
 
 /**
  * 移除对象上的遮罩
- *
  */
 DisplayObject.prototype.removeMask = function() {
   this.mask = null;
@@ -367,8 +367,8 @@ DisplayObject.prototype.removeMask = function() {
 /**
  * 设置对象上的属性值
  *
- * @param {json} props
  * @private
+ * @param {json} props
  */
 DisplayObject.prototype.setProps = function(props) {
   if (props === undefined) return;
@@ -384,12 +384,12 @@ DisplayObject.prototype.setProps = function(props) {
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateTransform
  * @private
+ * @method updateTransform
  */
 DisplayObject.prototype.updateTransform = function() {
-  let pt = (this.parent && this.parent.worldTransform) || IDENTITY;
-  let wt = this.worldTransform;
+  const pt = (this.parent && this.parent.worldTransform) || IDENTITY;
+  const wt = this.worldTransform;
   const worldAlpha = (this.parent && this.parent.worldAlpha) || 1;
 
   let a;
@@ -464,8 +464,8 @@ DisplayObject.prototype.updateTransform = function() {
 /**
  * 更新对象本身的动画
  *
- * @param {Number} snippet
  * @private
+ * @param {Number} snippet
  */
 DisplayObject.prototype.updateAnimation = function(snippet) {
   this.Animation.update(snippet);
@@ -474,11 +474,11 @@ DisplayObject.prototype.updateAnimation = function(snippet) {
 /**
  * 设置矩阵和透明度到当前绘图上下文
  *
- * @param {context} ctx
  * @private
+ * @param {context} ctx
  */
 DisplayObject.prototype.setTransform = function(ctx) {
-  let matrix = this.worldTransform;
+  const matrix = this.worldTransform;
   ctx.globalAlpha = this.worldAlpha;
   ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
 };
@@ -511,7 +511,7 @@ DisplayObject.prototype.setArea = function(shape, needless) {
  */
 DisplayObject.prototype.contains = function(global) {
   if (this.eventArea === null) return false;
-  let point = new Point();
+  const point = new Point();
   this.worldTransform.applyInverse(global, point);
   return this.eventArea && this.eventArea.contains(point.x, point.y);
 };

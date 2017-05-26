@@ -21,12 +21,17 @@ function PathMotion(options) {
   this.ease = options.ease || 'easeBoth';
   this.attachTangent = options.attachTangent || false;
   this._cacheRotate = this.element.rotation;
-  let radian = this._cacheRotate * Utils.DTR;
+  const radian = this._cacheRotate * Utils.DTR;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
 
 PathMotion.prototype = Object.create(Animate.prototype);
 
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
 PathMotion.prototype.nextPose = function() {
   let _rotate = 0;
   const t = Tween[this.ease](this.progress, 0, 1, this.duration);
@@ -43,21 +48,24 @@ PathMotion.prototype.nextPose = function() {
   return pose;
 };
 
+/**
+ * 解算旋转角度
+ * @private
+ * @param {number} t 当前进度, 区间[0, 1]
+ * @return {number}
+ */
 PathMotion.prototype.decomposeRotate = function(t) {
-  let vector = this.path.getTangent(t);
+  const vector = this.path.getTangent(t);
 
-  let nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
-  let pi = nor > 0 ? 1 : -1;
-  let cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y)
-            /
-            ( Math.sqrt(vector.x * vector.x + vector.y * vector.y)
-              *
-              Math.sqrt(
-                this._cacheVector.x * this._cacheVector.x
-                +
-                this._cacheVector.y * this._cacheVector.y
-              )
-            );
+  const nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
+  const pi = nor > 0 ? 1 : -1;
+  const cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y)/
+    ( Math.sqrt(vector.x * vector.x + vector.y * vector.y) *
+      Math.sqrt(
+        this._cacheVector.x * this._cacheVector.x +
+        this._cacheVector.y * this._cacheVector.y
+      )
+    );
   if (isNaN(cos)) return false;
   return pi * Math.acos(cos) * Utils.RTD;
 };

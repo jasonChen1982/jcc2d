@@ -87,7 +87,7 @@ InteractionManager.prototype.removeEvents = function() {
 };
 
 InteractionManager.prototype.onMouseMove = function(event) {
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
 
   this.cursor = this.defaultCursorStyle;
   this.processInteractive(this.stage, eventd, this.processMouseMove, true);
@@ -116,7 +116,7 @@ InteractionManager.prototype.processMouseOverOut = function(
   event,
   hit
 ) {
-  let eventd = event.clone();
+  const eventd = event.clone();
   if (hit) {
     if (!displayObject._over) {
       displayObject._over = true;
@@ -137,7 +137,7 @@ InteractionManager.prototype.onMouseDown = function(event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseDown, true);
 
   this.emit('mousedown', eventd);
@@ -157,7 +157,7 @@ InteractionManager.prototype.onClick = function(event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processClick, true);
 
   this.emit('click', eventd);
@@ -174,7 +174,7 @@ InteractionManager.prototype.processClick = function(
 };
 
 InteractionManager.prototype.onMouseUp = function(event) {
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processMouseUp, true);
 
   this.emit('mouseup', eventd);
@@ -191,7 +191,7 @@ InteractionManager.prototype.processMouseUp = function(
 };
 
 InteractionManager.prototype.onMouseOut = function(event) {
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
 
   this.processInteractive(this.stage, eventd, this.processMouseOverOut, false);
 
@@ -203,7 +203,7 @@ InteractionManager.prototype.onMouseOver = function(event) {
 };
 
 InteractionManager.prototype.onTouchStart = function(event) {
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
   this.processInteractive(this.stage, eventd, this.processTouchStart, true);
 
   this.emit('touchstart', eventd);
@@ -221,7 +221,7 @@ InteractionManager.prototype.processTouchStart = function(
 };
 
 InteractionManager.prototype.onTouchEnd = function(event) {
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
   this.processInteractive(
     this.stage,
     eventd,
@@ -243,7 +243,7 @@ InteractionManager.prototype.onTouchMove = function(event) {
   if (this.autoPreventDefault) {
     event.preventDefault();
   }
-  let eventd = this.fixCoord(event);
+  const eventd = this.fixCoord(event);
   this.processInteractive(
     this.stage,
     eventd,
@@ -279,11 +279,11 @@ InteractionManager.prototype.processInteractive = function(
    * @return {Boolean} 是否检测到
    */
   function process(object, event, func, shouldHit) {
-    let childs = object.childs;
+    const childs = object.childs;
     let hit = false;
     let i = childs.length - 1;
     while (i >= 0) {
-      let cchilds = childs[i--];
+      const cchilds = childs[i--];
       hit = false;
       if (cchilds.passEvent) continue;
       if (cchilds.childs.length > 0) {
@@ -317,7 +317,7 @@ InteractionManager.prototype.dispatchEvent = function(
 
     displayObject.emit(eventString, event);
 
-    let type = 'on' + eventString;
+    const type = 'on' + eventString;
     if (displayObject[type]) {
       displayObject[type](event);
     }
@@ -325,8 +325,8 @@ InteractionManager.prototype.dispatchEvent = function(
 };
 
 InteractionManager.prototype.fixCoord = function(event) {
-  let eventd = new InteractionData();
-  let offset = this.getPos(this.canvas);
+  const eventd = new InteractionData();
+  const offset = this.getPos(this.canvas);
   eventd.originalEvent = event;
   eventd.type = event.type;
 
@@ -351,9 +351,9 @@ InteractionManager.prototype.fixCoord = function(event) {
 };
 
 InteractionManager.prototype.getPos = function(obj) {
-  let pos = new Point();
+  const pos = new Point();
   if (obj.offsetParent) {
-    let p = this.getPos(obj.offsetParent);
+    const p = this.getPos(obj.offsetParent);
     pos.x = obj.offsetLeft + p.x;
     pos.y = obj.offsetTop + p.y;
   } else {

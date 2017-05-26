@@ -3,7 +3,7 @@ import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
 
 /**
- * AnimateRunner类型动画对象
+ * AnimateRunner类型动画类
  *
  * @class
  * @memberof JC
@@ -20,10 +20,20 @@ function AnimateRunner(options) {
   this.length = this.runners.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
+
+/**
+ * 更新下一个`runner`
+ * @private
+ */
 AnimateRunner.prototype.nextRunner = function() {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
 };
+
+/**
+ * 初始化当前`runner`
+ * @private
+ */
 AnimateRunner.prototype.initRunner = function() {
   const runner = this.runners[this.cursor];
   runner.infinite = false;
@@ -38,12 +48,26 @@ AnimateRunner.prototype.initRunner = function() {
   }
   if (animate !== null) this.queues.push(animate);
 };
+
+/**
+ * 下一帧的状态
+ * @private
+ * @param {number} snippetCache 时间片段
+ * @return {object}
+ */
 AnimateRunner.prototype.nextPose = function(snippetCache) {
   if (!this.queues[this.cursor] && this.runners[this.cursor]) {
     this.initRunner();
   }
   return this.queues[this.cursor].update(snippetCache);
 };
+
+/**
+ * 更新动画数据
+ * @private
+ * @param {number} snippet 时间片段
+ * @return {object}
+ */
 AnimateRunner.prototype.update = function(snippet) {
   if (this.wait > 0) {
     this.wait -= Math.abs(snippet);
@@ -56,7 +80,7 @@ AnimateRunner.prototype.update = function(snippet) {
 
   const cc = this.cursor;
 
-  let pose = this.nextPose(this.direction * this.timeScale * snippet);
+  const pose = this.nextPose(this.direction * this.timeScale * snippet);
   if (this.onUpdate) this.onUpdate({
     index: cc, pose: pose,
   }, this.progress / this.duration);
@@ -72,7 +96,14 @@ AnimateRunner.prototype.update = function(snippet) {
       if (this.onCompelete) this.onCompelete(pose);
     }
   }
+  return pose;
 };
+
+/**
+ * 检查动画是否到了边缘
+ * @private
+ * @return {boolean}
+ */
 AnimateRunner.prototype.spill = function() {
   const bottomSpill = this.cursor <= 0 && this.direction === -1;
   const topSpill = this.cursor >= this.length && this.direction === 1;

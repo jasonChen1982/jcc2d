@@ -32,8 +32,8 @@ Eventer.prototype.on = function(type, fn) {
  * @param {Function} fn 注册时回调函数的引用
  */
 Eventer.prototype.off = function(type, fn) {
-  let ears = this.listeners;
-  let cbs = ears[type];
+  const ears = this.listeners;
+  const cbs = ears[type];
   let i = ears[type].length;
   if (cbs && i > 0) {
     if (fn) {
@@ -71,10 +71,10 @@ Eventer.prototype.once = function(type, fn) {
  */
 Eventer.prototype.emit = function(type, ev) {
   if (this.listeners === undefined) return;
-  let ears = this.listeners;
-  let cbs = ears[type];
+  const ears = this.listeners;
+  const cbs = ears[type];
   if (cbs !== undefined) {
-    let length = cbs.length;
+    const length = cbs.length;
     let i;
     for (i = 0; i < length; i++) {
       cbs[i].call(this, ev);

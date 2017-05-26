@@ -39,12 +39,18 @@ function MovieClip(element, options) {
   this.pt = 0;
   this.nt = 0;
 }
+
+/**
+ * 更新动画
+ * @private
+ * @param {number} snippet 时间片段
+ */
 MovieClip.prototype.update = function(snippet) {
   if (this.paused || !this.living) return;
   this.nt += snippet;
   if (this.nt - this.pt < this.interval) return;
   this.pt = this.nt;
-  let i = this.index + this.direction;
+  const i = this.index + this.direction;
   if (i < this.frames.length && i >= 0) {
     this.index = i;
     // Do you need this handler???
@@ -69,20 +75,26 @@ MovieClip.prototype.update = function(snippet) {
     }
   }
 };
+
+/**
+ * 获取帧位置
+ * @private
+ * @return {JC.Rectangle}
+ */
 MovieClip.prototype.getFrame = function() {
   if (
     this.index === this.preIndex
     &&
     this.preFrame !== null
   ) return this.preFrame;
-  let frame = this.element.frame.clone();
-  let cf = this.frames[this.index];
+  const frame = this.element.frame.clone();
+  const cf = this.frames[this.index];
   if (cf > 0) {
-    let row = this.element.naturalWidth / this.element.frame.width >> 0;
-    let lintRow = this.element.frame.x / this.element.frame.width >> 0;
+    const row = this.element.naturalWidth / this.element.frame.width >> 0;
+    const lintRow = this.element.frame.x / this.element.frame.width >> 0;
 
-    let mCol = (lintRow + cf) / row >> 0;
-    let mRow = (lintRow + cf) % row;
+    const mCol = (lintRow + cf) / row >> 0;
+    const mRow = (lintRow + cf) % row;
     frame.x = mRow * this.element.frame.width;
     frame.y += mCol * this.element.frame.height;
   }
@@ -90,9 +102,14 @@ MovieClip.prototype.getFrame = function() {
   this.preFrame = frame;
   return frame;
 };
+
+/**
+ * 播放逐帧
+ * @param {object} options 播放配置
+ */
 MovieClip.prototype.playMovie = function(options) {
   this.next = null;
-  let movie = this.format(options.movie);
+  const movie = this.format(options.movie);
   if (!Utils.isArray(movie)) return;
   this.frames = movie;
   this.index = 0;
@@ -105,9 +122,16 @@ MovieClip.prototype.playMovie = function(options) {
   this.living = true;
   this.onCompelete = options.onCompelete || null;
 };
+
+/**
+ * 格式化逐帧信息
+ * @private
+ * @param {string|array|object} movie 逐帧信息
+ * @return {array}
+ */
 MovieClip.prototype.format = function(movie) {
   if (Utils.isString(movie)) {
-    let config = this.animations[movie];
+    const config = this.animations[movie];
     if (config) {
       return this.format(config);
     } else {
@@ -117,12 +141,12 @@ MovieClip.prototype.format = function(movie) {
   } else if (Utils.isArray(movie)) {
     return movie;
   } else if (Utils.isObject(movie)) {
-    let arr = [];
+    const arr = [];
     for (let i = movie.start; i <= movie.end; i++) {
       arr.push(i);
     }
     if (movie.next && this.animations[movie.next]) {
-      let This = this;
+      const This = this;
       let conf = {};
       if(Utils.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
@@ -139,15 +163,32 @@ MovieClip.prototype.format = function(movie) {
     return arr;
   }
 };
+
+/**
+ * 暂停逐帧
+ */
 MovieClip.prototype.pause = function() {
   this.paused = true;
 };
-MovieClip.prototype.start = function() {
+
+/**
+ * 恢复播放逐帧
+ */
+MovieClip.prototype.restart = function() {
   this.paused = false;
 };
+
+/**
+ * 取消逐帧
+ */
 MovieClip.prototype.cancle = function() {
   this.living = false;
 };
+
+/**
+ * 帧间隔
+ * @private
+ */
 Object.defineProperty(MovieClip.prototype, 'interval', {
   get: function() {
     return this.fps > 0 ? 1000 / this.fps >> 0 : 16;

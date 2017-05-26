@@ -27,8 +27,14 @@ function Transition(options) {
   this.to = options.to;
 }
 Transition.prototype = Object.create(Animate.prototype);
+
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
 Transition.prototype.nextPose = function() {
-  let pose = {};
+  const pose = {};
   for (let i in this.to) {
     pose[i] = Tween[this.ease](
       this.progress,

@@ -50,7 +50,7 @@ function InteractionData() {
   this.type = '';
 }
 InteractionData.prototype.clone = function() {
-  let evd = new InteractionData();
+  const evd = new InteractionData();
   evd.originalEvent = this.originalEvent;
   evd.ratio = this.ratio;
 

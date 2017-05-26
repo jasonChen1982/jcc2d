@@ -25,6 +25,7 @@ function ParserAnimation(options) {
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
   this.assetBox = null;
+  this.timeline = [];
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 }
@@ -78,7 +79,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
       const ani = new Sprite({
         texture: this.assetBox.getById(id),
       });
-      ani.keyFrames({
+      this.timeline.push(ani.keyFrames({
         ks: layer,
         fr: this.fr,
         ip,
@@ -86,14 +87,14 @@ ParserAnimation.prototype.parser = function(doc, layers) {
         repeats,
         infinite,
         alternate,
-      });
+      }));
       ani.name = layer.nm;
       doc.adds(ani);
     }
     if (layer.ty === 0) {
       const ddoc = new Container();
       const llayers = this.getAssets(layer.refId).layers;
-      ddoc.keyFrames({
+      this.timeline.push(ddoc.keyFrames({
         ks: layer,
         fr: this.fr,
         ip,
@@ -101,7 +102,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
         repeats,
         infinite,
         alternate,
-      });
+      }));
       ddoc.name = layer.nm;
       doc.adds(ddoc);
       this.parser(ddoc, llayers);
@@ -127,6 +128,42 @@ ParserAnimation.prototype.getAssets = function(id) {
  */
 ParserAnimation.prototype.setSpeed = function(speed) {
   this.doc.timeScale = speed;
+};
+
+/**
+ * 暂停播放动画
+ */
+ParserAnimation.prototype.pause = function() {
+  this.timeline.forEach(function(it) {
+    it.pause();
+  });
+};
+
+/**
+ * 恢复播放动画
+ */
+ParserAnimation.prototype.restart = function() {
+  this.timeline.forEach(function(it) {
+    it.restart();
+  });
+};
+
+/**
+ * 停止播放动画
+ */
+ParserAnimation.prototype.stop = function() {
+  this.timeline.forEach(function(it) {
+    it.stop();
+  });
+};
+
+/**
+ * 取消播放动画
+ */
+ParserAnimation.prototype.cancle = function() {
+  this.timeline.forEach(function(it) {
+    it.cancle();
+  });
 };
 
 export {ParserAnimation};

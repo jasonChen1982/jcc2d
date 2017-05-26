@@ -84,6 +84,11 @@ function KeyFrames(options) {
 }
 KeyFrames.prototype = Object.create(Animate.prototype);
 
+/**
+ * 预解析关键帧
+ * @private
+ * @param {object} keys 关键帧配置
+ */
 KeyFrames.prototype.preParser = function(keys) {
   const ks = keys.ks;
   for (const key in ks) {
@@ -94,6 +99,13 @@ KeyFrames.prototype.preParser = function(keys) {
     }
   }
 };
+
+/**
+ * 预解析动态属性的关键帧
+ * @private
+ * @param {object} ks 关键帧配置
+ * @param {string} key 所属的属性
+ */
 KeyFrames.prototype.prepareDynamic = function(ks, key) {
   this.aks[key] = ks[key];
   const k = ks[key].k;
@@ -125,6 +137,12 @@ KeyFrames.prototype.prepareDynamic = function(ks, key) {
   }
 };
 
+/**
+ * 预解析静态属性的关键帧
+ * @private
+ * @param {object} ks 关键帧配置
+ * @param {string} key 所属的属性
+ */
 KeyFrames.prototype.prepareStatic = function(ks, key) {
   const prop = PM[key].label;
   const scale = PM[key].scale;
@@ -145,8 +163,13 @@ KeyFrames.prototype.prepareStatic = function(ks, key) {
   }
 };
 
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
 KeyFrames.prototype.nextPose = function() {
-  let pose = {};
+  const pose = {};
   for (const key in this.aks) {
     const ak = this.aks[key];
     pose[key] = this.interpolation(key, ak);
@@ -154,12 +177,19 @@ KeyFrames.prototype.nextPose = function() {
   return pose;
 };
 
+/**
+ * 预计算关键帧属性值
+ * @private
+ * @param {string} key 关键帧配置
+ * @param {object} ak 所属的属性
+ * @return {array}
+ */
 KeyFrames.prototype.prepare = function(key, ak) {
   const k = ak.k;
   const rfr = this.rfr;
   const progress = Utils.clamp(this.progress, 0, ak.jcet * rfr);
-  let skt = ak.jcst * rfr;
-  let ekt = ak.jcet * rfr;
+  const skt = ak.jcst * rfr;
+  const ekt = ak.jcet * rfr;
   const last = k.length - 2;
   const invisible = progress < this.iip * rfr;
   if (invisible === this.element.visible) this.element.visible = !invisible;
@@ -186,11 +216,26 @@ KeyFrames.prototype.prepare = function(key, ak) {
     }
   }
 };
+
+/**
+ * 进行插值计算
+ * @private
+ * @param {string} key 属性
+ * @param {object} ak 属性配置
+ * @return {array}
+ */
 KeyFrames.prototype.interpolation = function(key, ak) {
   const value = this.prepare(key, ak);
   this.setValue(key, value);
   return value;
 };
+
+/**
+ * 更新元素的属性值
+ * @private
+ * @param {string} key 属性
+ * @param {array} value 属性值
+ */
 KeyFrames.prototype.setValue = function(key, value) {
   const prop = PM[key].label;
   const scale = PM[key].scale;

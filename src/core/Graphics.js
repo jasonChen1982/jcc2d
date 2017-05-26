@@ -39,8 +39,8 @@ const INSTANCE = 'in';
  * ```
  *
  * @class
- * @extends JC.Container
  * @memberof JC
+ * @extends JC.Container
  * @param {function|object} mesh 绘制对象，可以是函数，也可以是带有render方法的对象，绘制时会将当前绘图环境传递给它
  * @param {object} options 绘制对象
  * @param {boolean} [options.cache] 是否缓存改绘制对象，加入绘制对象非常复杂并后续无需更新时设置为 true 可以优化性能
@@ -50,7 +50,8 @@ function Graphics(mesh, options) {
   Container.call(this);
   options = options || {};
   this.mesh = mesh;
-  this.meshType = Utils.isFunction(mesh) ? FUNCTION : Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
+  this.meshType = Utils.isFunction(mesh) ? FUNCTION :
+  Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
   if (this.meshType === '') throw new Error('不支持的绘制对象');
 
   this.cache = options.cache || false;
@@ -64,8 +65,8 @@ Graphics.prototype = Object.create(Container.prototype);
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @param {context} ctx
  * @private
+ * @param {context} ctx
  */
 Graphics.prototype.renderMe = function(ctx) {
   if (!this.meshType) return;
@@ -84,8 +85,7 @@ Graphics.prototype.renderMe = function(ctx) {
       this.cached = true;
       this.cache = false;
     }
-    this.frameBuffer
-    &&
+    this.frameBuffer &&
     ctx.drawImage(
       this.frameBuffer.canvas,
       this.__co.x - this.__co.px,
@@ -101,8 +101,8 @@ Graphics.prototype.renderMe = function(ctx) {
 /**
  * 调用绘制函数
  *
- * @param {context} ctx
  * @private
+ * @param {context} ctx
  */
 Graphics.prototype._drawBack = function(ctx) {
   if (this.meshType === FUNCTION) {

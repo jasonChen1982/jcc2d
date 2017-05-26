@@ -25,8 +25,8 @@ import {Rectangle} from '../math/Rectangle';
  * ```
  *
  * @class
- * @extends JC.Container
  * @memberof JC
+ * @extends JC.Container
  * @param {json} options
  */
 function Sprite(options) {
@@ -36,7 +36,7 @@ function Sprite(options) {
   if (this.texture.loaded) {
     this.upTexture(options);
   } else {
-    let This = this;
+    const This = this;
     this._ready = false;
     this.texture.on('load', function() {
       This.upTexture(options);
@@ -51,7 +51,6 @@ Sprite.prototype = Object.create(Container.prototype);
 /**
  * 更新纹理对象
  *
- * @method upTexture
  * @private
  * @param {json} options
  */
@@ -66,10 +65,10 @@ Sprite.prototype.upTexture = function(options) {
     this.naturalHeight
   );
 
-  this.width = options.width || this.frame.width || this.naturalWidth;
-  this.height = options.height || this.frame.height || this.naturalHeight;
+  this.width = options.width || this.frame.width;
+  this.height = options.height || this.frame.height;
 
-  let rect = new Rectangle(0, 0, this.width, this.height);
+  const rect = new Rectangle(0, 0, this.width, this.height);
   this._bounds.addRect(rect);
   this.setArea(rect, true);
 };
@@ -77,7 +76,6 @@ Sprite.prototype.upTexture = function(options) {
 /**
  * 更新对象的动画姿态
  *
- * @method updateAnimation
  * @private
  * @param {number} snippet
  */
@@ -97,13 +95,12 @@ Sprite.prototype.playMovie = function(options) {
 /**
  * 更新对象本身的矩阵姿态以及透明度
  *
- * @method updateMe
  * @private
  * @param {context} ctx
  */
 Sprite.prototype.renderMe = function(ctx) {
   if (!this._ready) return;
-  let frame = this.MovieClip.getFrame();
+  const frame = this.MovieClip.getFrame();
   ctx.drawImage(
     this.texture.texture,
     frame.x,

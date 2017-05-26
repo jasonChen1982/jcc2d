@@ -1,5 +1,11 @@
+
+/* eslint guard-for-in: "off" */
+
 import {Eventer} from '../eventer/Eventer';
 import {Utils} from './Utils';
+
+const URL = 'url';
+const IMG = 'img';
 
 /**
  * 图片纹理类
@@ -7,11 +13,20 @@ import {Utils} from './Utils';
  * @class
  * @memberof JC
  * @param {string | Image} img 图片url或者图片对象.
- * @param {Boolean} lazy 图片是否需要懒加载
+ * @param {object} options 图片配置
+ * @param {boolean} [options.lazy] 图片是否需要懒加载
+ * @param {string} [options.crossOrigin] 图片是否配置跨域
  * @extends JC.Eventer
  */
-function Texture(img, lazy) {
+function Texture(img, options) {
   Eventer.call(this);
+  options = options || {};
+
+  const isImg = img instanceof Image || img.nodeName === 'IMG';
+  this.type = Utils.isString(img) ? URL :
+  isImg ? IMG : console.warn('not support asset');
+
+  this.crossOrigin = options.crossOrigin;
   this.texture = null;
   this.width = 0;
   this.height = 0;
@@ -20,8 +35,10 @@ function Texture(img, lazy) {
   this.loaded = false;
   this.hadload = false;
   this.src = img;
+
   this.resole(img);
-  if (!lazy || !Utils.isString(img)) this.load(img);
+
+  if (!options.lazy || this.type === IMG) this.load(img);
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
@@ -33,12 +50,15 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @private
  */
 Texture.prototype.resole = function(img) {
-  if (Utils.isString(img)) {
+  const This = this;
+  if (this.type === URL) {
     this.texture = new Image();
-  }
-  if (img instanceof Image || img.nodeName === 'IMG') {
+  } else if (this.type === IMG) {
     this.texture = img;
   }
+  this.on('load', function() {
+    This.update();
+  });
 };
 
 /**
@@ -50,36 +70,48 @@ Texture.prototype.resole = function(img) {
  */
 Texture.prototype.load = function(img) {
   if (this.hadload) return;
-  let This = this;
   this.hadload = true;
   img = img || this.src;
-  if (Utils.isString(img)) {
-    // TODO: 不默认配置跨域配置
-    this.texture.crossOrigin = '';
-    this.texture.src = img;
-    this.texture.onload = function() {
-      This.loaded = true;
-      This.emit('load');
-    };
-    this.texture.onerror = function() {
-      This.emit('error');
-    };
-    this.on('load', function() {
-      This.width = This.texture.width;
-      This.height = This.texture.height;
-      This.naturalWidth = This.texture.naturalWidth;
-      This.naturalHeight = This.texture.naturalHeight;
-    });
+  if (this.type === URL) {
+    this.fromURL(img);
+  } else if (this.type === IMG) {
+    if (this.texture.naturalWidth > 0 && this.texture.naturalHeight > 0) {
+      this.loaded = true;
+      this.update();
+    } else {
+      this.fromIMG(img);
+    }
   }
-  if (
-    (img instanceof Image || img.nodeName === 'IMG') &&
-    img.naturalWidth * img.naturalHeight > 0
-  ) {
-    this.width = img.width;
-    this.height = img.height;
-    this.naturalWidth = img.naturalWidth;
-    this.naturalHeight = img.naturalHeight;
+};
+
+Texture.prototype.fromURL = function(url) {
+  if (!Utils.isUndefined(this.crossOrigin)) {
+    this.texture.crossOrigin = this.crossOrigin;
   }
+  this.listen(this.texture);
+  this.texture.src = url;
+};
+
+Texture.prototype.fromIMG = function(img) {
+  this.listen(img);
+};
+
+Texture.prototype.listen = function(img) {
+  const This = this;
+  img.addEventListener('load', function() {
+    This.loaded = true;
+    This.emit('load');
+  });
+  img.addEventListener('error', function() {
+    This.emit('error');
+  });
+};
+
+Texture.prototype.update = function() {
+  this.width = this.texture.width;
+  this.height = this.texture.height;
+  this.naturalWidth = this.texture.naturalWidth;
+  this.naturalHeight = this.texture.naturalHeight;
 };
 
 
@@ -120,7 +152,6 @@ Loader.prototype.load = function(srcMap) {
   this._failed = 0;
   this._received = 0;
 
-  /* eslint guard-for-in: "off" */
   for (let src in srcMap) {
     this._total++;
     this.textures[src] = new Texture(srcMap[src]);
