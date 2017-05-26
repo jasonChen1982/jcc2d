@@ -140,7 +140,7 @@ Container.prototype.adds = function(object) {
     }
     object.parent = this;
     this.childs.push(object);
-    if (object.zIndex !== 0) this.souldSort = true;
+    this.souldSort = true;
   } else {
     console.error('adds: object not an instance of Container', object);
   }

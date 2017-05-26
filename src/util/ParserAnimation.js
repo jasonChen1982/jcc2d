@@ -74,6 +74,7 @@ ParserAnimation.prototype.parser = function(doc, layers) {
   const op = this.op;
   for (let i = l - 1; i >= 0; i--) {
     const layer = layers[i];
+    console.log(layer.nm);
     if (layer.ty === 2) {
       const id = this.getAssets(layer.refId).id;
       const ani = new Sprite({

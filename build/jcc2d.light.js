@@ -3114,7 +3114,7 @@ Container.prototype.adds = function (object) {
     }
     object.parent = this;
     this.childs.push(object);
-    if (object.zIndex !== 0) this.souldSort = true;
+    this.souldSort = true;
   } else {
     console.error('adds: object not an instance of Container', object);
   }
@@ -3664,6 +3664,7 @@ ParserAnimation.prototype.parser = function (doc, layers) {
   var op = this.op;
   for (var i = l - 1; i >= 0; i--) {
     var layer = layers[i];
+    console.log(layer.nm);
     if (layer.ty === 2) {
       var id = this.getAssets(layer.refId).id;
       var ani = new Sprite({
@@ -3757,12 +3758,12 @@ ParserAnimation.prototype.cancle = function () {
 };
 
 /**
+ * 帧缓冲区
  * @class
  */
 function FrameBuffer() {
   this.canvas = document.createElement('canvas');
   this.ctx = this.canvas.getContext('2d');
-  // document.body.appendChild(this.canvas);
 }
 FrameBuffer.prototype.setSize = function (rect) {
   this.width = this.canvas.width = rect.width + rect.px * 2;

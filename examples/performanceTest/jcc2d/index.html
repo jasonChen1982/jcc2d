@@ -78,6 +78,7 @@
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
     stage.on('postrender', function () {
+      DOC.souldSort = true;
       stats.update();
     })
 
