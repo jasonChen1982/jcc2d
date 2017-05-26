@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.1"></a>
+## [1.2.1](https://github.com/jasonChen1982/jcc2d/compare/v1.2.0...v1.2.1) (2017-05-26)
+
+
+### Features
+
+* **animation:** add animation control api ([6c4771b](https://github.com/jasonChen1982/jcc2d/commit/6c4771b))
+* **animation:** adjust spill theory ([a0b17ef](https://github.com/jasonChen1982/jcc2d/commit/a0b17ef))
+* **Point:** enhance Point class with cross function ([f96148d](https://github.com/jasonChen1982/jcc2d/commit/f96148d))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/jasonChen1982/jcc2d/compare/v1.1.10...v1.2.0) (2017-05-25)
 
