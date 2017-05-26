@@ -118,6 +118,8 @@ Eventer.prototype.emit = function (type, ev) {
   }
 };
 
+/* eslint max-len: "off" */
+
 /**
  * 二维空间内坐标点类
  *
@@ -188,7 +190,7 @@ Point.prototype.set = function (x, y, z, w) {
   this.w = w;
   return this;
 };
-/* eslint max-len: "off" */
+
 Point.prototype.add = function (v, w) {
   if (w !== undefined) {
     console.warn('Use .addVectors( a, b ) instead.');
@@ -268,6 +270,38 @@ Point.prototype.multiplyScalar = function (scalar) {
     this.z = 0;
     this.w = 0;
   }
+  return this;
+};
+
+Point.prototype.cross = function (v, w) {
+  if (w !== undefined) {
+    console.warn('Use .crossVectors( a, b ) instead.');
+    return this.crossVectors(v, w);
+  }
+
+  var x = this.x;
+  var y = this.y;
+  var z = this.z;
+
+  this.x = y * v.z - z * v.y;
+  this.y = z * v.x - x * v.z;
+  this.z = x * v.y - y * v.x;
+
+  return this;
+};
+
+Point.prototype.crossVectors = function (a, b) {
+  var ax = a.x;
+  var ay = a.y;
+  var az = a.z;
+  var bx = b.x;
+  var by = b.y;
+  var bz = b.z;
+
+  this.x = ay * bz - az * by;
+  this.y = az * bx - ax * bz;
+  this.z = ax * by - ay * bx;
+
   return this;
 };
 
@@ -718,19 +752,18 @@ function Animate(options) {
   this.delay = options.delay || 0;
   this.delayCut = this.delay;
   this.wait = options.wait || 0;
+  this.waitCut = this.wait;
   this.progress = 0;
   this.direction = 1;
 
   this.timeScale = options.timeScale || 1;
 
-  this.totalTime = 0;
-
   this.paused = false;
 }
 Animate.prototype.update = function (snippet) {
   var snippetCache = this.direction * this.timeScale * snippet;
-  if (this.wait > 0) {
-    this.wait -= Math.abs(snippetCache);
+  if (this.waitCut > 0) {
+    this.waitCut -= Math.abs(snippetCache);
     return;
   }
   if (this.paused || !this.living || this.delayCut > 0) {
@@ -739,12 +772,11 @@ Animate.prototype.update = function (snippet) {
   }
 
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
-  this.totalTime += Math.abs(snippetCache);
 
   var pose = this.nextPose();
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
-  if (this.totalTime >= this.duration) {
+  if (this.spill()) {
     if (this.repeatsCut > 0 || this.infinite) {
       if (this.repeatsCut > 0) --this.repeatsCut;
       this.delayCut = this.delay;
@@ -758,14 +790,20 @@ Animate.prototype.update = function (snippet) {
       if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
-    this.totalTime = 0;
   }
   return pose;
+};
+Animate.prototype.spill = function () {
+  var bottomSpill = this.progress <= 0 && this.direction === -1;
+  var topSpill = this.progress >= this.duration && this.direction === 1;
+  return bottomSpill || topSpill;
 };
 Animate.prototype.init = function () {
   this.direction = 1;
   this.progress = 0;
   this.repeatsCut = this.repeats;
+  this.delayCut = this.delay;
+  this.waitCut = this.wait;
 };
 Animate.prototype.nextPose = function () {
   console.warn('should be overwrite');
@@ -785,6 +823,8 @@ Animate.prototype.cancle = function () {
   this.living = false;
 };
 
+/* eslint guard-for-in: "off" */
+
 /**
  * Transition类型动画对象
  *
@@ -799,7 +839,6 @@ function Transition(options) {
     this.element.setProps(options.from);
   } else {
     options.from = {};
-    /* eslint guard-for-in: "off" */
     for (var i in options.to) {
       options.from[i] = this.element[i];
     }
@@ -811,7 +850,6 @@ function Transition(options) {
 Transition.prototype = Object.create(Animate.prototype);
 Transition.prototype.nextPose = function () {
   var pose = {};
-  /* eslint guard-for-in: "off" */
   for (var i in this.to) {
     pose[i] = Tween[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
     if (this.element[i] !== undefined) this.element[i] = pose[i];
@@ -983,7 +1021,7 @@ Curve.prototype = {
 function PathMotion(options) {
   Animate.call(this, options);
   if (!options.path || !(options.path instanceof Curve)) {
-    console.warn('%c JC.PathMotion warn %c: path is not instanceof Curve', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;');
+    console.warn('path is not instanceof Curve');
   }
 
   this.path = options.path;
@@ -1242,7 +1280,7 @@ BezierEasing.prototype.get = function (x) {
   return calcBezier(this._getTForX(x), this.mY1, this.mY2);
 };
 
-var bezierPoor = {};
+var bezierPool = {};
 
 /**
  * 准备好贝塞尔曲线
@@ -1255,11 +1293,11 @@ var bezierPoor = {};
  */
 function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
   var str = nm || [mX2, mY2, mX1, mY1].join('_').replace(/\./g, 'p');
-  if (bezierPoor[str]) {
-    return bezierPoor[str];
+  if (bezierPool[str]) {
+    return bezierPool[str];
   }
   var bezEasing = new BezierEasing(mX1, mY1, mX2, mY2);
-  bezierPoor[str] = bezEasing;
+  bezierPool[str] = bezEasing;
 }
 
 /**
@@ -1273,7 +1311,7 @@ function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
 function getEaseing(s, e, nm, p) {
   var value = [];
   for (var i = 0; i < s.length; i++) {
-    var rate = bezierPoor[nm[i]].get(p);
+    var rate = bezierPool[nm[i]].get(p);
     var v = e[i] - s[i];
     value[i] = s[i] + v * rate;
   }
@@ -1288,10 +1326,12 @@ function getEaseing(s, e, nm, p) {
  * @return {Point}
  */
 function getEaseingPath(curve, nm, p) {
-  var rate = bezierPoor[nm].get(p);
+  var rate = bezierPool[nm].get(p);
   var point = curve.getPointAt(rate);
   return [point.x, point.y, point.z];
 }
+
+/* eslint guard-for-in: "off" */
 
 var PM = {
   o: {
@@ -1434,7 +1474,6 @@ KeyFrames.prototype.prepareStatic = function (ks, key) {
 
 KeyFrames.prototype.nextPose = function () {
   var pose = {};
-  /* eslint guard-for-in: "off" */
   for (var key in this.aks) {
     var ak = this.aks[key];
     pose[key] = this.interpolation(key, ak);
@@ -1503,14 +1542,12 @@ function AnimateRunner(options) {
   this.queues = [];
   this.alternate = false;
 
-  // this.parserRunners();
   this.length = this.runners.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
 AnimateRunner.prototype.nextRunner = function () {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
-  this.totalTime++;
 };
 AnimateRunner.prototype.initRunner = function () {
   var runner = this.runners[this.cursor];
@@ -1549,7 +1586,7 @@ AnimateRunner.prototype.update = function (snippet) {
     index: cc, pose: pose
   }, this.progress / this.duration);
 
-  if (this.totalTime >= this.length) {
+  if (this.spill()) {
     if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       this.delayCut = this.delay;
@@ -1559,8 +1596,12 @@ AnimateRunner.prototype.update = function (snippet) {
       if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
-    this.totalTime = 0;
   }
+};
+AnimateRunner.prototype.spill = function () {
+  var bottomSpill = this.cursor <= 0 && this.direction === -1;
+  var topSpill = this.cursor >= this.length && this.direction === 1;
+  return bottomSpill || topSpill;
 };
 
 /**
@@ -3020,7 +3061,10 @@ Container.prototype.cancle = function () {
   this.Animator.clear();
 };
 
+/* eslint max-len: "off" */
+
 // TODO: 继承事件对象
+
 /**
  * MovieClip类型动画对象
  *
@@ -3124,8 +3168,7 @@ MovieClip.prototype.format = function (movie) {
     if (config) {
       return this.format(config);
     } else {
-      /* eslint max-len: "off" */
-      console.warn('%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ', 'color: #f98165; background: #80a89e', 'color: #80a89e; background: #cad9d5;', 'color: #f98165; background: #cad9d5', 'color: #80a89e; background: #cad9d5');
+      console.warn('you havn\'t config ' + movie + ' in animations ');
       return false;
     }
   } else if (Utils.isArray(movie)) {
@@ -3273,11 +3316,11 @@ Sprite.prototype.renderMe = function (ctx) {
  * @memberof JC
  * @param {object} options 动画配置
  * @param {object} [options.keyframes] bodymovin从ae导出的动画数据
- * @param {string} [options.prefix] 导出资源的前缀
  * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
  * @param {number} [options.repeats] 动画是否无限循环
  * @param {boolean} [options.infinite] 动画是否无限循环
  * @param {boolean} [options.alternate] 动画是否交替播放
+ * @param {string} [options.prefix] 导出资源的前缀
  */
 function ParserAnimation(options) {
   this.prefix = options.prefix || '';

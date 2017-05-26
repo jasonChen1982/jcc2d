@@ -17,14 +17,12 @@ function AnimateRunner(options) {
   this.queues = [];
   this.alternate = false;
 
-  // this.parserRunners();
   this.length = this.runners.length;
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
 AnimateRunner.prototype.nextRunner = function() {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
-  this.totalTime++;
 };
 AnimateRunner.prototype.initRunner = function() {
   const runner = this.runners[this.cursor];
@@ -63,7 +61,7 @@ AnimateRunner.prototype.update = function(snippet) {
     index: cc, pose: pose,
   }, this.progress / this.duration);
 
-  if (this.totalTime >= this.length) {
+  if (this.spill()) {
     if (this.repeats > 0 || this.infinite) {
       if (this.repeats > 0) --this.repeats;
       this.delayCut = this.delay;
@@ -73,8 +71,12 @@ AnimateRunner.prototype.update = function(snippet) {
       if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
-    this.totalTime = 0;
   }
+};
+AnimateRunner.prototype.spill = function() {
+  const bottomSpill = this.cursor <= 0 && this.direction === -1;
+  const topSpill = this.cursor >= this.length && this.direction === 1;
+  return bottomSpill || topSpill;
 };
 
 

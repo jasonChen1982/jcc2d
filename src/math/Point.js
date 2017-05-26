@@ -155,7 +155,7 @@ Point.prototype.multiplyScalar = function( scalar ) {
   return this;
 };
 
-JC.Point.prototype.cross = function(v, w) {
+Point.prototype.cross = function(v, w) {
   if (w !== undefined) {
     console.warn('Use .crossVectors( a, b ) instead.');
     return this.crossVectors(v, w);
@@ -172,7 +172,7 @@ JC.Point.prototype.cross = function(v, w) {
   return this;
 };
 
-JC.Point.prototype.crossVectors = function(a, b) {
+Point.prototype.crossVectors = function(a, b) {
   const ax = a.x;
   const ay = a.y;
   const az = a.z;

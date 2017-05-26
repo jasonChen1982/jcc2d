@@ -2,6 +2,8 @@ import {Tween} from '../util/Tween';
 import {Animate} from './Animate';
 import {Utils} from '../util/Utils';
 
+/* eslint guard-for-in: "off" */
+
 /**
  * Transition类型动画对象
  *
@@ -16,7 +18,6 @@ function Transition(options) {
     this.element.setProps(options.from);
   } else {
     options.from = {};
-    /* eslint guard-for-in: "off" */
     for (let i in options.to) {
       options.from[i] = this.element[i];
     }
@@ -28,13 +29,13 @@ function Transition(options) {
 Transition.prototype = Object.create(Animate.prototype);
 Transition.prototype.nextPose = function() {
   let pose = {};
-  /* eslint guard-for-in: "off" */
   for (let i in this.to) {
-    pose[i] = Tween[this.ease](this.progress,
-                                this.from[i],
-                                this.to[i] - this.from[i],
-                                this.duration
-                              );
+    pose[i] = Tween[this.ease](
+      this.progress,
+      this.from[i],
+      this.to[i] - this.from[i],
+      this.duration
+    );
     if (this.element[i] !== undefined) this.element[i] = pose[i];
   }
   return pose;

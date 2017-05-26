@@ -1,4 +1,6 @@
 
+/* eslint guard-for-in: "off" */
+
 import {Animate} from './Animate';
 import {BezierCurve} from '../math/BezierCurve';
 import {Point} from '../math/Point';
@@ -145,7 +147,6 @@ KeyFrames.prototype.prepareStatic = function(ks, key) {
 
 KeyFrames.prototype.nextPose = function() {
   let pose = {};
-  /* eslint guard-for-in: "off" */
   for (const key in this.aks) {
     const ak = this.aks[key];
     pose[key] = this.interpolation(key, ak);

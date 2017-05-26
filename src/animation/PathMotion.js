@@ -14,11 +14,7 @@ import {Point} from '../math/Point';
 function PathMotion(options) {
   Animate.call(this, options);
   if (!options.path || !(options.path instanceof Curve)) {
-    console.warn(
-      '%c JC.PathMotion warn %c: path is not instanceof Curve',
-      'color: #f98165; background: #80a89e',
-      'color: #80a89e; background: #cad9d5;'
-    );
+    console.warn('path is not instanceof Curve');
   }
 
   this.path = options.path;

@@ -23,19 +23,18 @@ function Animate(options) {
   this.delay = options.delay || 0;
   this.delayCut = this.delay;
   this.wait = options.wait || 0;
+  this.waitCut = this.wait;
   this.progress = 0;
   this.direction = 1;
 
   this.timeScale = options.timeScale || 1;
 
-  this.totalTime = 0;
-
   this.paused = false;
 }
 Animate.prototype.update = function(snippet) {
   let snippetCache = this.direction * this.timeScale * snippet;
-  if (this.wait > 0) {
-    this.wait -= Math.abs(snippetCache);
+  if (this.waitCut > 0) {
+    this.waitCut -= Math.abs(snippetCache);
     return;
   }
   if (this.paused || !this.living || this.delayCut > 0) {
@@ -44,12 +43,11 @@ Animate.prototype.update = function(snippet) {
   }
 
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
-  this.totalTime += Math.abs(snippetCache);
 
   let pose = this.nextPose();
   if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
-  if (this.totalTime >= this.duration) {
+  if (this.spill()) {
     if (this.repeatsCut > 0 || this.infinite) {
       if (this.repeatsCut > 0) --this.repeatsCut;
       this.delayCut = this.delay;
@@ -63,14 +61,20 @@ Animate.prototype.update = function(snippet) {
       if (!this.resident) this.living = false;
       if (this.onCompelete) this.onCompelete(pose);
     }
-    this.totalTime = 0;
   }
   return pose;
+};
+Animate.prototype.spill = function() {
+  const bottomSpill = this.progress <= 0 && this.direction === -1;
+  const topSpill = this.progress >= this.duration && this.direction === 1;
+  return bottomSpill || topSpill;
 };
 Animate.prototype.init = function() {
   this.direction = 1;
   this.progress = 0;
   this.repeatsCut = this.repeats;
+  this.delayCut = this.delay;
+  this.waitCut = this.wait;
 };
 Animate.prototype.nextPose = function() {
   console.warn('should be overwrite');

@@ -1,6 +1,9 @@
 import {Utils} from '../util/Utils';
 
+/* eslint max-len: "off" */
+
 // TODO: 继承事件对象
+
 /**
  * MovieClip类型动画对象
  *
@@ -108,14 +111,7 @@ MovieClip.prototype.format = function(movie) {
     if (config) {
       return this.format(config);
     } else {
-      /* eslint max-len: "off" */
-      console.warn(
-          '%c JC.MovieClip warn %c: you didn\`t config %c' + movie + '%c in animations ',
-          'color: #f98165; background: #80a89e',
-          'color: #80a89e; background: #cad9d5;',
-          'color: #f98165; background: #cad9d5',
-          'color: #80a89e; background: #cad9d5'
-      );
+      console.warn('you havn\'t config ' + movie + ' in animations ');
       return false;
     }
   } else if (Utils.isArray(movie)) {
