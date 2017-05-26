@@ -8,11 +8,11 @@ import {loaderUtil} from './Loader';
  * @memberof JC
  * @param {object} options 动画配置
  * @param {object} [options.keyframes] bodymovin从ae导出的动画数据
- * @param {string} [options.prefix] 导出资源的前缀
  * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
  * @param {number} [options.repeats] 动画是否无限循环
  * @param {boolean} [options.infinite] 动画是否无限循环
  * @param {boolean} [options.alternate] 动画是否交替播放
+ * @param {string} [options.prefix] 导出资源的前缀
  */
 function ParserAnimation(options) {
   this.prefix = options.prefix || '';

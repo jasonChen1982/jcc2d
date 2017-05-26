@@ -1,6 +1,6 @@
 
 import {BezierEasing} from '../math/BezierEasing';
-const bezierPoor = {};
+const bezierPool = {};
 
 /**
  * 准备好贝塞尔曲线
@@ -13,11 +13,11 @@ const bezierPoor = {};
  */
 function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
   const str = nm || [mX2, mY2, mX1, mY1].join('_').replace(/\./g, 'p');
-  if (bezierPoor[str]) {
-    return bezierPoor[str];
+  if (bezierPool[str]) {
+    return bezierPool[str];
   }
   const bezEasing = new BezierEasing(mX1, mY1, mX2, mY2);
-  bezierPoor[str] = bezEasing;
+  bezierPool[str] = bezEasing;
 }
 
 /**
@@ -31,7 +31,7 @@ function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
 function getEaseing(s, e, nm, p) {
   const value = [];
   for (let i = 0; i < s.length; i++) {
-    const rate = bezierPoor[nm[i]].get(p);
+    const rate = bezierPool[nm[i]].get(p);
     const v = e[i] - s[i];
     value[i] = s[i] + v * rate;
   }
@@ -46,7 +46,7 @@ function getEaseing(s, e, nm, p) {
  * @return {Point}
  */
 function getEaseingPath(curve, nm, p) {
-  const rate = bezierPoor[nm].get(p);
+  const rate = bezierPool[nm].get(p);
   const point = curve.getPointAt(rate);
   return [point.x, point.y, point.z];
 }
