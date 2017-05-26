@@ -3114,7 +3114,7 @@ Container.prototype.adds = function (object) {
     }
     object.parent = this;
     this.childs.push(object);
-    this.souldSort = true;
+    if (object.zIndex !== 0) this.souldSort = true;
   } else {
     console.error('adds: object not an instance of Container', object);
   }
@@ -3664,7 +3664,6 @@ ParserAnimation.prototype.parser = function (doc, layers) {
   var op = this.op;
   for (var i = l - 1; i >= 0; i--) {
     var layer = layers[i];
-    console.log(layer.nm);
     if (layer.ty === 2) {
       var id = this.getAssets(layer.refId).id;
       var ani = new Sprite({
