@@ -1,66 +1,77 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-	<title>JC_demo</title>
-	<style type="text/css">
-    * {padding:0;margin:0;}
-    body {overflow: hidden;background-color: #000;}
-    #demo_canvas {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 320px;
-        height: 568px;
-        margin: -284px 0 0 -160px;
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
     }
+
+    body {
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 320px;
+      height: 568px;
+      margin: -284px 0 0 -160px;
+    }
+
   </style>
 </head>
+
 <body>
-<canvas id="demo_canvas" width="640" height="1138"></canvas>
+  <canvas id="demo_canvas" width="640" height="1138"></canvas>
 
-<script type="text/javascript" src="../../build/jcc2d.js"></script>
-<script type="text/javascript" src="../libs/stats.min.js"></script>
-<script type="text/javascript" src="./js/data.js"></script>
-<script type="text/javascript">
-
-var stage = new JC.Stage({
-        dom: 'demo_canvas',
-        // resolution: window.devicePixelRatio,
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript" src="./js/data.js"></script>
+  <script type="text/javascript">
+    var stage = new JC.Stage({
+      dom: 'demo_canvas',
+      // resolution: window.devicePixelRatio,
     });
-var DOC = new JC.Container();
-// DOC.timeScale = 0.2;
+    var DOC = new JC.Container();
+    // DOC.timeScale = 0.2;
 
-var ani = new JC.ParserAnimation({
-  keyframes: data,
-  // fr: 30,
-  prefix: '',
-  infinite: true,
-  // alternate: true,
-});
-// ani.doc.timeScale = 0.2;
-DOC.y = 200;
-DOC.adds(ani.doc);
-ani.doc.pause();
-stage.adds(DOC);
-ani.assetBox.on('compelete', function() {
-  stage.startEngine();
-});
+    var ani = new JC.ParserAnimation({
+      keyframes: data,
+      // fr: 30,
+      prefix: '',
+      infinite: true,
+      // alternate: true,
+    });
+    // ani.doc.timeScale = 0.2;
+    DOC.y = 200;
+    DOC.adds(ani.doc);
+    ani.doc.pause();
+    stage.adds(DOC);
+    ani.assetBox.on('compelete', function () {
+      stage.startEngine();
+    });
 
 
-/**
- * 帧率监控工具
- */
-var stats = new Stats();
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
-stage.on('postrender', function() {
-  stats.update();
-})
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
 
-</script>
+  </script>
 </body>
+
 </html>

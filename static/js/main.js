@@ -141,11 +141,11 @@ LinkFace.prototype.render = function(ctx) {
 
 var w = window.innerWidth,
     h = window.innerHeight,
-    curvePath = new JC.Graphics(),
-    rectLeftBack = new JC.Graphics(),
-    rectLeftFront = new JC.Graphics(),
-    rectRightBack = new JC.Graphics(),
-    rectRightFront = new JC.Graphics(),
+    curvePath = new JC.Graphics(new WaveLines()),
+    rectLeftBack = new JC.Graphics(new RectBound()),
+    rectLeftFront = new JC.Graphics(new RectBound()),
+    rectRightBack = new JC.Graphics(new RectBound()),
+    rectRightFront = new JC.Graphics(new RectBound()),
     stage = new JC.Stage({
         dom: 'line-canvas',
         resolution: window.devicePixelRatio,
@@ -165,9 +165,8 @@ banner.y = h / 2;
 bannerRight.x = w;
 bannerRight.y = -0.25*h;
 bannerLeft.y = 0.25*h;
-curvePath.drawCall(new WaveLines());
 
-rectLeftBack.drawCall(new RectBound());
+
 rectLeftBack.alpha = 0;
 rectLeftBack.animate({
     to: {alpha: 1},
@@ -177,7 +176,7 @@ rectLeftBack.animate({
     infinite: true,
     alternate: true
 });
-rectLeftFront.drawCall(new RectBound());
+
 rectLeftFront.animate({
     to: {y: -120},
     ease: 'easeOutStrong',
@@ -197,7 +196,6 @@ bannerLeft.animate({
     alternate: true
 });
 
-rectRightBack.drawCall(new RectBound());
 rectRightBack.alpha = 0;
 rectRightBack.animate({
     to: {alpha: 1},
@@ -207,7 +205,7 @@ rectRightBack.animate({
     infinite: true,
     alternate: true
 });
-rectRightFront.drawCall(new RectBound());
+
 rectRightFront.animate({
     to: {y: -120},
     ease: 'easeOutStrong',
@@ -283,15 +281,14 @@ var miniText = new JC.TextFace('The canvas 2d renderer & An awesome animator', '
 miniText.y = JC.UI.RTP(.7);
 miniText.alpha = 0;
 LOGO.adds(miniText,BTNBOX);
-var documentLink = new JC.Graphics();
 var linkFace = new LinkFace({
     text: 'Document',
     font: 'bold '+JC.UI.RTP(.16)+'px Tangerine',
     color: '#eca31c',
     textColor: '#000000'
 });
+var documentLink = new JC.Graphics(linkFace);
 documentLink.buttonMode = true;
-documentLink.drawCall(linkFace);
 documentLink.setArea(linkFace.bound);
 documentLink.x = -JC.UI.RTP(1.2);
 documentLink.alpha = 0;
@@ -302,15 +299,14 @@ documentLink.on('click',function(){
 BTNBOX.adds(documentLink);
 
 
-var examplesLink = new JC.Graphics();
 var linkFace2 = new LinkFace({
     text: 'Examples',
     font: 'bold '+JC.UI.RTP(.16)+'px Tangerine',
     color: '#53d497',
     textColor: '#000000'
 });
+var examplesLink = new JC.Graphics(linkFace2);
 examplesLink.buttonMode = true;
-examplesLink.drawCall(linkFace2);
 examplesLink.setArea(linkFace2.bound);
 examplesLink.x = JC.UI.RTP(1.2);
 examplesLink.alpha = 0;

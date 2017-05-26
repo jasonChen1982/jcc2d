@@ -1,175 +1,205 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-	<title>JC_demo</title>
-	<style type="text/css">
-    * {padding:0;margin:0;}
-    body {overflow: hidden;background-color: #000;}
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background-color: #000;
+    }
+
+  </style>
 </head>
+
 <body>
-<canvas id="demo_canvas" width="640" height="900"></canvas>
+  <canvas id="demo_canvas" width="640" height="900"></canvas>
 
-<script type="text/javascript" src="../../build/jcc2d.js"></script>
-<script type="text/javascript" src="../libs/util/tween.js"></script>
-<script type="text/javascript" src="../libs/stats.min.js"></script>
-<script type="text/javascript">
-window.onresize = function(){
-    resize();
-};
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/util/tween.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    function Rect(color, size) {
+      this.size = size || 30;
+      this.color = color || '#749d9b';
+    }
+    Rect.prototype.render = function (ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+      ctx.fill();
+    };
 
-function Rect(color,size){
-    this.size = size||30;
-    this.color = color||'#749d9b';
-}
-Rect.prototype.render = function(ctx){
-    ctx.beginPath();
-    ctx.fillStyle = this.color;
-    ctx.fillRect(-this.size/2,-this.size/2,this.size,this.size);
-    ctx.fill();
-};
-
-function Circle(color,radius){
-    this.radius = radius||60;
-    this.color = color||'#eca378';
-}
-Circle.prototype.render = function(ctx){
-    ctx.beginPath();
-    ctx.fillStyle = this.color;
-    ctx.arc( 0, 0, this.radius, 0, Math.PI*2 );
-    ctx.fill();
-};
+    function Circle(color, radius) {
+      this.radius = radius || 60;
+      this.color = color || '#eca378';
+    }
+    Circle.prototype.render = function (ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+    };
 
 
-JC.Tween.extend(tween);
+    JC.Tween.extend(tween);
 
-var w = window.innerWidth,
-    h = window.innerHeight,
-    stage = new JC.Stage({
+    var w = window.innerWidth,
+      h = window.innerHeight,
+      stage = new JC.Stage({
         dom: 'demo_canvas'
-    }),
-    DOC = new JC.Container();
-DOC.x = w>>1;
-DOC.y = h>>1;
+      }),
+      DOC = new JC.Container();
+    DOC.x = w >> 1;
+    DOC.y = h >> 1;
 
-var stats = new Stats();
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
+    var shape = new JC.Graphics(new Rect('#749d9b'));
+    var bezierPath = new JC.BezierCurve([{
+        x: -80,
+        y: -80,
+        name: '起始点'
+      },
+      {
+        x: 150,
+        y: 60,
+        name: '控制点1'
+      },
+      {
+        x: 80,
+        y: 200,
+        name: '控制点2'
+      },
+      {
+        x: -80,
+        y: 200,
+        name: '控制点3'
+      },
+      {
+        x: -150,
+        y: 60,
+        name: '控制点4'
+      },
+      {
+        x: 80,
+        y: -80,
+        name: '结束点'
+      }
+    ]);
+
+    shape.motion({
+      path: bezierPath,
+      ease: 'elasticBoth',
+      duration: 4000,
+      attachTangent: true,
+      infinite: true,
+      alternate: true
+    });
+
+    // 生成起始点和控制点的现实并绑定拖拽事件
+    var pointsShape = [];
+    for (var i = 0; i < bezierPath.points.length; i++) {
+      var color = i === 0 || i === bezierPath.points.length - 1 ? '#e46d69' : '',
+        point = bezierPath.points[i],
+        control = new JC.Graphics(new Circle(color, 10));
+      control.x = point.x;
+      control.y = point.y;
+      control.setArea(new JC.Circle(0, 0, 20));
+      var text = new JC.TextFace(point.name, {
+        fillColor: '#acba9d'
+      });
+      text.y = -20;
+      control.adds(text);
+      DOC.adds(control);
+      pointsShape[i] = control;
+
+      // 为起始点和控制点绑定拖拽事件
+      bindDrag(control, point);
+    }
 
 
-var shape = new JC.Graphics();
-shape.drawCall(new Rect('#749d9b'));
-var bezierPath = new JC.BezierCurve([
-    {x: -80, y: -80, name: '起始点'},
-    {x: 150, y: 60, name: '控制点1'},
-    {x: 80, y: 200, name: '控制点2'},
-    {x: -80, y: 200, name: '控制点3'},
-    {x: -150, y: 60, name: '控制点4'},
-    {x: 80, y: -80, name: '结束点'}
-]);
 
-shape.motion({
-    path: bezierPath,
-    ease: 'elasticBoth',
-    duration: 4000,
-    attachTangent: true,
-    infinite: true,
-    alternate: true
-});
-
-// 生成起始点和控制点的现实并绑定拖拽事件
-var pointsShape = [];
-for(var i=0;i<bezierPath.points.length;i++){
-    var point = bezierPath.points[i],
-        control = new JC.Graphics();
-    control.x = point.x;
-    control.y = point.y;
-    var color = i === 0 || i === bezierPath.points.length-1 ? '#e46d69' : '';
-    control.drawCall(new Circle(color,10));
-    control.setArea(new JC.Circle(0,0,20));
-    var text = new JC.TextFace(point.name,'','#acba9d');
-    text.y = -20;
-    control.adds(text);
-    DOC.adds(control);
-    pointsShape[i] = control;
-
-    // 为起始点和控制点绑定拖拽事件
-    bindDrag(control,point);
-}
-
-
-
-function bindDrag(el,point){
-    var data = {};
-    el.on('touchstart',function(ev){
+    function bindDrag(el, point) {
+      var data = {};
+      el.on('touchstart', function (ev) {
         data.start = {};
         data.start.x = ev.global.x;
         data.start.y = ev.global.y;
         el.preX = el.x;
         el.preY = el.y;
-    });
-    el.on('touchmove',function(ev){
+      });
+      el.on('touchmove', function (ev) {
         data.translate = {};
-        data.translate.x = ev.global.x-data.start.x;
-        data.translate.y = ev.global.y-data.start.y;
+        data.translate.x = ev.global.x - data.start.x;
+        data.translate.y = ev.global.y - data.start.y;
 
         point.x = el.x = el.preX + data.translate.x;
         point.y = el.y = el.preY + data.translate.y;
 
-    });
-    el.on('touchend',function(){
+      });
+      el.on('touchend', function () {
         el.preX = el.x;
         el.preY = el.y;
-    });
-}
-
-
-
-// 绘制路径的辅助虚线
-var dashLine = new JC.Graphics();
-dashLine.drawCall(function(ctx){
-    ctx.beginPath();
-    ctx.strokeStyle = '#ffffff';
-    for(var i=0;i<100;i++){
-        var pos = bezierPath.getPoint(i/99);
-        if(i===0||dashLine.dash){
-            dashLine.dash = false;
-            ctx.moveTo(pos.x,pos.y);
-        }else{
-            dashLine.dash = true;
-            ctx.lineTo(pos.x,pos.y);
-        }
+      });
     }
-    ctx.stroke();
-});
-
-DOC.adds(dashLine);
-DOC.adds(shape);
 
 
-stage.adds(DOC);
-resize();
+
+    // 绘制路径的辅助虚线
+    var dashLine = new JC.Graphics(function (ctx) {
+      ctx.beginPath();
+      ctx.strokeStyle = '#ffffff';
+      for (var i = 0; i < 100; i++) {
+        var pos = bezierPath.getPoint(i / 99);
+        if (i === 0 || dashLine.dash) {
+          dashLine.dash = false;
+          ctx.moveTo(pos.x, pos.y);
+        } else {
+          dashLine.dash = true;
+          ctx.lineTo(pos.x, pos.y);
+        }
+      }
+      ctx.stroke();
+    });
+
+    DOC.adds(dashLine);
+    DOC.adds(shape);
 
 
-function render(){
-    RAF(render);
-
-    stage.render();
-
-    stats.update();
-}
-render();
+    stage.adds(DOC);
+    resize();
 
 
-function resize(){
-    w = window.innerWidth;
-    h = window.innerHeight;
-    stage.resize(w,h);
-}
-</script>
+    stage.startEngine();
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
+
+    window.onresize = function () {
+      resize();
+    };
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      stage.resize(w, h);
+    }
+
+  </script>
 </body>
+
 </html>

@@ -1,70 +1,73 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-	<title>JC_demo</title>
-	<style type="text/css">
-    * {padding:0;margin:0;}
-    body {overflow: hidden;}
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+  </style>
 </head>
+
 <body>
-<canvas id="demo_canvas" width="320" height="410"></canvas>
-
-<script type="text/javascript" src="../../build/jcc2d.js"></script>
-<script type="text/javascript" src="../libs/stats.min.js"></script>
-<script type="text/javascript">
-window.onerror = function(msg,url,line){
-	alert('line::::'+line+'url::::'+url+'msg::::'+msg);
-};
-window.onresize = function(){
-    resize();
-};
-
-var w = window.innerWidth,
-    h = window.innerHeight,
-    text,
-    stage = new JC.Stage({
+  <canvas id="demo_canvas" width="320" height="410"></canvas>
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    var w = window.innerWidth,
+      h = window.innerHeight,
+      text,
+      stage = new JC.Stage({
         dom: 'demo_canvas'
-    }),
-    DOC = new JC.Container();
-DOC.x = w/2;
-DOC.y = h/2;
+      }),
+      DOC = new JC.Container();
+    DOC.x = w / 2;
+    DOC.y = h / 2;
 
+    resize();
+    text = new JC.TextFace('JC jcc2d canvas renderer', {
+      fontSize: '36px',
+      fontWeight: 'bold',
+      fillColor: '#f00',
+    });
 
+    DOC.adds(text);
+    stage.adds(DOC);
 
+    stage.startEngine();
 
-var stats = new Stats();
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
 
+    window.onresize = function () {
+      resize();
+    };
 
-resize();
-text = new JC.TextFace('JC jcc2d canvas renderer','bold 36px Arial','#f00');
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      stage.resize(w, h);
+    }
 
-text.textAlign = 'center'; // start left center end right
-text.textBaseline = 'middle'; // top bottom middle alphabetic hanging
-
-DOC.adds(text);
-stage.adds(DOC);
-
-render();
-
-function render(){
-    RAF(render);
-
-    stage.render();
-
-    stats.update();
-}
-function resize(){
-    w = window.innerWidth;
-    h = window.innerHeight;
-    stage.resize(w,h);
-}
-</script>
+  </script>
 </body>
+
 </html>

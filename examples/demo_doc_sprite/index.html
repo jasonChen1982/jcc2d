@@ -1,131 +1,143 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-	<title>JC_demo</title>
-	<style type="text/css">
-    * {padding:0;margin:0;}
-    body {overflow: hidden;}
-    </style>
-</head>
-<body>
-<canvas id="demo_canvas" width="320" height="410"></canvas>
-
-<script type="text/javascript" src="../../build/jcc2d.js"></script>
-<script type="text/javascript" src="../libs/stats.min.js"></script>
-<script type="text/javascript">
-window.onerror = function(msg,url,line){
-    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
-};
-window.onresize = function(){
-    resize();
-};
-
-var w = window.innerWidth,
-    h = window.innerHeight,
-    pic,
-    pic2,
-    pic3,
-    stage = new JC.Stage({
-        dom: 'demo_canvas'
-    }),
-    DOC = new JC.Container();
-DOC.x = w/2;
-DOC.y = h/2;
-
-
-
-
-var stats = new Stats();
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
-
-JC.Tween.extend({
-    bounceOut: function(t, b, c, d){
-        if ((t/=d) < (1/2.75)) {
-            return c*(7.5625*t*t) + b;
-        } else if (t < (2/2.75)) {
-            return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b;
-        } else if (t < (2.5/2.75)) {
-            return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b;
-        }
-        return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b;
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
     }
-});
+
+    body {
+      overflow: hidden;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="320" height="410"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    var w = window.innerWidth,
+      h = window.innerHeight,
+      pic,
+      pic2,
+      pic3,
+      stage = new JC.Stage({
+        dom: 'demo_canvas'
+      }),
+      DOC = new JC.Container();
+    DOC.x = w / 2;
+    DOC.y = h / 2;
+
+    JC.Tween.extend({
+      bounceOut: function (t, b, c, d) {
+        if ((t /= d) < (1 / 2.75)) {
+          return c * (7.5625 * t * t) + b;
+        } else if (t < (2 / 2.75)) {
+          return c * (7.5625 * (t -= (1.5 / 2.75)) * t + 0.75) + b;
+        } else if (t < (2.5 / 2.75)) {
+          return c * (7.5625 * (t -= (2.25 / 2.75)) * t + 0.9375) + b;
+        }
+        return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b;
+      }
+    });
 
 
 
-var loadBox = JC.loaderUtil({
-    pic: './images/card02.png',
-    pic2: './images/card04.png',
-    pic3: './images/card05.png'
-});
+    var loadBox = JC.loaderUtil({
+      pic: './images/card02.png',
+      pic2: './images/card04.png',
+      pic3: './images/card05.png'
+    });
 
-loadBox.on('compelete',function(){
-    resize();
-    pic = new JC.Sprite({
+    loadBox.on('compelete', function () {
+      resize();
+      pic = new JC.Sprite({
         texture: loadBox.getById('pic')
-    });
-    pic.pivotX = pic.width >> 1;
-    pic.pivotY = pic.height >> 1;
-    pic.animate({
-        from: {x: 500},
-        to: {x: 100},
+      });
+      pic.pivotX = pic.width >> 1;
+      pic.pivotY = pic.height >> 1;
+      pic.animate({
+        from: {
+          x: 500
+        },
+        to: {
+          x: 100
+        },
         duration: 1000,
         ease: 'bounceOut'
-    });
+      });
 
-    pic2 = new JC.Sprite({
+      pic2 = new JC.Sprite({
         texture: loadBox.getById('pic2')
-    });
-    pic2.pivotX = pic2.width >> 1;
-    pic2.pivotY = pic2.height >> 1;
-    pic2.animate({
-        from: {x: -500},
-        to: {x: -100},
+      });
+      pic2.pivotX = pic2.width >> 1;
+      pic2.pivotY = pic2.height >> 1;
+      pic2.animate({
+        from: {
+          x: -500
+        },
+        to: {
+          x: -100
+        },
         duration: 1000,
         ease: 'bounceOut'
-    });
+      });
 
 
-    pic3 = new JC.Sprite({
+      pic3 = new JC.Sprite({
         texture: loadBox.getById('pic3')
-    });
-    pic3.pivotX = pic3.width >> 1;
-    pic3.pivotY = pic3.height >> 1;
-    pic3.animate({
-        to: {rotation: 360},
+      });
+      pic3.pivotX = pic3.width >> 1;
+      pic3.pivotY = pic3.height >> 1;
+      pic3.animate({
+        to: {
+          rotation: 360
+        },
         infinite: true,
         alternate: true,
         delay: 2000,
         duration: 1000
+      });
+      DOC.adds(pic3);
+
+
+      DOC.adds(pic2, pic);
+      stage.adds(DOC);
+
+      stage.startEngine();
     });
-    DOC.adds(pic3);
 
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
 
-    DOC.adds(pic2,pic);
-    stage.adds(DOC);
+    window.onresize = function () {
+      resize();
+    };
 
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      stage.resize(w, h);
+    }
 
-    render();
-});
-
-
-function render(){
-    RAF(render);
-
-    stage.render();
-
-    stats.update();
-}
-function resize(){
-    w = window.innerWidth;
-    h = window.innerHeight;
-    stage.resize(w,h);
-}
-</script>
+  </script>
 </body>
+
 </html>

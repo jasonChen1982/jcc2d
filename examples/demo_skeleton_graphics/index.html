@@ -1,299 +1,300 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-	<title>JC_demo</title>
-	<style type="text/css">
-    * {padding:0;margin:0;}
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
     html {
-        height: 100%;
+      height: 100%;
     }
+
     body {
-        height: 100%;
-        overflow: hidden;
+      height: 100%;
+      overflow: hidden;
     }
+
     #demo_canvas {
-        width: 100%;
-        height: 100%;
+      width: 100%;
+      height: 100%;
     }
-    </style>
+
+  </style>
 </head>
+
 <body>
-<canvas id="demo_canvas" width="640" height="960"></canvas>
+  <canvas id="demo_canvas" width="640" height="960"></canvas>
 
-<script type="text/javascript" src="../../build/jcc2d.js"></script>
-<script type="text/javascript" src="../libs/stats.min.js"></script>
-<script type="text/javascript">
-window.onerror = function(msg,url,line){
-    alert('line::::'+line+'url::::'+url+'msg::::'+msg);
-};
-window.onresize = function(){
-    resize();
-};
-
-var w = window.innerWidth*window.devicePixelRatio,
-    h = window.innerHeight*window.devicePixelRatio,
-    stage = new JC.Stage({
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    var w = window.innerWidth * window.devicePixelRatio,
+      h = window.innerHeight * window.devicePixelRatio,
+      stage = new JC.Stage({
         dom: 'demo_canvas'
-    }),
-    DOC = new JC.Container(),
-    body,
-    arm1,
-    arm2,
-    arm3,
-    hand,
-    wheel1,
-    wheel2,
-    ground;
-stage.setStyle = true;
+      }),
+      DOC = new JC.Container(),
+      body,
+      arm1,
+      arm2,
+      arm3,
+      hand,
+      wheel1,
+      wheel2,
+      ground;
+    stage.setStyle = true;
 
+    var loadBox = JC.loaderUtil({
+      body: './images/body.png'
+    });
 
+    loadBox.on('compelete', function () {
 
+      resize();
 
-var stats = new Stats();
-stats.domElement.style.position = 'absolute';
-stats.domElement.style.top = '0px';
-document.body.appendChild(stats.domElement);
-
-var loadBox = JC.loaderUtil({
-    body: './images/body.png'
-});
-
-loadBox.on('compelete',function(){
-
-    resize();
-
-    arm1 = new JC.Graphics();
-    arm1.drawCall(function(ctx){
+      arm1 = new JC.Graphics(function (ctx) {
         ctx.beginPath();
         ctx.strokeStyle = '#6d6e71';
         ctx.lineWidth = 4;
-        ctx.arc(0,-220,50,0,Math.PI*2);
+        ctx.arc(0, -220, 50, 0, Math.PI * 2);
         ctx.stroke();
         ctx.lineWidth = 1;
 
         ctx.beginPath();
         ctx.fillStyle = '#3d989b';
-        ctx.moveTo(-38,0);
-        ctx.lineTo(38,0);
-        ctx.lineTo(28,-220);
-        ctx.lineTo(-28,-220);
+        ctx.moveTo(-38, 0);
+        ctx.lineTo(38, 0);
+        ctx.lineTo(28, -220);
+        ctx.lineTo(-28, -220);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#42a6a9';
-        ctx.arc(0,0,40,0,Math.PI*2);
+        ctx.arc(0, 0, 40, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#6d6e71';
-        ctx.arc(0,0,22,0,Math.PI*2);
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#eeefef';
-        ctx.arc(0,0,10,0,Math.PI*2);
+        ctx.arc(0, 0, 10, 0, Math.PI * 2);
         ctx.fill();
-    });
-    arm1.x = 95;
-    arm1.rotation = 80;
+      });
+      arm1.x = 95;
+      arm1.rotation = 80;
 
-    arm2 = new JC.Graphics();
-    arm2.drawCall(function(ctx){
+      arm2 = new JC.Graphics(function (ctx) {
 
         ctx.beginPath();
         ctx.fillStyle = '#42a6a9';
-        ctx.moveTo(-30,0);
-        ctx.arcTo(-30,30,0,30,30);
-        ctx.arcTo(30,30,30,0,30);
-        ctx.lineTo(24,-220);
-        ctx.lineTo(-24,-220);
+        ctx.moveTo(-30, 0);
+        ctx.arcTo(-30, 30, 0, 30, 30);
+        ctx.arcTo(30, 30, 30, 0, 30);
+        ctx.lineTo(24, -220);
+        ctx.lineTo(-24, -220);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#6d6e71';
-        ctx.arc(0,0,14,0,Math.PI*2);
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#eeefef';
-        ctx.arc(0,0,7,0,Math.PI*2);
+        ctx.arc(0, 0, 7, 0, Math.PI * 2);
         ctx.fill();
-    });
-    arm2.x = 0;
-    arm2.y = -220;
-    arm2.rotation = 16;
+      });
+      arm2.x = 0;
+      arm2.y = -220;
+      arm2.rotation = 16;
 
-    arm3 = new JC.Graphics();
-    arm3.drawCall(function(ctx){
+      arm3 = new JC.Graphics(function (ctx) {
 
         ctx.beginPath();
         ctx.fillStyle = '#3d989b';
-        ctx.moveTo(-22,0);
-        ctx.arcTo(-22,22,0,22,22);
-        ctx.arcTo(22,22,22,0,22);
-        ctx.lineTo(22,-90);
-        ctx.lineTo(-22,-90);
+        ctx.moveTo(-22, 0);
+        ctx.arcTo(-22, 22, 0, 22, 22);
+        ctx.arcTo(22, 22, 22, 0, 22);
+        ctx.lineTo(22, -90);
+        ctx.lineTo(-22, -90);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#3d989b';
-        ctx.arc(0,0,22,0,Math.PI*2);
+        ctx.arc(0, 0, 22, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#6d6e71';
-        ctx.arc(0,0,14,0,Math.PI*2);
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#eeefef';
-        ctx.arc(0,0,7,0,Math.PI*2);
+        ctx.arc(0, 0, 7, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#42a6a9';
-        ctx.arc(0,-90,22,0,Math.PI*2);
+        ctx.arc(0, -90, 22, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#6d6e71';
-        ctx.arc(0,-90,10,0,Math.PI*2);
+        ctx.arc(0, -90, 10, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.beginPath();
         ctx.fillStyle = '#eeefef';
-        ctx.arc(0,-90,6,0,Math.PI*2);
+        ctx.arc(0, -90, 6, 0, Math.PI * 2);
         ctx.fill();
-    });
-    arm3.x = 0;
-    arm3.y = -220;
-    arm3.rotation = 26;
+      });
+      arm3.x = 0;
+      arm3.y = -220;
+      arm3.rotation = 26;
 
-    hand = new JC.Graphics();
-    hand.drawCall(function(ctx){
+      hand = new JC.Graphics(function (ctx) {
         ctx.beginPath();
         ctx.fillStyle = '#6d6e71';
-        ctx.fillRect(-42,-80,84,34);
+        ctx.fillRect(-42, -80, 84, 34);
 
         ctx.beginPath();
         ctx.fillStyle = '#42a6a9';
-        ctx.fillRect(-50,-50,100,36);
+        ctx.fillRect(-50, -50, 100, 36);
 
-    });
-    hand.x = 0;
-    hand.y = -90;
-    hand.rotation = 50;
+      });
+      hand.x = 0;
+      hand.y = -90;
+      hand.rotation = 50;
 
-    wheel1 = new JC.Graphics();
-    wheel1.drawCall(function(ctx){
+      wheel1 = new JC.Graphics(function (ctx) {
         ctx.beginPath();
         ctx.fillStyle = '#42a6a9';
-        ctx.fillRect(-10,-56,20,64);
+        ctx.fillRect(-10, -56, 20, 64);
+      });
+      wheel1.x = 26;
+      wheel1.y = -70;
+      wheel1.rotation = 30;
 
-
-    });
-    wheel1.x = 26;
-    wheel1.y = -70;
-    wheel1.rotation = 30;
-
-    wheel2 = new JC.Graphics();
-    wheel2.drawCall(function(ctx){
+      wheel2 = new JC.Graphics(function (ctx) {
         ctx.beginPath();
         ctx.fillStyle = '#42a6a9';
-        ctx.fillRect(-10,-56,20,64);
+        ctx.fillRect(-10, -56, 20, 64);
+      });
+      wheel2.x = -26;
+      wheel2.y = -70;
+      wheel2.rotation = -30;
 
-
-    });
-    wheel2.x = -26;
-    wheel2.y = -70;
-    wheel2.rotation = -30;
-
-    body = new JC.Sprite({
+      body = new JC.Sprite({
         texture: loadBox.getById('body')
-    });
-    body.pivotX = body.width >> 1;
-    body.pivotY = body.height >> 1;
+      });
+      body.pivotX = body.width >> 1;
+      body.pivotY = body.height >> 1;
 
-    ground = new JC.Graphics();
-    ground.drawCall(function(ctx){
+      ground = new JC.Graphics(function (ctx) {
         ctx.beginPath();
         ctx.strokeStyle = '#000000';
-        ctx.moveTo(0,h/2+116);
-        ctx.lineTo(w,h/2+116);
+        ctx.moveTo(0, h / 2 + 116);
+        ctx.lineTo(w, h / 2 + 116);
         ctx.stroke();
         ctx.closePath();
-    });
+      });
 
-    hand.adds(wheel1,wheel2);
-    arm3.adds(hand);
-    arm2.adds(arm3);
-    arm1.adds(arm2);
-    body.adds(arm1);
-    DOC.adds(body);
-    stage.adds(DOC,ground);
+      hand.adds(wheel1, wheel2);
+      arm3.adds(hand);
+      arm2.adds(arm3);
+      arm1.adds(arm2);
+      body.adds(arm1);
+      DOC.adds(body);
+      stage.adds(DOC, ground);
 
 
 
-    arm1.animate({
-        to: {rotation: -10},
+      arm1.animate({
+        to: {
+          rotation: -10
+        },
         duration: 2000,
         infinite: true,
         alternate: true
-    });
-    arm2.animate({
-        to: {rotation: 120},
+      });
+      arm2.animate({
+        to: {
+          rotation: 120
+        },
         duration: 2000,
         infinite: true,
         alternate: true
-    });
-    arm3.animate({
-        to: {rotation: 80},
+      });
+      arm3.animate({
+        to: {
+          rotation: 80
+        },
         duration: 2000,
         infinite: true,
         alternate: true
-    });
-    hand.animate({
-        to: {rotation: 0},
+      });
+      hand.animate({
+        to: {
+          rotation: 0
+        },
         duration: 2000,
         infinite: true,
         alternate: true
-    });
-    wheel1.animate({
-        to: {rotation: -30},
+      });
+      wheel1.animate({
+        to: {
+          rotation: -30
+        },
         duration: 1000,
         infinite: true,
         alternate: true
-    });
-    wheel2.animate({
-        to: {rotation: 30},
+      });
+      wheel2.animate({
+        to: {
+          rotation: 30
+        },
         duration: 1000,
         infinite: true,
         alternate: true
+      });
+
+      stage.startEngine();
+
     });
 
-    render();
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
 
-});
-
-
-
-function render(){
-    RAF(render);
-
-    stage.render();
-
-    stats.update();
-}
-function resize(){
-    w = window.innerWidth*window.devicePixelRatio;
-    h = window.innerHeight*window.devicePixelRatio;
-    DOC.x = w/4;
-    DOC.y = h/2;
-    stage.resize(w,h,window.innerWidth,window.innerHeight);
-}
-</script>
+    window.onresize = function () {
+      resize();
+    };
+    function resize() {
+      w = window.innerWidth * window.devicePixelRatio;
+      h = window.innerHeight * window.devicePixelRatio;
+      DOC.x = w / 4;
+      DOC.y = h / 2;
+      stage.resize(w, h, window.innerWidth, window.innerHeight);
+    }
+  </script>
 </body>
+
 </html>

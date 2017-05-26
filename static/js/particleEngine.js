@@ -83,7 +83,6 @@ Emitter.prototype.update = function(){
 };
 
 function ParticleCricle(){
-  this.doc = new JC.Graphics();
   this.speed = JC.Utils.random(1,2);
   this.alphaEnd = JC.Utils.random(0.5,1);
 
@@ -99,7 +98,7 @@ ParticleCricle.prototype.init = function(){
   this.spin = 0;
   this.color = JC.Utils.random(COLORS);
   this.radius = JC.Utils.random(0,10)>>0;
-  this.doc.drawCall(function(ctx){
+  this.doc = new JC.Graphics(function(ctx){
     ctx.beginPath();
     ctx.fillStyle = This.color;
     ctx.strokeStyle = This.color;
@@ -125,7 +124,6 @@ ParticleCricle.prototype.checkBound = function(){
 
 
 function ParticleTriangle(){
-  this.doc = new JC.Graphics();
   this.speed = JC.Utils.random(0,1);
   this.alphaEnd = JC.Utils.random(0.5,1);
 
@@ -148,7 +146,7 @@ ParticleTriangle.prototype.init = function(){
       {x: this.radius*Math.cos(120 * JC.Utils.DTR), y: this.radius*Math.sin(120 * JC.Utils.DTR)},
       {x: this.radius*Math.cos(240 * JC.Utils.DTR), y: this.radius*Math.sin(240 * JC.Utils.DTR)}
   ];
-  this.doc.drawCall(function(ctx){
+  this.doc = new JC.Graphics(function(ctx){
     ctx.beginPath();
     ctx.fillStyle = This.color;
     ctx.strokeStyle = This.color;
@@ -183,7 +181,6 @@ ParticleTriangle.prototype.checkBound = function(){
 
 
 function ParticlePlus(){
-  this.doc = new JC.Graphics();
   this.speed = JC.Utils.random(0,1);
   this.alphaEnd = JC.Utils.random(0.5,1);
 
@@ -201,7 +198,8 @@ ParticlePlus.prototype.init = function(){
   this.spin = JC.Utils.random(-3,3)>0?JC.Utils.random(2,3):JC.Utils.random(-3,-2);
   this.color = JC.Utils.random(COLORS);
   this.radius = JC.Utils.random(4,16)>>0;
-  this.doc.drawCall(function(ctx){
+
+  this.doc = new JC.Graphics(function(ctx){
     ctx.beginPath();
     ctx.fillStyle = This.color;
     ctx.fillRect(-ww/2,-hh/2,ww,hh);
