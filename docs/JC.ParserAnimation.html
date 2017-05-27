@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Source: math/Bounds.js</title>
+    <title>Class: ParserAnimation</title>
     
     
     
@@ -1391,159 +1391,769 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="math_Bounds.js.html">Source: math/Bounds.js</h1>
+        <h1 class="page-title" data-filename="JC.ParserAnimation.html">Class: ParserAnimation</h1>
         
 
 
+
+<section>
     
-    <section>
-        <article>
-            <pre id="source-code" class="prettyprint source linenums"><code>import {Rectangle} from './Rectangle';
+<header>
+    <h2>
+    ParserAnimation
+    </h2>
+    
+</header>  
 
-/**
- * 显示对象的包围盒子
- *
- * @class
- * @param {Number} minX
- * @param {Number} minY
- * @param {Number} maxX
- * @param {Number} maxY
- * @memberof JC
- */
-function Bounds(minX, minY, maxX, maxY) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minX = minX || Infinity;
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="ParserAnimation">
+            
+            new JC.ParserAnimation<span class="signature">(options)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_ParserAnimation.js.html">util/ParserAnimation.js</a>, <a href="util_ParserAnimation.js.html#line17">line 17</a>
+        </div>
+        
+    </div>
 
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minY = minY || Infinity;
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>解析bodymovin从ae导出的数据</p>
+    </div>
+    
 
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxX = maxX || -Infinity;
+    
+    
+    
+    
+    
+        
 
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxY = maxY || -Infinity;
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
 
-  this.rect = null;
-}
 
-Bounds.prototype.isEmpty = function() {
-  return this.minX > this.maxX || this.minY > this.maxY;
-};
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>动画配置</p>
+                
 
-Bounds.prototype.clear = function() {
-    // this.updateID++;
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>keyframes</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
 
-  this.minX = Infinity;
-  this.minY = Infinity;
-  this.maxX = -Infinity;
-  this.maxY = -Infinity;
-};
 
-/**
- * 将包围盒子转换成矩形描述
- *
- * @param {JC.Rectangle} rect 待转换的矩形
- * @return {JC.Rectangle}
- */
-Bounds.prototype.getRectangle = function(rect) {
-  if (this.isEmpty()) {
-    return Rectangle.EMPTY;
-  }
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>bodymovin从ae导出的动画数据</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fr</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
 
-  rect = rect || new Rectangle(0, 0, 1, 1);
 
-  rect.x = this.minX;
-  rect.y = this.minY;
-  rect.width = this.maxX - this.minX;
-  rect.height = this.maxY - this.minY;
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画的帧率，默认会读取导出数据配置的帧率</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>repeats</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
 
-  return rect;
-};
 
-/**
- * 往包围盒增加外部顶点，更新包围盒区域
- *
- * @param {JC.Point} point
- */
-Bounds.prototype.addPoint = function(point) {
-  this.minX = Math.min(this.minX, point.x);
-  this.maxX = Math.max(this.maxX, point.x);
-  this.minY = Math.min(this.minY, point.y);
-  this.maxY = Math.max(this.maxY, point.y);
-};
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画是否无限循环</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>infinite</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
 
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param {JC.Rectangle} rect
- */
-Bounds.prototype.addRect = function(rect) {
-  this.minX = rect.x;
-  this.maxX = rect.width + rect.x;
-  this.minY = rect.y;
-  this.maxY = rect.height + rect.y;
-};
 
-/**
- * 往包围盒增加顶点数组，更新包围盒区域
- *
- * @param {Array} vertices
- */
-Bounds.prototype.addVert = function(vertices) {
-  let minX = this.minX;
-  let minY = this.minY;
-  let maxX = this.maxX;
-  let maxY = this.maxY;
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画是否无限循环</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>alternate</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
 
-  for (let i = 0; i &lt; vertices.length; i += 2) {
-    let x = vertices[i];
-    let y = vertices[i + 1];
-    minX = x &lt; minX ? x : minX;
-    minY = y &lt; minY ? y : minY;
-    maxX = x > maxX ? x : maxX;
-    maxY = y > maxY ? y : maxY;
-  }
 
-  this.minX = minX;
-  this.minY = minY;
-  this.maxX = maxX;
-  this.maxY = maxY;
-};
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>动画是否交替播放</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>prefix</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
 
-/**
- * 往包围盒增加包围盒，更新包围盒区域
- *
- * @param {JC.Bounds} bounds
- */
-Bounds.prototype.addBounds = function(bounds) {
-  const minX = this.minX;
-  const minY = this.minY;
-  const maxX = this.maxX;
-  const maxY = this.maxY;
 
-  this.minX = bounds.minX &lt; minX ? bounds.minX : minX;
-  this.minY = bounds.minY &lt; minY ? bounds.minY : minY;
-  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
-  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
-};
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>导出资源的前缀</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
 
-export {Bounds};
-</code></pre>
-        </article>
-    </section>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
 
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        <h3 class="subsection-title">Methods</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="cancle">
+            
+            cancle<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_ParserAnimation.js.html">util/ParserAnimation.js</a>, <a href="util_ParserAnimation.js.html#line163">line 163</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>取消播放动画</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="pause">
+            
+            pause<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_ParserAnimation.js.html">util/ParserAnimation.js</a>, <a href="util_ParserAnimation.js.html#line136">line 136</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>暂停播放动画</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="restart">
+            
+            restart<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_ParserAnimation.js.html">util/ParserAnimation.js</a>, <a href="util_ParserAnimation.js.html#line145">line 145</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>恢复播放动画</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="setSpeed">
+            
+            setSpeed<span class="signature">(speed)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_ParserAnimation.js.html">util/ParserAnimation.js</a>, <a href="util_ParserAnimation.js.html#line129">line 129</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>设置动画播放速度</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>speed</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="stop">
+            
+            stop<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_ParserAnimation.js.html">util/ParserAnimation.js</a>, <a href="util_ParserAnimation.js.html#line154">line 154</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>停止播放动画</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
+    
+    
+    
+    
+    
+</article>
+
+</section>  
 
 
 
@@ -1552,7 +2162,7 @@ export {Bounds};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat May 27 2017 14:30:57 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat May 27 2017 14:30:58 GMT+0800 (CST)
         </footer>
     </div>
 </div>
