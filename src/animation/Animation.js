@@ -20,13 +20,12 @@ function Animation(element) {
  * @param {number} snippet 时间片段
  */
 Animation.prototype.update = function(snippet) {
-  for (let i = 0; i < this.animates.length; i++) {
-    if (
-      !this.animates[i].living
-      &&
-      !this.animates[i].resident
-    ) this.animates.splice(i, 1);
-    if (this.animates[i]) this.animates[i].update(snippet);
+  const cache = this.animates.slice(0);
+  for (let i = 0; i < cache.length; i++) {
+    if (!cache[i].living && !cache[i].resident) {
+      this.animates.splice(i, 1);
+    }
+    cache[i].update(snippet);
   }
 };
 

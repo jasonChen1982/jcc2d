@@ -87,9 +87,10 @@ Sprite.prototype.updateAnimation = function(snippet) {
 /**
  * 播放逐帧动画
  * @param {json} options
+ * @return {MovieClip}
  */
 Sprite.prototype.playMovie = function(options) {
-  this.MovieClip.playMovie(options);
+  return this.MovieClip.playMovie(options);
 };
 
 /**

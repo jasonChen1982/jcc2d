@@ -35,6 +35,260 @@
 })();
 
 /**
+ * 返回数据类型
+ * @param {*} val
+ * @return {String} 数据类型
+ */
+function _rt(val) {
+  return Object.prototype.toString.call(val);
+}
+
+/**
+ * Utils 引擎工具箱
+ *
+ * @namespace JC.Utils
+ */
+var Utils = {
+  /**
+   * 简单拷贝纯数据的JSON对象
+   *
+   * @static
+   * @memberof JC.Utils
+   * @param {JSON} json 待拷贝的纯数据JSON
+   * @return {JSON} 拷贝后的纯数据JSON
+   */
+  copyJSON: function copyJSON(json) {
+    return JSON.parse(JSON.stringify(json));
+  },
+
+  /**
+   * 将角度转化成弧度的乘法因子
+   *
+   * @static
+   * @memberof JC.Utils
+   * @type {number}
+   */
+  DTR: Math.PI / 180,
+
+  /**
+   * 将弧度转化成角度的乘法因子
+   *
+   * @static
+   * @memberof JC.Utils
+   * @type {number}
+   */
+  RTD: 180 / Math.PI,
+
+  /**
+   * 判断变量是否为数组类型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Array} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isArray: function () {
+    var ks = _rt([]);
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为对象类型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Object} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isObject: function () {
+    var ks = _rt({});
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为字符串类型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {String} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isString: function () {
+    var ks = _rt('s');
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为数字类型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isNumber: function () {
+    var ks = _rt(1);
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为函数类型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isFunction: function () {
+    var ks = _rt(function () {});
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为undefined
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isUndefined: function isUndefined(variable) {
+    return typeof variable === 'undefined';
+  },
+
+  /**
+   * 判断变量是否为布尔型
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isBoolean: function () {
+    var ks = _rt(true);
+    return function (variable) {
+      return _rt(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 强化的随机数，可以随机产生给定区间内的数字、随机输出数字内的项
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
+   * @param {Number} max 所给定区间较大的数字
+   * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
+   */
+  random: function random(min, max) {
+    if (this.isArray(min)) return min[~~(Math.random() * min.length)];
+    if (!this.isNumber(max)) max = min || 1, min = 0;
+    return min + Math.random() * (max - min);
+  },
+
+  /**
+   * 阿基米德求模
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} n 索引
+   * @param {Number} m 模
+   * @return {Number} 映射到模长内到索引
+   */
+  euclideanModulo: function euclideanModulo(n, m) {
+    return (n % m + m) % m;
+  },
+
+  /**
+   * 数字区间闭合，避免超出区间
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 待闭合到值
+   * @param {Number} a 闭合区间左边界
+   * @param {Number} b 闭合区间右边界
+   * @return {Number} 闭合后的值
+   */
+  clamp: function clamp(x, a, b) {
+    return x < a ? a : x > b ? b : x;
+  },
+
+  /**
+   * 线性插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  linear: function linear(x, min, max) {
+    if (x <= min) return 0;
+    if (x >= max) return 1;
+    x = (x - min) / (max - min);
+    return x;
+  },
+
+  /**
+   * 平滑插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  smoothstep: function smoothstep(x, min, max) {
+    if (x <= min) return 0;
+    if (x >= max) return 1;
+    x = (x - min) / (max - min);
+    return x * x * (3 - 2 * x);
+  },
+
+  /**
+   * 更平滑的插值
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} x 输入的值
+   * @param {Number} min 输入值的下区间
+   * @param {Number} max 输入值的上区间
+   * @return {Number} 返回的值在区间[0,1]内
+   */
+  smootherstep: function smootherstep(x, min, max) {
+    if (x <= min) return 0;
+    if (x >= max) return 1;
+    x = (x - min) / (max - min);
+    return x * x * x * (x * (x * 6 - 15) + 10);
+  }
+};
+
+/**
  * jcc2d的事件对象的类
  *
  * @class
@@ -57,6 +311,7 @@ function Eventer() {
  * @param {Function} fn 回调函数
  */
 Eventer.prototype.on = function (type, fn) {
+  if (!Utils.isFunction(fn)) return;
   this.listeners[type] = this.listeners[type] || [];
   this.listeners[type].push(fn);
 };
@@ -68,10 +323,10 @@ Eventer.prototype.on = function (type, fn) {
  * @param {Function} fn 注册时回调函数的引用
  */
 Eventer.prototype.off = function (type, fn) {
-  var ears = this.listeners;
-  var cbs = ears[type];
-  var i = ears[type].length;
-  if (cbs && i > 0) {
+  if (Utils.isUndefined(this.listeners[type])) return;
+  var cbs = this.listeners[type] || [];
+  var i = cbs.length;
+  if (i > 0) {
     if (fn) {
       while (i--) {
         if (cbs[i] === fn) {
@@ -91,6 +346,7 @@ Eventer.prototype.off = function (type, fn) {
  * @param {Function} fn 回调函数
  */
 Eventer.prototype.once = function (type, fn) {
+  if (!Utils.isFunction(fn)) return;
   var This = this;
   var cb = function cb(ev) {
     if (fn) fn(ev);
@@ -106,15 +362,12 @@ Eventer.prototype.once = function (type, fn) {
  * @param {JC.InteractionData} ev 事件类型
  */
 Eventer.prototype.emit = function (type, ev) {
-  if (this.listeners === undefined) return;
-  var ears = this.listeners;
-  var cbs = ears[type];
-  if (cbs !== undefined) {
-    var length = cbs.length;
-    var i = void 0;
-    for (i = 0; i < length; i++) {
-      cbs[i].call(this, ev);
-    }
+  if (Utils.isUndefined(this.listeners[type])) return;
+  var cbs = this.listeners[type] || [];
+  var cache = cbs.slice(0);
+  var i = void 0;
+  for (i = 0; i < cache.length; i++) {
+    cache[i].call(this, ev);
   }
 };
 
@@ -472,260 +725,6 @@ var Tween = {
     for (var key in options) {
       if (key !== 'extend' && options[key]) this[key] = options[key];
     }
-  }
-};
-
-/**
- * 返回数据类型
- * @param {*} val
- * @return {String} 数据类型
- */
-function _rt(val) {
-  return Object.prototype.toString.call(val);
-}
-
-/**
- * Utils 引擎工具箱
- *
- * @namespace JC.Utils
- */
-var Utils = {
-  /**
-   * 简单拷贝纯数据的JSON对象
-   *
-   * @static
-   * @memberof JC.Utils
-   * @param {JSON} json 待拷贝的纯数据JSON
-   * @return {JSON} 拷贝后的纯数据JSON
-   */
-  copyJSON: function copyJSON(json) {
-    return JSON.parse(JSON.stringify(json));
-  },
-
-  /**
-   * 将角度转化成弧度的乘法因子
-   *
-   * @static
-   * @memberof JC.Utils
-   * @type {number}
-   */
-  DTR: Math.PI / 180,
-
-  /**
-   * 将弧度转化成角度的乘法因子
-   *
-   * @static
-   * @memberof JC.Utils
-   * @type {number}
-   */
-  RTD: 180 / Math.PI,
-
-  /**
-   * 判断变量是否为数组类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Array} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isArray: function () {
-    var ks = _rt([]);
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为对象类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Object} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isObject: function () {
-    var ks = _rt({});
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为字符串类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {String} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isString: function () {
-    var ks = _rt('s');
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为数字类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isNumber: function () {
-    var ks = _rt(1);
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为函数类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isFunction: function () {
-    var ks = _rt(function () {});
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为undefined
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isUndefined: function isUndefined(variable) {
-    return typeof variable === 'undefined';
-  },
-
-  /**
-   * 判断变量是否为布尔型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isBoolean: function () {
-    var ks = _rt(true);
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 强化的随机数，可以随机产生给定区间内的数字、随机输出数字内的项
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
-   * @param {Number} max 所给定区间较大的数字
-   * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
-   */
-  random: function random(min, max) {
-    if (this.isArray(min)) return min[~~(Math.random() * min.length)];
-    if (!this.isNumber(max)) max = min || 1, min = 0;
-    return min + Math.random() * (max - min);
-  },
-
-  /**
-   * 阿基米德求模
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} n 索引
-   * @param {Number} m 模
-   * @return {Number} 映射到模长内到索引
-   */
-  euclideanModulo: function euclideanModulo(n, m) {
-    return (n % m + m) % m;
-  },
-
-  /**
-   * 数字区间闭合，避免超出区间
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 待闭合到值
-   * @param {Number} a 闭合区间左边界
-   * @param {Number} b 闭合区间右边界
-   * @return {Number} 闭合后的值
-   */
-  clamp: function clamp(x, a, b) {
-    return x < a ? a : x > b ? b : x;
-  },
-
-  /**
-   * 线性插值
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 输入的值
-   * @param {Number} min 输入值的下区间
-   * @param {Number} max 输入值的上区间
-   * @return {Number} 返回的值在区间[0,1]内
-   */
-  linear: function linear(x, min, max) {
-    if (x <= min) return 0;
-    if (x >= max) return 1;
-    x = (x - min) / (max - min);
-    return x;
-  },
-
-  /**
-   * 平滑插值
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 输入的值
-   * @param {Number} min 输入值的下区间
-   * @param {Number} max 输入值的上区间
-   * @return {Number} 返回的值在区间[0,1]内
-   */
-  smoothstep: function smoothstep(x, min, max) {
-    if (x <= min) return 0;
-    if (x >= max) return 1;
-    x = (x - min) / (max - min);
-    return x * x * (3 - 2 * x);
-  },
-
-  /**
-   * 更平滑的插值
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 输入的值
-   * @param {Number} min 输入值的下区间
-   * @param {Number} max 输入值的上区间
-   * @return {Number} 返回的值在区间[0,1]内
-   */
-  smootherstep: function smootherstep(x, min, max) {
-    if (x <= min) return 0;
-    if (x >= max) return 1;
-    x = (x - min) / (max - min);
-    return x * x * x * (x * (x * 6 - 15) + 10);
   }
 };
 
@@ -1763,9 +1762,12 @@ function Animation(element) {
  * @param {number} snippet 时间片段
  */
 Animation.prototype.update = function (snippet) {
-  for (var i = 0; i < this.animates.length; i++) {
-    if (!this.animates[i].living && !this.animates[i].resident) this.animates.splice(i, 1);
-    if (this.animates[i]) this.animates[i].update(snippet);
+  var cache = this.animates.slice(0);
+  for (var i = 0; i < cache.length; i++) {
+    if (!cache[i].living && !cache[i].resident) {
+      this.animates.splice(i, 1);
+    }
+    cache[i].update(snippet);
   }
 };
 
@@ -3315,21 +3317,22 @@ Container.prototype.setSpeed = function (speed) {
 
 /* eslint max-len: "off" */
 
-// TODO: 继承事件对象
-
 /**
  * MovieClip类型动画对象
  *
  * @class
  * @memberof JC
+ * @extends JC.Eventer
  * @param {object} [element] 动画对象 内部传入
  * @param {object} [options] 动画配置信息 内部传入
  */
 function MovieClip(element, options) {
+  Eventer.call(this);
+
   this.element = element;
   this.living = false;
 
-  this.onCompelete = null;
+  // this.onCompelete = null;
   // this.onUpdate = null;
 
   this.infinite = false;
@@ -3352,6 +3355,8 @@ function MovieClip(element, options) {
   this.pt = 0;
   this.nt = 0;
 }
+
+MovieClip.prototype = Object.create(Eventer.prototype);
 
 /**
  * 更新动画
@@ -3383,8 +3388,7 @@ MovieClip.prototype.update = function (snippet) {
     } else {
       this.living = false;
       this.index = this.fillMode;
-      if (this.onCompelete) this.onCompelete();
-      if (this.next) this.next();
+      this.emit('compelete');
     }
   }
 };
@@ -3415,9 +3419,11 @@ MovieClip.prototype.getFrame = function () {
 /**
  * 播放逐帧
  * @param {object} options 播放配置
+ * @return {this}
  */
 MovieClip.prototype.playMovie = function (options) {
-  this.next = null;
+  // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
+  this.off('compelete');
   var movie = this.format(options.movie);
   if (!Utils.isArray(movie)) return;
   this.frames = movie;
@@ -3429,7 +3435,13 @@ MovieClip.prototype.playMovie = function (options) {
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
-  this.onCompelete = options.onCompelete || null;
+  if (options.onCompelete) {
+    var This = this;
+    this.once('compelete', function () {
+      options.onCompelete.call(This);
+    });
+  }
+  return this;
 };
 
 /**
@@ -3464,9 +3476,9 @@ MovieClip.prototype.format = function (movie) {
         conf = movie.next;
       }
       if (Utils.isString(conf.movie)) {
-        this.next = function () {
+        this.once('compelete', function () {
           This.playMovie(conf);
-        };
+        });
       }
     }
     return arr;
@@ -3583,9 +3595,10 @@ Sprite.prototype.updateAnimation = function (snippet) {
 /**
  * 播放逐帧动画
  * @param {json} options
+ * @return {MovieClip}
  */
 Sprite.prototype.playMovie = function (options) {
-  this.MovieClip.playMovie(options);
+  return this.MovieClip.playMovie(options);
 };
 
 /**

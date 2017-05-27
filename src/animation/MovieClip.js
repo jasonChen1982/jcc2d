@@ -1,22 +1,25 @@
+
+import {Eventer} from '../eventer/Eventer';
 import {Utils} from '../util/Utils';
 
 /* eslint max-len: "off" */
-
-// TODO: 继承事件对象
 
 /**
  * MovieClip类型动画对象
  *
  * @class
  * @memberof JC
+ * @extends JC.Eventer
  * @param {object} [element] 动画对象 内部传入
  * @param {object} [options] 动画配置信息 内部传入
  */
 function MovieClip(element, options) {
+  Eventer.call(this);
+
   this.element = element;
   this.living = false;
 
-  this.onCompelete = null;
+  // this.onCompelete = null;
   // this.onUpdate = null;
 
   this.infinite = false;
@@ -39,6 +42,8 @@ function MovieClip(element, options) {
   this.pt = 0;
   this.nt = 0;
 }
+
+MovieClip.prototype = Object.create(Eventer.prototype);
 
 /**
  * 更新动画
@@ -70,8 +75,7 @@ MovieClip.prototype.update = function(snippet) {
     } else {
       this.living = false;
       this.index = this.fillMode;
-      if (this.onCompelete) this.onCompelete();
-      if (this.next) this.next();
+      this.emit('compelete');
     }
   }
 };
@@ -106,9 +110,11 @@ MovieClip.prototype.getFrame = function() {
 /**
  * 播放逐帧
  * @param {object} options 播放配置
+ * @return {this}
  */
 MovieClip.prototype.playMovie = function(options) {
-  this.next = null;
+  // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
+  this.off('compelete');
   const movie = this.format(options.movie);
   if (!Utils.isArray(movie)) return;
   this.frames = movie;
@@ -120,7 +126,13 @@ MovieClip.prototype.playMovie = function(options) {
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
-  this.onCompelete = options.onCompelete || null;
+  if (options.onCompelete) {
+    const This = this;
+    this.once('compelete', function() {
+      options.onCompelete.call(This);
+    });
+  }
+  return this;
 };
 
 /**
@@ -155,9 +167,9 @@ MovieClip.prototype.format = function(movie) {
         conf = movie.next;
       }
       if (Utils.isString(conf.movie)) {
-        this.next = function() {
+        this.once('compelete', function() {
           This.playMovie(conf);
-        };
+        });
       }
     }
     return arr;

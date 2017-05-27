@@ -1,3 +1,6 @@
+
+import {Utils} from '../util/Utils';
+
 /**
  * jcc2d的事件对象的类
  *
@@ -21,6 +24,7 @@ function Eventer() {
  * @param {Function} fn 回调函数
  */
 Eventer.prototype.on = function(type, fn) {
+  if (!Utils.isFunction(fn)) return;
   this.listeners[type] = this.listeners[type] || [];
   this.listeners[type].push(fn);
 };
@@ -32,10 +36,10 @@ Eventer.prototype.on = function(type, fn) {
  * @param {Function} fn 注册时回调函数的引用
  */
 Eventer.prototype.off = function(type, fn) {
-  const ears = this.listeners;
-  const cbs = ears[type];
-  let i = ears[type].length;
-  if (cbs && i > 0) {
+  if (Utils.isUndefined(this.listeners[type])) return;
+  const cbs = this.listeners[type] || [];
+  let i = cbs.length;
+  if (i > 0) {
     if (fn) {
       while (i--) {
         if (cbs[i] === fn) {
@@ -55,6 +59,7 @@ Eventer.prototype.off = function(type, fn) {
  * @param {Function} fn 回调函数
  */
 Eventer.prototype.once = function(type, fn) {
+  if (!Utils.isFunction(fn)) return;
   const This = this;
   const cb = function(ev) {
     if (fn) fn(ev);
@@ -70,15 +75,12 @@ Eventer.prototype.once = function(type, fn) {
  * @param {JC.InteractionData} ev 事件类型
  */
 Eventer.prototype.emit = function(type, ev) {
-  if (this.listeners === undefined) return;
-  const ears = this.listeners;
-  const cbs = ears[type];
-  if (cbs !== undefined) {
-    const length = cbs.length;
-    let i;
-    for (i = 0; i < length; i++) {
-      cbs[i].call(this, ev);
-    }
+  if (Utils.isUndefined(this.listeners[type])) return;
+  const cbs = this.listeners[type] || [];
+  const cache = cbs.slice(0);
+  let i;
+  for (i = 0; i < cache.length; i++) {
+    cache[i].call(this, ev);
   }
 };
 
