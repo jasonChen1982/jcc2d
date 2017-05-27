@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.3"></a>
+## [1.2.3](https://github.com/jasonChen1982/jcc2d/compare/v1.2.2...v1.2.3) (2017-05-27)
+
+
+### Features
+
+* **container:** fix array.sort was unstable, so change to bubble sort ([f3c9463](https://github.com/jasonChen1982/jcc2d/commit/f3c9463))
+
+
+
 <a name="1.2.2"></a>
 ## [1.2.2](https://github.com/jasonChen1982/jcc2d/compare/v1.2.1...v1.2.2) (2017-05-26)
 
