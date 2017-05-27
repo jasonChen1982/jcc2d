@@ -288,6 +288,8 @@ var Utils = {
   }
 };
 
+/* eslint prefer-rest-params: 0 */
+
 /**
  * jcc2d的事件对象的类
  *
@@ -359,15 +361,19 @@ Eventer.prototype.once = function (type, fn) {
  * 事件对象的触发事件函数
  *
  * @param {String} type 事件类型
- * @param {JC.InteractionData} ev 事件类型
+ * @param {JC.InteractionData} ev 事件数据
  */
-Eventer.prototype.emit = function (type, ev) {
+Eventer.prototype.emit = function (type) {
   if (Utils.isUndefined(this.listeners[type])) return;
   var cbs = this.listeners[type] || [];
   var cache = cbs.slice(0);
+  var reset = [];
+  for (var j = 1; j < arguments.length; j++) {
+    reset.push(arguments[j]);
+  }
   var i = void 0;
   for (i = 0; i < cache.length; i++) {
-    cache[i].call(this, ev);
+    cache[i].apply(this, reset);
   }
 };
 
@@ -736,13 +742,15 @@ var Tween = {
  * @param {object} [options] 动画配置信息
  */
 function Animate(options) {
+  Eventer.call(this);
+
   this.element = options.element || {};
   this.duration = options.duration || 300;
   this.living = true;
   this.resident = options.resident || false;
 
-  this.onCompelete = options.onCompelete || null;
-  this.onUpdate = options.onUpdate || null;
+  // this.onCompelete = options.onCompelete || null;
+  // this.onUpdate = options.onUpdate || null;
 
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
@@ -750,6 +758,13 @@ function Animate(options) {
   this.delay = options.delay || 0;
   this.wait = options.wait || 0;
   this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
+
+  if (options.onCompelete) {
+    this.on('compelete', options.onCompelete.bind(this));
+  }
+  if (options.onUpdate) {
+    this.on('update', options.onUpdate.bind(this));
+  }
 
   // this.repeatsCut = this.repeats;
   // this.delayCut = this.delay;
@@ -760,6 +775,8 @@ function Animate(options) {
 
   this.paused = false;
 }
+
+Animate.prototype = Object.create(Eventer.prototype);
 
 /**
  * 更新动画
@@ -781,7 +798,8 @@ Animate.prototype.update = function (snippet) {
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
 
   var pose = this.nextPose();
-  if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+  this.emit('update', pose, this.progress / this.duration);
+  // if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.spill()) {
     if (this.repeatsCut > 0 || this.infinite) {
@@ -795,7 +813,7 @@ Animate.prototype.update = function (snippet) {
       }
     } else {
       if (!this.resident) this.living = false;
-      if (this.onCompelete) this.onCompelete(pose);
+      this.emit('compelete', pose);
     }
   }
   return pose;
@@ -1673,14 +1691,17 @@ AnimateRunner.prototype.initRunner = function () {
   runner.infinite = false;
   runner.resident = true;
   runner.element = this.element;
-  runner.onCompelete = this.nextRunner.bind(this);
+  // runner.onCompelete = this.nextRunner.bind(this);
   var animate = null;
   if (runner.path) {
     animate = new PathMotion(runner);
   } else if (runner.to) {
     animate = new Transition(runner);
   }
-  if (animate !== null) this.queues.push(animate);
+  if (animate !== null) {
+    animate.on('compelete', this.nextRunner.bind(this));
+    this.queues.push(animate);
+  }
 };
 
 /**
@@ -1715,7 +1736,10 @@ AnimateRunner.prototype.update = function (snippet) {
   var cc = this.cursor;
 
   var pose = this.nextPose(this.direction * this.timeScale * snippet);
-  if (this.onUpdate) this.onUpdate({
+  // if (this.onUpdate) this.onUpdate({
+  //   index: cc, pose: pose,
+  // }, this.progress / this.duration);
+  this.emit('update', {
     index: cc, pose: pose
   }, this.progress / this.duration);
 
@@ -1727,7 +1751,8 @@ AnimateRunner.prototype.update = function (snippet) {
       this.cursor = 0;
     } else {
       if (!this.resident) this.living = false;
-      if (this.onCompelete) this.onCompelete(pose);
+      // if (this.onCompelete) this.onCompelete(pose);
+      this.emit('compelete', pose);
     }
   }
   return pose;

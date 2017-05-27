@@ -1,3 +1,5 @@
+
+import {Eventer} from '../eventer/Eventer';
 import {Utils} from '../util/Utils';
 
 /**
@@ -8,13 +10,15 @@ import {Utils} from '../util/Utils';
  * @param {object} [options] 动画配置信息
  */
 function Animate(options) {
+  Eventer.call(this);
+
   this.element = options.element || {};
   this.duration = options.duration || 300;
   this.living = true;
   this.resident = options.resident || false;
 
-  this.onCompelete = options.onCompelete || null;
-  this.onUpdate = options.onUpdate || null;
+  // this.onCompelete = options.onCompelete || null;
+  // this.onUpdate = options.onUpdate || null;
 
   this.infinite = options.infinite || false;
   this.alternate = options.alternate || false;
@@ -25,6 +29,13 @@ function Animate(options) {
   options.timeScale :
   1;
 
+  if (options.onCompelete) {
+    this.on('compelete', options.onCompelete.bind(this));
+  }
+  if (options.onUpdate) {
+    this.on('update', options.onUpdate.bind(this));
+  }
+
   // this.repeatsCut = this.repeats;
   // this.delayCut = this.delay;
   // this.waitCut = this.wait;
@@ -34,6 +45,8 @@ function Animate(options) {
 
   this.paused = false;
 }
+
+Animate.prototype = Object.create(Eventer.prototype);
 
 /**
  * 更新动画
@@ -55,7 +68,8 @@ Animate.prototype.update = function(snippet) {
   this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
 
   const pose = this.nextPose();
-  if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+  this.emit('update', pose, this.progress / this.duration);
+  // if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
 
   if (this.spill()) {
     if (this.repeatsCut > 0 || this.infinite) {
@@ -69,7 +83,7 @@ Animate.prototype.update = function(snippet) {
       }
     } else {
       if (!this.resident) this.living = false;
-      if (this.onCompelete) this.onCompelete(pose);
+      this.emit('compelete', pose);
     }
   }
   return pose;

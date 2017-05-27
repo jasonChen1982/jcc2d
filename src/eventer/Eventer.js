@@ -1,4 +1,6 @@
 
+/* eslint prefer-rest-params: 0 */
+
 import {Utils} from '../util/Utils';
 
 /**
@@ -72,15 +74,19 @@ Eventer.prototype.once = function(type, fn) {
  * 事件对象的触发事件函数
  *
  * @param {String} type 事件类型
- * @param {JC.InteractionData} ev 事件类型
+ * @param {JC.InteractionData} ev 事件数据
  */
-Eventer.prototype.emit = function(type, ev) {
+Eventer.prototype.emit = function(type) {
   if (Utils.isUndefined(this.listeners[type])) return;
   const cbs = this.listeners[type] || [];
   const cache = cbs.slice(0);
+  const reset = [];
+  for (let j = 1; j < arguments.length; j++) {
+    reset.push(arguments[j]);
+  }
   let i;
   for (i = 0; i < cache.length; i++) {
-    cache[i].call(this, ev);
+    cache[i].apply(this, reset);
   }
 };
 

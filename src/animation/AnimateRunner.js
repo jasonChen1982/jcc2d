@@ -39,14 +39,17 @@ AnimateRunner.prototype.initRunner = function() {
   runner.infinite = false;
   runner.resident = true;
   runner.element = this.element;
-  runner.onCompelete = this.nextRunner.bind(this);
+  // runner.onCompelete = this.nextRunner.bind(this);
   let animate = null;
   if (runner.path) {
     animate = new PathMotion(runner);
   } else if (runner.to) {
     animate = new Transition(runner);
   }
-  if (animate !== null) this.queues.push(animate);
+  if (animate !== null) {
+    animate.on('compelete', this.nextRunner.bind(this));
+    this.queues.push(animate);
+  }
 };
 
 /**
@@ -81,7 +84,10 @@ AnimateRunner.prototype.update = function(snippet) {
   const cc = this.cursor;
 
   const pose = this.nextPose(this.direction * this.timeScale * snippet);
-  if (this.onUpdate) this.onUpdate({
+  // if (this.onUpdate) this.onUpdate({
+  //   index: cc, pose: pose,
+  // }, this.progress / this.duration);
+  this.emit('update', {
     index: cc, pose: pose,
   }, this.progress / this.duration);
 
@@ -93,7 +99,8 @@ AnimateRunner.prototype.update = function(snippet) {
       this.cursor = 0;
     } else {
       if (!this.resident) this.living = false;
-      if (this.onCompelete) this.onCompelete(pose);
+      // if (this.onCompelete) this.onCompelete(pose);
+      this.emit('compelete', pose);
     }
   }
   return pose;
