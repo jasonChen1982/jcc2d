@@ -102,15 +102,23 @@ Object.defineProperty(Container.prototype, 'zIndex', {
  * @method _sortList
  */
 Container.prototype._sortList = function() {
-  this.childs.sort(function(a, b) {
-    if (a.zIndex > b.zIndex) {
-      return 1;
+  /**
+   * 因为数组sort排序的不稳定性，顾采用冒泡排序方式
+   */
+  const childs = this.childs;
+  const length = childs.length;
+  let i;
+  let j;
+  let temp;
+  for (i = 0; i < length - 1; i++) {
+    for (j = 0; j < length - 1 - i; j++) {
+      if (childs[j].zIndex > childs[j + 1].zIndex) {
+        temp = childs[j];
+        childs[j] = childs[j + 1];
+        childs[j + 1] = temp;
+      }
     }
-    if (a.zIndex < b.zIndex) {
-      return -1;
-    }
-    return 0;
-  });
+  }
   this.souldSort = false;
 };
 
@@ -140,7 +148,7 @@ Container.prototype.adds = function(object) {
     }
     object.parent = this;
     this.childs.push(object);
-    if (object.zIndex !== 0) this.souldSort = true;
+    this.souldSort = true;
   } else {
     console.error('adds: object not an instance of Container', object);
   }
