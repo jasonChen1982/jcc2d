@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.5"></a>
+## [1.2.5](https://github.com/jasonChen1982/jcc2d/compare/v1.2.4...v1.2.5) (2017-05-27)
+
+
+### Features
+
+* **animate:** all animation class extends JC.Eventer ([8c55f7c](https://github.com/jasonChen1982/jcc2d/commit/8c55f7c))
+
+
+
 <a name="1.2.4"></a>
 ## [1.2.4](https://github.com/jasonChen1982/jcc2d/compare/v1.2.3...v1.2.4) (2017-05-27)
 
