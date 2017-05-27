@@ -816,6 +816,14 @@
             
                 <li data-name="JC.MovieClip#cancle"><a href="JC.MovieClip.html#cancle">cancle</a></li>
             
+                <li data-name="JC.MovieClip#emit"><a href="JC.MovieClip.html#emit">emit</a></li>
+            
+                <li data-name="JC.MovieClip#off"><a href="JC.MovieClip.html#off">off</a></li>
+            
+                <li data-name="JC.MovieClip#on"><a href="JC.MovieClip.html#on">on</a></li>
+            
+                <li data-name="JC.MovieClip#once"><a href="JC.MovieClip.html#once">once</a></li>
+            
                 <li data-name="JC.MovieClip#pause"><a href="JC.MovieClip.html#pause">pause</a></li>
             
                 <li data-name="JC.MovieClip#playMovie"><a href="JC.MovieClip.html#playMovie">playMovie</a></li>
@@ -1420,7 +1428,7 @@
     
         
         <div class="tag-source">
-            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line15">line 15</a>
+            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line16">line 16</a>
         </div>
         
     </div>
@@ -1566,6 +1574,12 @@
     </div>
     
     
+        <h3 class="subsection-title">Extends</h3>
+        
+        <ul>
+            <li><a href="JC.Eventer.html">JC.Eventer</a></li>
+        </ul>
+    
     
     
     
@@ -1591,7 +1605,7 @@
     
         
         <div class="tag-source">
-            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line184">line 184</a>
+            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line196">line 196</a>
         </div>
         
     </div>
@@ -1654,6 +1668,570 @@
         
             
 <dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="emit">
+            
+                <span class="inherited"><a href="JC.Eventer.html#emit">inherited</a></span>
+            
+            emit<span class="signature">(type, ev)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line79">line 79</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的触发事件函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>ev</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="JC.InteractionData.html">JC.InteractionData</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件数据</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="off">
+            
+                <span class="inherited"><a href="JC.Eventer.html#off">inherited</a></span>
+            
+            off<span class="signature">(type, fn)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line40">line 40</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的事件解绑函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>注册时回调函数的引用</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="on">
+            
+                <span class="inherited"><a href="JC.Eventer.html#on">inherited</a></span>
+            
+            on<span class="signature">(type, fn)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line28">line 28</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的事件绑定函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>回调函数</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer inherited">
+        <h4 class="name" id="once">
+            
+                <span class="inherited"><a href="JC.Eventer.html#once">inherited</a></span>
+            
+            once<span class="signature">(type, fn)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line63">line 63</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>事件对象的一次性事件绑定函数</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>事件类型</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>fn</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>回调函数</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
     <div class="nameContainer">
         <h4 class="name" id="pause">
             
@@ -1662,7 +2240,7 @@
     
         
         <div class="tag-source">
-            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line170">line 170</a>
+            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line182">line 182</a>
         </div>
         
     </div>
@@ -1728,12 +2306,12 @@
     <div class="nameContainer">
         <h4 class="name" id="playMovie">
             
-            playMovie<span class="signature">(options)</span>
+            playMovie<span class="signature">(options)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{this}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line110">line 110</a>
+            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line115">line 115</a>
         </div>
         
     </div>
@@ -1834,6 +2412,35 @@
     
     
     
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        this
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
     
     
 </dd>
@@ -1849,7 +2456,7 @@
     
         
         <div class="tag-source">
-            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line177">line 177</a>
+            <a href="animation_MovieClip.js.html">animation/MovieClip.js</a>, <a href="animation_MovieClip.js.html#line189">line 189</a>
         </div>
         
     </div>
@@ -1926,7 +2533,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat May 27 2017 14:30:58 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Sat May 27 2017 18:39:38 GMT+0800 (CST)
         </footer>
     </div>
 </div>
