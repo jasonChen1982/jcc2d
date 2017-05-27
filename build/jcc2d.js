@@ -3649,6 +3649,8 @@ Sprite.prototype.renderMe = function (ctx) {
  * @param {boolean} [options.infinite] 动画是否无限循环
  * @param {boolean} [options.alternate] 动画是否交替播放
  * @param {string} [options.prefix] 导出资源的前缀
+ * @param {function} [options.onCompelete] 结束回调
+ * @param {function} [options.onUpdate] 更新回调
  */
 function ParserAnimation(options) {
   this.prefix = options.prefix || '';
@@ -3664,6 +3666,13 @@ function ParserAnimation(options) {
   this.timeline = [];
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
+
+  if (options.onCompelete) {
+    this.timeline[0].on('compelete', options.onCompelete.bind(this));
+  }
+  if (options.onUpdate) {
+    this.timeline[0].on('update', options.onUpdate.bind(this));
+  }
 }
 
 /**

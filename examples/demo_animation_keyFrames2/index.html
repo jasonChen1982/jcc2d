@@ -40,14 +40,16 @@
       dom: 'demo_canvas'
     });
     var DOC = new JC.Container();
-    // DOC.timeScale = 0.5;
+    DOC.timeScale = 0.2;
 
     var ani = new JC.ParserAnimation({
       keyframes: data,
       // fr: 30,
       prefix: '',
-      infinite: true,
+      // infinite: true,
       // alternate: true,
+      onUpdate: function() {},
+      onCompelete: function() {},
     });
     // ani.doc.timeScale = 0.2;
     DOC.adds(ani.doc);
