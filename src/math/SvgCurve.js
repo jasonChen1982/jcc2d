@@ -7,6 +7,8 @@ import {Utils} from '../util/Utils';
 
 /**
  *
+ * @class
+ * @memberof JC
  * @param {String}  path  array of points
  */
 function SvgCurve( path ) {

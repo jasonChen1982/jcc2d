@@ -4,6 +4,8 @@ import {Curve} from './Curve';
 
 /**
  *
+ * @class
+ * @memberof JC
  * @param {Array}  points  array of points
  */
 function BezierCurve( points ) {

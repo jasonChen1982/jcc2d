@@ -1,9 +1,12 @@
 import {FrameBuffer} from './FrameBuffer';
 import {Container} from '../core/Container';
 import {Matrix} from '../math/Matrix';
+import {Utils} from '../util/Utils';
 
 /**
  *
+ * @class
+ * @memberof JC
  * @param {number} blurX x轴的模糊值
  * @param {number} blurY y轴的模糊值
  * @param {number} quality 模糊的质量，模糊计算会被递归多少次
@@ -11,10 +14,9 @@ import {Matrix} from '../math/Matrix';
 function BlurFilter(blurX, blurY, quality) {
   Container.call(this);
 
-  // TODO: use Utils.isNumber displace isNaN
-  if (isNaN(blurX) || blurX < 0) blurX = 0;
-  if (isNaN(blurY) || blurY < 0) blurY = 0;
-  if (isNaN(quality) || quality < 1) quality = 1;
+  if (Utils.isNumber(blurX) || blurX < 0) blurX = 0;
+  if (Utils.isNumber(blurY) || blurY < 0) blurY = 0;
+  if (Utils.isNumber(quality) || quality < 1) quality = 1;
 
   this.frameBuffer = new FrameBuffer();
 

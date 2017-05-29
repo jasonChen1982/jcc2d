@@ -1,7 +1,8 @@
 
 // import { Point } from './Point';
 /**
- * @class Curve
+ * @class
+ * @memberof JC
  */
 function Curve() {}
 

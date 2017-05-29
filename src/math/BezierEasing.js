@@ -125,6 +125,8 @@ function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
 /**
  * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
  *
+ * @class
+ * @memberof JC
  * @param {number} mX1 控制点1的x分量
  * @param {number} mY1 控制点1的y分量
  * @param {number} mX2 控制点2的x分量

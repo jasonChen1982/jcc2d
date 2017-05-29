@@ -5,6 +5,8 @@ import {NURBSUtils} from './NURBSUtils';
 
 /**
  *
+ * @class
+ * @memberof JC
  * @param {Number} degree
  * @param {Array}  knots           array of reals
  * @param {Array}  controlPoints   array of Point

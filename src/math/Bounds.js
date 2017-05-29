@@ -4,11 +4,11 @@ import {Rectangle} from './Rectangle';
  * 显示对象的包围盒子
  *
  * @class
+ * @memberof JC
  * @param {Number} minX
  * @param {Number} minY
  * @param {Number} maxX
  * @param {Number} maxY
- * @memberof JC
  */
 function Bounds(minX, minY, maxX, maxY) {
   /**

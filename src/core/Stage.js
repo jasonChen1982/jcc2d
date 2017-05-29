@@ -190,11 +190,6 @@ function Stage(options) {
     }
   };
 
-  /**
-   * 设置canvas是否可交互
-   *
-   * @member {Boolean}
-   */
   this.interactive = Utils.isBoolean(options.interactive) ?
   options.interactive :
   true;

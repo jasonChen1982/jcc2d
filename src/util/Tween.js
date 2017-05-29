@@ -20,7 +20,7 @@ export const Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -35,7 +35,7 @@ export const Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -50,7 +50,7 @@ export const Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -65,7 +65,7 @@ export const Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
