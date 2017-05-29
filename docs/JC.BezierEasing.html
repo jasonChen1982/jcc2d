@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: Circle</title>
+    <title>Class: BezierEasing</title>
     
     
     
@@ -1524,7 +1524,7 @@
     </ul>
 </div>
     <div class="main">
-        <h1 class="page-title" data-filename="JC.Circle.html">Class: Circle</h1>
+        <h1 class="page-title" data-filename="JC.BezierEasing.html">Class: BezierEasing</h1>
         
 
 
@@ -1533,7 +1533,7 @@
     
 <header>
     <h2>
-    Circle
+    BezierEasing
     </h2>
     
 </header>  
@@ -1546,14 +1546,14 @@
         
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="Circle">
+        <h4 class="name" id="BezierEasing">
             
-            new JC.Circle<span class="signature">(x, y, radius)</span>
+            new JC.BezierEasing<span class="signature">(mX1, mY1, mX2, mY2)</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="math_Circle.js.html">math/Circle.js</a>, <a href="math_Circle.js.html#line12">line 12</a>
+            <a href="math_BezierEasing.js.html">math/BezierEasing.js</a>, <a href="math_BezierEasing.js.html#line135">line 135</a>
         </div>
         
     </div>
@@ -1564,7 +1564,7 @@
     
     
     <div class="description">
-        <p>圆形对象</p>
+        <p>cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1</p>
     </div>
     
 
@@ -1595,7 +1595,7 @@
 	
         <tr>
             
-                <td class="name"><code>x</code></td>
+                <td class="name"><code>mX1</code></td>
             
             
             <td class="type">
@@ -1611,14 +1611,14 @@
             
             <td class="description last">
                 
-                <p>x轴的坐标</p></td>
+                <p>控制点1的x分量</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>y</code></td>
+                <td class="name"><code>mY1</code></td>
             
             
             <td class="type">
@@ -1634,14 +1634,14 @@
             
             <td class="description last">
                 
-                <p>y轴的坐标</p></td>
+                <p>控制点1的y分量</p></td>
         </tr>
 	
 	
 	
         <tr>
             
-                <td class="name"><code>radius</code></td>
+                <td class="name"><code>mX2</code></td>
             
             
             <td class="type">
@@ -1657,7 +1657,30 @@
             
             <td class="description last">
                 
-                <p>圆的半径</p></td>
+                <p>控制点2的x分量</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>mY2</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>控制点2的y分量</p></td>
         </tr>
 	
 	
@@ -1717,142 +1740,6 @@
     
     
     
-    
-        <h3 class="subsection-title">Members</h3>
-        
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="radius">radius<span class="type-signature type number">number</span> </h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="x">x<span class="type-signature type number">number</span> </h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="y">y<span class="type-signature type number">number</span> </h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <dt class="tag-default">Default Value:</dt>
-    <dd class="tag-default"><ul class="dummy"><li>0</li></ul></dd>
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        </dl>
     
     
     
@@ -1862,14 +1749,14 @@
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="clone">
+        <h4 class="name" id="get">
             
-            clone<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{PIXI.Circle}</span>
+            get<span class="signature">(x)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{number}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="math_Circle.js.html">math/Circle.js</a>, <a href="math_Circle.js.html#line37">line 37</a>
+            <a href="math_BezierEasing.js.html">math/BezierEasing.js</a>, <a href="math_BezierEasing.js.html#line204">line 204</a>
         </div>
         
     </div>
@@ -1880,107 +1767,7 @@
     
     
     <div class="description">
-        <p>克隆一个该圆对象</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Type</th>
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-    <tbody>
-    
-        <tr>
-            
-            <td class="type">
-            
-                        PIXI.Circle
-                        
-                    
-            </td>
-            <td class="description last">克隆出来的圆对象</td>
-        </tr>
-    
-    </tbody>
-</table>
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="contains">
-            
-            contains<span class="signature">(x, y)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{boolean}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="math_Circle.js.html">math/Circle.js</a>, <a href="math_Circle.js.html#line48">line 48</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>检测坐标点是否在园内</p>
+        <p>通过x轴近似获取y的值</p>
     </div>
     
 
@@ -2027,30 +1814,7 @@
             
             <td class="description last">
                 
-                <p>坐标点的x轴坐标</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>y</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>坐标点的y轴坐标</p></td>
+                <p>x轴的偏移量</p></td>
         </tr>
 	
 	
@@ -2111,111 +1875,11 @@
             
             <td class="type">
             
-                        boolean
+                        number
                         
                     
             </td>
-            <td class="description last">坐标点是否在园内</td>
-        </tr>
-    
-    </tbody>
-</table>
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="getBounds">
-            
-            getBounds<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{PIXI.Rectangle}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="math_Circle.js.html">math/Circle.js</a>, <a href="math_Circle.js.html#line68">line 68</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>返回对象所占的矩形区域</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    <h5>Returns:</h5>
-    
-
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Type</th>
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-    <tbody>
-    
-        <tr>
-            
-            <td class="type">
-            
-                        PIXI.Rectangle
-                        
-                    
-            </td>
-            <td class="description last">矩形对象</td>
+            <td class="description last">y 与输入值x对应的y值</td>
         </tr>
     
     </tbody>
