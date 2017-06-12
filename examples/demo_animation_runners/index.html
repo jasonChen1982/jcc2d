@@ -84,8 +84,8 @@
         });
         coin.pivotX = 27;
         coin.pivotY = 24;
-        coin.x = this.coinsPoints[i].x;
-        coin.y = this.coinsPoints[i].y;
+        coin.x = coin.xx = this.coinsPoints[i].x;
+        coin.y = coin.yy = this.coinsPoints[i].y;
         this.coins.adds(coin);
       }
     };
@@ -95,6 +95,8 @@
       for (var i = s; i >= 0; i--) {
         var coin = this.coins.childs[i];
         coin.scale = 0;
+        coin.x = coin.xx;
+        coin.y = coin.yy;
         if (i === s) coin.name = 'me';
         var path = new JC.BezierCurve([
           new JC.Point(coin.x, coin.y),
@@ -131,7 +133,6 @@
               ease: 'linear'
             },
           ],
-          infinite: true,
           wait: (s - i) * 80,
           onCompelete: function () {
             if (this.element.name === 'me') {
@@ -186,10 +187,11 @@
     JC.Tween.extend(tween);
 
     var flyCoins = new FlyCoins();
-    flyCoins.fly();
     DOC.adds(flyCoins.blinks, flyCoins.coins);
     // DOC.timeScale = 0.2;
-
+    stage.on('click', function() {
+      flyCoins.fly();
+    })
     stage.adds(DOC);
     stage.startEngine();
 
