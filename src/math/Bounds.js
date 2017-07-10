@@ -1,4 +1,5 @@
 import {Rectangle} from './Rectangle';
+import {isNumber} from '../util/Utils';
 
 /**
  * 显示对象的包围盒子
@@ -15,25 +16,33 @@ function Bounds(minX, minY, maxX, maxY) {
    * @member {number}
    * @default 0
    */
-  this.minX = minX || Infinity;
+  this.minX = isNumber(minX)?
+  minX:
+  Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
-  this.minY = minY || Infinity;
+  this.minY = isNumber(minY)?
+  minY:
+  Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
-  this.maxX = maxX || -Infinity;
+  this.maxX = isNumber(maxX)?
+  maxX:
+  -Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
-  this.maxY = maxY || -Infinity;
+  this.maxY = isNumber(maxY)?
+  maxY:
+  -Infinity;
 
   this.rect = null;
 }
