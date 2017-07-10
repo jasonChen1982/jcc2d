@@ -14,12 +14,12 @@ import {Rectangle} from '../math/Rectangle';
  *      frame: new JC.Rectangle(0, 0, w, h),
  *      width: 100,
  *      height: 100,
- *      count: 38,
  *      animations: {
  *          fall: {start: 0,end: 4,next: 'stand'},
  *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
  *          stand: {start: 10,end: 39},
- *          walk: {start: 40,end: 59,next: 'stand'}
+ *          walk: {start: 40,end: 59,next: 'stand'},
+ *          other: [ 0, 1, 2, 1, 3, 4 ], // 同样接受数组形势
  *      }
  * });
  * ```
@@ -27,10 +27,19 @@ import {Rectangle} from '../math/Rectangle';
  * @class
  * @memberof JC
  * @extends JC.Container
- * @param {json} options
+ * @param {Object} options
+ * @param {JC.Texture} options.texture 图片纹理
+ * @param {JC.Rectangle} [options.frame] 当是逐帧或者是裁切显示时需要配置，显示的矩形区域
+ * @param {Number} [options.width] 实际显示的宽，可能会缩放图像
+ * @param {Number} [options.height] 实际显示的高，可能会缩放图像
+ * @param {Object} [options.animations] 逐帧的预置帧动画配置
  */
 function Sprite(options) {
   Container.call(this);
+
+  this._width = 0;
+
+  this._height = 0;
 
   this.texture = options.texture;
   if (this.texture.loaded) {
@@ -67,10 +76,56 @@ Sprite.prototype.upTexture = function(options) {
 
   this.width = options.width || this.frame.width;
   this.height = options.height || this.frame.height;
+};
 
+/**
+ * 当前图片对象的width
+ *
+ * @name width
+ * @member {Number}
+ * @memberof JC.Sprite#
+ */
+Object.defineProperty(Sprite.prototype, 'width', {
+  get: function() {
+    return this._width;
+  },
+  set: function(width) {
+    if (this._width !== width) {
+      this._width = width;
+      this.updateGeometry();
+    }
+  },
+});
+
+/**
+ * 当前图片对象的height
+ *
+ * @name height
+ * @member {Number}
+ * @memberof JC.Sprite#
+ */
+Object.defineProperty(Sprite.prototype, 'height', {
+  get: function() {
+    return this._height;
+  },
+  set: function(height) {
+    if (this._height !== height) {
+      this._height = height;
+      this.updateGeometry();
+    }
+  },
+});
+
+/**
+ * 更新对象的事件几何形态
+ * note: 此处的setArea是懒更新，如果需要
+ *
+ * @private
+ */
+Sprite.prototype.updateGeometry = function() {
   const rect = new Rectangle(0, 0, this.width, this.height);
-  this._bounds.addRect(rect);
-  this.setArea(rect, true);
+  this._bounds.clear().addRect(rect);
+  this.setArea(rect);
 };
 
 /**
@@ -86,7 +141,13 @@ Sprite.prototype.updateAnimation = function(snippet) {
 
 /**
  * 播放逐帧动画
- * @param {json} options
+ * @param {Object} options 可以是播放配置对象
+ * @param {String|Array} options.movie 预置的动画名，或者是帧索引数组
+ * @param {Number} [options.fillMode] 结束时停留在哪一帧
+ * @param {Boolean} [options.repeats] 重复播放次数
+ * @param {Boolean} [options.infinite] 无限循环，优先级比 repeats 高
+ * @param {Boolean} [options.alternate] 循环时交替播放
+ * @param {Number} [options.fps] 当前动画将使用的帧率
  * @return {MovieClip}
  */
 Sprite.prototype.playMovie = function(options) {

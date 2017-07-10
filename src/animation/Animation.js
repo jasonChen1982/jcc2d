@@ -11,7 +11,27 @@ import {AnimateRunner} from './AnimateRunner';
  */
 function Animation(element) {
   this.element = element;
+
+  /**
+   * 自身当前动画队列
+   *
+   * @member {array}
+   */
   this.animates = [];
+
+  /**
+   * 自身及后代动画的缩放比例
+   *
+   * @member {number}
+   */
+  this.timeScale = 1;
+
+  /**
+   * 是否暂停自身的动画
+   *
+   * @member {Boolean}
+   */
+  this.paused = false;
 }
 
 /**
@@ -20,6 +40,8 @@ function Animation(element) {
  * @param {number} snippet 时间片段
  */
 Animation.prototype.update = function(snippet) {
+  if (this.paused) return;
+  snippet = this.timeScale * snippet;
   const cache = this.animates.slice(0);
   for (let i = 0; i < cache.length; i++) {
     if (!cache[i].living && !cache[i].resident) {
@@ -88,6 +110,28 @@ Animation.prototype._addMove = function(animate, clear) {
   if (clear) this.clear();
   this.animates.push(animate);
   return animate;
+};
+
+/**
+ * 暂停动画组
+ */
+Animation.prototype.pause = function() {
+  this.paused = true;
+};
+
+/**
+ * 恢复动画组
+ */
+Animation.prototype.restart = function() {
+  this.paused = false;
+};
+
+/**
+ * 设置动画组的播放速率
+ * @param {number} speed
+ */
+Animation.prototype.setSpeed = function(speed) {
+  this.timeScale = speed;
 };
 
 /**

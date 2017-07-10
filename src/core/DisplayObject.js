@@ -203,7 +203,7 @@ DisplayObject.prototype = Object.create(Eventer.prototype);
  * 对渲染对象进行x、y轴同时缩放
  *
  * @name scale
- * @member {number}
+ * @member {Number}
  * @memberof JC.DisplayObject#
  */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
@@ -232,9 +232,9 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param {object} options 动画配置参数
- * @param {object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
- * @param {object} options.to 设置对象的结束位置和结束姿态等
+ * @param {Object} options 动画配置参数
+ * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
+ * @param {Object} options.to 设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
@@ -267,7 +267,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param {object} options 动画配置参数
+ * @param {Object} options 动画配置参数
  * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
@@ -301,8 +301,8 @@ DisplayObject.prototype.motion = function(options, clear) {
  * });
  * ```
  *
- * @param {object} options 动画配置参数
- * @param {object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
@@ -333,8 +333,8 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * });
  * ```
  *
- * @param {object} options 动画配置参数
- * @param {object} options.runners 各个拆分动画
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.runners 各个拆分动画
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
@@ -368,7 +368,7 @@ DisplayObject.prototype.removeMask = function() {
  * 设置对象上的属性值
  *
  * @private
- * @param {json} props
+ * @param {Object} props
  */
 DisplayObject.prototype.setProps = function(props) {
   if (props === undefined) return;
@@ -486,7 +486,7 @@ DisplayObject.prototype.setTransform = function(ctx) {
 /**
  * 获取物体相对于canvas世界坐标系的坐标位置
  *
- * @return {object}
+ * @return {Object}
  */
 DisplayObject.prototype.getGlobalPos = function() {
   return {x: this.worldTransform.tx, y: this.worldTransform.ty};
@@ -496,11 +496,12 @@ DisplayObject.prototype.getGlobalPos = function() {
  * 设置显示对象的事件检测区域
  *
  * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
- * @param {boolean} needless 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
+ * @param {Boolean} clock 是否锁住当前设置的监测区域不会被内部更新修改。
  */
-DisplayObject.prototype.setArea = function(shape, needless) {
-  if (this.eventArea !== null && needless) return;
+DisplayObject.prototype.setArea = function(shape, clock) {
+  if (this.eventArea !== null && this.eventArea.clocked && !clock) return;
   this.eventArea = shape;
+  if (clock) this.eventArea.clocked = true;
 };
 
 /**

@@ -654,7 +654,7 @@ var Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -669,7 +669,7 @@ var Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -684,7 +684,7 @@ var Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -699,7 +699,7 @@ var Tween = {
    *
    * @param {Number} t 当前时间
    * @param {Number} b 起始值
-   * @param {Number} c 结束值
+   * @param {Number} c 变化值
    * @param {Number} d 总时间
    * @static
    * @memberof JC.Tween
@@ -930,7 +930,8 @@ Transition.prototype.nextPose = function () {
 
 // import { Point } from './Point';
 /**
- * @class Curve
+ * @class
+ * @memberof JC
  */
 function Curve() {}
 
@@ -1144,6 +1145,8 @@ PathMotion.prototype.decomposeRotate = function (t) {
 
 /**
  *
+ * @class
+ * @memberof JC
  * @param {Array}  points  array of points
  */
 function BezierCurve(points) {
@@ -1294,6 +1297,8 @@ function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
 /**
  * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
  *
+ * @class
+ * @memberof JC
  * @param {number} mX1 控制点1的x分量
  * @param {number} mY1 控制点1的y分量
  * @param {number} mX2 控制点2的x分量
@@ -1778,7 +1783,27 @@ AnimateRunner.prototype.spill = function () {
  */
 function Animation(element) {
   this.element = element;
+
+  /**
+   * 自身当前动画队列
+   *
+   * @member {array}
+   */
   this.animates = [];
+
+  /**
+   * 自身及后代动画的缩放比例
+   *
+   * @member {number}
+   */
+  this.timeScale = 1;
+
+  /**
+   * 是否暂停自身的动画
+   *
+   * @member {Boolean}
+   */
+  this.paused = false;
 }
 
 /**
@@ -1787,6 +1812,8 @@ function Animation(element) {
  * @param {number} snippet 时间片段
  */
 Animation.prototype.update = function (snippet) {
+  if (this.paused) return;
+  snippet = this.timeScale * snippet;
   var cache = this.animates.slice(0);
   for (var i = 0; i < cache.length; i++) {
     if (!cache[i].living && !cache[i].resident) {
@@ -1855,6 +1882,28 @@ Animation.prototype._addMove = function (animate, clear) {
   if (clear) this.clear();
   this.animates.push(animate);
   return animate;
+};
+
+/**
+ * 暂停动画组
+ */
+Animation.prototype.pause = function () {
+  this.paused = true;
+};
+
+/**
+ * 恢复动画组
+ */
+Animation.prototype.restart = function () {
+  this.paused = false;
+};
+
+/**
+ * 设置动画组的播放速率
+ * @param {number} speed
+ */
+Animation.prototype.setSpeed = function (speed) {
+  this.timeScale = speed;
 };
 
 /**
@@ -2487,7 +2536,7 @@ DisplayObject.prototype = Object.create(Eventer.prototype);
  * 对渲染对象进行x、y轴同时缩放
  *
  * @name scale
- * @member {number}
+ * @member {Number}
  * @memberof JC.DisplayObject#
  */
 Object.defineProperty(DisplayObject.prototype, 'scale', {
@@ -2516,9 +2565,9 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * });
  * ```
  *
- * @param {object} options 动画配置参数
- * @param {object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
- * @param {object} options.to 设置对象的结束位置和结束姿态等
+ * @param {Object} options 动画配置参数
+ * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
+ * @param {Object} options.to 设置对象的结束位置和结束姿态等
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
@@ -2551,7 +2600,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
- * @param {object} options 动画配置参数
+ * @param {Object} options 动画配置参数
  * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
  * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
@@ -2585,8 +2634,8 @@ DisplayObject.prototype.motion = function (options, clear) {
  * });
  * ```
  *
- * @param {object} options 动画配置参数
- * @param {object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
@@ -2617,8 +2666,8 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  * });
  * ```
  *
- * @param {object} options 动画配置参数
- * @param {object} options.runners 各个拆分动画
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.runners 各个拆分动画
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
@@ -2652,7 +2701,7 @@ DisplayObject.prototype.removeMask = function () {
  * 设置对象上的属性值
  *
  * @private
- * @param {json} props
+ * @param {Object} props
  */
 DisplayObject.prototype.setProps = function (props) {
   if (props === undefined) return;
@@ -2760,7 +2809,7 @@ DisplayObject.prototype.setTransform = function (ctx) {
 /**
  * 获取物体相对于canvas世界坐标系的坐标位置
  *
- * @return {object}
+ * @return {Object}
  */
 DisplayObject.prototype.getGlobalPos = function () {
   return { x: this.worldTransform.tx, y: this.worldTransform.ty };
@@ -2770,11 +2819,12 @@ DisplayObject.prototype.getGlobalPos = function () {
  * 设置显示对象的事件检测区域
  *
  * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
- * @param {boolean} needless 当该值为true，当且仅当this.eventArea为空时才会更新点击区域。默认为false，总是更新点击区域。
+ * @param {Boolean} clock 是否锁住当前设置的监测区域不会被内部更新修改。
  */
-DisplayObject.prototype.setArea = function (shape, needless) {
-  if (this.eventArea !== null && needless) return;
+DisplayObject.prototype.setArea = function (shape, clock) {
+  if (this.eventArea !== null && this.eventArea.clocked && !clock) return;
   this.eventArea = shape;
+  if (clock) this.eventArea.clocked = true;
 };
 
 /**
@@ -2868,11 +2918,11 @@ Rectangle.prototype.contains = function (x, y) {
  * 显示对象的包围盒子
  *
  * @class
+ * @memberof JC
  * @param {Number} minX
  * @param {Number} minY
  * @param {Number} maxX
  * @param {Number} maxY
- * @memberof JC
  */
 function Bounds(minX, minY, maxX, maxY) {
   /**
@@ -2907,12 +2957,11 @@ Bounds.prototype.isEmpty = function () {
 };
 
 Bounds.prototype.clear = function () {
-  // this.updateID++;
-
   this.minX = Infinity;
   this.minY = Infinity;
   this.maxX = -Infinity;
   this.maxY = -Infinity;
+  return this;
 };
 
 /**
@@ -3079,7 +3128,7 @@ Container.prototype = Object.create(DisplayObject.prototype);
  * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
  *
  * @name zIndex
- * @member {number}
+ * @member {Number}
  * @memberof JC.Container#
  */
 Object.defineProperty(Container.prototype, 'zIndex', {
@@ -3184,16 +3233,35 @@ Container.prototype.remove = function (object) {
  * @private
  * @param {Number} snippet
  */
-Container.prototype.updatePosture = function (snippet) {
-  if (!this._ready) return;
-  if (this.souldSort) this._sortList();
+Container.prototype.updateTimeline = function (snippet) {
+  if (this.paused) return;
   snippet = this.timeScale * snippet;
-  if (!this.paused) this.updateAnimation(snippet);
+  this.updateAnimation(snippet);
+
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
+    var child = this.childs[i];
+    child.updateTimeline(snippet);
+    i++;
+  }
+};
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ *
+ * @private
+ */
+Container.prototype.updatePosture = function () {
+  if (this.souldSort) this._sortList();
   this.updateTransform();
 
-  for (var i = 0, l = this.childs.length; i < l; i++) {
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
     var child = this.childs[i];
-    child.updatePosture(snippet);
+    child.updatePosture();
+    i++;
   }
 };
 
@@ -3208,8 +3276,11 @@ Container.prototype.render = function (ctx) {
   if (this.mask) this.mask.render(ctx);
   this.renderMe(ctx);
 
-  for (var i = 0, l = this.childs.length; i < l; i++) {
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
     var child = this.childs[i];
+    i++;
     if (!child.isVisible() || !child._ready) continue;
     child.render(ctx);
   }
@@ -3219,7 +3290,7 @@ Container.prototype.render = function (ctx) {
 /**
  * 渲染自己
  * @private
- * @return {boolean} 是否渲染
+ * @return {Boolean} 是否渲染
  */
 Container.prototype.renderMe = function () {
   return true;
@@ -3303,38 +3374,22 @@ Container.prototype.setBounds = function (bounds) {
 };
 
 /**
- * 暂停自身的动画进度
+ * 暂停自身和子级的所有动画进度
  */
 Container.prototype.pause = function () {
   this.paused = true;
 };
 
 /**
- * 恢复自身的动画进度
+ * 恢复自身和子级的所有动画进度
  */
 Container.prototype.restart = function () {
   this.paused = false;
 };
 
 /**
- * 取消自身的所有动画
- */
-Container.prototype.cancle = function () {
-  this.Animation.clear();
-};
-
-/**
- * 停止掉自身的所有动画，并将状态保留在所以的结束点
- */
-Container.prototype.stop = function () {
-  this.Animation.animates.forEach(function (it) {
-    it.stop();
-  });
-};
-
-/**
- * 设置自身及子节点的动画速度
- * @param {number} speed 设置的速率值
+ * 设置自身及子级的动画速度
+ * @param {Number} speed 设置的速率值
  */
 Container.prototype.setSpeed = function (speed) {
   this.timeScale = speed;
@@ -3553,12 +3608,12 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  *      frame: new JC.Rectangle(0, 0, w, h),
  *      width: 100,
  *      height: 100,
- *      count: 38,
  *      animations: {
  *          fall: {start: 0,end: 4,next: 'stand'},
  *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
  *          stand: {start: 10,end: 39},
- *          walk: {start: 40,end: 59,next: 'stand'}
+ *          walk: {start: 40,end: 59,next: 'stand'},
+ *          other: [ 0, 1, 2, 1, 3, 4 ], // 同样接受数组形势
  *      }
  * });
  * ```
@@ -3566,10 +3621,19 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  * @class
  * @memberof JC
  * @extends JC.Container
- * @param {json} options
+ * @param {Object} options
+ * @param {JC.Texture} options.texture 图片纹理
+ * @param {JC.Rectangle} [options.frame] 当是逐帧或者是裁切显示时需要配置，显示的矩形区域
+ * @param {Number} [options.width] 实际显示的宽，可能会缩放图像
+ * @param {Number} [options.height] 实际显示的高，可能会缩放图像
+ * @param {Object} [options.animations] 逐帧的预置帧动画配置
  */
 function Sprite(options) {
   Container.call(this);
+
+  this._width = 0;
+
+  this._height = 0;
 
   this.texture = options.texture;
   if (this.texture.loaded) {
@@ -3600,10 +3664,56 @@ Sprite.prototype.upTexture = function (options) {
 
   this.width = options.width || this.frame.width;
   this.height = options.height || this.frame.height;
+};
 
+/**
+ * 当前图片对象的width
+ *
+ * @name width
+ * @member {Number}
+ * @memberof JC.Sprite#
+ */
+Object.defineProperty(Sprite.prototype, 'width', {
+  get: function get() {
+    return this._width;
+  },
+  set: function set(width) {
+    if (this._width !== width) {
+      this._width = width;
+      this.updateGeometry();
+    }
+  }
+});
+
+/**
+ * 当前图片对象的height
+ *
+ * @name height
+ * @member {Number}
+ * @memberof JC.Sprite#
+ */
+Object.defineProperty(Sprite.prototype, 'height', {
+  get: function get() {
+    return this._height;
+  },
+  set: function set(height) {
+    if (this._height !== height) {
+      this._height = height;
+      this.updateGeometry();
+    }
+  }
+});
+
+/**
+ * 更新对象的事件几何形态
+ * note: 此处的setArea是懒更新，如果需要
+ *
+ * @private
+ */
+Sprite.prototype.updateGeometry = function () {
   var rect = new Rectangle(0, 0, this.width, this.height);
-  this._bounds.addRect(rect);
-  this.setArea(rect, true);
+  this._bounds.clear().addRect(rect);
+  this.setArea(rect);
 };
 
 /**
@@ -3619,7 +3729,13 @@ Sprite.prototype.updateAnimation = function (snippet) {
 
 /**
  * 播放逐帧动画
- * @param {json} options
+ * @param {Object} options 可以是播放配置对象
+ * @param {String|Array} options.movie 预置的动画名，或者是帧索引数组
+ * @param {Number} [options.fillMode] 结束时停留在哪一帧
+ * @param {Boolean} [options.repeats] 重复播放次数
+ * @param {Boolean} [options.infinite] 无限循环，优先级比 repeats 高
+ * @param {Boolean} [options.alternate] 循环时交替播放
+ * @param {Number} [options.fps] 当前动画将使用的帧率
  * @return {MovieClip}
  */
 Sprite.prototype.playMovie = function (options) {
@@ -3643,7 +3759,7 @@ Sprite.prototype.renderMe = function (ctx) {
  * @class
  * @memberof JC
  * @param {object} options 动画配置
- * @param {object} [options.keyframes] bodymovin从ae导出的动画数据
+ * @param {object} options.keyframes bodymovin从ae导出的动画数据
  * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
  * @param {number} [options.repeats] 动画是否无限循环
  * @param {boolean} [options.infinite] 动画是否无限循环
@@ -3772,25 +3888,21 @@ ParserAnimation.prototype.getAssets = function (id) {
  * @param {number} speed
  */
 ParserAnimation.prototype.setSpeed = function (speed) {
-  this.doc.timeScale = speed;
+  this.doc.setSpeed(speed);
 };
 
 /**
  * 暂停播放动画
  */
 ParserAnimation.prototype.pause = function () {
-  this.timeline.forEach(function (it) {
-    it.pause();
-  });
+  this.doc.pause();
 };
 
 /**
  * 恢复播放动画
  */
 ParserAnimation.prototype.restart = function () {
-  this.timeline.forEach(function (it) {
-    it.restart();
-  });
+  this.doc.restart();
 };
 
 /**
@@ -3814,31 +3926,60 @@ ParserAnimation.prototype.cancle = function () {
 /**
  * 帧缓冲区
  * @class
+ * @memberof JC
  */
 function FrameBuffer() {
   this.canvas = document.createElement('canvas');
   this.ctx = this.canvas.getContext('2d');
 }
+
+/**
+ * 设置缓冲区大小
+ * @param {JC.Rectangle} rect 获取到的尺寸
+ */
 FrameBuffer.prototype.setSize = function (rect) {
   this.width = this.canvas.width = rect.width + rect.px * 2;
   this.height = this.canvas.height = rect.height + rect.py * 2;
 };
+
+/**
+ * 清除缓冲区
+ */
 FrameBuffer.prototype.clear = function () {
   this.ctx.setTransform(1, 0, 0, 1, 0, 0);
   this.ctx.clearRect(0, 0, this.width, this.height);
 };
+
+/**
+ * 设置绘图上下文的变换矩阵
+ * @param {number} a
+ * @param {number} b
+ * @param {number} c
+ * @param {number} d
+ * @param {number} e
+ * @param {number} f
+ */
 FrameBuffer.prototype.setTransform = function (a, b, c, d, e, f) {
   this.ctx.setTransform(a, b, c, d, e, f);
 };
+
+/**
+ * 获取缓冲区的像素
+ * @return {ImageData}
+ */
 FrameBuffer.prototype.getBuffer = function () {
   this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
   return this.bufferData;
 };
+
+/**
+ * 放置像素到缓冲区
+ * @return {canvas}
+ */
 FrameBuffer.prototype.putBuffer = function () {
   this.ctx.putImageData(this.bufferData, 0, 0);
   return this.canvas;
 };
-FrameBuffer.prototype.createBuffer = function () {};
 
 var FUNCTION = 'fn';
 var INSTANCE = 'in';
@@ -4434,11 +4575,6 @@ function Stage(options) {
     }
   };
 
-  /**
-   * 设置canvas是否可交互
-   *
-   * @member {Boolean}
-   */
   this.interactive = Utils.isBoolean(options.interactive) ? options.interactive : true;
 
   this.proxyOn();
@@ -4493,12 +4629,16 @@ Stage.prototype.render = function () {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
-  if (this.autoUpdate) this.updatePosture(this.snippet);
+  this.updateTimeline(this.snippet);
+  this.updatePosture();
 
-  for (var i = 0, l = this.childs.length; i < l; i++) {
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
     var child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
     child.render(this.ctx);
+    i++;
   }
 
   this.emit('postrender');

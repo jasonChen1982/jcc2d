@@ -136,25 +136,21 @@ ParserAnimation.prototype.getAssets = function(id) {
  * @param {number} speed
  */
 ParserAnimation.prototype.setSpeed = function(speed) {
-  this.doc.timeScale = speed;
+  this.doc.setSpeed(speed);
 };
 
 /**
  * 暂停播放动画
  */
 ParserAnimation.prototype.pause = function() {
-  this.timeline.forEach(function(it) {
-    it.pause();
-  });
+  this.doc.pause();
 };
 
 /**
  * 恢复播放动画
  */
 ParserAnimation.prototype.restart = function() {
-  this.timeline.forEach(function(it) {
-    it.restart();
-  });
+  this.doc.restart();
 };
 
 /**

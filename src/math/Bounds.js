@@ -43,12 +43,11 @@ Bounds.prototype.isEmpty = function() {
 };
 
 Bounds.prototype.clear = function() {
-    // this.updateID++;
-
   this.minX = Infinity;
   this.minY = Infinity;
   this.maxX = -Infinity;
   this.maxY = -Infinity;
+  return this;
 };
 
 /**

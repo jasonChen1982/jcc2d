@@ -257,12 +257,16 @@ Stage.prototype.render = function() {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.width, this.height);
   }
-  if (this.autoUpdate) this.updatePosture(this.snippet);
+  this.updateTimeline(this.snippet);
+  this.updatePosture();
 
-  for (let i = 0, l = this.childs.length; i < l; i++) {
+  let i = 0;
+  const l = this.childs.length;
+  while (i < l) {
     const child = this.childs[i];
     if (!child.isVisible() || !child._ready) continue;
     child.render(this.ctx);
+    i++;
   }
 
   this.emit('postrender');

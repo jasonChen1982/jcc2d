@@ -78,7 +78,7 @@ Container.prototype = Object.create(DisplayObject.prototype);
  * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
  *
  * @name zIndex
- * @member {number}
+ * @member {Number}
  * @memberof JC.Container#
  */
 Object.defineProperty(Container.prototype, 'zIndex', {
@@ -183,16 +183,35 @@ Container.prototype.remove = function(object) {
  * @private
  * @param {Number} snippet
  */
-Container.prototype.updatePosture = function(snippet) {
-  if (!this._ready) return;
-  if (this.souldSort) this._sortList();
+Container.prototype.updateTimeline = function(snippet) {
+  if (this.paused) return;
   snippet = this.timeScale * snippet;
-  if (!this.paused) this.updateAnimation(snippet);
+  this.updateAnimation(snippet);
+
+  let i = 0;
+  const l = this.childs.length;
+  while (i < l) {
+    const child = this.childs[i];
+    child.updateTimeline(snippet);
+    i++;
+  }
+};
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ *
+ * @private
+ */
+Container.prototype.updatePosture = function() {
+  if (this.souldSort) this._sortList();
   this.updateTransform();
 
-  for (let i = 0, l = this.childs.length; i < l; i++) {
+  let i = 0;
+  const l = this.childs.length;
+  while (i < l) {
     const child = this.childs[i];
-    child.updatePosture(snippet);
+    child.updatePosture();
+    i++;
   }
 };
 
@@ -207,8 +226,11 @@ Container.prototype.render = function(ctx) {
   if (this.mask) this.mask.render(ctx);
   this.renderMe(ctx);
 
-  for (let i = 0, l = this.childs.length; i < l; i++) {
+  let i = 0;
+  const l = this.childs.length;
+  while (i < l) {
     const child = this.childs[i];
+    i++;
     if (!child.isVisible() || !child._ready) continue;
     child.render(ctx);
   }
@@ -218,7 +240,7 @@ Container.prototype.render = function(ctx) {
 /**
  * 渲染自己
  * @private
- * @return {boolean} 是否渲染
+ * @return {Boolean} 是否渲染
  */
 Container.prototype.renderMe = function() {
   return true;
@@ -304,38 +326,22 @@ Container.prototype.setBounds = function(bounds) {
 };
 
 /**
- * 暂停自身的动画进度
+ * 暂停自身和子级的所有动画进度
  */
 Container.prototype.pause = function() {
   this.paused = true;
 };
 
 /**
- * 恢复自身的动画进度
+ * 恢复自身和子级的所有动画进度
  */
 Container.prototype.restart = function() {
   this.paused = false;
 };
 
 /**
- * 取消自身的所有动画
- */
-Container.prototype.cancle = function() {
-  this.Animation.clear();
-};
-
-/**
- * 停止掉自身的所有动画，并将状态保留在所以的结束点
- */
-Container.prototype.stop = function() {
-  this.Animation.animates.forEach(function(it) {
-    it.stop();
-  });
-};
-
-/**
- * 设置自身及子节点的动画速度
- * @param {number} speed 设置的速率值
+ * 设置自身及子级的动画速度
+ * @param {Number} speed 设置的速率值
  */
 Container.prototype.setSpeed = function(speed) {
   this.timeScale = speed;
