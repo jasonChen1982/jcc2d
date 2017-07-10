@@ -1495,6 +1495,7 @@ function KeyFrames(options) {
   this.keyState = {};
 
   this.preParser(Utils.copyJSON(options.ks));
+  this.nextPose();
 }
 KeyFrames.prototype = Object.create(Animate.prototype);
 
