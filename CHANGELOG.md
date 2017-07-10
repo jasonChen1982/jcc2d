@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.2.7"></a>
+## [1.2.7](https://github.com/jasonChen1982/jcc2d/compare/v1.2.6...v1.2.7) (2017-07-10)
+
+
+### Bug Fixes
+
+* **KeyFrames:** fixed KeyFrames status not init when pause before run animation ([bd5c8d0](https://github.com/jasonChen1982/jcc2d/commit/bd5c8d0))
+
+
+
 <a name="1.2.6"></a>
 ## [1.2.6](https://github.com/jasonChen1982/jcc2d/compare/v1.2.5...v1.2.6) (2017-07-10)
 
