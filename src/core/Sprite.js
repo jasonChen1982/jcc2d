@@ -41,15 +41,17 @@ function Sprite(options) {
 
   this._height = 0;
 
+  this.ready = true;
+
   this.texture = options.texture;
   if (this.texture.loaded) {
     this.upTexture(options);
   } else {
     const This = this;
-    this._ready = false;
+    this.ready = false;
     this.texture.on('load', function() {
       This.upTexture(options);
-      This._ready = true;
+      This.ready = true;
     });
   }
 
@@ -161,7 +163,7 @@ Sprite.prototype.playMovie = function(options) {
  * @param {context} ctx
  */
 Sprite.prototype.renderMe = function(ctx) {
-  if (!this._ready) return;
+  if (!this.ready) return;
   const frame = this.MovieClip.getFrame();
   ctx.drawImage(
     this.texture.texture,

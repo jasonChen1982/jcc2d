@@ -24,11 +24,13 @@ function Eventer() {
  *
  * @param {String} type 事件类型
  * @param {Function} fn 回调函数
+ * @return {this}
  */
 Eventer.prototype.on = function(type, fn) {
   if (!Utils.isFunction(fn)) return;
   this.listeners[type] = this.listeners[type] || [];
   this.listeners[type].push(fn);
+  return this;
 };
 
 /**
@@ -36,6 +38,7 @@ Eventer.prototype.on = function(type, fn) {
  *
  * @param {String} type 事件类型
  * @param {Function} fn 注册时回调函数的引用
+ * @return {this}
  */
 Eventer.prototype.off = function(type, fn) {
   if (Utils.isUndefined(this.listeners[type])) return;
@@ -52,6 +55,7 @@ Eventer.prototype.off = function(type, fn) {
       cbs.length = 0;
     }
   }
+  return this;
 };
 
 /**
@@ -59,6 +63,7 @@ Eventer.prototype.off = function(type, fn) {
  *
  * @param {String} type 事件类型
  * @param {Function} fn 回调函数
+ * @return {this}
  */
 Eventer.prototype.once = function(type, fn) {
   if (!Utils.isFunction(fn)) return;
@@ -68,6 +73,7 @@ Eventer.prototype.once = function(type, fn) {
     This.off(type, cb);
   };
   this.on(type, cb);
+  return this;
 };
 
 /**

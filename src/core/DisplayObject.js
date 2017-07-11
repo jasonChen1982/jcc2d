@@ -15,13 +15,6 @@ import {Utils} from '../util/Utils';
  */
 function DisplayObject() {
   Eventer.call(this);
-  /**
-   * 标记渲染对象是否就绪
-   *
-   * @private
-   * @member {Boolean}
-   */
-  this._ready = true;
 
   /**
    * 控制渲染对象是否显示

@@ -264,9 +264,9 @@ Stage.prototype.render = function() {
   const l = this.childs.length;
   while (i < l) {
     const child = this.childs[i];
-    if (!child.isVisible() || !child._ready) continue;
-    child.render(this.ctx);
     i++;
+    if (!child.isVisible()) continue;
+    child.render(this.ctx);
   }
 
   this.emit('postrender');

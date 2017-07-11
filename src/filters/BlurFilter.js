@@ -87,7 +87,6 @@ Object.defineProperty(BlurFilter.prototype, 'blur', {
 });
 
 BlurFilter.prototype.updatePosture = function(snippet) {
-  if (!this._ready) return;
   if (this.souldSort) this._sortList();
   snippet = this.timeScale * snippet;
   if (!this.paused) this.updateAnimation(snippet);
@@ -135,7 +134,7 @@ BlurFilter.prototype.render = function(ctx) {
     this.frameBuffer.setSize(this.__o);
     for (i = 0; i < l; i++) {
       child = this.childs[i];
-      if (!child.isVisible() || !child._ready) continue;
+      if (!child.isVisible()) continue;
       child.render(this.frameBuffer.ctx);
     }
     this._applyFilter(this.frameBuffer.getBuffer());

@@ -231,7 +231,7 @@ Container.prototype.render = function(ctx) {
   while (i < l) {
     const child = this.childs[i];
     i++;
-    if (!child.isVisible() || !child._ready) continue;
+    if (!child.isVisible()) continue;
     child.render(ctx);
   }
   ctx.restore();
