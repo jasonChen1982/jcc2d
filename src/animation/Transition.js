@@ -14,9 +14,7 @@ import {Utils} from '../util/Utils';
 function Transition(options) {
   Animate.call(this, options);
 
-  if (Utils.isObject(options.from)) {
-    this.element.setProps(options.from); // TODO: 不应该此时设置位置啊
-  } else {
+  if (!Utils.isObject(options.from)) {
     options.from = {};
     for (let i in options.to) {
       options.from[i] = this.element[i];

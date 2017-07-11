@@ -38,64 +38,61 @@
       DOC = new JC.Container();
     DOC.x = w / 2;
     DOC.y = h / 2;
+    var texture = new JC.Texture('./images/dragon.png');
 
-    var loadBox = JC.loaderUtil({
-      dragon: './images/dragon.png'
-    });
-
-    loadBox.on('compelete', function () {
-      resize();
-      runMan = new JC.Sprite({
-        texture: loadBox.getById('dragon'),
-        frame: new JC.Rectangle(0, 0, 210, 231),
-        animations: {
-          fall: {
-            start: 0,
-            end: 4,
-            next: 'stand'
-          },
-          fly: {
-            start: 5,
-            end: 9,
-            next: 'stand'
-          },
-          stand: {
-            start: 10,
-            end: 39
-          },
-          walk: {
-            start: 40,
-            end: 59,
-            next: 'stand'
-          }
+    resize();
+    runMan = new JC.Sprite({
+      texture: texture,
+      frame: new JC.Rectangle(0, 0, 210, 231),
+      animations: {
+        fall: {
+          start: 0,
+          end: 4,
+          next: 'stand'
+        },
+        fly: {
+          start: 5,
+          end: 9,
+          next: 'stand'
+        },
+        stand: {
+          start: 10,
+          end: 39
+        },
+        walk: {
+          start: 40,
+          end: 59,
+          next: 'stand'
         }
-      });
+      }
+    });
+    texture.on('load', function() {
       runMan.pivotX = runMan.width >> 1;
       runMan.pivotY = runMan.height >> 1;
-      runMan.playMovie({ // you can config repeats (repeat some times) or infinite (play infinite times)
-        movie: 'stand',
-        fps: 30,
-        // repeats: 1,
-        infinite: true
-      });
-      runMan.on('click', function () {
-        var movie = JC.Utils.random(['walk', 'fly', 'fall']);
-        document.querySelector('#movie').innerHTML = movie;
-        runMan.playMovie({
-          movie: movie,
-          repeats: 6,
-          onCompelete: function () {
-            document.querySelector('#movie').innerHTML = 'stand';
-          }
-        });
-      });
-      runMan.x = 20;
-
-      DOC.adds(runMan);
-      stage.adds(DOC);
-
-      stage.startEngine();
+    })
+    runMan.playMovie({ // you can config repeats (repeat some times) or infinite (play infinite times)
+      movie: 'stand',
+      fps: 30,
+      // repeats: 1,
+      infinite: true
     });
+    runMan.on('click', function () {
+      var movie = JC.Utils.random(['walk', 'fly', 'fall']);
+      document.querySelector('#movie').innerHTML = movie;
+      runMan.playMovie({
+        movie: movie,
+        repeats: 6,
+        onCompelete: function () {
+          document.querySelector('#movie').innerHTML = 'stand';
+        }
+      });
+    });
+    runMan.x = 20;
+
+    DOC.adds(runMan);
+    stage.adds(DOC);
+
+    stage.startEngine();
 
     /**
      * 帧率监控工具

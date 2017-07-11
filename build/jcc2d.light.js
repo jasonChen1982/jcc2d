@@ -311,11 +311,13 @@ function Eventer() {
  *
  * @param {String} type 事件类型
  * @param {Function} fn 回调函数
+ * @return {this}
  */
 Eventer.prototype.on = function (type, fn) {
   if (!Utils.isFunction(fn)) return;
   this.listeners[type] = this.listeners[type] || [];
   this.listeners[type].push(fn);
+  return this;
 };
 
 /**
@@ -323,6 +325,7 @@ Eventer.prototype.on = function (type, fn) {
  *
  * @param {String} type 事件类型
  * @param {Function} fn 注册时回调函数的引用
+ * @return {this}
  */
 Eventer.prototype.off = function (type, fn) {
   if (Utils.isUndefined(this.listeners[type])) return;
@@ -339,6 +342,7 @@ Eventer.prototype.off = function (type, fn) {
       cbs.length = 0;
     }
   }
+  return this;
 };
 
 /**
@@ -346,6 +350,7 @@ Eventer.prototype.off = function (type, fn) {
  *
  * @param {String} type 事件类型
  * @param {Function} fn 回调函数
+ * @return {this}
  */
 Eventer.prototype.once = function (type, fn) {
   if (!Utils.isFunction(fn)) return;
@@ -355,6 +360,7 @@ Eventer.prototype.once = function (type, fn) {
     This.off(type, cb);
   };
   this.on(type, cb);
+  return this;
 };
 
 /**
@@ -900,9 +906,7 @@ Animate.prototype.cancle = function () {
 function Transition(options) {
   Animate.call(this, options);
 
-  if (Utils.isObject(options.from)) {
-    this.element.setProps(options.from);
-  } else {
+  if (!Utils.isObject(options.from)) {
     options.from = {};
     for (var i in options.to) {
       options.from[i] = this.element[i];
@@ -2351,13 +2355,6 @@ var TEMP_MATRIX = new Matrix();
  */
 function DisplayObject() {
   Eventer.call(this);
-  /**
-   * 标记渲染对象是否就绪
-   *
-   * @private
-   * @member {Boolean}
-   */
-  this._ready = true;
 
   /**
    * 控制渲染对象是否显示
@@ -2930,25 +2927,25 @@ function Bounds(minX, minY, maxX, maxY) {
    * @member {number}
    * @default 0
    */
-  this.minX = minX || Infinity;
+  this.minX = Utils.isNumber(minX) ? minX : Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
-  this.minY = minY || Infinity;
+  this.minY = Utils.isNumber(minY) ? minY : Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
-  this.maxX = maxX || -Infinity;
+  this.maxX = Utils.isNumber(maxX) ? maxX : -Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
-  this.maxY = maxY || -Infinity;
+  this.maxY = Utils.isNumber(maxY) ? maxY : -Infinity;
 
   this.rect = null;
 }
@@ -3282,7 +3279,7 @@ Container.prototype.render = function (ctx) {
   while (i < l) {
     var child = this.childs[i];
     i++;
-    if (!child.isVisible() || !child._ready) continue;
+    if (!child.isVisible()) continue;
     child.render(ctx);
   }
   ctx.restore();
@@ -3636,15 +3633,17 @@ function Sprite(options) {
 
   this._height = 0;
 
+  this.ready = true;
+
   this.texture = options.texture;
   if (this.texture.loaded) {
     this.upTexture(options);
   } else {
     var This = this;
-    this._ready = false;
+    this.ready = false;
     this.texture.on('load', function () {
       This.upTexture(options);
-      This._ready = true;
+      This.ready = true;
     });
   }
 
@@ -3750,7 +3749,7 @@ Sprite.prototype.playMovie = function (options) {
  * @param {context} ctx
  */
 Sprite.prototype.renderMe = function (ctx) {
-  if (!this._ready) return;
+  if (!this.ready) return;
   var frame = this.MovieClip.getFrame();
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
 };
@@ -4637,9 +4636,9 @@ Stage.prototype.render = function () {
   var l = this.childs.length;
   while (i < l) {
     var child = this.childs[i];
-    if (!child.isVisible() || !child._ready) continue;
-    child.render(this.ctx);
     i++;
+    if (!child.isVisible()) continue;
+    child.render(this.ctx);
   }
 
   this.emit('postrender');
