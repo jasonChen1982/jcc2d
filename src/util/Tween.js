@@ -1,4 +1,7 @@
+import {BezierEasing} from '../math/BezierEasing';
 /* eslint no-cond-assign: "off" */
+/* eslint new-cap: 0 */
+/* eslint max-len: 0 */
 
 
 /**
@@ -8,94 +11,146 @@
  * dispay.animate({
  *   from: {x: 100},
  *   to: {x: 200},
- *   ease: 'linear' // 配置要调用的运动函数
+ *   ease: JC.Tween.Ease.In, // 配置要调用的运动函数
  * })
  * ```
  * @namespace JC.Tween
  */
 
 export const Tween = {
-  /**
-   * 匀速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  linear: function(t, b, c, d) {
-    return c*t/d + b;
+
+  Linear: {
+
+    None: function(k) {
+      return k;
+    },
+
   },
 
-  /**
-   * 加速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  easeIn: function(t, b, c, d) {
-    return c*(t/=d)*t + b;
+  Ease: {
+
+    In: (function() {
+      const beizer = new BezierEasing(.42, 0, 1, 1);
+      return function(k) {
+        return beizer.get(k);
+      };
+    })(),
+
+    Out: (function() {
+      const beizer = new BezierEasing(0, 0, .58, 1);
+      return function(k) {
+        return beizer.get(k);
+      };
+    })(),
+
+    InOut: (function() {
+      const beizer = new BezierEasing(.42, 0, .58, 1);
+      return function(k) {
+        return beizer.get(k);
+      };
+    })(),
+
+    Beizer: function(x1, y1, x2, y2) {
+      const beizer = new BezierEasing(x1, y1, x2, y2);
+      return function(k) {
+        return beizer.get(k);
+      };
+    },
+
   },
 
-  /**
-   * 减速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  easeOut: function(t, b, c, d) {
-    return -c *(t/=d)*(t-2) + b;
+  Elastic: {
+
+    In: function(k) {
+      if (k === 0) {
+        return 0;
+      }
+      if (k === 1) {
+        return 1;
+      }
+      return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+    },
+
+    Out: function(k) {
+      if (k === 0) {
+        return 0;
+      }
+      if (k === 1) {
+        return 1;
+      }
+      return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+    },
+
+    InOut: function(k) {
+      if (k === 0) {
+        return 0;
+      }
+      if (k === 1) {
+        return 1;
+      }
+      k *= 2;
+      if (k < 1) {
+        return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+      }
+      return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+    },
+
   },
 
-  /**
-   * 先加速再减速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  easeBoth: function(t, b, c, d) {
-    if ((t/=d/2) < 1) {
-      return c/2*t*t + b;
-    }
-    return -c/2 * ((--t)*(t-2) - 1) + b;
+  Back: {
+
+    In: function(k) {
+      let s = 1.70158;
+      return k * k * ((s + 1) * k - s);
+    },
+
+    Out: function(k) {
+      let s = 1.70158;
+      return --k * k * ((s + 1) * k + s) + 1;
+    },
+
+    InOut: function(k) {
+      let s = 1.70158 * 1.525;
+      if ((k *= 2) < 1) {
+        return 0.5 * (k * k * ((s + 1) * k - s));
+      }
+      return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+    },
+
   },
 
-  /**
-   * 扩展运动函数
-   *
-   * ```js
-   * JC.Tween.extend({
-   *   elasticIn: function(t, b, c, d){....},
-   *   elasticOut: function(t, b, c, d){....},
-   *   ......
-   * })
-   * ```
-   * @param {Number} options 扩展的时间函数
-   * @static
-   * @memberof JC.Tween
-   */
-  extend: function(options) {
-    if (!options) return;
-    for (let key in options) {
-      if (key !== 'extend' && options[key]) this[key] = options[key];
-    }
+  Bounce: {
+
+    In: function(k) {
+      return 1 - Tween.Bounce.Out(1 - k);
+    },
+
+    Out: function(k) {
+      if (k < (1 / 2.75)) {
+        return 7.5625 * k * k;
+      } else if (k < (2 / 2.75)) {
+        return 7.5625 * (k -= (1.5 / 2.75)) * k + 0.75;
+      } else if (k < (2.5 / 2.75)) {
+        return 7.5625 * (k -= (2.25 / 2.75)) * k + 0.9375;
+      } else {
+        return 7.5625 * (k -= (2.625 / 2.75)) * k + 0.984375;
+      }
+    },
+
+    InOut: function(k) {
+      if (k < 0.5) {
+        return Tween.Bounce.In(k * 2) * 0.5;
+      }
+      return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+    },
   },
+
+  Utils: {
+
+    Linear: function(p0, p1, t) {
+      return (p1 - p0) * t + p0;
+    },
+
+  },
+
 };

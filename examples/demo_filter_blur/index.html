@@ -23,7 +23,6 @@
   <canvas id="demo_canvas" width="320" height="410"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
-  <script type="text/javascript" src="../libs/util/tween.js"></script>
   <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
@@ -56,8 +55,6 @@
       this.blur = 0;
       this.padding = false;
     }
-
-    JC.Tween.extend(tween);
 
     var loadBox = JC.loaderUtil({
       pic: './images/card.jpg'

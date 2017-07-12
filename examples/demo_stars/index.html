@@ -41,7 +41,6 @@
   <p class="title">随意点击</p>
   <canvas id="demo_canvas" width="640" height="900"></canvas>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
-  <script type="text/javascript" src="../libs/util/tween.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     // init
@@ -50,8 +49,6 @@
     });
     var starContainer = new JC.Container();
     var COLORS = ['#f00', '#f6f', '#ff0', '#66f'];
-
-    JC.Tween.extend(tween);
 
     // 画圆类
     function Cricle(color, radius) {
@@ -101,7 +98,7 @@
           scale: 2.15,
           alpha: 0
         },
-        ease: 'linear',
+        ease: JC.Tween.Linear.None,
         duration: 300,
         onCompelete: function onCompelete() {
           circle.visible = false;
@@ -120,7 +117,7 @@
             y: JC.Utils.random((y - 200) * 1.15, (y + 200) * 1.15),
             scale: 0
           },
-          ease: 'linear',
+          ease: JC.Tween.Linear.None,
           duration: 350,
           onCompelete: function onCompelete() {
             starContainer.visible = false;

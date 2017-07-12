@@ -639,546 +639,6 @@ InteractionData.prototype.clone = function () {
   return evd;
 };
 
-/* eslint no-cond-assign: "off" */
-
-/**
- * Tween 缓动时间运动函数集合
- *
- * ```js
- * dispay.animate({
- *   from: {x: 100},
- *   to: {x: 200},
- *   ease: 'linear' // 配置要调用的运动函数
- * })
- * ```
- * @namespace JC.Tween
- */
-
-var Tween = {
-  /**
-   * 匀速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  linear: function linear(t, b, c, d) {
-    return c * t / d + b;
-  },
-
-  /**
-   * 加速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  easeIn: function easeIn(t, b, c, d) {
-    return c * (t /= d) * t + b;
-  },
-
-  /**
-   * 减速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  easeOut: function easeOut(t, b, c, d) {
-    return -c * (t /= d) * (t - 2) + b;
-  },
-
-  /**
-   * 先加速再减速运动函数
-   *
-   * @param {Number} t 当前时间
-   * @param {Number} b 起始值
-   * @param {Number} c 变化值
-   * @param {Number} d 总时间
-   * @static
-   * @memberof JC.Tween
-   * @return {Number} 当前时间对应的值
-   */
-  easeBoth: function easeBoth(t, b, c, d) {
-    if ((t /= d / 2) < 1) {
-      return c / 2 * t * t + b;
-    }
-    return -c / 2 * (--t * (t - 2) - 1) + b;
-  },
-
-  /**
-   * 扩展运动函数
-   *
-   * ```js
-   * JC.Tween.extend({
-   *   elasticIn: function(t, b, c, d){....},
-   *   elasticOut: function(t, b, c, d){....},
-   *   ......
-   * })
-   * ```
-   * @param {Number} options 扩展的时间函数
-   * @static
-   * @memberof JC.Tween
-   */
-  extend: function extend(options) {
-    if (!options) return;
-    for (var key in options) {
-      if (key !== 'extend' && options[key]) this[key] = options[key];
-    }
-  }
-};
-
-/**
- * 动画对象的基本类型
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画配置信息
- */
-function Animate(options) {
-  Eventer.call(this);
-
-  this.element = options.element || {};
-  this.duration = options.duration || 300;
-  this.living = true;
-  this.resident = options.resident || false;
-
-  // this.onCompelete = options.onCompelete || null;
-  // this.onUpdate = options.onUpdate || null;
-
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.repeats = options.repeats || 0;
-  this.delay = options.delay || 0;
-  this.wait = options.wait || 0;
-  this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
-
-  if (options.onCompelete) {
-    this.on('compelete', options.onCompelete.bind(this));
-  }
-  if (options.onUpdate) {
-    this.on('update', options.onUpdate.bind(this));
-  }
-
-  // this.repeatsCut = this.repeats;
-  // this.delayCut = this.delay;
-  // this.waitCut = this.wait;
-  // this.progress = 0;
-  // this.direction = 1;
-  this.init();
-
-  this.paused = false;
-}
-
-Animate.prototype = Object.create(Eventer.prototype);
-
-/**
- * 更新动画
- * @private
- * @param {number} snippet 时间片段
- * @return {object}
- */
-Animate.prototype.update = function (snippet) {
-  var snippetCache = this.direction * this.timeScale * snippet;
-  if (this.waitCut > 0) {
-    this.waitCut -= Math.abs(snippetCache);
-    return;
-  }
-  if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
-    return;
-  }
-
-  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
-
-  var pose = this.nextPose();
-  this.emit('update', pose, this.progress / this.duration);
-  // if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
-
-  if (this.spill()) {
-    if (this.repeatsCut > 0 || this.infinite) {
-      if (this.repeatsCut > 0) --this.repeatsCut;
-      this.delayCut = this.delay;
-      if (this.alternate) {
-        this.direction *= -1;
-      } else {
-        this.direction = 1;
-        this.progress = 0;
-      }
-    } else {
-      if (!this.resident) this.living = false;
-      this.emit('compelete', pose);
-    }
-  }
-  return pose;
-};
-
-/**
- * 检查动画是否到了边缘
- * @private
- * @return {boolean}
- */
-Animate.prototype.spill = function () {
-  var bottomSpill = this.progress <= 0 && this.direction === -1;
-  var topSpill = this.progress >= this.duration && this.direction === 1;
-  return bottomSpill || topSpill;
-};
-
-/**
- * 初始化动画状态
- * @private
- */
-Animate.prototype.init = function () {
-  this.direction = 1;
-  this.progress = 0;
-  this.repeatsCut = this.repeats;
-  this.delayCut = this.delay;
-  this.waitCut = this.wait;
-};
-
-/**
- * 下一帧的数据
- * @private
- */
-Animate.prototype.nextPose = function () {
-  console.warn('should be overwrite');
-};
-
-/**
- * 暂停动画
- */
-Animate.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复动画
- */
-Animate.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 停止动画，并把状态置为最后一帧，会触发事件
- */
-Animate.prototype.stop = function () {
-  this.repeats = 0;
-  this.infinite = false;
-  this.progress = this.duration;
-};
-
-/**
- * 设置动画的速率
- * @param {number} speed
- */
-Animate.prototype.setSpeed = function (speed) {
-  this.timeScale = speed;
-};
-
-/**
- * 取消动画，不会触发事件
- */
-Animate.prototype.cancle = function () {
-  this.living = false;
-};
-
-/* eslint guard-for-in: "off" */
-
-/**
- * Transition类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画所具备的特性
- */
-function Transition(options) {
-  Animate.call(this, options);
-
-  if (!Utils.isObject(options.from)) {
-    options.from = {};
-    for (var i in options.to) {
-      options.from[i] = this.element[i];
-    }
-  }
-  this.ease = options.ease || 'easeBoth';
-  this.from = options.from;
-  this.to = options.to;
-}
-Transition.prototype = Object.create(Animate.prototype);
-
-/**
- * 计算下一帧状态
- * @private
- * @return {object}
- */
-Transition.prototype.nextPose = function () {
-  var pose = {};
-  for (var i in this.to) {
-    pose[i] = Tween[this.ease](this.progress, this.from[i], this.to[i] - this.from[i], this.duration);
-    if (this.element[i] !== undefined) this.element[i] = pose[i];
-  }
-  return pose;
-};
-
-// import { Point } from './Point';
-/**
- * @class
- * @memberof JC
- */
-function Curve() {}
-
-Curve.prototype = {
-
-  constructor: Curve,
-
-  getPoint: function getPoint(t) {
-    console.warn('Curve: Warning, getPoint() not implemented!', t);
-    return null;
-  },
-
-  getPointAt: function getPointAt(u) {
-    var t = this.getUtoTmapping(u);
-    return this.getPoint(t);
-  },
-
-  getPoints: function getPoints(divisions) {
-    if (isNaN(divisions)) divisions = 5;
-
-    var points = [];
-
-    for (var d = 0; d <= divisions; d++) {
-      points.push(this.getPoint(d / divisions));
-    }
-
-    return points;
-  },
-
-  getSpacedPoints: function getSpacedPoints(divisions) {
-    if (isNaN(divisions)) divisions = 5;
-
-    var points = [];
-
-    for (var d = 0; d <= divisions; d++) {
-      points.push(this.getPointAt(d / divisions));
-    }
-
-    return points;
-  },
-
-  getLength: function getLength() {
-    var lengths = this.getLengths();
-    return lengths[lengths.length - 1];
-  },
-
-  getLengths: function getLengths(divisions) {
-    if (isNaN(divisions)) divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
-
-    if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
-      return this.cacheArcLengths;
-    }
-
-    this.needsUpdate = false;
-
-    var cache = [];
-    var current = void 0;
-    var last = this.getPoint(0);
-    var p = void 0;
-    var sum = 0;
-
-    cache.push(0);
-
-    for (p = 1; p <= divisions; p++) {
-      current = this.getPoint(p / divisions);
-      sum += current.distanceTo(last);
-      cache.push(sum);
-      last = current;
-    }
-    this.cacheArcLengths = cache;
-    return cache;
-  },
-
-  updateArcLengths: function updateArcLengths() {
-    this.needsUpdate = true;
-    this.getLengths();
-  },
-
-  getUtoTmapping: function getUtoTmapping(u, distance) {
-    var arcLengths = this.getLengths();
-
-    var i = 0;
-    var il = arcLengths.length;
-    var t = void 0;
-
-    var targetArcLength = void 0;
-
-    if (distance) {
-      targetArcLength = distance;
-    } else {
-      targetArcLength = u * arcLengths[il - 1];
-    }
-
-    var low = 0;
-    var high = il - 1;
-    var comparison = void 0;
-    while (low <= high) {
-      i = Math.floor(low + (high - low) / 2);
-      comparison = arcLengths[i] - targetArcLength;
-      if (comparison < 0) {
-        low = i + 1;
-      } else if (comparison > 0) {
-        high = i - 1;
-      } else {
-        high = i;
-        break;
-      }
-    }
-
-    i = high;
-
-    if (arcLengths[i] === targetArcLength) {
-      t = i / (il - 1);
-      return t;
-    }
-
-    var lengthBefore = arcLengths[i];
-    var lengthAfter = arcLengths[i + 1];
-
-    var segmentLength = lengthAfter - lengthBefore;
-
-    var segmentFraction = (targetArcLength - lengthBefore) / segmentLength;
-
-    t = (i + segmentFraction) / (il - 1);
-
-    return t;
-  },
-
-  getTangent: function getTangent(t) {
-    var delta = 0.0001;
-    var t1 = t - delta;
-    var t2 = t + delta;
-
-    // TODO: svg and bezier accept out of [0, 1] value
-    // if ( t1 < 0 ) t1 = 0;
-    // if ( t2 > 1 ) t2 = 1;
-
-    var pt1 = this.getPoint(t1);
-    var pt2 = this.getPoint(t2);
-
-    var vec = pt2.clone().sub(pt1);
-    return vec.normalize();
-  },
-
-  getTangentAt: function getTangentAt(u) {
-    var t = this.getUtoTmapping(u);
-    return this.getTangent(t);
-  }
-
-};
-
-/**
- * PathMotion类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画所具备的特性
- */
-function PathMotion(options) {
-  Animate.call(this, options);
-  if (!options.path || !(options.path instanceof Curve)) {
-    console.warn('path is not instanceof Curve');
-  }
-
-  this.path = options.path;
-  this.ease = options.ease || 'easeBoth';
-  this.attachTangent = options.attachTangent || false;
-  this._cacheRotate = this.element.rotation;
-  var radian = this._cacheRotate * Utils.DTR;
-  this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
-}
-
-PathMotion.prototype = Object.create(Animate.prototype);
-
-/**
- * 计算下一帧状态
- * @private
- * @return {object}
- */
-PathMotion.prototype.nextPose = function () {
-  var _rotate = 0;
-  var t = Tween[this.ease](this.progress, 0, 1, this.duration);
-  var pos = this.path.getPoint(t);
-  var pose = pos.clone();
-
-  if (this.attachTangent) {
-    _rotate = this.decomposeRotate(t);
-    pose.rotation = _rotate === false ? this.preDegree : _rotate;
-    pose.rotation += this._cacheRotate;
-    if (_rotate !== false) this.preDegree = _rotate;
-  }
-  this.element.setProps(pose);
-  return pose;
-};
-
-/**
- * 解算旋转角度
- * @private
- * @param {number} t 当前进度, 区间[0, 1]
- * @return {number}
- */
-PathMotion.prototype.decomposeRotate = function (t) {
-  var vector = this.path.getTangent(t);
-
-  var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
-  var pi = nor > 0 ? 1 : -1;
-  var cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y) / (Math.sqrt(vector.x * vector.x + vector.y * vector.y) * Math.sqrt(this._cacheVector.x * this._cacheVector.x + this._cacheVector.y * this._cacheVector.y));
-  if (isNaN(cos)) return false;
-  return pi * Math.acos(cos) * Utils.RTD;
-};
-
-/**
- *
- * @class
- * @memberof JC
- * @param {Array}  points  array of points
- */
-function BezierCurve(points) {
-  this.points = points;
-}
-
-BezierCurve.prototype = Object.create(Curve.prototype);
-
-BezierCurve.prototype.getPoint = function (t, points) {
-  var a = points || this.points;
-  var len = a.length;
-  var rT = 1 - t;
-  var l = a.slice(0, len - 1);
-  var r = a.slice(1);
-  var oP = new Point();
-  if (len > 3) {
-    var oL = this.getPoint(t, l);
-    var oR = this.getPoint(t, r);
-    oP.x = rT * oL.x + t * oR.x;
-    oP.y = rT * oL.y + t * oR.y;
-    return oP;
-  } else {
-    oP.x = rT * rT * a[0].x + 2 * t * rT * a[1].x + t * t * a[2].x;
-    oP.y = rT * rT * a[0].y + 2 * t * rT * a[1].y + t * t * a[2].y;
-    return oP;
-  }
-};
-
 /**
  * https://github.com/gre/bezier-easing
  * BezierEasing - use bezier curve for transition easing function
@@ -1369,6 +829,619 @@ BezierEasing.prototype.get = function (x) {
     return 1;
   }
   return calcBezier(this._getTForX(x), this.mY1, this.mY2);
+};
+
+/* eslint no-cond-assign: "off" */
+/* eslint new-cap: 0 */
+/* eslint max-len: 0 */
+
+/**
+ * Tween 缓动时间运动函数集合
+ *
+ * ```js
+ * dispay.animate({
+ *   from: {x: 100},
+ *   to: {x: 200},
+ *   ease: JC.Tween.Ease.In, // 配置要调用的运动函数
+ * })
+ * ```
+ * @namespace JC.Tween
+ */
+
+var Tween = {
+
+  Linear: {
+
+    None: function None(k) {
+      return k;
+    }
+
+  },
+
+  Ease: {
+
+    In: function () {
+      var beizer = new BezierEasing(.42, 0, 1, 1);
+      return function (k) {
+        return beizer.get(k);
+      };
+    }(),
+
+    Out: function () {
+      var beizer = new BezierEasing(0, 0, .58, 1);
+      return function (k) {
+        return beizer.get(k);
+      };
+    }(),
+
+    InOut: function () {
+      var beizer = new BezierEasing(.42, 0, .58, 1);
+      return function (k) {
+        return beizer.get(k);
+      };
+    }(),
+
+    Beizer: function Beizer(x1, y1, x2, y2) {
+      var beizer = new BezierEasing(x1, y1, x2, y2);
+      return function (k) {
+        return beizer.get(k);
+      };
+    }
+
+  },
+
+  Elastic: {
+
+    In: function In(k) {
+      if (k === 0) {
+        return 0;
+      }
+      if (k === 1) {
+        return 1;
+      }
+      return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+    },
+
+    Out: function Out(k) {
+      if (k === 0) {
+        return 0;
+      }
+      if (k === 1) {
+        return 1;
+      }
+      return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+    },
+
+    InOut: function InOut(k) {
+      if (k === 0) {
+        return 0;
+      }
+      if (k === 1) {
+        return 1;
+      }
+      k *= 2;
+      if (k < 1) {
+        return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+      }
+      return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+    }
+
+  },
+
+  Back: {
+
+    In: function In(k) {
+      var s = 1.70158;
+      return k * k * ((s + 1) * k - s);
+    },
+
+    Out: function Out(k) {
+      var s = 1.70158;
+      return --k * k * ((s + 1) * k + s) + 1;
+    },
+
+    InOut: function InOut(k) {
+      var s = 1.70158 * 1.525;
+      if ((k *= 2) < 1) {
+        return 0.5 * (k * k * ((s + 1) * k - s));
+      }
+      return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+    }
+
+  },
+
+  Bounce: {
+
+    In: function In(k) {
+      return 1 - Tween.Bounce.Out(1 - k);
+    },
+
+    Out: function Out(k) {
+      if (k < 1 / 2.75) {
+        return 7.5625 * k * k;
+      } else if (k < 2 / 2.75) {
+        return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+      } else if (k < 2.5 / 2.75) {
+        return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
+      } else {
+        return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+      }
+    },
+
+    InOut: function InOut(k) {
+      if (k < 0.5) {
+        return Tween.Bounce.In(k * 2) * 0.5;
+      }
+      return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+    }
+  },
+
+  Utils: {
+
+    Linear: function Linear(p0, p1, t) {
+      return (p1 - p0) * t + p0;
+    }
+
+  }
+
+};
+
+/**
+ * 动画对象的基本类型
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画配置信息
+ */
+function Animate(options) {
+  Eventer.call(this);
+
+  this.element = options.element || {};
+  this.duration = options.duration || 300;
+  this.living = true;
+  this.resident = options.resident || false;
+
+  // this.onCompelete = options.onCompelete || null;
+  // this.onUpdate = options.onUpdate || null;
+
+  this.infinite = options.infinite || false;
+  this.alternate = options.alternate || false;
+  this.repeats = options.repeats || 0;
+  this.delay = options.delay || 0;
+  this.wait = options.wait || 0;
+  this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
+
+  if (options.onCompelete) {
+    this.on('compelete', options.onCompelete.bind(this));
+  }
+  if (options.onUpdate) {
+    this.on('update', options.onUpdate.bind(this));
+  }
+
+  // this.repeatsCut = this.repeats;
+  // this.delayCut = this.delay;
+  // this.waitCut = this.wait;
+  // this.progress = 0;
+  // this.direction = 1;
+  this.init();
+
+  this.paused = false;
+}
+
+Animate.prototype = Object.create(Eventer.prototype);
+
+/**
+ * 更新动画
+ * @private
+ * @param {number} snippet 时间片段
+ * @return {object}
+ */
+Animate.prototype.update = function (snippet) {
+  var snippetCache = this.direction * this.timeScale * snippet;
+  if (this.waitCut > 0) {
+    this.waitCut -= Math.abs(snippetCache);
+    return;
+  }
+  if (this.paused || !this.living || this.delayCut > 0) {
+    if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
+    return;
+  }
+
+  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
+
+  var pose = this.nextPose();
+  this.emit('update', pose, this.progress / this.duration);
+  // if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+
+  if (this.spill()) {
+    if (this.repeatsCut > 0 || this.infinite) {
+      if (this.repeatsCut > 0) --this.repeatsCut;
+      this.delayCut = this.delay;
+      if (this.alternate) {
+        this.direction *= -1;
+      } else {
+        this.direction = 1;
+        this.progress = 0;
+      }
+    } else {
+      if (!this.resident) this.living = false;
+      this.emit('compelete', pose);
+    }
+  }
+  return pose;
+};
+
+/**
+ * 检查动画是否到了边缘
+ * @private
+ * @return {boolean}
+ */
+Animate.prototype.spill = function () {
+  var bottomSpill = this.progress <= 0 && this.direction === -1;
+  var topSpill = this.progress >= this.duration && this.direction === 1;
+  return bottomSpill || topSpill;
+};
+
+/**
+ * 初始化动画状态
+ * @private
+ */
+Animate.prototype.init = function () {
+  this.direction = 1;
+  this.progress = 0;
+  this.repeatsCut = this.repeats;
+  this.delayCut = this.delay;
+  this.waitCut = this.wait;
+};
+
+/**
+ * 下一帧的数据
+ * @private
+ */
+Animate.prototype.nextPose = function () {
+  console.warn('should be overwrite');
+};
+
+/**
+ * 线性插值
+ * @private
+ * @param {number} p0 起始位置
+ * @param {number} p1 结束位置
+ * @param {number} t  进度位置
+ * @return {Number}
+ */
+Animate.prototype.linear = function (p0, p1, t) {
+  return (p1 - p0) * t + p0;
+};
+
+/**
+ * 暂停动画
+ */
+Animate.prototype.pause = function () {
+  this.paused = true;
+};
+
+/**
+ * 恢复动画
+ */
+Animate.prototype.restart = function () {
+  this.paused = false;
+};
+
+/**
+ * 停止动画，并把状态置为最后一帧，会触发事件
+ */
+Animate.prototype.stop = function () {
+  this.repeats = 0;
+  this.infinite = false;
+  this.progress = this.duration;
+};
+
+/**
+ * 设置动画的速率
+ * @param {number} speed
+ */
+Animate.prototype.setSpeed = function (speed) {
+  this.timeScale = speed;
+};
+
+/**
+ * 取消动画，不会触发事件
+ */
+Animate.prototype.cancle = function () {
+  this.living = false;
+};
+
+/* eslint guard-for-in: "off" */
+
+/**
+ * Transition类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画所具备的特性
+ */
+function Transition(options) {
+  Animate.call(this, options);
+
+  if (!Utils.isObject(options.from)) {
+    options.from = {};
+    for (var i in options.to) {
+      options.from[i] = this.element[i];
+    }
+  }
+  this.ease = options.ease || Tween.Ease.InOut;
+  this.from = options.from;
+  this.to = options.to;
+}
+Transition.prototype = Object.create(Animate.prototype);
+
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
+Transition.prototype.nextPose = function () {
+  var pose = {};
+  var t = this.ease(this.progress / this.duration);
+  for (var i in this.to) {
+    pose[i] = this.linear(this.from[i], this.to[i], t);
+    if (this.element[i] !== undefined) this.element[i] = pose[i];
+  }
+  return pose;
+};
+
+// import { Point } from './Point';
+/**
+ * @class
+ * @memberof JC
+ */
+function Curve() {}
+
+Curve.prototype = {
+
+  constructor: Curve,
+
+  getPoint: function getPoint(t) {
+    console.warn('Curve: Warning, getPoint() not implemented!', t);
+    return null;
+  },
+
+  getPointAt: function getPointAt(u) {
+    var t = this.getUtoTmapping(u);
+    return this.getPoint(t);
+  },
+
+  getPoints: function getPoints(divisions) {
+    if (isNaN(divisions)) divisions = 5;
+
+    var points = [];
+
+    for (var d = 0; d <= divisions; d++) {
+      points.push(this.getPoint(d / divisions));
+    }
+
+    return points;
+  },
+
+  getSpacedPoints: function getSpacedPoints(divisions) {
+    if (isNaN(divisions)) divisions = 5;
+
+    var points = [];
+
+    for (var d = 0; d <= divisions; d++) {
+      points.push(this.getPointAt(d / divisions));
+    }
+
+    return points;
+  },
+
+  getLength: function getLength() {
+    var lengths = this.getLengths();
+    return lengths[lengths.length - 1];
+  },
+
+  getLengths: function getLengths(divisions) {
+    if (isNaN(divisions)) divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
+
+    if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
+      return this.cacheArcLengths;
+    }
+
+    this.needsUpdate = false;
+
+    var cache = [];
+    var current = void 0;
+    var last = this.getPoint(0);
+    var p = void 0;
+    var sum = 0;
+
+    cache.push(0);
+
+    for (p = 1; p <= divisions; p++) {
+      current = this.getPoint(p / divisions);
+      sum += current.distanceTo(last);
+      cache.push(sum);
+      last = current;
+    }
+    this.cacheArcLengths = cache;
+    return cache;
+  },
+
+  updateArcLengths: function updateArcLengths() {
+    this.needsUpdate = true;
+    this.getLengths();
+  },
+
+  getUtoTmapping: function getUtoTmapping(u, distance) {
+    var arcLengths = this.getLengths();
+
+    var i = 0;
+    var il = arcLengths.length;
+    var t = void 0;
+
+    var targetArcLength = void 0;
+
+    if (distance) {
+      targetArcLength = distance;
+    } else {
+      targetArcLength = u * arcLengths[il - 1];
+    }
+
+    var low = 0;
+    var high = il - 1;
+    var comparison = void 0;
+    while (low <= high) {
+      i = Math.floor(low + (high - low) / 2);
+      comparison = arcLengths[i] - targetArcLength;
+      if (comparison < 0) {
+        low = i + 1;
+      } else if (comparison > 0) {
+        high = i - 1;
+      } else {
+        high = i;
+        break;
+      }
+    }
+
+    i = high;
+
+    if (arcLengths[i] === targetArcLength) {
+      t = i / (il - 1);
+      return t;
+    }
+
+    var lengthBefore = arcLengths[i];
+    var lengthAfter = arcLengths[i + 1];
+
+    var segmentLength = lengthAfter - lengthBefore;
+
+    var segmentFraction = (targetArcLength - lengthBefore) / segmentLength;
+
+    t = (i + segmentFraction) / (il - 1);
+
+    return t;
+  },
+
+  getTangent: function getTangent(t) {
+    var delta = 0.0001;
+    var t1 = t - delta;
+    var t2 = t + delta;
+
+    // TODO: svg and bezier accept out of [0, 1] value
+    // if ( t1 < 0 ) t1 = 0;
+    // if ( t2 > 1 ) t2 = 1;
+
+    var pt1 = this.getPoint(t1);
+    var pt2 = this.getPoint(t2);
+
+    var vec = pt2.clone().sub(pt1);
+    return vec.normalize();
+  },
+
+  getTangentAt: function getTangentAt(u) {
+    var t = this.getUtoTmapping(u);
+    return this.getTangent(t);
+  }
+
+};
+
+/**
+ * PathMotion类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @param {object} [options] 动画所具备的特性
+ */
+function PathMotion(options) {
+  Animate.call(this, options);
+  if (!options.path || !(options.path instanceof Curve)) {
+    console.warn('path is not instanceof Curve');
+  }
+
+  this.path = options.path;
+
+  this.ease = options.ease || Tween.Ease.InOut;
+
+  this.lengthMode = Utils.isBoolean(options.lengthMode) ? options.lengthMode : false;
+
+  this.attachTangent = Utils.isBoolean(options.attachTangent) ? options.attachTangent : false;
+
+  this._cacheRotate = this.element.rotation;
+  var radian = this._cacheRotate * Utils.DTR;
+  this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
+}
+
+PathMotion.prototype = Object.create(Animate.prototype);
+
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
+PathMotion.prototype.nextPose = function () {
+  var _rotate = 0;
+  var t = this.ease(this.progress / this.duration);
+  var pos = this.lengthMode ? this.path.getPointAt(t) : this.path.getPoint(t);
+
+  var pose = pos.clone();
+
+  if (this.attachTangent) {
+    _rotate = this.decomposeRotate(t);
+    pose.rotation = _rotate === false ? this.preDegree : _rotate;
+    pose.rotation += this._cacheRotate;
+    if (_rotate !== false) this.preDegree = _rotate;
+  }
+  this.element.setProps(pose);
+  return pose;
+};
+
+/**
+ * 解算旋转角度
+ * @private
+ * @param {number} t 当前进度, 区间[0, 1]
+ * @return {number}
+ */
+PathMotion.prototype.decomposeRotate = function (t) {
+  var vector = this.lengthMode ? this.path.getTangentAt(t) : this.path.getTangent(t);
+
+  var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
+  var pi = nor > 0 ? 1 : -1;
+  var cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y) / (Math.sqrt(vector.x * vector.x + vector.y * vector.y) * Math.sqrt(this._cacheVector.x * this._cacheVector.x + this._cacheVector.y * this._cacheVector.y));
+  if (isNaN(cos)) return false;
+  return pi * Math.acos(cos) * Utils.RTD;
+};
+
+/**
+ *
+ * @class
+ * @memberof JC
+ * @param {Array}  points  array of points
+ */
+function BezierCurve(points) {
+  this.points = points;
+}
+
+BezierCurve.prototype = Object.create(Curve.prototype);
+
+BezierCurve.prototype.getPoint = function (t, points) {
+  var a = points || this.points;
+  var len = a.length;
+  var rT = 1 - t;
+  var l = a.slice(0, len - 1);
+  var r = a.slice(1);
+  var oP = new Point();
+  if (len > 3) {
+    var oL = this.getPoint(t, l);
+    var oR = this.getPoint(t, r);
+    oP.x = rT * oL.x + t * oR.x;
+    oP.y = rT * oL.y + t * oR.y;
+    return oP;
+  } else {
+    oP.x = rT * rT * a[0].x + 2 * t * rT * a[1].x + t * t * a[2].x;
+    oP.y = rT * rT * a[0].y + 2 * t * rT * a[1].y + t * t * a[2].y;
+    return oP;
+  }
 };
 
 var bezierPool = {};
@@ -2553,7 +2626,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * display.animate({
  *   from: {x: 100},
  *   to: {x: 200},
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
@@ -2566,7 +2639,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Object} options 动画配置参数
  * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
  * @param {Object} options.to 设置对象的结束位置和结束姿态等
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
@@ -2589,7 +2662,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   ease: JC.Tween.Ease.beizer(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
@@ -2601,7 +2674,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  * @param {Object} options 动画配置参数
  * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
@@ -2654,7 +2727,11 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  *
  * ```js
  * display.runners({
- *   runners: [], // ae导出的动画数据
+ *   runners: [
+ *     { from: {}, to: {} },
+ *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
+ *     { ks: data.layers[0] },
+ *   ], // 组合动画，支持组合 animate、motion、keyFrames
  *   delay: 1000, // ae导出的动画数据
  *   wait: 100, // ae导出的动画数据
  *   repeats: 10, // 动画运动完后再重复10次
@@ -2665,7 +2742,7 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  * ```
  *
  * @param {Object} options 动画配置参数
- * @param {Object} options.runners 各个拆分动画
+ * @param {Object} options.runners 组合动画，支持 animate、motion、keyFrames 这些的自定义组合
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms

@@ -121,6 +121,18 @@ Animate.prototype.nextPose = function() {
 };
 
 /**
+ * 线性插值
+ * @private
+ * @param {number} p0 起始位置
+ * @param {number} p1 结束位置
+ * @param {number} t  进度位置
+ * @return {Number}
+ */
+Animate.prototype.linear = function(p0, p1, t) {
+  return (p1 - p0) * t + p0;
+};
+
+/**
  * 暂停动画
  */
 Animate.prototype.pause = function() {

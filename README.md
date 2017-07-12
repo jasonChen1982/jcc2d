@@ -75,7 +75,7 @@ const ball = new JC.Sprite({
 const timeline = ball.animate({
   from: {x: 100}, // start pose, optional
   to: {x: 200}, // target pose
-  ease: 'bounceOut', // set a timingfunction
+  ease: JC.Tween.Bounce.Out, // set a timingfunction
   repeats: 10, // repeat sometimes
   delay: 1000, // delay a moment every repeat
   wait: 1000, // wait a moment to start
@@ -141,9 +141,9 @@ coin.motion({
 /* start a motion */
 coin.runners({             // combination multiple animation and run one by one
   runners: [
-    {from: {}, to: {}, ease: 'ease', ...},
-    {path: new JC.BezierCurve([...]), ease: 'ease', ...},
-    {to: {}, ease: 'ease', ...},
+    {from: {}, to: {}, ease: JC.Tween.Back.In, ...},
+    {path: new JC.BezierCurve([...]), ease: JC.Tween.Ease.Beizer(0, 0, 1, 1), ...},
+    {to: {}, ease: JC.Tween.Back.Out, ...},
   ],
   ...       // other options
 });

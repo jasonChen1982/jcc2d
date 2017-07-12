@@ -215,7 +215,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * display.animate({
  *   from: {x: 100},
  *   to: {x: 200},
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
@@ -228,7 +228,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Object} options 动画配置参数
  * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
  * @param {Object} options.to 设置对象的结束位置和结束姿态等
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
@@ -251,7 +251,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+ *   ease: JC.Tween.Ease.beizer(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
@@ -263,7 +263,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Object} options 动画配置参数
  * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
  * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 easeBoth
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
@@ -316,7 +316,11 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  *
  * ```js
  * display.runners({
- *   runners: [], // ae导出的动画数据
+ *   runners: [
+ *     { from: {}, to: {} },
+ *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
+ *     { ks: data.layers[0] },
+ *   ], // 组合动画，支持组合 animate、motion、keyFrames
  *   delay: 1000, // ae导出的动画数据
  *   wait: 100, // ae导出的动画数据
  *   repeats: 10, // 动画运动完后再重复10次
@@ -327,7 +331,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * ```
  *
  * @param {Object} options 动画配置参数
- * @param {Object} options.runners 各个拆分动画
+ * @param {Object} options.runners 组合动画，支持 animate、motion、keyFrames 这些的自定义组合
  * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
  * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms

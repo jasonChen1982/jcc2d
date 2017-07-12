@@ -32,7 +32,6 @@
 <body>
   <canvas id="demo_canvas" width="640" height="900"></canvas>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
-  <script type="text/javascript" src="../libs/util/tween.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     function Rect(color) {
@@ -44,8 +43,6 @@
       ctx.fillRect(-30, -30, 60, 60);
       ctx.fill();
     };
-
-    JC.Tween.extend(tween);
 
     var shape = [],
       stage = new JC.Stage({
@@ -63,7 +60,7 @@
       to: {
         x: 160
       },
-      ease: 'elasticIn',
+      ease: JC.Tween.Elastic.In,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -75,7 +72,7 @@
       to: {
         rotation: 0
       },
-      ease: 'elasticOut',
+      ease: JC.Tween.Elastic.Out,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -90,7 +87,7 @@
       to: {
         x: -160
       },
-      ease: 'elasticIn',
+      ease: JC.Tween.Elastic.In,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -102,7 +99,7 @@
       to: {
         rotation: -0
       },
-      ease: 'elasticOut',
+      ease: JC.Tween.Elastic.Out,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -117,7 +114,7 @@
       to: {
         y: -160
       },
-      ease: 'elasticIn',
+      ease: JC.Tween.Elastic.In,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -129,7 +126,7 @@
       to: {
         rotation: -0
       },
-      ease: 'elasticOut',
+      ease: JC.Tween.Elastic.Out,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -144,7 +141,7 @@
       to: {
         y: 160
       },
-      ease: 'elasticIn',
+      ease: JC.Tween.Elastic.In,
       duration: 3000,
       infinite: true,
       alternate: true
@@ -156,7 +153,7 @@
       to: {
         rotation: -0
       },
-      ease: 'elasticOut',
+      ease: JC.Tween.Elastic.Out,
       duration: 3000,
       infinite: true,
       alternate: true

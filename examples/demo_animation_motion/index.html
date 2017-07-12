@@ -24,7 +24,6 @@
   <canvas id="demo_canvas" width="640" height="900"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
-  <script type="text/javascript" src="../libs/util/tween.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     function Rect(color, size) {
@@ -48,9 +47,6 @@
       ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
       ctx.fill();
     };
-
-
-    JC.Tween.extend(tween);
 
     var w = window.innerWidth,
       h = window.innerHeight,
@@ -96,7 +92,7 @@
 
     shape.motion({
       path: bezierPath,
-      ease: 'elasticBoth',
+      ease: JC.Tween.Elastic.InOut,
       duration: 4000,
       attachTangent: true,
       infinite: true,

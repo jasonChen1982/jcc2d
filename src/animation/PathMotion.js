@@ -18,8 +18,17 @@ function PathMotion(options) {
   }
 
   this.path = options.path;
-  this.ease = options.ease || 'easeBoth';
-  this.attachTangent = options.attachTangent || false;
+
+  this.ease = options.ease || Tween.Ease.InOut;
+
+  this.lengthMode = Utils.isBoolean(options.lengthMode)?
+  options.lengthMode:
+  false;
+
+  this.attachTangent = Utils.isBoolean(options.attachTangent)?
+  options.attachTangent:
+  false;
+
   this._cacheRotate = this.element.rotation;
   const radian = this._cacheRotate * Utils.DTR;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
@@ -34,8 +43,11 @@ PathMotion.prototype = Object.create(Animate.prototype);
  */
 PathMotion.prototype.nextPose = function() {
   let _rotate = 0;
-  const t = Tween[this.ease](this.progress, 0, 1, this.duration);
-  const pos = this.path.getPoint(t);
+  const t = this.ease(this.progress / this.duration);
+  const pos = this.lengthMode ?
+  this.path.getPointAt(t) :
+  this.path.getPoint(t);
+
   const pose = pos.clone();
 
   if (this.attachTangent) {
@@ -55,7 +67,9 @@ PathMotion.prototype.nextPose = function() {
  * @return {number}
  */
 PathMotion.prototype.decomposeRotate = function(t) {
-  const vector = this.path.getTangent(t);
+  const vector = this.lengthMode ?
+  this.path.getTangentAt(t) :
+  this.path.getTangent(t);
 
   const nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
   const pi = nor > 0 ? 1 : -1;

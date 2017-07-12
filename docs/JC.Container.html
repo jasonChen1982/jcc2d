@@ -83,18 +83,6 @@
             </ul>
             <ul class="methods itemMembers">
             
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="JC.Tween.easeBoth"><a href="JC.Tween.html#.easeBoth">easeBoth</a></li>
-            
-                <li data-name="JC.Tween.easeIn"><a href="JC.Tween.html#.easeIn">easeIn</a></li>
-            
-                <li data-name="JC.Tween.easeOut"><a href="JC.Tween.html#.easeOut">easeOut</a></li>
-            
-                <li data-name="JC.Tween.extend"><a href="JC.Tween.html#.extend">extend</a></li>
-            
-                <li data-name="JC.Tween.linear"><a href="JC.Tween.html#.linear">linear</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -2792,7 +2780,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line250">line 250</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line243">line 243</a>
         </div>
         
     </div>
@@ -2807,7 +2795,7 @@ container.adds(sprite);</code></pre>
 <pre class="prettyprint source lang-js"><code>display.animate({
   from: {x: 100},
   to: {x: 200},
-  ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+  ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
   repeats: 10, // 动画运动完后再重复10次
   infinite: true, // 无限循环动画
   alternate: true, // 偶数次的时候动画回放
@@ -2965,7 +2953,7 @@ container.adds(sprite);</code></pre>
                         
                     
                 
-                <p>执行动画使用的缓动函数 默认值为 easeBoth</p></td>
+                <p>执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut</p></td>
         </tr>
 	
 	
@@ -3323,7 +3311,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line513">line 513</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line510">line 510</a>
         </div>
         
     </div>
@@ -3470,7 +3458,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line79">line 79</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line85">line 85</a>
         </div>
         
     </div>
@@ -3611,7 +3599,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line491">line 491</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line488">line 488</a>
         </div>
         
     </div>
@@ -3713,7 +3701,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line356">line 356</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line353">line 353</a>
         </div>
         
     </div>
@@ -3815,7 +3803,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line317">line 317</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line310">line 310</a>
         </div>
         
     </div>
@@ -4284,7 +4272,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line285">line 285</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line278">line 278</a>
         </div>
         
     </div>
@@ -4299,7 +4287,7 @@ container.adds(sprite);</code></pre>
 <pre class="prettyprint source lang-js"><code>display.motion({
   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
   attachTangent: true, // 物体是否捕获切线方向
-  ease: 'bounceOut', // 执行动画使用的缓动函数 默认值为 easeBoth
+  ease: JC.Tween.Ease.beizer(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
   repeats: 10, // 动画运动完后再重复10次
   infinite: true, // 无限循环动画
   alternate: true, // 偶数次的时候动画回放
@@ -4457,7 +4445,7 @@ container.adds(sprite);</code></pre>
                         
                     
                 
-                <p>执行动画使用的缓动函数 默认值为 easeBoth</p></td>
+                <p>执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut</p></td>
         </tr>
 	
 	
@@ -4810,12 +4798,12 @@ container.adds(sprite);</code></pre>
             
                 <span class="inherited"><a href="JC.Eventer.html#off">inherited</a></span>
             
-            off<span class="signature">(type, fn)</span>
+            off<span class="signature">(type, fn)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{this}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line40">line 40</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line43">line 43</a>
         </div>
         
     </div>
@@ -4939,6 +4927,35 @@ container.adds(sprite);</code></pre>
     
     
     
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        this
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
     
     
 </dd>
@@ -4951,12 +4968,12 @@ container.adds(sprite);</code></pre>
             
                 <span class="inherited"><a href="JC.Eventer.html#on">inherited</a></span>
             
-            on<span class="signature">(type, fn)</span>
+            on<span class="signature">(type, fn)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{this}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line28">line 28</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line29">line 29</a>
         </div>
         
     </div>
@@ -5080,6 +5097,35 @@ container.adds(sprite);</code></pre>
     
     
     
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        this
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
     
     
 </dd>
@@ -5092,12 +5138,12 @@ container.adds(sprite);</code></pre>
             
                 <span class="inherited"><a href="JC.Eventer.html#once">inherited</a></span>
             
-            once<span class="signature">(type, fn)</span>
+            once<span class="signature">(type, fn)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{this}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line63">line 63</a>
+            <a href="eventer_Eventer.js.html">eventer/Eventer.js</a>, <a href="eventer_Eventer.js.html#line68">line 68</a>
         </div>
         
     </div>
@@ -5220,6 +5266,35 @@ container.adds(sprite);</code></pre>
     
     
     
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        this
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
     
     
     
@@ -5426,7 +5501,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line363">line 363</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line360">line 360</a>
         </div>
         
     </div>
@@ -5570,7 +5645,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line347">line 347</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line344">line 344</a>
         </div>
         
     </div>
@@ -5583,7 +5658,11 @@ container.adds(sprite);</code></pre>
     <div class="description">
         <p>runners动画，多个复合动画的组合形式，不支持<code>alternate</code></p>
 <pre class="prettyprint source lang-js"><code>display.runners({
-  runners: [], // ae导出的动画数据
+  runners: [
+    { from: {}, to: {} },
+    { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
+    { ks: data.layers[0] },
+  ], // 组合动画，支持组合 animate、motion、keyFrames
   delay: 1000, // ae导出的动画数据
   wait: 100, // ae导出的动画数据
   repeats: 10, // 动画运动完后再重复10次
@@ -5681,7 +5760,7 @@ container.adds(sprite);</code></pre>
                         
                     
                 
-                <p>各个拆分动画</p></td>
+                <p>组合动画，支持 animate、motion、keyFrames 这些的自定义组合</p></td>
         </tr>
 	
 	
@@ -5979,7 +6058,7 @@ container.adds(sprite);</code></pre>
     
         
         <div class="tag-source">
-            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line501">line 501</a>
+            <a href="core_DisplayObject.js.html">core/DisplayObject.js</a>, <a href="core_DisplayObject.js.html#line498">line 498</a>
         </div>
         
     </div>
@@ -6359,7 +6438,7 @@ container.adds(sprite);</code></pre>
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Mon Jul 10 2017 22:41:34 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 20:17:48 GMT+0800 (CST)
         </footer>
     </div>
 </div>

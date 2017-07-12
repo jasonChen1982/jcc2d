@@ -36,20 +36,6 @@
     DOC.y = h / 2;
     DOC.name = 'doc';
 
-    JC.Tween.extend({
-      bounceOut: function (t, b, c, d) {
-        if ((t /= d) < (1 / 2.75)) {
-          return c * (7.5625 * t * t) + b;
-        } else if (t < (2 / 2.75)) {
-          return c * (7.5625 * (t -= (1.5 / 2.75)) * t + 0.75) + b;
-        } else if (t < (2.5 / 2.75)) {
-          return c * (7.5625 * (t -= (2.25 / 2.75)) * t + 0.9375) + b;
-        }
-        return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b;
-      }
-    });
-
-
     var loadBox = JC.loaderUtil({
       woman: './images/woman.png'
     });
@@ -74,7 +60,7 @@
             y: h / 2 - materialSprites[i].pivotY * materialSprites[i].scale
           },
           duration: 1000,
-          ease: 'bounceOut'
+          ease: JC.Tween.Bounce.Out
         });
         DOC.adds(materialSprites[i]);
       }

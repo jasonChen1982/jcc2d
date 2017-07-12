@@ -33,7 +33,6 @@
   <canvas id="demo_canvas" width="640" height="900"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
-  <script type="text/javascript" src="../libs/util/tween.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript" src="./js/data.js"></script>
   <script type="text/javascript">
@@ -105,7 +104,8 @@
           new JC.Point(0, 0),
         ]);
         coin.runners({
-          runners: [{
+          runners: [
+            {
               from: {
                 scale: 0
               },
@@ -124,14 +124,14 @@
               path: path,
               wait: 280,
               duration: 520,
-              ease: 'backIn'
+              ease: JC.Tween.Back.In
             },
             {
               to: {
                 scale: 0
               },
               duration: 120,
-              ease: 'linear'
+              ease: JC.Tween.Linear.None
             },
           ],
           wait: (s - i) * 80,
@@ -163,7 +163,7 @@
                 scale: 1
               },
               duration: 240,
-              ease: 'linear'
+              ease: JC.Tween.Linear.None
             },
             {
               to: {
@@ -171,21 +171,19 @@
                 y: y * 1.05
               },
               duration: 40,
-              ease: 'linear'
+              ease: JC.Tween.Linear.None
             },
             {
               to: {
                 scale: 0
               },
               duration: 120,
-              ease: 'linear'
+              ease: JC.Tween.Linear.None
             },
           ],
         });
       }
     };
-
-    JC.Tween.extend(tween);
 
     var flyCoins = new FlyCoins();
     DOC.adds(flyCoins.blinks, flyCoins.coins);

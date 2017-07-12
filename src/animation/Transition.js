@@ -20,7 +20,7 @@ function Transition(options) {
       options.from[i] = this.element[i];
     }
   }
-  this.ease = options.ease || 'easeBoth';
+  this.ease = options.ease || Tween.Ease.InOut;
   this.from = options.from;
   this.to = options.to;
 }
@@ -33,13 +33,9 @@ Transition.prototype = Object.create(Animate.prototype);
  */
 Transition.prototype.nextPose = function() {
   const pose = {};
+  const t = this.ease(this.progress / this.duration);
   for (let i in this.to) {
-    pose[i] = Tween[this.ease](
-      this.progress,
-      this.from[i],
-      this.to[i] - this.from[i],
-      this.duration
-    );
+    pose[i] = this.linear(this.from[i], this.to[i], t);
     if (this.element[i] !== undefined) this.element[i] = pose[i];
   }
   return pose;

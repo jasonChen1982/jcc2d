@@ -33,7 +33,6 @@
   <canvas id="demo_canvas" width="640" height="900"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
-  <script type="text/javascript" src="../libs/util/tween.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript" src="./js/data.js"></script>
   <script type="text/javascript">
@@ -46,8 +45,6 @@
       ctx.fillRect(0, 0, 60, 10);
       ctx.fill();
     };
-
-    JC.Tween.extend(tween);
 
     var shape = [],
       stage = new JC.Stage({

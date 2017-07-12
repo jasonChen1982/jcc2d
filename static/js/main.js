@@ -1,4 +1,4 @@
-JC.Tween.extend(tween);
+// JC.Tween.extend(tween);
 
 window.onresize = function () {
   resize();
@@ -155,7 +155,8 @@ var w = window.innerWidth,
   BTNBOX = new JC.Container(),
   banner = new JC.Container(),
   bannerLeft = new JC.Container(),
-  bannerRight = new JC.Container();
+  bannerRight = new JC.Container(),
+  easeInOutStrong = JC.Tween.Ease.Beizer(.7, 0, .3, 1);
 resize();
 LOGO.x = DOC.x = w / 2;
 DOC.y = h / 2;
@@ -171,7 +172,7 @@ rectLeftBack.animate({
   to: {
     alpha: 1
   },
-  ease: 'easeOutStrong',
+  ease: easeInOutStrong,
   duration: 600,
   delay: 1800,
   infinite: true,
@@ -182,7 +183,7 @@ rectLeftFront.animate({
   to: {
     y: -120
   },
-  ease: 'easeOutStrong',
+  ease: easeInOutStrong,
   duration: 600,
   delay: 1800,
   infinite: true,
@@ -195,7 +196,7 @@ bannerLeft.animate({
   to: {
     x: -60
   },
-  ease: 'easeBoth',
+  ease: JC.Tween.Ease.InOut,
   duration: 2000,
   infinite: true,
   alternate: true
@@ -206,7 +207,7 @@ rectRightBack.animate({
   to: {
     alpha: 1
   },
-  ease: 'easeOutStrong',
+  ease: easeInOutStrong,
   duration: 600,
   delay: 1800,
   infinite: true,
@@ -217,7 +218,7 @@ rectRightFront.animate({
   to: {
     y: -120
   },
-  ease: 'easeOutStrong',
+  ease: easeInOutStrong,
   duration: 600,
   delay: 1800,
   infinite: true,
@@ -231,7 +232,7 @@ bannerRight.animate({
   to: {
     x: w + 60
   },
-  ease: 'easeBoth',
+  ease: JC.Tween.Ease.InOut,
   duration: 2000,
   infinite: true,
   alternate: true
@@ -266,7 +267,7 @@ particleDOC.animate({
     alpha: 1
   },
   duration: 1000,
-  ease: 'backOut',
+  ease: JC.Tween.Back.Out,
   onCompelete: function () {
     shapeIn = true;
     if (fontLoaded && shapeIn) logoIn();
@@ -379,7 +380,7 @@ function logoIn() {
         y: 0,
         alpha: 1
       },
-      ease: 'bounceOut',
+      ease: JC.Tween.Bounce.Out,
       duration: 800,
       wait: i * 100
     });
