@@ -25,26 +25,11 @@ A canvas 2d renderer & An awesome animator
 ## Introduction
 [main page][jcc2d]
 
-jcc2d is a lightweight canvas2d render engine and built-in an awesome animator with timeline manager, of course support event system by default.
+`jcc2d` is a lightweight canvas2d render engine and built-in an awesome animator with timeline manager. of course, `jcc2d` support event system by default.
 
-built-in support [bodymovin][bodymovin] keyframes data, use [bodymovin add-on][bodymovin-add-on] exported keyframes data from [after effect][ae], and easy parser to [jcc2d][jcc2d] keyFrames animation, just like following:
+`jcc2d` built-in support [bodymovin][bodymovin] keyframes data, which use [bodymovin add-on][bodymovin-add-on] to exporting `keyframes data` from [after effect][ae], and `jcc2d` can parse the `keyframes data` to [jcc2d][jcc2d] keyFrames animation, just like following:
 
 ```js
-// parser a single animation layer
-const coin = new JC.Sprite({
-  texture: new JC.Texture('/path/coin.png'),
-});
-coin.keyFrames({
-  ks: data.layers[0], // bodymovin keyframes data
-  fr: 30, // frame rate
-  // infinite: true, // infinite loop
-  // alternate: true, // alternate
-  onUpdate() {},
-  onCompelete() {
-    console.log(this.element);
-  },
-});
-
 // parser all animation layers
 const ani = new JC.ParserAnimation({
   keyframes: data,
@@ -58,6 +43,20 @@ const ani = new JC.ParserAnimation({
   },
 });
 
+// or you can just parser a single animation layer
+const coin = new JC.Sprite({
+  texture: new JC.Texture('/path/coin.png'),
+});
+coin.keyFrames({
+  ks: data.layers[0], // bodymovin keyframes data
+  fr: 30, // frame rate
+  // infinite: true, // infinite loop
+  // alternate: true, // alternate
+  onUpdate() {},
+  onCompelete() {
+    console.log(this.element);
+  },
+});
 ```
 
 [view demo][ae-export]
@@ -66,7 +65,7 @@ const ani = new JC.ParserAnimation({
 
 `jcc2d` Include `Stage` `Sprite` `Graphics` `Container` `BlurFilter` `TextFace` and so on.
 
-Every display instance can easy start an animation and attach a timeline, just like following:
+Every display instance can easy start an animation and attach a timeline, like following:
 
 ```javascript
 const ball = new JC.Sprite({
