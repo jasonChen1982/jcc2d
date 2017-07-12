@@ -138,7 +138,7 @@ coin.motion({
   ...       // other options
 });
 
-/* start a motion */
+/* start a runners */
 coin.runners({             // combination multiple animation and run one by one
   runners: [
     {from: {}, to: {}, ease: JC.Tween.Back.In, ...},

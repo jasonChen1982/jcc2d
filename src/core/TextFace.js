@@ -11,8 +11,10 @@ import {Utils} from '../util/Utils';
  * ```js
  * var text = new JC.TextFace(
  *   'JC jcc2d canvas renderer',
- *   'bold 36px Arial',
- *   '#f00'
+ *   {
+ *     fontSize: '16px',
+ *     ...
+ *   }
  * );
  * ```
  *
