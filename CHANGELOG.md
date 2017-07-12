@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.0-beta.0"></a>
+# [1.4.0-beta.0](https://github.com/jasonChen1982/jcc2d/compare/v1.3.0...v1.4.0-beta.0) (2017-07-12)
+
+
+### Features
+
+* **tween:** enhance tween and more extendibility ([268396f](https://github.com/jasonChen1982/jcc2d/commit/268396f))
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/jasonChen1982/jcc2d/compare/v1.2.7...v1.3.0) (2017-07-11)
 
