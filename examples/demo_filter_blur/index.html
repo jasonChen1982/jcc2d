@@ -40,7 +40,8 @@
       h = window.innerHeight,
       pic,
       shape,
-      blurPass,
+      filterPass,
+      blurFilter,
       stage = new JC.Stage({
         dom: 'demo_canvas'
       }),
@@ -53,7 +54,8 @@
       this.blurX = 0;
       this.blurY = 0;
       this.blur = 0;
-      this.padding = false;
+      this.paddingX = 0;
+      this.paddingY = 0;
     }
 
     var loadBox = JC.loaderUtil({
@@ -68,42 +70,58 @@
       pic.pivotX = pic.width >> 1;
       pic.pivotY = pic.height >> 1;
 
-      blurPass = new JC.BlurFilter(0, 0, 1);
-      blurPass.adds(pic);
+      filterPass = new JC.FilterGroup();
+      filterPass.adds(pic);
+
+      blurFilter = new JC.BlurFilter(0, 0, 1);
+      filterPass.addFilter(blurFilter);
 
       var gui = new dat.GUI();
       var blurControl = new BlurControl();
       var blurX = gui.add(blurControl, 'blurX', 0, 20);
       var blurY = gui.add(blurControl, 'blurY', 0, 20);
       var blur = gui.add(blurControl, 'blur', 0, 20);
-      var padding = gui.add(blurControl, 'padding');
+      var paddingX = gui.add(blurControl, 'paddingX', 0, 20);
+      var paddingY = gui.add(blurControl, 'paddingY', 0, 20);
       var quality = gui.add(blurControl, 'quality', 0, 4);
       blurX.onChange(function (value) {
-        blurPass.blurX = value;
-        blurPass.needUpdateBuffer = true;
+        blurFilter.blurX = value;
+        filterPass.needUpdateBuffer = true;
       });
       blurY.onChange(function (value) {
-        blurPass.blurY = value;
-        blurPass.needUpdateBuffer = true;
+        blurFilter.blurY = value;
+        filterPass.needUpdateBuffer = true;
       });
       blur.onChange(function (value) {
-        blurControl.blurY = blurControl.blurX = blurPass.blurY = blurPass.blurX = value;
-        blurPass.needUpdateBuffer = true;
+        blurControl.blurY = blurControl.blurX = blurFilter.blurY = blurFilter.blurX = value;
+        filterPass.needUpdateBuffer = true;
       });
-      padding.onChange(function (value) {
-        blurPass.padding = value;
-        blurPass.needUpdateBuffer = true;
+      paddingX.onChange(function (value) {
+        filterPass.padding.x = value;
+        filterPass.needUpdateBuffer = true;
+      });
+      paddingY.onChange(function (value) {
+        filterPass.padding.y = value;
+        filterPass.needUpdateBuffer = true;
       });
       quality.onChange(function (value) {
-        blurPass.quality = value;
-        blurPass.needUpdateBuffer = true;
+        blurFilter.quality = value;
+        filterPass.needUpdateBuffer = true;
       });
 
-      DOC.adds(blurPass);
+      DOC.adds(filterPass);
       stage.adds(DOC);
+
+      filterPass.animate({
+        from: { rotation: 0 },
+        to: { rotation: 360 },
+        duration: 3000,
+        infinite: true,
+      })
 
       stage.startEngine();
     });
+
 
     /**
      * 帧率监控工具

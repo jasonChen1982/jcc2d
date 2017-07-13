@@ -43,8 +43,8 @@ FrameBuffer.prototype.setTransform = function(a, b, c, d, e, f) {
  * @return {ImageData}
  */
 FrameBuffer.prototype.getBuffer = function() {
-  this.bufferData = this.ctx.getImageData(0, 0, this.width, this.height);
-  return this.bufferData;
+  this.buffer = this.ctx.getImageData(0, 0, this.width, this.height);
+  return this.buffer;
 };
 
 /**
@@ -52,7 +52,7 @@ FrameBuffer.prototype.getBuffer = function() {
  * @return {canvas}
  */
 FrameBuffer.prototype.putBuffer = function() {
-  this.ctx.putImageData(this.bufferData, 0, 0);
+  this.ctx.putImageData(this.buffer, 0, 0);
   return this.canvas;
 };
 
