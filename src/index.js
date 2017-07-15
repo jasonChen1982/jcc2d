@@ -17,6 +17,7 @@ export {Circle} from './math/Circle';
 export {Ellipse} from './math/Ellipse';
 export {Matrix, IDENTITY, TEMP_MATRIX} from './math/Matrix';
 
+export {CatmullRom} from './math/CatmullRom';
 export {BezierCurve} from './math/BezierCurve';
 export {SvgCurve} from './math/SvgCurve';
 export {NURBSCurve} from './math/NURBSCurve';

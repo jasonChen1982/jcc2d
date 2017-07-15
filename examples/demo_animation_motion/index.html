@@ -58,7 +58,7 @@
     DOC.y = h >> 1;
 
     var shape = new JC.Graphics(new Rect('#749d9b'));
-    var bezierPath = new JC.BezierCurve([{
+    var bezierPath = new JC.CatmullRom([{
         x: -80,
         y: -80,
         name: '起始点'
@@ -138,6 +138,7 @@
 
         point.x = el.x = el.preX + data.translate.x;
         point.y = el.y = el.preY + data.translate.y;
+        bezierPath.updateCcmp();
 
       });
       el.on('touchend', function () {
