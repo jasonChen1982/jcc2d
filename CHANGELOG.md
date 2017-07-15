@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.4.0"></a>
+# [1.4.0](https://github.com/jasonChen1982/jcc2d/compare/v1.4.0-beta.0...v1.4.0) (2017-07-15)
+
+
+### Features
+
+* init object3d ([7e455d7](https://github.com/jasonChen1982/jcc2d/commit/7e455d7))
+* **catmull-rom:** add CatmullRom spline Class ([c5d51b0](https://github.com/jasonChen1982/jcc2d/commit/c5d51b0))
+* **filter:** support muliter-filters for FilterGroup ([0f191e7](https://github.com/jasonChen1982/jcc2d/commit/0f191e7))
+* **mesh:** init mesh class ([f9c79b5](https://github.com/jasonChen1982/jcc2d/commit/f9c79b5))
+
+
+
 <a name="1.4.0-beta.0"></a>
 # [1.4.0-beta.0](https://github.com/jasonChen1982/jcc2d/compare/v1.3.0...v1.4.0-beta.0) (2017-07-12)
 
