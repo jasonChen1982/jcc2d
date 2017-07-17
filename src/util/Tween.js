@@ -145,12 +145,12 @@ export const Tween = {
     },
   },
 
-  Utils: {
+  // Utils: {
 
-    Linear: function(p0, p1, t) {
-      return (p1 - p0) * t + p0;
-    },
+  //   Linear: function(p0, p1, t) {
+  //     return (p1 - p0) * t + p0;
+  //   },
 
-  },
+  // },
 
 };
