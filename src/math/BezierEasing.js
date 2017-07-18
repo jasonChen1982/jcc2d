@@ -80,7 +80,7 @@ function getSlope(aT, aA1, aA2) {
  * @param {number} aB
  * @param {number} mX1
  * @param {number} mX2
- * @return {number} 三次贝塞尔公式的导数
+ * @return {number} 二分法猜测t的值
  */
 function binarySubdivide(aX, aA, aB, mX1, mX2) {
   let currentX;
@@ -116,6 +116,7 @@ function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
     if (currentSlope === 0.0) {
       return aGuessT;
     }
+    if (currentSlope < 0) console.log(currentSlope);
     let currentX = calcBezier(aGuessT, mX1, mX2) - aX;
     aGuessT -= currentX / currentSlope;
   }

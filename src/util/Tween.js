@@ -30,30 +30,30 @@ export const Tween = {
   Ease: {
 
     In: (function() {
-      const beizer = new BezierEasing(.42, 0, 1, 1);
+      const bezier = new BezierEasing(.42, 0, 1, 1);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     })(),
 
     Out: (function() {
-      const beizer = new BezierEasing(0, 0, .58, 1);
+      const bezier = new BezierEasing(0, 0, .58, 1);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     })(),
 
     InOut: (function() {
-      const beizer = new BezierEasing(.42, 0, .58, 1);
+      const bezier = new BezierEasing(.42, 0, .58, 1);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     })(),
 
     Beizer: function(x1, y1, x2, y2) {
-      const beizer = new BezierEasing(x1, y1, x2, y2);
+      const bezier = new BezierEasing(x1, y1, x2, y2);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     },
 

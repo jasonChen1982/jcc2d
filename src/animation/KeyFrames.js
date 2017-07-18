@@ -202,8 +202,7 @@ KeyFrames.prototype.prepare = function(key, ak) {
   } else {
     let ck = this.keyState[key];
     if (
-      !Utils.isNumber(ck)
-      ||
+      !Utils.isNumber(ck) ||
       !inRange(progress, k[ck].t * rfr, k[ck].jcet * rfr)
     ) {
       ck = this.keyState[key] = findStep(k, progress, rfr);

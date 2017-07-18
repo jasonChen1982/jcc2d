@@ -145,6 +145,33 @@
         el.preX = el.x;
         el.preY = el.y;
       });
+
+      var enable = false;
+      el.on('mousedown', function (ev) {
+        if (enable) return;
+        enable = true;
+        data.start = {};
+        data.start.x = ev.global.x;
+        data.start.y = ev.global.y;
+        el.preX = el.x;
+        el.preY = el.y;
+      });
+      stage.on('mousemove', function (ev) {
+        if (!enable) return;
+        data.translate = {};
+        data.translate.x = ev.global.x - data.start.x;
+        data.translate.y = ev.global.y - data.start.y;
+
+        point.x = el.x = el.preX + data.translate.x;
+        point.y = el.y = el.preY + data.translate.y;
+        bezierPath.updateCcmp();
+      });
+      stage.on('mouseup', function (ev) {
+        if (!enable) return;
+        enable = false;
+        el.preX = el.x;
+        el.preY = el.y;
+      });
     }
 
 

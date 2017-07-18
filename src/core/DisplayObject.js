@@ -251,7 +251,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: JC.Tween.Ease.beizer(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放

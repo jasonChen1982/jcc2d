@@ -720,7 +720,7 @@ function getSlope(aT, aA1, aA2) {
  * @param {number} aB
  * @param {number} mX1
  * @param {number} mX2
- * @return {number} 三次贝塞尔公式的导数
+ * @return {number} 二分法猜测t的值
  */
 function binarySubdivide(aX, aA, aB, mX1, mX2) {
   var currentX = void 0;
@@ -752,6 +752,7 @@ function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
     if (currentSlope === 0.0) {
       return aGuessT;
     }
+    if (currentSlope < 0) console.log(currentSlope);
     var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
     aGuessT -= currentX / currentSlope;
   }
@@ -861,30 +862,30 @@ var Tween = {
   Ease: {
 
     In: function () {
-      var beizer = new BezierEasing(.42, 0, 1, 1);
+      var bezier = new BezierEasing(.42, 0, 1, 1);
       return function (k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     }(),
 
     Out: function () {
-      var beizer = new BezierEasing(0, 0, .58, 1);
+      var bezier = new BezierEasing(0, 0, .58, 1);
       return function (k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     }(),
 
     InOut: function () {
-      var beizer = new BezierEasing(.42, 0, .58, 1);
+      var bezier = new BezierEasing(.42, 0, .58, 1);
       return function (k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     }(),
 
     Beizer: function Beizer(x1, y1, x2, y2) {
-      var beizer = new BezierEasing(x1, y1, x2, y2);
+      var bezier = new BezierEasing(x1, y1, x2, y2);
       return function (k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     }
 
@@ -2662,7 +2663,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: JC.Tween.Ease.beizer(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放

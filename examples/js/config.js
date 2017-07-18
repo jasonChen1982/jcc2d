@@ -81,9 +81,9 @@ var EXAMPLES = [{
     link: 'demo_animation_animate_1'
   },
   {
-    title: 'animate动画2',
+    title: 'cubic-bezier曲线',
     type: 'demo',
-    link: 'demo_animation_animate_2'
+    link: 'demo_animation_bezier'
   },
   {
     title: 'runners动画',

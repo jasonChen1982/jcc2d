@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background-color: #1b213b;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 320px;
+      height: 540px;
+      margin: -270px 0 0 -160px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="640" height="1080"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    function Rect(color) {
+      this.color = color || '#c243ff';
+    }
+    Rect.prototype.render = function (ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-30, -30, 60, 60);
+      ctx.fill();
+    };
+
+    function Circle(color, radius) {
+      this.radius = radius || 60;
+      this.color = color || '#eca378';
+    }
+    Circle.prototype.render = function (ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#2feef5';
+      ctx.fill();
+      ctx.stroke();
+    };
+
+    var lattice = function(ctx) {
+      var size = 400;
+      var seg = 10;
+      ctx.beginPath();
+      ctx.moveTo(0, -50);
+      ctx.lineTo(0, size + 50);
+      ctx.moveTo(-50, size);
+      ctx.lineTo(size + 50, size);
+      ctx.strokeStyle = '#646794';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.lineWidth = 1;
+      for (var i = 1; i <= 10; i++) {
+        var step = i * size / seg;
+        ctx.moveTo(step, 0);
+        ctx.lineTo(step, size);
+        ctx.moveTo(0, size - step);
+        ctx.lineTo(size, size - step);
+      }
+      ctx.strokeStyle = '#444a61';
+      ctx.stroke();
+      // ctx.strokeStyle = '#f08';
+    }
+
+    function bindDrag(el, point) {
+      var data = {};
+      el.on('touchstart', function (ev) {
+        data.start = {};
+        data.start.x = ev.global.x;
+        data.start.y = ev.global.y;
+        el.preX = el.x;
+        el.preY = el.y;
+      });
+      el.on('touchmove', function (ev) {
+        data.translate = {};
+        data.translate.x = ev.global.x - data.start.x;
+        data.translate.y = ev.global.y - data.start.y;
+
+        el.x = JC.Utils.clamp(el.preX + data.translate.x, 0, 400);
+        el.y = el.preY + data.translate.y;
+
+        point.x = el.x / 400;
+        point.y = -el.y / 400;
+        updateEase();
+      });
+      el.on('touchend', function () {
+        el.preX = el.x;
+        el.preY = el.y;
+      });
+
+      var enable = false;
+      el.on('mousedown', function (ev) {
+        if (enable) return;
+        enable = true;
+        data.start = {};
+        data.start.x = ev.global.x;
+        data.start.y = ev.global.y;
+        el.preX = el.x;
+        el.preY = el.y;
+      });
+      stage.on('mousemove', function (ev) {
+        if (!enable) return;
+        data.translate = {};
+        data.translate.x = ev.global.x - data.start.x;
+        data.translate.y = ev.global.y - data.start.y;
+
+        el.x = JC.Utils.clamp(el.preX + data.translate.x, 0, 400);
+        el.y = el.preY + data.translate.y;
+
+        point.x = el.x / 400;
+        point.y = -el.y / 400;
+        updateEase();
+      });
+      stage.on('mouseup', function (ev) {
+        if (!enable) return;
+        enable = false;
+        el.preX = el.x;
+        el.preY = el.y;
+      });
+    }
+
+    function updateEase() {
+      shapeEase.ease = JC.Tween.Ease.Beizer(controls[1].x, controls[1].y, controls[2].x, controls[2].y);
+    }
+
+    var controls = [
+      new JC.Point(0, 0),
+      new JC.Point(0.19,1.61),
+      new JC.Point(0.48,0.88),
+      new JC.Point(1, 1),
+    ];
+    var bezierPath = new JC.BezierCurve(controls);
+    var descartesSys = new JC.Container();
+    var stage = new JC.Stage({
+      dom: 'demo_canvas',
+    })
+
+    var solidLine = new JC.Graphics(function(ctx) {
+      if (!this.grd) {
+        this.grd = ctx.createLinearGradient(0, 0, 400, -400);
+        this.grd.addColorStop(0,"#ff7593");
+        this.grd.addColorStop(1,"#bd59ff");
+      }
+      ctx.beginPath();
+      ctx.strokeStyle = this.grd;
+      for (var i = 0; i <= 100; i++) {
+        var pos = bezierPath.getPoint(i / 100);
+        if (i === 0) {
+          ctx.moveTo(pos.x * 400, pos.y * -400);
+        } else {
+          ctx.lineTo(pos.x * 400, pos.y * -400);
+        }
+      }
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.moveTo(0, 0);
+      ctx.lineTo(controls[1].x * 400, controls[1].y * -400);
+      ctx.moveTo(400, -400);
+      ctx.lineTo(controls[2].x * 400, controls[2].y * -400);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+    for (var i = 1; i <= 2; i++) {
+      var color = i === 1 ? '#ff7593' : '#bd59ff';
+      var control = new JC.Graphics(new Circle(color, 15));
+      var point = controls[i];
+      control.x = point.x * 400;
+      control.y = point.y * -400;
+      control.setArea(new JC.Circle(0, 0, 15));
+      solidLine.adds(control);
+
+      bindDrag(control, point);
+    }
+
+    var shape = new JC.Graphics(new Rect('#ea2e88'));
+    var box = new JC.Graphics(lattice);
+    descartesSys.x = 180;
+    descartesSys.y = 300;
+    solidLine.y = 400;
+    descartesSys.adds(box, solidLine);
+
+    shape.x = 80;
+    shape.y = 700;
+    var shapeEase = shape.animate({
+      to: { y: 300 },
+      ease: JC.Tween.Ease.Beizer(controls[1].x, controls[1].y, controls[2].x, controls[2].y),
+      duration: 2000,
+      infinite: true,
+    })
+    stage.adds(shape, descartesSys);
+    stage.startEngine();
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
+
+  </script>
+</body>
+
+</html>
