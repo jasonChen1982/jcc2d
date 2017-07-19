@@ -35,10 +35,13 @@
     DOC.y = h / 2;
 
     resize();
+    var color = stage.ctx.createLinearGradient(0, 0, 200, 0);
+    color.addColorStop(0,"#8488fa");
+    color.addColorStop(1,"#27feff");
     text = new JC.TextFace('JC jcc2d canvas renderer', {
       fontSize: '36px',
-      fontWeight: 'bold',
-      fillColor: '#f00',
+      fontWeight: 'normal',
+      fillColor: color,
     });
 
     DOC.adds(text);

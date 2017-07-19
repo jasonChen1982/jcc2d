@@ -14,7 +14,6 @@
 
     body {
       overflow: hidden;
-      background-color: #000;
     }
 
     #demo_canvas {
@@ -46,16 +45,17 @@
       ctx.fill();
     };
 
-    var shape = [],
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container();
+    var stage = new JC.Stage({
+      dom: 'demo_canvas'
+    });
+    var DOC = new JC.Container();
     DOC.x = -200;
     DOC.y = 0;
 
-    shape = new JC.Graphics(new Rect('#749d9b'));
-    shape.keyFrames({
+    var coin = new JC.Sprite({
+      texture: new JC.Texture('../demo_animation_ae/images/img_3.png'),
+    });
+    coin.keyFrames({
       ks: data.layers[0],
       fr: 30,
       infinite: true,
@@ -64,8 +64,8 @@
         console.log(this.element);
       }
     });
-    DOC.timeScale = 0.2;
-    DOC.adds(shape);
+    DOC.setSpeed(0.5);
+    DOC.adds(coin);
 
     stage.adds(DOC);
 

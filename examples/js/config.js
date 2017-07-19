@@ -3,7 +3,7 @@ var EXAMPLES = [{
     type: 'title'
   },
   {
-    title: '修改zIndex',
+    title: '3D旋转图片云',
     type: 'demo',
     link: 'demo_zIndex_bitmap'
   },
@@ -13,27 +13,27 @@ var EXAMPLES = [{
     link: 'demo_frames_sprite'
   },
   {
-    title: '图形绘制',
+    title: '几何图形绘制',
     type: 'demo',
     link: 'demo_graphics_cache'
   },
   {
-    title: '粒子效果',
+    title: '物理粒子效果',
     type: 'demo',
     link: 'demo_graphics_particle'
   },
   {
-    title: '模糊滤镜',
+    title: '高效模糊滤镜',
     type: 'demo',
     link: 'demo_filter_blur'
   },
   {
-    title: '形状绘制的骨骼动画',
+    title: '几何图形的骨骼动画',
     type: 'demo',
     link: 'demo_skeleton_graphics'
   },
   {
-    title: '位图绘制的骨骼动画',
+    title: '位图的骨骼动画',
     type: 'demo',
     link: 'demo_skeleton_sprite'
   },
@@ -43,18 +43,8 @@ var EXAMPLES = [{
     link: 'demo_text_style'
   },
   {
-    title: '容器填装位图',
-    type: 'demo',
-    link: 'demo_doc_sprite'
-  },
-  {
     title: '交互demo',
     type: 'title'
-  },
-  {
-    title: '可交互位图',
-    type: 'demo',
-    link: 'demo_interactive_bitmap'
   },
   {
     title: '精确事件检测',
@@ -71,19 +61,9 @@ var EXAMPLES = [{
     type: 'title'
   },
   {
-    title: '缓动曲线动画',
+    title: 'animate动画',
     type: 'demo',
-    link: 'demo_timingfunction_allInOne'
-  },
-  {
-    title: 'animate动画1',
-    type: 'demo',
-    link: 'demo_animation_animate_1'
-  },
-  {
-    title: 'cubic-bezier曲线',
-    type: 'demo',
-    link: 'demo_animation_bezier'
+    link: 'demo_animation_animate'
   },
   {
     title: 'runners动画',
@@ -91,22 +71,32 @@ var EXAMPLES = [{
     link: 'demo_animation_runners'
   },
   {
-    title: 'AE导出的动画片段',
-    type: 'demo',
-    link: 'demo_animation_keyFrames'
-  },
-  {
-    title: 'AE导出的完整动画',
-    type: 'demo',
-    link: 'demo_animation_keyFrames2'
-  },
-  {
-    title: '沿着曲线运动的动画',
+    title: '沿曲线运动的动画',
     type: 'demo',
     link: 'demo_animation_motion'
   },
   {
-    title: '性能PK',
+    title: '缓动曲线动画',
+    type: 'demo',
+    link: 'demo_timingfunction_allInOne'
+  },
+  {
+    title: 'cubic-bezier曲线',
+    type: 'demo',
+    link: 'demo_animation_bezier'
+  },
+  {
+    title: '解析AE导出动画',
+    type: 'demo',
+    link: 'demo_animation_ae'
+  },
+  {
+    title: '解析AE导出的单层动画',
+    type: 'demo',
+    link: 'demo_animation_keyFrames'
+  },
+  {
+    title: '性能对比',
     type: 'title'
   },
   {

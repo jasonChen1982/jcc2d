@@ -31,11 +31,9 @@
 
 <body>
   <canvas id="demo_canvas" width="320" height="410"></canvas>
-  <div class="control_box">
-    <input type="checkbox" name="hitArea" id="hitArea"><span id="text_face">点击显示事件热区</span>
-  </div>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth,
       h = window.innerHeight,
@@ -49,31 +47,24 @@
     DOC.y = h / 2;
     DOC.name = 'doc';
     DOC.on('touchstart', function (ev) {
-      // ev.cancleBubble = true;
       console.log('touchstart at my doc by Bubble !!!!!');
     });
     DOC.on('touchmove', function (ev) {
-      // ev.cancleBubble = true;
       console.log('touchmove at my doc by Bubble !!!!!');
     });
     DOC.on('touchend', function (ev) {
-      // ev.cancleBubble = true;
       console.log('touchend at my doc by Bubble !!!!!');
     });
 
 
-
-    var checkBox = document.getElementById('hitArea');
-    var face = document.getElementById('text_face');
-    checkBox.addEventListener('click', function () {
-
-      if (checkBox.checked) {
-        face.innerHTML = '点击隐藏事件热区';
-        boundBox.visible = true;
-      } else {
-        face.innerHTML = '点击显示事件热区';
-        boundBox.visible = false;
-      }
+    function BoundsControl() {
+      this.bounds = false;
+    }
+    var gui = new dat.GUI();
+    var boundsControl = new BoundsControl();
+    var bounds = gui.add(boundsControl, 'bounds');
+    bounds.onChange(function (value) {
+      boundBox.visible = value;
     });
 
     var loadBox = JC.loaderUtil({
@@ -153,7 +144,7 @@
       pic.setArea(new JC.Polygon(bounds));
 
       boundBox = new JC.Graphics(function (ctx) {
-        ctx.strokeStyle = '#ff0000';
+        ctx.strokeStyle = '#eb1983';
         ctx.beginPath();
         var l = bounds.length >> 1;
         for (var i = 0; i < l; i++) {
@@ -165,6 +156,7 @@
             ctx.lineTo(x, y);
           }
         }
+        ctx.lineWidth = 2;
         ctx.closePath();
         ctx.stroke();
       });

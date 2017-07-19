@@ -14,7 +14,6 @@
 
     body {
       overflow: hidden;
-      background-color: #222;
       text-align: center;
     }
 
@@ -48,7 +47,9 @@
       dom: 'demo_canvas'
     });
     var starContainer = new JC.Container();
-    var COLORS = ['#f00', '#f6f', '#ff0', '#66f'];
+    var COLORS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
+    var PI = Math.PI;
+    var PI2 = 2 * PI;
 
     // 画圆类
     function Cricle(color, radius) {
@@ -99,13 +100,17 @@
           alpha: 0
         },
         ease: JC.Tween.Linear.None,
-        duration: 300,
+        duration: 500,
         onCompelete: function onCompelete() {
           circle.visible = false;
         }
       }, true);
 
-      starContainer.childs.forEach(function (el) {
+      starContainer.childs.forEach(function (el, idx) {
+        var deg = JC.Utils.random(-0.05 * PI, 0.05 * PI) + idx / (PI2 * 26);
+        var radius = JC.Utils.random(100, 220);
+        var tx = radius * Math.cos(deg);
+        var ty = radius * Math.sin(deg);
         el.animate({
           from: {
             x: x,
@@ -113,12 +118,12 @@
             scale: 1
           },
           to: {
-            x: JC.Utils.random(x - 200, x + 200),
-            y: JC.Utils.random((y - 200) * 1.15, (y + 200) * 1.15),
+            x: tx,
+            y: ty,
             scale: 0
           },
           ease: JC.Tween.Linear.None,
-          duration: 350,
+          duration: 550,
           onCompelete: function onCompelete() {
             starContainer.visible = false;
           }
