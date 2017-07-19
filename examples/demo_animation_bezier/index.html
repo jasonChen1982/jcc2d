@@ -24,14 +24,34 @@
       height: 540px;
       margin: -270px 0 0 -160px;
     }
+    .output-bezier {
+      position: absolute;
+      left: 50%;
+      bottom: 50%;
+      margin: 0 0 -140px -95px;
+      width: 250px;
+      height: 30px;
+      border-radius: 4px;
+      text-align: center;
+      line-height: 30px;
+      font-size: 12px;
+      color: #0ab;
+    }
+    .red {
+      color: #ff7593;
+    }
+    .blue {
+      color: #bd59ff;
+    }
 
   </style>
 </head>
 
 <body>
   <canvas id="demo_canvas" width="640" height="1080"></canvas>
-
+  <div class="output-bezier" id="output-bezier"></div>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/derivedClass/coordinate.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     function Rect(color) {
@@ -58,31 +78,49 @@
       ctx.stroke();
     };
 
-    var lattice = function(ctx) {
-      var size = 400;
-      var seg = 10;
+    function CurveGraph(options) {
+      options = options || {};
+      this.gradStart = options.gradStart;
+      this.gradEnd = options.gradEnd;
+      this.path = options.path;
+      this.scale = options.scale;
+      this.segment = options.segment || 100;
+    }
+    CurveGraph.prototype.initGrad = function(ctx) {
+      this.gradient = ctx.createLinearGradient(
+        this.gradStart.x,
+        this.gradStart.y,
+        this.gradEnd.x,
+        this.gradEnd.y
+      );
+      this.gradient.addColorStop(0, this.gradStart.color);
+      this.gradient.addColorStop(1, this.gradEnd.color);
+    };
+    CurveGraph.prototype.render = function(ctx) {
+      if (!this.gradient) this.initGrad(ctx);
+
+      var scale = this.scale;
+      var points = this.path.points;
       ctx.beginPath();
-      ctx.moveTo(0, -50);
-      ctx.lineTo(0, size + 50);
-      ctx.moveTo(-50, size);
-      ctx.lineTo(size + 50, size);
-      ctx.strokeStyle = '#646794';
+      ctx.strokeStyle = this.gradient;
+      for (var i = 0; i <= this.segment; i++) {
+        var pos = this.path.getPoint(i / 100);
+        if (i === 0) {
+          ctx.moveTo(pos.x * scale, pos.y * -scale);
+        } else {
+          ctx.lineTo(pos.x * scale, pos.y * -scale);
+        }
+      }
       ctx.lineWidth = 4;
       ctx.stroke();
 
-      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(points[1].x * scale, points[1].y * -scale);
+      ctx.moveTo(scale, -scale);
+      ctx.lineTo(points[2].x * scale, points[2].y * -scale);
       ctx.lineWidth = 1;
-      for (var i = 1; i <= 10; i++) {
-        var step = i * size / seg;
-        ctx.moveTo(step, 0);
-        ctx.lineTo(step, size);
-        ctx.moveTo(0, size - step);
-        ctx.lineTo(size, size - step);
-      }
-      ctx.strokeStyle = '#444a61';
       ctx.stroke();
-      // ctx.strokeStyle = '#f08';
-    }
+    };
 
     function bindDrag(el, point) {
       var data = {};
@@ -142,7 +180,12 @@
     }
 
     function updateEase() {
-      shapeEase.ease = JC.Tween.Ease.Bezier(controls[1].x, controls[1].y, controls[2].x, controls[2].y);
+      var x1 = bezierPath.points[1].x;
+      var y1 = bezierPath.points[1].y;
+      var x2 = bezierPath.points[2].x;
+      var y2 = bezierPath.points[2].y;
+      output.innerHTML = 'cubic-bezier(<span class="red">'+ x1 +'</span>, <span class="red">'+ y1 +'</span>, <span class="blue">'+ x2 +'</span>, <span class="blue">'+ y2 +'</span>)';
+      shapeEase.ease = JC.Tween.Ease.Bezier(x1, y1, x2, y2);
     }
 
     var controls = [
@@ -156,37 +199,19 @@
     var stage = new JC.Stage({
       dom: 'demo_canvas',
     })
+    var output = document.querySelector('#output-bezier');
 
-    var solidLine = new JC.Graphics(function(ctx) {
-      if (!this.grd) {
-        this.grd = ctx.createLinearGradient(0, 0, 400, -400);
-        this.grd.addColorStop(0,"#ff7593");
-        this.grd.addColorStop(1,"#bd59ff");
-      }
-      ctx.beginPath();
-      ctx.strokeStyle = this.grd;
-      for (var i = 0; i <= 100; i++) {
-        var pos = bezierPath.getPoint(i / 100);
-        if (i === 0) {
-          ctx.moveTo(pos.x * 400, pos.y * -400);
-        } else {
-          ctx.lineTo(pos.x * 400, pos.y * -400);
-        }
-      }
-      ctx.lineWidth = 4;
-      ctx.stroke();
+    var solidLine = new JC.Graphics(new CurveGraph({
+      gradStart: { x: 0, y: 0, color: '#ff7593'},
+      gradEnd: { x: 400, y: -400, color: '#bd59ff'},
+      path: bezierPath,
+      scale: 400,
+    }));
 
-      ctx.moveTo(0, 0);
-      ctx.lineTo(controls[1].x * 400, controls[1].y * -400);
-      ctx.moveTo(400, -400);
-      ctx.lineTo(controls[2].x * 400, controls[2].y * -400);
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    });
     for (var i = 1; i <= 2; i++) {
       var color = i === 1 ? '#ff7593' : '#bd59ff';
       var control = new JC.Graphics(new Circle(color, 15));
-      var point = controls[i];
+      var point = bezierPath.points[i];
       control.x = point.x * 400;
       control.y = point.y * -400;
       control.setArea(new JC.Circle(0, 0, 15));
@@ -196,22 +221,27 @@
     }
 
     var shape = new JC.Graphics(new Rect('#ea2e88'));
-    var box = new JC.Graphics(lattice);
+    var box = new JC.Graphics(new Coordinate());
     descartesSys.x = 180;
-    descartesSys.y = 300;
-    solidLine.y = 400;
+    descartesSys.y = 700;
     descartesSys.adds(box, solidLine);
 
     shape.x = 80;
     shape.y = 700;
     var shapeEase = shape.animate({
       to: { y: 300 },
-      ease: JC.Tween.Ease.Bezier(controls[1].x, controls[1].y, controls[2].x, controls[2].y),
+      ease: JC.Tween.Ease.Bezier(
+        bezierPath.points[1].x,
+        bezierPath.points[1].y,
+        bezierPath.points[2].x,
+        bezierPath.points[2].y
+      ),
       duration: 2000,
       infinite: true,
     })
     stage.adds(shape, descartesSys);
     stage.startEngine();
+    updateEase();
 
     /**
      * 帧率监控工具

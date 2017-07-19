@@ -83,7 +83,7 @@ var EXAMPLES = [{
   {
     title: '缓动曲线动画',
     type: 'demo',
-    link: 'demo_timingfunction_allInOne'
+    link: 'demo_animation_allInOne'
   },
   {
     title: 'cubic-bezier曲线',

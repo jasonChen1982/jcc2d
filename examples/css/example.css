@@ -1,3 +1,4 @@
+
 /* Reset */
 
 html,
@@ -116,7 +117,7 @@ a {
 .left-side {
     position: absolute;
     left: 0;
-    width: 3rem;
+    width: 2.9rem;
     height: 100%;
 
     transition: all .4s ease;
@@ -127,6 +128,13 @@ a {
 
     transform: rotateY(-30deg);
     -webkit-transform: rotateY(-30deg);
+}
+.center-side {
+    position: absolute;
+    right: 0.98rem;
+    width: 0.14rem;
+    height: 100%;
+    background: #212944;
 }
 
 .center-view-box {
@@ -183,7 +191,7 @@ a {
     transition: all .5s ease;
     -webkit-transition: all .5s ease;
     visibility: hidden;
-    background: linear-gradient(to right, rgba(249, 157, 149, 0.01), rgba(249, 157, 149, 0.2));
+    background: linear-gradient(to right, rgba(249, 157, 149, 0.01), rgba(249, 157, 149, 0.3));
     transform: translateZ(1px);
     -webkit-transform: translateZ(1px);
 }

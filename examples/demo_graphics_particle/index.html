@@ -6,13 +6,16 @@
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
   <title>JC_demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Plaster" rel="stylesheet">
   <style type="text/css">
+
     * {
       padding: 0;
       margin: 0;
     }
 
     body {
+      font-family: 'Plaster', cursive;
       overflow: hidden;
       background-color: transparent;
     }
@@ -137,17 +140,30 @@
       DOC = new JC.Container();
     resize();
     DOC.x = w / 2;
-    DOC.y = h - 30;
+    DOC.y = h/2 + 120;
 
     init(); // 创建粒子更新循环
 
-    JCparticle = new JC.Graphics(function (ctx) {
+    JCparticle = new JC.Graphics(function(ctx) {
       update();
       ctx.globalCompositeOperation = 'lighter';
       for (var i = particles.length - 1; i >= 0; i--) {
         particles[i].draw(ctx);
       }
     }); // 创建形状绘制对象
+
+    var color = stage.ctx.createLinearGradient(-100, 0, 100, 0);
+    color.addColorStop(0,"#ff6ab3");
+    color.addColorStop(1,"#27feff");
+    var text = new JC.TextFace('JCC2D', {
+      fontSize: '60px',
+      fontWeight: 'bold',
+      fontFamily: 'Plaster',
+      fillColor: color,
+    });
+    text.y = -200;
+
+    JCparticle.adds(text);
 
     DOC.adds(JCparticle);
     stage.adds(DOC);

@@ -6,6 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
   <title>JC_demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Plaster" rel="stylesheet">
   <style type="text/css">
     * {
       padding: 0;
@@ -13,14 +14,15 @@
     }
 
     body {
+      font-family: 'Plaster', cursive;
       overflow: hidden;
       text-align: center;
     }
 
     .title {
-      font-size: 30px;
+      font-size: 20px;
       color: #fff;
-      margin-top: 50px;
+      margin-top: 10px;
     }
 
     #demo_canvas {
@@ -35,7 +37,7 @@
 </head>
 
 <body>
-  <p class="title">随意点击</p>
+  <p class="title">click somewhere</p>
   <canvas id="demo_canvas" width="640" height="900"></canvas>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
@@ -51,7 +53,6 @@
     var PI = Math.PI;
     var PI2 = 2 * PI;
     var stars = [];
-    resize();
 
     // 画圆类
     function Cricle(color, radius, mode) {
@@ -82,8 +83,19 @@
     // 创建一个浅黄色的圆
     var circle = new JC.Graphics(new Cricle('#fff', 70, 'stroke'));
 
+    var color = stage.ctx.createLinearGradient(-200, 0, 200, 0);
+    color.addColorStop(0,"#ff6ab3");
+    color.addColorStop(1,"#27feff");
+    var text = new JC.TextFace('JCC2D ANIMATOR', {
+      fontSize: '60px',
+      fontWeight: 'bold',
+      fontFamily: 'Plaster',
+      fillColor: color,
+    });
+
     starContainer.adds(circle);
-    stage.adds(starContainer);
+    stage.adds(starContainer, text);
+    resize();
 
     /**
      * 执行动画
@@ -164,6 +176,8 @@
     function resize() {
       w = window.innerWidth;
       h = window.innerHeight;
+      text.x = w >> 1;
+      text.y = h >> 1;
       stage.resize(w, h);
     }
 

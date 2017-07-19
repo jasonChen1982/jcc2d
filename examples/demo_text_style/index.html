@@ -6,6 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
   <title>JC_demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Plaster" rel="stylesheet">
   <style type="text/css">
     * {
       padding: 0;
@@ -13,6 +14,7 @@
     }
 
     body {
+      font-family: 'Plaster', cursive;
       overflow: hidden;
     }
 
@@ -35,12 +37,13 @@
     DOC.y = h / 2;
 
     resize();
-    var color = stage.ctx.createLinearGradient(0, 0, 200, 0);
+    var color = stage.ctx.createLinearGradient(-200, 0, 200, 0);
     color.addColorStop(0,"#8488fa");
     color.addColorStop(1,"#27feff");
-    text = new JC.TextFace('JC jcc2d canvas renderer', {
+    text = new JC.TextFace('JCC2D CANVAS RENDERER', {
       fontSize: '36px',
       fontWeight: 'normal',
+      fontFamily: 'Plaster',
       fillColor: color,
     });
 
