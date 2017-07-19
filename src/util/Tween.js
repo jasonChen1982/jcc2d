@@ -50,7 +50,7 @@ export const Tween = {
       };
     })(),
 
-    Beizer: function(x1, y1, x2, y2) {
+    Bezier: function(x1, y1, x2, y2) {
       const bezier = new BezierEasing(x1, y1, x2, y2);
       return function(k) {
         return bezier.get(k);

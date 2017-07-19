@@ -25,12 +25,10 @@
 
     #demo_canvas {
       position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 320px;
-      height: 450px;
-      margin: -225px 0 0 -160px;
-      border: 1px solid;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
     }
 
   </style>
@@ -43,6 +41,8 @@
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     // init
+    var w = window.innerWidth;
+    var h = window.innerHeight;
     var stage = new JC.Stage({
       dom: 'demo_canvas'
     });
@@ -50,45 +50,52 @@
     var COLORS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'];
     var PI = Math.PI;
     var PI2 = 2 * PI;
+    var stars = [];
+    resize();
 
     // 画圆类
-    function Cricle(color, radius) {
+    function Cricle(color, radius, mode) {
       this.radius = radius || 60;
       this.color = color || '#eca378';
+      this.mode = mode || 'fill';
     }
     Cricle.prototype.render = function (ctx) {
       ctx.beginPath();
-      ctx.fillStyle = this.color;
       ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-      ctx.fill();
+      if (this.mode === 'fill') {
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      } else {
+        ctx.strokeStyle = this.color;
+        ctx.stroke();
+      }
     };
 
     // 创建好多小星星
     for (var i = 0; i < 26; i++) {
-      var star = new JC.Graphics(new Cricle(JC.Utils.random(COLORS), JC.Utils.random(24, 48)));
+      var star = new JC.Graphics(new Cricle(JC.Utils.random(COLORS), JC.Utils.random(15, 40)));
+      stars.push(star);
       starContainer.adds(star);
     }
     starContainer.visible = false;
 
     // 创建一个浅黄色的圆
-    var circle = new JC.Graphics(new Cricle('rgba(255,255,102,0.46)', 78));
-    circle.visible = false;
+    var circle = new JC.Graphics(new Cricle('#fff', 70, 'stroke'));
 
-    stage.adds(circle, starContainer);
+    starContainer.adds(circle);
+    stage.adds(starContainer);
 
     /**
      * 执行动画
      *
      */
-    function play() {
-      var p = getPos();
+    function play(p) {
       var x = p.x;
       var y = p.y;
 
-      circle.x = x;
-      circle.y = y;
-      circle.visible = true;
       starContainer.visible = true;
+      starContainer.x = x;
+      starContainer.y = y;
 
       circle.animate({
         from: {
@@ -96,25 +103,26 @@
           alpha: 1
         },
         to: {
-          scale: 2.15,
+          scale: 1.8,
           alpha: 0
         },
-        ease: JC.Tween.Linear.None,
-        duration: 500,
+        ease: JC.Tween.Ease.Bezier(0,.89,.46,1),
+        duration: 1400,
         onCompelete: function onCompelete() {
-          circle.visible = false;
+          starContainer.visible = false;
         }
       }, true);
 
-      starContainer.childs.forEach(function (el, idx) {
-        var deg = JC.Utils.random(-0.05 * PI, 0.05 * PI) + idx / (PI2 * 26);
-        var radius = JC.Utils.random(100, 220);
+      stars.forEach(function (el, idx) {
+        var deg = JC.Utils.random(-0.1 * PI, 0.1 * PI) + PI2 * idx / 10;
+        var radius = JC.Utils.random(80, 200);
         var tx = radius * Math.cos(deg);
         var ty = radius * Math.sin(deg);
+
         el.animate({
           from: {
-            x: x,
-            y: y,
+            x: 0,
+            y: 0,
             scale: 1
           },
           to: {
@@ -122,45 +130,12 @@
             y: ty,
             scale: 0
           },
-          ease: JC.Tween.Linear.None,
-          duration: 550,
-          onCompelete: function onCompelete() {
-            starContainer.visible = false;
-          }
+          ease: JC.Tween.Ease.Bezier(0,.89,.46,1),
+          duration: JC.Utils.random(900, 1400),
         }, true);
       });
     }
 
-    /**
-     * 随机坐标
-     */
-    function getPos() {
-      var pos = parseInt(JC.Utils.random(0, 4), 10);
-
-      var posArr = [{
-          x: 97,
-          y: 300
-        },
-        {
-          x: 252,
-          y: 300
-        },
-        {
-          x: 392,
-          y: 300
-        },
-        {
-          x: 543,
-          y: 300
-        }
-      ];
-
-      //return posArr[pos];
-      return {
-        x: JC.Utils.random(640 * .1, 640 * .9),
-        y: JC.Utils.random(900 * .1, 900 * .9)
-      }
-    }
     stage.startEngine();
 
     /**
@@ -174,7 +149,23 @@
       stats.update();
     })
 
-    document.addEventListener('click', play)
+    document.addEventListener('click', function(ev) {
+      var x = ev.offsetX;
+      var y = ev.offsetY;
+      play({
+        x: x,
+        y: y,
+      });
+    });
+
+    window.onresize = function () {
+      resize();
+    };
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      stage.resize(w, h);
+    }
 
   </script>
 </body>

@@ -68,15 +68,21 @@
       wheel1 = new JC.Sprite({
         texture: loadBox.getById('wheel')
       });
+      wheel1.pivotX = wheel1.width >> 1;
+      wheel1.pivotY = wheel1.height >> 1;
       wheel1.x = -76;
       wheel2 = new JC.Sprite({
         texture: loadBox.getById('wheel')
       });
+      wheel2.pivotX = wheel2.width >> 1;
+      wheel2.pivotY = wheel2.height >> 1;
       wheel2.x = 48;
       wheels.adds(wheel1, wheel2);
       body = new JC.Sprite({
         texture: loadBox.getById('body')
       });
+      body.pivotX = body.width >> 1;
+      body.pivotY = body.height >> 1;
       arm1 = new JC.Sprite({
         texture: loadBox.getById('arm1')
       });
@@ -88,16 +94,16 @@
       arm2 = new JC.Sprite({
         texture: loadBox.getById('arm2')
       });
-      arm2.x = -135;
-      arm2.y = -94;
-      arm2.pivotX = 14;
+      arm2.x = 6;
+      arm2.y = 8;
+      arm2.pivotX = 16;
       arm2.pivotY = 20;
       arm1.adds(arm2);
       hand = new JC.Sprite({
         texture: loadBox.getById('hand')
       });
-      hand.x = 12;
-      hand.y = 88;
+      hand.x = 42;
+      hand.y = 120;
       hand.pivotX = 4;
       hand.pivotY = 41;
       arm2.adds(hand);

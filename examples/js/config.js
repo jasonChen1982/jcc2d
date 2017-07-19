@@ -23,6 +23,11 @@ var EXAMPLES = [{
     link: 'demo_graphics_particle'
   },
   {
+    title: '爆炸粒子效果',
+    type: 'demo',
+    link: 'demo_graphics_stars'
+  },
+  {
     title: '高效模糊滤镜',
     type: 'demo',
     link: 'demo_filter_blur'

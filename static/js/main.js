@@ -132,12 +132,6 @@ LinkFace.prototype.render = function (ctx) {
   ctx.fillText(this.text, 0, 0);
 };
 
-
-
-
-
-
-
 var w = window.innerWidth,
   h = window.innerHeight,
   curvePath = new JC.Graphics(new WaveLines()),
@@ -156,7 +150,7 @@ var w = window.innerWidth,
   banner = new JC.Container(),
   bannerLeft = new JC.Container(),
   bannerRight = new JC.Container(),
-  easeInOutStrong = JC.Tween.Ease.Beizer(.7, 0, .3, 1);
+  easeInOutStrong = JC.Tween.Ease.Bezier(.7, 0, .3, 1);
 resize();
 LOGO.x = DOC.x = w / 2;
 DOC.y = h / 2;
@@ -406,10 +400,6 @@ function logoIn() {
         },
         duration: 1000
       });
-      // BG.animate({
-      //     to: {alpha: 0.5},
-      //     duration: 1000
-      // });
     });
   }
 }

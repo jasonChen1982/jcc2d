@@ -56,17 +56,6 @@
       console.log('touchend at my doc by Bubble !!!!!');
     });
 
-
-    function BoundsControl() {
-      this.bounds = false;
-    }
-    var gui = new dat.GUI();
-    var boundsControl = new BoundsControl();
-    var bounds = gui.add(boundsControl, 'bounds');
-    bounds.onChange(function (value) {
-      boundBox.visible = value;
-    });
-
     var loadBox = JC.loaderUtil({
       daisy: './images/daisy.png'
     });
@@ -167,6 +156,20 @@
       DOC.adds(pic);
       stage.adds(DOC);
       stage.startEngine();
+    });
+
+
+    /**
+     * 界面控件工具
+     */
+    function BoundsControl() {
+      this.bounds = false;
+    }
+    var gui = new dat.GUI();
+    var boundsControl = new BoundsControl();
+    var bounds = gui.add(boundsControl, 'bounds');
+    bounds.onChange(function (value) {
+      boundBox.visible = value;
     });
 
     /**

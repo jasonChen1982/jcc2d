@@ -882,7 +882,7 @@ var Tween = {
       };
     }(),
 
-    Beizer: function Beizer(x1, y1, x2, y2) {
+    Bezier: function Bezier(x1, y1, x2, y2) {
       var bezier = new BezierEasing(x1, y1, x2, y2);
       return function (k) {
         return bezier.get(k);
@@ -975,14 +975,6 @@ var Tween = {
       }
       return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
     }
-  },
-
-  Utils: {
-
-    Linear: function Linear(p0, p1, t) {
-      return (p1 - p0) * t + p0;
-    }
-
   }
 
 };

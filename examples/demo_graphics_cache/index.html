@@ -24,11 +24,11 @@
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth,
       h = window.innerHeight,
-      cacheMap,
-      cacheMap2,
+      graphicsCube,
       COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'],
       stage = new JC.Stage({
         dom: 'demo_canvas'
@@ -38,47 +38,50 @@
     DOC.x = w / 2;
     DOC.y = h / 2;
 
-    cacheMap = new JC.Graphics(function (ctx) {
-      for (var i = 50; i > 0; i--) {
+    graphicsCube = new JC.Graphics(function (ctx) {
+      for (var i = 100; i > 0; i--) {
         ctx.strokeStyle = COLOURS[i % COLOURS.length];
         ctx.beginPath();
-        ctx.arc(0, 0, i, 0, Math.PI * 2);
+        ctx.arc(0, 0, i * 2, 0, Math.PI * 2);
         ctx.closePath();
+        ctx.lineWidth = 2;
         ctx.stroke();
       }
     }, {
       cache: true,
-      bounds: new JC.Bounds(-50, -50, 50, 50)
-    }); // 创建形状绘制对象
-    cacheMap2 = new JC.Graphics(function (ctx) {
-      for (var i = 50; i > 0; i--) {
-        ctx.strokeStyle = COLOURS[i % COLOURS.length];
-        ctx.beginPath();
-        ctx.strokeRect(50 - i - 50, 50 - i - 50, i * 2, i * 2);
-        ctx.closePath();
-        ctx.stroke();
-      }
-    }, {
-      cache: false,
-      bounds: new JC.Bounds(-50, -50, 50, 50)
+      bounds: new JC.Bounds(-202, -202, 202, 202)
     }); // 创建形状绘制对象
 
-    cacheMap.x = -100;
-    cacheMap.y = -200;
-    var aa = cacheMap.animate({
-      to: {
-        x: 100,
-        y: 200
+    graphicsCube.animate({
+      from: {
+        x: -200,
       },
-      duration: 1000,
+      to: {
+        x: 200,
+      },
+      duration: 2000,
       infinite: true,
-      alternate: true
+      alternate: true,
+      ease: JC.Tween.Elastic.InOut,
     });
 
-    DOC.adds(cacheMap, cacheMap2);
+    DOC.adds(graphicsCube);
     stage.adds(DOC);
 
     stage.startEngine();
+
+    /**
+     * 界面控件工具
+     */
+    function CacheControl() {
+      this.cache = true;
+    }
+    var gui = new dat.GUI();
+    var cacheControl = new CacheControl();
+    var cache = gui.add(cacheControl, 'cache');
+    cache.onChange(function (value) {
+      graphicsCube.cached = graphicsCube.cache = value;
+    });
 
     /**
      * 帧率监控工具

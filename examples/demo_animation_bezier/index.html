@@ -142,7 +142,7 @@
     }
 
     function updateEase() {
-      shapeEase.ease = JC.Tween.Ease.Beizer(controls[1].x, controls[1].y, controls[2].x, controls[2].y);
+      shapeEase.ease = JC.Tween.Ease.Bezier(controls[1].x, controls[1].y, controls[2].x, controls[2].y);
     }
 
     var controls = [
@@ -206,7 +206,7 @@
     shape.y = 700;
     var shapeEase = shape.animate({
       to: { y: 300 },
-      ease: JC.Tween.Ease.Beizer(controls[1].x, controls[1].y, controls[2].x, controls[2].y),
+      ease: JC.Tween.Ease.Bezier(controls[1].x, controls[1].y, controls[2].x, controls[2].y),
       duration: 2000,
       infinite: true,
     })

@@ -141,7 +141,7 @@ coin.motion({
 coin.runners({             // combination multiple animation and run one by one
   runners: [
     {from: {}, to: {}, ease: JC.Tween.Back.In, ...},
-    {path: new JC.BezierCurve([...]), ease: JC.Tween.Ease.Beizer(0, 0, 1, 1), ...},
+    {path: new JC.BezierCurve([...]), ease: JC.Tween.Ease.Bezier(0, 0, 1, 1), ...},
     {to: {}, ease: JC.Tween.Back.Out, ...},
   ],
   ...       // other options
