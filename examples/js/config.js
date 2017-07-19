@@ -110,23 +110,23 @@ var EXAMPLES = [{
     type: 'title'
   },
   {
-    title: '渲染300个物体lufy引擎性能对比',
+    title: '渲染300个物体-lufy',
     type: 'PK',
     describe: 'ps:用法好不习惯啊',
     link: 'performanceTest/lufy'
   },
   {
-    title: '渲染300个物体create引擎性能对比',
+    title: '渲染300个物体-create',
     type: 'PK',
     link: 'performanceTest/create'
   },
   {
-    title: '渲染300个物体jcc2d引擎性能对比',
+    title: '渲染300个物体-jcc2d',
     type: 'PK',
     link: 'performanceTest/jcc2d'
   },
   {
-    title: '渲染300个物体原生方式渲染性能对比',
+    title: '渲染300个物体-原生方式',
     type: 'PK',
     link: 'performanceTest/native'
   }

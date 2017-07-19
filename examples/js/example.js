@@ -1,7 +1,11 @@
 var list = '';
 for (var i = 0; i < EXAMPLES.length; i++) {
   var item = EXAMPLES[i];
-  list += '<li class="demo-item" data-url="' + (item.link ? item.link : '') + '">' + item.title + '</li>';
+  if (item.type === 'title') {
+    list += '<li class="demo-item demo-title">' + item.title + '</li>';
+  } else {
+    list += '<li class="demo-item" data-url="' + item.link + '">' + item.title + '</li>';
+  }
 }
 
 $('#listBox').html(list);
