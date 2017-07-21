@@ -6,6 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
   <title>JC_demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Plaster" rel="stylesheet">
   <style type="text/css">
     * {
       padding: 0;
@@ -13,185 +14,72 @@
     }
 
     body {
+      font-family: 'Plaster', cursive;
       overflow: hidden;
+      text-align: center;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .title {
+      font-size: 20px;
+      color: #fff;
+      margin-top: 10px;
     }
 
     #demo_canvas {
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 320px;
-      height: 450px;
-      margin: -225px 0 0 -160px;
+      width: 400px;
+      height: 480px;
+      margin: -240px 0 0 -200px;
     }
 
   </style>
 </head>
 
 <body>
-  <canvas id="demo_canvas" width="640" height="900"></canvas>
+  <p class="title">click anywhere</p>
+  <canvas id="demo_canvas" width="800" height="960"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
-  <script type="text/javascript" src="./js/data.js"></script>
+  <script type="text/javascript" src="//jasonchen1982.github.io/jcc2d-flycoins/build/index.js"></script>
   <script type="text/javascript">
-    var stage = new JC.Stage({
-      dom: 'demo_canvas',
+    var w = 800;
+    var h = 960;
+    var flyCoins = new JC.FlyCoins({
+      stage: {
+        dom: 'demo_canvas',
+        interactive: false,
+        enableFPS: false,
+        width: w,
+        height: h,
+      },
+      coins: {
+        texture: 'http://img.ucweb.com/s/uae/g/01/indiacricketfow/app/components/images/box/coin-f_f38ac.png',
+      },
+      blinks: {
+        count: 8,
+        radius: 8,
+        range: 60,
+        color: '#FFD44F',
+      },
+      end: {
+        x: w >> 1,
+        y: h >> 1,
+      }
     });
-    DOC = new JC.Container();
-    DOC.x = stage.width >> 1;
-    DOC.y = stage.height >> 1;
-
-    function Cricle(radius) {
-      this.radius = radius;
+    flyCoins.start();
+    document.onclick = function(ev) {
+      flyCoins.flying({
+        start: { x: JC.Utils.random(80, 720), y: JC.Utils.random(100, 400) },
+      });
+      ev.preventDefault();
     }
-    Cricle.prototype.render = function (ctx) {
-      ctx.beginPath();
-      ctx.fillStyle = '#FFD44F';
-      ctx.arc(0, 0, this.radius, 0, Math.PI * 2, true);
-      ctx.closePath();
-      ctx.fill();
-    };
-
-    function FlyCoins() {
-      this.coins = new JC.Container();
-      this.blinks = new JC.Container();
-      this.blinks.alpha = 0;
-      this.blinks.x = this.coins.x = -200;
-      this.blinks.y = this.coins.y = 146;
-      this.blinksNum = 8;
-      this.blinkPoints = [];
-      this.coinsPoints = [new JC.Point(280, -220), new JC.Point(302.5, -213.5), new JC.Point(282.5, -200.5)];
-      this.radius = 57;
-      this.init();
-    }
-    FlyCoins.prototype.init = function () {
-      for (var i = 0; i < this.blinksNum; i++) {
-        var rad = Math.PI * 2 * i / this.blinksNum;
-        var p = new JC.Point(Math.cos(rad) * this.radius, Math.sin(rad) * this.radius);
-        this.blinkPoints.push(p);
-      }
-      for (var i = 0; i < this.blinksNum; i++) {
-        var blink = new JC.Graphics(new Cricle(8));
-        this.blinks.adds(blink);
-      }
-      for (var i = 0; i < this.coinsPoints.length; i++) {
-        var coin = new JC.Sprite({
-          texture: new JC.Texture(
-            'http://img.ucweb.com/s/uae/g/01/indiacricketfow/app/components/images/box/coin-f_f38ac.png'),
-        });
-        coin.pivotX = 27;
-        coin.pivotY = 24;
-        coin.scale = 0;
-        coin.x = coin.xx = this.coinsPoints[i].x;
-        coin.y = coin.yy = this.coinsPoints[i].y;
-        this.coins.adds(coin);
-      }
-    };
-    FlyCoins.prototype.fly = function () {
-      var This = this;
-      var s = this.coins.childs.length - 1;
-      for (var i = s; i >= 0; i--) {
-        var coin = this.coins.childs[i];
-        coin.scale = 0;
-        coin.x = coin.xx;
-        coin.y = coin.yy;
-        if (i === s) coin.name = 'me';
-        var path = new JC.BezierCurve([
-          new JC.Point(coin.x, coin.y),
-          new JC.Point(coin.x / 2 - 60, coin.y / 2 - 40),
-          new JC.Point(0, 0),
-        ]);
-        coin.runners({
-          runners: [
-            {
-              from: {
-                scale: 0
-              },
-              to: {
-                scale: 1.2
-              },
-              duration: 80
-            },
-            {
-              to: {
-                scale: 1
-              },
-              duration: 80
-            },
-            {
-              path: path,
-              wait: 280,
-              duration: 520,
-              ease: JC.Tween.Back.In
-            },
-            {
-              to: {
-                scale: 0
-              },
-              duration: 120,
-              ease: JC.Tween.Linear.None
-            },
-          ],
-          wait: (s - i) * 80,
-          onCompelete: function () {
-            if (this.element.name === 'me') {
-              This.blinks.alpha = 1;
-              This.blinksCoin();
-            }
-          },
-        }, true);
-      }
-    };
-    FlyCoins.prototype.blinksCoin = function () {
-      for (var i = 0; i < this.blinkPoints.length; i++) {
-        var blink = this.blinks.childs[i];
-        var t = this.blinkPoints[i];
-        var x = t.x;
-        var y = t.y;
-        blink.runners({
-          runners: [{
-              from: {
-                x: 0,
-                y: 0,
-                scale: 0
-              },
-              to: {
-                x: x,
-                y: y,
-                scale: 1
-              },
-              duration: 240,
-              ease: JC.Tween.Linear.None
-            },
-            {
-              to: {
-                x: x * 1.05,
-                y: y * 1.05
-              },
-              duration: 40,
-              ease: JC.Tween.Linear.None
-            },
-            {
-              to: {
-                scale: 0
-              },
-              duration: 120,
-              ease: JC.Tween.Linear.None
-            },
-          ],
-        });
-      }
-    };
-
-    var flyCoins = new FlyCoins();
-    DOC.adds(flyCoins.blinks, flyCoins.coins);
-    // DOC.timeScale = 0.2;
-    stage.on('click', function() {
-      flyCoins.fly();
-    })
-    stage.adds(DOC);
-    stage.startEngine();
 
 
     /**
@@ -201,7 +89,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    flyCoins.stage.on('postrender', function () {
       stats.update();
     })
 

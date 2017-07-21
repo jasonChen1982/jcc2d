@@ -17,6 +17,10 @@
       font-family: 'Plaster', cursive;
       overflow: hidden;
       text-align: center;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
     }
 
     .title {
@@ -37,7 +41,7 @@
 </head>
 
 <body>
-  <p class="title">click somewhere</p>
+  <p class="title">click anywhere</p>
   <canvas id="demo_canvas" width="640" height="900"></canvas>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
