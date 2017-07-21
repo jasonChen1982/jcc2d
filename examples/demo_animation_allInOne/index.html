@@ -22,7 +22,7 @@
       top: 50%;
       width: 320px;
       height: 450px;
-      margin: -225px 0 0 -160px;
+      margin: -225px 0 0 -200px;
     }
 
   </style>
@@ -32,6 +32,8 @@
   <canvas id="demo_canvas" width="640" height="900"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/derivedClass/coordinate.js"></script>
+  <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     function Rect(color) {
@@ -44,193 +46,114 @@
       ctx.fill();
     };
 
-    var shape = [],
-    stage = new JC.Stage({
+    function CurveGraph(options) {
+      options = options || {};
+      this.gradStart = options.gradStart;
+      this.gradEnd = options.gradEnd;
+      this.ease = options.ease;
+      this.scale = options.scale;
+      this.segment = options.segment || 100;
+    }
+    CurveGraph.prototype.initGrad = function(ctx) {
+      this.gradient = ctx.createLinearGradient(
+        this.gradStart.x,
+        this.gradStart.y,
+        this.gradEnd.x,
+        this.gradEnd.y
+      );
+      this.gradient.addColorStop(0, this.gradStart.color);
+      this.gradient.addColorStop(1, this.gradEnd.color);
+    };
+    CurveGraph.prototype.render = function(ctx) {
+      if (!this.gradient) this.initGrad(ctx);
+
+      var scale = this.scale;
+      ctx.beginPath();
+      ctx.strokeStyle = this.gradient;
+      for (var i = 0; i <= this.segment; i++) {
+        var x = i / 100;
+        var y = this.ease(x);
+        if (i === 0) {
+          ctx.moveTo(x * scale, y * -scale);
+        } else {
+          ctx.lineTo(x * scale, y * -scale);
+        }
+      }
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    };
+
+    var stage = new JC.Stage({
       dom: 'demo_canvas'
-    }),
-    DOC = new JC.Container();
-    DOC.x = 320;
-    DOC.y = 400;
-
-    shape[0] = new JC.Graphics(new Rect('#749d9b'));
-    shape[0].y = -320;
-    shape[0].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Ease.In,
-      duration: 3000,
-      infinite: true,
-      alternate: true
     });
-    DOC.adds(shape[0]);
+    var descartesSys = new JC.Container();
+    var curveGraph = new CurveGraph({
+      gradStart: { x: 0, y: 0, color: '#ff7593'},
+      gradEnd: { x: 400, y: -400, color: '#bd59ff'},
+      ease: JC.Tween.Linear.None,
+      scale: 400,
+    })
+    var solidLine = new JC.Graphics(curveGraph);
 
+    var box = new JC.Graphics(new Coordinate({
+      gridColor: '#979ac4',
+      axisColor: '#7d81bb',
+    }));
+    descartesSys.x = 180;
+    descartesSys.y = 600;
+    descartesSys.adds(box, solidLine);
 
-
-    shape[1] = new JC.Graphics(new Rect('#acba9d'));
-    shape[1].y = -240;
-    shape[1].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Ease.Out,
-      duration: 3000,
+    var shape = new JC.Graphics(new Rect('#e61d5f'));
+    shape.x = 80;
+    shape.y = 600;
+    var shapeEase = shape.animate({
+      to: { y: 200 },
+      ease: JC.Tween.Linear.None,
+      duration: 2000,
       infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[1]);
-
-
-
-    shape[2] = new JC.Graphics(new Rect('#ebca88'));
-    shape[2].y = -160;
-    shape[2].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Elastic.In,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[2]);
-
-
-
-    shape[3] = new JC.Graphics(new Rect('#eca378'));
-    shape[3].y = -80;
-    shape[3].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Elastic.Out,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[3]);
-
-
-
-    shape[4] = new JC.Graphics(new Rect('#e46d69'));
-    shape[4].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Back.In,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[4]);
-
-
-
-    shape[5] = new JC.Graphics(new Rect('#749d9b'));
-    shape[5].y = 80;
-    shape[5].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Back.Out,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[5]);
-
-
-
-    shape[6] = new JC.Graphics(new Rect('#acba9d'));
-    shape[6].y = 160;
-    shape[6].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Bounce.In,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[6]);
-
-
-
-    shape[7] = new JC.Graphics(new Rect('#ebca88'));
-    shape[7].y = 240;
-    shape[7].animate({
-      from: {
-        x: -160,
-        rotation: -360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Bounce.Out,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[7]);
-
-
-
-    shape[8] = new JC.Graphics(new Rect('#e46d69'));
-    shape[8].y = 340;
-    shape[8].animate({
-      from: {
-        x: -160,
-        rotation: 360
-      },
-      to: {
-        x: 160,
-        rotation: 0
-      },
-      ease: JC.Tween.Bounce.InOut,
-      duration: 3000,
-      infinite: true,
-      alternate: true
-    });
-    DOC.adds(shape[8]);
-
-    stage.adds(DOC);
+      alternate: true,
+    })
+    stage.adds(shape, descartesSys);
     stage.startEngine();
+
+    var tween = {
+      LinearNone: JC.Tween.Linear.None,
+      EaseIn: JC.Tween.Ease.In,
+      EaseOut: JC.Tween.Ease.Out,
+      EaseInOut: JC.Tween.Ease.InOut,
+      ElasticIn: JC.Tween.Elastic.In,
+      ElasticOut: JC.Tween.Elastic.Out,
+      ElasticInOut: JC.Tween.Elastic.InOut,
+      BackIn: JC.Tween.Back.In,
+      BackOut: JC.Tween.Back.Out,
+      BackInOut: JC.Tween.Back.InOut,
+      BounceIn: JC.Tween.Bounce.In,
+      BounceOut: JC.Tween.Bounce.Out,
+      BounceInOut: JC.Tween.Bounce.InOut,
+    };
+    function TweenControl(map, cb) {
+      Object.keys(map).forEach(function(it) {
+        this[it] = (function(ease) {
+          return function() {
+            cb(ease);
+          };
+        })(map[it]);
+      }, this);
+    }
+    var gui = new dat.GUI();
+    var tweenControl = new TweenControl(tween, function(ease){
+      curveGraph.ease = shapeEase.ease = ease;
+    });
+    var folderName = '';
+    var folder = null;
+    Object.keys(tween).forEach(function(it) {
+      var nowFolderName = it.replace(/In|Out|None/g, '');
+      if (!folderName || folderName !== nowFolderName) {
+        folderName = nowFolderName;
+        folder = gui.addFolder(nowFolderName);
+      }
+      folder.add(tweenControl, it);
+    });
 
     /**
      * 帧率监控工具
@@ -245,5 +168,4 @@
 
   </script>
 </body>
-
 </html>

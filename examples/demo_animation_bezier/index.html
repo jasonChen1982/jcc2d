@@ -36,6 +36,7 @@
       line-height: 30px;
       font-size: 12px;
       color: #0ab;
+      font-weight: bold;
     }
     .red {
       color: #ff7593;
@@ -179,11 +180,17 @@
       });
     }
 
+    function fixedDecimal(num, digit) {
+      digit = digit || 0;
+      var scale = Math.pow(10, digit);
+      return Math.round(num * scale) / scale;
+    }
+
     function updateEase() {
-      var x1 = bezierPath.points[1].x;
-      var y1 = bezierPath.points[1].y;
-      var x2 = bezierPath.points[2].x;
-      var y2 = bezierPath.points[2].y;
+      var x1 = fixedDecimal(bezierPath.points[1].x, 3);
+      var y1 = fixedDecimal(bezierPath.points[1].y, 3);
+      var x2 = fixedDecimal(bezierPath.points[2].x, 3);
+      var y2 = fixedDecimal(bezierPath.points[2].y, 3);
       output.innerHTML = 'cubic-bezier(<span class="red">'+ x1 +'</span>, <span class="red">'+ y1 +'</span>, <span class="blue">'+ x2 +'</span>, <span class="blue">'+ y2 +'</span>)';
       shapeEase.ease = JC.Tween.Ease.Bezier(x1, y1, x2, y2);
     }
@@ -221,7 +228,10 @@
     }
 
     var shape = new JC.Graphics(new Rect('#ea2e88'));
-    var box = new JC.Graphics(new Coordinate());
+    var box = new JC.Graphics(new Coordinate({
+      gridColor: '#979ac4',
+      axisColor: '#7d81bb',
+    }));
     descartesSys.x = 180;
     descartesSys.y = 700;
     descartesSys.adds(box, solidLine);

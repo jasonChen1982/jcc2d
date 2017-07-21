@@ -42,7 +42,9 @@ $('#openOther').on('click', function () {
   this.href = hash + '/index.html';
 });
 window.onload = function () {
-  $('#windowBox').removeClass('active-window');
+  setTimeout(function() {
+    $('#windowBox').removeClass('active-window');
+  }, 1500);
 };
 
 stroll.bind($('#listBox'));

@@ -76,12 +76,12 @@ var EXAMPLES = [{
     link: 'demo_animation_runners'
   },
   {
-    title: '沿曲线运动的动画',
+    title: 'path-motion动画',
     type: 'demo',
     link: 'demo_animation_motion'
   },
   {
-    title: '缓动曲线动画',
+    title: 'timing-funtion曲线',
     type: 'demo',
     link: 'demo_animation_allInOne'
   },

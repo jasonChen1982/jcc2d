@@ -152,7 +152,7 @@ a {
     transform-origin: left;
     -webkit-transform-origin: left;
 
-    background: linear-gradient(to bottom, #1d2641, #161b33);
+    background: -webkit-radial-gradient(center, circle cover, #43517b 0%, #060a1d 100%);
 }
 
 .demo-list-box {

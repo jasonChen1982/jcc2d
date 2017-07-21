@@ -78,11 +78,15 @@
 
       var gui = new dat.GUI();
       var blurControl = new BlurControl();
-      var blurX = gui.add(blurControl, 'blurX', 0, 20);
-      var blurY = gui.add(blurControl, 'blurY', 0, 20);
-      var blur = gui.add(blurControl, 'blur', 0, 20);
-      var paddingX = gui.add(blurControl, 'paddingX', 0, 20);
-      var paddingY = gui.add(blurControl, 'paddingY', 0, 20);
+      var blurFolder = gui.addFolder('blur props');
+      var blurX = blurFolder.add(blurControl, 'blurX', 0, 20);
+      var blurY = blurFolder.add(blurControl, 'blurY', 0, 20);
+      var blur = blurFolder.add(blurControl, 'blur', 0, 20);
+
+      var paddingFolder = gui.addFolder('padding props');
+      var paddingX = paddingFolder.add(blurControl, 'paddingX', 0, 20);
+      var paddingY = paddingFolder.add(blurControl, 'paddingY', 0, 20);
+
       var quality = gui.add(blurControl, 'quality', 0, 4);
       blurX.onChange(function (value) {
         blurFilter.blurX = value;
@@ -113,10 +117,12 @@
       stage.adds(DOC);
 
       filterPass.animate({
-        from: { rotation: 0 },
-        to: { rotation: 360 },
-        duration: 3000,
+        from: { x: -50 },
+        to: { x: 50 },
+        duration: 2000,
         infinite: true,
+        alternate: true,
+        ease: JC.Tween.Elastic.InOut,
       })
 
       stage.startEngine();

@@ -20,13 +20,10 @@
 </head>
 
 <body>
-  <div style="float: right;text-align: right;">
-    <p>点击屏幕随机播放动画</p>
-    <p id="movie">stand</p>
-  </div>
   <canvas id="demo_canvas" width="320" height="410"></canvas>
 
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth,
@@ -76,23 +73,39 @@
       // repeats: 1,
       infinite: true
     });
-    runMan.on('click', function () {
-      var movie = JC.Utils.random(['walk', 'fly', 'fall']);
-      document.querySelector('#movie').innerHTML = movie;
-      runMan.playMovie({
-        movie: movie,
-        repeats: 6,
-        onCompelete: function () {
-          document.querySelector('#movie').innerHTML = 'stand';
-        }
-      });
-    });
     runMan.x = 20;
 
     DOC.adds(runMan);
     stage.adds(DOC);
 
     stage.startEngine();
+
+
+    var moviesClip = [
+      'fall',
+      'fly',
+      'walk',
+    ];
+    function Movies(moviesClip, cb) {
+      moviesClip.forEach(function(it, idx) {
+        this[it] = (function(movie) {
+          return function() {
+            cb(movie);
+          };
+        })(moviesClip[idx]);
+      }, this);
+    }
+    var gui = new dat.GUI();
+    var movies = new Movies(moviesClip, function(movie) {
+      console.log(movie);
+      runMan.playMovie({
+        movie: movie,
+        repeats: 6
+      });
+    });
+    moviesClip.forEach(function(it) {
+      gui.add(movies, it);
+    });
 
     /**
      * 帧率监控工具
