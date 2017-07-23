@@ -235,10 +235,9 @@ bannerRight.animate({
 
 var particleEngine = new ParticleEngine(w, h);
 var particleDOC = new JC.Container();
-particleDOC.scale = 0.6;
-particleDOC.alpha = 0;
+
 var emiter = new Emitter({
-  count: 15,
+  count: 10,
   type: ParticleCricle
 });
 particleEngine.addEmitter(emiter);
@@ -248,7 +247,7 @@ var emiter2 = new Emitter({
 });
 particleEngine.addEmitter(emiter2);
 var emiter3 = new Emitter({
-  count: 5,
+  count: 10,
   type: ParticlePlus
 });
 particleEngine.addEmitter(emiter3);
@@ -256,6 +255,10 @@ particleDOC.adds(emiter.doc);
 particleDOC.adds(emiter2.doc);
 particleDOC.adds(emiter3.doc);
 particleDOC.animate({
+  from: {
+    scale: 0.6,
+    alpha: 0
+  },
   to: {
     scale: 1,
     alpha: 1

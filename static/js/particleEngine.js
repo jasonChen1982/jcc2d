@@ -97,7 +97,7 @@ ParticleCricle.prototype.init = function () {
   var This = this;
   this.spin = 0;
   this.color = JC.Utils.random(COLORS);
-  this.radius = JC.Utils.random(0, 10) >> 0;
+  this.radius = JC.Utils.random(3, 10) >> 0;
   this.doc = new JC.Graphics(function (ctx) {
     ctx.beginPath();
     ctx.fillStyle = This.color;
@@ -140,7 +140,7 @@ ParticleTriangle.prototype.init = function () {
   var This = this;
   this.spin = JC.Utils.random(-3, 3);
   this.color = JC.Utils.random(COLORS);
-  this.radius = JC.Utils.random(4, 16) >> 0;
+  this.radius = JC.Utils.random(5, 16) >> 0;
   var points = [{
       x: this.radius * Math.cos(0),
       y: this.radius * Math.sin(0)
@@ -202,8 +202,8 @@ function ParticlePlus() {
 ParticlePlus.prototype.init = function () {
   var This = this,
     scale = JC.Utils.random(0.5, 1),
-    ww = 6 * scale,
-    hh = 30 * scale;
+    ww = 4 * scale,
+    hh = 26 * scale;
   this.spin = JC.Utils.random(-3, 3) > 0 ? JC.Utils.random(2, 3) : JC.Utils.random(-3, -2);
   this.color = JC.Utils.random(COLORS);
   this.radius = JC.Utils.random(4, 16) >> 0;
