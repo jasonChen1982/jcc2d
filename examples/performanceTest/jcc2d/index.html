@@ -55,6 +55,8 @@
         el.pivotY = el.height >> 1;
         el.x = (Math.random() - 0.5) * 2 * w;
         el.y = (Math.random() - 0.5) * 2 * h;
+
+
         el.animate({
           to: {
             rotation: 360
@@ -63,6 +65,23 @@
           alternate: true,
           duration: 2e3 + Math.random() * 1e3
         });
+
+        // dump style
+        // var duration = 1.2e3 + Math.random() * 0.6e3;
+        // el.runners({
+        //   runners: [{
+        //     to: { y: el.y - 200 },
+        //     duration: duration * 0.4,
+        //     ease: JC.Tween.Ease.Out
+        //   }, {
+        //     to: { y: el.y },
+        //     duration: duration * 0.6,
+        //     ease: JC.Tween.Bounce.Out
+        //   }],
+        //   wait: Math.random() * 1e3,
+        //   infinite: true,
+        // });
+
         DOC.adds(el);
       }
     })

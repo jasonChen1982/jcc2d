@@ -27,6 +27,7 @@ export {Container} from './core/Container';
 export {Sprite} from './core/Sprite';
 export {Graphics} from './core/Graphics';
 // export {TextFace} from './core/TextFace';
+// export {FilterGroup} from './filters/FilterGroup';
 // export {BlurFilter} from './filters/BlurFilter';
 
 export {Stage} from './core/Stage';
