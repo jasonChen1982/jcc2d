@@ -151,6 +151,25 @@ coin.runners({             // combination multiple animation and run one by one
 would like to know more information please look in [documentation][documentation], or quick start a living edit in web [runing man][quick-start].
 
 ## Documentation
+
+`jcc2d` source code is written in `ES6 Modules` and build to `UMD` bundle. so if you want use it in `ES6 Modules`, you can `import` the source code direct
+
+```js
+import * as JC from 'jcc2d/src/index.js';
+// or 
+import * as JC from 'jcc2d/src/index.light.js';
+// or import modules as you need
+import { Stage, Sprite, Graphics } from 'jcc2d/src/index.js';
+```
+
+and if you just want use `UMD` bundle, you can use `require` method
+
+```js
+const JC = require('jcc2d');
+// or require a lightweight jcc2d
+const JC = require('jcc2d/build/jcc2d.light.js');
+```
+
 [documentation][documentation]
 
 ## Examples

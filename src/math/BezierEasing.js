@@ -116,7 +116,6 @@ function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
     if (currentSlope === 0.0) {
       return aGuessT;
     }
-    if (currentSlope < 0) console.log(currentSlope);
     let currentX = calcBezier(aGuessT, mX1, mX2) - aX;
     aGuessT -= currentX / currentSlope;
   }
