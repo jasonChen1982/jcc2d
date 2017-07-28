@@ -140,7 +140,7 @@ Curve.prototype = {
     let t1 = t - delta;
     let t2 = t + delta;
 
-    // TODO: svg and bezier accept out of [0, 1] value
+    // NOTE: svg and bezier accept out of [0, 1] value
     // if ( t1 < 0 ) t1 = 0;
     // if ( t2 > 1 ) t2 = 1;
 

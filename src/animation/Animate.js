@@ -65,11 +65,9 @@ Animate.prototype.update = function(snippet) {
     return;
   }
 
-  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
-
-  const pose = this.nextPose();
-  this.emit('update', pose, this.progress / this.duration);
-  // if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+  this.progress += snippetCache;
+  let isEnd = false;
+  const progressCache = this.progress;
 
   if (this.spill()) {
     if (this.repeatsCut > 0 || this.infinite) {
@@ -77,14 +75,24 @@ Animate.prototype.update = function(snippet) {
       this.delayCut = this.delay;
       if (this.alternate) {
         this.direction *= -1;
+        this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
       } else {
         this.direction = 1;
-        this.progress = 0;
+        this.progress = Utils.euclideanModulo(this.progress, this.duration);
       }
     } else {
-      if (!this.resident) this.living = false;
-      this.emit('compelete', pose);
+      isEnd = true;
     }
+  }
+
+  let pose = this.nextPose();
+  this.emit('update', pose, this.progress / this.duration);
+
+  if (isEnd) {
+    if (!this.resident) this.living = false;
+    this.progress = Utils.clamp(progressCache, 0, this.duration);
+    pose = this.nextPose();
+    this.emit('compelete', pose);
   }
   return pose;
 };

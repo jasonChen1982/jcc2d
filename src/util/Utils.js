@@ -177,12 +177,29 @@ export const Utils = {
    * @static
    * @method
    * @memberof JC.Utils
-   * @param {Number} n 索引
+   * @param {Number} n 当前值
    * @param {Number} m 模
-   * @return {Number} 映射到模长内到索引
+   * @return {Number} 映射到模长内的值
    */
   euclideanModulo: function(n, m) {
     return ((n % m) + m) % m;
+  },
+
+  /**
+   * 边界值域镜像
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} n 当前值
+   * @param {Number} min 值域下边界
+   * @param {Number} max 值域上边界
+   * @return {Number} 值域内反射到的值
+   */
+  codomainBounce: function(n, min, max) {
+    if (n < min) return 2 * min - n;
+    if (n > max) return 2 * max - n;
+    return n;
   },
 
   /**

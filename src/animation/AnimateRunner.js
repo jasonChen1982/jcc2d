@@ -112,6 +112,7 @@ AnimateRunner.prototype.update = function(snippet) {
  * @return {boolean}
  */
 AnimateRunner.prototype.spill = function() {
+  // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
   const bottomSpill = this.cursor <= 0 && this.direction === -1;
   const topSpill = this.cursor >= this.length && this.direction === 1;
   return bottomSpill || topSpill;
