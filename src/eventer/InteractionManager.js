@@ -312,7 +312,8 @@ InteractionManager.prototype.dispatchEvent = function(
   event
 ) {
   if (!event.cancleBubble) {
-    event.target = displayObject;
+    // TODO: 如果有设置 target 了那就不要再设置了，还要确认是不是可以直接去掉
+    if (!event.target) event.target = displayObject;
     event.type = eventString;
 
     displayObject.emit(eventString, event);
