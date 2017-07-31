@@ -85,10 +85,11 @@ Animate.prototype.update = function(snippet) {
     }
   }
 
-  let pose = this.nextPose();
-  this.emit('update', pose, this.progress / this.duration);
-
-  if (isEnd) {
+  let pose;
+  if (!isEnd) {
+    pose = this.nextPose();
+    this.emit('update', pose, this.progress / this.duration);
+  } else {
     if (!this.resident) this.living = false;
     this.progress = Utils.clamp(progressCache, 0, this.duration);
     pose = this.nextPose();
