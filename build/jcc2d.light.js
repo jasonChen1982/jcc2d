@@ -210,12 +210,29 @@ var Utils = {
    * @static
    * @method
    * @memberof JC.Utils
-   * @param {Number} n 索引
+   * @param {Number} n 当前值
    * @param {Number} m 模
-   * @return {Number} 映射到模长内到索引
+   * @return {Number} 映射到模长内的值
    */
   euclideanModulo: function euclideanModulo(n, m) {
     return (n % m + m) % m;
+  },
+
+  /**
+   * 边界值域镜像
+   *
+   * @static
+   * @method
+   * @memberof JC.Utils
+   * @param {Number} n 当前值
+   * @param {Number} min 值域下边界
+   * @param {Number} max 值域上边界
+   * @return {Number} 值域内反射到的值
+   */
+  codomainBounce: function codomainBounce(n, min, max) {
+    if (n < min) return 2 * min - n;
+    if (n > max) return 2 * max - n;
+    return n;
   },
 
   /**
@@ -752,7 +769,6 @@ function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
     if (currentSlope === 0.0) {
       return aGuessT;
     }
-    if (currentSlope < 0) console.log(currentSlope);
     var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
     aGuessT -= currentX / currentSlope;
   }
@@ -1040,11 +1056,9 @@ Animate.prototype.update = function (snippet) {
     return;
   }
 
-  this.progress = Utils.clamp(this.progress + snippetCache, 0, this.duration);
-
-  var pose = this.nextPose();
-  this.emit('update', pose, this.progress / this.duration);
-  // if (this.onUpdate) this.onUpdate(pose, this.progress / this.duration);
+  this.progress += snippetCache;
+  var isEnd = false;
+  var progressCache = this.progress;
 
   if (this.spill()) {
     if (this.repeatsCut > 0 || this.infinite) {
@@ -1052,14 +1066,25 @@ Animate.prototype.update = function (snippet) {
       this.delayCut = this.delay;
       if (this.alternate) {
         this.direction *= -1;
+        this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
       } else {
         this.direction = 1;
-        this.progress = 0;
+        this.progress = Utils.euclideanModulo(this.progress, this.duration);
       }
     } else {
-      if (!this.resident) this.living = false;
-      this.emit('compelete', pose);
+      isEnd = true;
     }
+  }
+
+  var pose = void 0;
+  if (!isEnd) {
+    pose = this.nextPose();
+    this.emit('update', pose, this.progress / this.duration);
+  } else {
+    if (!this.resident) this.living = false;
+    this.progress = Utils.clamp(progressCache, 0, this.duration);
+    pose = this.nextPose();
+    this.emit('compelete', pose);
   }
   return pose;
 };
@@ -1321,7 +1346,7 @@ Curve.prototype = {
     var t1 = t - delta;
     var t2 = t + delta;
 
-    // TODO: svg and bezier accept out of [0, 1] value
+    // NOTE: svg and bezier accept out of [0, 1] value
     // if ( t1 < 0 ) t1 = 0;
     // if ( t2 > 1 ) t2 = 1;
 
@@ -1840,6 +1865,7 @@ AnimateRunner.prototype.update = function (snippet) {
  * @return {boolean}
  */
 AnimateRunner.prototype.spill = function () {
+  // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
   var bottomSpill = this.cursor <= 0 && this.direction === -1;
   var topSpill = this.cursor >= this.length && this.direction === 1;
   return bottomSpill || topSpill;
@@ -4495,7 +4521,8 @@ InteractionManager.prototype.processInteractive = function (object, event, func,
 
 InteractionManager.prototype.dispatchEvent = function (displayObject, eventString, event) {
   if (!event.cancleBubble) {
-    event.target = displayObject;
+    // TODO: 如果有设置 target 了那就不要再设置了，还要确认是不是可以直接去掉
+    if (!event.target) event.target = displayObject;
     event.type = eventString;
 
     displayObject.emit(eventString, event);
