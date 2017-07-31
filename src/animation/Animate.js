@@ -93,7 +93,7 @@ Animate.prototype.update = function(snippet) {
     if (!this.resident) this.living = false;
     this.progress = Utils.clamp(progressCache, 0, this.duration);
     pose = this.nextPose();
-    this.emit('compelete', pose);
+    this.emit('compelete', pose, Math.abs(progressCache - this.progress));
   }
   return pose;
 };

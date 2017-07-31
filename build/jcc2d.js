@@ -1084,7 +1084,7 @@ Animate.prototype.update = function (snippet) {
     if (!this.resident) this.living = false;
     this.progress = Utils.clamp(progressCache, 0, this.duration);
     pose = this.nextPose();
-    this.emit('compelete', pose);
+    this.emit('compelete', pose, Math.abs(progressCache - this.progress));
   }
   return pose;
 };
@@ -1776,11 +1776,15 @@ AnimateRunner.prototype = Object.create(Animate.prototype);
 
 /**
  * 更新下一个`runner`
+ * @param {Object} _
+ * @param {Number} time
  * @private
  */
-AnimateRunner.prototype.nextRunner = function () {
+AnimateRunner.prototype.nextRunner = function (_, time) {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
+  this.timeSnippet = time;
+  console.log(time);
 };
 
 /**
@@ -1814,6 +1818,10 @@ AnimateRunner.prototype.initRunner = function () {
 AnimateRunner.prototype.nextPose = function (snippetCache) {
   if (!this.queues[this.cursor] && this.runners[this.cursor]) {
     this.initRunner();
+  }
+  if (this.timeSnippet >= 0) {
+    snippetCache += this.timeSnippet;
+    this.timeSnippet = 0;
   }
   return this.queues[this.cursor].update(snippetCache);
 };
@@ -1866,9 +1874,8 @@ AnimateRunner.prototype.update = function (snippet) {
  */
 AnimateRunner.prototype.spill = function () {
   // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
-  var bottomSpill = this.cursor <= 0 && this.direction === -1;
-  var topSpill = this.cursor >= this.length && this.direction === 1;
-  return bottomSpill || topSpill;
+  var topSpill = this.cursor >= this.length;
+  return topSpill;
 };
 
 /**
