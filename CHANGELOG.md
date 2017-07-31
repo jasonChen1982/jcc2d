@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.0"></a>
+# [1.5.0](https://github.com/jasonChen1982/jcc2d/compare/v1.4.0...v1.5.0) (2017-07-31)
+
+
+### Features
+
+* **animate:** adjust animate update and complete ([1904580](https://github.com/jasonChen1982/jcc2d/commit/1904580))
+* **animate-deviation:** fixed animate time spill ([47499a0](https://github.com/jasonChen1982/jcc2d/commit/47499a0))
+* **event-target:** fixed event target ([7db7f6a](https://github.com/jasonChen1982/jcc2d/commit/7db7f6a)), closes [#2](https://github.com/jasonChen1982/jcc2d/issues/2)
+* **tween:** adjust tween key ([6c00c7c](https://github.com/jasonChen1982/jcc2d/commit/6c00c7c))
+
+
+
 <a name="1.4.0"></a>
 # [1.4.0](https://github.com/jasonChen1982/jcc2d/compare/v1.4.0-beta.0...v1.4.0) (2017-07-15)
 
