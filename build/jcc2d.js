@@ -1784,7 +1784,6 @@ AnimateRunner.prototype.nextRunner = function (_, time) {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
   this.timeSnippet = time;
-  console.log(time);
 };
 
 /**
@@ -2935,7 +2934,7 @@ DisplayObject.prototype.setArea = function (shape, clock) {
  * @return {Boolean} 是否包含该点
  */
 DisplayObject.prototype.contains = function (global) {
-  if (this.eventArea === null) return false;
+  if (this.eventArea === null || !this.visible) return false;
   var point = new Point();
   this.worldTransform.applyInverse(global, point);
   return this.eventArea && this.eventArea.contains(point.x, point.y);

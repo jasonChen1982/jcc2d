@@ -31,7 +31,6 @@ AnimateRunner.prototype.nextRunner = function(_, time) {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
   this.timeSnippet = time;
-  console.log(time);
 };
 
 /**
