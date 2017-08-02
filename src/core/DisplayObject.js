@@ -221,7 +221,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -236,7 +236,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -257,7 +257,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){}, // 动画更新回调
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  * @param {Object} options 动画配置参数
@@ -271,7 +271,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -290,7 +290,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -303,7 +303,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -326,7 +326,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -337,7 +337,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */

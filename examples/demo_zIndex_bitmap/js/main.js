@@ -129,7 +129,7 @@ var loadBox = JC.loaderUtil({
   pic12: './images/pic12.jpg'
 });
 
-loadBox.on('compelete', function () {
+loadBox.on('complete', function () {
   sphere = new Sphere();
 
   sphere.createVertex(DOC, ['pic1', 'pic2', 'pic3', 'pic4', 'pic5', 'pic6', 'pic7', 'pic8', 'pic9', 'pic10', 'pic11', 'pic12']);

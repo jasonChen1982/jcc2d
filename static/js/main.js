@@ -265,7 +265,7 @@ particleDOC.animate({
   },
   duration: 1000,
   ease: JC.Tween.Back.Out,
-  onCompelete: function () {
+  onComplete: function () {
     shapeIn = true;
     if (fontLoaded && shapeIn) logoIn();
   }
@@ -381,7 +381,7 @@ function logoIn() {
       duration: 800,
       wait: i * 100
     });
-    if (i === textDOC.length - 1) animate.on('compelete', function () {
+    if (i === textDOC.length - 1) animate.on('complete', function () {
       miniText.animate({
         to: {
           y: JC.UI.RTP(.5),

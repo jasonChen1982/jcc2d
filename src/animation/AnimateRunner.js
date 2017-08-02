@@ -43,7 +43,7 @@ AnimateRunner.prototype.initRunner = function() {
   runner.infinite = false;
   runner.resident = true;
   runner.element = this.element;
-  // runner.onCompelete = this.nextRunner.bind(this);
+  // runner.onComplete = this.nextRunner.bind(this);
   let animate = null;
   if (runner.path) {
     animate = new PathMotion(runner);
@@ -51,7 +51,7 @@ AnimateRunner.prototype.initRunner = function() {
     animate = new Transition(runner);
   }
   if (animate !== null) {
-    animate.on('compelete', this.nextRunner.bind(this));
+    animate.on('complete', this.nextRunner.bind(this));
     this.queues.push(animate);
   }
 };
@@ -107,8 +107,8 @@ AnimateRunner.prototype.update = function(snippet) {
       this.cursor = 0;
     } else {
       if (!this.resident) this.living = false;
-      // if (this.onCompelete) this.onCompelete(pose);
-      this.emit('compelete', pose);
+      // if (this.onComplete) this.onComplete(pose);
+      this.emit('complete', pose);
     }
   }
   return pose;

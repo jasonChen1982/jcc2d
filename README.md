@@ -38,7 +38,7 @@ const ani = new JC.ParserAnimation({
   // infinite: true, // infinite loop
   // alternate: true, // alternate
   onUpdate() {},
-  onCompelete() {
+  onComplete() {
     console.log(this.element);
   },
 });
@@ -53,7 +53,7 @@ coin.keyFrames({
   // infinite: true, // infinite loop
   // alternate: true, // alternate
   onUpdate() {},
-  onCompelete() {
+  onComplete() {
     console.log(this.element);
   },
 });
@@ -82,12 +82,12 @@ const timeline = ball.animate({
   alternate: true, // repeats with alternate
   duration: 1000, // duration
   onUpdate: function(state,rate){}, // onUpdate callback
-  onCompelete: function(){ console.log('end'); } // onCompelete callback
+  onComplete: function(){ console.log('end'); } // onComplete callback
 });
 timeline.pause(); // pause animation progress
 timeline.restart(); // restart animation progress, use with pause
-timeline.stop(); // stop animation to end, will trigger onCompelete callback
-timeline.cancle(); // cancle animation right now, will not trigger onCompelete callback
+timeline.stop(); // stop animation to end, will trigger onComplete callback
+timeline.cancle(); // cancle animation right now, will not trigger onComplete callback
 timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed * 0.5
 ```
 

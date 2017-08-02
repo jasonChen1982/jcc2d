@@ -165,12 +165,12 @@ Loader.prototype.load = function(srcMap) {
     texture.on('load', function() {
       This._received++;
       This.emit('update');
-      if (This._received + This._failed >= This._total) This.emit('compelete');
+      if (This._received + This._failed >= This._total) This.emit('complete');
     });
     texture.on('error', function() {
       This._failed++;
       This.emit('update');
-      if (This._received + This._failed >= This._total) This.emit('compelete');
+      if (This._received + This._failed >= This._total) This.emit('complete');
     });
   }
   return this;

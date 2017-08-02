@@ -19,7 +19,7 @@ function MovieClip(element, options) {
   this.element = element;
   this.living = false;
 
-  // this.onCompelete = null;
+  // this.onComplete = null;
   // this.onUpdate = null;
 
   this.infinite = false;
@@ -75,7 +75,7 @@ MovieClip.prototype.update = function(snippet) {
     } else {
       this.living = false;
       this.index = this.fillMode;
-      this.emit('compelete');
+      this.emit('complete');
     }
   }
 };
@@ -114,7 +114,7 @@ MovieClip.prototype.getFrame = function() {
  */
 MovieClip.prototype.playMovie = function(options) {
   // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
-  this.off('compelete');
+  this.off('complete');
   const movie = this.format(options.movie);
   if (!Utils.isArray(movie)) return;
   this.frames = movie;
@@ -126,10 +126,10 @@ MovieClip.prototype.playMovie = function(options) {
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
-  if (options.onCompelete) {
+  if (options.onComplete) {
     const This = this;
-    this.once('compelete', function() {
-      options.onCompelete.call(This);
+    this.once('complete', function() {
+      options.onComplete.call(This);
     });
   }
   return this;
@@ -167,7 +167,7 @@ MovieClip.prototype.format = function(movie) {
         conf = movie.next;
       }
       if (Utils.isString(conf.movie)) {
-        this.once('compelete', function() {
+        this.once('complete', function() {
           This.playMovie(conf);
         });
       }

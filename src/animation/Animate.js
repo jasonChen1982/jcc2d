@@ -17,7 +17,7 @@ function Animate(options) {
   this.living = true;
   this.resident = options.resident || false;
 
-  // this.onCompelete = options.onCompelete || null;
+  // this.onComplete = options.onComplete || null;
   // this.onUpdate = options.onUpdate || null;
 
   this.infinite = options.infinite || false;
@@ -29,8 +29,8 @@ function Animate(options) {
   options.timeScale :
   1;
 
-  if (options.onCompelete) {
-    this.on('compelete', options.onCompelete.bind(this));
+  if (options.onComplete) {
+    this.on('complete', options.onComplete.bind(this));
   }
   if (options.onUpdate) {
     this.on('update', options.onUpdate.bind(this));
@@ -93,7 +93,7 @@ Animate.prototype.update = function(snippet) {
     if (!this.resident) this.living = false;
     this.progress = Utils.clamp(progressCache, 0, this.duration);
     pose = this.nextPose();
-    this.emit('compelete', pose, Math.abs(progressCache - this.progress));
+    this.emit('complete', pose, Math.abs(progressCache - this.progress));
   }
   return pose;
 };
