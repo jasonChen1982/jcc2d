@@ -114,6 +114,8 @@
             
                 <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
             
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
                 <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
             
                 <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
@@ -282,17 +284,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="JC.BlurFilter#autoUpdateBuffer"><a href="JC.BlurFilter.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
-            
                 <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
             
                 <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
             
                 <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
-            
-                <li data-name="JC.BlurFilter#needUpdateBuffer"><a href="JC.BlurFilter.html#needUpdateBuffer">needUpdateBuffer</a></li>
-            
-                <li data-name="JC.BlurFilter#padding"><a href="JC.BlurFilter.html#padding">padding</a></li>
             
                 <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
             
@@ -342,6 +338,25 @@
                 <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
             
                 <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -648,6 +663,37 @@
                 <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
             
                 <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1544,11 +1590,15 @@ AnimateRunner.prototype = Object.create(Animate.prototype);
 
 /**
  * 更新下一个`runner`
+ * @param {Object} _
+ * @param {Number} time
  * @private
  */
-AnimateRunner.prototype.nextRunner = function() {
+AnimateRunner.prototype.nextRunner = function(_, time) {
   this.queues[this.cursor].init();
   this.cursor += this.direction;
+  this.timeSnippet = time;
+  console.log(time);
 };
 
 /**
@@ -1560,7 +1610,7 @@ AnimateRunner.prototype.initRunner = function() {
   runner.infinite = false;
   runner.resident = true;
   runner.element = this.element;
-  // runner.onCompelete = this.nextRunner.bind(this);
+  // runner.onComplete = this.nextRunner.bind(this);
   let animate = null;
   if (runner.path) {
     animate = new PathMotion(runner);
@@ -1568,7 +1618,7 @@ AnimateRunner.prototype.initRunner = function() {
     animate = new Transition(runner);
   }
   if (animate !== null) {
-    animate.on('compelete', this.nextRunner.bind(this));
+    animate.on('complete', this.nextRunner.bind(this));
     this.queues.push(animate);
   }
 };
@@ -1582,6 +1632,10 @@ AnimateRunner.prototype.initRunner = function() {
 AnimateRunner.prototype.nextPose = function(snippetCache) {
   if (!this.queues[this.cursor] &amp;&amp; this.runners[this.cursor]) {
     this.initRunner();
+  }
+  if (this.timeSnippet >= 0) {
+    snippetCache += this.timeSnippet;
+    this.timeSnippet = 0;
   }
   return this.queues[this.cursor].update(snippetCache);
 };
@@ -1620,8 +1674,8 @@ AnimateRunner.prototype.update = function(snippet) {
       this.cursor = 0;
     } else {
       if (!this.resident) this.living = false;
-      // if (this.onCompelete) this.onCompelete(pose);
-      this.emit('compelete', pose);
+      // if (this.onComplete) this.onComplete(pose);
+      this.emit('complete', pose);
     }
   }
   return pose;
@@ -1633,9 +1687,9 @@ AnimateRunner.prototype.update = function(snippet) {
  * @return {boolean}
  */
 AnimateRunner.prototype.spill = function() {
-  const bottomSpill = this.cursor &lt;= 0 &amp;&amp; this.direction === -1;
-  const topSpill = this.cursor >= this.length &amp;&amp; this.direction === 1;
-  return bottomSpill || topSpill;
+  // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
+  const topSpill = this.cursor >= this.length;
+  return topSpill;
 };
 
 
@@ -1652,7 +1706,7 @@ export {AnimateRunner};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 21:01:30 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>

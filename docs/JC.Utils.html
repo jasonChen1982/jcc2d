@@ -114,6 +114,8 @@
             
                 <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
             
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
                 <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
             
                 <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
@@ -282,17 +284,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="JC.BlurFilter#autoUpdateBuffer"><a href="JC.BlurFilter.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
-            
                 <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
             
                 <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
             
                 <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
-            
-                <li data-name="JC.BlurFilter#needUpdateBuffer"><a href="JC.BlurFilter.html#needUpdateBuffer">needUpdateBuffer</a></li>
-            
-                <li data-name="JC.BlurFilter#padding"><a href="JC.BlurFilter.html#padding">padding</a></li>
             
                 <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
             
@@ -342,6 +338,25 @@
                 <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
             
                 <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -648,6 +663,37 @@
                 <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
             
                 <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1685,7 +1731,7 @@
     
         
         <div class="tag-source">
-            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line199">line 199</a>
+            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line216">line 216</a>
         </div>
         
     </div>
@@ -1855,6 +1901,197 @@
                     
             </td>
             <td class="description last">闭合后的值</td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id=".codomainBounce">
+            
+            <span class="type-signature static">static</span>JC.Utils.codomainBounce<span class="signature">(n, min, max)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Number}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line199">line 199</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>边界值域镜像</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>当前值</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>min</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>值域下边界</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>max</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>值域上边界</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        Number
+                        
+                    
+            </td>
+            <td class="description last">值域内反射到的值</td>
         </tr>
     
     </tbody>
@@ -2079,7 +2316,7 @@
             
             <td class="description last">
                 
-                <p>索引</p></td>
+                <p>当前值</p></td>
         </tr>
 	
 	
@@ -2167,7 +2404,7 @@
                         
                     
             </td>
-            <td class="description last">映射到模长内到索引</td>
+            <td class="description last">映射到模长内的值</td>
         </tr>
     
     </tbody>
@@ -3204,7 +3441,7 @@
     
         
         <div class="tag-source">
-            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line214">line 214</a>
+            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line231">line 231</a>
         </div>
         
     </div>
@@ -3569,7 +3806,7 @@
     
         
         <div class="tag-source">
-            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line250">line 250</a>
+            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line267">line 267</a>
         </div>
         
     </div>
@@ -3760,7 +3997,7 @@
     
         
         <div class="tag-source">
-            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line232">line 232</a>
+            <a href="util_Utils.js.html">util/Utils.js</a>, <a href="util_Utils.js.html#line249">line 249</a>
         </div>
         
     </div>
@@ -3957,7 +4194,7 @@
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 21:01:30 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>

@@ -114,6 +114,8 @@
             
                 <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
             
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
                 <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
             
                 <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
@@ -282,17 +284,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="JC.BlurFilter#autoUpdateBuffer"><a href="JC.BlurFilter.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
-            
                 <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
             
                 <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
             
                 <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
-            
-                <li data-name="JC.BlurFilter#needUpdateBuffer"><a href="JC.BlurFilter.html#needUpdateBuffer">needUpdateBuffer</a></li>
-            
-                <li data-name="JC.BlurFilter#padding"><a href="JC.BlurFilter.html#padding">padding</a></li>
             
                 <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
             
@@ -342,6 +338,25 @@
                 <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
             
                 <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -648,6 +663,37 @@
                 <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
             
                 <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1742,7 +1788,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -1757,7 +1803,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -1772,13 +1818,13 @@ DisplayObject.prototype.animate = function(options, clear) {
  * display.motion({
  *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
  *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: JC.Tween.Ease.beizer(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){}, // 动画更新回调
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  * @param {Object} options 动画配置参数
@@ -1792,7 +1838,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -1811,7 +1857,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -1824,7 +1870,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -1847,7 +1893,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -1858,7 +1904,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -2048,7 +2094,7 @@ export {DisplayObject};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 21:01:30 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>

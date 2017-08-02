@@ -114,6 +114,8 @@
             
                 <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
             
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
                 <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
             
                 <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
@@ -282,17 +284,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="JC.BlurFilter#autoUpdateBuffer"><a href="JC.BlurFilter.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
-            
                 <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
             
                 <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
             
                 <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
-            
-                <li data-name="JC.BlurFilter#needUpdateBuffer"><a href="JC.BlurFilter.html#needUpdateBuffer">needUpdateBuffer</a></li>
-            
-                <li data-name="JC.BlurFilter#padding"><a href="JC.BlurFilter.html#padding">padding</a></li>
             
                 <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
             
@@ -342,6 +338,25 @@
                 <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
             
                 <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -648,6 +663,37 @@
                 <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
             
                 <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1540,7 +1586,7 @@ function MovieClip(element, options) {
   this.element = element;
   this.living = false;
 
-  // this.onCompelete = null;
+  // this.onComplete = null;
   // this.onUpdate = null;
 
   this.infinite = false;
@@ -1596,7 +1642,7 @@ MovieClip.prototype.update = function(snippet) {
     } else {
       this.living = false;
       this.index = this.fillMode;
-      this.emit('compelete');
+      this.emit('complete');
     }
   }
 };
@@ -1635,7 +1681,7 @@ MovieClip.prototype.getFrame = function() {
  */
 MovieClip.prototype.playMovie = function(options) {
   // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
-  this.off('compelete');
+  this.off('complete');
   const movie = this.format(options.movie);
   if (!Utils.isArray(movie)) return;
   this.frames = movie;
@@ -1647,10 +1693,10 @@ MovieClip.prototype.playMovie = function(options) {
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
-  if (options.onCompelete) {
+  if (options.onComplete) {
     const This = this;
-    this.once('compelete', function() {
-      options.onCompelete.call(This);
+    this.once('complete', function() {
+      options.onComplete.call(This);
     });
   }
   return this;
@@ -1688,7 +1734,7 @@ MovieClip.prototype.format = function(movie) {
         conf = movie.next;
       }
       if (Utils.isString(conf.movie)) {
-        this.once('compelete', function() {
+        this.once('complete', function() {
           This.playMovie(conf);
         });
       }
@@ -1741,7 +1787,7 @@ export {MovieClip};
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 21:01:30 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>

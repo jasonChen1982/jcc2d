@@ -114,6 +114,8 @@
             
                 <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
             
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
                 <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
             
                 <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
@@ -282,17 +284,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="JC.BlurFilter#autoUpdateBuffer"><a href="JC.BlurFilter.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
-            
                 <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
             
                 <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
             
                 <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
-            
-                <li data-name="JC.BlurFilter#needUpdateBuffer"><a href="JC.BlurFilter.html#needUpdateBuffer">needUpdateBuffer</a></li>
-            
-                <li data-name="JC.BlurFilter#padding"><a href="JC.BlurFilter.html#padding">padding</a></li>
             
                 <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
             
@@ -342,6 +338,25 @@
                 <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
             
                 <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -648,6 +663,37 @@
                 <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
             
                 <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1551,30 +1597,30 @@ export const Tween = {
   Ease: {
 
     In: (function() {
-      const beizer = new BezierEasing(.42, 0, 1, 1);
+      const bezier = new BezierEasing(.42, 0, 1, 1);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     })(),
 
     Out: (function() {
-      const beizer = new BezierEasing(0, 0, .58, 1);
+      const bezier = new BezierEasing(0, 0, .58, 1);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     })(),
 
     InOut: (function() {
-      const beizer = new BezierEasing(.42, 0, .58, 1);
+      const bezier = new BezierEasing(.42, 0, .58, 1);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     })(),
 
-    Beizer: function(x1, y1, x2, y2) {
-      const beizer = new BezierEasing(x1, y1, x2, y2);
+    Bezier: function(x1, y1, x2, y2) {
+      const bezier = new BezierEasing(x1, y1, x2, y2);
       return function(k) {
-        return beizer.get(k);
+        return bezier.get(k);
       };
     },
 
@@ -1666,13 +1712,13 @@ export const Tween = {
     },
   },
 
-  Utils: {
+  // Utils: {
 
-    Linear: function(p0, p1, t) {
-      return (p1 - p0) * t + p0;
-    },
+  //   Linear: function(p0, p1, t) {
+  //     return (p1 - p0) * t + p0;
+  //   },
 
-  },
+  // },
 
 };
 </code></pre>
@@ -1687,7 +1733,7 @@ export const Tween = {
         
 
         <footer>
-            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 21:01:30 GMT+0800 (CST)
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>

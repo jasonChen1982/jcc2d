@@ -114,6 +114,8 @@
             
                 <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
             
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
                 <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
             
                 <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
@@ -282,17 +284,11 @@
             
             <span class="subtitle">Members</span>
             
-                <li data-name="JC.BlurFilter#autoUpdateBuffer"><a href="JC.BlurFilter.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
-            
                 <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
             
                 <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
             
                 <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
-            
-                <li data-name="JC.BlurFilter#needUpdateBuffer"><a href="JC.BlurFilter.html#needUpdateBuffer">needUpdateBuffer</a></li>
-            
-                <li data-name="JC.BlurFilter#padding"><a href="JC.BlurFilter.html#padding">padding</a></li>
             
                 <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
             
@@ -342,6 +338,25 @@
                 <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
             
                 <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -648,6 +663,37 @@
                 <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
             
                 <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -1561,7 +1607,7 @@ const ani = new JC.ParserAnimation({
   // infinite: true, // infinite loop
   // alternate: true, // alternate
   onUpdate() {},
-  onCompelete() {
+  onComplete() {
     console.log(this.element);
   },
 });
@@ -1576,7 +1622,7 @@ coin.keyFrames({
   // infinite: true, // infinite loop
   // alternate: true, // alternate
   onUpdate() {},
-  onCompelete() {
+  onComplete() {
     console.log(this.element);
   },
 });</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">view demo</a></p>
@@ -1596,12 +1642,12 @@ const timeline = ball.animate({
   alternate: true, // repeats with alternate
   duration: 1000, // duration
   onUpdate: function(state,rate){}, // onUpdate callback
-  onCompelete: function(){ console.log('end'); } // onCompelete callback
+  onComplete: function(){ console.log('end'); } // onComplete callback
 });
 timeline.pause(); // pause animation progress
 timeline.restart(); // restart animation progress, use with pause
-timeline.stop(); // stop animation to end, will trigger onCompelete callback
-timeline.cancle(); // cancle animation right now, will not trigger onCompelete callback
+timeline.stop(); // stop animation to end, will trigger onComplete callback
+timeline.cancle(); // cancle animation right now, will not trigger onComplete callback
 timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed * 0.5</code></pre><h2>Display animation property</h2><table>
 <thead>
 <tr>
@@ -1663,12 +1709,20 @@ coin.motion({
 coin.runners({             // combination multiple animation and run one by one
   runners: [
     {from: {}, to: {}, ease: JC.Tween.Back.In, ...},
-    {path: new JC.BezierCurve([...]), ease: JC.Tween.Ease.Beizer(0, 0, 1, 1), ...},
+    {path: new JC.BezierCurve([...]), ease: JC.Tween.Ease.Bezier(0, 0, 1, 1), ...},
     {to: {}, ease: JC.Tween.Back.Out, ...},
   ],
   ...       // other options
 });</code></pre><p>would like to know more information please look in <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a>, or quick start a living edit in web <a target="_blank" href="http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010" title="quick start demo">runing man</a>.</p>
-<h2>Documentation</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a></p>
+<h2>Documentation</h2><p><code>jcc2d</code> source code is written in <code>ES6 Modules</code> and build to <code>UMD</code> bundle. so if you want use it in <code>ES6 Modules</code>, you can <code>import</code> the source code direct</p>
+<pre class="prettyprint source lang-js"><code>import * as JC from 'jcc2d/src/index.js';
+// or 
+import * as JC from 'jcc2d/src/index.light.js';
+// or import modules as you need
+import { Stage, Sprite, Graphics } from 'jcc2d/src/index.js';</code></pre><p>and if you just want use <code>UMD</code> bundle, you can use <code>require</code> method</p>
+<pre class="prettyprint source lang-js"><code>const JC = require('jcc2d');
+// or require a lightweight jcc2d
+const JC = require('jcc2d/build/jcc2d.light.js');</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a></p>
 <h2>Examples</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples" title="jcc2d examples page">examples</a></p>
 <h2>Changelog</h2><p><a target="_blank" href="https://github.com/jasonChen1982/jcc2d/blob/master/Changelog.md" title="change log">changelog</a></p>
 <h2>License</h2><p><a target="_blank" href="http://opensource.org/licenses/MIT">MIT</a></p></article>
@@ -1682,7 +1736,7 @@ coin.runners({             // combination multiple animation and run one by one
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Jul 12 2017 21:01:30 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
         </footer>
     </div>
 </div>
