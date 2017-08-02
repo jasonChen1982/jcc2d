@@ -1010,7 +1010,7 @@ function Animate(options) {
   this.living = true;
   this.resident = options.resident || false;
 
-  // this.onCompelete = options.onCompelete || null;
+  // this.onComplete = options.onComplete || null;
   // this.onUpdate = options.onUpdate || null;
 
   this.infinite = options.infinite || false;
@@ -1020,8 +1020,8 @@ function Animate(options) {
   this.wait = options.wait || 0;
   this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
 
-  if (options.onCompelete) {
-    this.on('compelete', options.onCompelete.bind(this));
+  if (options.onComplete) {
+    this.on('complete', options.onComplete.bind(this));
   }
   if (options.onUpdate) {
     this.on('update', options.onUpdate.bind(this));
@@ -1084,7 +1084,7 @@ Animate.prototype.update = function (snippet) {
     if (!this.resident) this.living = false;
     this.progress = Utils.clamp(progressCache, 0, this.duration);
     pose = this.nextPose();
-    this.emit('compelete', pose, Math.abs(progressCache - this.progress));
+    this.emit('complete', pose, Math.abs(progressCache - this.progress));
   }
   return pose;
 };
@@ -1796,7 +1796,7 @@ AnimateRunner.prototype.initRunner = function () {
   runner.infinite = false;
   runner.resident = true;
   runner.element = this.element;
-  // runner.onCompelete = this.nextRunner.bind(this);
+  // runner.onComplete = this.nextRunner.bind(this);
   var animate = null;
   if (runner.path) {
     animate = new PathMotion(runner);
@@ -1804,7 +1804,7 @@ AnimateRunner.prototype.initRunner = function () {
     animate = new Transition(runner);
   }
   if (animate !== null) {
-    animate.on('compelete', this.nextRunner.bind(this));
+    animate.on('complete', this.nextRunner.bind(this));
     this.queues.push(animate);
   }
 };
@@ -1860,8 +1860,8 @@ AnimateRunner.prototype.update = function (snippet) {
       this.cursor = 0;
     } else {
       if (!this.resident) this.living = false;
-      // if (this.onCompelete) this.onCompelete(pose);
-      this.emit('compelete', pose);
+      // if (this.onComplete) this.onComplete(pose);
+      this.emit('complete', pose);
     }
   }
   return pose;
@@ -2179,12 +2179,12 @@ Loader.prototype.load = function (srcMap) {
     texture.on('load', function () {
       This._received++;
       This.emit('update');
-      if (This._received + This._failed >= This._total) This.emit('compelete');
+      if (This._received + This._failed >= This._total) This.emit('complete');
     });
     texture.on('error', function () {
       This._failed++;
       This.emit('update');
-      if (This._received + This._failed >= This._total) This.emit('compelete');
+      if (This._received + This._failed >= This._total) This.emit('complete');
     });
   }
   return this;
@@ -2658,7 +2658,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -2673,7 +2673,7 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -2694,7 +2694,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  *   alternate: true, // 偶数次的时候动画回放
  *   duration: 1000, // 动画时长 ms单位 默认 300ms
  *   onUpdate: function(state,rate){}, // 动画更新回调
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  * @param {Object} options 动画配置参数
@@ -2708,7 +2708,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -2727,7 +2727,7 @@ DisplayObject.prototype.motion = function (options, clear) {
  *   infinite: true, // 无限循环动画
  *   alternate: true, // 偶数次的时候动画回放
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -2740,7 +2740,7 @@ DisplayObject.prototype.motion = function (options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -2763,7 +2763,7 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  *   repeats: 10, // 动画运动完后再重复10次
  *   infinite: true, // 无限循环动画
  *   onUpdate: function(state,rate){},
- *   onCompelete: function(){ console.log('end'); } // 动画执行结束回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
  * });
  * ```
  *
@@ -2774,7 +2774,7 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
  * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onCompelete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
  * @return {JC.Animate}
  */
@@ -3513,7 +3513,7 @@ function MovieClip(element, options) {
   this.element = element;
   this.living = false;
 
-  // this.onCompelete = null;
+  // this.onComplete = null;
   // this.onUpdate = null;
 
   this.infinite = false;
@@ -3569,7 +3569,7 @@ MovieClip.prototype.update = function (snippet) {
     } else {
       this.living = false;
       this.index = this.fillMode;
-      this.emit('compelete');
+      this.emit('complete');
     }
   }
 };
@@ -3604,7 +3604,7 @@ MovieClip.prototype.getFrame = function () {
  */
 MovieClip.prototype.playMovie = function (options) {
   // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
-  this.off('compelete');
+  this.off('complete');
   var movie = this.format(options.movie);
   if (!Utils.isArray(movie)) return;
   this.frames = movie;
@@ -3616,10 +3616,10 @@ MovieClip.prototype.playMovie = function (options) {
   this.alternate = options.alternate || false;
   this.repeats = options.repeats || 0;
   this.living = true;
-  if (options.onCompelete) {
+  if (options.onComplete) {
     var This = this;
-    this.once('compelete', function () {
-      options.onCompelete.call(This);
+    this.once('complete', function () {
+      options.onComplete.call(This);
     });
   }
   return this;
@@ -3657,7 +3657,7 @@ MovieClip.prototype.format = function (movie) {
         conf = movie.next;
       }
       if (Utils.isString(conf.movie)) {
-        this.once('compelete', function () {
+        this.once('complete', function () {
           This.playMovie(conf);
         });
       }
@@ -3868,7 +3868,7 @@ Sprite.prototype.renderMe = function (ctx) {
  * @param {boolean} [options.infinite] 动画是否无限循环
  * @param {boolean} [options.alternate] 动画是否交替播放
  * @param {string} [options.prefix] 导出资源的前缀
- * @param {function} [options.onCompelete] 结束回调
+ * @param {function} [options.onComplete] 结束回调
  * @param {function} [options.onUpdate] 更新回调
  */
 function ParserAnimation(options) {
@@ -3886,8 +3886,8 @@ function ParserAnimation(options) {
   this.preParser(this.keyframes.assets, this.keyframes.layers);
   this.parser(this.doc, this.keyframes.layers);
 
-  if (options.onCompelete) {
-    this.timeline[0].on('compelete', options.onCompelete.bind(this));
+  if (options.onComplete) {
+    this.timeline[0].on('complete', options.onComplete.bind(this));
   }
   if (options.onUpdate) {
     this.timeline[0].on('update', options.onUpdate.bind(this));
