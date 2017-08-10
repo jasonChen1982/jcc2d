@@ -285,7 +285,7 @@ InteractionManager.prototype.processInteractive = function(
     while (i >= 0) {
       const cchilds = childs[i--];
       hit = false;
-      if (cchilds.passEvent) continue;
+      if (cchilds.passEvent || !cchilds.visible) continue;
       if (cchilds.childs.length > 0) {
         if (process(cchilds, event, func, shouldHit)) {
           shouldHit = false;

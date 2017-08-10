@@ -2934,7 +2934,7 @@ DisplayObject.prototype.setArea = function (shape, clock) {
  * @return {Boolean} 是否包含该点
  */
 DisplayObject.prototype.contains = function (global) {
-  if (this.eventArea === null || !this.visible) return false;
+  if (this.eventArea === null) return false;
   var point = new Point();
   this.worldTransform.applyInverse(global, point);
   return this.eventArea && this.eventArea.contains(point.x, point.y);
@@ -5640,7 +5640,7 @@ InteractionManager.prototype.processInteractive = function (object, event, func,
     while (i >= 0) {
       var cchilds = childs[i--];
       hit = false;
-      if (cchilds.passEvent) continue;
+      if (cchilds.passEvent || !cchilds.visible) continue;
       if (cchilds.childs.length > 0) {
         if (process(cchilds, event, func, shouldHit)) {
           shouldHit = false;
