@@ -197,7 +197,7 @@ Loader.prototype.getById = function(id) {
  * @property progress {number} 0至1之间的值
  * @memberof JC.Loader
  */
-Object.defineProperty(Texture.prototype, 'progress', {
+Object.defineProperty(Loader.prototype, 'progress', {
   get: function() {
     return this._total === 0 ? 1 :
     (this._received + this._failed) / this._total;
