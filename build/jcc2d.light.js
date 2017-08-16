@@ -2210,7 +2210,7 @@ Loader.prototype.getById = function (id) {
  * @property progress {number} 0至1之间的值
  * @memberof JC.Loader
  */
-Object.defineProperty(Texture.prototype, 'progress', {
+Object.defineProperty(Loader.prototype, 'progress', {
   get: function get() {
     return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
   }
@@ -3334,6 +3334,7 @@ Container.prototype.remove = function (object) {
  * @param {Number} snippet
  */
 Container.prototype.updateTimeline = function (snippet) {
+  this.emit('pretimeline', snippet);
   if (this.paused) return;
   snippet = this.timeScale * snippet;
   this.updateAnimation(snippet);
@@ -3345,6 +3346,7 @@ Container.prototype.updateTimeline = function (snippet) {
     child.updateTimeline(snippet);
     i++;
   }
+  this.emit('posttimeline', snippet);
 };
 
 /**
@@ -3353,6 +3355,7 @@ Container.prototype.updateTimeline = function (snippet) {
  * @private
  */
 Container.prototype.updatePosture = function () {
+  this.emit('preposture');
   if (this.souldSort) this._sortList();
   this.updateTransform();
 
@@ -3363,6 +3366,7 @@ Container.prototype.updatePosture = function () {
     child.updatePosture();
     i++;
   }
+  this.emit('postposture');
 };
 
 /**
@@ -3371,6 +3375,7 @@ Container.prototype.updatePosture = function () {
  * @private
  */
 Container.prototype.render = function (ctx) {
+  this.emit('prerender');
   ctx.save();
   this.setTransform(ctx);
   if (this.mask) this.mask.render(ctx);
@@ -3385,6 +3390,7 @@ Container.prototype.render = function (ctx) {
     child.render(ctx);
   }
   ctx.restore();
+  this.emit('postrender');
 };
 
 /**
