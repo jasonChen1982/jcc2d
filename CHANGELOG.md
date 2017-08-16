@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.5"></a>
+## [1.5.5](https://github.com/jasonChen1982/jcc2d/compare/v1.5.4...v1.5.5) (2017-08-16)
+
+
+### Bug Fixes
+
+* **loader:** fixed loader get progress ([be164f6](https://github.com/jasonChen1982/jcc2d/commit/be164f6))
+
+
+### Features
+
+* **container:** add some emit ([c1a8314](https://github.com/jasonChen1982/jcc2d/commit/c1a8314))
+
+
+
 <a name="1.5.4"></a>
 ## [1.5.4](https://github.com/jasonChen1982/jcc2d/compare/v1.5.3...v1.5.4) (2017-08-10)
 
