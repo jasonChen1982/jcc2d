@@ -24,7 +24,7 @@ function Texture(img, options) {
 
   const isImg = img instanceof Image || img.nodeName === 'IMG';
   this.type = Utils.isString(img) ? URL :
-  isImg ? IMG : console.warn('not support asset');
+    isImg ? IMG : console.warn('not support asset');
 
   this.crossOrigin = options.crossOrigin;
   this.texture = null;
@@ -200,7 +200,7 @@ Loader.prototype.getById = function(id) {
 Object.defineProperty(Loader.prototype, 'progress', {
   get: function() {
     return this._total === 0 ? 1 :
-    (this._received + this._failed) / this._total;
+      (this._received + this._failed) / this._total;
   },
 });
 

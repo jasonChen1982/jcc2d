@@ -50,9 +50,11 @@ Curve.prototype = {
   },
 
   getLengths: function( divisions ) {
-    if (isNaN(divisions)) divisions = ( this.__arcLengthDivisions ) ?
-    ( this.__arcLengthDivisions ) :
-    200;
+    if (isNaN(divisions)) {
+      divisions = ( this.__arcLengthDivisions ) ?
+        ( this.__arcLengthDivisions ) :
+        200;
+    }
 
     if ( this.cacheArcLengths
       && ( this.cacheArcLengths.length === divisions + 1 )

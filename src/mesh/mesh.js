@@ -77,8 +77,8 @@ Mesh.prototype.drawTriangle = function(ctx, vertices, uvs, index0, index1, index
   const deltaF = (u0 * v1 * y2) + (v0 * y1 * u2) + (y0 * u1 * v2) - (y0 * v1 * u2) - (v0 * u1 * y2) - (u0 * y1 * v2);
 
   ctx.transform(deltaA / delta, deltaD / delta,
-      deltaB / delta, deltaE / delta,
-      deltaC / delta, deltaF / delta);
+    deltaB / delta, deltaE / delta,
+    deltaC / delta, deltaF / delta);
 
   ctx.drawImage(texture, 0, 0, w, h, 0, 0, w, h);
   ctx.restore();

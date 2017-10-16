@@ -164,10 +164,8 @@ export const Utils = {
    * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
    */
   random: function(min, max) {
-    if (this.isArray(min))
-      return min[~~(Math.random() * min.length)];
-    if (!this.isNumber(max))
-      max = min || 1, min = 0;
+    if (this.isArray(min)) return min[~~(Math.random() * min.length)];
+    if (!this.isNumber(max)) max = min || 1, min = 0;
     return min + Math.random() * (max - min);
   },
 

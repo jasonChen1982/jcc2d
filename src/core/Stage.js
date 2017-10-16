@@ -42,8 +42,9 @@ function Stage(options) {
    * @member {CANVAS}
    */
   this.canvas = Utils.isString(options.dom) ?
-  document.getElementById(options.dom) || document.querySelector(options.dom) :
-  options.dom;
+    document.getElementById(options.dom) ||
+    document.querySelector(options.dom) :
+    options.dom;
 
   this.realWidth = options.width || this.canvas.width;
   this.realHeight = options.height || this.canvas.height;
@@ -168,8 +169,8 @@ function Stage(options) {
    * @member {Boolean}
    */
   this.enableFPS = Utils.isBoolean(options.enableFPS) ?
-  options.enableFPS :
-  true;
+    options.enableFPS :
+    true;
 
   this.interactionManager = new InteractionManager(this);
 
@@ -191,8 +192,8 @@ function Stage(options) {
   };
 
   this.interactive = Utils.isBoolean(options.interactive) ?
-  options.interactive :
-  true;
+    options.interactive :
+    true;
 
   this.proxyOn();
 }
@@ -285,7 +286,7 @@ Stage.prototype.timeline = function() {
     this.snippet = Date.now() - this.pt;
   }
 
-  if(this.enableFPS) {
+  if (this.enableFPS) {
     this._renderTimes++;
     this._takeTime += Math.max(15, this.snippet);
     this.fps = 1000 / Math.max(15, this.snippet) >> 0;

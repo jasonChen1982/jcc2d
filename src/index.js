@@ -1,8 +1,8 @@
 
 import './util/Raf';
-import './eventer/Eventer';
-import './eventer/InteractionData';
-import './animation/Animation';
+export {Eventer} from './eventer/Eventer';
+export {InteractionData} from './eventer/InteractionData';
+export {Animation} from './animation/Animation';
 
 export {Tween} from './util/Tween';
 export {Utils} from './util/Utils';

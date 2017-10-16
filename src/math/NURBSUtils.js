@@ -114,16 +114,19 @@ let NURBSUtils = {
   calcBasisFunctionDerivatives: function( span, u, p, n, U ) {
     let zeroArr = [];
     let i = 0;
-    for ( i = 0; i <= p; ++ i )
+    for ( i = 0; i <= p; ++ i ) {
       zeroArr[i] = 0.0;
+    }
 
     let ders = [];
-    for ( i = 0; i <= n; ++ i )
+    for ( i = 0; i <= n; ++ i ) {
       ders[i] = zeroArr.slice( 0 );
+    }
 
     let ndu = [];
-    for ( i = 0; i <= p; ++ i )
+    for ( i = 0; i <= p; ++ i ) {
       ndu[i] = zeroArr.slice( 0 );
+    }
 
     ndu[0][0] = 1.0;
 
@@ -310,8 +313,8 @@ let NURBSUtils = {
       for ( i = 1; i <= k; ++ i ) {
         v.sub(
           CK[k - i].
-          clone().
-          multiplyScalar( this.calcKoverI( k, i ) * wders[i] )
+            clone().
+            multiplyScalar( this.calcKoverI( k, i ) * wders[i] )
         );
       }
 

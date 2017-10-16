@@ -160,10 +160,10 @@ MovieClip.prototype.format = function(movie) {
     if (movie.next && this.animations[movie.next]) {
       const This = this;
       let conf = {};
-      if(Utils.isString(movie.next) && this.animations[movie.next]) {
+      if (Utils.isString(movie.next) && this.animations[movie.next]) {
         conf.movie = movie.next;
         conf.infinite = true;
-      } else if(Utils.isObject(movie.next)) {
+      } else if (Utils.isObject(movie.next)) {
         conf = movie.next;
       }
       if (Utils.isString(conf.movie)) {

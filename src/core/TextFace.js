@@ -53,16 +53,16 @@ function TextFace(text, style) {
   this.textBaseline = style.textBaseline || 'middle';
 
   this.lineWidth = Utils.isNumber(style.lineWidth) ?
-  style.lineWidth :
-  1;
+    style.lineWidth :
+    1;
 
   this.stroke = Utils.isBoolean(style.stroke) ?
-  style.stroke :
-  false;
+    style.stroke :
+    false;
 
   this.fill = Utils.isBoolean(style.fill) ?
-  style.fill :
-  true;
+    style.fill :
+    true;
 
   // ctx.measureText(str); // 返回指定文本的宽度
 }
@@ -79,11 +79,11 @@ TextFace.prototype.renderMe = function(ctx) {
   ctx.font = this.fontStyle + ' ' + this.fontWeight + ' ' + this.fontSize + ' ' + this.fontFamily;
   ctx.textAlign = this.textAlign;
   ctx.textBaseline = this.textBaseline;
-  if(this.fill) {
+  if (this.fill) {
     ctx.fillStyle = this.fillColor;
     ctx.fillText(this.text, 0, 0);
   }
-  if(this.stroke) {
+  if (this.stroke) {
     ctx.lineWidth = this.lineWidth;
     ctx.strokeStyle = this.strokeColor;
     ctx.strokeText(this.text, 0, 0);

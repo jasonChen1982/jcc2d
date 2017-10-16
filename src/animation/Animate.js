@@ -26,8 +26,8 @@ function Animate(options) {
   this.delay = options.delay || 0;
   this.wait = options.wait || 0;
   this.timeScale = Utils.isNumber(options.timeScale) ?
-  options.timeScale :
-  1;
+    options.timeScale :
+    1;
 
   if (options.onComplete) {
     this.on('complete', options.onComplete.bind(this));

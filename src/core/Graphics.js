@@ -51,7 +51,7 @@ function Graphics(mesh, options) {
   options = options || {};
   this.mesh = mesh;
   this.meshType = Utils.isFunction(mesh) ? FUNCTION :
-  Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
+    Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
   if (this.meshType === '') console.error('不支持的绘制对象');
 
   this.cache = options.cache || false;

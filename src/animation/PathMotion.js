@@ -22,12 +22,12 @@ function PathMotion(options) {
   this.ease = options.ease || Tween.Ease.InOut;
 
   this.lengthMode = Utils.isBoolean(options.lengthMode)?
-  options.lengthMode:
-  false;
+    options.lengthMode:
+    false;
 
   this.attachTangent = Utils.isBoolean(options.attachTangent)?
-  options.attachTangent:
-  false;
+    options.attachTangent:
+    false;
 
   this._cacheRotate = this.element.rotation;
   const radian = this._cacheRotate * Utils.DTR;
@@ -45,8 +45,8 @@ PathMotion.prototype.nextPose = function() {
   let _rotate = 0;
   const t = this.ease(this.progress / this.duration);
   const pos = this.lengthMode ?
-  this.path.getPointAt(t) :
-  this.path.getPoint(t);
+    this.path.getPointAt(t) :
+    this.path.getPoint(t);
 
   const pose = pos.clone();
 
@@ -68,8 +68,8 @@ PathMotion.prototype.nextPose = function() {
  */
 PathMotion.prototype.decomposeRotate = function(t) {
   const vector = this.lengthMode ?
-  this.path.getTangentAt(t) :
-  this.path.getTangent(t);
+    this.path.getTangentAt(t) :
+    this.path.getTangent(t);
 
   const nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
   const pi = nor > 0 ? 1 : -1;

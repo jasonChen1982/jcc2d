@@ -35,10 +35,10 @@ Matrix.prototype.fromArray = function(array) {
  * @return {number[]} 返回数组
  */
 Matrix.prototype.toArray = function(transpose) {
-  if(!this.array) this.array = new Float32Array(9);
+  if (!this.array) this.array = new Float32Array(9);
   let array = this.array;
 
-  if(transpose) {
+  if (transpose) {
     array[0] = this.a;
     array[1] = this.b;
     array[2] = 0;
@@ -48,7 +48,7 @@ Matrix.prototype.toArray = function(transpose) {
     array[6] = this.tx;
     array[7] = this.ty;
     array[8] = 1;
-  }else{
+  } else {
     array[0] = this.a;
     array[1] = this.c;
     array[2] = this.tx;

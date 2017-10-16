@@ -17,32 +17,32 @@ function Bounds(minX, minY, maxX, maxY) {
    * @default 0
    */
   this.minX = Utils.isNumber(minX)?
-  minX:
-  Infinity;
+    minX:
+    Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
   this.minY = Utils.isNumber(minY)?
-  minY:
-  Infinity;
+    minY:
+    Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
   this.maxX = Utils.isNumber(maxX)?
-  maxX:
-  -Infinity;
+    maxX:
+    -Infinity;
 
   /**
    * @member {number}
    * @default 0
    */
   this.maxY = Utils.isNumber(maxY)?
-  maxY:
-  -Infinity;
+    maxY:
+    -Infinity;
 
   this.rect = null;
 }

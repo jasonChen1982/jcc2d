@@ -338,9 +338,9 @@ InteractionManager.prototype.fixCoord = function(event) {
       for (let i = 0; i < event.touches.length; i++) {
         eventd.touches[i] = {};
         eventd.touches[i].global = new Point(
-                    (event.touches[i].pageX - offset.x) * eventd.ratio,
-                    (event.touches[i].pageY - offset.y) * eventd.ratio
-                );
+          (event.touches[i].pageX - offset.x) * eventd.ratio,
+          (event.touches[i].pageY - offset.y) * eventd.ratio
+        );
       }
       eventd.global = eventd.touches[0].global;
     }

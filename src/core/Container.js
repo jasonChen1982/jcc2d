@@ -301,7 +301,7 @@ Container.prototype.calculateVertices = function() {
  */
 Container.prototype.calculateBounds = function() {
   this.bounds.clear();
-  if(!this.visible) {
+  if (!this.visible) {
     return;
   }
   this._calculateBounds();
