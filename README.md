@@ -49,9 +49,9 @@ const coin = new JC.Sprite({
 });
 coin.keyFrames({
   ks: data.layers[0], // bodymovin keyframes data
-  fr: 30, // frame rate
+  fr: 30, // overwrite frame rate
   // infinite: true, // infinite loop
-  // alternate: true, // alternate
+  // alternate: true, // alternate, just like yoyo
   onUpdate() {},
   onComplete() {
     console.log(this.element);
@@ -95,12 +95,12 @@ timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed 
 
 |                   type                   |         property          |
 | :--------------------------------------: | :-----------------------: |
-| display instance coordinate axis position |          `x` `y`          |
 |       display instance scale value       | `scale` `scaleX` `scaleY` |
+|          display instance pivot          |    ` pivotX` ` pivotY`    |
 |       display instance skew value        |      `skewX` `skewY`      |
 |    display instance rotation with CCW    |        `rotation`         |
+| display instance coordinate axis position |         `x` `y`          |
 |      display instance opacity alpha      |          `alpha`          |
-|          display instance pivot          |    ` pivotX` ` pivotY`    |
 
 
 
@@ -152,19 +152,23 @@ would like to know more information please look in [documentation][documentation
 
 ## Documentation
 
-`jcc2d` source code is written in `ES6 Modules` and build to `UMD` bundle. so if you want use it in `ES6 Modules`, you can `import` the source code direct
+`jcc2d` source code was used `ES6 Modules` and build to `UMD` bundle by `rollup`. so `jcc2d` can support `tree-shaking` seamless.
 
 ```js
+// import all over the modules
 import * as JC from 'jcc2d';
-// or import modules as you need, this allow tree-shaking
+
+// import modules which you need, allow tree-shaking
 import { Stage, Sprite, Graphics } from 'jcc2d';
 ```
 
 and if you just want use `UMD` bundle, you can use `require` method
 
 ```js
+// require jcc2d
 const JC = require('jcc2d');
-// or require a lightweight jcc2d
+
+// require a lightweight jcc2d
 const JC = require('jcc2d/build/jcc2d.light.js');
 ```
 
