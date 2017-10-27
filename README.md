@@ -155,11 +155,9 @@ would like to know more information please look in [documentation][documentation
 `jcc2d` source code is written in `ES6 Modules` and build to `UMD` bundle. so if you want use it in `ES6 Modules`, you can `import` the source code direct
 
 ```js
-import * as JC from 'jcc2d/src/index.js';
-// or 
-import * as JC from 'jcc2d/src/index.light.js';
-// or import modules as you need
-import { Stage, Sprite, Graphics } from 'jcc2d/src/index.js';
+import * as JC from 'jcc2d';
+// or import modules as you need, this allow tree-shaking
+import { Stage, Sprite, Graphics } from 'jcc2d';
 ```
 
 and if you just want use `UMD` bundle, you can use `require` method

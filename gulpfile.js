@@ -5,6 +5,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const rename = require('gulp-rename');
 const rollup = require('rollup');
 const babel = require('rollup-plugin-babel');
+const gulpBabel = require('gulp-babel');
 const chalk = require('chalk');
 const yargs = require('yargs');
 
@@ -31,6 +32,11 @@ const buildTask = [
   },
 ];
 
+gulp.task('compile', function() {
+  return gulp.src('./src/**/*.js')
+  .pipe(gulpBabel())
+  .pipe(gulp.dest('./esm'));
+});
 
 gulp.task('build', function () {
   console.log(STARTBUILD);

@@ -3,7 +3,7 @@
   "version": "1.5.5",
   "description": "a light weight canvas 2d render & an awesome animator",
   "main": "build/jcc2d.min.js",
-  "module": "src/index.js",
+  "module": "esm/index.js",
   "directories": {
     "example": "examples"
   },
@@ -14,9 +14,10 @@
     "src"
   ],
   "scripts": {
-    "release": "gulp release",
+    "release": "gulp release && npm run compile",
     "build": "gulp build",
     "watch": "gulp build --watch",
+    "esm": "gulp compile",
     "prever": "npm run release && git add -A && git commit -m 'release: release new version'",
     "ver": "standard-version -m 'chore(release): v%s'",
     "postver": "git push --follow-tags origin master && npm publish",
@@ -54,6 +55,7 @@
     "eslint": "^4.9.0",
     "eslint-config-google": "^0.9.1",
     "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^2.0.0-alpha",
     "gulp-uglify": "^1.5.3",
