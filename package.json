@@ -14,7 +14,7 @@
     "src"
   ],
   "scripts": {
-    "release": "gulp release && npm run compile",
+    "release": "gulp release && npm run esm",
     "build": "gulp build",
     "watch": "gulp build --watch",
     "esm": "gulp compile",
