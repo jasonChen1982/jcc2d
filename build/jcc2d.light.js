@@ -1260,7 +1260,9 @@ Curve.prototype = {
   },
 
   getLengths: function getLengths(divisions) {
-    if (isNaN(divisions)) divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
+    if (isNaN(divisions)) {
+      divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
+    }
 
     if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
       return this.cacheArcLengths;
@@ -4928,6 +4930,9 @@ Object.defineProperty(Stage.prototype, 'resolution', {
   }
 });
 
+exports.Eventer = Eventer;
+exports.InteractionData = InteractionData;
+exports.Animation = Animation;
 exports.Tween = Tween;
 exports.Utils = Utils;
 exports.Texture = Texture;

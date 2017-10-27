@@ -1260,7 +1260,9 @@ Curve.prototype = {
   },
 
   getLengths: function getLengths(divisions) {
-    if (isNaN(divisions)) divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
+    if (isNaN(divisions)) {
+      divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
+    }
 
     if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
       return this.cacheArcLengths;
@@ -4463,13 +4465,19 @@ var NURBSUtils = {
     var i = 0;
     for (i = 0; i <= p; ++i) {
       zeroArr[i] = 0.0;
-    }var ders = [];
+    }
+
+    var ders = [];
     for (i = 0; i <= n; ++i) {
       ders[i] = zeroArr.slice(0);
-    }var ndu = [];
+    }
+
+    var ndu = [];
     for (i = 0; i <= p; ++i) {
       ndu[i] = zeroArr.slice(0);
-    }ndu[0][0] = 1.0;
+    }
+
+    ndu[0][0] = 1.0;
 
     var left = zeroArr.slice(0);
     var right = zeroArr.slice(0);
@@ -6064,6 +6072,9 @@ Object.defineProperty(Stage.prototype, 'resolution', {
   }
 });
 
+exports.Eventer = Eventer;
+exports.InteractionData = InteractionData;
+exports.Animation = Animation;
 exports.Tween = Tween;
 exports.Utils = Utils;
 exports.Texture = Texture;
