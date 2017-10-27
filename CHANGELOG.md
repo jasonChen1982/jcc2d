@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.7"></a>
+## [1.5.7](https://github.com/jasonChen1982/jcc2d/compare/v1.5.6...v1.5.7) (2017-10-27)
+
+
+### Features
+
+* **esm:** add esm directory to npm pkg ([22383e7](https://github.com/jasonChen1982/jcc2d/commit/22383e7))
+
+
+
 <a name="1.5.6"></a>
 ## [1.5.6](https://github.com/jasonChen1982/jcc2d/compare/v1.5.5...v1.5.6) (2017-10-27)
 
