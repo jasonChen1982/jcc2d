@@ -4612,6 +4612,7 @@ InteractionManager.prototype.getPos = function (obj) {
  * @param {string} [options.bgColor] 设置舞台的背景颜色，`默认为` ‘transparent’
  * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
  * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
+ * @param {number} [options.fixedFPS] 设置舞台的固定更新帧率，非特殊情况不要使用，`默认为` 60
  */
 function Stage(options) {
   options = options || {};
@@ -4677,6 +4678,13 @@ function Stage(options) {
    * @private
    */
   this._resolution = 0;
+
+  /**
+   * 场景分辨率
+   *
+   * @member {Number}
+   */
+  this.fixedFPS = options.fixedFPS || 60;
 
   /**
    * 场景分辨率
@@ -4811,9 +4819,9 @@ Stage.prototype.resize = function (w, h, sw, sh) {
  * 渲染舞台内的所有可见渲染对象
  */
 Stage.prototype.render = function () {
-  this.emit('prerender');
-
   this.timeline();
+
+  this.emit('prerender');
 
   if (this.autoClear) {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -4863,7 +4871,11 @@ Stage.prototype.timeline = function () {
 Stage.prototype.startEngine = function () {
   if (this.inRender) return;
   this.inRender = true;
-  this.renderer();
+  if (this.fixedFPS === 60) {
+    this.renderer();
+  } else {
+    this.rendererFixedFPS();
+  }
 };
 
 /**
@@ -4871,6 +4883,7 @@ Stage.prototype.startEngine = function () {
  */
 Stage.prototype.stopEngine = function () {
   CAF(this.loop);
+  clearInterval(this.loop);
   this.inRender = false;
 };
 
@@ -4889,6 +4902,19 @@ Stage.prototype.renderer = function () {
     This.loop = RAF(render);
   }
   render();
+};
+
+/**
+ * 固定帧率的渲染循环
+ *
+ * @method rendererFixedFPS
+ */
+Stage.prototype.rendererFixedFPS = function () {
+  var This = this;
+  this.loop = setInterval(function () {
+    This.render();
+  }, 1000 / this.fixedFPS);
+  this.render();
 };
 
 /**
