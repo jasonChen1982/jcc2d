@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.8"></a>
+## [1.5.8](https://github.com/jasonChen1982/jcc2d/compare/v1.5.7...v1.5.8) (2017-11-01)
+
+
+
 <a name="1.5.7"></a>
 ## [1.5.7](https://github.com/jasonChen1982/jcc2d/compare/v1.5.6...v1.5.7) (2017-10-27)
 
