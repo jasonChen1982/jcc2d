@@ -1279,6 +1279,8 @@
             
                 <li data-name="JC.Stage#enableFPS"><a href="JC.Stage.html#enableFPS">enableFPS</a></li>
             
+                <li data-name="JC.Stage#fixedFPS"><a href="JC.Stage.html#fixedFPS">fixedFPS</a></li>
+            
                 <li data-name="JC.Stage#fps"><a href="JC.Stage.html#fps">fps</a></li>
             
                 <li data-name="JC.Stage#height"><a href="JC.Stage.html#height">height</a></li>
@@ -1594,7 +1596,7 @@
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_interactive_boundPrecise" title="check eventer pointer exact polygon">check eventer pointer exact polygon</a></li>
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_timingfunction_allInOne" title="varied timingfunction supported">varied timingfunction supported</a></li>
 <li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_motion" title="path motion animation">path motion animation</a></li>
-<li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">after effect export</a></li>
+<li><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_ae" title="after effect export">after effect export</a></li>
 </ul>
 <h2>Introduction</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/" title="jcc2d main page">main page</a></p>
 <p><code>jcc2d</code> is a lightweight canvas2d render engine and built-in an awesome animator with timeline manager. of course, <code>jcc2d</code> support event system by default.</p>
@@ -1618,14 +1620,14 @@ const coin = new JC.Sprite({
 });
 coin.keyFrames({
   ks: data.layers[0], // bodymovin keyframes data
-  fr: 30, // frame rate
+  fr: 30, // overwrite frame rate
   // infinite: true, // infinite loop
-  // alternate: true, // alternate
+  // alternate: true, // alternate, just like yoyo
   onUpdate() {},
   onComplete() {
     console.log(this.element);
   },
-});</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_keyFrames2" title="after effect export">view demo</a></p>
+});</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_ae" title="after effect export">view demo</a></p>
 <h2>Feature</h2><p><code>jcc2d</code> Include <code>Stage</code> <code>Sprite</code> <code>Graphics</code> <code>Container</code> <code>BlurFilter</code> <code>TextFace</code> and so on.</p>
 <p>Every display instance can easy start an animation and attach a timeline, like following:</p>
 <pre class="prettyprint source lang-javascript"><code>const ball = new JC.Sprite({
@@ -1657,12 +1659,12 @@ timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed 
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center">display instance coordinate axis position</td>
-<td style="text-align:center"><code>x</code> <code>y</code></td>
-</tr>
-<tr>
 <td style="text-align:center">display instance scale value</td>
 <td style="text-align:center"><code>scale</code> <code>scaleX</code> <code>scaleY</code></td>
+</tr>
+<tr>
+<td style="text-align:center">display instance pivot</td>
+<td style="text-align:center"><code>pivotX</code> <code>pivotY</code></td>
 </tr>
 <tr>
 <td style="text-align:center">display instance skew value</td>
@@ -1673,12 +1675,12 @@ timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed 
 <td style="text-align:center"><code>rotation</code></td>
 </tr>
 <tr>
-<td style="text-align:center">display instance opacity alpha</td>
-<td style="text-align:center"><code>alpha</code></td>
+<td style="text-align:center">display instance coordinate axis position</td>
+<td style="text-align:center"><code>x</code> <code>y</code></td>
 </tr>
 <tr>
-<td style="text-align:center">display instance pivot</td>
-<td style="text-align:center"><code>pivotX</code> <code>pivotY</code></td>
+<td style="text-align:center">display instance opacity alpha</td>
+<td style="text-align:center"><code>alpha</code></td>
 </tr>
 </tbody>
 </table>
@@ -1714,14 +1716,16 @@ coin.runners({             // combination multiple animation and run one by one
   ],
   ...       // other options
 });</code></pre><p>would like to know more information please look in <a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a>, or quick start a living edit in web <a target="_blank" href="http://codepen.io/JasonChen1982/pen/grJzmz?editors=0010" title="quick start demo">runing man</a>.</p>
-<h2>Documentation</h2><p><code>jcc2d</code> source code is written in <code>ES6 Modules</code> and build to <code>UMD</code> bundle. so if you want use it in <code>ES6 Modules</code>, you can <code>import</code> the source code direct</p>
-<pre class="prettyprint source lang-js"><code>import * as JC from 'jcc2d/src/index.js';
-// or 
-import * as JC from 'jcc2d/src/index.light.js';
-// or import modules as you need
-import { Stage, Sprite, Graphics } from 'jcc2d/src/index.js';</code></pre><p>and if you just want use <code>UMD</code> bundle, you can use <code>require</code> method</p>
-<pre class="prettyprint source lang-js"><code>const JC = require('jcc2d');
-// or require a lightweight jcc2d
+<h2>Documentation</h2><p><code>jcc2d</code> source code was used <code>ES6 Modules</code> and build to <code>UMD</code> bundle by <code>rollup</code>. so <code>jcc2d</code> can support <code>tree-shaking</code> seamless.</p>
+<pre class="prettyprint source lang-js"><code>// import all over the modules
+import * as JC from 'jcc2d';
+
+// import modules which you need, allow tree-shaking
+import { Stage, Sprite, Graphics } from 'jcc2d';</code></pre><p>and if you just want use <code>UMD</code> bundle, you can use <code>require</code> method</p>
+<pre class="prettyprint source lang-js"><code>// require jcc2d
+const JC = require('jcc2d');
+
+// require a lightweight jcc2d
 const JC = require('jcc2d/build/jcc2d.light.js');</code></pre><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/docs" title="jcc2d documention page">documentation</a></p>
 <h2>Examples</h2><p><a target="_blank" href="https://jasonchen1982.github.io/jcc2d/examples" title="jcc2d examples page">examples</a></p>
 <h2>Changelog</h2><p><a target="_blank" href="https://github.com/jasonChen1982/jcc2d/blob/master/Changelog.md" title="change log">changelog</a></p>
@@ -1736,7 +1740,7 @@ const JC = require('jcc2d/build/jcc2d.light.js');</code></pre><p><a target="_bla
         
 
         <footer>
-            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Aug 02 2017 10:53:10 GMT+0800 (CST)
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Wed Nov 01 2017 12:13:04 GMT+0800 (CST)
         </footer>
     </div>
 </div>
