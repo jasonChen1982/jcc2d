@@ -117,19 +117,19 @@
     stage.startEngine();
 
     var tween = {
-      LinearNone: JC.Tween.Linear.None,
-      EaseIn: JC.Tween.Ease.In,
-      EaseOut: JC.Tween.Ease.Out,
-      EaseInOut: JC.Tween.Ease.InOut,
-      ElasticIn: JC.Tween.Elastic.In,
-      ElasticOut: JC.Tween.Elastic.Out,
-      ElasticInOut: JC.Tween.Elastic.InOut,
-      BackIn: JC.Tween.Back.In,
-      BackOut: JC.Tween.Back.Out,
-      BackInOut: JC.Tween.Back.InOut,
-      BounceIn: JC.Tween.Bounce.In,
-      BounceOut: JC.Tween.Bounce.Out,
-      BounceInOut: JC.Tween.Bounce.InOut,
+      'Linear.None': JC.Tween.Linear.None,
+      'Ease.In': JC.Tween.Ease.In,
+      'Ease.Out': JC.Tween.Ease.Out,
+      'Ease.InOut': JC.Tween.Ease.InOut,
+      'Elastic.In': JC.Tween.Elastic.In,
+      'Elastic.Out': JC.Tween.Elastic.Out,
+      'Elastic.InOut': JC.Tween.Elastic.InOut,
+      'Back.In': JC.Tween.Back.In,
+      'Back.Out': JC.Tween.Back.Out,
+      'Back.InOut': JC.Tween.Back.InOut,
+      'Bounce.In': JC.Tween.Bounce.In,
+      'Bounce.Out': JC.Tween.Bounce.Out,
+      'Bounce.InOut': JC.Tween.Bounce.InOut,
     };
     function TweenControl(map, cb) {
       Object.keys(map).forEach(function(it) {
@@ -147,7 +147,7 @@
     var folderName = '';
     var folder = null;
     Object.keys(tween).forEach(function(it) {
-      var nowFolderName = it.replace(/In|Out|None/g, '');
+      var nowFolderName = it.replace(/\.|In|Out|None/g, '');
       if (!folderName || folderName !== nowFolderName) {
         folderName = nowFolderName;
         folder = gui.addFolder(nowFolderName);
@@ -159,8 +159,6 @@
      * 帧率监控工具
      */
     var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
     stage.on('postrender', function () {
       stats.update();
