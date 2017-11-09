@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.5.9"></a>
+## [1.5.9](https://github.com/jasonChen1982/jcc2d/compare/v1.5.8...v1.5.9) (2017-11-09)
+
+
+### Features
+
+* **origin:** add origin property for object ([d9bd971](https://github.com/jasonChen1982/jcc2d/commit/d9bd971))
+
+
+
 <a name="1.5.8"></a>
 ## [1.5.8](https://github.com/jasonChen1982/jcc2d/compare/v1.5.7...v1.5.8) (2017-11-01)
 
