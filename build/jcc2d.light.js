@@ -2407,37 +2407,31 @@ Matrix.prototype.identity = function () {
  * @param {number} rotation
  * @param {number} skewX
  * @param {number} skewY
+ * @param {number} originX
+ * @param {number} originY
  * @return {this}
  */
-Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY) {
-  var a = void 0;
-  var b = void 0;
-  var c = void 0;
-  var d = void 0;
-  var sr = void 0;
-  var cr = void 0;
-  var sy = void 0;
-  var nsx = void 0; // cy, cx,
+Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
+  var sr = Math.sin(rotation);
+  var cr = Math.cos(rotation);
+  var sy = Math.tan(skewY);
+  var nsx = Math.tan(skewX);
 
-  sr = Math.sin(rotation);
-  cr = Math.cos(rotation);
-  // cy  = Math.cos(skewY);
-  sy = Math.tan(skewY);
-  nsx = Math.tan(skewX);
-  // cx  =  Math.cos(skewX);
+  var a = cr * scaleX;
+  var b = sr * scaleX;
+  var c = -sr * scaleY;
+  var d = cr * scaleY;
 
-  a = cr * scaleX;
-  b = sr * scaleX;
-  c = -sr * scaleY;
-  d = cr * scaleY;
+  var pox = pivotX + originX;
+  var poy = pivotY + originY;
 
   this.a = a + sy * c;
   this.b = b + sy * d;
   this.c = nsx * a + c;
   this.d = nsx * b + d;
 
-  this.tx = x + (pivotX * a + pivotY * c);
-  this.ty = y + (pivotX * b + pivotY * d);
+  this.tx = x - pox * this.a - poy * this.c + originX;
+  this.ty = y - pox * this.b - poy * this.d + originY;
 
   return this;
 };
@@ -2543,6 +2537,20 @@ function DisplayObject() {
    * @member {Number}
    */
   this.pivotY = 0;
+
+  /**
+   * 控制渲染对象的x变换中心
+   *
+   * @member {Number}
+   */
+  this.originX = 0;
+
+  /**
+   * 控制渲染对象的y变换中心
+   *
+   * @member {Number}
+   */
+  this.originY = 0;
 
   /**
    * 对象的遮罩层
@@ -2834,8 +2842,11 @@ DisplayObject.prototype.updateTransform = function () {
   var tx = void 0;
   var ty = void 0;
 
+  var pox = this.pivotX + this.originX;
+  var poy = this.pivotY + this.originY;
+
   if (this.skewX || this.skewY) {
-    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * Utils.DTR, this.skewX * Utils.DTR, this.skewY * Utils.DTR);
+    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * Utils.DTR, this.skewX * Utils.DTR, this.skewY * Utils.DTR, this.originX, this.originY);
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
     wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
@@ -2858,9 +2869,9 @@ DisplayObject.prototype.updateTransform = function () {
       tx = this.x;
       ty = this.y;
 
-      if (this.pivotX || this.pivotY) {
-        tx -= this.pivotX * a + this.pivotY * c;
-        ty -= this.pivotX * b + this.pivotY * d;
+      if (this.pivotX || this.pivotY || this.originX || this.originY) {
+        tx -= pox * a + poy * c - this.originX;
+        ty -= pox * b + poy * d - this.originY;
       }
       wt.a = a * pt.a + b * pt.c;
       wt.b = a * pt.b + b * pt.d;
@@ -2872,8 +2883,8 @@ DisplayObject.prototype.updateTransform = function () {
       a = this.scaleX;
       d = this.scaleY;
 
-      tx = this.x - this.pivotX * a;
-      ty = this.y - this.pivotY * d;
+      tx = this.x - pox * a + this.originX;
+      ty = this.y - poy * d + this.originY;
 
       wt.a = a * pt.a;
       wt.b = a * pt.b;
@@ -4891,6 +4902,7 @@ Stage.prototype.stopEngine = function () {
  * 渲染循环
  *
  * @method renderer
+ * @private
  */
 Stage.prototype.renderer = function () {
   var This = this;
@@ -4905,9 +4917,10 @@ Stage.prototype.renderer = function () {
 };
 
 /**
- * 固定帧率的渲染循环
+ * 固定帧率的渲染循环，不合理使用改方法将会导致性能问题
  *
  * @method rendererFixedFPS
+ * @private
  */
 Stage.prototype.rendererFixedFPS = function () {
   var This = this;

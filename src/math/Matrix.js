@@ -184,6 +184,8 @@ Matrix.prototype.identity = function() {
  * @param {number} rotation
  * @param {number} skewX
  * @param {number} skewY
+ * @param {number} originX
+ * @param {number} originY
  * @return {this}
  */
 Matrix.prototype.setTransform = function(
@@ -195,36 +197,30 @@ Matrix.prototype.setTransform = function(
   scaleY,
   rotation,
   skewX,
-  skewY
+  skewY,
+  originX,
+  originY
 ) {
-  let a;
-  let b;
-  let c;
-  let d;
-  let sr;
-  let cr;
-  let sy;
-  let nsx; // cy, cx,
+  const sr = Math.sin(rotation);
+  const cr = Math.cos(rotation);
+  const sy = Math.tan(skewY);
+  const nsx = Math.tan(skewX);
 
-  sr = Math.sin(rotation);
-  cr = Math.cos(rotation);
-  // cy  = Math.cos(skewY);
-  sy = Math.tan(skewY);
-  nsx = Math.tan(skewX);
-  // cx  =  Math.cos(skewX);
+  const a = cr * scaleX;
+  const b = sr * scaleX;
+  const c = -sr * scaleY;
+  const d = cr * scaleY;
 
-  a = cr * scaleX;
-  b = sr * scaleX;
-  c = -sr * scaleY;
-  d = cr * scaleY;
+  const pox = pivotX + originX;
+  const poy = pivotY + originY;
 
   this.a = a + sy * c;
   this.b = b + sy * d;
   this.c = nsx * a + c;
   this.d = nsx * b + d;
 
-  this.tx = x + ( pivotX * a + pivotY * c );
-  this.ty = y + ( pivotX * b + pivotY * d );
+  this.tx = x - pox * this.a - poy * this.c + originX;
+  this.ty = y - pox * this.b - poy * this.d + originY;
 
   return this;
 };

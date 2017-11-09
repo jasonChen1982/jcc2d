@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <link href="https://fonts.googleapis.com/css?family=Plaster" rel="stylesheet">
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Plaster', cursive;
+      overflow: hidden;
+      text-align: center;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    .title {
+      font-size: 20px;
+      color: #fff;
+      margin-top: 10px;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+  </style>
+</head>
+
+<body>
+  <p class="title">try to click close</p>
+  <canvas id="demo_canvas" width="800" height="960"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    function RectBox(options) {
+      this.width = options.width;
+      this.height = options.height;
+      this.background = options.background;
+      this.border = options.border;
+      this.borderwidth = options.borderwidth;
+    }
+    RectBox.prototype.render = function(ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.background;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowOffsetY = 2;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = this.border;
+      ctx.lineWidth = this.borderwidth;
+      ctx.rect(-this.width / 2, -this.height / 2, this.width, this.height);
+      ctx.fill();
+      ctx.stroke();
+      ctx.closePath();
+    };
+
+    function CloseBtn(options) {
+      this.radius = options.radius;
+      this.background = options.background;
+      this.border = options.border;
+      this.borderwidth = options.borderwidth;
+    }
+    CloseBtn.prototype.render = function(ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.background;
+      ctx.strokeStyle = this.border;
+      ctx.lineWidth = this.borderwidth;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowOffsetY = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowBlur = 10;
+      ctx.arc(0, 0, this.radius, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.rect(-8, -1, 16, 2);
+      ctx.rect(-1, -8, 2, 16);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    var stage = new JC.Stage({
+      dom: 'demo_canvas',
+      width: w,
+      height: h,
+    });
+    var doc = new JC.Container();
+    doc.x = w >> 1;
+    doc.y = h >> 1;
+
+    var rectBox = new JC.Graphics(new RectBox({
+      width: 400,
+      height: 300,
+      background: '#333',
+      border: '#33D0B4',
+      borderwidth: 4,
+    }));
+    rectBox.originX = -200;
+    rectBox.originY = -150;
+
+    var closeBtn = new JC.Graphics(new CloseBtn({
+      radius: 18,
+      background: '#333',
+      border: '#33D0B4',
+      borderwidth: 4,
+    }));
+    closeBtn.setArea(new JC.Circle(0, 0, 22));
+    closeBtn.rotation = 45;
+    closeBtn.x = 200;
+    closeBtn.y = -150;
+
+    closeBtn.on('click', function() {
+      rectBox.runners({
+        runners: [
+          { to: { rotation: 20 }, ease: JC.Tween.Elastic.Out, duration: 1500 },
+          { to: { y: 600 }, ease: JC.Tween.Ease.Bezier(0.7, 0, 1, 0.5) }
+        ],
+      });
+    })
+
+    rectBox.adds(closeBtn);
+    doc.adds(rectBox);
+    stage.adds(doc);
+    stage.startEngine();
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function() {
+      stats.update();
+    });
+
+    window.onresize = function() {
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+      doc.x = w >> 1;
+      doc.y = h >> 1;
+      stage.resize(w, h);
+    }
+
+  </script>
+</body>
+
+</html>

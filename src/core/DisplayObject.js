@@ -105,6 +105,20 @@ function DisplayObject() {
   this.pivotY = 0;
 
   /**
+   * 控制渲染对象的x变换中心
+   *
+   * @member {Number}
+   */
+  this.originX = 0;
+
+  /**
+   * 控制渲染对象的y变换中心
+   *
+   * @member {Number}
+   */
+  this.originY = 0;
+
+  /**
    * 对象的遮罩层
    *
    * @member {JC.Graphics}
@@ -396,6 +410,9 @@ DisplayObject.prototype.updateTransform = function() {
   let tx;
   let ty;
 
+  const pox = this.pivotX + this.originX;
+  const poy = this.pivotY + this.originY;
+
   if (this.skewX || this.skewY) {
     TEMP_MATRIX.setTransform(
       this.x,
@@ -406,7 +423,9 @@ DisplayObject.prototype.updateTransform = function() {
       this.scaleY,
       this.rotation * Utils.DTR,
       this.skewX * Utils.DTR,
-      this.skewY * Utils.DTR
+      this.skewY * Utils.DTR,
+      this.originX,
+      this.originY
     );
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
@@ -430,9 +449,9 @@ DisplayObject.prototype.updateTransform = function() {
       tx = this.x;
       ty = this.y;
 
-      if (this.pivotX || this.pivotY) {
-        tx -= this.pivotX * a + this.pivotY * c;
-        ty -= this.pivotX * b + this.pivotY * d;
+      if (this.pivotX || this.pivotY || this.originX || this.originY) {
+        tx -= pox * a + poy * c - this.originX;
+        ty -= pox * b + poy * d - this.originY;
       }
       wt.a = a * pt.a + b * pt.c;
       wt.b = a * pt.b + b * pt.d;
@@ -444,8 +463,8 @@ DisplayObject.prototype.updateTransform = function() {
       a = this.scaleX;
       d = this.scaleY;
 
-      tx = this.x - this.pivotX * a;
-      ty = this.y - this.pivotY * d;
+      tx = this.x - pox * a + this.originX;
+      ty = this.y - poy * d + this.originY;
 
       wt.a = a * pt.a;
       wt.b = a * pt.b;
