@@ -176,37 +176,31 @@ Matrix.prototype.identity = function () {
  * @param {number} rotation
  * @param {number} skewX
  * @param {number} skewY
+ * @param {number} originX
+ * @param {number} originY
  * @return {this}
  */
-Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY) {
-  var a = void 0;
-  var b = void 0;
-  var c = void 0;
-  var d = void 0;
-  var sr = void 0;
-  var cr = void 0;
-  var sy = void 0;
-  var nsx = void 0; // cy, cx,
+Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
+  var sr = Math.sin(rotation);
+  var cr = Math.cos(rotation);
+  var sy = Math.tan(skewY);
+  var nsx = Math.tan(skewX);
 
-  sr = Math.sin(rotation);
-  cr = Math.cos(rotation);
-  // cy  = Math.cos(skewY);
-  sy = Math.tan(skewY);
-  nsx = Math.tan(skewX);
-  // cx  =  Math.cos(skewX);
+  var a = cr * scaleX;
+  var b = sr * scaleX;
+  var c = -sr * scaleY;
+  var d = cr * scaleY;
 
-  a = cr * scaleX;
-  b = sr * scaleX;
-  c = -sr * scaleY;
-  d = cr * scaleY;
+  var pox = pivotX + originX;
+  var poy = pivotY + originY;
 
   this.a = a + sy * c;
   this.b = b + sy * d;
   this.c = nsx * a + c;
   this.d = nsx * b + d;
 
-  this.tx = x + (pivotX * a + pivotY * c);
-  this.ty = y + (pivotX * b + pivotY * d);
+  this.tx = x - pox * this.a - poy * this.c + originX;
+  this.ty = y - pox * this.b - poy * this.d + originY;
 
   return this;
 };

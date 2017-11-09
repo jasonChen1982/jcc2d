@@ -310,6 +310,7 @@ Stage.prototype.stopEngine = function () {
  * 渲染循环
  *
  * @method renderer
+ * @private
  */
 Stage.prototype.renderer = function () {
   var This = this;
@@ -324,9 +325,10 @@ Stage.prototype.renderer = function () {
 };
 
 /**
- * 固定帧率的渲染循环
+ * 固定帧率的渲染循环，不合理使用改方法将会导致性能问题
  *
  * @method rendererFixedFPS
+ * @private
  */
 Stage.prototype.rendererFixedFPS = function () {
   var This = this;
