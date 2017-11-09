@@ -124,13 +124,24 @@
     closeBtn.rotation = 45;
     closeBtn.x = 200;
     closeBtn.y = -150;
+    closeBtn.clicked = false;
 
     closeBtn.on('click', function() {
+      if (closeBtn.clicked) return;
+      closeBtn.clicked = true;
       rectBox.runners({
         runners: [
           { to: { rotation: 20 }, ease: JC.Tween.Elastic.Out, duration: 1500 },
-          { to: { y: 600 }, ease: JC.Tween.Ease.Bezier(0.7, 0, 1, 0.5) }
+          { to: { y: 700 }, ease: JC.Tween.Ease.Bezier(0.7, 0, 1, 0.5) }
         ],
+      }).on('complete', function() {
+        rectBox.animate({
+          from: { y: -300, alpha: 0, rotation: 0 },
+          to: { y: 0, alpha: 1, rotation: 0 },
+          wait: 500,
+        }).on('complete', function() {
+          closeBtn.clicked = false;
+        });
       });
     })
 
