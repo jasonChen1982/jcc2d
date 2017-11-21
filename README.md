@@ -13,6 +13,7 @@ A canvas 2d renderer & An awesome animator
 * [refactor usopen-sessions main page][jcc2d]
 * [particle effect][particle]
 * [3D pictures cloud][zIndex-demo]
+* [multi-segment animation][combine]
 * [sprites movieclip][movieclip]
 * [blur mask high performance filter][blur-mask]
 * [skeleton draw by graphics][skeleton-graphics]
@@ -25,7 +26,7 @@ A canvas 2d renderer & An awesome animator
 ## Introduction
 [main page][jcc2d]
 
-`jcc2d` is a lightweight canvas2d render engine and built-in an awesome animator with timeline manager. of course, `jcc2d` support event system by default.
+`jcc2d` is a lightweight canvas2d-render engine and built-in an awesome animator with timeline manager. of course, `jcc2d` support event system by default.
 
 `jcc2d` built-in support [bodymovin][bodymovin] keyframes data, which use [bodymovin add-on][bodymovin-add-on] to exporting `keyframes data` from [after effect][ae], and `jcc2d` can parse the `keyframes data` to [jcc2d][jcc2d] keyFrames animation, just like following:
 
@@ -96,7 +97,8 @@ timeline.timeScale = 0.5; // set timeScale, get a Slow motion，just like speed 
 |                   type                   |         property          |
 | :--------------------------------------: | :-----------------------: |
 |       display instance scale value       | `scale` `scaleX` `scaleY` |
-|          display instance pivot          |    ` pivotX` ` pivotY`    |
+|         display instance origin          |    `originX` `originY`    |
+|          display instance pivot          |     `pivotX` ` pivotY`    |
 |       display instance skew value        |      `skewX` `skewY`      |
 |    display instance rotation with CCW    |        `rotation`         |
 | display instance coordinate axis position |         `x` `y`          |
@@ -190,6 +192,7 @@ const JC = require('jcc2d/build/jcc2d.light.js');
 [examples]:https://jasonchen1982.github.io/jcc2d/examples "jcc2d examples page"
 [particle]:https://jasonchen1982.github.io/jcc2d/examples/ "Particle effect"
 [zIndex-demo]:https://jasonchen1982.github.io/jcc2d/examples/#demo_zIndex_bitmap "3D pictures cloud used zIndex"
+[combine]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_combine "multi-segment animation"
 [movieclip]:https://jasonchen1982.github.io/jcc2d/examples/#demo_frames_sprite "sprites movieclip"
 [blur-mask]:https://jasonchen1982.github.io/jcc2d/examples/#demo_filter_blur "blur mask high performance filter"
 [skeleton-graphics]:https://jasonchen1982.github.io/jcc2d/examples/#demo_skeleton_graphics "skeleton draw by graphics"
