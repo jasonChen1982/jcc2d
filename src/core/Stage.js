@@ -106,15 +106,14 @@ function Stage(options) {
    *
    * @member {Number}
    */
-  this.fixedFPS = options.fixedFPS || 60;
+  this.resolution = options.resolution || 1;
 
   /**
-   * 场景分辨率
+   * 固定更新帧率，默认为 60fps
    *
    * @member {Number}
-   * @private
    */
-  this.resolution = options.resolution || 1;
+  this.fixedFPS = options.fixedFPS || 60;
 
   /**
    * 上一次绘制的时间点

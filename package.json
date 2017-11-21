@@ -8,7 +8,7 @@
     "example": "examples"
   },
   "files": [
-    "changelog.md",
+    "CHANGELOG.md",
     "README.md",
     "build",
     "esm",
