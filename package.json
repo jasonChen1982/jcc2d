@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "release": "gulp release && npm run esm",
-    "build": "node scripts/build.js",
+    "build": "gulp build",
     "watch": "gulp build --watch",
     "esm": "gulp compile",
     "prever": "npm run release && git add -A && git commit -m 'release: release new version'",
