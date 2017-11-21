@@ -144,13 +144,4 @@ export const Tween = {
       return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
     },
   },
-
-  // Utils: {
-
-  //   Linear: function(p0, p1, t) {
-  //     return (p1 - p0) * t + p0;
-  //   },
-
-  // },
-
 };
