@@ -2100,6 +2100,11 @@ Texture.prototype.load = function (img) {
   }
 };
 
+/**
+ *
+ * @param {String} url 图片资源连接
+ * @private
+ */
 Texture.prototype.fromURL = function (url) {
   if (!Utils.isUndefined(this.crossOrigin)) {
     this.texture.crossOrigin = this.crossOrigin;
@@ -2108,6 +2113,10 @@ Texture.prototype.fromURL = function (url) {
   this.texture.src = url;
 };
 
+/**
+ *
+ * @param {Image} img Image object
+ */
 Texture.prototype.fromIMG = function (img) {
   this.listen(img);
 };

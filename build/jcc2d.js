@@ -1,7 +1,14 @@
+
+/**
+ * jcc2d.js
+ * (c) 2014-2017 jason chen
+ * Released under the MIT License.
+ */
+
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (factory((global.JC = global.JC || {})));
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.JC = global.JC || {})));
 }(this, (function (exports) { 'use strict';
 
 (function () {
@@ -992,7 +999,6 @@ var Tween = {
       return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
     }
   }
-
 };
 
 /**
@@ -2100,6 +2106,11 @@ Texture.prototype.load = function (img) {
   }
 };
 
+/**
+ *
+ * @param {String} url 图片资源连接
+ * @private
+ */
 Texture.prototype.fromURL = function (url) {
   if (!Utils.isUndefined(this.crossOrigin)) {
     this.texture.crossOrigin = this.crossOrigin;
@@ -2108,6 +2119,10 @@ Texture.prototype.fromURL = function (url) {
   this.texture.src = url;
 };
 
+/**
+ *
+ * @param {Image} img Image object
+ */
 Texture.prototype.fromIMG = function (img) {
   this.listen(img);
 };
@@ -5837,15 +5852,14 @@ function Stage(options) {
    *
    * @member {Number}
    */
-  this.fixedFPS = options.fixedFPS || 60;
+  this.resolution = options.resolution || 1;
 
   /**
-   * 场景分辨率
+   * 固定更新帧率，默认为 60fps
    *
    * @member {Number}
-   * @private
    */
-  this.resolution = options.resolution || 1;
+  this.fixedFPS = options.fixedFPS || 60;
 
   /**
    * 上一次绘制的时间点
