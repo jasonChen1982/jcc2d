@@ -21,7 +21,7 @@
     "ver": "standard-version -m 'chore(release): v%s'",
     "postver": "git push --follow-tags origin master && npm publish",
     "docs": "jsdoc -c scripts/jsdoc.conf.json -R README.md",
-    "http": "hs -o -a",
+    "http": "hs -o",
     "test": "karma start",
     "lint": "eslint .",
     "fix": "eslint --fix ./src",
