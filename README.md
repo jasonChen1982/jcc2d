@@ -26,7 +26,7 @@ A canvas 2d renderer & An awesome animator
 ## Introduction
 [main page][jcc2d]
 
-`jcc2d` is a lightweight canvas2d-render engine and built-in an awesome animator with timeline manager. of course, `jcc2d` support event system by default.
+`jcc2d` is a lightweight canvas2d-render engine and built-in an awesome animator with timeline manager. obviously, `jcc2d` support event system by default.
 
 `jcc2d` built-in support [bodymovin][bodymovin] keyframes data, which use [bodymovin add-on][bodymovin-add-on] to exporting `keyframes data` from [after effect][ae], and `jcc2d` can parse the `keyframes data` to [jcc2d][jcc2d] keyFrames animation, just like following:
 
@@ -188,8 +188,8 @@ const JC = require('jcc2d/build/jcc2d.light.js');
 [MIT](http://opensource.org/licenses/MIT)
 
 [jcc2d]:https://jasonchen1982.github.io/jcc2d/ "jcc2d main page"
-[documentation]:https://jasonchen1982.github.io/jcc2d/docs "jcc2d documention page"
-[examples]:https://jasonchen1982.github.io/jcc2d/examples "jcc2d examples page"
+[documentation]:https://jasonchen1982.github.io/jcc2d/docs/ "jcc2d documention page"
+[examples]:https://jasonchen1982.github.io/jcc2d/examples/ "jcc2d examples page"
 [particle]:https://jasonchen1982.github.io/jcc2d/examples/ "Particle effect"
 [zIndex-demo]:https://jasonchen1982.github.io/jcc2d/examples/#demo_zIndex_bitmap "3D pictures cloud used zIndex"
 [combine]:https://jasonchen1982.github.io/jcc2d/examples/#demo_animation_combine "multi-segment animation"

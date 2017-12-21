@@ -14,12 +14,14 @@ import {Utils} from '../util/Utils';
 function Transition(options) {
   Animate.call(this, options);
 
-  if (!Utils.isObject(options.from)) {
-    options.from = {};
-    for (let i in options.to) {
+  // collect from pose, when from was not complete
+  options.from = options.from || {};
+  for (const i in options.to) {
+    if (Utils.isUndefined(options.from[i])) {
       options.from[i] = this.element[i];
     }
   }
+
   this.ease = options.ease || Tween.Ease.InOut;
   this.from = options.from;
   this.to = options.to;

@@ -1,6 +1,7 @@
 import {Animate} from './Animate';
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
+import {Utils} from '../util/Utils';
 
 /**
  * AnimateRunner类型动画类
@@ -16,10 +17,41 @@ function AnimateRunner(options) {
   this.cursor = 0;
   this.queues = [];
   this.alternate = false;
+  this.propsMap = [];
 
   this.length = this.runners.length;
+
+  this.prepare();
 }
 AnimateRunner.prototype = Object.create(Animate.prototype);
+
+/**
+ * 填补每个runner的配置
+ * @private
+ */
+AnimateRunner.prototype.prepare = function() {
+  let i = 0;
+  let j = 0;
+  for (i = 0; i < this.runners.length; i++) {
+    const runner = this.runners[i];
+    if (Utils.isUndefined(runner.to)) continue;
+    const keys = Object.keys(runner.to);
+    for (j = 0; j < keys.length; j++) {
+      const prop = keys[j];
+      if (this.propsMap.indexOf(prop) === -1) this.propsMap.push(prop);
+    }
+  }
+  for (i = 0; i < this.runners.length; i++) {
+    const runner = this.runners[i];
+    if (!runner.to) continue;
+    for (j = 0; j < this.propsMap.length; j++) {
+      const prop = this.propsMap[j];
+      if (Utils.isUndefined(runner.to[prop])) {
+        runner.to[prop] = this.element[prop];
+      }
+    }
+  }
+};
 
 /**
  * 更新下一个`runner`
