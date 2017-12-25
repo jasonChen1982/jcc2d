@@ -28,6 +28,7 @@ function Eventer() {
  */
 Eventer.prototype.on = function(type, fn) {
   if (!Utils.isFunction(fn)) return;
+  this.interactive = true;
   this.listeners[type] = this.listeners[type] || [];
   this.listeners[type].push(fn);
   return this;

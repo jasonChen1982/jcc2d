@@ -1,6 +1,6 @@
 
 import {Container} from './Container';
-import {InteractionManager} from '../eventer/InteractionManager';
+import InteractionManager from '../eventer/InteractionManager';
 import {Utils} from '../util/Utils';
 
 /* global RAF CAF */
@@ -184,21 +184,27 @@ function Stage(options) {
   /**
    * 舞台是否可交互
    *
-   * @member {boolean}
+   * @member {Boolean}
    * @private
    */
-  this._interactive = false;
+  this._enableinteractive = null;
 
+  // update interaction in every tick
+  const interactionUpdate = (snippet) => {
+    this.interactionManager.update(snippet);
+  };
 
   this.interactiveOnChange = function() {
-    if (this.interactive) {
+    if (this.enableinteractive) {
+      this.on('prerender', interactionUpdate);
       this.interactionManager.addEvents();
     } else {
+      this.off('prerender', interactionUpdate);
       this.interactionManager.removeEvents();
     }
   };
 
-  this.interactive = Utils.isBoolean(options.interactive) ?
+  this.enableinteractive = Utils.isBoolean(options.interactive) ?
     options.interactive :
     true;
 
@@ -259,7 +265,7 @@ Stage.prototype.resize = function(w, h, sw, sh) {
 Stage.prototype.render = function() {
   this.timeline();
 
-  this.emit('prerender');
+  this.emit('prerender', this.snippet);
 
   if (this.autoClear) {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -364,13 +370,13 @@ Stage.prototype.rendererFixedFPS = function() {
  * @name interactive
  * @memberof JC.Stage#
  */
-Object.defineProperty(Stage.prototype, 'interactive', {
+Object.defineProperty(Stage.prototype, 'enableinteractive', {
   get: function() {
-    return this._interactive;
+    return this._enableinteractive;
   },
   set: function(value) {
-    if (this._interactive !== value) {
-      this._interactive = value;
+    if (this._enableinteractive !== value) {
+      this._enableinteractive = value;
       this.interactiveOnChange();
     }
   },

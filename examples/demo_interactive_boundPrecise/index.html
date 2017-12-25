@@ -81,14 +81,15 @@
         y: pic.y
       };
       pic.on('touchstart', function (ev) {
-        pic.sp.x = ev.global.x;
-        pic.sp.y = ev.global.y;
+        console.log(ev);
+        pic.sp.x = ev.data.global.x;
+        pic.sp.y = ev.data.global.y;
         console.log('touchstart at my pic as target !!!!!');
       });
       pic.on('touchmove', function (ev) {
         var np = {};
-        np.x = ev.global.x - pic.sp.x;
-        np.y = ev.global.y - pic.sp.y;
+        np.x = ev.data.global.x - pic.sp.x;
+        np.y = ev.data.global.y - pic.sp.y;
 
         pic.x = pic.pp.x + np.x;
         pic.y = pic.pp.y + np.y;
@@ -104,15 +105,15 @@
       pic.on('mousedown', function (ev) {
         if (enable) return;
         enable = true;
-        pic.sp.x = ev.global.x;
-        pic.sp.y = ev.global.y;
+        pic.sp.x = ev.data.global.x;
+        pic.sp.y = ev.data.global.y;
         console.log('mousedown at my pic as target !!!!!');
       });
       stage.on('mousemove', function (ev) {
         if (!enable) return;
         var np = {};
-        np.x = ev.global.x - pic.sp.x;
-        np.y = ev.global.y - pic.sp.y;
+        np.x = ev.data.global.x - pic.sp.x;
+        np.y = ev.data.global.y - pic.sp.y;
 
         pic.x = pic.pp.x + np.x;
         pic.y = pic.pp.y + np.y;

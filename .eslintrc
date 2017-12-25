@@ -17,6 +17,7 @@
         "quotes": ["error", "single"],
         "semi": ["error", "always"],
         "no-cond-assign": ["error", "always"],
-        "no-console": "off"
+        "no-console": "off",
+        "max-len": "off"
     }
 }

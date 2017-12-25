@@ -1,7 +1,6 @@
 
 import './util/Raf';
 export {Eventer} from './eventer/Eventer';
-export {InteractionData} from './eventer/InteractionData';
 export {Animation} from './animation/Animation';
 
 export {Tween} from './util/Tween';

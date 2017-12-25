@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 320px;
+      height: 480px;
+      margin: -240px 0 0 -160px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="640" height="960"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    function Trangle(options) {
+      options = options || {};
+      this.radius = options.radius || 240;
+      this.color = options.color || '#e61d5f';
+      this.width = options.width || 15;
+      this.join = options.join || 'miter';
+      this.points = [];
+      this.init();
+    }
+    Trangle.prototype.init = function() {
+      for (var i = 0; i < 3; i++) {
+        var radian = JC.Utils.DTR * (-90 + i * 120);
+        var x = this.radius * Math.cos(radian);
+        var y = this.radius * Math.sin(radian);
+        this.points[i] = new JC.Point(x, y);
+      }
+    };
+    Trangle.prototype.render = function(ctx) {
+      ctx.beginPath();
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth = this.width;
+      ctx.lineJoin = this.join;
+      for (var i = 0; i < 3; i++) {
+        var point = this.points[i];
+        if (i === 0) {
+          ctx.moveTo(point.x, point.y);
+        } else {
+          ctx.lineTo(point.x, point.y);
+        }
+      }
+      ctx.closePath();
+      ctx.stroke();
+    };
+
+    var stage = new JC.Stage({
+      dom: '#demo_canvas'
+    });
+    var DOC = new JC.Container();
+    DOC.x = 320;
+    DOC.y = 480;
+    DOC.rotation = 7;
+
+    for (var i = 0; i < 10; i++) {
+      var trangle = new JC.Graphics(new Trangle());
+      var wait = 600 * i;
+      trangle.alpha = 0;
+      trangle.runners({
+        runners: [
+          { to: { rotation: -20, scale: 0.6 }, duration: 1800, ease: JC.Tween.Linear.None },
+          { to: { rotation: -45, scale: 0.3 }, duration: 1800, ease: JC.Tween.Linear.None },
+          { to: { rotation: -67, scale: 0.1 }, duration: 1500, ease: JC.Tween.Linear.None },
+          { to: { rotation: -67, scale: 0.1 }, duration: 900, ease: JC.Tween.Linear.None },
+        ],
+        wait: wait,
+        infinite: true,
+      });
+      trangle.runners({
+        runners: [
+          { to: { alpha: 0.7 }, duration: 3000, ease: JC.Tween.Ease.Out },
+          { to: { alpha: 0 }, duration: 3000, ease: JC.Tween.Ease.Out },
+        ],
+        wait: wait,
+        infinite: true,
+      });
+
+      DOC.adds(trangle);
+    }
+    stage.adds(DOC);
+    stage.startEngine();
+
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
+
+  </script>
+</body>
+
+</html>

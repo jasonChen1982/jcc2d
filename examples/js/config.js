@@ -81,6 +81,11 @@ var EXAMPLES = [{
     link: 'demo_animation_combine'
   },
   {
+    title: 'runners循环动画',
+    type: 'demo',
+    link: 'demo_animation_graphic'
+  },
+  {
     title: 'path-motion动画',
     type: 'demo',
     link: 'demo_animation_motion'

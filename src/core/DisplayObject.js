@@ -180,7 +180,7 @@ function DisplayObject() {
    * @private
    * @member {Boolean}
    */
-  this._touchstarted = false;
+  // this._touchstarted = false;
 
   /**
    * 标记当前对象是否为mousedown触发状态
@@ -188,21 +188,38 @@ function DisplayObject() {
    * @private
    * @member {Boolean}
    */
-  this._mousedowned = false;
+  // this._mousedowned = false;
 
   /**
    * 渲染对象是否具备光标样式，例如 cursor
    *
    * @member {Boolean}
    */
-  this.buttonMode = false;
+  // this.buttonMode = false;
 
   /**
    * 当渲染对象是按钮时所具备的光标样式
    *
    * @member {Boolean}
    */
-  this.cursor = 'pointer';
+  this.cursor = '';
+
+  /**
+   * Enable interaction events for the DisplayObject. Touch, pointer and mouse
+   * events will not be emitted unless `interactive` is set to `true`.
+   *
+   * @member {boolean}
+   */
+  this.interactive = false;
+
+  /**
+   * Determines if the children to the displayObject can be clicked/touched
+   * Setting this to false allows PixiJS to bypass a recursive `hitTest` function
+   *
+   * @member {boolean}
+   * @memberof PIXI.Container#
+   */
+  this.interactiveChildren = true;
 }
 DisplayObject.prototype = Object.create(Eventer.prototype);
 
@@ -219,6 +236,20 @@ Object.defineProperty(DisplayObject.prototype, 'scale', {
   },
   set: function(scale) {
     this.scaleX = this.scaleY = scale;
+  },
+});
+
+/**
+ * 对渲染对象进行x、y轴同时缩放
+ *
+ * @name scale
+ * @member {Number}
+ * @memberof JC.DisplayObject#
+ */
+Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
+  get: function() {
+    if (this._trackedPointers === undefined) this._trackedPointers = {};
+    return this._trackedPointers;
   },
 });
 
