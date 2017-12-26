@@ -127,15 +127,15 @@
       var data = {};
       el.on('touchstart', function (ev) {
         data.start = {};
-        data.start.x = ev.global.x;
-        data.start.y = ev.global.y;
+        data.start.x = ev.data.global.x;
+        data.start.y = ev.data.global.y;
         el.preX = el.x;
         el.preY = el.y;
       });
       el.on('touchmove', function (ev) {
         data.translate = {};
-        data.translate.x = ev.global.x - data.start.x;
-        data.translate.y = ev.global.y - data.start.y;
+        data.translate.x = ev.data.global.x - data.start.x;
+        data.translate.y = ev.data.global.y - data.start.y;
 
         el.x = JC.Utils.clamp(el.preX + data.translate.x, 0, 400);
         el.y = el.preY + data.translate.y;
@@ -154,16 +154,16 @@
         if (enable) return;
         enable = true;
         data.start = {};
-        data.start.x = ev.global.x;
-        data.start.y = ev.global.y;
+        data.start.x = ev.data.global.x;
+        data.start.y = ev.data.global.y;
         el.preX = el.x;
         el.preY = el.y;
       });
       stage.on('mousemove', function (ev) {
         if (!enable) return;
         data.translate = {};
-        data.translate.x = ev.global.x - data.start.x;
-        data.translate.y = ev.global.y - data.start.y;
+        data.translate.x = ev.data.global.x - data.start.x;
+        data.translate.y = ev.data.global.y - data.start.y;
 
         el.x = JC.Utils.clamp(el.preX + data.translate.x, 0, 400);
         el.y = el.preY + data.translate.y;

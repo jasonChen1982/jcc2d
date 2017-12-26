@@ -141,8 +141,8 @@ loadBox.on('complete', function () {
 stage.on('touchstart', function (ev) {
   if (sphere === null) return;
   var point = {};
-  point.x = ev.global.x - WIDTH / 2;
-  point.y = HEIGHT / 2 - ev.global.y;
+  point.x = ev.data.global.x - WIDTH / 2;
+  point.y = HEIGHT / 2 - ev.data.global.y;
 
   var r = Math.sqrt(point.x * point.x + point.y * point.y);
 
@@ -154,8 +154,8 @@ stage.on('touchstart', function (ev) {
 stage.on('mousemove', function (ev) {
   if (sphere === null) return;
   var point = {};
-  point.x = ev.global.x - WIDTH / 2;
-  point.y = HEIGHT / 2 - ev.global.y;
+  point.x = ev.data.global.x - WIDTH / 2;
+  point.y = HEIGHT / 2 - ev.data.global.y;
 
   var r = Math.sqrt(point.x * point.x + point.y * point.y);
   var s = r / Math.max(HEIGHT / 3, WIDTH / 3);
