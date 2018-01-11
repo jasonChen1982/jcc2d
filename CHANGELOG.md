@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.1"></a>
+## [1.6.1](https://github.com/jasonChen1982/jcc2d/compare/v1.6.0...v1.6.1) (2018-01-11)
+
+
+### Bug Fixes
+
+* **compatibility:** auto complete transition config ([1aac79f](https://github.com/jasonChen1982/jcc2d/commit/1aac79f))
+* **runners:** fixed runners props pre-cache ([7a2206b](https://github.com/jasonChen1982/jcc2d/commit/7a2206b))
+
+
+### Features
+
+* **interaction:** enhance interaction manager ([1509def](https://github.com/jasonChen1982/jcc2d/commit/1509def))
+
+
+
 <a name="1.6.0"></a>
 # [1.6.0](https://github.com/jasonChen1982/jcc2d/compare/v1.5.9...v1.6.0) (2017-11-22)
 
