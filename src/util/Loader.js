@@ -43,6 +43,8 @@ function Texture(texture, options) {
     this.type = URL;
     this.url = texture;
     this.texture = this.resole();
+    this.texture.crossOrigin = this.crossOrigin;
+    if (!this.lazy) this.load();
   } else if (isFrame(texture)) {
     this.type = IMG;
     this.loaded = true;
@@ -64,12 +66,7 @@ Texture.prototype = Object.create(Eventer.prototype);
  * @return {Image}
  */
 Texture.prototype.resole = function() {
-  const image = new Image();
-  image.crossOrigin = this.crossOrigin;
-  if (!this.lazy) {
-    this.load();
-  }
-  return image;
+  return new Image();
 };
 
 /**

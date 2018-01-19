@@ -1691,6 +1691,8 @@ KeyFrames.prototype.setValue = function (key, value) {
   }
 };
 
+// import {Utils} from '../util/Utils';
+
 /**
  * AnimateRunner类型动画类
  *
@@ -1991,119 +1993,145 @@ var URL = 'url';
 var IMG = 'img';
 
 /**
+ *
+ * @param {Object} frame object
+ * @return {Boolean}
+ */
+function isFrame(frame) {
+  return frame.tagName === 'VIDEO' || frame.tagName === 'CANVAS' || frame.tagName === 'IMG';
+}
+
+/**
  * 图片纹理类
  *
  * @class
  * @memberof JC
- * @param {string | Image} img 图片url或者图片对象.
+ * @param {string | Image} texture 图片url或者图片对象.
  * @param {object} options 图片配置
- * @param {boolean} [options.lazy] 图片是否需要懒加载
+ * @param {boolean} [options.lazy=false] 图片是否需要懒加载
  * @param {string} [options.crossOrigin] 图片是否配置跨域
  * @extends JC.Eventer
  */
-function Texture(img, options) {
+function Texture(texture, options) {
   Eventer.call(this);
   options = options || {};
 
-  var isImg = img instanceof Image || img.nodeName === 'IMG';
-  this.type = Utils.isString(img) ? URL : isImg ? IMG : console.warn('not support asset');
-
-  this.crossOrigin = options.crossOrigin;
+  this.type = '';
+  this.url = '';
   this.texture = null;
-  this.width = 0;
-  this.height = 0;
-  this.naturalWidth = 0;
-  this.naturalHeight = 0;
+  this.crossOrigin = options.crossOrigin;
   this.loaded = false;
   this.hadload = false;
-  this.src = img;
+  this.lazy = options.lazy || false;
 
-  this.resole(img);
+  if (Utils.isString(texture)) {
+    this.type = URL;
+    this.url = texture;
+    this.texture = this.resole();
+    this.texture.crossOrigin = this.crossOrigin;
+    if (!this.lazy) this.load();
+  } else if (isFrame(texture)) {
+    this.type = IMG;
+    this.loaded = true;
+    this.hadload = true;
+    this.texture = texture;
+  } else {
+    console.warn('texture not support this texture');
+    return;
+  }
 
-  if (!options.lazy || this.type === IMG) this.load(img);
+  this.listen();
 }
 Texture.prototype = Object.create(Eventer.prototype);
 
 /**
- * 预先处理一些数据
+ * 创建一个图片
  *
- * @static
- * @param {string | Image} img 先生成对应的对象
  * @private
+ * @return {Image}
  */
-Texture.prototype.resole = function (img) {
-  var This = this;
-  if (this.type === URL) {
-    this.texture = new Image();
-  } else if (this.type === IMG) {
-    this.texture = img;
-  }
-  this.on('load', function () {
-    This.update();
-  });
+Texture.prototype.resole = function () {
+  return new Image();
 };
 
 /**
  * 尝试加载图片
  *
- * @static
- * @param {string | Image} img 图片url或者图片对象.
- * @private
+ * @param {String} url 图片url或者图片对象.
  */
-Texture.prototype.load = function (img) {
-  if (this.hadload) return;
+Texture.prototype.load = function (url) {
+  if (this.hadload || this.type !== URL) return;
+  url = url || this.url;
   this.hadload = true;
-  img = img || this.src;
-  if (this.type === URL) {
-    this.fromURL(img);
-  } else if (this.type === IMG) {
-    if (this.texture.naturalWidth > 0 && this.texture.naturalHeight > 0) {
-      this.loaded = true;
-      this.update();
-    } else {
-      this.fromIMG(img);
-    }
-  }
-};
-
-/**
- *
- * @param {String} url 图片资源连接
- * @private
- */
-Texture.prototype.fromURL = function (url) {
-  if (!Utils.isUndefined(this.crossOrigin)) {
-    this.texture.crossOrigin = this.crossOrigin;
-  }
-  this.listen(this.texture);
   this.texture.src = url;
 };
 
 /**
- *
- * @param {Image} img Image object
+ * 监听加载事件
  */
-Texture.prototype.fromIMG = function (img) {
-  this.listen(img);
-};
+Texture.prototype.listen = function () {
+  var _this = this;
 
-Texture.prototype.listen = function (img) {
-  var This = this;
-  img.addEventListener('load', function () {
-    This.loaded = true;
-    This.emit('load');
+  this.texture.addEventListener('load', function () {
+    _this.loaded = true;
+    _this.emit('load');
   });
-  img.addEventListener('error', function () {
-    This.emit('error');
+  this.texture.addEventListener('error', function () {
+    _this.emit('error');
   });
 };
 
-Texture.prototype.update = function () {
-  this.width = this.texture.width;
-  this.height = this.texture.height;
-  this.naturalWidth = this.texture.naturalWidth;
-  this.naturalHeight = this.texture.naturalHeight;
-};
+/**
+ * 获取纹理的宽
+ *
+ * @member width
+ * @property {Number} width 纹理的宽
+ * @memberof JC.Texture
+ */
+Object.defineProperty(Texture.prototype, 'width', {
+  get: function get() {
+    return this.texture ? this.texture.width : 0;
+  }
+});
+
+/**
+ * 获取纹理的高
+ *
+ * @member height
+ * @property {Number} height 纹理的高
+ * @memberof JC.Texture
+ */
+Object.defineProperty(Texture.prototype, 'height', {
+  get: function get() {
+    return this.texture ? this.texture.height : 0;
+  }
+});
+
+/**
+ * 获取纹理的原始宽
+ *
+ * @member naturalWidth
+ * @property {Number} naturalWidth 纹理的原始宽
+ * @memberof JC.Texture
+ */
+Object.defineProperty(Texture.prototype, 'naturalWidth', {
+  get: function get() {
+    return this.texture ? this.texture.naturalWidth : 0;
+  }
+});
+
+/**
+ * 获取纹理的原始高
+ *
+ * @member naturalHeight
+ * @property {Number} naturalHeight 纹理的原始高
+ * @memberof JC.Texture
+ */
+Object.defineProperty(Texture.prototype, 'naturalHeight', {
+  get: function get() {
+    return this.texture ? this.texture.naturalHeight : 0;
+  }
+});
 
 /**
  * 图片资源加载器
