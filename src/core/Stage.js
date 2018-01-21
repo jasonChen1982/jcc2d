@@ -80,20 +80,6 @@ function Stage(options) {
   this.autoStyle = false;
 
   /**
-   * canvas的宽度
-   *
-   * @member {Number}
-   */
-  this.width = this.canvas.width = this.realWidth * this.resolution;
-
-  /**
-   * canvas的高度
-   *
-   * @member {Number}
-   */
-  this.height = this.canvas.height = this.realHeight * this.resolution;
-
-  /**
    * 场景分辨率
    *
    * @member {Number}
@@ -107,6 +93,20 @@ function Stage(options) {
    * @member {Number}
    */
   this.resolution = options.resolution || 1;
+
+  /**
+   * canvas的宽度
+   *
+   * @member {Number}
+   */
+  this.width = this.canvas.width = this.realWidth * this.resolution;
+
+  /**
+   * canvas的高度
+   *
+   * @member {Number}
+   */
+  this.height = this.canvas.height = this.realHeight * this.resolution;
 
   /**
    * 固定更新帧率，默认为 60fps
