@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.3"></a>
+## [1.6.3](https://github.com/jasonChen1982/jcc2d/compare/v1.6.2...v1.6.3) (2018-01-29)
+
+
+### Bug Fixes
+
+* **stage:** fixed stage width and height ([606b02e](https://github.com/jasonChen1982/jcc2d/commit/606b02e))
+
+
+### Features
+
+* **crossOrigin:** export more way to set texture crossOrigin ([94c3143](https://github.com/jasonChen1982/jcc2d/commit/94c3143))
+
+
+
 <a name="1.6.2"></a>
 ## [1.6.2](https://github.com/jasonChen1982/jcc2d/compare/v1.6.1...v1.6.2) (2018-01-19)
 
