@@ -2137,11 +2137,13 @@ Object.defineProperty(Texture.prototype, 'naturalHeight', {
  * 图片资源加载器
  *
  * @class
+ * @param {String} crossOrigin cross-origin config
  * @namespace JC.Loader
  * @extends JC.Eventer
  */
-function Loader() {
+function Loader(crossOrigin) {
   Eventer.call(this);
+  this.crossOrigin = crossOrigin;
   this.textures = {};
   this._total = 0;
   this._failed = 0;
@@ -2172,7 +2174,7 @@ Loader.prototype.load = function (srcMap) {
 
   for (var src in srcMap) {
     this._total++;
-    this.textures[src] = new Texture(srcMap[src]);
+    this.textures[src] = new Texture(srcMap[src], { crossOrigin: this.crossOrigin });
     bind(this.textures[src]);
   }
 
@@ -2227,10 +2229,11 @@ Object.defineProperty(Loader.prototype, 'progress', {
  * @function
  * @memberof JC
  * @param {object} srcMap key-src map
+ * @param {String} crossOrigin cross-origin config
  * @return {JC.Loader}
  */
-var loaderUtil = function loaderUtil(srcMap) {
-  return new Loader().load(srcMap);
+var loaderUtil = function loaderUtil(srcMap, crossOrigin) {
+  return new Loader(crossOrigin).load(srcMap);
 };
 
 /**
@@ -7818,20 +7821,6 @@ function Stage(options) {
   this.autoStyle = false;
 
   /**
-   * canvas的宽度
-   *
-   * @member {Number}
-   */
-  this.width = this.canvas.width = this.realWidth * this.resolution;
-
-  /**
-   * canvas的高度
-   *
-   * @member {Number}
-   */
-  this.height = this.canvas.height = this.realHeight * this.resolution;
-
-  /**
    * 场景分辨率
    *
    * @member {Number}
@@ -7845,6 +7834,20 @@ function Stage(options) {
    * @member {Number}
    */
   this.resolution = options.resolution || 1;
+
+  /**
+   * canvas的宽度
+   *
+   * @member {Number}
+   */
+  this.width = this.canvas.width = this.realWidth * this.resolution;
+
+  /**
+   * canvas的高度
+   *
+   * @member {Number}
+   */
+  this.height = this.canvas.height = this.realHeight * this.resolution;
 
   /**
    * 固定更新帧率，默认为 60fps
