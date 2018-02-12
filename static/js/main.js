@@ -331,7 +331,7 @@ var linkFace = new LinkFace({
   textColor: '#000000'
 });
 var documentLink = new JC.Graphics(linkFace);
-documentLink.buttonMode = true;
+documentLink.cursor = 'pointer';
 documentLink.setArea(linkFace.bound);
 documentLink.x = -JC.UI.RTP(1.2);
 documentLink.alpha = 0;
@@ -349,7 +349,7 @@ var linkFace2 = new LinkFace({
   textColor: '#000000'
 });
 var examplesLink = new JC.Graphics(linkFace2);
-examplesLink.buttonMode = true;
+examplesLink.cursor = 'pointer';
 examplesLink.setArea(linkFace2.bound);
 examplesLink.x = JC.UI.RTP(1.2);
 examplesLink.alpha = 0;
