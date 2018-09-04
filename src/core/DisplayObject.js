@@ -357,6 +357,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
 };
 
 /**
+ * 不推荐使用，建议使用`queues`方法达到同样效果
  * runners动画，多个复合动画的组合形式，不支持`alternate`
  *
  * ```js
@@ -364,8 +365,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  *   runners: [
  *     { from: {}, to: {} },
  *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
- *     { ks: data.layers[0] },
- *   ], // 组合动画，支持组合 animate、motion、keyFrames
+ *   ], // 组合动画，支持组合 animate、motion
  *   delay: 1000, // ae导出的动画数据
  *   wait: 100, // ae导出的动画数据
  *   repeats: 10, // 动画运动完后再重复10次
@@ -376,11 +376,11 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * ```
  *
  * @param {Object} options 动画配置参数
- * @param {Object} options.runners 组合动画，支持 animate、motion、keyFrames 这些的自定义组合
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Object} options.runners 组合动画，支持 animate、motion 这些的自定义组合
+ * @param {Number} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait=0] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay=0] 设置动画延迟时间，在重复动画也会生效 默认 0ms
  * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
  * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
  * @param {Boolean} clear 是否去掉之前的动画
@@ -388,6 +388,32 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  */
 DisplayObject.prototype.runners = function(options, clear) {
   return this.Animation.runners(options, clear);
+};
+
+/**
+ * 以链式调用的方式触发一串动画 （不支持`alternate`）
+ *
+ * ```js
+ * display.queues({ from: { x: 1 }, to: { x: 2 } })
+ *   .then({ path: JC.BezierCurve([ point1, point2, point3, point4 ]) })
+ *   .then({ from: { x: 2 }, to: { x: 1 } })
+ *   .then({ from: { scale: 1 }, to: { scale: 0 } })
+ *   .on('complete', function() {
+ *     console.log('end queues');
+ *   });
+ * ```
+ *
+ * @param {Object} [runner] 添加动画，可以是 animate 或者 motion 动画配置
+ * @param {Object} [options={}] 整个动画的循环等配置
+ * @param {Object} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Object} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Boolean} [clear=false] 是否去掉之前的动画
+ * @return {JC.Queues}
+ */
+DisplayObject.prototype.queues = function(runner, options = {}, clear) {
+  return this.Animation.queues(runner, options, clear);
 };
 
 /**
