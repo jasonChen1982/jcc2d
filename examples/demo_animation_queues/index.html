@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>demo animation queues</title>
+  <link href="https://fonts.googleapis.com/css?family=Plaster" rel="stylesheet">
+  <style type="text/css">
+
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Plaster', cursive;
+      overflow: hidden;
+      background-color: transparent;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    function Rect(color) {
+      this.color = color || '#c243ff';
+    }
+    Rect.prototype.render = function (ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-20, -20, 40, 40);
+      ctx.fill();
+    };
+
+    var stage = new JC.Stage({
+      dom: 'demo_canvas'
+    });
+    var DOC = new JC.Container();
+    resize();
+
+    var startPoint = new JC.Point(200, -200);
+    var controlPoint = new JC.Point(40, -160);
+    var endPoint = new JC.Point(0, 0);
+    var path = new JC.BezierCurve([startPoint, controlPoint, endPoint]);
+    var cube = new JC.Graphics(new Rect('#ea2e88'));
+
+    cube.queues({
+      from: {scale: 0, x: startPoint.x, y: startPoint.y},
+      to: {scale: 1.2, x: startPoint.x, y: startPoint.y},
+      duration: 80,
+    }, { infinite: true })
+    .then({
+      to: {scale: 1},
+      duration: 80,
+    })
+    .then({
+      path: path,
+      ease: JC.Tween.Back.In,
+      wait: 280,
+      duration: 520,
+    })
+    .then({
+      to: {scale: 0},
+      ease: JC.Tween.Linear.None,
+      duration: 120,
+    });
+
+    DOC.adds(cube);
+    stage.adds(DOC);
+    stage.startEngine();
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    stats.domElement.style.display = 'none';
+    document.body.appendChild(stats.domElement);
+    stage.on('postrender', function () {
+      stats.update();
+    })
+
+    window.onresize = function () {
+      resize();
+    };
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      DOC.x = w / 2;
+      DOC.y = h / 2;
+      stage.resize(w, h);
+    }
+
+  </script>
+</body>
+
+</html>
