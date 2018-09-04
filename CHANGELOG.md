@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.4"></a>
+## [1.6.4](https://github.com/jasonChen1982/jcc2d/compare/v1.6.3...v1.6.4) (2018-09-04)
+
+
+### Features
+
+* **queues:** add queues animation function ([8abf957](https://github.com/jasonChen1982/jcc2d/commit/8abf957))
+
+
+
 <a name="1.6.3"></a>
 ## [1.6.3](https://github.com/jasonChen1982/jcc2d/compare/v1.6.2...v1.6.3) (2018-01-29)
 
