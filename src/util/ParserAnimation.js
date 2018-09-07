@@ -28,8 +28,14 @@ function ParserAnimation(options) {
   this.alternate = options.alternate || false;
   this.assetBox = null;
   this.timeline = [];
-  this.preParser(this.keyframes.assets, this.keyframes.layers);
-  this.parser(this.doc, this.keyframes.layers);
+  this.parserAssets(this.keyframes.assets);
+  this.parserComposition(this.doc, this.keyframes.layers, {
+    repeats: this.repeats,
+    infinite: this.infinite,
+    alternate: this.alternate,
+    ip: this.ip,
+    op: this.op,
+  });
 
   if (options.onComplete) {
     this.timeline[0].on('complete', options.onComplete.bind(this));
@@ -42,12 +48,10 @@ function ParserAnimation(options) {
 /**
  * @private
  * @param {array} assets 资源数组
- * @param {array} layers 图层数组
  */
-ParserAnimation.prototype.preParser = function(assets, layers) {
+ParserAnimation.prototype.parserAssets = function(assets) {
   const sourceMap = {};
   let i = 0;
-  const l = layers.length;
   for (i = 0; i < assets.length; i++) {
     const id = assets[i].id;
     const up = assets[i].up;
@@ -61,60 +65,87 @@ ParserAnimation.prototype.preParser = function(assets, layers) {
       console.error('can not get asset url');
     }
   }
-  for (i = l - 1; i >= 0; i--) {
-    const layer = layers[i];
-    this.ip = Math.min(this.ip, layer.ip);
-    this.op = Math.max(this.op, layer.op);
-  }
   this.assetBox = loaderUtil(sourceMap);
 };
 
 /**
+ * 创建 Sprite
+ * @private
+ * @param {object} layer 图层信息
+ * @return {Sprite}
+ */
+ParserAnimation.prototype.spriteItem = function(layer) {
+  const id = this.getAssets(layer.refId).id;
+  return new Sprite({
+    texture: this.assetBox.getById(id),
+  });
+};
+
+/**
+ * 创建 Container
+ * @private
+ * @return {Container}
+ */
+ParserAnimation.prototype.docItem = function() {
+  return new Container();
+};
+
+/**
+ * 初始化合成组内的图层
+ * @private
+ * @param {array} layers 图层数组
+ * @param {object} options 动画配置
+ * @return {object} 该图层的所有渲染对象
+ */
+ParserAnimation.prototype.initLayers = function(layers, {ip, op, repeats, infinite, alternate}) {
+  const layersMap = {};
+  for (let i = layers.length - 1; i >= 0; i--) {
+    const layer = layers[i];
+    let element = null;
+    if (layer.ty === 2) {
+      element = this.spriteItem(layer);
+    } else if (layer.ty === 0) {
+      element = this.docItem();
+    } else {
+      continue;
+    }
+
+    element.name = layer.nm;
+    layersMap[layer.ind] = element;
+    this.timeline.push(element.keyFrames({
+      ks: layer,
+      fr: this.fr,
+      ip,
+      op,
+      repeats,
+      infinite,
+      alternate,
+    }));
+  }
+  return layersMap;
+};
+
+/**
+ * 解析合成组
  * @private
  * @param {JC.Container} doc 动画元素的渲染组
- * @param {array} layers 图层数组
+ * @param {array} layers 预合成数组
+ * @param {object} options 动画配置
  */
-ParserAnimation.prototype.parser = function(doc, layers) {
-  const l = layers.length;
-  const repeats = this.repeats;
-  const infinite = this.infinite;
-  const alternate = this.alternate;
-  const ip = this.ip;
-  const op = this.op;
-  for (let i = l - 1; i >= 0; i--) {
+ParserAnimation.prototype.parserComposition = function(doc, layers, options) {
+  const layersMap = this.initLayers(layers, options);
+  for (let i = layers.length - 1; i >= 0; i--) {
     const layer = layers[i];
-    if (layer.ty === 2) {
-      const id = this.getAssets(layer.refId).id;
-      const ani = new Sprite({
-        texture: this.assetBox.getById(id),
-      });
-      this.timeline.push(ani.keyFrames({
-        ks: layer,
-        fr: this.fr,
-        ip,
-        op,
-        repeats,
-        infinite,
-        alternate,
-      }));
-      ani.name = layer.nm;
-      doc.adds(ani);
+    const item = layersMap[layer.ind];
+    if (layer.parent) {
+      const parent = layersMap[layer.parent];
+      parent.adds(item);
+    } else {
+      doc.adds(item);
     }
     if (layer.ty === 0) {
-      const ddoc = new Container();
-      const llayers = this.getAssets(layer.refId).layers;
-      this.timeline.push(ddoc.keyFrames({
-        ks: layer,
-        fr: this.fr,
-        ip,
-        op,
-        repeats,
-        infinite,
-        alternate,
-      }));
-      ddoc.name = layer.nm;
-      doc.adds(ddoc);
-      this.parser(ddoc, llayers);
+      const childLayers = this.getAssets(layer.refId).layers;
+      this.parserComposition(item, childLayers, options);
     }
   }
 };

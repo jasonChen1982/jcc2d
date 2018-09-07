@@ -69,7 +69,7 @@ function KeyFrames(options) {
 
   this.keys = options.ks;
   this.aks = {};
-  this.fr = this.keys.fr || 30;
+  this.fr = options.fr || 30;
   this.rfr = 1000 / this.fr;
   this.iip = this.keys.ip;
   this.ip = options.ip === undefined ? this.keys.ip : options.ip;
