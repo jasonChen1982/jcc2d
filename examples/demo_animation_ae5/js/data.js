@@ -16,38 +16,31 @@ var data = {
     "e": 0
   }, {
     "id": "image_1",
-    "w": 88,
-    "h": 25,
+    "w": 122,
+    "h": 62,
     "u": "images/",
     "p": "img_1.png",
     "e": 0
   }, {
     "id": "image_2",
-    "w": 750,
-    "h": 1334,
+    "w": 64,
+    "h": 64,
     "u": "images/",
     "p": "img_2.png",
     "e": 0
   }, {
     "id": "image_3",
-    "w": 64,
-    "h": 64,
+    "w": 117,
+    "h": 117,
     "u": "images/",
     "p": "img_3.png",
     "e": 0
   }, {
     "id": "image_4",
-    "w": 117,
-    "h": 117,
-    "u": "images/",
-    "p": "img_4.png",
-    "e": 0
-  }, {
-    "id": "image_5",
     "w": 166,
     "h": 166,
     "u": "images/",
-    "p": "img_5.png",
+    "p": "img_4.png",
     "e": 0
   }, {
     "id": "comp_0",
@@ -252,7 +245,7 @@ var data = {
       "ind": 3,
       "ty": 2,
       "nm": "3",
-      "refId": "image_3",
+      "refId": "image_2",
       "sr": 1,
       "ks": {
         "o": {
@@ -383,7 +376,7 @@ var data = {
       "ind": 4,
       "ty": 2,
       "nm": "2",
-      "refId": "image_4",
+      "refId": "image_3",
       "sr": 1,
       "ks": {
         "o": {
@@ -553,7 +546,7 @@ var data = {
       "ind": 5,
       "ty": 2,
       "nm": "4",
-      "refId": "image_5",
+      "refId": "image_4",
       "sr": 1,
       "ks": {
         "o": {
@@ -677,12 +670,12 @@ var data = {
         },
         "p": {
           "a": 0,
-          "k": [224, 899.5, 0],
+          "k": [221, 907.5, 0],
           "ix": 2
         },
         "a": {
           "a": 0,
-          "k": [44, 12.5, 0],
+          "k": [61, 31, 0],
           "ix": 1
         },
         "s": {

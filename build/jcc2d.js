@@ -1520,7 +1520,7 @@ function KeyFrames(options) {
 
   this.keys = options.ks;
   this.aks = {};
-  this.fr = this.keys.fr || 30;
+  this.fr = options.fr || 30;
   this.rfr = 1000 / this.fr;
   this.iip = this.keys.ip;
   this.ip = options.ip === undefined ? this.keys.ip : options.ip;
@@ -4113,8 +4113,14 @@ function ParserAnimation(options) {
   this.alternate = options.alternate || false;
   this.assetBox = null;
   this.timeline = [];
-  this.preParser(this.keyframes.assets, this.keyframes.layers);
-  this.parser(this.doc, this.keyframes.layers);
+  this.parserAssets(this.keyframes.assets);
+  this.parserComposition(this.doc, this.keyframes.layers, {
+    repeats: this.repeats,
+    infinite: this.infinite,
+    alternate: this.alternate,
+    ip: this.ip,
+    op: this.op
+  });
 
   if (options.onComplete) {
     this.timeline[0].on('complete', options.onComplete.bind(this));
@@ -4127,12 +4133,10 @@ function ParserAnimation(options) {
 /**
  * @private
  * @param {array} assets 资源数组
- * @param {array} layers 图层数组
  */
-ParserAnimation.prototype.preParser = function (assets, layers) {
+ParserAnimation.prototype.parserAssets = function (assets) {
   var sourceMap = {};
   var i = 0;
-  var l = layers.length;
   for (i = 0; i < assets.length; i++) {
     var id = assets[i].id;
     var up = assets[i].up;
@@ -4146,60 +4150,93 @@ ParserAnimation.prototype.preParser = function (assets, layers) {
       console.error('can not get asset url');
     }
   }
-  for (i = l - 1; i >= 0; i--) {
-    var layer = layers[i];
-    this.ip = Math.min(this.ip, layer.ip);
-    this.op = Math.max(this.op, layer.op);
-  }
   this.assetBox = loaderUtil(sourceMap);
 };
 
 /**
+ * 创建 Sprite
+ * @private
+ * @param {object} layer 图层信息
+ * @return {Sprite}
+ */
+ParserAnimation.prototype.spriteItem = function (layer) {
+  var id = this.getAssets(layer.refId).id;
+  return new Sprite({
+    texture: this.assetBox.getById(id)
+  });
+};
+
+/**
+ * 创建 Container
+ * @private
+ * @return {Container}
+ */
+ParserAnimation.prototype.docItem = function () {
+  return new Container();
+};
+
+/**
+ * 初始化合成组内的图层
+ * @private
+ * @param {array} layers 图层数组
+ * @param {object} options 动画配置
+ * @return {object} 该图层的所有渲染对象
+ */
+ParserAnimation.prototype.initLayers = function (layers, _ref) {
+  var ip = _ref.ip,
+      op = _ref.op,
+      repeats = _ref.repeats,
+      infinite = _ref.infinite,
+      alternate = _ref.alternate;
+
+  var layersMap = {};
+  for (var i = layers.length - 1; i >= 0; i--) {
+    var layer = layers[i];
+    var element = null;
+    if (layer.ty === 2) {
+      element = this.spriteItem(layer);
+    } else if (layer.ty === 0) {
+      element = this.docItem();
+    } else {
+      continue;
+    }
+
+    element.name = layer.nm;
+    layersMap[layer.ind] = element;
+    this.timeline.push(element.keyFrames({
+      ks: layer,
+      fr: this.fr,
+      ip: ip,
+      op: op,
+      repeats: repeats,
+      infinite: infinite,
+      alternate: alternate
+    }));
+  }
+  return layersMap;
+};
+
+/**
+ * 解析合成组
  * @private
  * @param {JC.Container} doc 动画元素的渲染组
- * @param {array} layers 图层数组
+ * @param {array} layers 预合成数组
+ * @param {object} options 动画配置
  */
-ParserAnimation.prototype.parser = function (doc, layers) {
-  var l = layers.length;
-  var repeats = this.repeats;
-  var infinite = this.infinite;
-  var alternate = this.alternate;
-  var ip = this.ip;
-  var op = this.op;
-  for (var i = l - 1; i >= 0; i--) {
+ParserAnimation.prototype.parserComposition = function (doc, layers, options) {
+  var layersMap = this.initLayers(layers, options);
+  for (var i = layers.length - 1; i >= 0; i--) {
     var layer = layers[i];
-    if (layer.ty === 2) {
-      var id = this.getAssets(layer.refId).id;
-      var ani = new Sprite({
-        texture: this.assetBox.getById(id)
-      });
-      this.timeline.push(ani.keyFrames({
-        ks: layer,
-        fr: this.fr,
-        ip: ip,
-        op: op,
-        repeats: repeats,
-        infinite: infinite,
-        alternate: alternate
-      }));
-      ani.name = layer.nm;
-      doc.adds(ani);
+    var item = layersMap[layer.ind];
+    if (layer.parent) {
+      var parent = layersMap[layer.parent];
+      parent.adds(item);
+    } else {
+      doc.adds(item);
     }
     if (layer.ty === 0) {
-      var ddoc = new Container();
-      var llayers = this.getAssets(layer.refId).layers;
-      this.timeline.push(ddoc.keyFrames({
-        ks: layer,
-        fr: this.fr,
-        ip: ip,
-        op: op,
-        repeats: repeats,
-        infinite: infinite,
-        alternate: alternate
-      }));
-      ddoc.name = layer.nm;
-      doc.adds(ddoc);
-      this.parser(ddoc, llayers);
+      var childLayers = this.getAssets(layer.refId).layers;
+      this.parserComposition(item, childLayers, options);
     }
   }
 };

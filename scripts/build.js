@@ -62,7 +62,7 @@ const TASKS = [
     ],
     targets: {
       format: 'es',
-      dest: 'esm/jcc2d.js',
+      dest: 'build/jcc2d.module.js',
       sourceMap: true,
       banner: BANNER,
     },
