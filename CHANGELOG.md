@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.5"></a>
+## [1.6.5](https://github.com/jasonChen1982/jcc2d/compare/v1.6.4...v1.6.5) (2018-09-07)
+
+
+### Features
+
+* **bodymovin:** add some feature and upgrade bodymovin version ([c1a46a6](https://github.com/jasonChen1982/jcc2d/commit/c1a46a6))
+
+
+
 <a name="1.6.4"></a>
 ## [1.6.4](https://github.com/jasonChen1982/jcc2d/compare/v1.6.3...v1.6.4) (2018-09-04)
 
