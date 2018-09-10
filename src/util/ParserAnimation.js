@@ -29,13 +29,7 @@ function ParserAnimation(options) {
   this.assetBox = null;
   this.timeline = [];
   this.parserAssets(this.keyframes.assets);
-  this.parserComposition(this.doc, this.keyframes.layers, {
-    repeats: this.repeats,
-    infinite: this.infinite,
-    alternate: this.alternate,
-    ip: this.ip,
-    op: this.op,
-  });
+  this.parserComposition(this.doc, this.keyframes.layers);
 
   if (options.onComplete) {
     this.timeline[0].on('complete', options.onComplete.bind(this));
@@ -94,11 +88,17 @@ ParserAnimation.prototype.docItem = function() {
  * 初始化合成组内的图层
  * @private
  * @param {array} layers 图层数组
- * @param {object} options 动画配置
  * @return {object} 该图层的所有渲染对象
  */
-ParserAnimation.prototype.initLayers = function(layers, {ip, op, repeats, infinite, alternate}) {
+ParserAnimation.prototype.initLayers = function(layers) {
   const layersMap = {};
+  const fr = this.fr;
+  const ip = this.ip;
+  const op = this.op;
+  const repeats = this.repeats;
+  const infinite = this.infinite;
+  const alternate = this.alternate;
+
   for (let i = layers.length - 1; i >= 0; i--) {
     const layer = layers[i];
     let element = null;
@@ -113,8 +113,8 @@ ParserAnimation.prototype.initLayers = function(layers, {ip, op, repeats, infini
     element.name = layer.nm;
     layersMap[layer.ind] = element;
     this.timeline.push(element.keyFrames({
-      ks: layer,
-      fr: this.fr,
+      layer,
+      fr,
       ip,
       op,
       repeats,
@@ -130,10 +130,9 @@ ParserAnimation.prototype.initLayers = function(layers, {ip, op, repeats, infini
  * @private
  * @param {JC.Container} doc 动画元素的渲染组
  * @param {array} layers 预合成数组
- * @param {object} options 动画配置
  */
-ParserAnimation.prototype.parserComposition = function(doc, layers, options) {
-  const layersMap = this.initLayers(layers, options);
+ParserAnimation.prototype.parserComposition = function(doc, layers) {
+  const layersMap = this.initLayers(layers);
   for (let i = layers.length - 1; i >= 0; i--) {
     const layer = layers[i];
     const item = layersMap[layer.ind];
@@ -145,7 +144,7 @@ ParserAnimation.prototype.parserComposition = function(doc, layers, options) {
     }
     if (layer.ty === 0) {
       const childLayers = this.getAssets(layer.refId).layers;
-      this.parserComposition(item, childLayers, options);
+      this.parserComposition(item, childLayers);
     }
   }
 };
