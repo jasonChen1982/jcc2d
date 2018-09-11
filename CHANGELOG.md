@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.6.6"></a>
+## [1.6.6](https://github.com/jasonChen1982/jcc2d/compare/v1.6.5...v1.6.6) (2018-09-11)
+
+
+### Bug Fixes
+
+* **bodymovin:** filter some layer type ([c9dcd67](https://github.com/jasonChen1982/jcc2d/commit/c9dcd67))
+
+
+### Performance Improvements
+
+* **keyframes:** upgrade keyframes performance ([84030b7](https://github.com/jasonChen1982/jcc2d/commit/84030b7))
+
+
+
 <a name="1.6.5"></a>
 ## [1.6.5](https://github.com/jasonChen1982/jcc2d/compare/v1.6.4...v1.6.5) (2018-09-07)
 
