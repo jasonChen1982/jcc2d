@@ -1451,25 +1451,25 @@ function getEaseingPath(curve, nm, p) {
 
 /* eslint guard-for-in: "off" */
 
-var PM = {
+var PROPS_MAP = {
   o: {
-    label: 'alpha',
+    props: ['alpha'],
     scale: 0.01
   },
   r: {
-    label: 'rotation',
+    props: ['rotation'],
     scale: 1
   },
   p: {
-    label: ['x', 'y'],
+    props: ['x', 'y'],
     scale: 1
   },
   a: {
-    label: ['pivotX', 'pivotY'],
+    props: ['pivotX', 'pivotY'],
     scale: 1
   },
   s: {
-    label: ['scaleX', 'scaleY'],
+    props: ['scaleX', 'scaleY'],
     scale: 0.01
   }
 };
@@ -1489,14 +1489,13 @@ function inRange(v, min, max) {
  * 判断当前进度在哪一帧内
  * @param {array} steps 帧数组
  * @param {number} progress 当前进度
- * @param {number} rfr 每一帧的时间
  * @return {number} 当前进度停留在第几帧
  */
-function findStep(steps, progress, rfr) {
+function findStep(steps, progress) {
   var last = steps.length - 1;
   for (var i = 0; i < last; i++) {
     var step = steps[i];
-    if (inRange(progress, step.t * rfr, step.jcet * rfr)) {
+    if (inRange(progress, step.jcst, step.jcet)) {
       return i;
     }
   }
@@ -1512,20 +1511,24 @@ function findStep(steps, progress, rfr) {
 function KeyFrames(options) {
   Animate.call(this, options);
 
-  this.keys = options.ks;
-  this.aks = {};
+  this.layer = Utils.copyJSON(options.layer);
   this.fr = options.fr || 30;
-  this.rfr = 1000 / this.fr;
-  this.iip = this.keys.ip;
-  this.ip = options.ip === undefined ? this.keys.ip : options.ip;
-  this.op = options.op === undefined ? this.keys.op : options.op;
+  this.tpf = 1000 / this.fr;
+
+  this.iipt = this.layer.ip * this.tpf;
+  this.iopt = this.layer.op * this.tpf;
+
+  this.ip = options.ip === undefined ? this.layer.ip : options.ip;
+  this.op = options.op === undefined ? this.layer.op : options.op;
 
   this.tfs = Math.floor(this.op - this.ip);
-  this.duration = this.tfs * this.rfr;
+  this.duration = this.tfs * this.tpf;
 
-  this.keyState = {};
+  // this.keyState = {};
+  this.aks = {};
+  this.kic = {};
 
-  this.preParser(Utils.copyJSON(options.ks));
+  this.preParser();
   this.nextPose();
 }
 KeyFrames.prototype = Object.create(Animate.prototype);
@@ -1533,15 +1536,14 @@ KeyFrames.prototype = Object.create(Animate.prototype);
 /**
  * 预解析关键帧
  * @private
- * @param {object} keys 关键帧配置
  */
-KeyFrames.prototype.preParser = function (keys) {
-  var ks = keys.ks;
+KeyFrames.prototype.preParser = function () {
+  var ks = this.layer.ks;
   for (var key in ks) {
     if (ks[key].a) {
-      this.prepareDynamic(ks, key);
+      this.parserDynamic(key);
     } else {
-      this.prepareStatic(ks, key);
+      this.parserStatic(key);
     }
   }
 };
@@ -1549,64 +1551,68 @@ KeyFrames.prototype.preParser = function (keys) {
 /**
  * 预解析动态属性的关键帧
  * @private
- * @param {object} ks 关键帧配置
  * @param {string} key 所属的属性
  */
-KeyFrames.prototype.prepareDynamic = function (ks, key) {
-  this.aks[key] = ks[key];
-  var k = ks[key].k;
-  var et = k[k.length - 1].t;
-  var st = k[0].t;
+KeyFrames.prototype.parserDynamic = function (key) {
+  var ksp = this.layer.ks[key];
+  var kspk = ksp.k;
 
-  this.aks[key].jcet = et;
-  this.aks[key].jcst = st;
-  for (var i = 0; i < k.length; i++) {
-    var now = k[i];
-    var next = k[i + 1];
-    if (next) {
-      now.jcet = next.t;
-      if (Utils.isString(now.n) && now.ti && now.to) {
-        prepareEaseing(now.o.x, now.o.y, now.i.x, now.i.y);
-        var s = new Point(now.s[0], now.s[1]);
-        var e = new Point(now.e[0], now.e[1]);
-        var ti = new Point(now.ti[0], now.ti[1]);
-        var to = new Point(now.to[0], now.to[1]);
-        var c1 = new Point(now.s[0], now.s[1]);
-        var c2 = new Point(now.e[0], now.e[1]);
-        now.curve = new BezierCurve([s, c1.add(ti), c2.add(to), e]);
+  ksp.jcst = kspk[0].t * this.tpf;
+  ksp.jcet = kspk[kspk.length - 1].t * this.tpf;
+
+  for (var i = 0; i < kspk.length; i++) {
+    var sbk = kspk[i];
+    var sek = kspk[i + 1];
+    if (sek) {
+      sbk.jcst = sbk.t * this.tpf;
+      sbk.jcet = sek.t * this.tpf;
+      if (Utils.isString(sbk.n) && sbk.ti && sbk.to) {
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+        var sp = new Point(sbk.s[0], sbk.s[1]);
+        var ep = new Point(sbk.e[0], sbk.e[1]);
+        var c1 = new Point(sbk.s[0] + sbk.ti[0], sbk.s[1] + sbk.ti[1]);
+        var c2 = new Point(sbk.e[0] + sbk.to[0], sbk.e[1] + sbk.to[1]);
+        sbk.curve = new BezierCurve([sp, c1, c2, ep]);
       } else {
-        for (var _i = 0; _i < now.n.length; _i++) {
-          prepareEaseing(now.o.x[_i], now.o.y[_i], now.i.x[_i], now.i.y[_i]);
+        for (var _i = 0; _i < sbk.n.length; _i++) {
+          prepareEaseing(sbk.o.x[_i], sbk.o.y[_i], sbk.i.x[_i], sbk.i.y[_i]);
         }
       }
     }
   }
+
+  this.aks[key] = ksp;
 };
 
 /**
  * 预解析静态属性的关键帧
  * @private
- * @param {object} ks 关键帧配置
  * @param {string} key 所属的属性
  */
-KeyFrames.prototype.prepareStatic = function (ks, key) {
-  var prop = PM[key].label;
-  var scale = PM[key].scale;
-  var k = 0;
-  if (Utils.isString(prop)) {
-    if (Utils.isNumber(ks[key].k)) {
-      k = ks[key].k;
-    }
-    if (Utils.isArray(ks[key].k)) {
-      k = ks[key].k[0];
-    }
-    this.element[prop] = scale * k;
-  } else if (Utils.isArray(prop)) {
-    for (var i = 0; i < prop.length; i++) {
-      k = ks[key].k[i];
-      this.element[prop[i]] = scale * k;
-    }
-  }
+KeyFrames.prototype.parserStatic = function (key) {
+  // const prop = PM[key].label;
+  // const scale = PM[key].scale;
+  // let k = 0;
+  // if (Utils.isString(prop)) {
+  //   if (Utils.isNumber(ks[key].k)) {
+  //     k = ks[key].k;
+  //   }
+  //   if (Utils.isArray(ks[key].k)) {
+  //     k = ks[key].k[0];
+  //   }
+  //   this.element[prop] = scale * k;
+  // } else if (Utils.isArray(prop)) {
+  //   for (let i = 0; i < prop.length; i++) {
+  //     k = ks[key].k[i];
+  //     this.element[prop[i]] = scale * k;
+  //   }
+  // }
+
+  var ksp = this.layer.ks[key];
+  var kspk = ksp.k;
+  if (Utils.isNumber(kspk)) kspk = [kspk];
+
+  this.setValue(key, kspk);
 };
 
 /**
@@ -1619,38 +1625,38 @@ KeyFrames.prototype.nextPose = function () {
   for (var key in this.aks) {
     var ak = this.aks[key];
     pose[key] = this.interpolation(key, ak);
+    this.setValue(key, pose[key]);
   }
   return pose;
 };
 
 /**
- * 预计算关键帧属性值
+ * 计算关键帧属性值
  * @private
  * @param {string} key 关键帧配置
  * @param {object} ak 所属的属性
  * @return {array}
  */
-KeyFrames.prototype.prepare = function (key, ak) {
-  var k = ak.k;
-  var rfr = this.rfr;
-  var progress = Utils.clamp(this.progress, 0, ak.jcet * rfr);
-  var skt = ak.jcst * rfr;
-  var ekt = ak.jcet * rfr;
-  var last = k.length - 2;
-  var invisible = progress < this.iip * rfr;
+KeyFrames.prototype.interpolation = function (key, ak) {
+  var akk = ak.k;
+  var progress = Utils.clamp(this.progress, 0, ak.jcet);
+  var skt = ak.jcst;
+  var ekt = ak.jcet;
+  var invisible = progress < this.iipt;
   if (invisible === this.element.visible) this.element.visible = !invisible;
 
   if (progress <= skt) {
-    return k[0].s;
+    return akk[0].s;
   } else if (progress >= ekt) {
-    return k[last].e;
+    var last = akk.length - 2;
+    return akk[last].e;
   } else {
-    var ck = this.keyState[key];
-    if (!Utils.isNumber(ck) || !inRange(progress, k[ck].t * rfr, k[ck].jcet * rfr)) {
-      ck = this.keyState[key] = findStep(k, progress, rfr);
+    var kic = this.kic[key];
+    if (!Utils.isNumber(kic) || !inRange(progress, akk[kic].jcst, akk[kic].jcet)) {
+      kic = this.kic[key] = findStep(akk, progress);
     }
-    var frame = k[ck];
-    var rate = (progress / rfr - frame.t) / (frame.jcet - frame.t);
+    var frame = akk[kic];
+    var rate = (progress - frame.jcst) / (frame.jcet - frame.jcst);
     if (frame.curve) {
       return getEaseingPath(frame.curve, frame.n, rate);
     } else {
@@ -1660,34 +1666,17 @@ KeyFrames.prototype.prepare = function (key, ak) {
 };
 
 /**
- * 进行插值计算
- * @private
- * @param {string} key 属性
- * @param {object} ak 属性配置
- * @return {array}
- */
-KeyFrames.prototype.interpolation = function (key, ak) {
-  var value = this.prepare(key, ak);
-  this.setValue(key, value);
-  return value;
-};
-
-/**
  * 更新元素的属性值
  * @private
  * @param {string} key 属性
  * @param {array} value 属性值
  */
 KeyFrames.prototype.setValue = function (key, value) {
-  var prop = PM[key].label;
-  var scale = PM[key].scale;
-  if (Utils.isString(prop)) {
-    this.element[prop] = scale * value[0];
-  } else if (Utils.isArray(prop)) {
-    for (var i = 0; i < prop.length; i++) {
-      var v = value[i];
-      this.element[prop[i]] = scale * v;
-    }
+  var props = PROPS_MAP[key].props;
+  var scale = PROPS_MAP[key].scale;
+  for (var i = 0; i < props.length; i++) {
+    var v = value[i];
+    this.element[props[i]] = scale * v;
   }
 };
 
@@ -4108,13 +4097,7 @@ function ParserAnimation(options) {
   this.assetBox = null;
   this.timeline = [];
   this.parserAssets(this.keyframes.assets);
-  this.parserComposition(this.doc, this.keyframes.layers, {
-    repeats: this.repeats,
-    infinite: this.infinite,
-    alternate: this.alternate,
-    ip: this.ip,
-    op: this.op
-  });
+  this.parserComposition(this.doc, this.keyframes.layers);
 
   if (options.onComplete) {
     this.timeline[0].on('complete', options.onComplete.bind(this));
@@ -4173,17 +4156,17 @@ ParserAnimation.prototype.docItem = function () {
  * 初始化合成组内的图层
  * @private
  * @param {array} layers 图层数组
- * @param {object} options 动画配置
  * @return {object} 该图层的所有渲染对象
  */
-ParserAnimation.prototype.initLayers = function (layers, _ref) {
-  var ip = _ref.ip,
-      op = _ref.op,
-      repeats = _ref.repeats,
-      infinite = _ref.infinite,
-      alternate = _ref.alternate;
-
+ParserAnimation.prototype.initLayers = function (layers) {
   var layersMap = {};
+  var fr = this.fr;
+  var ip = this.ip;
+  var op = this.op;
+  var repeats = this.repeats;
+  var infinite = this.infinite;
+  var alternate = this.alternate;
+
   for (var i = layers.length - 1; i >= 0; i--) {
     var layer = layers[i];
     var element = null;
@@ -4198,8 +4181,8 @@ ParserAnimation.prototype.initLayers = function (layers, _ref) {
     element.name = layer.nm;
     layersMap[layer.ind] = element;
     this.timeline.push(element.keyFrames({
-      ks: layer,
-      fr: this.fr,
+      layer: layer,
+      fr: fr,
       ip: ip,
       op: op,
       repeats: repeats,
@@ -4215,13 +4198,13 @@ ParserAnimation.prototype.initLayers = function (layers, _ref) {
  * @private
  * @param {JC.Container} doc 动画元素的渲染组
  * @param {array} layers 预合成数组
- * @param {object} options 动画配置
  */
-ParserAnimation.prototype.parserComposition = function (doc, layers, options) {
-  var layersMap = this.initLayers(layers, options);
+ParserAnimation.prototype.parserComposition = function (doc, layers) {
+  var layersMap = this.initLayers(layers);
   for (var i = layers.length - 1; i >= 0; i--) {
     var layer = layers[i];
     var item = layersMap[layer.ind];
+    if (!item) continue;
     if (layer.parent) {
       var parent = layersMap[layer.parent];
       parent.adds(item);
@@ -4230,7 +4213,7 @@ ParserAnimation.prototype.parserComposition = function (doc, layers, options) {
     }
     if (layer.ty === 0) {
       var childLayers = this.getAssets(layer.refId).layers;
-      this.parserComposition(item, childLayers, options);
+      this.parserComposition(item, childLayers);
     }
   }
 };
