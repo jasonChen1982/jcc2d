@@ -136,6 +136,7 @@ ParserAnimation.prototype.parserComposition = function(doc, layers) {
   for (let i = layers.length - 1; i >= 0; i--) {
     const layer = layers[i];
     const item = layersMap[layer.ind];
+    if (!item) continue;
     if (layer.parent) {
       const parent = layersMap[layer.parent];
       parent.adds(item);
