@@ -32,7 +32,8 @@ function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
 function getEaseing(s, e, nm, p) {
   const value = [];
   for (let i = 0; i < s.length; i++) {
-    const rate = bezierPool[nm[i]].get(p);
+    const bezier = bezierPool[nm[i]] || bezierPool[nm[0]];
+    const rate = bezier.get(p);
     const v = e[i] - s[i];
     value[i] = s[i] + v * rate;
   }

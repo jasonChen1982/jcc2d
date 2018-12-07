@@ -1,4 +1,4 @@
-import GraphicsElement from '../core/elements/GraphicsElement';
+import Graphics from './graphics/Graphics';
 
 /**
  * Shapes
@@ -30,8 +30,8 @@ class Shapes {
     for (let i = 0; i < shapes.length; i++) {
       const shape = shapes[i];
       if (shape.ty === 'gr') {
-        const ge = new GraphicsElement(layer, shape, session);
-        this.element.addChild(ge);
+        const ge = new Graphics(layer, shape, session);
+        this.element.adds(ge);
         this.shapes.push(ge);
       }
     }
@@ -44,8 +44,7 @@ class Shapes {
    */
   update(progress, session) {
     for (let i = 0; i < this.shapes.length; i++) {
-      const shape = this.shapes[i];
-      shape.updateShape(progress);
+      this.shapes[i].update(progress, session);
     }
   }
 }

@@ -1,6 +1,6 @@
 import {Container} from '../../../core/Container';
 import SpriteElement from './SpriteElement';
-// import ShapeElement from './ShapeElement';
+import ShapeElement from './ShapeElement';
 import {Utils} from '../../../utils/Utils';
 import {getAssets} from '../../common/common';
 import {Keyframes} from '../../keyframes/Keyframes';
@@ -103,9 +103,9 @@ class CompElement extends Container {
       case 2:
         element = new SpriteElement(layer, session);
         break;
-      // case 4:
-      //   element = new ShapeElement(layer, session);
-      //   break;
+      case 4:
+        element = new ShapeElement(layer, session);
+        break;
       default:
         continue;
       }

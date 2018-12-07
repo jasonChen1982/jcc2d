@@ -6,16 +6,15 @@ import CurveShape from './CurveShape';
 /**
  * getShape
  * @ignore
- * @param {*} element element
  * @param {*} item data
  * @param {*} session session
  * @return {shape}
  */
-function getShape(element, item, session) {
+function getShape(item, session) {
   let shape = null;
   switch (item.ty) {
   case 'sh':
-    shape = new CurveShape(element, item, session);
+    shape = new CurveShape(item, session);
     break;
   // case 'el':
   //   shape = new EllipseShape(item, session);

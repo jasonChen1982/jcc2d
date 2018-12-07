@@ -30,7 +30,7 @@ function PathMotion(options) {
     false;
 
   this._cacheRotate = this.element.rotation;
-  const radian = this._cacheRotate * Utils.DTR;
+  const radian = this._cacheRotate;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
 

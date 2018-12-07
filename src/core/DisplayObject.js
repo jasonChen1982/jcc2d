@@ -1,11 +1,9 @@
-
 /* eslint max-len: "off" */
 
 import {Matrix, TEMP_MATRIX, IDENTITY} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
 import {Animation} from '../animation/Animation';
-import {Utils} from '../utils/Utils';
 
 /**
  * 显示对象的基类，继承至Eventer
@@ -480,9 +478,9 @@ DisplayObject.prototype.updateTransform = function(rootMatrix) {
       this.pivotY,
       this.scaleX,
       this.scaleY,
-      this.rotation * Utils.DTR,
-      this.skewX * Utils.DTR,
-      this.skewY * Utils.DTR,
+      this.rotation,
+      this.skewX,
+      this.skewY,
       this.originX,
       this.originY
     );
@@ -497,8 +495,8 @@ DisplayObject.prototype.updateTransform = function(rootMatrix) {
     if (this.rotation % 360) {
       if (this.rotation !== this.rotationCache) {
         this.rotationCache = this.rotation;
-        this._sr = Math.sin(this.rotation * Utils.DTR);
-        this._cr = Math.cos(this.rotation * Utils.DTR);
+        this._sr = Math.sin(this.rotation);
+        this._cr = Math.cos(this.rotation);
       }
 
       a = this._cr * this.scaleX;

@@ -1,43 +1,4 @@
-import {Graphics} from '../../core/Graphics';
-import CurveData from './shapes/CurveData';
-import {drawCurve, drawInv} from './shapes/DrawCurve';
-
-/**
- * Shape
- */
-class Shape {
-  /**
-   *
-   * @param {*} shapes a
-   * @param {*} session a
-   */
-  constructor(shapes, session) {
-    this.shapes = shapes;
-    this.session = session;
-    this.curves = [];
-  }
-
-  /**
-   * a
-   * @param {*} progress a
-   */
-  update(progress) {
-    for (let i = 0; i < this.shapes.length; i++) {
-      this.curves[i] = this.shapes[i].getCurve(progress);
-    }
-  }
-
-  /**
-   * a
-   * @param {*} ctx a
-   */
-  render(ctx) {
-    for (let i = 0; i < this.shapes.length; i++) {
-      if (this.shapes[i].inv) drawInv(ctx, this.session.size);
-      drawCurve(ctx, this.curves[i]);
-    }
-  }
-}
+import GraphicsMask from './graphics/GraphicsMask';
 
 /**
  * Mask
@@ -60,15 +21,9 @@ class Mask {
 
     this.session = session;
 
-    this.maskData = this.masksProperties.filter((it) => {
-      return it.mode !== 'n';
-    });
-    this.shapes = this.maskData.map((it) => {
-      return new CurveData(it, session, true);
-    });
+    this.mask = new GraphicsMask(this.masksProperties, session);
 
-    this.maskShape = new Shape(this.shapes, session);
-    this.element.mask = new Graphics(this.maskShape);
+    this.element.mask = this.mask;
   }
 
   /**
@@ -77,7 +32,7 @@ class Mask {
    * @param {object} session update session
    */
   update(progress, session) {
-    this.maskShape.update(progress);
+    this.mask.update(progress);
   }
 }
 

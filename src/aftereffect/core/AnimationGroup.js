@@ -85,7 +85,7 @@ class AnimationGroup {
    */
   bindSlot(name, slot) {
     const slotDot = this.getLayerByName(name);
-    if (slotDot) slotDot.addChild(slot);
+    if (slotDot) slotDot.add(slot);
   }
 
   /**

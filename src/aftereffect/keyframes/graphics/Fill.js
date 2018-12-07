@@ -1,29 +1,26 @@
-import {Utils} from '../../utils/Utils';
-import {STROKE_MAP} from '../common/PropsMap';
-import {prepareEaseing, interpolation} from '../../utils/Easeing';
+import {Utils} from '../../../utils/Utils';
+import {FILL_MAP} from '../../common/PropsMap';
+import {prepareEaseing, interpolation} from '../../../utils/Easeing';
 
 /**
- * Stroke
+ * Fill keyframes class
  * @class
  * @private
  */
-class Stroke {
+class Fill {
   /**
-   * generate a keyframes buffer
-   * @param {Container} element host element
+   * generate a fill-type keyframes buffer
    * @param {object} item item data
    * @param {object} session now session
    * @param {object} session.size time of pre-frame
    * @param {number} session.st time of start position
    */
-  constructor(element, item, session) {
+  constructor(item, session) {
     const {st = 0} = session;
-    this.element = element;
     this.item = item;
 
-    this.alpha = 1;
-    this.lineWidth = 1;
-    this.color = 0x000000;
+    this.alpha = 255;
+    this.color = [0, 0, 0];
 
     this.st = st;
     this.aks = {};
@@ -37,7 +34,7 @@ class Stroke {
    * @param {object} item fill tiem config
    */
   preParse(item) {
-    for (const key in STROKE_MAP) {
+    for (const key in FILL_MAP) {
       if (item[key] && item[key].a) {
         this.parseDynamic(key);
       } else if (item[key]) {
@@ -93,7 +90,7 @@ class Stroke {
       }
     }
 
-    this.element.lineStyle(this.lineWidth, this.color, this.alpha);
+    // this.element.beginFill(this.color, this.alpha);
   }
 
   /**
@@ -103,11 +100,19 @@ class Stroke {
    * @param {array} value value array
    */
   setValue(key, value) {
-    const {props, translate} = STROKE_MAP[key];
+    const {props, translate} = FILL_MAP[key];
     for (let i = 0; i < props.length; i++) {
       this[props[i]] = translate(value, i);
     }
   }
+
+  /**
+   * a
+   * @param {*} ctx a
+   */
+  render(ctx) {
+    ctx.fillStyle = `rgba(${this.color.join(', ')}, ${this.alpha})`;
+  }
 }
 
-export default Stroke;
+export default Fill;

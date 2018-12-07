@@ -135,7 +135,7 @@ Container.prototype.updateMovin = function(progress, session) {
       doc.updateMovin(progress, session);
     }
   }
-  this.updateKeyframes(progress, session);
+  this.updateKeyframes && this.updateKeyframes(progress, session);
 };
 
 /**
@@ -158,7 +158,7 @@ Container.prototype.adds = function(object) {
   if (object === this) {
     console.error('adds: object can\'t be added as a child of itself.', object);
   }
-  if ((object && object instanceof Container)) {
+  if ((object)) {
     if (object.parent !== null) {
       object.parent.remove(object);
     }

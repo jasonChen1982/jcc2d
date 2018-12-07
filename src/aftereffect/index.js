@@ -43,7 +43,7 @@ class AnimationManager {
      */
     this.groups = [];
 
-    this.ticker.on('tick', (snippet) => {
+    this.ticker.on('update', (snippet) => {
       this.update(snippet);
     });
   }
@@ -59,7 +59,7 @@ class AnimationManager {
     if (argumentsLength > 1) {
       for (let i = 0; i < argumentsLength; i++) {
         /* eslint prefer-rest-params: 0 */
-        this.addChild(arguments[i]);
+        this.add(arguments[i]);
       }
     } else {
       this.groups.push(child);

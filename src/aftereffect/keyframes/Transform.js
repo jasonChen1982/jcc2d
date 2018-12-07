@@ -2,6 +2,7 @@ import {Point} from '../../math/Point';
 import {Utils} from '../../utils/Utils';
 import {hasExpression, getEX} from '../common/Expression';
 import {TRANSFORM_MAP} from '../common/PropsMap';
+import {inRange} from '../common/common';
 import {BezierCurve} from '../../math/BezierCurve';
 import {prepareEaseing, interpolation} from '../../utils/Easeing';
 
@@ -118,7 +119,7 @@ class Transform {
     if (session.forever) {
       this.element.visible = progress >= this.oip;
     } else {
-      const visible = Utils.inRange(progress, this.oip, this.oop);
+      const visible = inRange(progress, this.oip, this.oop);
       this.element.visible = visible;
       if (!visible) return;
     }

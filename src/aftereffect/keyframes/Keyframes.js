@@ -32,8 +32,8 @@ class Keyframes {
   parse(element, layer, session) {
     this.transform(element, layer, session);
 
-    // if (layer.hasMask) this.mask(element, layer, session);
-    // if (layer.shapes) this.shapes(element, layer, session);
+    if (layer.hasMask) this.mask(element, layer, session);
+    if (layer.shapes) this.shapes(element, layer, session);
   }
 
   /**

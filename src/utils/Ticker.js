@@ -108,6 +108,7 @@ Ticker.prototype.timeline = function() {
 Ticker.prototype.tick = function() {
   if (this.paused) return;
   this.timeline();
+  this.emit('update', this.snippet);
   this.emit('tick', this.snippet);
 };
 

@@ -30,18 +30,24 @@ export const Utils = {
    *
    * @static
    * @memberof JC.Utils
-   * @type {number}
+   * @param {number} degree 角度数
+   * @return {number} 弧度数
    */
-  DTR: Math.PI/180,
+  DTR(degree) {
+    return degree * Math.PI / 180;
+  },
 
   /**
    * 将弧度转化成角度的乘法因子
    *
    * @static
    * @memberof JC.Utils
-   * @type {number}
+   * @param {number} radian 角度数
+   * @return {number} 弧度数
    */
-  RTD: 180/Math.PI,
+  RTD(radian) {
+    return radian * 180 / Math.PI;
+  },
 
   /**
    * 判断变量是否为数组类型

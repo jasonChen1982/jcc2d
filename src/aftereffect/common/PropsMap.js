@@ -1,4 +1,3 @@
-import {Utils} from '../../utils/Utils';
 
 /**
  * translate rgba array to hex
@@ -9,7 +8,20 @@ import {Utils} from '../../utils/Utils';
  */
 function toColor(color, _) {
   color = color.slice(0, 3);
-  return Utils.rgb2hex(color);
+  return color.map((c) => {
+    return c * 255 >> 0;
+  });
+}
+
+/**
+ * just return the value * 2.55 >> 0
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function to255(value, _) {
+  return value[0] * 2.55 >> 0;
 }
 
 /**
@@ -59,7 +71,7 @@ function toRadian(value, _) {
 export const FILL_MAP = {
   o: {
     props: ['alpha'],
-    translate: toNormalize,
+    translate: to255,
   },
   c: {
     props: ['color'],
@@ -70,7 +82,7 @@ export const FILL_MAP = {
 export const STROKE_MAP = {
   o: {
     props: ['alpha'],
-    translate: toNormalize,
+    translate: to255,
   },
   c: {
     props: ['color'],
