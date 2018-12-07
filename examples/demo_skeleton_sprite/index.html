@@ -89,7 +89,7 @@
       arm1.y = 22;
       arm1.pivotX = 140;
       arm1.pivotY = 102;
-      arm1.rotation = 30;
+      arm1.rotation = JC.Utils.DTR(30);
       arm2 = new JC.Sprite({
         texture: loadBox.getById('arm2')
       });
@@ -123,7 +123,7 @@
 
       arm1.animate({
         to: {
-          rotation: -10
+          rotation: JC.Utils.DTR(-10)
         },
         duration: 2000,
         infinite: true,
@@ -131,7 +131,7 @@
       });
       hand.animate({
         to: {
-          rotation: 50
+          rotation: JC.Utils.DTR(50)
         },
         duration: 2000,
         infinite: true,
@@ -139,7 +139,7 @@
       });
       arm2.animate({
         to: {
-          rotation: 80
+          rotation: JC.Utils.DTR(80)
         },
         duration: 2000,
         infinite: true,
@@ -204,7 +204,7 @@
     function upPos() {
       if (!stat.enable && !stat.autoing) return;
       var rad = stat.velocity * 90 / 52 * Math.PI;
-      wheel1.rotation = wheel2.rotation += rad;
+      wheel1.rotation = wheel2.rotation += JC.Utils.DTR(rad);
       bodyDoc.x += stat.velocity;
     }
 

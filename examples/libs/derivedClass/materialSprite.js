@@ -101,7 +101,7 @@ MaterialSprite.prototype.moveRotate = function (ev) {
   var pi = nor > 0 ? 1 : -1;
   var tmp = (INV.x * this.SV.x + INV.y * this.SV.y) / (Math.sqrt(INV.x * INV.x + INV.y * INV.y) * Math.sqrt(this.SV.x * this.SV.x + this.SV.y * this.SV.y));
 
-  var iNowDeg = pi * Math.acos(tmp) * 180 / Math.PI;
+  var iNowDeg = pi * Math.acos(tmp);
   if (isNaN(iNowDeg)) return;
   this.rotation = this.preDeg + iNowDeg;
 };

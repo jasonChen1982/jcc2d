@@ -74,7 +74,7 @@
     var DOC = new JC.Container();
     DOC.x = 320;
     DOC.y = 480;
-    DOC.rotation = 7;
+    DOC.rotation = JC.Utils.DTR(7);
 
     for (var i = 0; i < 10; i++) {
       var trangle = new JC.Graphics(new Trangle());
@@ -82,10 +82,10 @@
       trangle.alpha = 0;
       trangle.runners({
         runners: [
-          { to: { rotation: -20, scale: 0.6 }, duration: 1800, ease: JC.Tween.Linear.None },
-          { to: { rotation: -45, scale: 0.3 }, duration: 1800, ease: JC.Tween.Linear.None },
-          { to: { rotation: -67, scale: 0.1 }, duration: 1500, ease: JC.Tween.Linear.None },
-          { to: { rotation: -67, scale: 0.1 }, duration: 900, ease: JC.Tween.Linear.None },
+          { to: { rotation: JC.Utils.DTR(-20), scale: 0.6 }, duration: 1800, ease: JC.Tween.Linear.None },
+          { to: { rotation: JC.Utils.DTR(-45), scale: 0.3 }, duration: 1800, ease: JC.Tween.Linear.None },
+          { to: { rotation: JC.Utils.DTR(-67), scale: 0.1 }, duration: 1500, ease: JC.Tween.Linear.None },
+          { to: { rotation: JC.Utils.DTR(-67), scale: 0.1 }, duration: 900, ease: JC.Tween.Linear.None },
         ],
         wait: wait,
         infinite: true,

@@ -91,7 +91,7 @@
         ctx.fill();
       });
       arm1.x = 95;
-      arm1.rotation = 80;
+      arm1.rotation = JC.Utils.DTR(80);
 
       arm2 = new JC.Graphics(function (ctx) {
 
@@ -116,7 +116,7 @@
       });
       arm2.x = 0;
       arm2.y = -220;
-      arm2.rotation = 16;
+      arm2.rotation = JC.Utils.DTR(16);
 
       arm3 = new JC.Graphics(function (ctx) {
 
@@ -161,7 +161,7 @@
       });
       arm3.x = 0;
       arm3.y = -220;
-      arm3.rotation = 26;
+      arm3.rotation = JC.Utils.DTR(26);
 
       hand = new JC.Graphics(function (ctx) {
         ctx.beginPath();
@@ -175,7 +175,7 @@
       });
       hand.x = 0;
       hand.y = -90;
-      hand.rotation = 50;
+      hand.rotation = JC.Utils.DTR(50);
 
       wheel1 = new JC.Graphics(function (ctx) {
         ctx.beginPath();
@@ -184,7 +184,7 @@
       });
       wheel1.x = 26;
       wheel1.y = -70;
-      wheel1.rotation = 30;
+      wheel1.rotation = JC.Utils.DTR(30);
 
       wheel2 = new JC.Graphics(function (ctx) {
         ctx.beginPath();
@@ -193,7 +193,7 @@
       });
       wheel2.x = -26;
       wheel2.y = -70;
-      wheel2.rotation = -30;
+      wheel2.rotation = JC.Utils.DTR(-30);
 
       body = new JC.Sprite({
         texture: loadBox.getById('body')
@@ -222,7 +222,7 @@
 
       arm1.animate({
         to: {
-          rotation: -10
+          rotation: JC.Utils.DTR(-10)
         },
         duration: 2000,
         infinite: true,
@@ -230,7 +230,7 @@
       });
       arm2.animate({
         to: {
-          rotation: 120
+          rotation: JC.Utils.DTR(120)
         },
         duration: 2000,
         infinite: true,
@@ -238,7 +238,7 @@
       });
       arm3.animate({
         to: {
-          rotation: 80
+          rotation: JC.Utils.DTR(80)
         },
         duration: 2000,
         infinite: true,
@@ -254,7 +254,7 @@
       });
       wheel1.animate({
         to: {
-          rotation: -30
+          rotation: JC.Utils.DTR(-30)
         },
         duration: 1000,
         infinite: true,
@@ -262,7 +262,7 @@
       });
       wheel2.animate({
         to: {
-          rotation: 30
+          rotation: JC.Utils.DTR(30)
         },
         duration: 1000,
         infinite: true,

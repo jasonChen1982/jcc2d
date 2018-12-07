@@ -184,7 +184,7 @@ rectLeftFront.animate({
   alternate: true
 });
 
-rectLeftFront.skewX = rectLeftBack.skewX = 30;
+rectLeftFront.skewX = rectLeftBack.skewX = JC.Utils.DTR(30);
 bannerLeft.adds(rectLeftBack, rectLeftFront);
 bannerLeft.animate({
   to: {
@@ -219,8 +219,8 @@ rectRightFront.animate({
   alternate: true
 });
 
-rectRightFront.skewX = rectRightBack.skewX = 30;
-bannerRight.rotation = 180;
+rectRightFront.skewX = rectRightBack.skewX = JC.Utils.DTR(30);
+bannerRight.rotation = JC.Utils.DTR(180);
 bannerRight.adds(rectRightBack, rectRightFront);
 bannerRight.animate({
   to: {

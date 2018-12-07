@@ -62,7 +62,7 @@
         materialSprites[i].name = 'pic' + i;
         materialSprites[i].x = w * (Math.random() - 0.5);
         materialSprites[i].scale = 0.25;
-        materialSprites[i].rotation = 60 * (Math.random() - 0.5);
+        materialSprites[i].rotation = JC.Utils.DTR(60 * (Math.random() - 0.5));
         materialSprites[i].animate({
           from: {
             y: -400

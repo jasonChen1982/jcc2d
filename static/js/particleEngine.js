@@ -73,7 +73,7 @@ Emitter.prototype.update = function () {
         child.fadeIn = false;
       }
     }
-    doc.rotation += child.spin;
+    doc.rotation += JC.Utils.DTR(child.spin);
     doc.x += child.speed * child.directionX;
     doc.y += child.speed * child.directionY;
     if (child.checkBound()) child.reset();
@@ -87,8 +87,8 @@ function ParticleCricle() {
   this.alphaEnd = JC.Utils.random(0.5, 1);
 
   var degree = JC.Utils.random(0, 360);
-  this.directionX = Math.sin(degree * JC.Utils.DTR);
-  this.directionY = Math.cos(degree * JC.Utils.DTR);
+  this.directionX = Math.sin(JC.Utils.DTR(degree));
+  this.directionY = Math.cos(JC.Utils.DTR(degree));
 
   this.init();
   this.reset();
@@ -128,8 +128,8 @@ function ParticleTriangle() {
   this.alphaEnd = JC.Utils.random(0.5, 1);
 
   var degree = JC.Utils.random(0, 360);
-  this.directionX = Math.sin(degree * JC.Utils.DTR);
-  this.directionY = Math.cos(degree * JC.Utils.DTR);
+  this.directionX = Math.sin(JC.Utils.DTR(degree));
+  this.directionY = Math.cos(JC.Utils.DTR(degree));
 
   this.FOS = JC.Utils.random(['fill', 'stroke']);
 
@@ -146,12 +146,12 @@ ParticleTriangle.prototype.init = function () {
       y: this.radius * Math.sin(0)
     },
     {
-      x: this.radius * Math.cos(120 * JC.Utils.DTR),
-      y: this.radius * Math.sin(120 * JC.Utils.DTR)
+      x: this.radius * Math.cos(JC.Utils.DTR(120)),
+      y: this.radius * Math.sin(JC.Utils.DTR(120))
     },
     {
-      x: this.radius * Math.cos(240 * JC.Utils.DTR),
-      y: this.radius * Math.sin(240 * JC.Utils.DTR)
+      x: this.radius * Math.cos(JC.Utils.DTR(240)),
+      y: this.radius * Math.sin(JC.Utils.DTR(240))
     }
   ];
   this.doc = new JC.Graphics(function (ctx) {
@@ -193,8 +193,8 @@ function ParticlePlus() {
   this.alphaEnd = JC.Utils.random(0.5, 1);
 
   var degree = JC.Utils.random(0, 360);
-  this.directionX = Math.sin(degree * JC.Utils.DTR);
-  this.directionY = Math.cos(degree * JC.Utils.DTR);
+  this.directionX = Math.sin(JC.Utils.DTR(degree));
+  this.directionY = Math.cos(JC.Utils.DTR(degree));
 
   this.init();
   this.reset();

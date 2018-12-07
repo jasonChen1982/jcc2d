@@ -121,7 +121,7 @@
       borderwidth: 4,
     }));
     closeBtn.setArea(new JC.Circle(0, 0, 22));
-    closeBtn.rotation = 45;
+    closeBtn.rotation = JC.Utils.DTR(45);
     closeBtn.x = 200;
     closeBtn.y = -150;
     closeBtn.clicked = false;
@@ -130,7 +130,7 @@
       if (closeBtn.clicked) return;
       closeBtn.clicked = true;
       rectBox.queues()
-      .then({ to: { rotation: 20 }, ease: JC.Tween.Elastic.Out, duration: 1500 })
+      .then({ to: { rotation: JC.Utils.DTR(20) }, ease: JC.Tween.Elastic.Out, duration: 1500 })
       .then({ to: { y: 700 }, ease: JC.Tween.Ease.Bezier(0.7, 0, 1, 0.5) })
       .then({
         wait: 500,
