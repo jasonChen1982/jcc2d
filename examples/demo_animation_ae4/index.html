@@ -42,11 +42,12 @@
     DOC.x = 150;
     DOC.y = 350;
 
-    var ani = new JC.ParserAnimation({
+    var manager = new JC.AnimationManager(app.ticker);
+    var ani = manager.parseAnimation({
       keyframes: data,
       infinite: true,
     });
-    DOC.adds(ani.doc);
+    DOC.adds(ani.group);
     app.scene.adds(DOC);
 
 

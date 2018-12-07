@@ -40,13 +40,13 @@
     });
     var DOC = new JC.Container();
 
-    var ani = new JC.ParserAnimation({
+    var manager = new JC.AnimationManager(app.ticker);
+    var ani = manager.parseAnimation({
       keyframes: data,
       infinite: true,
     });
     DOC.y = 200;
-    DOC.adds(ani.doc);
-    ani.doc.pause();
+    DOC.adds(ani.group);
     app.scene.adds(DOC);
 
 
