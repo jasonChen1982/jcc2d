@@ -27,13 +27,13 @@
   <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth,
-      h = window.innerHeight,
-      graphicsCube,
-      COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'],
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container();
+    h = window.innerHeight,
+    graphicsCube,
+    COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'],
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container();
     resize();
     DOC.x = w / 2;
     DOC.y = h / 2;
@@ -66,9 +66,7 @@
     });
 
     DOC.adds(graphicsCube);
-    stage.adds(DOC);
-
-    stage.startEngine();
+    app.scene.adds(DOC);
 
     /**
      * 界面控件工具
@@ -90,7 +88,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -100,7 +98,7 @@
     function resize() {
       w = window.innerWidth;
       h = window.innerHeight;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

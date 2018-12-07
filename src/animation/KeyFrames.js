@@ -4,8 +4,8 @@
 import {Animate} from './Animate';
 import {BezierCurve} from '../math/BezierCurve';
 import {Point} from '../math/Point';
-import {Utils} from '../util/Utils';
-import {prepareEaseing, getEaseing, getEaseingPath} from '../util/Easeing';
+import {Utils} from '../utils/Utils';
+import {prepareEaseing, getEaseing, getEaseingPath} from '../utils/Easeing';
 const PROPS_MAP = {
   o: {
     props: ['alpha'],

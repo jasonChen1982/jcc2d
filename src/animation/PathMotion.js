@@ -1,6 +1,6 @@
 import {Animate} from './Animate';
-import {Utils} from '../util/Utils';
-import {Tween} from '../util/Tween';
+import {Utils} from '../utils/Utils';
+import {Tween} from '../utils/Tween';
 import {Curve} from '../math/Curve';
 import {Point} from '../math/Point';
 

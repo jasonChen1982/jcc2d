@@ -1,7 +1,7 @@
 import {Animate} from './Animate';
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
-// import {Utils} from '../util/Utils';
+// import {Utils} from '../utils/Utils';
 
 /**
  * AnimateRunner类型动画类

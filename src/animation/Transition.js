@@ -1,6 +1,6 @@
-import {Tween} from '../util/Tween';
+import {Tween} from '../utils/Tween';
 import {Animate} from './Animate';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /* eslint guard-for-in: "off" */
 

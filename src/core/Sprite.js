@@ -55,7 +55,7 @@ function Sprite(options) {
     });
   }
 
-  this.MovieClip = new MovieClip(this, options);
+  this.movieClip = new MovieClip(this, options);
 }
 Sprite.prototype = Object.create(Container.prototype);
 
@@ -137,8 +137,8 @@ Sprite.prototype.updateGeometry = function() {
  * @param {number} snippet
  */
 Sprite.prototype.updateAnimation = function(snippet) {
-  this.Animation.update(snippet);
-  this.MovieClip.update(snippet);
+  this.animation.update(snippet);
+  this.movieClip.update(snippet);
 };
 
 /**
@@ -153,7 +153,7 @@ Sprite.prototype.updateAnimation = function(snippet) {
  * @return {MovieClip}
  */
 Sprite.prototype.playMovie = function(options) {
-  return this.MovieClip.playMovie(options);
+  return this.movieClip.playMovie(options);
 };
 
 /**
@@ -164,7 +164,7 @@ Sprite.prototype.playMovie = function(options) {
  */
 Sprite.prototype.renderMe = function(ctx) {
   if (!this.ready) return;
-  const frame = this.MovieClip.getFrame();
+  const frame = this.movieClip.getFrame();
   ctx.drawImage(
     this.texture.texture,
     frame.x,

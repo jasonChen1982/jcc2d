@@ -36,13 +36,13 @@
   <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth,
-      h = window.innerHeight,
-      pic,
-      boundBox,
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container();
+    h = window.innerHeight,
+    pic,
+    boundBox,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container();
     DOC.x = w / 2;
     DOC.y = h / 2;
     DOC.name = 'doc';
@@ -110,7 +110,7 @@
         pic.sp.y = ev.data.global.y;
         console.log('mousedown at my pic as target !!!!!');
       });
-      stage.on('mousemove', function (ev) {
+      app.renderer.on('mousemove', function (ev) {
         if (!enable) return;
         var np = {};
         np.x = ev.data.global.x - pic.sp.x;
@@ -156,8 +156,7 @@
 
 
       DOC.adds(pic);
-      stage.adds(DOC);
-      stage.startEngine();
+      app.scene.adds(DOC);
     });
 
 
@@ -181,9 +180,9 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
-    })
+    });
 
     window.onresize = function () {
       resize();
@@ -191,7 +190,7 @@
     function resize() {
       w = window.innerWidth;
       h = window.innerHeight;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

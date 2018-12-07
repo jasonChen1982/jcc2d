@@ -5,13 +5,16 @@
         "es6": true
     },
     "globals": {
-        "JC": true
+        "JC": true,
+        "RAF": true,
+        "CAF": true
     },
     "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module"
     },
     "rules": {
+        "new-cap": "off",
         "indent": ["error", 2],
         "linebreak-style": ["error", "unix"],
         "quotes": ["error", "single"],

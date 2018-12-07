@@ -1,6 +1,6 @@
 
 import {Container} from './Container';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /* eslint max-len: 0 */
 

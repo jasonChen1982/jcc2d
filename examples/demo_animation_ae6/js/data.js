@@ -247,6 +247,7 @@ var data = {
           }, {
             "t": 93
           }],
+          "x": "var $bm_rt;\n$bm_rt = loopOut('pingpong', 1);",
           "ix": 2
         },
         "a": {
@@ -370,8 +371,7 @@ var data = {
         "s": {
           "a": 0,
           "k": [100, 100, 100],
-          "ix": 6,
-          "x": "var $bm_rt;\n$bm_rt = transform.scale;"
+          "ix": 6
         }
       },
       "ao": 0,
@@ -687,6 +687,7 @@ var data = {
           }, {
             "t": 93.79052734375
           }],
+          "x": "var $bm_rt;\n$bm_rt = loopOut('pingpong', 1);",
           "ix": 2
         },
         "a": {

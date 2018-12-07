@@ -1,7 +1,7 @@
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
 import {KeyFrames} from './KeyFrames';
-import {AnimateRunner} from './AnimateRunner';
+// import {AnimateRunner} from './AnimateRunner';
 import {Queues} from './Queues';
 /**
  * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
@@ -83,11 +83,10 @@ Animation.prototype.motion = function(options, clear) {
  * @param {boolean} clear 是否清除之前的动画
  * @return {JC.AnimateRunner}
  */
-Animation.prototype.runners = function(options, clear) {
-  options.element = this.element;
-  return this._addMove(new AnimateRunner(options), clear);
-};
-
+// Animation.prototype.runners = function(options, clear) {
+//   options.element = this.element;
+//   return this._addMove(new AnimateRunner(options), clear);
+// };
 Animation.prototype.queues = function(runner, options, clear) {
   options.element = this.element;
   return this._addMove(new Queues(runner, options), clear);

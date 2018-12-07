@@ -1,7 +1,7 @@
 
 /* eslint prefer-rest-params: 0 */
 
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /**
  * jcc2d的事件对象的类

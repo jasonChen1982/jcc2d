@@ -4,6 +4,8 @@
 import {Eventer} from '../eventer/Eventer';
 import {Utils} from './Utils';
 
+// const TextureCache = {};
+
 const URL = 'url';
 const IMG = 'img';
 

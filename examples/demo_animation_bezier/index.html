@@ -159,7 +159,7 @@
         el.preX = el.x;
         el.preY = el.y;
       });
-      stage.on('mousemove', function (ev) {
+      app.renderer.on('mousemove', function (ev) {
         if (!enable) return;
         data.translate = {};
         data.translate.x = ev.data.global.x - data.start.x;
@@ -172,7 +172,7 @@
         point.y = -el.y / 400;
         updateEase();
       });
-      stage.on('mouseup', function (ev) {
+      app.renderer.on('mouseup', function (ev) {
         if (!enable) return;
         enable = false;
         el.preX = el.x;
@@ -203,7 +203,7 @@
     ];
     var bezierPath = new JC.BezierCurve(controls);
     var descartesSys = new JC.Container();
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: 'demo_canvas',
     })
     var output = document.querySelector('#output-bezier');
@@ -249,8 +249,7 @@
       duration: 2000,
       infinite: true,
     })
-    stage.adds(shape, descartesSys);
-    stage.startEngine();
+    app.scene.adds(shape, descartesSys);
     updateEase();
 
     /**
@@ -260,7 +259,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 

@@ -5,7 +5,9 @@ import {Matrix, TEMP_MATRIX, IDENTITY} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
 import {Animation} from '../animation/Animation';
-import {Utils} from '../util/Utils';
+import {Keyframes} from '../keyframes/keyframes/Keyframes';
+import {Utils} from '../utils/Utils';
+
 /**
  * 显示对象的基类，继承至Eventer
  *
@@ -171,7 +173,7 @@ function DisplayObject() {
    * @private
    * @member {Array}
    */
-  this.Animation = new Animation(this);
+  this.animation = new Animation(this);
 
 
   /**
@@ -286,7 +288,7 @@ Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.animate = function(options, clear) {
-  return this.Animation.animate(options, clear);
+  return this.animation.animate(options, clear);
 };
 
 /**
@@ -321,7 +323,7 @@ DisplayObject.prototype.animate = function(options, clear) {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.motion = function(options, clear) {
-  return this.Animation.motion(options, clear);
+  return this.animation.motion(options, clear);
 };
 
 /**
@@ -353,7 +355,7 @@ DisplayObject.prototype.motion = function(options, clear) {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.keyFrames = function(options, clear) {
-  return this.Animation.keyFrames(options, clear);
+  return this.animation.keyFrames(options, clear);
 };
 
 /**
@@ -387,7 +389,7 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.runners = function(options, clear) {
-  return this.Animation.runners(options, clear);
+  return this.animation.runners(options, clear);
 };
 
 /**
@@ -413,7 +415,27 @@ DisplayObject.prototype.runners = function(options, clear) {
  * @return {JC.Queues}
  */
 DisplayObject.prototype.queues = function(runner, options = {}, clear) {
-  return this.Animation.queues(runner, options, clear);
+  return this.animation.queues(runner, options, clear);
+};
+
+/**
+ * initKeyFrames
+ * @param {object} layer layer
+ * @param {object} session session
+ */
+DisplayObject.prototype.initKeyFrames = function(layer, session) {
+  this.bodymovin = new Keyframes(this, layer, session);
+  this.movin = true;
+};
+
+/**
+ * initKeyFrames
+ * @param {number} progress progress
+ * @param {object} session session
+ */
+DisplayObject.prototype.updateKeyframes = function(progress, session) {
+  if (!this.movin) return;
+  this.bodymovin.update(progress, session);
 };
 
 /**
@@ -453,10 +475,11 @@ DisplayObject.prototype.setProps = function(props) {
  * 更新对象本身的矩阵姿态以及透明度
  *
  * @private
+ * @param {Matrix} rootMatrix
  * @method updateTransform
  */
-DisplayObject.prototype.updateTransform = function() {
-  const pt = (this.parent && this.parent.worldTransform) || IDENTITY;
+DisplayObject.prototype.updateTransform = function(rootMatrix) {
+  const pt = rootMatrix || (this.parent && this.parent.worldTransform) || IDENTITY;
   const wt = this.worldTransform;
   const worldAlpha = (this.parent && this.parent.worldAlpha) || 1;
 
@@ -541,7 +564,7 @@ DisplayObject.prototype.updateTransform = function() {
  * @param {Number} snippet
  */
 DisplayObject.prototype.updateAnimation = function(snippet) {
-  this.Animation.update(snippet);
+  this.animation.update(snippet);
 };
 
 /**

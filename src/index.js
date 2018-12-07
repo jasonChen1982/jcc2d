@@ -1,12 +1,12 @@
 
-import './util/Raf';
+import './utils/Raf';
 export {Eventer} from './eventer/Eventer';
 export {Animation} from './animation/Animation';
 
-export {Tween} from './util/Tween';
-export {Utils} from './util/Utils';
-export {Texture, Loader, loaderUtil} from './util/Loader';
-export {ParserAnimation} from './util/ParserAnimation';
+export {Tween} from './utils/Tween';
+export {Utils} from './utils/Utils';
+export {Texture, Loader, loaderUtil} from './utils/Loader';
+export {Ticker} from './utils/Ticker';
 
 export {Bounds} from './math/Bounds';
 export {Point} from './math/Point';
@@ -29,4 +29,8 @@ export {TextFace} from './core/TextFace';
 export {FilterGroup} from './filters/FilterGroup';
 export {BlurFilter} from './filters/BlurFilter';
 
-export {Stage} from './core/Stage';
+export {Scene} from './core/Scene';
+export {Renderer} from './core/Renderer';
+export {Application} from './core/Application';
+
+export {AnimationManager} from './keyframes/index';

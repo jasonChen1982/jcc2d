@@ -1,7 +1,7 @@
 
 import {Point} from './Point';
 import {Curve} from './Curve';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /**
  *

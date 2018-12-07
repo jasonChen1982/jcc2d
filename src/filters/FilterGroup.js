@@ -1,7 +1,7 @@
 import {FrameBuffer} from './FrameBuffer';
 import {Container} from '../core/Container';
 import {Matrix} from '../math/Matrix';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /**
  *

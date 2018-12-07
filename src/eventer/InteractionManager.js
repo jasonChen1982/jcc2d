@@ -28,23 +28,23 @@ const hitTestEvent = {
  */
 class InteractionManager extends Eventer {
   /**
-   * @param {Stage} stage - A reference to the current renderer
+   * @param {Renderer} renderer - A reference to the current renderer
    * @param {Object} [options] - The options for the manager.
    * @param {Boolean} [options.autoPreventDefault=false] - Should the manager automatically prevent default browser actions.
    * @param {Boolean} [options.autoAttach=true] - Should the manager automatically attach target element.
    * @param {Number} [options.interactionFrequency=10] - Frequency increases the interaction events will be checked.
    */
-  constructor(stage, options) {
+  constructor(renderer, options) {
     super();
 
     options = options || {};
 
     /**
-     * The stage this interaction manager works for.
+     * The renderer this interaction manager works for.
      *
-     * @member {Stage}
+     * @member {Renderer}
      */
-    this.stage = stage;
+    this.renderer = renderer;
 
     /**
      * Should default browser actions automatically be prevented.
@@ -249,7 +249,7 @@ class InteractionManager extends Eventer {
      */
     this._deltaTime = 0;
 
-    this.setTargetElement(this.stage.canvas);
+    this.setTargetElement(this.renderer.canvas);
 
     /**
      * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
@@ -660,10 +660,15 @@ class InteractionManager extends Eventer {
     hitTestEvent.data.global = globalPoint;
     // ensure safety of the root
     if (!root) {
-      root = this.stage;
+      root = this.renderer;
     }
     // run the hit test
-    this.processInteractive(hitTestEvent, root, null, true);
+    this.processInteractive(
+      hitTestEvent,
+      root,
+      null,
+      true
+    );
     // return our found object - it'll be null if we didn't hit anything
 
     return hitTestEvent.target;
@@ -833,7 +838,7 @@ class InteractionManager extends Eventer {
 
           this.processInteractive(
             interactionEvent,
-            this.stage,
+            this.renderer.currentScene,
             this.processPointerOverOut,
             true
           );
@@ -986,7 +991,13 @@ class InteractionManager extends Eventer {
         const child = children[i];
 
         // time to get recursive.. if this function will return if something is hit..
-        const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent);
+        const childHit = this.processInteractive(
+          interactionEvent,
+          child,
+          func,
+          hitTest,
+          interactiveParent
+        );
 
         if (childHit) {
           // its a good idea to check if a child has lost its parent.
@@ -1062,7 +1073,12 @@ class InteractionManager extends Eventer {
 
     interactionEvent.data.originalEvent = originalEvent;
 
-    this.processInteractive(interactionEvent, this.stage, this.processClick, true);
+    this.processInteractive(
+      interactionEvent,
+      this.renderer.currentScene,
+      this.processClick,
+      true
+    );
 
     this.emit('click', interactionEvent);
   }
@@ -1116,7 +1132,12 @@ class InteractionManager extends Eventer {
 
       interactionEvent.data.originalEvent = originalEvent;
 
-      this.processInteractive(interactionEvent, this.stage, this.processPointerDown, true);
+      this.processInteractive(
+        interactionEvent,
+        this.renderer.currentScene,
+        this.processPointerDown,
+        true
+      );
 
       this.emit('pointerdown', interactionEvent);
       if (event.pointerType === 'touch') {
@@ -1191,7 +1212,12 @@ class InteractionManager extends Eventer {
       interactionEvent.data.originalEvent = originalEvent;
 
       // perform hit testing for events targeting our canvas or cancel events
-      this.processInteractive(interactionEvent, this.stage, func, cancelled || !eventAppend);
+      this.processInteractive(
+        interactionEvent,
+        this.renderer.currentScene,
+        func,
+        cancelled || !eventAppend
+      );
 
       this.emit(cancelled ? 'pointercancel' : `pointerup${eventAppend}`, interactionEvent);
 
@@ -1362,7 +1388,7 @@ class InteractionManager extends Eventer {
 
       this.processInteractive(
         interactionEvent,
-        this.stage,
+        this.renderer.currentScene,
         this.processPointerMove,
         interactive
       );
@@ -1430,7 +1456,12 @@ class InteractionManager extends Eventer {
 
     interactionEvent.data.originalEvent = event;
 
-    this.processInteractive(interactionEvent, this.stage, this.processPointerOverOut, false);
+    this.processInteractive(
+      interactionEvent,
+      this.renderer.currentScene,
+      this.processPointerOverOut,
+      false
+    );
 
     this.emit('pointerout', interactionEvent);
     if (event.pointerType === 'mouse' || event.pointerType === 'pen') {

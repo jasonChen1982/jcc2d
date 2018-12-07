@@ -1,6 +1,6 @@
 import {Container} from './Container';
 import {FrameBuffer} from '../filters/FrameBuffer';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 const FUNCTION = 'fn';
 const INSTANCE = 'in';

@@ -68,7 +68,7 @@
       ctx.stroke();
     };
 
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: '#demo_canvas'
     });
     var DOC = new JC.Container();
@@ -101,8 +101,7 @@
 
       DOC.adds(trangle);
     }
-    stage.adds(DOC);
-    stage.startEngine();
+    app.scene.adds(DOC);
 
 
     /**
@@ -112,7 +111,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 

@@ -1,7 +1,7 @@
 
 import {Point} from './Point';
 import {Curve} from './Curve';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 // SvgCurve.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // NOTE: some like don`t need svg tag to wrap
 

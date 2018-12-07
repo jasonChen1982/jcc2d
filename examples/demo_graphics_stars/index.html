@@ -49,7 +49,7 @@
     // init
     var w = window.innerWidth;
     var h = window.innerHeight;
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: 'demo_canvas'
     });
     var starContainer = new JC.Container();
@@ -87,7 +87,7 @@
     // 创建一个浅黄色的圆
     var circle = new JC.Graphics(new Cricle('#fff', 70, 'stroke'));
 
-    var color = stage.ctx.createLinearGradient(-200, 0, 200, 0);
+    var color = app.renderer.ctx.createLinearGradient(-200, 0, 200, 0);
     color.addColorStop(0,"#ff6ab3");
     color.addColorStop(1,"#27feff");
     var text = new JC.TextFace('JCC2D ANIMATOR', {
@@ -98,7 +98,7 @@
     });
 
     starContainer.adds(circle);
-    stage.adds(starContainer, text);
+    app.scene.adds(starContainer, text);
     resize();
 
     /**
@@ -152,8 +152,6 @@
       });
     }
 
-    stage.startEngine();
-
     /**
      * 帧率监控工具
      */
@@ -161,7 +159,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -182,7 +180,7 @@
       h = window.innerHeight;
       text.x = w >> 1;
       text.y = h >> 1;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

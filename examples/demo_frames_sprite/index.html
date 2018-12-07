@@ -27,12 +27,12 @@
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth,
-      h = window.innerHeight,
-      runMan,
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container();
+    h = window.innerHeight,
+    runMan,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container();
     DOC.x = w / 2;
     DOC.y = h / 2;
     var texture = new JC.Texture('./images/dragon.png');
@@ -76,9 +76,7 @@
     runMan.x = 20;
 
     DOC.adds(runMan);
-    stage.adds(DOC);
-
-    stage.startEngine();
+    app.scene.adds(DOC);
 
 
     var moviesClip = [
@@ -114,7 +112,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -125,7 +123,7 @@
     function resize() {
       w = window.innerWidth;
       h = window.innerHeight;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

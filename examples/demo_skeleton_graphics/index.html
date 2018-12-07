@@ -36,20 +36,20 @@
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript">
     var w = window.innerWidth * window.devicePixelRatio,
-      h = window.innerHeight * window.devicePixelRatio,
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container(),
-      body,
-      arm1,
-      arm2,
-      arm3,
-      hand,
-      wheel1,
-      wheel2,
-      ground;
-    stage.setStyle = true;
+    h = window.innerHeight * window.devicePixelRatio,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container(),
+    body,
+    arm1,
+    arm2,
+    arm3,
+    hand,
+    wheel1,
+    wheel2,
+    ground;
+    // app.setStyle = true;
 
     var loadBox = JC.loaderUtil({
       body: './images/body.png'
@@ -216,7 +216,7 @@
       arm1.adds(arm2);
       body.adds(arm1);
       DOC.adds(body);
-      stage.adds(DOC, ground);
+      app.scene.adds(DOC, ground);
 
 
 
@@ -269,8 +269,6 @@
         alternate: true
       });
 
-      stage.startEngine();
-
     });
 
     /**
@@ -280,7 +278,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -292,7 +290,7 @@
       h = window.innerHeight * window.devicePixelRatio;
       DOC.x = w / 4;
       DOC.y = h / 2;
-      stage.resize(w, h, window.innerWidth, window.innerHeight);
+      app.renderer.resize(w, h);
     }
   </script>
 </body>

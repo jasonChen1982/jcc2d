@@ -2,7 +2,7 @@ var HEIGHT = window.innerHeight;
 var WIDTH = window.innerWidth;
 var COLORS = ['#FF324A', '#31FFA6', '#206EFF', '#FFFF99'];
 
-var stage = new JC.Stage({
+var app = new JC.Application({
   dom: 'canvas-3d'
 });
 var DOC = new JC.Container();
@@ -133,12 +133,10 @@ loadBox.on('complete', function () {
   sphere = new Sphere();
 
   sphere.createVertex(DOC, ['pic1', 'pic2', 'pic3', 'pic4', 'pic5', 'pic6', 'pic7', 'pic8', 'pic9', 'pic10', 'pic11', 'pic12']);
-  stage.adds(DOC);
-
-  stage.startEngine();
+  app.scene.adds(DOC);
 });
 
-stage.on('touchstart', function (ev) {
+app.renderer.on('touchstart', function (ev) {
   if (sphere === null) return;
   var point = {};
   point.x = ev.data.global.x - WIDTH / 2;
@@ -151,7 +149,7 @@ stage.on('touchstart', function (ev) {
 
 });
 
-stage.on('mousemove', function (ev) {
+app.renderer.on('mousemove', function (ev) {
   if (sphere === null) return;
   var point = {};
   point.x = ev.data.global.x - WIDTH / 2;
@@ -173,9 +171,9 @@ var stats = new Stats();
 stats.domElement.style.position = 'absolute';
 stats.domElement.style.top = '0px';
 document.body.appendChild(stats.domElement);
-stage.on('postrender', function () {
+app.renderer.on('postrender', function () {
   stats.update();
-  sphere.update();
+  sphere && sphere.update();
 })
 
 window.onresize = function () {
@@ -187,5 +185,5 @@ function resize() {
   HEIGHT = window.innerHeight;
   DOC.x = WIDTH >> 1;
   DOC.y = HEIGHT >> 1;
-  stage.resize(WIDTH, HEIGHT);
+  app.renderer.resize(WIDTH, HEIGHT);
 }

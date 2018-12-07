@@ -1,5 +1,5 @@
 import {Rectangle} from './Rectangle';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /**
  * 显示对象的包围盒子

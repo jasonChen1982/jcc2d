@@ -35,21 +35,20 @@
     };
 
     var w = window.innerWidth * window.devicePixelRatio,
-      h = window.innerHeight * window.devicePixelRatio,
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container(),
-      bodyDoc,
-      body,
-      arm1,
-      arm2,
-      hand,
-      wheel1,
-      wheel2,
-      ground,
-      wheels;
-    stage.setStyle = true;
+    h = window.innerHeight * window.devicePixelRatio,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container(),
+    bodyDoc,
+    body,
+    arm1,
+    arm2,
+    hand,
+    wheel1,
+    wheel2,
+    ground,
+    wheels;
 
     var loadBox = JC.loaderUtil({
       arm1: './images/arm1.png',
@@ -120,7 +119,7 @@
         ctx.closePath();
       });
 
-      stage.adds(DOC, ground);
+      app.scene.adds(DOC, ground);
 
       arm1.animate({
         to: {
@@ -146,9 +145,6 @@
         infinite: true,
         alternate: true
       });
-
-
-      stage.startEngine();
 
       autoMove();
     });
@@ -219,7 +215,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       upPos();
       stats.update();
     })
@@ -229,7 +225,7 @@
       h = window.innerHeight * window.devicePixelRatio;
       DOC.x = w / 2;
       DOC.y = h / 2;
-      stage.resize(w, h, window.innerWidth, window.innerHeight);
+      app.renderer.resize(w, h);
     }
 
   </script>

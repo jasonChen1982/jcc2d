@@ -95,7 +95,7 @@
 
     var w = window.innerWidth;
     var h = window.innerHeight;
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: 'demo_canvas',
       width: w,
       height: h,
@@ -144,15 +144,14 @@
 
     rectBox.adds(closeBtn);
     doc.adds(rectBox);
-    stage.adds(doc);
-    stage.startEngine();
+    app.scene.adds(doc);
 
     /**
      * 帧率监控工具
      */
     var stats = new Stats();
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function() {
+    app.renderer.on('postrender', function() {
       stats.update();
     });
 
@@ -161,7 +160,7 @@
       var h = window.innerHeight;
       doc.x = w >> 1;
       doc.y = h >> 1;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

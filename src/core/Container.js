@@ -123,6 +123,22 @@ Container.prototype._sortList = function() {
 };
 
 /**
+ * 更新bodymovin动画
+ * @param {number} progress progress
+ * @param {object} session
+ */
+Container.prototype.updateMovin = function(progress, session) {
+  const length = this.childs.length;
+  for (let i = 0; i < length; i++) {
+    const doc = this.childs[i];
+    if (doc && !doc._aniRoot && doc.updateMovin) {
+      doc.updateMovin(progress, session);
+    }
+  }
+  this.updateKeyframes(progress, session);
+};
+
+/**
  * 向容器添加一个物体
  *
  * ```js

@@ -124,20 +124,20 @@
     }
 
     var w = window.innerWidth,
-      h = window.innerHeight,
-      MAX_PARTICLES = 300,
-      TWO_PI = Math.PI * 2,
-      particles = [],
-      pool = [],
-      theta,
-      force,
-      COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'],
-      particle,
-      JCparticle,
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container();
+    h = window.innerHeight,
+    MAX_PARTICLES = 300,
+    TWO_PI = Math.PI * 2,
+    particles = [],
+    pool = [],
+    theta,
+    force,
+    COLOURS = ['#69D2E7', '#A7DBD8', '#E0E4CC', '#F38630', '#FA6900', '#FF4E50', '#F9D423'],
+    particle,
+    JCparticle,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container();
     resize();
     DOC.x = w / 2;
     DOC.y = h/2 + 120;
@@ -152,7 +152,7 @@
       }
     }); // 创建形状绘制对象
 
-    var color = stage.ctx.createLinearGradient(-100, 0, 100, 0);
+    var color = app.renderer.ctx.createLinearGradient(-100, 0, 100, 0);
     color.addColorStop(0,"#ff6ab3");
     color.addColorStop(1,"#27feff");
     var text = new JC.TextFace('JCC2D', {
@@ -166,9 +166,7 @@
     JCparticle.adds(text);
 
     DOC.adds(JCparticle);
-    stage.adds(DOC);
-
-    stage.startEngine();
+    app.scene.adds(DOC);
 
     /**
      * 帧率监控工具
@@ -178,7 +176,7 @@
     stats.domElement.style.top = '0px';
     stats.domElement.style.display = 'none';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -188,7 +186,7 @@
     function resize() {
       w = window.innerWidth;
       h = window.innerHeight;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

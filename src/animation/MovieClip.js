@@ -1,6 +1,6 @@
 
 import {Eventer} from '../eventer/Eventer';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /* eslint max-len: "off" */
 

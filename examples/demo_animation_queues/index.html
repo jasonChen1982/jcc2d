@@ -39,7 +39,7 @@
       ctx.fill();
     };
 
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: 'demo_canvas'
     });
     var DOC = new JC.Container();
@@ -73,8 +73,7 @@
     });
 
     DOC.adds(cube);
-    stage.adds(DOC);
-    stage.startEngine();
+    app.scene.adds(DOC);
 
     /**
      * 帧率监控工具
@@ -84,7 +83,7 @@
     stats.domElement.style.top = '0px';
     stats.domElement.style.display = 'none';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -96,7 +95,7 @@
       h = window.innerHeight;
       DOC.x = w / 2;
       DOC.y = h / 2;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

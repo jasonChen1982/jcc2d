@@ -35,29 +35,21 @@
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript" src="./js/data.js"></script>
   <script type="text/javascript">
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: 'demo_canvas'
     });
     var DOC = new JC.Container();
     DOC.x = 180;
     DOC.y = 100;
-    // DOC.timeScale = 0.2;
 
-    var ani = new JC.ParserAnimation({
+    var manager = new JC.AnimationManager(app.ticker);
+
+    var ani = manager.parseAnimation({
       keyframes: data,
-      // fr: 30,
-      prefix: '',
       infinite: true,
-      // alternate: true,
-      onUpdate: function() {},
-      onComplete: function() {},
     });
-    // ani.doc.timeScale = 0.2;
-    DOC.adds(ani.doc);
-    stage.adds(DOC);
-    ani.assetBox.on('complete', function () {
-      stage.startEngine();
-    });
+    DOC.adds(ani.group);
+    app.scene.adds(DOC);
 
 
     /**
@@ -67,7 +59,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 

@@ -133,24 +133,24 @@ LinkFace.prototype.render = function (ctx) {
 };
 
 var w = window.innerWidth,
-  h = window.innerHeight,
-  curvePath = new JC.Graphics(new WaveLines()),
-  rectLeftBack = new JC.Graphics(new RectBound()),
-  rectLeftFront = new JC.Graphics(new RectBound()),
-  rectRightBack = new JC.Graphics(new RectBound()),
-  rectRightFront = new JC.Graphics(new RectBound()),
-  stage = new JC.Stage({
-    dom: 'line-canvas',
-    resolution: window.devicePixelRatio,
-  }),
-  BG = new JC.Container(),
-  DOC = new JC.Container(),
-  LOGO = new JC.Container(),
-  BTNBOX = new JC.Container(),
-  banner = new JC.Container(),
-  bannerLeft = new JC.Container(),
-  bannerRight = new JC.Container(),
-  easeInOutStrong = JC.Tween.Ease.Bezier(.7, 0, .3, 1);
+h = window.innerHeight,
+curvePath = new JC.Graphics(new WaveLines()),
+rectLeftBack = new JC.Graphics(new RectBound()),
+rectLeftFront = new JC.Graphics(new RectBound()),
+rectRightBack = new JC.Graphics(new RectBound()),
+rectRightFront = new JC.Graphics(new RectBound()),
+app = new JC.Application({
+  dom: 'line-canvas',
+  resolution: window.devicePixelRatio,
+}),
+BG = new JC.Container(),
+DOC = new JC.Container(),
+LOGO = new JC.Container(),
+BTNBOX = new JC.Container(),
+banner = new JC.Container(),
+bannerLeft = new JC.Container(),
+bannerRight = new JC.Container(),
+easeInOutStrong = JC.Tween.Ease.Bezier(.7, 0, .3, 1);
 resize();
 LOGO.x = DOC.x = w / 2;
 DOC.y = h / 2;
@@ -363,12 +363,11 @@ BTNBOX.y = JC.UI.RTP(.84);
 DOC.adds(particleDOC, curvePath);
 banner.adds(bannerLeft, bannerRight);
 BG.adds(DOC, banner);
-stage.adds(BG, LOGO);
+app.scene.adds(BG, LOGO);
 
-stage.on('postrender', function () {
+app.renderer.on('postrender', function () {
   particleEngine.update();
 });
-stage.startEngine();
 
 function logoIn() {
   for (var i = 0; i < textDOC.length; i++) {
@@ -411,7 +410,7 @@ function resize() {
   w = window.innerWidth;
   h = window.innerHeight;
   bannerLeft.scale = bannerRight.scale = Math.sqrt(Math.min(1, w / 1280), 0.5);
-  stage.resize(w, h);
+  app.renderer.resize(w, h);
 }
 
 

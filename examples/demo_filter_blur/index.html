@@ -37,15 +37,15 @@
     };
 
     var w = window.innerWidth,
-      h = window.innerHeight,
-      pic,
-      shape,
-      filterPass,
-      blurFilter,
-      stage = new JC.Stage({
-        dom: 'demo_canvas'
-      }),
-      DOC = new JC.Container();
+    h = window.innerHeight,
+    pic,
+    shape,
+    filterPass,
+    blurFilter,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container();
     DOC.x = w / 2;
     DOC.y = h / 2;
 
@@ -114,7 +114,7 @@
       });
 
       DOC.adds(filterPass);
-      stage.adds(DOC);
+      app.scene.adds(DOC);
 
       filterPass.animate({
         from: { x: -50 },
@@ -125,7 +125,6 @@
         ease: JC.Tween.Elastic.InOut,
       })
 
-      stage.startEngine();
     });
 
 
@@ -136,7 +135,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
@@ -147,7 +146,7 @@
     function resize() {
       w = window.innerWidth;
       h = window.innerHeight;
-      stage.resize(w, h);
+      app.renderer.resize(w, h);
     }
 
   </script>

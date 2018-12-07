@@ -1,7 +1,7 @@
 
 import {Container} from './Container';
 import InteractionManager from '../eventer/InteractionManager';
-import {Utils} from '../util/Utils';
+import {Utils} from '../utils/Utils';
 
 /* global RAF CAF */
 /* eslint new-cap: 0 */

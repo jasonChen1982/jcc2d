@@ -1,4 +1,5 @@
-
+import {Utils} from './Utils';
+import {findStep, inRange} from '../keyframes/common/common';
 import {BezierEasing} from '../math/BezierEasing';
 const bezierPool = {};
 
@@ -51,4 +52,42 @@ function getEaseingPath(curve, nm, p) {
   return [point.x, point.y, point.z];
 }
 
-export {prepareEaseing, getEaseing, getEaseingPath};
+/**
+ * interpolation keyframes and return value
+ * @ignore
+ * @param {object} keyframes keyframes with special prop
+ * @param {number} progress progress
+ * @param {object} indexCache index cache
+ * @param {string} key prop name
+ * @return {array}
+ */
+function interpolation(keyframes, progress, indexCache, key) {
+  const aksk = keyframes.k;
+  if (keyframes.expression) {
+    progress = keyframes.expression.update(progress);
+  }
+  if (progress <= keyframes.ost) {
+    return aksk[0].s;
+  } else if (progress >= keyframes.oet) {
+    const last = aksk.length - 2;
+    return aksk[last].e;
+  } else {
+    let ick = indexCache[key];
+    let frame = aksk[ick];
+    if (
+      !Utils.isNumber(ick) ||
+      !inRange(progress, frame.ost, frame.oet)
+    ) {
+      ick = indexCache[key] = findStep(aksk, progress);
+      frame = aksk[ick];
+    }
+    const rate = (progress - frame.ost) / (frame.oet - frame.ost);
+    if (frame.curve) {
+      return getEaseingPath(frame.curve, frame.n, rate);
+    } else {
+      return getEaseing(frame.s, frame.e, frame.n, rate);
+    }
+  }
+}
+
+export {prepareEaseing, getEaseing, getEaseingPath, interpolation};

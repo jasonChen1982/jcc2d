@@ -45,7 +45,7 @@
       ctx.fill();
     };
 
-    var stage = new JC.Stage({
+    var app = new JC.Application({
       dom: 'demo_canvas'
     });
     var DOC = new JC.Container();
@@ -56,20 +56,13 @@
       texture: new JC.Texture('../demo_animation_ae/images/img_3.png'),
     });
     coin.keyFrames({
-      ks: data.layers[0],
-      fr: 30,
+      layer: data.layers[0],
       infinite: true,
-      // alternate: true,
-      onComplete(info) {
-        console.log(this.element);
-      }
     });
     DOC.setSpeed(0.5);
     DOC.adds(coin);
 
-    stage.adds(DOC);
-
-    stage.startEngine();
+    app.scene.adds(DOC);
 
     /**
      * 帧率监控工具
@@ -78,7 +71,7 @@
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     document.body.appendChild(stats.domElement);
-    stage.on('postrender', function () {
+    app.renderer.on('postrender', function () {
       stats.update();
     })
 
