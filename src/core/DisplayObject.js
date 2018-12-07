@@ -5,7 +5,6 @@ import {Matrix, TEMP_MATRIX, IDENTITY} from '../math/Matrix';
 import {Point} from '../math/Point';
 import {Eventer} from '../eventer/Eventer';
 import {Animation} from '../animation/Animation';
-import {Keyframes} from '../keyframes/keyframes/Keyframes';
 import {Utils} from '../utils/Utils';
 
 /**
@@ -416,26 +415,6 @@ DisplayObject.prototype.runners = function(options, clear) {
  */
 DisplayObject.prototype.queues = function(runner, options = {}, clear) {
   return this.animation.queues(runner, options, clear);
-};
-
-/**
- * initKeyFrames
- * @param {object} layer layer
- * @param {object} session session
- */
-DisplayObject.prototype.initKeyFrames = function(layer, session) {
-  this.bodymovin = new Keyframes(this, layer, session);
-  this.movin = true;
-};
-
-/**
- * initKeyFrames
- * @param {number} progress progress
- * @param {object} session session
- */
-DisplayObject.prototype.updateKeyframes = function(progress, session) {
-  if (!this.movin) return;
-  this.bodymovin.update(progress, session);
 };
 
 /**

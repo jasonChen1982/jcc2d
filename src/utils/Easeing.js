@@ -1,5 +1,5 @@
 import {Utils} from './Utils';
-import {findStep, inRange} from '../keyframes/common/common';
+import {findStep, inRange} from '../aftereffect/common/common';
 import {BezierEasing} from '../math/BezierEasing';
 const bezierPool = {};
 

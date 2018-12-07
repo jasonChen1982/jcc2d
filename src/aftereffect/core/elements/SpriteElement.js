@@ -1,4 +1,5 @@
 import {Sprite} from '../../../core/Sprite';
+import {Keyframes} from '../../keyframes/Keyframes';
 
 /**
  * SpriteElement class
@@ -22,6 +23,26 @@ class SpriteElement extends Sprite {
     register.setLayer(this.name, this);
 
     this.initKeyFrames(layer, session);
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+  initKeyFrames(layer, session) {
+    this.bodymovin = new Keyframes(this, layer, session);
+    this.movin = true;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {number} progress progress
+   * @param {object} session session
+   */
+  updateKeyframes(progress, session) {
+    if (!this.movin) return;
+    this.bodymovin.update(progress, session);
   }
 }
 

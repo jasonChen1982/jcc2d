@@ -3,6 +3,7 @@ import SpriteElement from './SpriteElement';
 // import ShapeElement from './ShapeElement';
 import {Utils} from '../../../utils/Utils';
 import {getAssets} from '../../common/common';
+import {Keyframes} from '../../keyframes/Keyframes';
 
 /**
  * CompElement class
@@ -41,6 +42,26 @@ class CompElement extends Container {
     register.setLayer(parentName, this);
 
     this.parseLayers(layers, {assets, st: ist, size: mySize, prefix, register, parentName});
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+  initKeyFrames(layer, session) {
+    this.bodymovin = new Keyframes(this, layer, session);
+    this.movin = true;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {number} progress progress
+   * @param {object} session session
+   */
+  updateKeyframes(progress, session) {
+    if (!this.movin) return;
+    this.bodymovin.update(progress, session);
   }
 
   /**

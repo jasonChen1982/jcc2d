@@ -33,3 +33,5 @@ export {Graphics} from './core/Graphics';
 export {Scene} from './core/Scene';
 export {Renderer} from './core/Renderer';
 export {Application} from './core/Application';
+
+export {AnimationManager} from './aftereffect/index';

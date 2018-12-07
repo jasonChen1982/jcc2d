@@ -33,4 +33,4 @@ export {Scene} from './core/Scene';
 export {Renderer} from './core/Renderer';
 export {Application} from './core/Application';
 
-export {AnimationManager} from './keyframes/index';
+export {AnimationManager} from './aftereffect/index';
