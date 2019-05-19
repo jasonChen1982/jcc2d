@@ -67,18 +67,26 @@ var Utils = {
    *
    * @static
    * @memberof JC.Utils
-   * @type {number}
+   * @param {number} degree 角度数
+   * @return {number} 弧度数
    */
-  DTR: Math.PI / 180,
+  DTR: function DTR(degree) {
+    return degree * Math.PI / 180;
+  },
+
 
   /**
    * 将弧度转化成角度的乘法因子
    *
    * @static
    * @memberof JC.Utils
-   * @type {number}
+   * @param {number} radian 角度数
+   * @return {number} 弧度数
    */
-  RTD: 180 / Math.PI,
+  RTD: function RTD(radian) {
+    return radian * 180 / Math.PI;
+  },
+
 
   /**
    * 判断变量是否为数组类型
@@ -1322,7 +1330,7 @@ function PathMotion(options) {
   this.attachTangent = Utils.isBoolean(options.attachTangent) ? options.attachTangent : false;
 
   this._cacheRotate = this.element.rotation;
-  var radian = this._cacheRotate * Utils.DTR;
+  var radian = this._cacheRotate;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
 
@@ -1398,6 +1406,62 @@ BezierCurve.prototype.getPoint = function (t, points) {
   }
 };
 
+/**
+ * detect number was in [min, max]
+ * @method
+ * @param {number} v   value
+ * @param {number} min lower
+ * @param {number} max upper
+ * @return {boolean} in [min, max] range ?
+ */
+function inRange$1(v, min, max) {
+  return v >= min && v <= max;
+}
+
+/**
+ * detect current frame index
+ * @method
+ * @param {array} steps frames array
+ * @param {number} progress current time
+ * @return {number} which frame index
+ */
+function findStep$1(steps, progress) {
+  var last = steps.length - 1;
+  for (var i = 0; i < last; i++) {
+    var step = steps[i];
+    if (inRange$1(progress, step.ost, step.oet)) {
+      return i;
+    }
+  }
+}
+
+/**
+ * prefix
+ * @method
+ * @param {object} asset asset
+ * @param {string} prefix prefix
+ * @return {string}
+ */
+function createUrl(asset, prefix) {
+  var up = (prefix ? prefix : asset.u) + asset.p;
+  var url = asset.up || up;
+  return url;
+}
+
+/**
+ * get assets from keyframes assets
+ * @method
+ * @param {string} id assets refid
+ * @param {object} assets assets object
+ * @return {object} asset object
+ */
+function getAssets(id, assets) {
+  for (var i = 0; i < assets.length; i++) {
+    if (id === assets[i].id) return assets[i];
+  }
+  return {};
+}
+
 var bezierPool = {};
 
 /**
@@ -1429,7 +1493,8 @@ function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
 function getEaseing(s, e, nm, p) {
   var value = [];
   for (var i = 0; i < s.length; i++) {
-    var rate = bezierPool[nm[i]].get(p);
+    var bezier = bezierPool[nm[i]] || bezierPool[nm[0]];
+    var rate = bezier.get(p);
     var v = e[i] - s[i];
     value[i] = s[i] + v * rate;
   }
@@ -1447,6 +1512,41 @@ function getEaseingPath(curve, nm, p) {
   var rate = bezierPool[nm].get(p);
   var point = curve.getPointAt(rate);
   return [point.x, point.y, point.z];
+}
+
+/**
+ * interpolation keyframes and return value
+ * @ignore
+ * @param {object} keyframes keyframes with special prop
+ * @param {number} progress progress
+ * @param {object} indexCache index cache
+ * @param {string} key prop name
+ * @return {array}
+ */
+function interpolation(keyframes, progress, indexCache, key) {
+  var aksk = keyframes.k;
+  if (keyframes.expression) {
+    progress = keyframes.expression.update(progress);
+  }
+  if (progress <= keyframes.ost) {
+    return aksk[0].s;
+  } else if (progress >= keyframes.oet) {
+    var last = aksk.length - 2;
+    return aksk[last].e;
+  } else {
+    var ick = indexCache[key];
+    var frame = aksk[ick];
+    if (!Utils.isNumber(ick) || !inRange$1(progress, frame.ost, frame.oet)) {
+      ick = indexCache[key] = findStep$1(aksk, progress);
+      frame = aksk[ick];
+    }
+    var rate = (progress - frame.ost) / (frame.oet - frame.ost);
+    if (frame.curve) {
+      return getEaseingPath(frame.curve, frame.n, rate);
+    } else {
+      return getEaseing(frame.s, frame.e, frame.n, rate);
+    }
+  }
 }
 
 /* eslint guard-for-in: "off" */
@@ -1680,163 +1780,7 @@ KeyFrames.prototype.setValue = function (key, value) {
   }
 };
 
-// import {Utils} from '../util/Utils';
-
-/**
- * AnimateRunner类型动画类
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画配置信息
- */
-function AnimateRunner(options) {
-  Animate.call(this, options);
-
-  this.runners = options.runners;
-  this.cursor = 0;
-  this.queues = [];
-  this.alternate = false;
-
-  this.length = this.runners.length;
-
-  // TODO: Is it necessary to exist ?
-  // this.propsMap = [];
-  // this.prepare();
-}
-AnimateRunner.prototype = Object.create(Animate.prototype);
-
-/**
- * 填补每个runner的配置
- * @private
- */
-// AnimateRunner.prototype.prepare = function() {
-//   let i = 0;
-//   let j = 0;
-//   for (i = 0; i < this.runners.length; i++) {
-//     const runner = this.runners[i];
-//     if (Utils.isUndefined(runner.to)) continue;
-//     const keys = Object.keys(runner.to);
-//     for (j = 0; j < keys.length; j++) {
-//       const prop = keys[j];
-//       if (this.propsMap.indexOf(prop) === -1) this.propsMap.push(prop);
-//     }
-//   }
-//   for (i = 0; i < this.runners.length; i++) {
-//     const runner = this.runners[i];
-//     if (!runner.to) continue;
-//     for (j = 0; j < this.propsMap.length; j++) {
-//       const prop = this.propsMap[j];
-//       if (Utils.isUndefined(runner.to[prop])) {
-//         runner.to[prop] = this.element[prop];
-//       }
-//     }
-//   }
-// };
-
-/**
- * 更新下一个`runner`
- * @param {Object} _
- * @param {Number} time
- * @private
- */
-AnimateRunner.prototype.nextRunner = function (_, time) {
-  this.queues[this.cursor].init();
-  this.cursor += this.direction;
-  this.timeSnippet = time;
-};
-
-/**
- * 初始化当前`runner`
- * @private
- */
-AnimateRunner.prototype.initRunner = function () {
-  var runner = this.runners[this.cursor];
-  runner.infinite = false;
-  runner.resident = true;
-  runner.element = this.element;
-  // runner.onComplete = this.nextRunner.bind(this);
-  var animate = null;
-  if (runner.path) {
-    animate = new PathMotion(runner);
-  } else if (runner.to) {
-    animate = new Transition(runner);
-  }
-  if (animate !== null) {
-    animate.on('complete', this.nextRunner.bind(this));
-    this.queues.push(animate);
-  }
-};
-
-/**
- * 下一帧的状态
- * @private
- * @param {number} snippetCache 时间片段
- * @return {object}
- */
-AnimateRunner.prototype.nextPose = function (snippetCache) {
-  if (!this.queues[this.cursor] && this.runners[this.cursor]) {
-    this.initRunner();
-  }
-  if (this.timeSnippet >= 0) {
-    snippetCache += this.timeSnippet;
-    this.timeSnippet = 0;
-  }
-  return this.queues[this.cursor].update(snippetCache);
-};
-
-/**
- * 更新动画数据
- * @private
- * @param {number} snippet 时间片段
- * @return {object}
- */
-AnimateRunner.prototype.update = function (snippet) {
-  if (this.wait > 0) {
-    this.wait -= Math.abs(snippet);
-    return;
-  }
-  if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
-    return;
-  }
-
-  var cc = this.cursor;
-
-  var pose = this.nextPose(this.direction * this.timeScale * snippet);
-  // if (this.onUpdate) this.onUpdate({
-  //   index: cc, pose: pose,
-  // }, this.progress / this.duration);
-  this.emit('update', {
-    index: cc, pose: pose
-  }, this.progress / this.duration);
-
-  if (this.spill()) {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
-      this.delayCut = this.delay;
-      this.direction = 1;
-      this.cursor = 0;
-    } else {
-      if (!this.resident) this.living = false;
-      // if (this.onComplete) this.onComplete(pose);
-      this.emit('complete', pose);
-    }
-  }
-  return pose;
-};
-
-/**
- * 检查动画是否到了边缘
- * @private
- * @return {boolean}
- */
-AnimateRunner.prototype.spill = function () {
-  // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
-  var topSpill = this.cursor >= this.length;
-  return topSpill;
-};
-
-// import {Utils} from '../util/Utils';
+// import {Utils} from '../utils/Utils';
 
 /**
  * AnimateRunner类型动画类
@@ -1971,6 +1915,7 @@ Queues.prototype.spill = function () {
   return topSpill;
 };
 
+// import {AnimateRunner} from './AnimateRunner';
 /**
  * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
  *
@@ -2051,11 +1996,10 @@ Animation.prototype.motion = function (options, clear) {
  * @param {boolean} clear 是否清除之前的动画
  * @return {JC.AnimateRunner}
  */
-Animation.prototype.runners = function (options, clear) {
-  options.element = this.element;
-  return this._addMove(new AnimateRunner(options), clear);
-};
-
+// Animation.prototype.runners = function(options, clear) {
+//   options.element = this.element;
+//   return this._addMove(new AnimateRunner(options), clear);
+// };
 Animation.prototype.queues = function (runner, options, clear) {
   options.element = this.element;
   return this._addMove(new Queues(runner, options), clear);
@@ -2117,6 +2061,8 @@ Animation.prototype.clear = function () {
 };
 
 /* eslint guard-for-in: "off" */
+
+// const TextureCache = {};
 
 var URL = 'url';
 var IMG = 'img';
@@ -2366,786 +2312,157 @@ var loaderUtil = function loaderUtil(srcMap, crossOrigin) {
 };
 
 /**
- * 矩阵对象，用来描述和记录对象的tansform 状态信息
- *
- * @class
- * @memberof JC
+ * ticker class
+ * @param {boolean} enableFPS
  */
-function Matrix() {
-  this.a = 1;
-  this.b = 0;
-  this.c = 0;
-  this.d = 1;
-  this.tx = 0;
-  this.ty = 0;
-}
-
-/**
- * 从数组设置一个矩阵
- *
- * @param {array} array
- */
-Matrix.prototype.fromArray = function (array) {
-  this.a = array[0];
-  this.b = array[1];
-  this.c = array[3];
-  this.d = array[4];
-  this.tx = array[2];
-  this.ty = array[5];
-};
-
-/**
- * 将对象的数据以数组的形式导出
- *
- * @param {boolean} transpose 是否对矩阵进行转置
- * @return {number[]} 返回数组
- */
-Matrix.prototype.toArray = function (transpose) {
-  if (!this.array) this.array = new Float32Array(9);
-  var array = this.array;
-
-  if (transpose) {
-    array[0] = this.a;
-    array[1] = this.b;
-    array[2] = 0;
-    array[3] = this.c;
-    array[4] = this.d;
-    array[5] = 0;
-    array[6] = this.tx;
-    array[7] = this.ty;
-    array[8] = 1;
-  } else {
-    array[0] = this.a;
-    array[1] = this.c;
-    array[2] = this.tx;
-    array[3] = this.b;
-    array[4] = this.d;
-    array[5] = this.ty;
-    array[6] = 0;
-    array[7] = 0;
-    array[8] = 1;
-  }
-  return array;
-};
-
-/**
- * 将坐标点与矩阵左乘
- *
- * @param {object} pos 原始点
- * @param {object} newPos 变换之后的点
- * @return {object} 返回数组
- */
-Matrix.prototype.apply = function (pos, newPos) {
-  newPos = newPos || {};
-  newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
-  newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
-  return newPos;
-};
-/**
- * 将坐标点与转置矩阵左乘
- *
- * @param {object} pos 原始点
- * @param {object} newPos 变换之后的点
- * @return {object} 变换之后的点
- */
-Matrix.prototype.applyInverse = function (pos, newPos) {
-  var id = 1 / (this.a * this.d + this.c * -this.b);
-  newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
-  newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
-  return newPos;
-};
-/**
- * 位移操作
- * @param {number} x
- * @param {number} y
- * @return {this}
- */
-Matrix.prototype.translate = function (x, y) {
-  this.tx += x;
-  this.ty += y;
-  return this;
-};
-/**
- * 缩放操作
- * @param {number} x
- * @param {number} y
- * @return {this}
- */
-Matrix.prototype.scale = function (x, y) {
-  this.a *= x;
-  this.d *= y;
-  this.c *= x;
-  this.b *= y;
-  this.tx *= x;
-  this.ty *= y;
-  return this;
-};
-/**
- * 旋转操作
- * @param {number} angle
- * @return {this}
- */
-Matrix.prototype.rotate = function (angle) {
-  var cos = Math.cos(angle);
-  var sin = Math.sin(angle);
-  var a1 = this.a;
-  var c1 = this.c;
-  var tx1 = this.tx;
-  this.a = a1 * cos - this.b * sin;
-  this.b = a1 * sin + this.b * cos;
-  this.c = c1 * cos - this.d * sin;
-  this.d = c1 * sin + this.d * cos;
-  this.tx = tx1 * cos - this.ty * sin;
-  this.ty = tx1 * sin + this.ty * cos;
-  return this;
-};
-/**
- * 矩阵相乘
- * @param {matrix} matrix
- * @return {this}
- */
-Matrix.prototype.append = function (matrix) {
-  var a1 = this.a;
-  var b1 = this.b;
-  var c1 = this.c;
-  var d1 = this.d;
-  this.a = matrix.a * a1 + matrix.b * c1;
-  this.b = matrix.a * b1 + matrix.b * d1;
-  this.c = matrix.c * a1 + matrix.d * c1;
-  this.d = matrix.c * b1 + matrix.d * d1;
-  this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
-  this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
-  return this;
-};
-/**
- * 单位矩阵
- *
- * @return {this}
- */
-Matrix.prototype.identity = function () {
-  this.a = 1;
-  this.b = 0;
-  this.c = 0;
-  this.d = 1;
-  this.tx = 0;
-  this.ty = 0;
-  return this;
-};
-/**
- * 快速设置矩阵各个分量
- * @param {number} x
- * @param {number} y
- * @param {number} pivotX
- * @param {number} pivotY
- * @param {number} scaleX
- * @param {number} scaleY
- * @param {number} rotation
- * @param {number} skewX
- * @param {number} skewY
- * @param {number} originX
- * @param {number} originY
- * @return {this}
- */
-Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
-  var sr = Math.sin(rotation);
-  var cr = Math.cos(rotation);
-  var sy = Math.tan(skewY);
-  var nsx = Math.tan(skewX);
-
-  var a = cr * scaleX;
-  var b = sr * scaleX;
-  var c = -sr * scaleY;
-  var d = cr * scaleY;
-
-  var pox = pivotX + originX;
-  var poy = pivotY + originY;
-
-  this.a = a + sy * c;
-  this.b = b + sy * d;
-  this.c = nsx * a + c;
-  this.d = nsx * b + d;
-
-  this.tx = x - pox * this.a - poy * this.c + originX;
-  this.ty = y - pox * this.b - poy * this.d + originY;
-
-  return this;
-};
-var IDENTITY = new Matrix();
-var TEMP_MATRIX = new Matrix();
-
-/* eslint max-len: "off" */
-
-/**
- * 显示对象的基类，继承至Eventer
- *
- * @class
- * @memberof JC
- * @extends JC.Eventer
- */
-function DisplayObject() {
+function Ticker(enableFPS) {
   Eventer.call(this);
 
   /**
-   * 控制渲染对象是否显示
+   * 是否记录渲染性能
    *
    * @member {Boolean}
    */
-  this.visible = true;
+  this.enableFPS = Utils.isBoolean(enableFPS) ? enableFPS : true;
 
   /**
-   * 世界透明度
+   * 上一次绘制的时间点
    *
+   * @member {Number}
    * @private
-   * @member {Number}
    */
-  this.worldAlpha = 1;
+  this.pt = 0;
 
   /**
-   * 控制渲染对象的透明度
+   * 本次渲染经历的时间片段长度
    *
    * @member {Number}
-   */
-  this.alpha = 1;
-
-  /**
-   * 控制渲染对象的x轴的缩放
-   *
-   * @member {Number}
-   */
-  this.scaleX = 1;
-
-  /**
-   * 控制渲染对象的y轴的缩放
-   *
-   * @member {Number}
-   */
-  this.scaleY = 1;
-
-  /**
-   * 控制渲染对象的x轴的斜切
-   *
-   * @member {Number}
-   */
-  this.skewX = 0;
-
-  /**
-   * 控制渲染对象的y轴的斜切
-   *
-   * @member {Number}
-   */
-  this.skewY = 0;
-
-  /**
-   * 控制渲染对象的旋转角度
-   *
-   * @member {Number}
-   */
-  this.rotation = 0;
-  this.rotationCache = 0;
-  this._sr = 0;
-  this._cr = 1;
-
-  /**
-   * 控制渲染对象的x位置
-   *
-   * @member {Number}
-   */
-  this.x = 0;
-
-  /**
-   * 控制渲染对象的y位置
-   *
-   * @member {Number}
-   */
-  this.y = 0;
-
-  /**
-   * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
-   *
-   * @member {Number}
-   */
-  this.pivotX = 0;
-
-  /**
-   * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
-   *
-   * @member {Number}
-   */
-  this.pivotY = 0;
-
-  /**
-   * 控制渲染对象的x变换中心
-   *
-   * @member {Number}
-   */
-  this.originX = 0;
-
-  /**
-   * 控制渲染对象的y变换中心
-   *
-   * @member {Number}
-   */
-  this.originY = 0;
-
-  /**
-   * 对象的遮罩层
-   *
-   * @member {JC.Graphics}
-   */
-  this.mask = null;
-
-  /**
-   * 当前对象的直接父级
-   *
    * @private
-   * @member {JC.Container}
    */
-  this.parent = null;
+  this.snippet = 0;
 
   /**
-   * 当前对象所应用的矩阵状态
+   * 平均渲染经历的时间片段长度
    *
+   * @member {Number}
    * @private
-   * @member {JC.Matrix}
    */
-  this.worldTransform = new Matrix();
+  this.averageSnippet = 0;
 
   /**
-   * 当前对象的事件管家
+   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
    *
-   * @private
-   * @member {JC.Eventer}
+   * @member {Number}
    */
-  // this.event = new Eventer();
+  this.fps = 0;
 
   /**
-   * 当前对象是否穿透自身的事件检测
+   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
+  this.averageFps = 0;
+
+  /**
+   * 渲染总花费时间，除去被中断、被暂停等时间
+   *
+   * @member {Number}
+   * @private
+   */
+  this._takeTime = 0;
+
+  /**
+   * 渲染总次数
+   *
+   * @member {Number}
+   * @private
+   */
+  this._renderTimes = 0;
+
+  /**
+   * 是否开启 ticker
    *
    * @member {Boolean}
    */
-  this.passEvent = false;
+  this.started = false;
 
   /**
-   * 当前对象的事件检测边界
-   *
-   * @private
-   * @member {JC.Shape}
-   */
-  this.eventArea = null;
-
-  /**
-   * 当前对象的动画管家
-   *
-   * @private
-   * @member {Array}
-   */
-  this.Animation = new Animation(this);
-
-  /**
-   * 标记当前对象是否为touchstart触发状态
-   *
-   * @private
-   * @member {Boolean}
-   */
-  // this._touchstarted = false;
-
-  /**
-   * 标记当前对象是否为mousedown触发状态
-   *
-   * @private
-   * @member {Boolean}
-   */
-  // this._mousedowned = false;
-
-  /**
-   * 渲染对象是否具备光标样式，例如 cursor
+   * 是否暂停 ticker
    *
    * @member {Boolean}
    */
-  // this.buttonMode = false;
-
-  /**
-   * 当渲染对象是按钮时所具备的光标样式
-   *
-   * @member {Boolean}
-   */
-  this.cursor = '';
-
-  /**
-   * Enable interaction events for the DisplayObject. Touch, pointer and mouse
-   * events will not be emitted unless `interactive` is set to `true`.
-   *
-   * @member {boolean}
-   */
-  this.interactive = false;
-
-  /**
-   * Determines if the children to the displayObject can be clicked/touched
-   * Setting this to false allows PixiJS to bypass a recursive `hitTest` function
-   *
-   * @member {boolean}
-   * @memberof PIXI.Container#
-   */
-  this.interactiveChildren = true;
+  this.paused = false;
 }
-DisplayObject.prototype = Object.create(Eventer.prototype);
 
-/**
- * 对渲染对象进行x、y轴同时缩放
- *
- * @name scale
- * @member {Number}
- * @memberof JC.DisplayObject#
- */
-Object.defineProperty(DisplayObject.prototype, 'scale', {
-  get: function get() {
-    return this.scaleX;
-  },
-  set: function set(scale) {
-    this.scaleX = this.scaleY = scale;
+Ticker.prototype = Object.create(Eventer.prototype);
+
+Ticker.prototype.timeline = function () {
+  this.snippet = Date.now() - this.pt;
+  if (this.pt === 0 || this.snippet > 200) {
+    this.pt = Date.now();
+    this.snippet = Date.now() - this.pt;
   }
-});
 
-/**
- * 对渲染对象进行x、y轴同时缩放
- *
- * @name scale
- * @member {Number}
- * @memberof JC.DisplayObject#
- */
-Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
-  get: function get() {
-    if (this._trackedPointers === undefined) this._trackedPointers = {};
-    return this._trackedPointers;
+  if (this.enableFPS) {
+    this._renderTimes++;
+    this._takeTime += Math.max(15, this.snippet);
+    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
+    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
   }
-});
 
-/**
- * animate动画，指定动画的启始位置和结束位置
- *
- * ```js
- * display.animate({
- *   from: {x: 100},
- *   to: {x: 200},
- *   ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
- *   onUpdate: function(state,rate){},
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {Object} options 动画配置参数
- * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
- * @param {Object} options.to 设置对象的结束位置和结束姿态等
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
- */
-DisplayObject.prototype.animate = function (options, clear) {
-  return this.Animation.animate(options, clear);
+  this.pt += this.snippet;
+};
+
+Ticker.prototype.tick = function () {
+  if (this.paused) return;
+  this.timeline();
+  this.emit('update', this.snippet);
+  this.emit('tick', this.snippet);
 };
 
 /**
- * motion动画，让物体按照设定好的曲线运动
+ * 渲染循环
  *
- * ```js
- * display.motion({
- *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
- *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
- *   onUpdate: function(state,rate){}, // 动画更新回调
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- * @param {Object} options 动画配置参数
- * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
- * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
+ * @method start
  */
-DisplayObject.prototype.motion = function (options, clear) {
-  return this.Animation.motion(options, clear);
+Ticker.prototype.start = function () {
+  var _this = this;
+
+  if (this.started) return;
+  this.started = true;
+  var loop = function loop() {
+    _this.tick();
+    _this.loop = RAF(loop);
+  };
+  loop();
 };
 
 /**
- * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
+ * 渲染循环
  *
- * ```js
- * display.keyFrames({
- *   ks: data.layers[0], // ae导出的动画数据
- *   fr: 30, // 动画的帧率，默认：30fps
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   onUpdate: function(state,rate){},
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {Object} options 动画配置参数
- * @param {Object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
- * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
+ * @method stop
  */
-DisplayObject.prototype.keyFrames = function (options, clear) {
-  return this.Animation.keyFrames(options, clear);
+Ticker.prototype.stop = function () {
+  CAF(this.loop);
+  this.started = false;
 };
 
 /**
- * 不推荐使用，建议使用`queues`方法达到同样效果
- * runners动画，多个复合动画的组合形式，不支持`alternate`
+ * 暂停触发 tick
  *
- * ```js
- * display.runners({
- *   runners: [
- *     { from: {}, to: {} },
- *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
- *   ], // 组合动画，支持组合 animate、motion
- *   delay: 1000, // ae导出的动画数据
- *   wait: 100, // ae导出的动画数据
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   onUpdate: function(state,rate){},
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {Object} options 动画配置参数
- * @param {Object} options.runners 组合动画，支持 animate、motion 这些的自定义组合
- * @param {Number} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
- * @param {Number} [options.wait=0] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay=0] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
+ * @method pause
  */
-DisplayObject.prototype.runners = function (options, clear) {
-  return this.Animation.runners(options, clear);
+Ticker.prototype.pause = function () {
+  this.paused = true;
 };
 
 /**
- * 以链式调用的方式触发一串动画 （不支持`alternate`）
+ * 恢复触发 tick
  *
- * ```js
- * display.queues({ from: { x: 1 }, to: { x: 2 } })
- *   .then({ path: JC.BezierCurve([ point1, point2, point3, point4 ]) })
- *   .then({ from: { x: 2 }, to: { x: 1 } })
- *   .then({ from: { scale: 1 }, to: { scale: 0 } })
- *   .on('complete', function() {
- *     console.log('end queues');
- *   });
- * ```
- *
- * @param {Object} [runner] 添加动画，可以是 animate 或者 motion 动画配置
- * @param {Object} [options={}] 整个动画的循环等配置
- * @param {Object} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Object} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Boolean} [clear=false] 是否去掉之前的动画
- * @return {JC.Queues}
+ * @method resume
  */
-DisplayObject.prototype.queues = function (runner) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var clear = arguments[2];
-
-  return this.Animation.queues(runner, options, clear);
-};
-
-/**
- * 检查对象是否可见
- *
- * @return {Boolean} 对象是否可见
- */
-DisplayObject.prototype.isVisible = function () {
-  return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
-};
-
-/**
- * 移除对象上的遮罩
- */
-DisplayObject.prototype.removeMask = function () {
-  this.mask = null;
-};
-
-/**
- * 设置对象上的属性值
- *
- * @private
- * @param {Object} props
- */
-DisplayObject.prototype.setProps = function (props) {
-  if (props === undefined) return;
-  for (var key in props) {
-    if (this[key] === undefined) {
-      continue;
-    } else {
-      this[key] = props[key];
-    }
-  }
-};
-
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @private
- * @method updateTransform
- */
-DisplayObject.prototype.updateTransform = function () {
-  var pt = this.parent && this.parent.worldTransform || IDENTITY;
-  var wt = this.worldTransform;
-  var worldAlpha = this.parent && this.parent.worldAlpha || 1;
-
-  var a = void 0;
-  var b = void 0;
-  var c = void 0;
-  var d = void 0;
-  var tx = void 0;
-  var ty = void 0;
-
-  var pox = this.pivotX + this.originX;
-  var poy = this.pivotY + this.originY;
-
-  if (this.skewX || this.skewY) {
-    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * Utils.DTR, this.skewX * Utils.DTR, this.skewY * Utils.DTR, this.originX, this.originY);
-
-    wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
-    wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
-    wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
-    wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
-    wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
-    wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
-  } else {
-    if (this.rotation % 360) {
-      if (this.rotation !== this.rotationCache) {
-        this.rotationCache = this.rotation;
-        this._sr = Math.sin(this.rotation * Utils.DTR);
-        this._cr = Math.cos(this.rotation * Utils.DTR);
-      }
-
-      a = this._cr * this.scaleX;
-      b = this._sr * this.scaleX;
-      c = -this._sr * this.scaleY;
-      d = this._cr * this.scaleY;
-      tx = this.x;
-      ty = this.y;
-
-      if (this.pivotX || this.pivotY || this.originX || this.originY) {
-        tx -= pox * a + poy * c - this.originX;
-        ty -= pox * b + poy * d - this.originY;
-      }
-      wt.a = a * pt.a + b * pt.c;
-      wt.b = a * pt.b + b * pt.d;
-      wt.c = c * pt.a + d * pt.c;
-      wt.d = c * pt.b + d * pt.d;
-      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
-      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-    } else {
-      a = this.scaleX;
-      d = this.scaleY;
-
-      tx = this.x - pox * a + this.originX;
-      ty = this.y - poy * d + this.originY;
-
-      wt.a = a * pt.a;
-      wt.b = a * pt.b;
-      wt.c = d * pt.c;
-      wt.d = d * pt.d;
-      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
-      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-    }
-  }
-  this.worldAlpha = this.alpha * worldAlpha;
-};
-
-/**
- * 更新对象本身的动画
- *
- * @private
- * @param {Number} snippet
- */
-DisplayObject.prototype.updateAnimation = function (snippet) {
-  this.Animation.update(snippet);
-};
-
-/**
- * 设置矩阵和透明度到当前绘图上下文
- *
- * @private
- * @param {context} ctx
- */
-DisplayObject.prototype.setTransform = function (ctx) {
-  var matrix = this.worldTransform;
-  ctx.globalAlpha = this.worldAlpha;
-  ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
-};
-
-/**
- * 获取物体相对于canvas世界坐标系的坐标位置
- *
- * @return {Object}
- */
-DisplayObject.prototype.getGlobalPos = function () {
-  return { x: this.worldTransform.tx, y: this.worldTransform.ty };
-};
-
-/**
- * 设置显示对象的事件检测区域
- *
- * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
- * @param {Boolean} clock 是否锁住当前设置的监测区域不会被内部更新修改。
- */
-DisplayObject.prototype.setArea = function (shape, clock) {
-  if (this.eventArea !== null && this.eventArea.clocked && !clock) return;
-  this.eventArea = shape;
-  if (clock) this.eventArea.clocked = true;
-};
-
-/**
- * 检测坐标点是否在多变性内
- *
- * @param {JC.Point} global
- * @return {Boolean} 是否包含该点
- */
-DisplayObject.prototype.contains = function (global) {
-  if (this.eventArea === null) return false;
-  var point = new Point();
-  this.worldTransform.applyInverse(global, point);
-  return this.eventArea && this.eventArea.contains(point.x, point.y);
+Ticker.prototype.resume = function () {
+  this.paused = false;
 };
 
 /**
@@ -3360,916 +2677,6 @@ Bounds.prototype.addBounds = function (bounds) {
   this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
 };
 
-/* eslint prefer-rest-params: 0 */
-
-/**
- * 显示对象容器，继承至DisplayObject
- *
- * ```js
- * var container = new JC.Container();
- * container.adds(sprite);
- * ```
- *
- * @class
- * @memberof JC
- * @extends JC.DisplayObject
- */
-function Container() {
-  DisplayObject.call(this);
-
-  /**
-   * 渲染对象的列表
-   *
-   * @member {Array}
-   */
-  this.childs = [];
-
-  /**
-   * 自身及后代动画的缩放比例
-   *
-   * @member {Number}
-   */
-  this.timeScale = 1;
-
-  /**
-   * 是否暂停自身的动画
-   *
-   * @member {Boolean}
-   */
-  this.paused = false;
-
-  /**
-   * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
-   *
-   * @private
-   * @member {Number}
-   */
-  this._zIndex = 0;
-
-  /**
-   * 强制该对象在渲染子集之前为他们排序
-   *
-   * @member {Boolean}
-   */
-  this.souldSort = false;
-
-  /**
-   * 显示对象的包围盒
-   *
-   * @member {JC.Bounds}
-   */
-  this.bounds = new Bounds();
-
-  /**
-   * 显示对象内部表示的边界
-   *
-   * @private
-   * @member {JC.Bounds}
-   */
-  this._bounds = new Bounds();
-
-  this.vertexData = new Float32Array(8);
-}
-Container.prototype = Object.create(DisplayObject.prototype);
-
-/**
- * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
- *
- * @name zIndex
- * @member {Number}
- * @memberof JC.Container#
- */
-Object.defineProperty(Container.prototype, 'zIndex', {
-  get: function get() {
-    return this._zIndex;
-  },
-  set: function set(zIndex) {
-    if (this._zIndex !== zIndex) {
-      this._zIndex = zIndex;
-      if (this.parent) {
-        this.parent.souldSort = true;
-      }
-    }
-  }
-});
-
-/**
- * 对自身子集进行zIndex排序
- *
- * @private
- * @method _sortList
- */
-Container.prototype._sortList = function () {
-  /**
-   * 因为数组sort排序的不稳定性，顾采用冒泡排序方式
-   */
-  var childs = this.childs;
-  var length = childs.length;
-  var i = void 0;
-  var j = void 0;
-  var temp = void 0;
-  for (i = 0; i < length - 1; i++) {
-    for (j = 0; j < length - 1 - i; j++) {
-      if (childs[j].zIndex > childs[j + 1].zIndex) {
-        temp = childs[j];
-        childs[j] = childs[j + 1];
-        childs[j + 1] = temp;
-      }
-    }
-  }
-  this.souldSort = false;
-};
-
-/**
- * 向容器添加一个物体
- *
- * ```js
- * container.adds(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param {JC.Container} object
- * @return {JC.Container}
- */
-Container.prototype.adds = function (object) {
-  if (arguments.length > 1) {
-    for (var i = 0; i < arguments.length; i++) {
-      this.adds(arguments[i]);
-    }
-    return this;
-  }
-  if (object === this) {
-    console.error('adds: object can\'t be added as a child of itself.', object);
-  }
-  if (object && object instanceof Container) {
-    if (object.parent !== null) {
-      object.parent.remove(object);
-    }
-    object.parent = this;
-    this.childs.push(object);
-    this.souldSort = true;
-  } else {
-    console.error('adds: object not an instance of Container', object);
-  }
-  return this;
-};
-
-/**
- * 从容器移除一个物体
- *
- * ```js
- * container.remove(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param {JC.Container} object
- */
-Container.prototype.remove = function (object) {
-  if (arguments.length > 1) {
-    for (var i = 0; i < arguments.length; i++) {
-      this.remove(arguments[i]);
-    }
-  }
-  var index = this.childs.indexOf(object);
-  if (index !== -1) {
-    object.parent = null;
-    this.childs.splice(index, 1);
-  }
-};
-
-/**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
- *
- * @private
- * @param {Number} snippet
- */
-Container.prototype.updateTimeline = function (snippet) {
-  this.emit('pretimeline', snippet);
-  if (this.paused) return;
-  snippet = this.timeScale * snippet;
-  this.updateAnimation(snippet);
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    child.updateTimeline(snippet);
-    i++;
-  }
-  this.emit('posttimeline', snippet);
-};
-
-/**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
- *
- * @private
- */
-Container.prototype.updatePosture = function () {
-  this.emit('preposture');
-  if (this.souldSort) this._sortList();
-  this.updateTransform();
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    child.updatePosture();
-    i++;
-  }
-  this.emit('postposture');
-};
-
-/**
- * 渲染自己并触发后代渲染
- * @param {context} ctx
- * @private
- */
-Container.prototype.render = function (ctx) {
-  this.emit('prerender');
-  ctx.save();
-  this.setTransform(ctx);
-  if (this.mask) this.mask.render(ctx);
-  this.renderMe(ctx);
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    i++;
-    if (!child.isVisible()) continue;
-    child.render(ctx);
-  }
-  ctx.restore();
-  this.emit('postrender');
-};
-
-/**
- * 渲染自己
- * @private
- * @return {Boolean} 是否渲染
- */
-Container.prototype.renderMe = function () {
-  return true;
-};
-
-/**
- * 计算自己的包围盒
- * @private
- */
-Container.prototype.calculateVertices = function () {
-  var wt = this.worldTransform;
-  var a = wt.a;
-  var b = wt.b;
-  var c = wt.c;
-  var d = wt.d;
-  var tx = wt.tx;
-  var ty = wt.ty;
-  var vertexData = this.vertexData;
-  var w0 = void 0;
-  var w1 = void 0;
-  var h0 = void 0;
-  var h1 = void 0;
-
-  w0 = this._bounds.minX;
-  w1 = this._bounds.maxX;
-
-  h0 = this._bounds.minY;
-  h1 = this._bounds.maxY;
-
-  // xy
-  vertexData[0] = a * w1 + c * h1 + tx;
-  vertexData[1] = d * h1 + b * w1 + ty;
-
-  // xy
-  vertexData[2] = a * w0 + c * h1 + tx;
-  vertexData[3] = d * h1 + b * w0 + ty;
-
-  // xy
-  vertexData[4] = a * w0 + c * h0 + tx;
-  vertexData[5] = d * h0 + b * w0 + ty;
-
-  // xy
-  vertexData[6] = a * w1 + c * h0 + tx;
-  vertexData[7] = d * h0 + b * w1 + ty;
-};
-
-/**
- * 计算包围盒子
- *
- * @method calculateBounds
- */
-Container.prototype.calculateBounds = function () {
-  this.bounds.clear();
-  if (!this.visible) {
-    return;
-  }
-  this._calculateBounds();
-
-  for (var i = 0; i < this.childs.length; i++) {
-    var child = this.childs[i];
-
-    child.calculateBounds();
-
-    this.bounds.addBounds(child.bounds);
-  }
-};
-
-Container.prototype._calculateBounds = function () {
-  this.calculateVertices();
-  this.bounds.addVert(this.vertexData);
-};
-
-/**
- * 设置渲染物体的包围盒
- * @param {JC.Bounds} bounds
- */
-Container.prototype.setBounds = function (bounds) {
-  if (bounds instanceof Bounds) {
-    this._bounds = bounds;
-  }
-};
-
-/**
- * 暂停自身和子级的所有动画进度
- */
-Container.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复自身和子级的所有动画进度
- */
-Container.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 设置自身及子级的动画速度
- * @param {Number} speed 设置的速率值
- */
-Container.prototype.setSpeed = function (speed) {
-  this.timeScale = speed;
-};
-
-/* eslint max-len: "off" */
-
-/**
- * MovieClip类型动画对象
- *
- * @class
- * @memberof JC
- * @extends JC.Eventer
- * @param {object} [element] 动画对象 内部传入
- * @param {object} [options] 动画配置信息 内部传入
- */
-function MovieClip(element, options) {
-  Eventer.call(this);
-
-  this.element = element;
-  this.living = false;
-
-  // this.onComplete = null;
-  // this.onUpdate = null;
-
-  this.infinite = false;
-  this.alternate = false;
-  this.repeats = 0;
-
-  this.animations = options.animations || {};
-
-  this.index = 0;
-  this.preIndex = -1;
-  this.direction = 1;
-  this.frames = [];
-  this.preFrame = null;
-
-  this.fillMode = 0;
-  this.fps = 16;
-
-  this.paused = false;
-
-  this.pt = 0;
-  this.nt = 0;
-}
-
-MovieClip.prototype = Object.create(Eventer.prototype);
-
-/**
- * 更新动画
- * @private
- * @param {number} snippet 时间片段
- */
-MovieClip.prototype.update = function (snippet) {
-  if (this.paused || !this.living) return;
-  this.nt += snippet;
-  if (this.nt - this.pt < this.interval) return;
-  this.pt = this.nt;
-  var i = this.index + this.direction;
-  if (i < this.frames.length && i >= 0) {
-    this.index = i;
-    // Do you need this handler???
-    // this.onUpdate&&this.onUpdate(this.index);
-  } else {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
-      if (this.alternate) {
-        this.direction *= -1;
-        this.index += this.direction;
-      } else {
-        this.direction = 1;
-        this.index = 0;
-      }
-      // Do you need this handler???
-      // this.onUpdate && this.onUpdate(this.index);
-    } else {
-      this.living = false;
-      this.index = this.fillMode;
-      this.emit('complete');
-    }
-  }
-};
-
-/**
- * 获取帧位置
- * @private
- * @return {JC.Rectangle}
- */
-MovieClip.prototype.getFrame = function () {
-  if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
-  var frame = this.element.frame.clone();
-  var cf = this.frames[this.index];
-  if (cf > 0) {
-    var row = this.element.naturalWidth / this.element.frame.width >> 0;
-    var lintRow = this.element.frame.x / this.element.frame.width >> 0;
-
-    var mCol = (lintRow + cf) / row >> 0;
-    var mRow = (lintRow + cf) % row;
-    frame.x = mRow * this.element.frame.width;
-    frame.y += mCol * this.element.frame.height;
-  }
-  this.preIndex = this.index;
-  this.preFrame = frame;
-  return frame;
-};
-
-/**
- * 播放逐帧
- * @param {object} options 播放配置
- * @return {this}
- */
-MovieClip.prototype.playMovie = function (options) {
-  // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
-  this.off('complete');
-  var movie = this.format(options.movie);
-  if (!Utils.isArray(movie)) return;
-  this.frames = movie;
-  this.index = 0;
-  this.direction = 1;
-  this.fillMode = options.fillMode || 0;
-  this.fps = options.fps || this.fps;
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.repeats = options.repeats || 0;
-  this.living = true;
-  if (options.onComplete) {
-    var This = this;
-    this.once('complete', function () {
-      options.onComplete.call(This);
-    });
-  }
-  return this;
-};
-
-/**
- * 格式化逐帧信息
- * @private
- * @param {string|array|object} movie 逐帧信息
- * @return {array}
- */
-MovieClip.prototype.format = function (movie) {
-  if (Utils.isString(movie)) {
-    var config = this.animations[movie];
-    if (config) {
-      return this.format(config);
-    } else {
-      console.warn('you havn\'t config ' + movie + ' in animations ');
-      return false;
-    }
-  } else if (Utils.isArray(movie)) {
-    return movie;
-  } else if (Utils.isObject(movie)) {
-    var arr = [];
-    for (var i = movie.start; i <= movie.end; i++) {
-      arr.push(i);
-    }
-    if (movie.next && this.animations[movie.next]) {
-      var This = this;
-      var conf = {};
-      if (Utils.isString(movie.next) && this.animations[movie.next]) {
-        conf.movie = movie.next;
-        conf.infinite = true;
-      } else if (Utils.isObject(movie.next)) {
-        conf = movie.next;
-      }
-      if (Utils.isString(conf.movie)) {
-        this.once('complete', function () {
-          This.playMovie(conf);
-        });
-      }
-    }
-    return arr;
-  }
-};
-
-/**
- * 暂停逐帧
- */
-MovieClip.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复播放逐帧
- */
-MovieClip.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 取消逐帧
- */
-MovieClip.prototype.cancle = function () {
-  this.living = false;
-};
-
-/**
- * 帧间隔
- * @private
- */
-Object.defineProperty(MovieClip.prototype, 'interval', {
-  get: function get() {
-    return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
-  }
-});
-
-/**
- * 位图精灵图，继承至Container
- *
- * ```js
- * var loadBox = JC.loaderUtil({
- *    frames: './images/frames.png'
- * });
- * var sprite = new JC.Sprite({
- *      texture: loadBox.getById('frames'),
- *      frame: new JC.Rectangle(0, 0, w, h),
- *      width: 100,
- *      height: 100,
- *      animations: {
- *          fall: {start: 0,end: 4,next: 'stand'},
- *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
- *          stand: {start: 10,end: 39},
- *          walk: {start: 40,end: 59,next: 'stand'},
- *          other: [ 0, 1, 2, 1, 3, 4 ], // 同样接受数组形势
- *      }
- * });
- * ```
- *
- * @class
- * @memberof JC
- * @extends JC.Container
- * @param {Object} options
- * @param {JC.Texture} options.texture 图片纹理
- * @param {JC.Rectangle} [options.frame] 当是逐帧或者是裁切显示时需要配置，显示的矩形区域
- * @param {Number} [options.width] 实际显示的宽，可能会缩放图像
- * @param {Number} [options.height] 实际显示的高，可能会缩放图像
- * @param {Object} [options.animations] 逐帧的预置帧动画配置
- */
-function Sprite(options) {
-  Container.call(this);
-
-  this._width = 0;
-
-  this._height = 0;
-
-  this.ready = true;
-
-  this.texture = options.texture;
-  if (this.texture.loaded) {
-    this.upTexture(options);
-  } else {
-    var This = this;
-    this.ready = false;
-    this.texture.on('load', function () {
-      This.upTexture(options);
-      This.ready = true;
-    });
-  }
-
-  this.MovieClip = new MovieClip(this, options);
-}
-Sprite.prototype = Object.create(Container.prototype);
-
-/**
- * 更新纹理对象
- *
- * @private
- * @param {json} options
- */
-Sprite.prototype.upTexture = function (options) {
-  this.naturalWidth = options.texture.naturalWidth;
-  this.naturalHeight = options.texture.naturalHeight;
-  this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
-
-  this.width = options.width || this.frame.width;
-  this.height = options.height || this.frame.height;
-};
-
-/**
- * 当前图片对象的width
- *
- * @name width
- * @member {Number}
- * @memberof JC.Sprite#
- */
-Object.defineProperty(Sprite.prototype, 'width', {
-  get: function get() {
-    return this._width;
-  },
-  set: function set(width) {
-    if (this._width !== width) {
-      this._width = width;
-      this.updateGeometry();
-    }
-  }
-});
-
-/**
- * 当前图片对象的height
- *
- * @name height
- * @member {Number}
- * @memberof JC.Sprite#
- */
-Object.defineProperty(Sprite.prototype, 'height', {
-  get: function get() {
-    return this._height;
-  },
-  set: function set(height) {
-    if (this._height !== height) {
-      this._height = height;
-      this.updateGeometry();
-    }
-  }
-});
-
-/**
- * 更新对象的事件几何形态
- * note: 此处的setArea是懒更新，如果需要
- *
- * @private
- */
-Sprite.prototype.updateGeometry = function () {
-  var rect = new Rectangle(0, 0, this.width, this.height);
-  this._bounds.clear().addRect(rect);
-  this.setArea(rect);
-};
-
-/**
- * 更新对象的动画姿态
- *
- * @private
- * @param {number} snippet
- */
-Sprite.prototype.updateAnimation = function (snippet) {
-  this.Animation.update(snippet);
-  this.MovieClip.update(snippet);
-};
-
-/**
- * 播放逐帧动画
- * @param {Object} options 可以是播放配置对象
- * @param {String|Array} options.movie 预置的动画名，或者是帧索引数组
- * @param {Number} [options.fillMode] 结束时停留在哪一帧
- * @param {Boolean} [options.repeats] 重复播放次数
- * @param {Boolean} [options.infinite] 无限循环，优先级比 repeats 高
- * @param {Boolean} [options.alternate] 循环时交替播放
- * @param {Number} [options.fps] 当前动画将使用的帧率
- * @return {MovieClip}
- */
-Sprite.prototype.playMovie = function (options) {
-  return this.MovieClip.playMovie(options);
-};
-
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @private
- * @param {context} ctx
- */
-Sprite.prototype.renderMe = function (ctx) {
-  if (!this.ready) return;
-  var frame = this.MovieClip.getFrame();
-  ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
-};
-
-/**
- * 解析bodymovin从ae导出的数据
- * @class
- * @memberof JC
- * @param {object} options 动画配置
- * @param {object} options.keyframes bodymovin从ae导出的动画数据
- * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
- * @param {number} [options.repeats] 动画是否无限循环
- * @param {boolean} [options.infinite] 动画是否无限循环
- * @param {boolean} [options.alternate] 动画是否交替播放
- * @param {string} [options.prefix] 导出资源的前缀
- * @param {function} [options.onComplete] 结束回调
- * @param {function} [options.onUpdate] 更新回调
- */
-function ParserAnimation(options) {
-  this.prefix = options.prefix || '';
-  this.doc = new Container();
-  this.fr = options.fr || options.keyframes.fr;
-  this.keyframes = options.keyframes;
-  this.ip = this.keyframes.ip;
-  this.op = this.keyframes.op;
-  this.repeats = options.repeats || 0;
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.assetBox = null;
-  this.timeline = [];
-  this.parserAssets(this.keyframes.assets);
-  this.parserComposition(this.doc, this.keyframes.layers);
-
-  if (options.onComplete) {
-    this.timeline[0].on('complete', options.onComplete.bind(this));
-  }
-  if (options.onUpdate) {
-    this.timeline[0].on('update', options.onUpdate.bind(this));
-  }
-}
-
-/**
- * @private
- * @param {array} assets 资源数组
- */
-ParserAnimation.prototype.parserAssets = function (assets) {
-  var sourceMap = {};
-  var i = 0;
-  for (i = 0; i < assets.length; i++) {
-    var id = assets[i].id;
-    var up = assets[i].up;
-    var u = assets[i].u;
-    var p = assets[i].p;
-    if (up) {
-      sourceMap[id] = up;
-    } else if (u && p) {
-      sourceMap[id] = u + p;
-    } else if (!assets[i].layers) {
-      console.error('can not get asset url');
-    }
-  }
-  this.assetBox = loaderUtil(sourceMap);
-};
-
-/**
- * 创建 Sprite
- * @private
- * @param {object} layer 图层信息
- * @return {Sprite}
- */
-ParserAnimation.prototype.spriteItem = function (layer) {
-  var id = this.getAssets(layer.refId).id;
-  return new Sprite({
-    texture: this.assetBox.getById(id)
-  });
-};
-
-/**
- * 创建 Container
- * @private
- * @return {Container}
- */
-ParserAnimation.prototype.docItem = function () {
-  return new Container();
-};
-
-/**
- * 初始化合成组内的图层
- * @private
- * @param {array} layers 图层数组
- * @return {object} 该图层的所有渲染对象
- */
-ParserAnimation.prototype.initLayers = function (layers) {
-  var layersMap = {};
-  var fr = this.fr;
-  var ip = this.ip;
-  var op = this.op;
-  var repeats = this.repeats;
-  var infinite = this.infinite;
-  var alternate = this.alternate;
-
-  for (var i = layers.length - 1; i >= 0; i--) {
-    var layer = layers[i];
-    var element = null;
-    if (layer.ty === 2) {
-      element = this.spriteItem(layer);
-    } else if (layer.ty === 0) {
-      element = this.docItem();
-    } else {
-      continue;
-    }
-
-    element.name = layer.nm;
-    layersMap[layer.ind] = element;
-    this.timeline.push(element.keyFrames({
-      layer: layer,
-      fr: fr,
-      ip: ip,
-      op: op,
-      repeats: repeats,
-      infinite: infinite,
-      alternate: alternate
-    }));
-  }
-  return layersMap;
-};
-
-/**
- * 解析合成组
- * @private
- * @param {JC.Container} doc 动画元素的渲染组
- * @param {array} layers 预合成数组
- */
-ParserAnimation.prototype.parserComposition = function (doc, layers) {
-  var layersMap = this.initLayers(layers);
-  for (var i = layers.length - 1; i >= 0; i--) {
-    var layer = layers[i];
-    var item = layersMap[layer.ind];
-    if (!item) continue;
-    if (layer.parent) {
-      var parent = layersMap[layer.parent];
-      parent.adds(item);
-    } else {
-      doc.adds(item);
-    }
-    if (layer.ty === 0) {
-      var childLayers = this.getAssets(layer.refId).layers;
-      this.parserComposition(item, childLayers);
-    }
-  }
-};
-
-/**
- * @private
- * @param {string} id 资源的refid
- * @return {object} 资源配置
- */
-ParserAnimation.prototype.getAssets = function (id) {
-  var assets = this.keyframes.assets;
-  for (var i = 0; i < assets.length; i++) {
-    if (id === assets[i].id) return assets[i];
-  }
-};
-
-/**
- * 设置动画播放速度
- * @param {number} speed
- */
-ParserAnimation.prototype.setSpeed = function (speed) {
-  this.doc.setSpeed(speed);
-};
-
-/**
- * 暂停播放动画
- */
-ParserAnimation.prototype.pause = function () {
-  this.doc.pause();
-};
-
-/**
- * 恢复播放动画
- */
-ParserAnimation.prototype.restart = function () {
-  this.doc.restart();
-};
-
-/**
- * 停止播放动画
- */
-ParserAnimation.prototype.stop = function () {
-  this.timeline.forEach(function (it) {
-    it.stop();
-  });
-};
-
-/**
- * 取消播放动画
- */
-ParserAnimation.prototype.cancle = function () {
-  this.timeline.forEach(function (it) {
-    it.cancle();
-  });
-};
-
 /**
  * @class
  * @memberof JC
@@ -4478,6 +2885,214 @@ Ellipse.prototype.contains = function (x, y) {
 Ellipse.prototype.getBounds = function () {
   return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
 };
+
+/**
+ * 矩阵对象，用来描述和记录对象的tansform 状态信息
+ *
+ * @class
+ * @memberof JC
+ */
+function Matrix() {
+  this.a = 1;
+  this.b = 0;
+  this.c = 0;
+  this.d = 1;
+  this.tx = 0;
+  this.ty = 0;
+}
+
+/**
+ * 从数组设置一个矩阵
+ *
+ * @param {array} array
+ */
+Matrix.prototype.fromArray = function (array) {
+  this.a = array[0];
+  this.b = array[1];
+  this.c = array[3];
+  this.d = array[4];
+  this.tx = array[2];
+  this.ty = array[5];
+};
+
+/**
+ * 将对象的数据以数组的形式导出
+ *
+ * @param {boolean} transpose 是否对矩阵进行转置
+ * @return {number[]} 返回数组
+ */
+Matrix.prototype.toArray = function (transpose) {
+  if (!this.array) this.array = new Float32Array(9);
+  var array = this.array;
+
+  if (transpose) {
+    array[0] = this.a;
+    array[1] = this.b;
+    array[2] = 0;
+    array[3] = this.c;
+    array[4] = this.d;
+    array[5] = 0;
+    array[6] = this.tx;
+    array[7] = this.ty;
+    array[8] = 1;
+  } else {
+    array[0] = this.a;
+    array[1] = this.c;
+    array[2] = this.tx;
+    array[3] = this.b;
+    array[4] = this.d;
+    array[5] = this.ty;
+    array[6] = 0;
+    array[7] = 0;
+    array[8] = 1;
+  }
+  return array;
+};
+
+/**
+ * 将坐标点与矩阵左乘
+ *
+ * @param {object} pos 原始点
+ * @param {object} newPos 变换之后的点
+ * @return {object} 返回数组
+ */
+Matrix.prototype.apply = function (pos, newPos) {
+  newPos = newPos || {};
+  newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
+  newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
+  return newPos;
+};
+/**
+ * 将坐标点与转置矩阵左乘
+ *
+ * @param {object} pos 原始点
+ * @param {object} newPos 变换之后的点
+ * @return {object} 变换之后的点
+ */
+Matrix.prototype.applyInverse = function (pos, newPos) {
+  var id = 1 / (this.a * this.d + this.c * -this.b);
+  newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
+  newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
+  return newPos;
+};
+/**
+ * 位移操作
+ * @param {number} x
+ * @param {number} y
+ * @return {this}
+ */
+Matrix.prototype.translate = function (x, y) {
+  this.tx += x;
+  this.ty += y;
+  return this;
+};
+/**
+ * 缩放操作
+ * @param {number} x
+ * @param {number} y
+ * @return {this}
+ */
+Matrix.prototype.scale = function (x, y) {
+  this.a *= x;
+  this.d *= y;
+  this.c *= x;
+  this.b *= y;
+  this.tx *= x;
+  this.ty *= y;
+  return this;
+};
+/**
+ * 旋转操作
+ * @param {number} angle
+ * @return {this}
+ */
+Matrix.prototype.rotate = function (angle) {
+  var cos = Math.cos(angle);
+  var sin = Math.sin(angle);
+  var a1 = this.a;
+  var c1 = this.c;
+  var tx1 = this.tx;
+  this.a = a1 * cos - this.b * sin;
+  this.b = a1 * sin + this.b * cos;
+  this.c = c1 * cos - this.d * sin;
+  this.d = c1 * sin + this.d * cos;
+  this.tx = tx1 * cos - this.ty * sin;
+  this.ty = tx1 * sin + this.ty * cos;
+  return this;
+};
+/**
+ * 矩阵相乘
+ * @param {matrix} matrix
+ * @return {this}
+ */
+Matrix.prototype.append = function (matrix) {
+  var a1 = this.a;
+  var b1 = this.b;
+  var c1 = this.c;
+  var d1 = this.d;
+  this.a = matrix.a * a1 + matrix.b * c1;
+  this.b = matrix.a * b1 + matrix.b * d1;
+  this.c = matrix.c * a1 + matrix.d * c1;
+  this.d = matrix.c * b1 + matrix.d * d1;
+  this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
+  this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
+  return this;
+};
+/**
+ * 单位矩阵
+ *
+ * @return {this}
+ */
+Matrix.prototype.identity = function () {
+  this.a = 1;
+  this.b = 0;
+  this.c = 0;
+  this.d = 1;
+  this.tx = 0;
+  this.ty = 0;
+  return this;
+};
+/**
+ * 快速设置矩阵各个分量
+ * @param {number} x
+ * @param {number} y
+ * @param {number} pivotX
+ * @param {number} pivotY
+ * @param {number} scaleX
+ * @param {number} scaleY
+ * @param {number} rotation
+ * @param {number} skewX
+ * @param {number} skewY
+ * @param {number} originX
+ * @param {number} originY
+ * @return {this}
+ */
+Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
+  var sr = Math.sin(rotation);
+  var cr = Math.cos(rotation);
+  var sy = Math.tan(skewY);
+  var nsx = Math.tan(skewX);
+
+  var a = cr * scaleX;
+  var b = sr * scaleX;
+  var c = -sr * scaleY;
+  var d = cr * scaleY;
+
+  var pox = pivotX + originX;
+  var poy = pivotY + originY;
+
+  this.a = a + sy * c;
+  this.b = b + sy * d;
+  this.c = nsx * a + c;
+  this.d = nsx * b + d;
+
+  this.tx = x - pox * this.a - poy * this.c + originX;
+  this.ty = y - pox * this.b - poy * this.d + originY;
+
+  return this;
+};
+var IDENTITY = new Matrix();
+var TEMP_MATRIX = new Matrix();
 
 /**
  *
@@ -5001,6 +3616,1308 @@ NURBSCurve.prototype.getTangent = function (t) {
   tangent.normalize();
 
   return tangent;
+};
+
+/* eslint max-len: "off" */
+
+/**
+ * 显示对象的基类，继承至Eventer
+ *
+ * @class
+ * @memberof JC
+ * @extends JC.Eventer
+ */
+function DisplayObject() {
+  Eventer.call(this);
+
+  /**
+   * 控制渲染对象是否显示
+   *
+   * @member {Boolean}
+   */
+  this.visible = true;
+
+  /**
+   * 世界透明度
+   *
+   * @private
+   * @member {Number}
+   */
+  this.worldAlpha = 1;
+
+  /**
+   * 控制渲染对象的透明度
+   *
+   * @member {Number}
+   */
+  this.alpha = 1;
+
+  /**
+   * 控制渲染对象的x轴的缩放
+   *
+   * @member {Number}
+   */
+  this.scaleX = 1;
+
+  /**
+   * 控制渲染对象的y轴的缩放
+   *
+   * @member {Number}
+   */
+  this.scaleY = 1;
+
+  /**
+   * 控制渲染对象的x轴的斜切
+   *
+   * @member {Number}
+   */
+  this.skewX = 0;
+
+  /**
+   * 控制渲染对象的y轴的斜切
+   *
+   * @member {Number}
+   */
+  this.skewY = 0;
+
+  /**
+   * 控制渲染对象的旋转角度
+   *
+   * @member {Number}
+   */
+  this.rotation = 0;
+  this.rotationCache = 0;
+  this._sr = 0;
+  this._cr = 1;
+
+  /**
+   * 控制渲染对象的x位置
+   *
+   * @member {Number}
+   */
+  this.x = 0;
+
+  /**
+   * 控制渲染对象的y位置
+   *
+   * @member {Number}
+   */
+  this.y = 0;
+
+  /**
+   * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
+   *
+   * @member {Number}
+   */
+  this.pivotX = 0;
+
+  /**
+   * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
+   *
+   * @member {Number}
+   */
+  this.pivotY = 0;
+
+  /**
+   * 控制渲染对象的x变换中心
+   *
+   * @member {Number}
+   */
+  this.originX = 0;
+
+  /**
+   * 控制渲染对象的y变换中心
+   *
+   * @member {Number}
+   */
+  this.originY = 0;
+
+  /**
+   * 对象的遮罩层
+   *
+   * @member {JC.Graphics}
+   */
+  this.mask = null;
+
+  /**
+   * 当前对象的直接父级
+   *
+   * @private
+   * @member {JC.Container}
+   */
+  this.parent = null;
+
+  /**
+   * 当前对象所应用的矩阵状态
+   *
+   * @private
+   * @member {JC.Matrix}
+   */
+  this.worldTransform = new Matrix();
+
+  /**
+   * 当前对象的事件管家
+   *
+   * @private
+   * @member {JC.Eventer}
+   */
+  // this.event = new Eventer();
+
+  /**
+   * 当前对象是否穿透自身的事件检测
+   *
+   * @member {Boolean}
+   */
+  this.passEvent = false;
+
+  /**
+   * 当前对象的事件检测边界
+   *
+   * @private
+   * @member {JC.Shape}
+   */
+  this.eventArea = null;
+
+  /**
+   * 当前对象的动画管家
+   *
+   * @private
+   * @member {Array}
+   */
+  this.animation = new Animation(this);
+
+  /**
+   * 标记当前对象是否为touchstart触发状态
+   *
+   * @private
+   * @member {Boolean}
+   */
+  // this._touchstarted = false;
+
+  /**
+   * 标记当前对象是否为mousedown触发状态
+   *
+   * @private
+   * @member {Boolean}
+   */
+  // this._mousedowned = false;
+
+  /**
+   * 渲染对象是否具备光标样式，例如 cursor
+   *
+   * @member {Boolean}
+   */
+  // this.buttonMode = false;
+
+  /**
+   * 当渲染对象是按钮时所具备的光标样式
+   *
+   * @member {Boolean}
+   */
+  this.cursor = '';
+
+  /**
+   * Enable interaction events for the DisplayObject. Touch, pointer and mouse
+   * events will not be emitted unless `interactive` is set to `true`.
+   *
+   * @member {boolean}
+   */
+  this.interactive = false;
+
+  /**
+   * Determines if the children to the displayObject can be clicked/touched
+   * Setting this to false allows PixiJS to bypass a recursive `hitTest` function
+   *
+   * @member {boolean}
+   * @memberof PIXI.Container#
+   */
+  this.interactiveChildren = true;
+}
+DisplayObject.prototype = Object.create(Eventer.prototype);
+
+/**
+ * 对渲染对象进行x、y轴同时缩放
+ *
+ * @name scale
+ * @member {Number}
+ * @memberof JC.DisplayObject#
+ */
+Object.defineProperty(DisplayObject.prototype, 'scale', {
+  get: function get() {
+    return this.scaleX;
+  },
+  set: function set(scale) {
+    this.scaleX = this.scaleY = scale;
+  }
+});
+
+/**
+ * 对渲染对象进行x、y轴同时缩放
+ *
+ * @name scale
+ * @member {Number}
+ * @memberof JC.DisplayObject#
+ */
+Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
+  get: function get() {
+    if (this._trackedPointers === undefined) this._trackedPointers = {};
+    return this._trackedPointers;
+  }
+});
+
+/**
+ * animate动画，指定动画的启始位置和结束位置
+ *
+ * ```js
+ * display.animate({
+ *   from: {x: 100},
+ *   to: {x: 200},
+ *   ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){},
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param {Object} options 动画配置参数
+ * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
+ * @param {Object} options.to 设置对象的结束位置和结束姿态等
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.animate = function (options, clear) {
+  return this.animation.animate(options, clear);
+};
+
+/**
+ * motion动画，让物体按照设定好的曲线运动
+ *
+ * ```js
+ * display.motion({
+ *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
+ *   attachTangent: true, // 物体是否捕获切线方向
+ *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   duration: 1000, // 动画时长 ms单位 默认 300ms
+ *   onUpdate: function(state,rate){}, // 动画更新回调
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ * @param {Object} options 动画配置参数
+ * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+ * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
+ * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.motion = function (options, clear) {
+  return this.animation.motion(options, clear);
+};
+
+/**
+ * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
+ *
+ * ```js
+ * display.keyFrames({
+ *   ks: data.layers[0], // ae导出的动画数据
+ *   fr: 30, // 动画的帧率，默认：30fps
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   alternate: true, // 偶数次的时候动画回放
+ *   onUpdate: function(state,rate){},
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.keyFrames = function (options, clear) {
+  return this.animation.keyFrames(options, clear);
+};
+
+/**
+ * 不推荐使用，建议使用`queues`方法达到同样效果
+ * runners动画，多个复合动画的组合形式，不支持`alternate`
+ *
+ * ```js
+ * display.runners({
+ *   runners: [
+ *     { from: {}, to: {} },
+ *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
+ *   ], // 组合动画，支持组合 animate、motion
+ *   delay: 1000, // ae导出的动画数据
+ *   wait: 100, // ae导出的动画数据
+ *   repeats: 10, // 动画运动完后再重复10次
+ *   infinite: true, // 无限循环动画
+ *   onUpdate: function(state,rate){},
+ *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+ * });
+ * ```
+ *
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.runners 组合动画，支持 animate、motion 这些的自定义组合
+ * @param {Number} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait=0] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay=0] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否去掉之前的动画
+ * @return {JC.Animate}
+ */
+DisplayObject.prototype.runners = function (options, clear) {
+  return this.animation.runners(options, clear);
+};
+
+/**
+ * 以链式调用的方式触发一串动画 （不支持`alternate`）
+ *
+ * ```js
+ * display.queues({ from: { x: 1 }, to: { x: 2 } })
+ *   .then({ path: JC.BezierCurve([ point1, point2, point3, point4 ]) })
+ *   .then({ from: { x: 2 }, to: { x: 1 } })
+ *   .then({ from: { scale: 1 }, to: { scale: 0 } })
+ *   .on('complete', function() {
+ *     console.log('end queues');
+ *   });
+ * ```
+ *
+ * @param {Object} [runner] 添加动画，可以是 animate 或者 motion 动画配置
+ * @param {Object} [options={}] 整个动画的循环等配置
+ * @param {Object} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Object} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Boolean} [clear=false] 是否去掉之前的动画
+ * @return {JC.Queues}
+ */
+DisplayObject.prototype.queues = function (runner) {
+  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  var clear = arguments[2];
+
+  return this.animation.queues(runner, options, clear);
+};
+
+/**
+ * 检查对象是否可见
+ *
+ * @return {Boolean} 对象是否可见
+ */
+DisplayObject.prototype.isVisible = function () {
+  return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
+};
+
+/**
+ * 移除对象上的遮罩
+ */
+DisplayObject.prototype.removeMask = function () {
+  this.mask = null;
+};
+
+/**
+ * 设置对象上的属性值
+ *
+ * @private
+ * @param {Object} props
+ */
+DisplayObject.prototype.setProps = function (props) {
+  if (props === undefined) return;
+  for (var key in props) {
+    if (this[key] === undefined) {
+      continue;
+    } else {
+      this[key] = props[key];
+    }
+  }
+};
+
+/**
+ * 更新对象本身的矩阵姿态以及透明度
+ *
+ * @private
+ * @param {Matrix} rootMatrix
+ * @method updateTransform
+ */
+DisplayObject.prototype.updateTransform = function (rootMatrix) {
+  var pt = rootMatrix || this.parent && this.parent.worldTransform || IDENTITY;
+  var wt = this.worldTransform;
+  var worldAlpha = this.parent && this.parent.worldAlpha || 1;
+
+  var a = void 0;
+  var b = void 0;
+  var c = void 0;
+  var d = void 0;
+  var tx = void 0;
+  var ty = void 0;
+
+  var pox = this.pivotX + this.originX;
+  var poy = this.pivotY + this.originY;
+
+  if (this.skewX || this.skewY) {
+    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation, this.skewX, this.skewY, this.originX, this.originY);
+
+    wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
+    wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
+    wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
+    wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
+    wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
+    wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
+  } else {
+    if (this.rotation % 360) {
+      if (this.rotation !== this.rotationCache) {
+        this.rotationCache = this.rotation;
+        this._sr = Math.sin(this.rotation);
+        this._cr = Math.cos(this.rotation);
+      }
+
+      a = this._cr * this.scaleX;
+      b = this._sr * this.scaleX;
+      c = -this._sr * this.scaleY;
+      d = this._cr * this.scaleY;
+      tx = this.x;
+      ty = this.y;
+
+      if (this.pivotX || this.pivotY || this.originX || this.originY) {
+        tx -= pox * a + poy * c - this.originX;
+        ty -= pox * b + poy * d - this.originY;
+      }
+      wt.a = a * pt.a + b * pt.c;
+      wt.b = a * pt.b + b * pt.d;
+      wt.c = c * pt.a + d * pt.c;
+      wt.d = c * pt.b + d * pt.d;
+      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
+    } else {
+      a = this.scaleX;
+      d = this.scaleY;
+
+      tx = this.x - pox * a + this.originX;
+      ty = this.y - poy * d + this.originY;
+
+      wt.a = a * pt.a;
+      wt.b = a * pt.b;
+      wt.c = d * pt.c;
+      wt.d = d * pt.d;
+      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
+    }
+  }
+  this.worldAlpha = this.alpha * worldAlpha;
+};
+
+/**
+ * 更新对象本身的动画
+ *
+ * @private
+ * @param {Number} snippet
+ */
+DisplayObject.prototype.updateAnimation = function (snippet) {
+  this.animation.update(snippet);
+};
+
+/**
+ * 设置矩阵和透明度到当前绘图上下文
+ *
+ * @private
+ * @param {context} ctx
+ */
+DisplayObject.prototype.setTransform = function (ctx) {
+  var matrix = this.worldTransform;
+  ctx.globalAlpha = this.worldAlpha;
+  ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
+};
+
+/**
+ * 获取物体相对于canvas世界坐标系的坐标位置
+ *
+ * @return {Object}
+ */
+DisplayObject.prototype.getGlobalPos = function () {
+  return { x: this.worldTransform.tx, y: this.worldTransform.ty };
+};
+
+/**
+ * 设置显示对象的事件检测区域
+ *
+ * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
+ * @param {Boolean} clock 是否锁住当前设置的监测区域不会被内部更新修改。
+ */
+DisplayObject.prototype.setArea = function (shape, clock) {
+  if (this.eventArea !== null && this.eventArea.clocked && !clock) return;
+  this.eventArea = shape;
+  if (clock) this.eventArea.clocked = true;
+};
+
+/**
+ * 检测坐标点是否在多变性内
+ *
+ * @param {JC.Point} global
+ * @return {Boolean} 是否包含该点
+ */
+DisplayObject.prototype.contains = function (global) {
+  if (this.eventArea === null) return false;
+  var point = new Point();
+  this.worldTransform.applyInverse(global, point);
+  return this.eventArea && this.eventArea.contains(point.x, point.y);
+};
+
+/* eslint prefer-rest-params: 0 */
+
+/**
+ * 显示对象容器，继承至DisplayObject
+ *
+ * ```js
+ * var container = new JC.Container();
+ * container.adds(sprite);
+ * ```
+ *
+ * @class
+ * @memberof JC
+ * @extends JC.DisplayObject
+ */
+function Container() {
+  DisplayObject.call(this);
+
+  /**
+   * 渲染对象的列表
+   *
+   * @member {Array}
+   */
+  this.childs = [];
+
+  /**
+   * 自身及后代动画的缩放比例
+   *
+   * @member {Number}
+   */
+  this.timeScale = 1;
+
+  /**
+   * 是否暂停自身的动画
+   *
+   * @member {Boolean}
+   */
+  this.paused = false;
+
+  /**
+   * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+   *
+   * @private
+   * @member {Number}
+   */
+  this._zIndex = 0;
+
+  /**
+   * 强制该对象在渲染子集之前为他们排序
+   *
+   * @member {Boolean}
+   */
+  this.souldSort = false;
+
+  /**
+   * 显示对象的包围盒
+   *
+   * @member {JC.Bounds}
+   */
+  this.bounds = new Bounds();
+
+  /**
+   * 显示对象内部表示的边界
+   *
+   * @private
+   * @member {JC.Bounds}
+   */
+  this._bounds = new Bounds();
+
+  this.vertexData = new Float32Array(8);
+}
+Container.prototype = Object.create(DisplayObject.prototype);
+
+/**
+ * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+ *
+ * @name zIndex
+ * @member {Number}
+ * @memberof JC.Container#
+ */
+Object.defineProperty(Container.prototype, 'zIndex', {
+  get: function get() {
+    return this._zIndex;
+  },
+  set: function set(zIndex) {
+    if (this._zIndex !== zIndex) {
+      this._zIndex = zIndex;
+      if (this.parent) {
+        this.parent.souldSort = true;
+      }
+    }
+  }
+});
+
+/**
+ * 对自身子集进行zIndex排序
+ *
+ * @private
+ * @method _sortList
+ */
+Container.prototype._sortList = function () {
+  /**
+   * 因为数组sort排序的不稳定性，顾采用冒泡排序方式
+   */
+  var childs = this.childs;
+  var length = childs.length;
+  var i = void 0;
+  var j = void 0;
+  var temp = void 0;
+  for (i = 0; i < length - 1; i++) {
+    for (j = 0; j < length - 1 - i; j++) {
+      if (childs[j].zIndex > childs[j + 1].zIndex) {
+        temp = childs[j];
+        childs[j] = childs[j + 1];
+        childs[j + 1] = temp;
+      }
+    }
+  }
+  this.souldSort = false;
+};
+
+/**
+ * 更新bodymovin动画
+ * @param {number} progress progress
+ * @param {object} session
+ */
+Container.prototype.updateMovin = function (progress, session) {
+  var length = this.childs.length;
+  for (var i = 0; i < length; i++) {
+    var doc = this.childs[i];
+    if (doc && !doc._aniRoot && doc.updateMovin) {
+      doc.updateMovin(progress, session);
+    }
+  }
+  this.updateKeyframes && this.updateKeyframes(progress, session);
+};
+
+/**
+ * 向容器添加一个物体
+ *
+ * ```js
+ * container.adds(sprite,sprite2,text3,graphice);
+ * ```
+ *
+ * @param {JC.Container} object
+ * @return {JC.Container}
+ */
+Container.prototype.adds = function (object) {
+  if (arguments.length > 1) {
+    for (var i = 0; i < arguments.length; i++) {
+      this.adds(arguments[i]);
+    }
+    return this;
+  }
+  if (object === this) {
+    console.error('adds: object can\'t be added as a child of itself.', object);
+  }
+  if (object) {
+    if (object.parent !== null) {
+      object.parent.remove(object);
+    }
+    object.parent = this;
+    this.childs.push(object);
+    this.souldSort = true;
+  } else {
+    console.error('adds: object not an instance of Container', object);
+  }
+  return this;
+};
+
+/**
+ * 从容器移除一个物体
+ *
+ * ```js
+ * container.remove(sprite,sprite2,text3,graphice);
+ * ```
+ *
+ * @param {JC.Container} object
+ */
+Container.prototype.remove = function (object) {
+  if (arguments.length > 1) {
+    for (var i = 0; i < arguments.length; i++) {
+      this.remove(arguments[i]);
+    }
+  }
+  var index = this.childs.indexOf(object);
+  if (index !== -1) {
+    object.parent = null;
+    this.childs.splice(index, 1);
+  }
+};
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ *
+ * @private
+ * @param {Number} snippet
+ */
+Container.prototype.updateTimeline = function (snippet) {
+  this.emit('pretimeline', snippet);
+  if (this.paused) return;
+  snippet = this.timeScale * snippet;
+  this.updateAnimation(snippet);
+
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
+    var child = this.childs[i];
+    child.updateTimeline(snippet);
+    i++;
+  }
+  this.emit('posttimeline', snippet);
+};
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+ *
+ * @private
+ */
+Container.prototype.updatePosture = function () {
+  this.emit('preposture');
+  if (this.souldSort) this._sortList();
+  this.updateTransform();
+
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
+    var child = this.childs[i];
+    child.updatePosture();
+    i++;
+  }
+  this.emit('postposture');
+};
+
+/**
+ * 渲染自己并触发后代渲染
+ * @param {context} ctx
+ * @private
+ */
+Container.prototype.render = function (ctx) {
+  this.emit('prerender');
+  ctx.save();
+  this.setTransform(ctx);
+  if (this.mask) this.mask.render(ctx);
+  this.renderMe(ctx);
+
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
+    var child = this.childs[i];
+    i++;
+    if (!child.isVisible()) continue;
+    child.render(ctx);
+  }
+  ctx.restore();
+  this.emit('postrender');
+};
+
+/**
+ * 渲染自己
+ * @private
+ * @return {Boolean} 是否渲染
+ */
+Container.prototype.renderMe = function () {
+  return true;
+};
+
+/**
+ * 计算自己的包围盒
+ * @private
+ */
+Container.prototype.calculateVertices = function () {
+  var wt = this.worldTransform;
+  var a = wt.a;
+  var b = wt.b;
+  var c = wt.c;
+  var d = wt.d;
+  var tx = wt.tx;
+  var ty = wt.ty;
+  var vertexData = this.vertexData;
+  var w0 = void 0;
+  var w1 = void 0;
+  var h0 = void 0;
+  var h1 = void 0;
+
+  w0 = this._bounds.minX;
+  w1 = this._bounds.maxX;
+
+  h0 = this._bounds.minY;
+  h1 = this._bounds.maxY;
+
+  // xy
+  vertexData[0] = a * w1 + c * h1 + tx;
+  vertexData[1] = d * h1 + b * w1 + ty;
+
+  // xy
+  vertexData[2] = a * w0 + c * h1 + tx;
+  vertexData[3] = d * h1 + b * w0 + ty;
+
+  // xy
+  vertexData[4] = a * w0 + c * h0 + tx;
+  vertexData[5] = d * h0 + b * w0 + ty;
+
+  // xy
+  vertexData[6] = a * w1 + c * h0 + tx;
+  vertexData[7] = d * h0 + b * w1 + ty;
+};
+
+/**
+ * 计算包围盒子
+ *
+ * @method calculateBounds
+ */
+Container.prototype.calculateBounds = function () {
+  this.bounds.clear();
+  if (!this.visible) {
+    return;
+  }
+  this._calculateBounds();
+
+  for (var i = 0; i < this.childs.length; i++) {
+    var child = this.childs[i];
+
+    child.calculateBounds();
+
+    this.bounds.addBounds(child.bounds);
+  }
+};
+
+Container.prototype._calculateBounds = function () {
+  this.calculateVertices();
+  this.bounds.addVert(this.vertexData);
+};
+
+/**
+ * 设置渲染物体的包围盒
+ * @param {JC.Bounds} bounds
+ */
+Container.prototype.setBounds = function (bounds) {
+  if (bounds instanceof Bounds) {
+    this._bounds = bounds;
+  }
+};
+
+/**
+ * 暂停自身和子级的所有动画进度
+ */
+Container.prototype.pause = function () {
+  this.paused = true;
+};
+
+/**
+ * 恢复自身和子级的所有动画进度
+ */
+Container.prototype.restart = function () {
+  this.paused = false;
+};
+
+/**
+ * 设置自身及子级的动画速度
+ * @param {Number} speed 设置的速率值
+ */
+Container.prototype.setSpeed = function (speed) {
+  this.timeScale = speed;
+};
+
+/* eslint max-len: "off" */
+
+/**
+ * MovieClip类型动画对象
+ *
+ * @class
+ * @memberof JC
+ * @extends JC.Eventer
+ * @param {object} [element] 动画对象 内部传入
+ * @param {object} [options] 动画配置信息 内部传入
+ */
+function MovieClip(element, options) {
+  Eventer.call(this);
+
+  this.element = element;
+  this.living = false;
+
+  // this.onComplete = null;
+  // this.onUpdate = null;
+
+  this.infinite = false;
+  this.alternate = false;
+  this.repeats = 0;
+
+  this.animations = options.animations || {};
+
+  this.index = 0;
+  this.preIndex = -1;
+  this.direction = 1;
+  this.frames = [];
+  this.preFrame = null;
+
+  this.fillMode = 0;
+  this.fps = 16;
+
+  this.paused = false;
+
+  this.pt = 0;
+  this.nt = 0;
+}
+
+MovieClip.prototype = Object.create(Eventer.prototype);
+
+/**
+ * 更新动画
+ * @private
+ * @param {number} snippet 时间片段
+ */
+MovieClip.prototype.update = function (snippet) {
+  if (this.paused || !this.living) return;
+  this.nt += snippet;
+  if (this.nt - this.pt < this.interval) return;
+  this.pt = this.nt;
+  var i = this.index + this.direction;
+  if (i < this.frames.length && i >= 0) {
+    this.index = i;
+    // Do you need this handler???
+    // this.onUpdate&&this.onUpdate(this.index);
+  } else {
+    if (this.repeats > 0 || this.infinite) {
+      if (this.repeats > 0) --this.repeats;
+      if (this.alternate) {
+        this.direction *= -1;
+        this.index += this.direction;
+      } else {
+        this.direction = 1;
+        this.index = 0;
+      }
+      // Do you need this handler???
+      // this.onUpdate && this.onUpdate(this.index);
+    } else {
+      this.living = false;
+      this.index = this.fillMode;
+      this.emit('complete');
+    }
+  }
+};
+
+/**
+ * 获取帧位置
+ * @private
+ * @return {JC.Rectangle}
+ */
+MovieClip.prototype.getFrame = function () {
+  if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
+  var frame = this.element.frame.clone();
+  var cf = this.frames[this.index];
+  if (cf > 0) {
+    var row = this.element.naturalWidth / this.element.frame.width >> 0;
+    var lintRow = this.element.frame.x / this.element.frame.width >> 0;
+
+    var mCol = (lintRow + cf) / row >> 0;
+    var mRow = (lintRow + cf) % row;
+    frame.x = mRow * this.element.frame.width;
+    frame.y += mCol * this.element.frame.height;
+  }
+  this.preIndex = this.index;
+  this.preFrame = frame;
+  return frame;
+};
+
+/**
+ * 播放逐帧
+ * @param {object} options 播放配置
+ * @return {this}
+ */
+MovieClip.prototype.playMovie = function (options) {
+  // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
+  this.off('complete');
+  var movie = this.format(options.movie);
+  if (!Utils.isArray(movie)) return;
+  this.frames = movie;
+  this.index = 0;
+  this.direction = 1;
+  this.fillMode = options.fillMode || 0;
+  this.fps = options.fps || this.fps;
+  this.infinite = options.infinite || false;
+  this.alternate = options.alternate || false;
+  this.repeats = options.repeats || 0;
+  this.living = true;
+  if (options.onComplete) {
+    var This = this;
+    this.once('complete', function () {
+      options.onComplete.call(This);
+    });
+  }
+  return this;
+};
+
+/**
+ * 格式化逐帧信息
+ * @private
+ * @param {string|array|object} movie 逐帧信息
+ * @return {array}
+ */
+MovieClip.prototype.format = function (movie) {
+  if (Utils.isString(movie)) {
+    var config = this.animations[movie];
+    if (config) {
+      return this.format(config);
+    } else {
+      console.warn('you havn\'t config ' + movie + ' in animations ');
+      return false;
+    }
+  } else if (Utils.isArray(movie)) {
+    return movie;
+  } else if (Utils.isObject(movie)) {
+    var arr = [];
+    for (var i = movie.start; i <= movie.end; i++) {
+      arr.push(i);
+    }
+    if (movie.next && this.animations[movie.next]) {
+      var This = this;
+      var conf = {};
+      if (Utils.isString(movie.next) && this.animations[movie.next]) {
+        conf.movie = movie.next;
+        conf.infinite = true;
+      } else if (Utils.isObject(movie.next)) {
+        conf = movie.next;
+      }
+      if (Utils.isString(conf.movie)) {
+        this.once('complete', function () {
+          This.playMovie(conf);
+        });
+      }
+    }
+    return arr;
+  }
+};
+
+/**
+ * 暂停逐帧
+ */
+MovieClip.prototype.pause = function () {
+  this.paused = true;
+};
+
+/**
+ * 恢复播放逐帧
+ */
+MovieClip.prototype.restart = function () {
+  this.paused = false;
+};
+
+/**
+ * 取消逐帧
+ */
+MovieClip.prototype.cancle = function () {
+  this.living = false;
+};
+
+/**
+ * 帧间隔
+ * @private
+ */
+Object.defineProperty(MovieClip.prototype, 'interval', {
+  get: function get() {
+    return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
+  }
+});
+
+/**
+ * 位图精灵图，继承至Container
+ *
+ * ```js
+ * var loadBox = JC.loaderUtil({
+ *    frames: './images/frames.png'
+ * });
+ * var sprite = new JC.Sprite({
+ *      texture: loadBox.getById('frames'),
+ *      frame: new JC.Rectangle(0, 0, w, h),
+ *      width: 100,
+ *      height: 100,
+ *      animations: {
+ *          fall: {start: 0,end: 4,next: 'stand'},
+ *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
+ *          stand: {start: 10,end: 39},
+ *          walk: {start: 40,end: 59,next: 'stand'},
+ *          other: [ 0, 1, 2, 1, 3, 4 ], // 同样接受数组形势
+ *      }
+ * });
+ * ```
+ *
+ * @class
+ * @memberof JC
+ * @extends JC.Container
+ * @param {Object} options
+ * @param {JC.Texture} options.texture 图片纹理
+ * @param {JC.Rectangle} [options.frame] 当是逐帧或者是裁切显示时需要配置，显示的矩形区域
+ * @param {Number} [options.width] 实际显示的宽，可能会缩放图像
+ * @param {Number} [options.height] 实际显示的高，可能会缩放图像
+ * @param {Object} [options.animations] 逐帧的预置帧动画配置
+ */
+function Sprite(options) {
+  Container.call(this);
+
+  this._width = 0;
+
+  this._height = 0;
+
+  this.ready = true;
+
+  this.texture = options.texture;
+  if (this.texture.loaded) {
+    this.upTexture(options);
+  } else {
+    var This = this;
+    this.ready = false;
+    this.texture.on('load', function () {
+      This.upTexture(options);
+      This.ready = true;
+    });
+  }
+
+  this.movieClip = new MovieClip(this, options);
+}
+Sprite.prototype = Object.create(Container.prototype);
+
+/**
+ * 更新纹理对象
+ *
+ * @private
+ * @param {json} options
+ */
+Sprite.prototype.upTexture = function (options) {
+  this.naturalWidth = options.texture.naturalWidth;
+  this.naturalHeight = options.texture.naturalHeight;
+  this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
+
+  this.width = options.width || this.frame.width;
+  this.height = options.height || this.frame.height;
+};
+
+/**
+ * 当前图片对象的width
+ *
+ * @name width
+ * @member {Number}
+ * @memberof JC.Sprite#
+ */
+Object.defineProperty(Sprite.prototype, 'width', {
+  get: function get() {
+    return this._width;
+  },
+  set: function set(width) {
+    if (this._width !== width) {
+      this._width = width;
+      this.updateGeometry();
+    }
+  }
+});
+
+/**
+ * 当前图片对象的height
+ *
+ * @name height
+ * @member {Number}
+ * @memberof JC.Sprite#
+ */
+Object.defineProperty(Sprite.prototype, 'height', {
+  get: function get() {
+    return this._height;
+  },
+  set: function set(height) {
+    if (this._height !== height) {
+      this._height = height;
+      this.updateGeometry();
+    }
+  }
+});
+
+/**
+ * 更新对象的事件几何形态
+ * note: 此处的setArea是懒更新，如果需要
+ *
+ * @private
+ */
+Sprite.prototype.updateGeometry = function () {
+  var rect = new Rectangle(0, 0, this.width, this.height);
+  this._bounds.clear().addRect(rect);
+  this.setArea(rect);
+};
+
+/**
+ * 更新对象的动画姿态
+ *
+ * @private
+ * @param {number} snippet
+ */
+Sprite.prototype.updateAnimation = function (snippet) {
+  this.animation.update(snippet);
+  this.movieClip.update(snippet);
+};
+
+/**
+ * 播放逐帧动画
+ * @param {Object} options 可以是播放配置对象
+ * @param {String|Array} options.movie 预置的动画名，或者是帧索引数组
+ * @param {Number} [options.fillMode] 结束时停留在哪一帧
+ * @param {Boolean} [options.repeats] 重复播放次数
+ * @param {Boolean} [options.infinite] 无限循环，优先级比 repeats 高
+ * @param {Boolean} [options.alternate] 循环时交替播放
+ * @param {Number} [options.fps] 当前动画将使用的帧率
+ * @return {MovieClip}
+ */
+Sprite.prototype.playMovie = function (options) {
+  return this.movieClip.playMovie(options);
+};
+
+/**
+ * 更新对象本身的矩阵姿态以及透明度
+ *
+ * @private
+ * @param {context} ctx
+ */
+Sprite.prototype.renderMe = function (ctx) {
+  if (!this.ready) return;
+  var frame = this.movieClip.getFrame();
+  ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
 };
 
 /**
@@ -5651,6 +5568,41 @@ BlurFilter.prototype.applyFilter = function (imageData) {
     return true;
 };
 
+// import {Utils} from '../utils/Utils';
+
+/**
+ * 舞台对象，继承至 Container
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
+function Scene() {
+  Container.call(this);
+}
+
+Scene.prototype = Object.create(Container.prototype);
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新。
+ * Scene 的 updatePosture 会接收一个来自 Renderer 的 rootMatrix。
+ *
+ * @private
+ * @param {Matrix} [rootMatrix] 初始矩阵，由 Renderer 直接传入。
+ */
+Scene.prototype.updatePosture = function (rootMatrix) {
+  this.emit('preposture');
+  if (this.souldSort) this._sortList();
+  this.updateTransform(rootMatrix);
+
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
+    this.childs[i].updatePosture();
+    i++;
+  }
+  this.emit('postposture');
+};
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -6189,13 +6141,13 @@ var InteractionManager = function (_Eventer) {
   inherits(InteractionManager, _Eventer);
 
   /**
-   * @param {Stage} stage - A reference to the current renderer
+   * @param {Renderer} renderer - A reference to the current renderer
    * @param {Object} [options] - The options for the manager.
    * @param {Boolean} [options.autoPreventDefault=false] - Should the manager automatically prevent default browser actions.
    * @param {Boolean} [options.autoAttach=true] - Should the manager automatically attach target element.
    * @param {Number} [options.interactionFrequency=10] - Frequency increases the interaction events will be checked.
    */
-  function InteractionManager(stage, options) {
+  function InteractionManager(renderer, options) {
     classCallCheck(this, InteractionManager);
 
     var _this = possibleConstructorReturn(this, (InteractionManager.__proto__ || Object.getPrototypeOf(InteractionManager)).call(this));
@@ -6203,11 +6155,11 @@ var InteractionManager = function (_Eventer) {
     options = options || {};
 
     /**
-     * The stage this interaction manager works for.
+     * The renderer this interaction manager works for.
      *
-     * @member {Stage}
+     * @member {Renderer}
      */
-    _this.stage = stage;
+    _this.renderer = renderer;
 
     /**
      * Should default browser actions automatically be prevented.
@@ -6412,7 +6364,7 @@ var InteractionManager = function (_Eventer) {
      */
     _this._deltaTime = 0;
 
-    _this.setTargetElement(_this.stage.canvas);
+    _this.setTargetElement(_this.renderer.canvas);
 
     /**
      * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
@@ -6828,7 +6780,7 @@ var InteractionManager = function (_Eventer) {
       hitTestEvent.data.global = globalPoint;
       // ensure safety of the root
       if (!root) {
-        root = this.stage;
+        root = this.renderer;
       }
       // run the hit test
       this.processInteractive(hitTestEvent, root, null, true);
@@ -7009,7 +6961,7 @@ var InteractionManager = function (_Eventer) {
           if (interactionData.originalEvent && interactionData.pointerType !== 'touch') {
             var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, interactionData.originalEvent, interactionData);
 
-            this.processInteractive(interactionEvent, this.stage, this.processPointerOverOut, true);
+            this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, true);
           }
         }
       }
@@ -7249,7 +7201,7 @@ var InteractionManager = function (_Eventer) {
 
       interactionEvent.data.originalEvent = originalEvent;
 
-      this.processInteractive(interactionEvent, this.stage, this.processClick, true);
+      this.processInteractive(interactionEvent, this.renderer.currentScene, this.processClick, true);
 
       this.emit('click', interactionEvent);
     }
@@ -7309,7 +7261,7 @@ var InteractionManager = function (_Eventer) {
 
         interactionEvent.data.originalEvent = originalEvent;
 
-        this.processInteractive(interactionEvent, this.stage, this.processPointerDown, true);
+        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerDown, true);
 
         this.emit('pointerdown', interactionEvent);
         if (_event.pointerType === 'touch') {
@@ -7390,7 +7342,7 @@ var InteractionManager = function (_Eventer) {
         interactionEvent.data.originalEvent = originalEvent;
 
         // perform hit testing for events targeting our canvas or cancel events
-        this.processInteractive(interactionEvent, this.stage, func, cancelled || !eventAppend);
+        this.processInteractive(interactionEvent, this.renderer.currentScene, func, cancelled || !eventAppend);
 
         this.emit(cancelled ? 'pointercancel' : 'pointerup' + eventAppend, interactionEvent);
 
@@ -7574,7 +7526,7 @@ var InteractionManager = function (_Eventer) {
 
         var interactive = _event3.pointerType === 'touch' ? this.moveWhenInside : true;
 
-        this.processInteractive(interactionEvent, this.stage, this.processPointerMove, interactive);
+        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerMove, interactive);
         this.emit('pointermove', interactionEvent);
         if (_event3.pointerType === 'touch') this.emit('touchmove', interactionEvent);
         if (_event3.pointerType === 'mouse' || _event3.pointerType === 'pen') this.emit('mousemove', interactionEvent);
@@ -7645,7 +7597,7 @@ var InteractionManager = function (_Eventer) {
 
       interactionEvent.data.originalEvent = event;
 
-      this.processInteractive(interactionEvent, this.stage, this.processPointerOverOut, false);
+      this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, false);
 
       this.emit('pointerout', interactionEvent);
       if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
@@ -7934,41 +7886,17 @@ var InteractionManager = function (_Eventer) {
   return InteractionManager;
 }(Eventer);
 
-/* global RAF CAF */
-/* eslint new-cap: 0 */
-
 /**
- * 舞台对象，继承至Eventer
- *
- *
- * ```js
- * var stage = new JC.Stage({
- *   dom: 'canvas-dom', // 格式可以是 .canvas-dom 或者 ＃canvas-dom 或者 canvas-dom
- *   resolution: 1, // 分辨率
- *   interactive: true, // 是否可交互
- *   enableFPS: true, // 是否记录帧率
- *   bgColor: ‘rgba(0,0,0,0.4)’, // 背景色
- * });
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
  * @param {object} options 舞台的配置项
  * @param {string} options.dom 舞台要附着的`canvas`元素
  * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
  * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
- * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
- * @param {string} [options.bgColor] 设置舞台的背景颜色，`默认为` ‘transparent’
  * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
  * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
- * @param {number} [options.fixedFPS] 设置舞台的固定更新帧率，非特殊情况不要使用，`默认为` 60
+ * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
  */
-function Stage(options) {
+function Renderer(options) {
   var _this = this;
-
-  options = options || {};
-  Container.call(this);
 
   /**
    * 场景的canvas的dom
@@ -7986,7 +7914,7 @@ function Stage(options) {
    * @member {context2d}
    */
   this.ctx = this.canvas.getContext('2d');
-  this.canvas.style.backgroundColor = options.bgColor || 'transparent';
+  this.canvas.style.backgroundColor = options.backgroundColor || 'transparent';
 
   /**
    * 场景是否自动清除上一帧的像素内容
@@ -7996,18 +7924,16 @@ function Stage(options) {
   this.autoClear = true;
 
   /**
-   * 是否在每一帧绘制之前自动更新场景内所有物体的状态
-   *
-   * @member {Boolean}
-   */
-  this.autoUpdate = true;
-
-  /**
    * 场景是否应用style控制宽高
    *
    * @member {Boolean}
    */
   this.autoStyle = false;
+
+  /**
+   * 整个场景的初始矩阵
+   */
+  this.rootMatrix = new Matrix();
 
   /**
    * 场景分辨率
@@ -8038,74 +7964,6 @@ function Stage(options) {
    */
   this.height = this.canvas.height = this.realHeight * this.resolution;
 
-  /**
-   * 固定更新帧率，默认为 60fps
-   *
-   * @member {Number}
-   */
-  this.fixedFPS = options.fixedFPS || 60;
-
-  /**
-   * 上一次绘制的时间点
-   *
-   * @member {Number}
-   * @private
-   */
-  this.pt = null;
-
-  /**
-   * 本次渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.snippet = 0;
-
-  /**
-   * 平均渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.averageSnippet = 0;
-
-  /**
-   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.fps = 0;
-
-  /**
-   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.averageFps = 0;
-
-  /**
-   * 渲染总花费时间，除去被中断、被暂停等时间
-   *
-   * @member {Number}
-   * @private
-   */
-  this._takeTime = 0;
-
-  /**
-   * 渲染总次数
-   *
-   * @member {Number}
-   * @private
-   */
-  this._renderTimes = 0;
-
-  /**
-   * 是否记录渲染性能
-   *
-   * @member {Boolean}
-   */
-  this.enableFPS = Utils.isBoolean(options.enableFPS) ? options.enableFPS : true;
-
   this.interactionManager = new InteractionManager(this);
 
   /**
@@ -8133,20 +7991,24 @@ function Stage(options) {
 
   this.enableinteractive = Utils.isBoolean(options.interactive) ? options.interactive : true;
 
-  this.proxyOn();
+  this.currentScene = null;
 }
-Stage.prototype = Object.create(Container.prototype);
 
-Stage.prototype.proxyOn = function () {
-  var This = this;
-  var EventList = ['click', 'mousemove', 'mousedown', 'mouseout', 'mouseover', 'touchstart', 'touchend', 'touchmove', 'mouseup'];
-  EventList.forEach(function (it) {
-    This.interactionManager.on(it, function (it) {
-      return function (ev) {
-        This.emit(it, ev);
-      };
-    }(it));
-  });
+Renderer.prototype.render = function (scene, snippet) {
+  this.currentScene = scene;
+
+  this.emit('preupdate', snippet);
+  this.currentScene.updateTimeline(snippet);
+  this.currentScene.updatePosture(this.rootMatrix);
+  this.emit('postupdate', snippet);
+
+  this.emit('prerender', snippet);
+  if (this.autoClear) {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+  this.currentScene.render(this.ctx);
+  this.emit('postrender', snippet);
 };
 
 /**
@@ -8154,10 +8016,8 @@ Stage.prototype.proxyOn = function () {
  *
  * @param {number} w canvas的width值
  * @param {number} h canvas的height值
- * @param {number} sw canvas的style.width值，需将舞台属性autoStyle设置为true
- * @param {number} sh canvas的style.height值，需将舞台属性autoStyle设置为true
  */
-Stage.prototype.resize = function (w, h, sw, sh) {
+Renderer.prototype.resize = function (w, h) {
   if (Utils.isNumber(w) && Utils.isNumber(h)) {
     this.realWidth = w;
     this.realHeight = h;
@@ -8167,124 +8027,89 @@ Stage.prototype.resize = function (w, h, sw, sh) {
   }
   this.width = this.canvas.width = w * this.resolution;
   this.height = this.canvas.height = h * this.resolution;
-  if (this.autoStyle && sw && sh) {
-    this.canvas.style.width = Utils.isString(sw) ? sw : sw + 'px';
-    this.canvas.style.height = Utils.isString(sh) ? sh : sh + 'px';
-  }
 };
 
 /**
- * 渲染舞台内的所有可见渲染对象
- */
-Stage.prototype.render = function () {
-  this.timeline();
-
-  this.emit('prerender', this.snippet);
-
-  if (this.autoClear) {
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.clearRect(0, 0, this.width, this.height);
-  }
-  this.updateTimeline(this.snippet);
-  this.updatePosture();
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    i++;
-    if (!child.isVisible()) continue;
-    child.render(this.ctx);
-  }
-
-  this.emit('postrender');
-};
-
-/**
- * 引擎的时间轴
+ * proxy this.interactionManager event-emit
+ * Emit an event to all registered event listeners.
  *
- * @method timeline
- * @private
+ * @param {String} event The name of the event.
  */
-Stage.prototype.timeline = function () {
-  this.snippet = Date.now() - this.pt;
-  if (this.pt === null || this.snippet > 200) {
-    this.pt = Date.now();
-    this.snippet = Date.now() - this.pt;
-  }
+Renderer.prototype.emit = function () {
+  var _interactionManager;
 
-  if (this.enableFPS) {
-    this._renderTimes++;
-    this._takeTime += Math.max(15, this.snippet);
-    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
-    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
-  }
-
-  this.pt += this.snippet;
+  (_interactionManager = this.interactionManager).emit.apply(_interactionManager, arguments);
 };
 
 /**
- * 启动渲染引擎的渲染循环
- */
-Stage.prototype.startEngine = function () {
-  if (this.inRender) return;
-  this.inRender = true;
-  if (this.fixedFPS === 60) {
-    this.renderer();
-  } else {
-    this.rendererFixedFPS();
-  }
-};
-
-/**
- * 关闭渲染引擎的渲染循环
- */
-Stage.prototype.stopEngine = function () {
-  CAF(this.loop);
-  clearInterval(this.loop);
-  this.inRender = false;
-};
-
-/**
- * 渲染循环
+ * proxy this.interactionManager event-on
+ * Register a new EventListener for the given event.
  *
- * @method renderer
- * @private
+ * @param {String} event Name of the event.
+ * @param {Function} fn Callback function.
+ * @param {Mixed} [context=this] The context of the function.
  */
-Stage.prototype.renderer = function () {
-  var This = this;
-  /**
-   * render loop
-   */
-  function render() {
-    This.render();
-    This.loop = RAF(render);
-  }
-  render();
+Renderer.prototype.on = function () {
+  var _interactionManager2;
+
+  (_interactionManager2 = this.interactionManager).on.apply(_interactionManager2, arguments);
 };
 
 /**
- * 固定帧率的渲染循环，不合理使用改方法将会导致性能问题
+ * proxy this.interactionManager event-once
+ * Add an EventListener that's only called once.
  *
- * @method rendererFixedFPS
- * @private
+ * @param {String} event Name of the event.
+ * @param {Function} fn Callback function.
+ * @param {Mixed} [context=this] The context of the function.
  */
-Stage.prototype.rendererFixedFPS = function () {
-  var This = this;
-  this.loop = setInterval(function () {
-    This.render();
-  }, 1000 / this.fixedFPS);
-  this.render();
+Renderer.prototype.once = function () {
+  var _interactionManager3;
+
+  (_interactionManager3 = this.interactionManager).once.apply(_interactionManager3, arguments);
 };
+
+/**
+ * proxy this.interactionManager event-off
+ * @param {String} event The event we want to remove.
+ * @param {Function} fn The listener that we need to find.
+ * @param {Mixed} context Only remove listeners matching this context.
+ * @param {Boolean} once Only remove once listeners.
+ */
+Renderer.prototype.off = function () {
+  var _interactionManager4;
+
+  (_interactionManager4 = this.interactionManager).off.apply(_interactionManager4, arguments);
+};
+
+/**
+ * 场景设置分辨率
+ *
+ * @member {Number}
+ * @name resolution
+ * @memberof JC.Renderer#
+ */
+Object.defineProperty(Renderer.prototype, 'resolution', {
+  get: function get() {
+    return this._resolution;
+  },
+  set: function set(value) {
+    if (this._resolution !== value) {
+      this._resolution = value;
+      this.rootMatrix.identity().scale(value, value);
+      this.resize();
+    }
+  }
+});
 
 /**
  * 标记场景是否可交互，涉及到是否进行事件检测
  *
  * @member {Boolean}
- * @name interactive
- * @memberof JC.Stage#
+ * @name enableinteractive
+ * @memberof JC.Renderer#
  */
-Object.defineProperty(Stage.prototype, 'enableinteractive', {
+Object.defineProperty(Renderer.prototype, 'enableinteractive', {
   get: function get() {
     return this._enableinteractive;
   },
@@ -8297,24 +8122,2309 @@ Object.defineProperty(Stage.prototype, 'enableinteractive', {
 });
 
 /**
- * 场景设置分辨率
- *
- * @member {Number}
- * @name resolution
- * @memberof JC.Stage#
+ * @memberof JC
+ * @param {object} options 舞台的配置项
+ * @param {string} options.dom 舞台要附着的`canvas`元素
+ * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
+ * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
+ * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
+ * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
+ * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
+ * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
  */
-Object.defineProperty(Stage.prototype, 'resolution', {
-  get: function get() {
-    return this._resolution;
-  },
-  set: function set(value) {
-    if (this._resolution !== value) {
-      this._resolution = value;
-      this.scale = value;
-      this.resize();
-    }
-  }
-});
+function Application(options) {
+  var _this = this;
 
-export { Eventer, Animation, Tween, Utils, Texture, Loader, loaderUtil, ParserAnimation, Bounds, Point, Rectangle, Polygon, Circle, Ellipse, Matrix, IDENTITY, TEMP_MATRIX, CatmullRom, BezierCurve, SvgCurve, NURBSCurve, DisplayObject, Container, Sprite, Graphics, TextFace, FilterGroup, BlurFilter, Stage };
+  this.renderer = new Renderer(options);
+  this.scene = new Scene();
+
+  this.ticker = new Ticker(options.enableFPS);
+
+  this.ticker.on('tick', function (snippet) {
+    _this.update(snippet);
+  });
+
+  this.ticker.start();
+}
+
+Application.prototype.update = function (snippet) {
+  this.renderer.render(this.scene, snippet);
+};
+
+/**
+ * register class
+ * @class
+ * @private
+ */
+
+var Register = function () {
+  /**
+   * register
+   * @param {array} assets assets array
+   * @param {string} prefix assets array
+   */
+  function Register(assets, prefix) {
+    classCallCheck(this, Register);
+
+    this.layers = {};
+    this._forever = false;
+    this.loader = this.loadAssets(assets, prefix);
+  }
+
+  /**
+   * load assets base pixi loader
+   * @param {array} assets assets array
+   * @param {string} prefix assets array
+   * @return {loader}
+   */
+
+
+  createClass(Register, [{
+    key: 'loadAssets',
+    value: function loadAssets(assets, prefix) {
+      var urls = {};
+      assets.filter(function (it) {
+        return it.u && it.p;
+      }).forEach(function (it) {
+        var url = createUrl(it, prefix);
+        urls[it.id] = url;
+      });
+      return loaderUtil(urls);
+    }
+
+    /**
+     * get texture by id
+     * @param {string} id id name
+     * @return {Texture}
+     */
+
+  }, {
+    key: 'getTexture',
+    value: function getTexture(id) {
+      return this.loader.getById(id);
+    }
+
+    /**
+     * registe layer
+     * @private
+     * @param {string} name layer name path
+     * @param {object} layer layer object
+     */
+
+  }, {
+    key: 'setLayer',
+    value: function setLayer(name, layer) {
+      if (!name) return;
+      if (this.layers[name]) console.warn('动画层命名冲突', name);
+      this.layers[name] = layer;
+    }
+
+    /**
+     * registe layer
+     * @private
+     */
+
+  }, {
+    key: 'forever',
+    value: function forever() {
+      if (this._forever) return;
+      this._forever = true;
+    }
+
+    /**
+     * get layer by name path
+     * @param {string} name layer name path, example: root.gift.star1
+     * @return {object}
+     */
+
+  }, {
+    key: 'getLayer',
+    value: function getLayer(name) {
+      return this.layers[name];
+    }
+  }]);
+  return Register;
+}();
+
+/**
+ * CurveData
+ * @class
+ * @private
+ */
+
+var CurveData = function () {
+  /**
+   * the primitive curve data object
+   * @param {object} data curve config data
+   * @param {object} session session
+   * @param {boolean} mask is mask
+   */
+  function CurveData(data, session, mask) {
+    classCallCheck(this, CurveData);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st;
+
+    this.inv = data.inv;
+
+    this.data = mask ? data.pt : data.ks;
+
+    this.dynamic = this.data.a === 1;
+
+    this.st = st;
+
+    this.kic = 0;
+
+    if (this.dynamic) this.prepare();
+  }
+
+  /**
+   * prepare some data for faster calculation
+   */
+
+
+  createClass(CurveData, [{
+    key: 'prepare',
+    value: function prepare() {
+      var datak = this.data.k;
+      var last = datak.length - 1;
+
+      this.ost = this.st + datak[0].t;
+      this.oet = this.st + datak[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = datak[i];
+        var sek = datak[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+
+        // TODO: 是否需要预先 修正坐标值，i、o 相对值 转换成 绝对值
+
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+      }
+    }
+
+    /**
+     * get the curve frame by this progress
+     * @param {number} progress timeline progress
+     * @return {object}
+     */
+
+  }, {
+    key: 'getCurve',
+    value: function getCurve(progress) {
+      if (!this.dynamic) return this.data.k;
+      return this.interpolation(progress);
+    }
+
+    /**
+     * compute value with keyframes buffer
+     * @private
+     * @param {number} progress progress
+     * @return {array}
+     */
+
+  }, {
+    key: 'interpolation',
+    value: function interpolation$$1(progress) {
+      var datak = this.data.k;
+
+      if (progress <= this.ost) {
+        return datak[0].s[0];
+      } else if (progress >= this.oet) {
+        var last = datak.length - 2;
+        return datak[last].e[0];
+      } else {
+        var path = {
+          i: [],
+          o: [],
+          v: []
+        };
+        var frame = datak[this.kic];
+        if (!inRange$1(progress, frame.ost, frame.oet)) {
+          this.kic = findStep$1(datak, progress);
+          frame = datak[this.kic];
+        }
+        var rate = (progress - frame.ost) / (frame.oet - frame.ost);
+        var nm = [frame.n, frame.n];
+
+        var s0 = frame.s[0];
+        var e0 = frame.e[0];
+        for (var prop in path) {
+          if (path[prop]) {
+            var sp = s0[prop];
+            var ep = e0[prop];
+            var vv = [];
+            for (var i = 0; i < sp.length; i++) {
+              var s = sp[i];
+              var e = ep[i];
+              vv[i] = getEaseing(s, e, nm, rate);
+            }
+            path[prop] = vv;
+          }
+        }
+        path.c = s0.c;
+        return path;
+      }
+    }
+  }]);
+  return CurveData;
+}();
+
+/**
+ * a
+ * @param {*} ctx a
+ * @param {*} data a
+ */
+function drawCurve(ctx, data) {
+  var start = data.v[0];
+  ctx.moveTo(start[0], start[1]);
+  var jLen = data.v.length;
+  var j = 1;
+  var pre = start;
+  for (; j < jLen; j++) {
+    var _oj = data.o[j - 1];
+    var _ij = data.i[j];
+    var _vj = data.v[j];
+    ctx.bezierCurveTo(pre[0] + _oj[0], pre[1] + _oj[1], _vj[0] + _ij[0], _vj[1] + _ij[1], _vj[0], _vj[1]);
+    pre = _vj;
+  }
+  var oj = data.o[j - 1];
+  var ij = data.i[0];
+  var vj = data.v[0];
+  ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
+}
+
+/**
+ * a
+ * @param {*} ctx a
+ * @param {*} size a
+ */
+function drawInv(ctx, size) {
+  ctx.moveTo(0, 0);
+  ctx.lineTo(size.w, 0);
+  ctx.lineTo(size.w, size.h);
+  ctx.lineTo(0, size.h);
+  ctx.lineTo(0, 0);
+}
+
+/**
+ * GraphicsMask class
+ * @class
+ * @private
+ */
+
+var GraphicsMask = function () {
+  /**
+   * GraphicsMask constructor
+   * @param {object} masksProperties layer data information
+   * @param {object} session layer data information
+   */
+  function GraphicsMask(masksProperties) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, GraphicsMask);
+
+    this.maskData = masksProperties.filter(function (it) {
+      return it.mode !== 'n';
+    });
+
+    this.shapes = this.maskData.map(function (it) {
+      return new CurveData(it, session, true);
+    });
+
+    this.session = session;
+
+    this.curves = [];
+  }
+
+  /**
+   * updateShape
+   * @param {number} progress
+   */
+
+
+  createClass(GraphicsMask, [{
+    key: 'update',
+    value: function update(progress) {
+      for (var i = 0; i < this.shapes.length; i++) {
+        this.curves[i] = this.shapes[i].getCurve(progress);
+      }
+    }
+
+    /**
+     * render content
+     * @param {object} ctx
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      ctx.beginPath();
+      for (var i = 0; i < this.shapes.length; i++) {
+        if (this.shapes[i].inv) drawInv(ctx, this.session.size);
+        drawCurve(ctx, this.curves[i]);
+      }
+      ctx.clip();
+    }
+  }]);
+  return GraphicsMask;
+}();
+
+/**
+ * Mask
+ * @class
+ * @private
+ */
+
+var Mask = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {Container} element host element
+   * @param {object} layer layer data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Mask(element, layer, session) {
+    classCallCheck(this, Mask);
+
+    this.element = element;
+
+    this.masksProperties = layer.masksProperties || [];
+
+    this.session = session;
+
+    this.mask = new GraphicsMask(this.masksProperties, session);
+
+    this.element.mask = this.mask;
+  }
+
+  /**
+   * update
+   * @param {number} progress progress
+   * @param {object} session update session
+   */
+
+
+  createClass(Mask, [{
+    key: 'update',
+    value: function update(progress, session) {
+      this.mask.update(progress);
+    }
+  }]);
+  return Mask;
+}();
+
+/**
+ * CurveShape
+ * @class
+ * @private
+ */
+
+var CurveShape = function (_CurveData) {
+  inherits(CurveShape, _CurveData);
+
+  /**
+   * CurveShape
+   * @param {object} data curve config data
+   * @param {object} session session
+   * @param {boolean} mask is mask or not
+   */
+  function CurveShape(data, session) {
+    classCallCheck(this, CurveShape);
+
+    var _this = possibleConstructorReturn(this, (CurveShape.__proto__ || Object.getPrototypeOf(CurveShape)).call(this, data, session));
+
+    _this.curve = null;
+    return _this;
+  }
+
+  /**
+   * update curve by progress
+   * @param {number} progress progress
+   */
+
+
+  createClass(CurveShape, [{
+    key: 'update',
+    value: function update(progress) {
+      this.curve = this.getCurve(progress);
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      drawCurve(ctx, this.curve);
+    }
+  }]);
+  return CurveShape;
+}(CurveData);
+
+// import EllipseShape from './EllipseShape';
+// import RectShape from './RectShape';
+// import StartShape from './StartShape';
+
+/**
+ * getShape
+ * @ignore
+ * @param {*} item data
+ * @param {*} session session
+ * @return {shape}
+ */
+function getShape(item, session) {
+  var shape = null;
+  switch (item.ty) {
+    case 'sh':
+      shape = new CurveShape(item, session);
+      break;
+    // case 'el':
+    //   shape = new EllipseShape(item, session);
+    //   break;
+    // case 'rc':
+    //   shape = new RectShape(item, session);
+    //   break;
+    // case 'sr':
+    //   shape = new StartShape(item, session);
+    //   break;
+    default:
+      break;
+  }
+  return shape;
+}
+
+/**
+ * translate rgba array to hex
+ * @ignore
+ * @param {array} color an array with rgba
+ * @param {*} _ just a placeholder param
+ * @return {hex}
+ */
+function toColor(color, _) {
+  color = color.slice(0, 3);
+  return color.map(function (c) {
+    return c * 255 >> 0;
+  });
+}
+
+/**
+ * just return the value * 2.55 >> 0
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function to255(value, _) {
+  return value[0] * 2.55 >> 0;
+}
+
+/**
+ * just return the value / 100
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function toNormalize(value, _) {
+  return value[0] / 100;
+}
+
+/**
+ * just return the value / 100 by index
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {number} index use which value
+ * @return {number}
+ */
+function toNormalizeByIdx(value, index) {
+  return value[index] / 100;
+}
+
+/**
+ * just return the origin value by index
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {number} index use which value
+ * @return {number}
+ */
+function toBack(value, index) {
+  return value[index];
+}
+
+/**
+ * translate degree to radian
+ * @ignore
+ * @param {array} value an array with degree value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function toRadian(value, _) {
+  return value[0] * Math.PI / 180;
+}
+
+var FILL_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: to255
+  },
+  c: {
+    props: ['color'],
+    translate: toColor
+  }
+};
+
+var STROKE_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: to255
+  },
+  c: {
+    props: ['color'],
+    translate: toColor
+  },
+  w: {
+    props: ['lineWidth'],
+    translate: toBack
+  }
+};
+
+var TRANSFORM_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: toNormalize
+  },
+  r: {
+    props: ['rotation'],
+    translate: toRadian
+  },
+  p: {
+    props: ['x', 'y'],
+    translate: toBack
+  },
+  a: {
+    props: ['pivotX', 'pivotY'],
+    translate: toBack
+  },
+  s: {
+    props: ['scaleX', 'scaleY'],
+    translate: toNormalizeByIdx
+  }
+};
+
+/**
+ * Fill keyframes class
+ * @class
+ * @private
+ */
+
+var Fill = function () {
+  /**
+   * generate a fill-type keyframes buffer
+   * @param {object} item item data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Fill(item, session) {
+    classCallCheck(this, Fill);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st;
+
+    this.item = item;
+
+    this.alpha = 255;
+    this.color = [0, 0, 0];
+
+    this.st = st;
+    this.aks = {};
+    this.kic = {};
+
+    this.preParse(item);
+  }
+
+  /**
+   * preParse
+   * @param {object} item fill tiem config
+   */
+
+
+  createClass(Fill, [{
+    key: 'preParse',
+    value: function preParse(item) {
+      for (var key in FILL_MAP) {
+        if (item[key] && item[key].a) {
+          this.parseDynamic(key);
+        } else if (item[key]) {
+          this.parseStatic(key);
+        }
+      }
+    }
+
+    /**
+     * parse dynamic property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseDynamic',
+    value: function parseDynamic(key) {
+      var prop = this.item[key];
+      var propk = prop.k;
+      var last = propk.length - 1;
+
+      prop.ost = this.st + propk[0].t;
+      prop.oet = this.st + propk[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = propk[i];
+        var sek = propk[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+      }
+      this.aks[key] = prop;
+    }
+
+    /**
+     * parse static property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseStatic',
+    value: function parseStatic(key) {
+      var propk = this.item[key].k;
+      if (Utils.isNumber(propk)) propk = [propk];
+      this.setValue(key, propk);
+    }
+
+    /**
+     * update fill information
+     * @param {number} progress progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var key in this.aks) {
+        if (this.aks[key]) {
+          var value = interpolation(this.aks[key], progress, this.kic, key);
+          this.setValue(key, value);
+        }
+      }
+
+      // this.element.beginFill(this.color, this.alpha);
+    }
+
+    /**
+     * set value to host element
+     * @private
+     * @param {string} key property
+     * @param {array} value value array
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(key, value) {
+      var _FILL_MAP$key = FILL_MAP[key],
+          props = _FILL_MAP$key.props,
+          translate = _FILL_MAP$key.translate;
+
+      for (var i = 0; i < props.length; i++) {
+        this[props[i]] = translate(value, i);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      ctx.fillStyle = 'rgba(' + this.color.join(', ') + ', ' + this.alpha + ')';
+    }
+  }]);
+  return Fill;
+}();
+
+/**
+ * Stroke
+ * @class
+ * @private
+ */
+
+var Stroke = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {object} item item data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Stroke(item, session) {
+    classCallCheck(this, Stroke);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st;
+
+    this.item = item;
+
+    this.alpha = 255;
+    this.lineWidth = 1;
+    this.color = [0, 0, 0];
+
+    this.st = st;
+    this.aks = {};
+    this.kic = {};
+
+    this.preParse(item);
+  }
+
+  /**
+   * preParse
+   * @param {object} item fill tiem config
+   */
+
+
+  createClass(Stroke, [{
+    key: 'preParse',
+    value: function preParse(item) {
+      for (var key in STROKE_MAP) {
+        if (item[key] && item[key].a) {
+          this.parseDynamic(key);
+        } else if (item[key]) {
+          this.parseStatic(key);
+        }
+      }
+    }
+
+    /**
+     * parse dynamic property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseDynamic',
+    value: function parseDynamic(key) {
+      var prop = this.item[key];
+      var propk = prop.k;
+      var last = propk.length - 1;
+
+      prop.ost = this.st + propk[0].t;
+      prop.oet = this.st + propk[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = propk[i];
+        var sek = propk[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+      }
+      this.aks[key] = prop;
+    }
+
+    /**
+     * parse static property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseStatic',
+    value: function parseStatic(key) {
+      var propk = this.item[key].k;
+      if (Utils.isNumber(propk)) propk = [propk];
+      this.setValue(key, propk);
+    }
+
+    /**
+     * update fill information
+     * @param {number} progress progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var key in this.aks) {
+        if (this.aks[key]) {
+          var value = interpolation(this.aks[key], progress, this.kic, key);
+          this.setValue(key, value);
+        }
+      }
+    }
+
+    /**
+     * set value to host element
+     * @private
+     * @param {string} key property
+     * @param {array} value value array
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(key, value) {
+      var _STROKE_MAP$key = STROKE_MAP[key],
+          props = _STROKE_MAP$key.props,
+          translate = _STROKE_MAP$key.translate;
+
+      for (var i = 0; i < props.length; i++) {
+        this[props[i]] = translate(value, i);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      ctx.strokeStyle = 'rgba(' + this.color.join(', ') + ', ' + this.alpha + ')';
+      ctx.lineWidth = this.lineWidth;
+    }
+  }]);
+  return Stroke;
+}();
+
+var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
+var STR_REG = /["']\w+["']/;
+
+/**
+ * Cycle
+ * @class
+ * @private
+ */
+
+var Cycle = function () {
+  /**
+   * Pingpong
+   * @param {*} type Pingpong
+   * @param {*} begin Pingpong
+   * @param {*} end Pingpong
+   */
+  function Cycle(type, begin, end) {
+    classCallCheck(this, Cycle);
+
+    this.begin = begin;
+    this.end = end;
+    this.total = this.end - this.begin;
+    this.type = type;
+  }
+
+  /**
+   * progress
+   * @param {number} progress progress
+   * @return {number} progress
+   */
+
+
+  createClass(Cycle, [{
+    key: 'update',
+    value: function update(progress) {
+      if (this.type === 'in') {
+        if (progress >= this.begin) return progress;
+        return this.end - Utils.euclideanModulo(this.begin - progress, this.total);
+      } else if (this.type === 'out') {
+        if (progress <= this.end) return progress;
+        return this.begin + Utils.euclideanModulo(progress - this.end, this.total);
+      }
+    }
+  }]);
+  return Cycle;
+}();
+
+/**
+ * Pingpong
+ * @class
+ * @private
+ */
+
+
+var Pingpong = function () {
+  /**
+   * Pingpong
+   * @param {*} type Pingpong
+   * @param {*} begin Pingpong
+   * @param {*} end Pingpong
+   */
+  function Pingpong(type, begin, end) {
+    classCallCheck(this, Pingpong);
+
+    this.begin = begin;
+    this.end = end;
+    this.total = this.end - this.begin;
+    this.type = type;
+  }
+
+  /**
+   * progress
+   * @param {number} progress progress
+   * @return {number} progress
+   */
+
+
+  createClass(Pingpong, [{
+    key: 'update',
+    value: function update(progress) {
+      if (this.type === 'in' && progress < this.begin || this.type === 'out' && progress > this.end) {
+        var space = progress - this.end;
+        return this.pingpong(space);
+      }
+      return progress;
+    }
+
+    /**
+     * pingpong
+     * @param {number} space
+     * @return {number}
+     */
+
+  }, {
+    key: 'pingpong',
+    value: function pingpong(space) {
+      var dir = Math.floor(space / this.total) % 2;
+      if (dir) {
+        return this.begin + Utils.euclideanModulo(space, this.total);
+      } else {
+        return this.end - Utils.euclideanModulo(space, this.total);
+      }
+    }
+  }]);
+  return Pingpong;
+}();
+
+var FN_MAPS = {
+  loopIn: function loopIn(datak, mode, offset) {
+    var begin = datak[0].t;
+    var end = datak[offset].t;
+    switch (mode) {
+      case 'cycle':
+        return new Cycle('in', begin, end);
+      case 'pingpong':
+        return new Pingpong('in', begin, end);
+      default:
+        break;
+    }
+    return null;
+  },
+  loopOut: function loopOut(datak, mode, offset) {
+    var last = datak.length - 1;
+    var begin = datak[last - offset].t;
+    var end = datak[last].t;
+    switch (mode) {
+      case 'cycle':
+        return new Cycle('out', begin, end);
+      case 'pingpong':
+        return new Pingpong('out', begin, end);
+      default:
+        break;
+    }
+    return null;
+  }
+};
+
+/**
+ * parseParams
+ * @ignore
+ * @param {string} pStr string
+ * @return {array}
+ */
+function parseParams(pStr) {
+  var params = pStr.split(/\s*,\s*/);
+  return params.map(function (it) {
+    if (STR_REG.test(it)) return it.replace(/"|'/g, '');
+    return parseInt(it);
+  });
+}
+
+/**
+ * parseEx
+ * @ignore
+ * @param {string} ex string
+ * @return {object}
+ */
+function parseEx(ex) {
+  var rs = ex.match(EX_REG);
+  var ps = parseParams(rs[2]);
+  return {
+    name: rs[1],
+    mode: ps[0],
+    offset: ps[1]
+  };
+}
+
+/**
+ * hasExpression
+ * @ignore
+ * @param {string} ex string
+ * @return {boolean}
+ */
+function hasExpression(ex) {
+  return EX_REG.test(ex);
+}
+
+/**
+ * getEX
+ * @ignore
+ * @param {object} ksp ksp
+ * @return {object}
+ */
+function getEX(ksp) {
+  var _parseEx = parseEx(ksp.x),
+      name = _parseEx.name,
+      mode = _parseEx.mode,
+      offset = _parseEx.offset;
+
+  var _offset = offset === 0 ? ksp.k.length - 1 : offset;
+  return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
+}
+
+/**
+ * keyframes buffer, cache some status and progress
+ * @class
+ * @private
+ */
+
+var Transform = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {Container} element host element
+   * @param {object} layer layer data
+   * @param {object} session now session
+   * @param {number} session.st time of start position
+   */
+  function Transform(element, layer, session) {
+    classCallCheck(this, Transform);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st,
+        register = session.register;
+
+
+    this.element = element;
+
+    this.ks = layer.ks;
+    this.ip = layer.ip;
+    this.op = layer.op;
+
+    this.st = st;
+    this.oip = this.st + this.ip;
+    this.oop = this.st + this.op;
+
+    this.aks = {};
+    this.kic = {};
+
+    this.preParse(register);
+  }
+
+  /**
+   * preparse keyframes
+   * @private
+   * @param {Register} register
+   */
+
+
+  createClass(Transform, [{
+    key: 'preParse',
+    value: function preParse(register) {
+      var ks = this.ks;
+      for (var key in TRANSFORM_MAP) {
+        if (ks[key] && ks[key].a) {
+          this.parseDynamic(key, register);
+        } else if (ks[key]) {
+          this.parseStatic(key);
+        }
+      }
+    }
+
+    /**
+     * preparse dynamic keyframes
+     * @private
+     * @param {string} key property
+     * @param {Register} register
+     */
+
+  }, {
+    key: 'parseDynamic',
+    value: function parseDynamic(key, register) {
+      var ksp = this.ks[key];
+      var kspk = ksp.k;
+      var last = kspk.length - 1;
+
+      ksp.ost = this.st + kspk[0].t;
+      ksp.oet = this.st + kspk[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = kspk[i];
+        var sek = kspk[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+        if (Utils.isString(sbk.n) && sbk.ti && sbk.to) {
+          prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+          var sp = new Point(sbk.s[0], sbk.s[1]);
+          var ep = new Point(sbk.e[0], sbk.e[1]);
+          var c1 = new Point(sbk.s[0] + sbk.ti[0], sbk.s[1] + sbk.ti[1]);
+          var c2 = new Point(sbk.e[0] + sbk.to[0], sbk.e[1] + sbk.to[1]);
+          sbk.curve = new BezierCurve([sp, c1, c2, ep]);
+        } else {
+          for (var _i = 0; _i < sbk.n.length; _i++) {
+            prepareEaseing(sbk.o.x[_i], sbk.o.y[_i], sbk.i.x[_i], sbk.i.y[_i]);
+          }
+        }
+      }
+
+      if (hasExpression(ksp.x)) {
+        ksp.expression = getEX(ksp);
+        register.forever();
+      }
+      this.aks[key] = ksp;
+    }
+
+    /**
+     * preparse static keyframes
+     * @private
+     * @param {string} key property
+     */
+
+  }, {
+    key: 'parseStatic',
+    value: function parseStatic(key) {
+      var ksp = this.ks[key];
+      var kspk = ksp.k;
+      if (Utils.isNumber(kspk)) kspk = [kspk];
+
+      this.setValue(key, kspk);
+    }
+
+    /**
+     * compute child transform props
+     * @private
+     * @param {number} progress timeline progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      if (session.forever) {
+        this.element.visible = progress >= this.oip;
+      } else {
+        var visible = inRange$1(progress, this.oip, this.oop);
+        this.element.visible = visible;
+        if (!visible) return;
+      }
+
+      for (var key in this.aks) {
+        if (this.aks[key]) {
+          this.setValue(key, this.interpolation(key, progress));
+        }
+      }
+    }
+
+    /**
+     * compute value with keyframes buffer
+     * @private
+     * @param {string} key which prop
+     * @param {number} progress which prop
+     * @return {array}
+     */
+
+  }, {
+    key: 'interpolation',
+    value: function interpolation$$1(key, progress) {
+      var ak = this.aks[key];
+      return interpolation(ak, progress, this.kic, key);
+    }
+
+    /**
+     * set value to host element
+     * @private
+     * @param {string} key property
+     * @param {array} value value array
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(key, value) {
+      var _TRANSFORM_MAP$key = TRANSFORM_MAP[key],
+          props = _TRANSFORM_MAP$key.props,
+          translate = _TRANSFORM_MAP$key.translate;
+
+      for (var i = 0; i < props.length; i++) {
+        this.element[props[i]] = translate(value, i);
+      }
+    }
+  }]);
+  return Transform;
+}();
+
+/**
+ * Graphics class
+ * @class
+ * @private
+ */
+
+var Graphics$1 = function (_Container) {
+  inherits(Graphics, _Container);
+
+  /**
+   * Graphics constructor
+   * @param {object} layer layer data information
+   * @param {object} items items data information
+   * @param {object} session layer data information
+   */
+  function Graphics(layer, items) {
+    var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    classCallCheck(this, Graphics);
+
+    var _this = possibleConstructorReturn(this, (Graphics.__proto__ || Object.getPrototypeOf(Graphics)).call(this));
+
+    _this.fill = null;
+    _this.stroke = null;
+    _this.shape = null;
+
+    _this.layer = layer;
+    _this.itemCache = [];
+
+    _this.parseItems(items.it, session);
+    return _this;
+  }
+
+  /**
+   * parseItems
+   * @param {object} items items
+   * @param {object} session session
+   */
+
+
+  createClass(Graphics, [{
+    key: 'parseItems',
+    value: function parseItems(items, session) {
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item.ty == 'tr') {
+          var ip = this.layer.ip;
+          var op = this.layer.op;
+          this.itemCache.push(new Transform(this, { ks: item, ip: ip, op: op }, session));
+        } else if (item.ty == 'sh' || item.ty == 'el' || item.ty == 'rc' || item.ty == 'sr') {
+          var shape = getShape(item, session);
+          if (!shape) continue;
+          this.shape = shape;
+          this.itemCache.push(this.shape);
+        } else if (items[i].ty == 'fl') {
+          this.fill = new Fill(item, session);
+          this.itemCache.push(this.fill);
+        } else if (items[i].ty == 'st') {
+          this.stroke = new Stroke(item, session);
+          this.itemCache.push(this.stroke);
+        } else if (items[i].ty == 'tm') {
+          // TODO:
+        }
+      }
+    }
+
+    /**
+     * update
+     * @param {number} progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var i = 0; i < this.itemCache.length; i++) {
+        this.itemCache[i].update(progress, session);
+      }
+    }
+
+    /**
+     * render content
+     * @param {object} ctx
+     */
+
+  }, {
+    key: 'renderMe',
+    value: function renderMe(ctx) {
+      if (this.fill) this.fill.render(ctx);
+      if (this.stroke) this.stroke.render(ctx);
+      if (this.shape) {
+        ctx.beginPath();
+        this.shape.render(ctx);
+      }
+      if (this.fill) ctx.fill();
+      if (this.stroke) ctx.stroke();
+    }
+  }]);
+  return Graphics;
+}(Container);
+
+/**
+ * Shapes
+ * @class
+ * @private
+ */
+
+var Shapes = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {Container} element host element
+   * @param {object} layer layer data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Shapes(element, layer, session) {
+    classCallCheck(this, Shapes);
+
+    this.element = element;
+    this.shapes = [];
+    this.createShapes(layer, session);
+  }
+
+  /**
+   * createShapes
+   * @param {object} layer layer data
+   * @param {object} session now session
+   */
+
+
+  createClass(Shapes, [{
+    key: 'createShapes',
+    value: function createShapes(layer, session) {
+      var shapes = layer.shapes;
+      for (var i = 0; i < shapes.length; i++) {
+        var shape = shapes[i];
+        if (shape.ty === 'gr') {
+          var ge = new Graphics$1(layer, shape, session);
+          this.element.adds(ge);
+          this.shapes.push(ge);
+        }
+      }
+    }
+
+    /**
+     * update
+     * @param {number} progress progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var i = 0; i < this.shapes.length; i++) {
+        this.shapes[i].update(progress, session);
+      }
+    }
+  }]);
+  return Shapes;
+}();
+
+/**
+ * Keyframes
+ * @class
+ * @private
+ */
+
+var Keyframes = function () {
+  /**
+   * manager
+   * @param {object} element element
+   * @param {object} layer element
+   * @param {object} session element
+   */
+  function Keyframes(element, layer, session) {
+    classCallCheck(this, Keyframes);
+
+    this.element = element;
+    this.layer = Utils.copyJSON(layer);
+    this.keyframes = [];
+
+    this.parse(element, layer, session);
+  }
+
+  /**
+   * parse
+   * @param {object} element element
+   * @param {object} layer
+   * @param {object} session
+   */
+
+
+  createClass(Keyframes, [{
+    key: 'parse',
+    value: function parse(element, layer, session) {
+      this.transform(element, layer, session);
+
+      if (layer.hasMask) this.mask(element, layer, session);
+      if (layer.shapes) this.shapes(element, layer, session);
+    }
+
+    /**
+     * transform
+     * @param {object} element element
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'transform',
+    value: function transform(element, layer, session) {
+      this.add(new Transform(element, layer, session));
+    }
+
+    /**
+     * mask
+     * @param {object} element element
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'mask',
+    value: function mask(element, layer, session) {
+      this.add(new Mask(element, layer, session));
+    }
+
+    /**
+     * shapes
+     * @param {object} element element
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'shapes',
+    value: function shapes(element, layer, session) {
+      this.add(new Shapes(element, layer, session));
+    }
+
+    /**
+     * update
+     * @param {number} progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var i = 0; i < this.keyframes.length; i++) {
+        this.keyframes[i].update(progress, session);
+      }
+    }
+
+    /**
+     * add
+     * @param {object} keyframe
+     */
+
+  }, {
+    key: 'add',
+    value: function add(keyframe) {
+      this.keyframes.push(keyframe);
+    }
+  }]);
+  return Keyframes;
+}();
+
+/**
+ * SpriteElement class
+ * @class
+ * @private
+ */
+
+var SpriteElement = function (_Sprite) {
+  inherits(SpriteElement, _Sprite);
+
+  /**
+   * SpriteElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session layer data information
+   */
+  function SpriteElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, SpriteElement);
+    var parentName = session.parentName,
+        register = session.register;
+
+
+    var texture = register.getTexture(layer.refId);
+
+    var _this = possibleConstructorReturn(this, (SpriteElement.__proto__ || Object.getPrototypeOf(SpriteElement)).call(this, { texture: texture }));
+
+    _this.name = parentName + '.' + layer.nm;
+
+    register.setLayer(_this.name, _this);
+
+    _this.initKeyFrames(layer, session);
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(SpriteElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+  }]);
+  return SpriteElement;
+}(Sprite);
+
+/**
+ * ShapeElement class
+ * @class
+ * @private
+ */
+
+var ShapeElement = function (_Container) {
+  inherits(ShapeElement, _Container);
+
+  /**
+   * ShapeElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session layer data information
+   */
+  function ShapeElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, ShapeElement);
+
+    var _this = possibleConstructorReturn(this, (ShapeElement.__proto__ || Object.getPrototypeOf(ShapeElement)).call(this));
+
+    var parentName = session.parentName,
+        register = session.register;
+
+
+    _this.name = parentName + '.' + layer.nm;
+
+    register.setLayer(_this.name, _this);
+
+    _this.initKeyFrames(layer, session);
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(ShapeElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+  }]);
+  return ShapeElement;
+}(Container);
+
+/**
+ * CompElement class
+ * @class
+ * @private
+ */
+
+var CompElement = function (_Container) {
+  inherits(CompElement, _Container);
+
+  /**
+   * CompElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session global session information
+   */
+  function CompElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, CompElement);
+
+    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this));
+
+    var assets = session.assets,
+        size = session.size,
+        prefix = session.prefix,
+        register = session.register;
+
+    var parentName = session.parentName;
+    var ist = 0;
+    var layers = [];
+
+    var mySize = {
+      w: size.w,
+      h: size.h
+    };
+    if (Utils.isArray(layer)) {
+      layers = layer;
+      _this.name = parentName;
+    } else {
+      _this.initKeyFrames(layer, session);
+      mySize.w = layer.w;
+      mySize.h = layer.h;
+      layers = getAssets(layer.refId, assets).layers;
+      ist = layer.st;
+      parentName = _this.name = parentName + '.' + layer.nm;
+    }
+
+    register.setLayer(parentName, _this);
+
+    _this.parseLayers(layers, { assets: assets, st: ist, size: mySize, prefix: prefix, register: register, parentName: parentName });
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(CompElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+
+    /**
+     * parse layers
+     * @param {array} layers layers data
+     * @param {object} session assets data
+     */
+
+  }, {
+    key: 'parseLayers',
+    value: function parseLayers(layers, session) {
+      var elementsMap = this.createElements(layers, session);
+      for (var i = layers.length - 1; i >= 0; i--) {
+        var layer = layers[i];
+        var item = elementsMap[layer.ind];
+        if (!item) continue;
+        if (layer.parent) {
+          var parent = elementsMap[layer.parent];
+          parent.adds(item);
+        } else {
+          this.adds(item);
+        }
+      }
+    }
+
+    /**
+     * createElements
+     * @param {arrya} layers layers
+     * @param {object} session object
+     * @return {object}
+     */
+
+  }, {
+    key: 'createElements',
+    value: function createElements(layers, session) {
+      var elementsMap = {};
+      for (var i = layers.length - 1; i >= 0; i--) {
+        var layer = layers[i];
+        var element = null;
+
+        switch (layer.ty) {
+          case 0:
+            element = new CompElement(layer, session);
+            break;
+          case 2:
+            element = new SpriteElement(layer, session);
+            break;
+          case 4:
+            element = new ShapeElement(layer, session);
+            break;
+          default:
+            continue;
+        }
+
+        if (element) {
+          elementsMap[layer.ind] = element;
+        }
+      }
+      return elementsMap;
+    }
+  }]);
+  return CompElement;
+}(Container);
+
+/**
+ * an animation group, store and compute frame information
+ * @class
+ */
+
+var AnimationGroup = function () {
+  /**
+   * pass a data and extra config
+   * @param {object} options config and data
+   * @param {Object} options.keyframes bodymovin data, which export from AE
+   * @param {Number} [options.repeats=0] need repeat somt times?
+   * @param {Boolean} [options.infinite=false] play this animation round and round forever
+   * @param {Boolean} [options.alternate=false] alternate direction every round
+   * @param {Number} [options.wait=0] need wait how much time to start
+   * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
+   * @param {String} [options.prefix=''] assets url prefix, like link path
+   * @param {Number} [options.timeScale=1] animation speed
+   * @param {Number} [options.autoStart=true] auto start animation after assets loaded
+   */
+  function AnimationGroup(options) {
+    var _this = this;
+
+    classCallCheck(this, AnimationGroup);
+
+    this.prefix = options.prefix || '';
+    this.keyframes = options.keyframes;
+    this.fr = this.keyframes.fr;
+    this.ip = this.keyframes.ip;
+    this.op = this.keyframes.op;
+
+    this.tpf = 1000 / this.fr;
+    this.tfs = Math.floor(this.op - this.ip);
+
+    this.living = true;
+    this.alternate = options.alternate || false;
+    this.infinite = options.infinite || false;
+    this.repeats = options.repeats || 0;
+    this.delay = options.delay || 0;
+    this.wait = options.wait || 0;
+    this.duration = this.tfs;
+    this.progress = 0;
+    this._pf = -10000;
+
+    this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
+
+    this.direction = 1;
+    this.repeatsCut = this.repeats;
+    this.delayCut = this.delay;
+    this.waitCut = this.wait;
+
+    this._paused = true;
+
+    this.register = new Register(this.keyframes.assets, this.prefix);
+
+    this.register.loader.once('complete', function () {
+      _this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
+    });
+
+    this.group = new CompElement(this.keyframes.layers, {
+      assets: this.keyframes.assets,
+      size: { w: this.keyframes.w, h: this.keyframes.h },
+      prefix: this.prefix,
+      register: this.register,
+      parentName: this.keyframes.nm
+    });
+    this.group._aniRoot = true;
+
+    this.updateSession = { forever: this.isForever() };
+  }
+
+  /**
+   * get layer by name path
+   * @param {string} name layer name path, example: root.gift.star1
+   * @return {object}
+   */
+
+
+  createClass(AnimationGroup, [{
+    key: 'getLayerByName',
+    value: function getLayerByName(name) {
+      return this.register.getLayer(name);
+    }
+
+    /**
+     * bind other animation group to this animation group with name path
+     * @param {*} name
+     * @param {*} slot
+     */
+
+  }, {
+    key: 'bindSlot',
+    value: function bindSlot(name, slot) {
+      var slotDot = this.getLayerByName(name);
+      if (slotDot) slotDot.add(slot);
+    }
+
+    /**
+     * emit frame
+     * @private
+     * @param {*} np now frame
+     */
+
+  }, {
+    key: 'emitFrame',
+    value: function emitFrame(np) {
+      this.emit('@' + np);
+    }
+
+    /**
+     * update with time snippet
+     * @private
+     * @param {number} snippetCache snippet
+     */
+
+  }, {
+    key: 'update',
+    value: function update(snippetCache) {
+      if (!this.living) return;
+
+      var isEnd = this.updateTime(snippetCache);
+
+      this.group.updateMovin(this.progress, this.updateSession);
+
+      var np = this.progress >> 0;
+      if (this._pf !== np) {
+        this.emitFrame(this.direction > 0 ? np : this._pf);
+        this._pf = np;
+      }
+      if (isEnd === false) {
+        this.emit('update', this.progress / this.duration);
+      } else if (isEnd === true) {
+        this.emit('complete');
+      }
+    }
+
+    /**
+     * update timeline with time snippet
+     * @private
+     * @param {number} snippet snippet
+     * @return {boolean} progress status
+     */
+
+  }, {
+    key: 'updateTime',
+    value: function updateTime(snippet) {
+      var snippetCache = this.direction * this.timeScale * snippet;
+      if (this.waitCut > 0) {
+        this.waitCut -= Math.abs(snippetCache);
+        return null;
+      }
+      if (this._paused || this.delayCut > 0) {
+        if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
+        return null;
+      }
+
+      this.progress += snippetCache / this.tpf;
+      var isEnd = false;
+
+      if (!this.updateSession.forever && this.spill()) {
+        if (this.repeatsCut > 0 || this.infinite) {
+          if (this.repeatsCut > 0) --this.repeatsCut;
+          this.delayCut = this.delay;
+          if (this.alternate) {
+            this.direction *= -1;
+            this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
+          } else {
+            this.direction = 1;
+            this.progress = Utils.euclideanModulo(this.progress, this.duration);
+          }
+        } else {
+          this.progress = Utils.clamp(this.progress, 0, this.duration);
+          isEnd = true;
+          this.living = false;
+        }
+      }
+
+      return isEnd;
+    }
+
+    /**
+     * check the animation group was in forever mode
+     * @private
+     * @return {boolean}
+     */
+
+  }, {
+    key: 'isForever',
+    value: function isForever() {
+      return this.register._forever;
+    }
+
+    /**
+     * is this time progress spill the range
+     * @private
+     * @return {boolean}
+     */
+
+  }, {
+    key: 'spill',
+    value: function spill() {
+      var bottomSpill = this.progress <= 0 && this.direction === -1;
+      var topSpill = this.progress >= this.duration && this.direction === 1;
+      return bottomSpill || topSpill;
+    }
+
+    /**
+     * get time
+     * @param {number} frame frame index
+     * @return {number}
+     */
+
+  }, {
+    key: 'frameToTime',
+    value: function frameToTime(frame) {
+      return frame * this.tpf;
+    }
+
+    /**
+     * set animation speed, time scale
+     * @param {number} speed
+     */
+
+  }, {
+    key: 'setSpeed',
+    value: function setSpeed(speed) {
+      this.timeScale = speed;
+    }
+
+    /**
+     * pause this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      this._paused = true;
+      return this;
+    }
+
+    /**
+     * resume or play this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this._paused = false;
+      return this;
+    }
+
+    /**
+     * play this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'play',
+    value: function play() {
+      this._paused = false;
+      return this;
+    }
+
+    /**
+     * replay this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'replay',
+    value: function replay() {
+      this._paused = false;
+      this.living = true;
+      this.progress = 0;
+      return this;
+    }
+
+    /**
+     * proxy this.group event-emit
+     * Emit an event to all registered event listeners.
+     *
+     * @param {String} event The name of the event.
+     */
+
+  }, {
+    key: 'emit',
+    value: function emit() {
+      var _group;
+
+      (_group = this.group).emit.apply(_group, arguments);
+    }
+
+    /**
+     * proxy this.group event-on
+     * Register a new EventListener for the given event.
+     *
+     * @param {String} event Name of the event.
+     * @param {Function} fn Callback function.
+     * @param {Mixed} [context=this] The context of the function.
+     */
+
+  }, {
+    key: 'on',
+    value: function on() {
+      var _group2;
+
+      (_group2 = this.group).on.apply(_group2, arguments);
+    }
+
+    /**
+     * proxy this.group event-once
+     * Add an EventListener that's only called once.
+     *
+     * @param {String} event Name of the event.
+     * @param {Function} fn Callback function.
+     * @param {Mixed} [context=this] The context of the function.
+     */
+
+  }, {
+    key: 'once',
+    value: function once() {
+      var _group3;
+
+      (_group3 = this.group).once.apply(_group3, arguments);
+    }
+
+    /**
+     * proxy this.group event-off
+     * @param {String} event The event we want to remove.
+     * @param {Function} fn The listener that we need to find.
+     * @param {Mixed} context Only remove listeners matching this context.
+     * @param {Boolean} once Only remove once listeners.
+     */
+
+  }, {
+    key: 'off',
+    value: function off() {
+      var _group4;
+
+      (_group4 = this.group).off.apply(_group4, arguments);
+    }
+
+    /**
+     * proxy this.group event-removeAllListeners
+     * Remove event listeners.
+     *
+     * @param {String} event The event we want to remove.
+     * @param {Function} fn The listener that we need to find.
+     * @param {Mixed} context Only remove listeners matching this context.
+     * @param {Boolean} once Only remove once listeners.
+     */
+
+  }, {
+    key: 'removeAllListeners',
+    value: function removeAllListeners() {
+      var _group5;
+
+      (_group5 = this.group).removeAllListeners.apply(_group5, arguments);
+    }
+  }]);
+  return AnimationGroup;
+}();
+
+/**
+ * all animation manager, manage ticker and animation groups
+ * @example
+ * var manager = new PIXI.AnimationManager(app.ticker);
+ * var ani = manager.parseAnimation({
+ *   keyframes: data,
+ *   infinite: true,
+ * });
+ * @class
+ */
+
+var AnimationManager = function () {
+  /**
+   * animation manager, optional a ticker param
+   * @param {Ticker} _ticker
+   */
+  function AnimationManager(_ticker) {
+    var _this = this;
+
+    classCallCheck(this, AnimationManager);
+
+    /**
+     * time scale, just like speed scalar
+     *
+     * @member {Number}
+     */
+    this.timeScale = 1;
+
+    /**
+     * mark the manager was pause or not
+     *
+     * @member {Boolean}
+     */
+    this.paused = false;
+
+    /**
+     * ticker engine
+     * @private
+     */
+    this.ticker = _ticker || new Ticker();
+
+    /**
+     * all animation groups
+     * @private
+     */
+    this.groups = [];
+
+    this.ticker.on('update', function (snippet) {
+      _this.update(snippet);
+    });
+  }
+
+  /**
+   * add a animationGroup child to array
+   * @param {AnimationGroup} child AnimationGroup instance
+   * @return {AnimationGroup} child
+   */
+
+
+  createClass(AnimationManager, [{
+    key: 'add',
+    value: function add(child) {
+      var argumentsLength = arguments.length;
+
+      if (argumentsLength > 1) {
+        for (var i = 0; i < argumentsLength; i++) {
+          /* eslint prefer-rest-params: 0 */
+          this.add(arguments[i]);
+        }
+      } else {
+        this.groups.push(child);
+      }
+
+      return child;
+    }
+
+    /**
+     * parser a bodymovin data, and post some config for this animation group
+     * @param {object} options bodymovin data
+     * @param {Object} options.keyframes bodymovin data, which export from AE
+     * @param {Number} [options.repeats=0] need repeat somt times?
+     * @param {Boolean} [options.infinite=false] play this animation round and round forever
+     * @param {Boolean} [options.alternate=false] alternate direction every round
+     * @param {Number} [options.wait=0] need wait how much time to start
+     * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
+     * @param {String} [options.prefix=''] assets url prefix, like link path
+     * @param {Number} [options.timeScale=1] animation speed
+     * @param {Number} [options.autoStart=true] auto start animation after assets loaded
+     * @return {AnimationGroup}
+     * @example
+     * var manager = new PIXI.AnimationManager(app.ticker);
+     * var ani = manager.parseAnimation({
+     *   keyframes: data,
+     *   infinite: true,
+     * });
+     */
+
+  }, {
+    key: 'parseAnimation',
+    value: function parseAnimation(options) {
+      var animate = new AnimationGroup(options);
+      return this.add(animate);
+    }
+
+    /**
+     * set animation speed, time scale
+     * @param {number} speed
+     */
+
+  }, {
+    key: 'setSpeed',
+    value: function setSpeed(speed) {
+      this.timeScale = speed;
+    }
+
+    /**
+     * pause all animation groups
+     * @return {this}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      this.paused = true;
+      return this;
+    }
+
+    /**
+     * pause all animation groups
+     * @return {this}
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this.paused = false;
+      return this;
+    }
+
+    /**
+     * update
+     * @private
+     * @param {number} snippet
+     */
+
+  }, {
+    key: 'update',
+    value: function update(snippet) {
+      if (this.paused) return;
+      var snippetCache = this.timeScale * snippet;
+      var length = this.groups.length;
+      for (var i = 0; i < length; i++) {
+        var animationGroup = this.groups[i];
+        animationGroup.update(snippetCache);
+      }
+    }
+  }]);
+  return AnimationManager;
+}();
+
+export { Eventer, Animation, Tween, Utils, Texture, Loader, loaderUtil, Ticker, Bounds, Point, Rectangle, Polygon, Circle, Ellipse, Matrix, IDENTITY, TEMP_MATRIX, CatmullRom, BezierCurve, SvgCurve, NURBSCurve, DisplayObject, Container, Sprite, Graphics, TextFace, FilterGroup, BlurFilter, Scene, Renderer, Application, AnimationManager };
 //# sourceMappingURL=jcc2d.module.js.map

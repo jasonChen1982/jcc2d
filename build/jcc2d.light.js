@@ -73,18 +73,26 @@ var Utils = {
    *
    * @static
    * @memberof JC.Utils
-   * @type {number}
+   * @param {number} degree 角度数
+   * @return {number} 弧度数
    */
-  DTR: Math.PI / 180,
+  DTR: function DTR(degree) {
+    return degree * Math.PI / 180;
+  },
+
 
   /**
    * 将弧度转化成角度的乘法因子
    *
    * @static
    * @memberof JC.Utils
-   * @type {number}
+   * @param {number} radian 角度数
+   * @return {number} 弧度数
    */
-  RTD: 180 / Math.PI,
+  RTD: function RTD(radian) {
+    return radian * 180 / Math.PI;
+  },
+
 
   /**
    * 判断变量是否为数组类型
@@ -1328,7 +1336,7 @@ function PathMotion(options) {
   this.attachTangent = Utils.isBoolean(options.attachTangent) ? options.attachTangent : false;
 
   this._cacheRotate = this.element.rotation;
-  var radian = this._cacheRotate * Utils.DTR;
+  var radian = this._cacheRotate;
   this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
 }
 
@@ -1404,6 +1412,62 @@ BezierCurve.prototype.getPoint = function (t, points) {
   }
 };
 
+/**
+ * detect number was in [min, max]
+ * @method
+ * @param {number} v   value
+ * @param {number} min lower
+ * @param {number} max upper
+ * @return {boolean} in [min, max] range ?
+ */
+function inRange$1(v, min, max) {
+  return v >= min && v <= max;
+}
+
+/**
+ * detect current frame index
+ * @method
+ * @param {array} steps frames array
+ * @param {number} progress current time
+ * @return {number} which frame index
+ */
+function findStep$1(steps, progress) {
+  var last = steps.length - 1;
+  for (var i = 0; i < last; i++) {
+    var step = steps[i];
+    if (inRange$1(progress, step.ost, step.oet)) {
+      return i;
+    }
+  }
+}
+
+/**
+ * prefix
+ * @method
+ * @param {object} asset asset
+ * @param {string} prefix prefix
+ * @return {string}
+ */
+function createUrl(asset, prefix) {
+  var up = (prefix ? prefix : asset.u) + asset.p;
+  var url = asset.up || up;
+  return url;
+}
+
+/**
+ * get assets from keyframes assets
+ * @method
+ * @param {string} id assets refid
+ * @param {object} assets assets object
+ * @return {object} asset object
+ */
+function getAssets(id, assets) {
+  for (var i = 0; i < assets.length; i++) {
+    if (id === assets[i].id) return assets[i];
+  }
+  return {};
+}
+
 var bezierPool = {};
 
 /**
@@ -1435,7 +1499,8 @@ function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
 function getEaseing(s, e, nm, p) {
   var value = [];
   for (var i = 0; i < s.length; i++) {
-    var rate = bezierPool[nm[i]].get(p);
+    var bezier = bezierPool[nm[i]] || bezierPool[nm[0]];
+    var rate = bezier.get(p);
     var v = e[i] - s[i];
     value[i] = s[i] + v * rate;
   }
@@ -1453,6 +1518,41 @@ function getEaseingPath(curve, nm, p) {
   var rate = bezierPool[nm].get(p);
   var point = curve.getPointAt(rate);
   return [point.x, point.y, point.z];
+}
+
+/**
+ * interpolation keyframes and return value
+ * @ignore
+ * @param {object} keyframes keyframes with special prop
+ * @param {number} progress progress
+ * @param {object} indexCache index cache
+ * @param {string} key prop name
+ * @return {array}
+ */
+function interpolation(keyframes, progress, indexCache, key) {
+  var aksk = keyframes.k;
+  if (keyframes.expression) {
+    progress = keyframes.expression.update(progress);
+  }
+  if (progress <= keyframes.ost) {
+    return aksk[0].s;
+  } else if (progress >= keyframes.oet) {
+    var last = aksk.length - 2;
+    return aksk[last].e;
+  } else {
+    var ick = indexCache[key];
+    var frame = aksk[ick];
+    if (!Utils.isNumber(ick) || !inRange$1(progress, frame.ost, frame.oet)) {
+      ick = indexCache[key] = findStep$1(aksk, progress);
+      frame = aksk[ick];
+    }
+    var rate = (progress - frame.ost) / (frame.oet - frame.ost);
+    if (frame.curve) {
+      return getEaseingPath(frame.curve, frame.n, rate);
+    } else {
+      return getEaseing(frame.s, frame.e, frame.n, rate);
+    }
+  }
 }
 
 /* eslint guard-for-in: "off" */
@@ -1686,163 +1786,7 @@ KeyFrames.prototype.setValue = function (key, value) {
   }
 };
 
-// import {Utils} from '../util/Utils';
-
-/**
- * AnimateRunner类型动画类
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画配置信息
- */
-function AnimateRunner(options) {
-  Animate.call(this, options);
-
-  this.runners = options.runners;
-  this.cursor = 0;
-  this.queues = [];
-  this.alternate = false;
-
-  this.length = this.runners.length;
-
-  // TODO: Is it necessary to exist ?
-  // this.propsMap = [];
-  // this.prepare();
-}
-AnimateRunner.prototype = Object.create(Animate.prototype);
-
-/**
- * 填补每个runner的配置
- * @private
- */
-// AnimateRunner.prototype.prepare = function() {
-//   let i = 0;
-//   let j = 0;
-//   for (i = 0; i < this.runners.length; i++) {
-//     const runner = this.runners[i];
-//     if (Utils.isUndefined(runner.to)) continue;
-//     const keys = Object.keys(runner.to);
-//     for (j = 0; j < keys.length; j++) {
-//       const prop = keys[j];
-//       if (this.propsMap.indexOf(prop) === -1) this.propsMap.push(prop);
-//     }
-//   }
-//   for (i = 0; i < this.runners.length; i++) {
-//     const runner = this.runners[i];
-//     if (!runner.to) continue;
-//     for (j = 0; j < this.propsMap.length; j++) {
-//       const prop = this.propsMap[j];
-//       if (Utils.isUndefined(runner.to[prop])) {
-//         runner.to[prop] = this.element[prop];
-//       }
-//     }
-//   }
-// };
-
-/**
- * 更新下一个`runner`
- * @param {Object} _
- * @param {Number} time
- * @private
- */
-AnimateRunner.prototype.nextRunner = function (_, time) {
-  this.queues[this.cursor].init();
-  this.cursor += this.direction;
-  this.timeSnippet = time;
-};
-
-/**
- * 初始化当前`runner`
- * @private
- */
-AnimateRunner.prototype.initRunner = function () {
-  var runner = this.runners[this.cursor];
-  runner.infinite = false;
-  runner.resident = true;
-  runner.element = this.element;
-  // runner.onComplete = this.nextRunner.bind(this);
-  var animate = null;
-  if (runner.path) {
-    animate = new PathMotion(runner);
-  } else if (runner.to) {
-    animate = new Transition(runner);
-  }
-  if (animate !== null) {
-    animate.on('complete', this.nextRunner.bind(this));
-    this.queues.push(animate);
-  }
-};
-
-/**
- * 下一帧的状态
- * @private
- * @param {number} snippetCache 时间片段
- * @return {object}
- */
-AnimateRunner.prototype.nextPose = function (snippetCache) {
-  if (!this.queues[this.cursor] && this.runners[this.cursor]) {
-    this.initRunner();
-  }
-  if (this.timeSnippet >= 0) {
-    snippetCache += this.timeSnippet;
-    this.timeSnippet = 0;
-  }
-  return this.queues[this.cursor].update(snippetCache);
-};
-
-/**
- * 更新动画数据
- * @private
- * @param {number} snippet 时间片段
- * @return {object}
- */
-AnimateRunner.prototype.update = function (snippet) {
-  if (this.wait > 0) {
-    this.wait -= Math.abs(snippet);
-    return;
-  }
-  if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
-    return;
-  }
-
-  var cc = this.cursor;
-
-  var pose = this.nextPose(this.direction * this.timeScale * snippet);
-  // if (this.onUpdate) this.onUpdate({
-  //   index: cc, pose: pose,
-  // }, this.progress / this.duration);
-  this.emit('update', {
-    index: cc, pose: pose
-  }, this.progress / this.duration);
-
-  if (this.spill()) {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
-      this.delayCut = this.delay;
-      this.direction = 1;
-      this.cursor = 0;
-    } else {
-      if (!this.resident) this.living = false;
-      // if (this.onComplete) this.onComplete(pose);
-      this.emit('complete', pose);
-    }
-  }
-  return pose;
-};
-
-/**
- * 检查动画是否到了边缘
- * @private
- * @return {boolean}
- */
-AnimateRunner.prototype.spill = function () {
-  // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
-  var topSpill = this.cursor >= this.length;
-  return topSpill;
-};
-
-// import {Utils} from '../util/Utils';
+// import {Utils} from '../utils/Utils';
 
 /**
  * AnimateRunner类型动画类
@@ -1977,6 +1921,7 @@ Queues.prototype.spill = function () {
   return topSpill;
 };
 
+// import {AnimateRunner} from './AnimateRunner';
 /**
  * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
  *
@@ -2057,11 +2002,10 @@ Animation.prototype.motion = function (options, clear) {
  * @param {boolean} clear 是否清除之前的动画
  * @return {JC.AnimateRunner}
  */
-Animation.prototype.runners = function (options, clear) {
-  options.element = this.element;
-  return this._addMove(new AnimateRunner(options), clear);
-};
-
+// Animation.prototype.runners = function(options, clear) {
+//   options.element = this.element;
+//   return this._addMove(new AnimateRunner(options), clear);
+// };
 Animation.prototype.queues = function (runner, options, clear) {
   options.element = this.element;
   return this._addMove(new Queues(runner, options), clear);
@@ -2123,6 +2067,8 @@ Animation.prototype.clear = function () {
 };
 
 /* eslint guard-for-in: "off" */
+
+// const TextureCache = {};
 
 var URL = 'url';
 var IMG = 'img';
@@ -2745,7 +2691,7 @@ function DisplayObject() {
    * @private
    * @member {Array}
    */
-  this.Animation = new Animation(this);
+  this.animation = new Animation(this);
 
   /**
    * 标记当前对象是否为touchstart触发状态
@@ -2859,7 +2805,7 @@ Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.animate = function (options, clear) {
-  return this.Animation.animate(options, clear);
+  return this.animation.animate(options, clear);
 };
 
 /**
@@ -2894,7 +2840,7 @@ DisplayObject.prototype.animate = function (options, clear) {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.motion = function (options, clear) {
-  return this.Animation.motion(options, clear);
+  return this.animation.motion(options, clear);
 };
 
 /**
@@ -2926,7 +2872,7 @@ DisplayObject.prototype.motion = function (options, clear) {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.keyFrames = function (options, clear) {
-  return this.Animation.keyFrames(options, clear);
+  return this.animation.keyFrames(options, clear);
 };
 
 /**
@@ -2960,7 +2906,7 @@ DisplayObject.prototype.keyFrames = function (options, clear) {
  * @return {JC.Animate}
  */
 DisplayObject.prototype.runners = function (options, clear) {
-  return this.Animation.runners(options, clear);
+  return this.animation.runners(options, clear);
 };
 
 /**
@@ -2989,7 +2935,7 @@ DisplayObject.prototype.queues = function (runner) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   var clear = arguments[2];
 
-  return this.Animation.queues(runner, options, clear);
+  return this.animation.queues(runner, options, clear);
 };
 
 /**
@@ -3029,10 +2975,11 @@ DisplayObject.prototype.setProps = function (props) {
  * 更新对象本身的矩阵姿态以及透明度
  *
  * @private
+ * @param {Matrix} rootMatrix
  * @method updateTransform
  */
-DisplayObject.prototype.updateTransform = function () {
-  var pt = this.parent && this.parent.worldTransform || IDENTITY;
+DisplayObject.prototype.updateTransform = function (rootMatrix) {
+  var pt = rootMatrix || this.parent && this.parent.worldTransform || IDENTITY;
   var wt = this.worldTransform;
   var worldAlpha = this.parent && this.parent.worldAlpha || 1;
 
@@ -3047,7 +2994,7 @@ DisplayObject.prototype.updateTransform = function () {
   var poy = this.pivotY + this.originY;
 
   if (this.skewX || this.skewY) {
-    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation * Utils.DTR, this.skewX * Utils.DTR, this.skewY * Utils.DTR, this.originX, this.originY);
+    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation, this.skewX, this.skewY, this.originX, this.originY);
 
     wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
     wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
@@ -3059,8 +3006,8 @@ DisplayObject.prototype.updateTransform = function () {
     if (this.rotation % 360) {
       if (this.rotation !== this.rotationCache) {
         this.rotationCache = this.rotation;
-        this._sr = Math.sin(this.rotation * Utils.DTR);
-        this._cr = Math.cos(this.rotation * Utils.DTR);
+        this._sr = Math.sin(this.rotation);
+        this._cr = Math.cos(this.rotation);
       }
 
       a = this._cr * this.scaleX;
@@ -3105,7 +3052,7 @@ DisplayObject.prototype.updateTransform = function () {
  * @param {Number} snippet
  */
 DisplayObject.prototype.updateAnimation = function (snippet) {
-  this.Animation.update(snippet);
+  this.animation.update(snippet);
 };
 
 /**
@@ -3487,6 +3434,22 @@ Container.prototype._sortList = function () {
 };
 
 /**
+ * 更新bodymovin动画
+ * @param {number} progress progress
+ * @param {object} session
+ */
+Container.prototype.updateMovin = function (progress, session) {
+  var length = this.childs.length;
+  for (var i = 0; i < length; i++) {
+    var doc = this.childs[i];
+    if (doc && !doc._aniRoot && doc.updateMovin) {
+      doc.updateMovin(progress, session);
+    }
+  }
+  this.updateKeyframes && this.updateKeyframes(progress, session);
+};
+
+/**
  * 向容器添加一个物体
  *
  * ```js
@@ -3506,7 +3469,7 @@ Container.prototype.adds = function (object) {
   if (object === this) {
     console.error('adds: object can\'t be added as a child of itself.', object);
   }
-  if (object && object instanceof Container) {
+  if (object) {
     if (object.parent !== null) {
       object.parent.remove(object);
     }
@@ -3969,7 +3932,7 @@ function Sprite(options) {
     });
   }
 
-  this.MovieClip = new MovieClip(this, options);
+  this.movieClip = new MovieClip(this, options);
 }
 Sprite.prototype = Object.create(Container.prototype);
 
@@ -4045,8 +4008,8 @@ Sprite.prototype.updateGeometry = function () {
  * @param {number} snippet
  */
 Sprite.prototype.updateAnimation = function (snippet) {
-  this.Animation.update(snippet);
-  this.MovieClip.update(snippet);
+  this.animation.update(snippet);
+  this.movieClip.update(snippet);
 };
 
 /**
@@ -4061,7 +4024,7 @@ Sprite.prototype.updateAnimation = function (snippet) {
  * @return {MovieClip}
  */
 Sprite.prototype.playMovie = function (options) {
-  return this.MovieClip.playMovie(options);
+  return this.movieClip.playMovie(options);
 };
 
 /**
@@ -4072,7 +4035,7 @@ Sprite.prototype.playMovie = function (options) {
  */
 Sprite.prototype.renderMe = function (ctx) {
   if (!this.ready) return;
-  var frame = this.MovieClip.getFrame();
+  var frame = this.movieClip.getFrame();
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
 };
 
@@ -4274,6 +4237,160 @@ ParserAnimation.prototype.cancle = function () {
   this.timeline.forEach(function (it) {
     it.cancle();
   });
+};
+
+/**
+ * ticker class
+ * @param {boolean} enableFPS
+ */
+function Ticker(enableFPS) {
+  Eventer.call(this);
+
+  /**
+   * 是否记录渲染性能
+   *
+   * @member {Boolean}
+   */
+  this.enableFPS = Utils.isBoolean(enableFPS) ? enableFPS : true;
+
+  /**
+   * 上一次绘制的时间点
+   *
+   * @member {Number}
+   * @private
+   */
+  this.pt = 0;
+
+  /**
+   * 本次渲染经历的时间片段长度
+   *
+   * @member {Number}
+   * @private
+   */
+  this.snippet = 0;
+
+  /**
+   * 平均渲染经历的时间片段长度
+   *
+   * @member {Number}
+   * @private
+   */
+  this.averageSnippet = 0;
+
+  /**
+   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
+  this.fps = 0;
+
+  /**
+   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
+  this.averageFps = 0;
+
+  /**
+   * 渲染总花费时间，除去被中断、被暂停等时间
+   *
+   * @member {Number}
+   * @private
+   */
+  this._takeTime = 0;
+
+  /**
+   * 渲染总次数
+   *
+   * @member {Number}
+   * @private
+   */
+  this._renderTimes = 0;
+
+  /**
+   * 是否开启 ticker
+   *
+   * @member {Boolean}
+   */
+  this.started = false;
+
+  /**
+   * 是否暂停 ticker
+   *
+   * @member {Boolean}
+   */
+  this.paused = false;
+}
+
+Ticker.prototype = Object.create(Eventer.prototype);
+
+Ticker.prototype.timeline = function () {
+  this.snippet = Date.now() - this.pt;
+  if (this.pt === 0 || this.snippet > 200) {
+    this.pt = Date.now();
+    this.snippet = Date.now() - this.pt;
+  }
+
+  if (this.enableFPS) {
+    this._renderTimes++;
+    this._takeTime += Math.max(15, this.snippet);
+    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
+    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
+  }
+
+  this.pt += this.snippet;
+};
+
+Ticker.prototype.tick = function () {
+  if (this.paused) return;
+  this.timeline();
+  this.emit('update', this.snippet);
+  this.emit('tick', this.snippet);
+};
+
+/**
+ * 渲染循环
+ *
+ * @method start
+ */
+Ticker.prototype.start = function () {
+  var _this = this;
+
+  if (this.started) return;
+  this.started = true;
+  var loop = function loop() {
+    _this.tick();
+    _this.loop = RAF(loop);
+  };
+  loop();
+};
+
+/**
+ * 渲染循环
+ *
+ * @method stop
+ */
+Ticker.prototype.stop = function () {
+  CAF(this.loop);
+  this.started = false;
+};
+
+/**
+ * 暂停触发 tick
+ *
+ * @method pause
+ */
+Ticker.prototype.pause = function () {
+  this.paused = true;
+};
+
+/**
+ * 恢复触发 tick
+ *
+ * @method resume
+ */
+Ticker.prototype.resume = function () {
+  this.paused = false;
 };
 
 /**
@@ -4513,6 +4630,41 @@ Graphics.prototype._drawBack = function (ctx) {
   } else if (this.meshType === INSTANCE) {
     this.mesh.render(ctx);
   }
+};
+
+// import {Utils} from '../utils/Utils';
+
+/**
+ * 舞台对象，继承至 Container
+ * @class
+ * @extends JC.Container
+ * @memberof JC
+ */
+function Scene() {
+  Container.call(this);
+}
+
+Scene.prototype = Object.create(Container.prototype);
+
+/**
+ * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新。
+ * Scene 的 updatePosture 会接收一个来自 Renderer 的 rootMatrix。
+ *
+ * @private
+ * @param {Matrix} [rootMatrix] 初始矩阵，由 Renderer 直接传入。
+ */
+Scene.prototype.updatePosture = function (rootMatrix) {
+  this.emit('preposture');
+  if (this.souldSort) this._sortList();
+  this.updateTransform(rootMatrix);
+
+  var i = 0;
+  var l = this.childs.length;
+  while (i < l) {
+    this.childs[i].updatePosture();
+    i++;
+  }
+  this.emit('postposture');
 };
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
@@ -5053,13 +5205,13 @@ var InteractionManager = function (_Eventer) {
   inherits(InteractionManager, _Eventer);
 
   /**
-   * @param {Stage} stage - A reference to the current renderer
+   * @param {Renderer} renderer - A reference to the current renderer
    * @param {Object} [options] - The options for the manager.
    * @param {Boolean} [options.autoPreventDefault=false] - Should the manager automatically prevent default browser actions.
    * @param {Boolean} [options.autoAttach=true] - Should the manager automatically attach target element.
    * @param {Number} [options.interactionFrequency=10] - Frequency increases the interaction events will be checked.
    */
-  function InteractionManager(stage, options) {
+  function InteractionManager(renderer, options) {
     classCallCheck(this, InteractionManager);
 
     var _this = possibleConstructorReturn(this, (InteractionManager.__proto__ || Object.getPrototypeOf(InteractionManager)).call(this));
@@ -5067,11 +5219,11 @@ var InteractionManager = function (_Eventer) {
     options = options || {};
 
     /**
-     * The stage this interaction manager works for.
+     * The renderer this interaction manager works for.
      *
-     * @member {Stage}
+     * @member {Renderer}
      */
-    _this.stage = stage;
+    _this.renderer = renderer;
 
     /**
      * Should default browser actions automatically be prevented.
@@ -5276,7 +5428,7 @@ var InteractionManager = function (_Eventer) {
      */
     _this._deltaTime = 0;
 
-    _this.setTargetElement(_this.stage.canvas);
+    _this.setTargetElement(_this.renderer.canvas);
 
     /**
      * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
@@ -5692,7 +5844,7 @@ var InteractionManager = function (_Eventer) {
       hitTestEvent.data.global = globalPoint;
       // ensure safety of the root
       if (!root) {
-        root = this.stage;
+        root = this.renderer;
       }
       // run the hit test
       this.processInteractive(hitTestEvent, root, null, true);
@@ -5873,7 +6025,7 @@ var InteractionManager = function (_Eventer) {
           if (interactionData.originalEvent && interactionData.pointerType !== 'touch') {
             var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, interactionData.originalEvent, interactionData);
 
-            this.processInteractive(interactionEvent, this.stage, this.processPointerOverOut, true);
+            this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, true);
           }
         }
       }
@@ -6113,7 +6265,7 @@ var InteractionManager = function (_Eventer) {
 
       interactionEvent.data.originalEvent = originalEvent;
 
-      this.processInteractive(interactionEvent, this.stage, this.processClick, true);
+      this.processInteractive(interactionEvent, this.renderer.currentScene, this.processClick, true);
 
       this.emit('click', interactionEvent);
     }
@@ -6173,7 +6325,7 @@ var InteractionManager = function (_Eventer) {
 
         interactionEvent.data.originalEvent = originalEvent;
 
-        this.processInteractive(interactionEvent, this.stage, this.processPointerDown, true);
+        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerDown, true);
 
         this.emit('pointerdown', interactionEvent);
         if (_event.pointerType === 'touch') {
@@ -6254,7 +6406,7 @@ var InteractionManager = function (_Eventer) {
         interactionEvent.data.originalEvent = originalEvent;
 
         // perform hit testing for events targeting our canvas or cancel events
-        this.processInteractive(interactionEvent, this.stage, func, cancelled || !eventAppend);
+        this.processInteractive(interactionEvent, this.renderer.currentScene, func, cancelled || !eventAppend);
 
         this.emit(cancelled ? 'pointercancel' : 'pointerup' + eventAppend, interactionEvent);
 
@@ -6438,7 +6590,7 @@ var InteractionManager = function (_Eventer) {
 
         var interactive = _event3.pointerType === 'touch' ? this.moveWhenInside : true;
 
-        this.processInteractive(interactionEvent, this.stage, this.processPointerMove, interactive);
+        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerMove, interactive);
         this.emit('pointermove', interactionEvent);
         if (_event3.pointerType === 'touch') this.emit('touchmove', interactionEvent);
         if (_event3.pointerType === 'mouse' || _event3.pointerType === 'pen') this.emit('mousemove', interactionEvent);
@@ -6509,7 +6661,7 @@ var InteractionManager = function (_Eventer) {
 
       interactionEvent.data.originalEvent = event;
 
-      this.processInteractive(interactionEvent, this.stage, this.processPointerOverOut, false);
+      this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, false);
 
       this.emit('pointerout', interactionEvent);
       if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
@@ -6798,41 +6950,17 @@ var InteractionManager = function (_Eventer) {
   return InteractionManager;
 }(Eventer);
 
-/* global RAF CAF */
-/* eslint new-cap: 0 */
-
 /**
- * 舞台对象，继承至Eventer
- *
- *
- * ```js
- * var stage = new JC.Stage({
- *   dom: 'canvas-dom', // 格式可以是 .canvas-dom 或者 ＃canvas-dom 或者 canvas-dom
- *   resolution: 1, // 分辨率
- *   interactive: true, // 是否可交互
- *   enableFPS: true, // 是否记录帧率
- *   bgColor: ‘rgba(0,0,0,0.4)’, // 背景色
- * });
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
  * @param {object} options 舞台的配置项
  * @param {string} options.dom 舞台要附着的`canvas`元素
  * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
  * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
- * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
- * @param {string} [options.bgColor] 设置舞台的背景颜色，`默认为` ‘transparent’
  * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
  * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
- * @param {number} [options.fixedFPS] 设置舞台的固定更新帧率，非特殊情况不要使用，`默认为` 60
+ * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
  */
-function Stage(options) {
+function Renderer(options) {
   var _this = this;
-
-  options = options || {};
-  Container.call(this);
 
   /**
    * 场景的canvas的dom
@@ -6850,7 +6978,7 @@ function Stage(options) {
    * @member {context2d}
    */
   this.ctx = this.canvas.getContext('2d');
-  this.canvas.style.backgroundColor = options.bgColor || 'transparent';
+  this.canvas.style.backgroundColor = options.backgroundColor || 'transparent';
 
   /**
    * 场景是否自动清除上一帧的像素内容
@@ -6860,18 +6988,16 @@ function Stage(options) {
   this.autoClear = true;
 
   /**
-   * 是否在每一帧绘制之前自动更新场景内所有物体的状态
-   *
-   * @member {Boolean}
-   */
-  this.autoUpdate = true;
-
-  /**
    * 场景是否应用style控制宽高
    *
    * @member {Boolean}
    */
   this.autoStyle = false;
+
+  /**
+   * 整个场景的初始矩阵
+   */
+  this.rootMatrix = new Matrix();
 
   /**
    * 场景分辨率
@@ -6902,74 +7028,6 @@ function Stage(options) {
    */
   this.height = this.canvas.height = this.realHeight * this.resolution;
 
-  /**
-   * 固定更新帧率，默认为 60fps
-   *
-   * @member {Number}
-   */
-  this.fixedFPS = options.fixedFPS || 60;
-
-  /**
-   * 上一次绘制的时间点
-   *
-   * @member {Number}
-   * @private
-   */
-  this.pt = null;
-
-  /**
-   * 本次渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.snippet = 0;
-
-  /**
-   * 平均渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.averageSnippet = 0;
-
-  /**
-   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.fps = 0;
-
-  /**
-   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.averageFps = 0;
-
-  /**
-   * 渲染总花费时间，除去被中断、被暂停等时间
-   *
-   * @member {Number}
-   * @private
-   */
-  this._takeTime = 0;
-
-  /**
-   * 渲染总次数
-   *
-   * @member {Number}
-   * @private
-   */
-  this._renderTimes = 0;
-
-  /**
-   * 是否记录渲染性能
-   *
-   * @member {Boolean}
-   */
-  this.enableFPS = Utils.isBoolean(options.enableFPS) ? options.enableFPS : true;
-
   this.interactionManager = new InteractionManager(this);
 
   /**
@@ -6997,20 +7055,24 @@ function Stage(options) {
 
   this.enableinteractive = Utils.isBoolean(options.interactive) ? options.interactive : true;
 
-  this.proxyOn();
+  this.currentScene = null;
 }
-Stage.prototype = Object.create(Container.prototype);
 
-Stage.prototype.proxyOn = function () {
-  var This = this;
-  var EventList = ['click', 'mousemove', 'mousedown', 'mouseout', 'mouseover', 'touchstart', 'touchend', 'touchmove', 'mouseup'];
-  EventList.forEach(function (it) {
-    This.interactionManager.on(it, function (it) {
-      return function (ev) {
-        This.emit(it, ev);
-      };
-    }(it));
-  });
+Renderer.prototype.render = function (scene, snippet) {
+  this.currentScene = scene;
+
+  this.emit('preupdate', snippet);
+  this.currentScene.updateTimeline(snippet);
+  this.currentScene.updatePosture(this.rootMatrix);
+  this.emit('postupdate', snippet);
+
+  this.emit('prerender', snippet);
+  if (this.autoClear) {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+  this.currentScene.render(this.ctx);
+  this.emit('postrender', snippet);
 };
 
 /**
@@ -7018,10 +7080,8 @@ Stage.prototype.proxyOn = function () {
  *
  * @param {number} w canvas的width值
  * @param {number} h canvas的height值
- * @param {number} sw canvas的style.width值，需将舞台属性autoStyle设置为true
- * @param {number} sh canvas的style.height值，需将舞台属性autoStyle设置为true
  */
-Stage.prototype.resize = function (w, h, sw, sh) {
+Renderer.prototype.resize = function (w, h) {
   if (Utils.isNumber(w) && Utils.isNumber(h)) {
     this.realWidth = w;
     this.realHeight = h;
@@ -7031,124 +7091,89 @@ Stage.prototype.resize = function (w, h, sw, sh) {
   }
   this.width = this.canvas.width = w * this.resolution;
   this.height = this.canvas.height = h * this.resolution;
-  if (this.autoStyle && sw && sh) {
-    this.canvas.style.width = Utils.isString(sw) ? sw : sw + 'px';
-    this.canvas.style.height = Utils.isString(sh) ? sh : sh + 'px';
-  }
 };
 
 /**
- * 渲染舞台内的所有可见渲染对象
- */
-Stage.prototype.render = function () {
-  this.timeline();
-
-  this.emit('prerender', this.snippet);
-
-  if (this.autoClear) {
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.clearRect(0, 0, this.width, this.height);
-  }
-  this.updateTimeline(this.snippet);
-  this.updatePosture();
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    i++;
-    if (!child.isVisible()) continue;
-    child.render(this.ctx);
-  }
-
-  this.emit('postrender');
-};
-
-/**
- * 引擎的时间轴
+ * proxy this.interactionManager event-emit
+ * Emit an event to all registered event listeners.
  *
- * @method timeline
- * @private
+ * @param {String} event The name of the event.
  */
-Stage.prototype.timeline = function () {
-  this.snippet = Date.now() - this.pt;
-  if (this.pt === null || this.snippet > 200) {
-    this.pt = Date.now();
-    this.snippet = Date.now() - this.pt;
-  }
+Renderer.prototype.emit = function () {
+  var _interactionManager;
 
-  if (this.enableFPS) {
-    this._renderTimes++;
-    this._takeTime += Math.max(15, this.snippet);
-    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
-    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
-  }
-
-  this.pt += this.snippet;
+  (_interactionManager = this.interactionManager).emit.apply(_interactionManager, arguments);
 };
 
 /**
- * 启动渲染引擎的渲染循环
- */
-Stage.prototype.startEngine = function () {
-  if (this.inRender) return;
-  this.inRender = true;
-  if (this.fixedFPS === 60) {
-    this.renderer();
-  } else {
-    this.rendererFixedFPS();
-  }
-};
-
-/**
- * 关闭渲染引擎的渲染循环
- */
-Stage.prototype.stopEngine = function () {
-  CAF(this.loop);
-  clearInterval(this.loop);
-  this.inRender = false;
-};
-
-/**
- * 渲染循环
+ * proxy this.interactionManager event-on
+ * Register a new EventListener for the given event.
  *
- * @method renderer
- * @private
+ * @param {String} event Name of the event.
+ * @param {Function} fn Callback function.
+ * @param {Mixed} [context=this] The context of the function.
  */
-Stage.prototype.renderer = function () {
-  var This = this;
-  /**
-   * render loop
-   */
-  function render() {
-    This.render();
-    This.loop = RAF(render);
-  }
-  render();
+Renderer.prototype.on = function () {
+  var _interactionManager2;
+
+  (_interactionManager2 = this.interactionManager).on.apply(_interactionManager2, arguments);
 };
 
 /**
- * 固定帧率的渲染循环，不合理使用改方法将会导致性能问题
+ * proxy this.interactionManager event-once
+ * Add an EventListener that's only called once.
  *
- * @method rendererFixedFPS
- * @private
+ * @param {String} event Name of the event.
+ * @param {Function} fn Callback function.
+ * @param {Mixed} [context=this] The context of the function.
  */
-Stage.prototype.rendererFixedFPS = function () {
-  var This = this;
-  this.loop = setInterval(function () {
-    This.render();
-  }, 1000 / this.fixedFPS);
-  this.render();
+Renderer.prototype.once = function () {
+  var _interactionManager3;
+
+  (_interactionManager3 = this.interactionManager).once.apply(_interactionManager3, arguments);
 };
+
+/**
+ * proxy this.interactionManager event-off
+ * @param {String} event The event we want to remove.
+ * @param {Function} fn The listener that we need to find.
+ * @param {Mixed} context Only remove listeners matching this context.
+ * @param {Boolean} once Only remove once listeners.
+ */
+Renderer.prototype.off = function () {
+  var _interactionManager4;
+
+  (_interactionManager4 = this.interactionManager).off.apply(_interactionManager4, arguments);
+};
+
+/**
+ * 场景设置分辨率
+ *
+ * @member {Number}
+ * @name resolution
+ * @memberof JC.Renderer#
+ */
+Object.defineProperty(Renderer.prototype, 'resolution', {
+  get: function get() {
+    return this._resolution;
+  },
+  set: function set(value) {
+    if (this._resolution !== value) {
+      this._resolution = value;
+      this.rootMatrix.identity().scale(value, value);
+      this.resize();
+    }
+  }
+});
 
 /**
  * 标记场景是否可交互，涉及到是否进行事件检测
  *
  * @member {Boolean}
- * @name interactive
- * @memberof JC.Stage#
+ * @name enableinteractive
+ * @memberof JC.Renderer#
  */
-Object.defineProperty(Stage.prototype, 'enableinteractive', {
+Object.defineProperty(Renderer.prototype, 'enableinteractive', {
   get: function get() {
     return this._enableinteractive;
   },
@@ -7161,24 +7186,2309 @@ Object.defineProperty(Stage.prototype, 'enableinteractive', {
 });
 
 /**
- * 场景设置分辨率
- *
- * @member {Number}
- * @name resolution
- * @memberof JC.Stage#
+ * @memberof JC
+ * @param {object} options 舞台的配置项
+ * @param {string} options.dom 舞台要附着的`canvas`元素
+ * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
+ * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
+ * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
+ * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
+ * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
+ * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
  */
-Object.defineProperty(Stage.prototype, 'resolution', {
-  get: function get() {
-    return this._resolution;
-  },
-  set: function set(value) {
-    if (this._resolution !== value) {
-      this._resolution = value;
-      this.scale = value;
-      this.resize();
-    }
+function Application(options) {
+  var _this = this;
+
+  this.renderer = new Renderer(options);
+  this.scene = new Scene();
+
+  this.ticker = new Ticker(options.enableFPS);
+
+  this.ticker.on('tick', function (snippet) {
+    _this.update(snippet);
+  });
+
+  this.ticker.start();
+}
+
+Application.prototype.update = function (snippet) {
+  this.renderer.render(this.scene, snippet);
+};
+
+/**
+ * register class
+ * @class
+ * @private
+ */
+
+var Register = function () {
+  /**
+   * register
+   * @param {array} assets assets array
+   * @param {string} prefix assets array
+   */
+  function Register(assets, prefix) {
+    classCallCheck(this, Register);
+
+    this.layers = {};
+    this._forever = false;
+    this.loader = this.loadAssets(assets, prefix);
   }
-});
+
+  /**
+   * load assets base pixi loader
+   * @param {array} assets assets array
+   * @param {string} prefix assets array
+   * @return {loader}
+   */
+
+
+  createClass(Register, [{
+    key: 'loadAssets',
+    value: function loadAssets(assets, prefix) {
+      var urls = {};
+      assets.filter(function (it) {
+        return it.u && it.p;
+      }).forEach(function (it) {
+        var url = createUrl(it, prefix);
+        urls[it.id] = url;
+      });
+      return loaderUtil(urls);
+    }
+
+    /**
+     * get texture by id
+     * @param {string} id id name
+     * @return {Texture}
+     */
+
+  }, {
+    key: 'getTexture',
+    value: function getTexture(id) {
+      return this.loader.getById(id);
+    }
+
+    /**
+     * registe layer
+     * @private
+     * @param {string} name layer name path
+     * @param {object} layer layer object
+     */
+
+  }, {
+    key: 'setLayer',
+    value: function setLayer(name, layer) {
+      if (!name) return;
+      if (this.layers[name]) console.warn('动画层命名冲突', name);
+      this.layers[name] = layer;
+    }
+
+    /**
+     * registe layer
+     * @private
+     */
+
+  }, {
+    key: 'forever',
+    value: function forever() {
+      if (this._forever) return;
+      this._forever = true;
+    }
+
+    /**
+     * get layer by name path
+     * @param {string} name layer name path, example: root.gift.star1
+     * @return {object}
+     */
+
+  }, {
+    key: 'getLayer',
+    value: function getLayer(name) {
+      return this.layers[name];
+    }
+  }]);
+  return Register;
+}();
+
+/**
+ * CurveData
+ * @class
+ * @private
+ */
+
+var CurveData = function () {
+  /**
+   * the primitive curve data object
+   * @param {object} data curve config data
+   * @param {object} session session
+   * @param {boolean} mask is mask
+   */
+  function CurveData(data, session, mask) {
+    classCallCheck(this, CurveData);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st;
+
+    this.inv = data.inv;
+
+    this.data = mask ? data.pt : data.ks;
+
+    this.dynamic = this.data.a === 1;
+
+    this.st = st;
+
+    this.kic = 0;
+
+    if (this.dynamic) this.prepare();
+  }
+
+  /**
+   * prepare some data for faster calculation
+   */
+
+
+  createClass(CurveData, [{
+    key: 'prepare',
+    value: function prepare() {
+      var datak = this.data.k;
+      var last = datak.length - 1;
+
+      this.ost = this.st + datak[0].t;
+      this.oet = this.st + datak[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = datak[i];
+        var sek = datak[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+
+        // TODO: 是否需要预先 修正坐标值，i、o 相对值 转换成 绝对值
+
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+      }
+    }
+
+    /**
+     * get the curve frame by this progress
+     * @param {number} progress timeline progress
+     * @return {object}
+     */
+
+  }, {
+    key: 'getCurve',
+    value: function getCurve(progress) {
+      if (!this.dynamic) return this.data.k;
+      return this.interpolation(progress);
+    }
+
+    /**
+     * compute value with keyframes buffer
+     * @private
+     * @param {number} progress progress
+     * @return {array}
+     */
+
+  }, {
+    key: 'interpolation',
+    value: function interpolation$$1(progress) {
+      var datak = this.data.k;
+
+      if (progress <= this.ost) {
+        return datak[0].s[0];
+      } else if (progress >= this.oet) {
+        var last = datak.length - 2;
+        return datak[last].e[0];
+      } else {
+        var path = {
+          i: [],
+          o: [],
+          v: []
+        };
+        var frame = datak[this.kic];
+        if (!inRange$1(progress, frame.ost, frame.oet)) {
+          this.kic = findStep$1(datak, progress);
+          frame = datak[this.kic];
+        }
+        var rate = (progress - frame.ost) / (frame.oet - frame.ost);
+        var nm = [frame.n, frame.n];
+
+        var s0 = frame.s[0];
+        var e0 = frame.e[0];
+        for (var prop in path) {
+          if (path[prop]) {
+            var sp = s0[prop];
+            var ep = e0[prop];
+            var vv = [];
+            for (var i = 0; i < sp.length; i++) {
+              var s = sp[i];
+              var e = ep[i];
+              vv[i] = getEaseing(s, e, nm, rate);
+            }
+            path[prop] = vv;
+          }
+        }
+        path.c = s0.c;
+        return path;
+      }
+    }
+  }]);
+  return CurveData;
+}();
+
+/**
+ * a
+ * @param {*} ctx a
+ * @param {*} data a
+ */
+function drawCurve(ctx, data) {
+  var start = data.v[0];
+  ctx.moveTo(start[0], start[1]);
+  var jLen = data.v.length;
+  var j = 1;
+  var pre = start;
+  for (; j < jLen; j++) {
+    var _oj = data.o[j - 1];
+    var _ij = data.i[j];
+    var _vj = data.v[j];
+    ctx.bezierCurveTo(pre[0] + _oj[0], pre[1] + _oj[1], _vj[0] + _ij[0], _vj[1] + _ij[1], _vj[0], _vj[1]);
+    pre = _vj;
+  }
+  var oj = data.o[j - 1];
+  var ij = data.i[0];
+  var vj = data.v[0];
+  ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
+}
+
+/**
+ * a
+ * @param {*} ctx a
+ * @param {*} size a
+ */
+function drawInv(ctx, size) {
+  ctx.moveTo(0, 0);
+  ctx.lineTo(size.w, 0);
+  ctx.lineTo(size.w, size.h);
+  ctx.lineTo(0, size.h);
+  ctx.lineTo(0, 0);
+}
+
+/**
+ * GraphicsMask class
+ * @class
+ * @private
+ */
+
+var GraphicsMask = function () {
+  /**
+   * GraphicsMask constructor
+   * @param {object} masksProperties layer data information
+   * @param {object} session layer data information
+   */
+  function GraphicsMask(masksProperties) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, GraphicsMask);
+
+    this.maskData = masksProperties.filter(function (it) {
+      return it.mode !== 'n';
+    });
+
+    this.shapes = this.maskData.map(function (it) {
+      return new CurveData(it, session, true);
+    });
+
+    this.session = session;
+
+    this.curves = [];
+  }
+
+  /**
+   * updateShape
+   * @param {number} progress
+   */
+
+
+  createClass(GraphicsMask, [{
+    key: 'update',
+    value: function update(progress) {
+      for (var i = 0; i < this.shapes.length; i++) {
+        this.curves[i] = this.shapes[i].getCurve(progress);
+      }
+    }
+
+    /**
+     * render content
+     * @param {object} ctx
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      ctx.beginPath();
+      for (var i = 0; i < this.shapes.length; i++) {
+        if (this.shapes[i].inv) drawInv(ctx, this.session.size);
+        drawCurve(ctx, this.curves[i]);
+      }
+      ctx.clip();
+    }
+  }]);
+  return GraphicsMask;
+}();
+
+/**
+ * Mask
+ * @class
+ * @private
+ */
+
+var Mask = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {Container} element host element
+   * @param {object} layer layer data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Mask(element, layer, session) {
+    classCallCheck(this, Mask);
+
+    this.element = element;
+
+    this.masksProperties = layer.masksProperties || [];
+
+    this.session = session;
+
+    this.mask = new GraphicsMask(this.masksProperties, session);
+
+    this.element.mask = this.mask;
+  }
+
+  /**
+   * update
+   * @param {number} progress progress
+   * @param {object} session update session
+   */
+
+
+  createClass(Mask, [{
+    key: 'update',
+    value: function update(progress, session) {
+      this.mask.update(progress);
+    }
+  }]);
+  return Mask;
+}();
+
+/**
+ * CurveShape
+ * @class
+ * @private
+ */
+
+var CurveShape = function (_CurveData) {
+  inherits(CurveShape, _CurveData);
+
+  /**
+   * CurveShape
+   * @param {object} data curve config data
+   * @param {object} session session
+   * @param {boolean} mask is mask or not
+   */
+  function CurveShape(data, session) {
+    classCallCheck(this, CurveShape);
+
+    var _this = possibleConstructorReturn(this, (CurveShape.__proto__ || Object.getPrototypeOf(CurveShape)).call(this, data, session));
+
+    _this.curve = null;
+    return _this;
+  }
+
+  /**
+   * update curve by progress
+   * @param {number} progress progress
+   */
+
+
+  createClass(CurveShape, [{
+    key: 'update',
+    value: function update(progress) {
+      this.curve = this.getCurve(progress);
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      drawCurve(ctx, this.curve);
+    }
+  }]);
+  return CurveShape;
+}(CurveData);
+
+// import EllipseShape from './EllipseShape';
+// import RectShape from './RectShape';
+// import StartShape from './StartShape';
+
+/**
+ * getShape
+ * @ignore
+ * @param {*} item data
+ * @param {*} session session
+ * @return {shape}
+ */
+function getShape(item, session) {
+  var shape = null;
+  switch (item.ty) {
+    case 'sh':
+      shape = new CurveShape(item, session);
+      break;
+    // case 'el':
+    //   shape = new EllipseShape(item, session);
+    //   break;
+    // case 'rc':
+    //   shape = new RectShape(item, session);
+    //   break;
+    // case 'sr':
+    //   shape = new StartShape(item, session);
+    //   break;
+    default:
+      break;
+  }
+  return shape;
+}
+
+/**
+ * translate rgba array to hex
+ * @ignore
+ * @param {array} color an array with rgba
+ * @param {*} _ just a placeholder param
+ * @return {hex}
+ */
+function toColor(color, _) {
+  color = color.slice(0, 3);
+  return color.map(function (c) {
+    return c * 255 >> 0;
+  });
+}
+
+/**
+ * just return the value * 2.55 >> 0
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function to255(value, _) {
+  return value[0] * 2.55 >> 0;
+}
+
+/**
+ * just return the value / 100
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function toNormalize(value, _) {
+  return value[0] / 100;
+}
+
+/**
+ * just return the value / 100 by index
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {number} index use which value
+ * @return {number}
+ */
+function toNormalizeByIdx(value, index) {
+  return value[index] / 100;
+}
+
+/**
+ * just return the origin value by index
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {number} index use which value
+ * @return {number}
+ */
+function toBack(value, index) {
+  return value[index];
+}
+
+/**
+ * translate degree to radian
+ * @ignore
+ * @param {array} value an array with degree value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function toRadian(value, _) {
+  return value[0] * Math.PI / 180;
+}
+
+var FILL_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: to255
+  },
+  c: {
+    props: ['color'],
+    translate: toColor
+  }
+};
+
+var STROKE_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: to255
+  },
+  c: {
+    props: ['color'],
+    translate: toColor
+  },
+  w: {
+    props: ['lineWidth'],
+    translate: toBack
+  }
+};
+
+var TRANSFORM_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: toNormalize
+  },
+  r: {
+    props: ['rotation'],
+    translate: toRadian
+  },
+  p: {
+    props: ['x', 'y'],
+    translate: toBack
+  },
+  a: {
+    props: ['pivotX', 'pivotY'],
+    translate: toBack
+  },
+  s: {
+    props: ['scaleX', 'scaleY'],
+    translate: toNormalizeByIdx
+  }
+};
+
+/**
+ * Fill keyframes class
+ * @class
+ * @private
+ */
+
+var Fill = function () {
+  /**
+   * generate a fill-type keyframes buffer
+   * @param {object} item item data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Fill(item, session) {
+    classCallCheck(this, Fill);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st;
+
+    this.item = item;
+
+    this.alpha = 255;
+    this.color = [0, 0, 0];
+
+    this.st = st;
+    this.aks = {};
+    this.kic = {};
+
+    this.preParse(item);
+  }
+
+  /**
+   * preParse
+   * @param {object} item fill tiem config
+   */
+
+
+  createClass(Fill, [{
+    key: 'preParse',
+    value: function preParse(item) {
+      for (var key in FILL_MAP) {
+        if (item[key] && item[key].a) {
+          this.parseDynamic(key);
+        } else if (item[key]) {
+          this.parseStatic(key);
+        }
+      }
+    }
+
+    /**
+     * parse dynamic property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseDynamic',
+    value: function parseDynamic(key) {
+      var prop = this.item[key];
+      var propk = prop.k;
+      var last = propk.length - 1;
+
+      prop.ost = this.st + propk[0].t;
+      prop.oet = this.st + propk[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = propk[i];
+        var sek = propk[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+      }
+      this.aks[key] = prop;
+    }
+
+    /**
+     * parse static property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseStatic',
+    value: function parseStatic(key) {
+      var propk = this.item[key].k;
+      if (Utils.isNumber(propk)) propk = [propk];
+      this.setValue(key, propk);
+    }
+
+    /**
+     * update fill information
+     * @param {number} progress progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var key in this.aks) {
+        if (this.aks[key]) {
+          var value = interpolation(this.aks[key], progress, this.kic, key);
+          this.setValue(key, value);
+        }
+      }
+
+      // this.element.beginFill(this.color, this.alpha);
+    }
+
+    /**
+     * set value to host element
+     * @private
+     * @param {string} key property
+     * @param {array} value value array
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(key, value) {
+      var _FILL_MAP$key = FILL_MAP[key],
+          props = _FILL_MAP$key.props,
+          translate = _FILL_MAP$key.translate;
+
+      for (var i = 0; i < props.length; i++) {
+        this[props[i]] = translate(value, i);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      ctx.fillStyle = 'rgba(' + this.color.join(', ') + ', ' + this.alpha + ')';
+    }
+  }]);
+  return Fill;
+}();
+
+/**
+ * Stroke
+ * @class
+ * @private
+ */
+
+var Stroke = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {object} item item data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Stroke(item, session) {
+    classCallCheck(this, Stroke);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st;
+
+    this.item = item;
+
+    this.alpha = 255;
+    this.lineWidth = 1;
+    this.color = [0, 0, 0];
+
+    this.st = st;
+    this.aks = {};
+    this.kic = {};
+
+    this.preParse(item);
+  }
+
+  /**
+   * preParse
+   * @param {object} item fill tiem config
+   */
+
+
+  createClass(Stroke, [{
+    key: 'preParse',
+    value: function preParse(item) {
+      for (var key in STROKE_MAP) {
+        if (item[key] && item[key].a) {
+          this.parseDynamic(key);
+        } else if (item[key]) {
+          this.parseStatic(key);
+        }
+      }
+    }
+
+    /**
+     * parse dynamic property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseDynamic',
+    value: function parseDynamic(key) {
+      var prop = this.item[key];
+      var propk = prop.k;
+      var last = propk.length - 1;
+
+      prop.ost = this.st + propk[0].t;
+      prop.oet = this.st + propk[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = propk[i];
+        var sek = propk[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+
+        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+      }
+      this.aks[key] = prop;
+    }
+
+    /**
+     * parse static property
+     * @param {string} key property name
+     */
+
+  }, {
+    key: 'parseStatic',
+    value: function parseStatic(key) {
+      var propk = this.item[key].k;
+      if (Utils.isNumber(propk)) propk = [propk];
+      this.setValue(key, propk);
+    }
+
+    /**
+     * update fill information
+     * @param {number} progress progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var key in this.aks) {
+        if (this.aks[key]) {
+          var value = interpolation(this.aks[key], progress, this.kic, key);
+          this.setValue(key, value);
+        }
+      }
+    }
+
+    /**
+     * set value to host element
+     * @private
+     * @param {string} key property
+     * @param {array} value value array
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(key, value) {
+      var _STROKE_MAP$key = STROKE_MAP[key],
+          props = _STROKE_MAP$key.props,
+          translate = _STROKE_MAP$key.translate;
+
+      for (var i = 0; i < props.length; i++) {
+        this[props[i]] = translate(value, i);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'render',
+    value: function render(ctx) {
+      ctx.strokeStyle = 'rgba(' + this.color.join(', ') + ', ' + this.alpha + ')';
+      ctx.lineWidth = this.lineWidth;
+    }
+  }]);
+  return Stroke;
+}();
+
+var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
+var STR_REG = /["']\w+["']/;
+
+/**
+ * Cycle
+ * @class
+ * @private
+ */
+
+var Cycle = function () {
+  /**
+   * Pingpong
+   * @param {*} type Pingpong
+   * @param {*} begin Pingpong
+   * @param {*} end Pingpong
+   */
+  function Cycle(type, begin, end) {
+    classCallCheck(this, Cycle);
+
+    this.begin = begin;
+    this.end = end;
+    this.total = this.end - this.begin;
+    this.type = type;
+  }
+
+  /**
+   * progress
+   * @param {number} progress progress
+   * @return {number} progress
+   */
+
+
+  createClass(Cycle, [{
+    key: 'update',
+    value: function update(progress) {
+      if (this.type === 'in') {
+        if (progress >= this.begin) return progress;
+        return this.end - Utils.euclideanModulo(this.begin - progress, this.total);
+      } else if (this.type === 'out') {
+        if (progress <= this.end) return progress;
+        return this.begin + Utils.euclideanModulo(progress - this.end, this.total);
+      }
+    }
+  }]);
+  return Cycle;
+}();
+
+/**
+ * Pingpong
+ * @class
+ * @private
+ */
+
+
+var Pingpong = function () {
+  /**
+   * Pingpong
+   * @param {*} type Pingpong
+   * @param {*} begin Pingpong
+   * @param {*} end Pingpong
+   */
+  function Pingpong(type, begin, end) {
+    classCallCheck(this, Pingpong);
+
+    this.begin = begin;
+    this.end = end;
+    this.total = this.end - this.begin;
+    this.type = type;
+  }
+
+  /**
+   * progress
+   * @param {number} progress progress
+   * @return {number} progress
+   */
+
+
+  createClass(Pingpong, [{
+    key: 'update',
+    value: function update(progress) {
+      if (this.type === 'in' && progress < this.begin || this.type === 'out' && progress > this.end) {
+        var space = progress - this.end;
+        return this.pingpong(space);
+      }
+      return progress;
+    }
+
+    /**
+     * pingpong
+     * @param {number} space
+     * @return {number}
+     */
+
+  }, {
+    key: 'pingpong',
+    value: function pingpong(space) {
+      var dir = Math.floor(space / this.total) % 2;
+      if (dir) {
+        return this.begin + Utils.euclideanModulo(space, this.total);
+      } else {
+        return this.end - Utils.euclideanModulo(space, this.total);
+      }
+    }
+  }]);
+  return Pingpong;
+}();
+
+var FN_MAPS = {
+  loopIn: function loopIn(datak, mode, offset) {
+    var begin = datak[0].t;
+    var end = datak[offset].t;
+    switch (mode) {
+      case 'cycle':
+        return new Cycle('in', begin, end);
+      case 'pingpong':
+        return new Pingpong('in', begin, end);
+      default:
+        break;
+    }
+    return null;
+  },
+  loopOut: function loopOut(datak, mode, offset) {
+    var last = datak.length - 1;
+    var begin = datak[last - offset].t;
+    var end = datak[last].t;
+    switch (mode) {
+      case 'cycle':
+        return new Cycle('out', begin, end);
+      case 'pingpong':
+        return new Pingpong('out', begin, end);
+      default:
+        break;
+    }
+    return null;
+  }
+};
+
+/**
+ * parseParams
+ * @ignore
+ * @param {string} pStr string
+ * @return {array}
+ */
+function parseParams(pStr) {
+  var params = pStr.split(/\s*,\s*/);
+  return params.map(function (it) {
+    if (STR_REG.test(it)) return it.replace(/"|'/g, '');
+    return parseInt(it);
+  });
+}
+
+/**
+ * parseEx
+ * @ignore
+ * @param {string} ex string
+ * @return {object}
+ */
+function parseEx(ex) {
+  var rs = ex.match(EX_REG);
+  var ps = parseParams(rs[2]);
+  return {
+    name: rs[1],
+    mode: ps[0],
+    offset: ps[1]
+  };
+}
+
+/**
+ * hasExpression
+ * @ignore
+ * @param {string} ex string
+ * @return {boolean}
+ */
+function hasExpression(ex) {
+  return EX_REG.test(ex);
+}
+
+/**
+ * getEX
+ * @ignore
+ * @param {object} ksp ksp
+ * @return {object}
+ */
+function getEX(ksp) {
+  var _parseEx = parseEx(ksp.x),
+      name = _parseEx.name,
+      mode = _parseEx.mode,
+      offset = _parseEx.offset;
+
+  var _offset = offset === 0 ? ksp.k.length - 1 : offset;
+  return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
+}
+
+/**
+ * keyframes buffer, cache some status and progress
+ * @class
+ * @private
+ */
+
+var Transform = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {Container} element host element
+   * @param {object} layer layer data
+   * @param {object} session now session
+   * @param {number} session.st time of start position
+   */
+  function Transform(element, layer, session) {
+    classCallCheck(this, Transform);
+    var _session$st = session.st,
+        st = _session$st === undefined ? 0 : _session$st,
+        register = session.register;
+
+
+    this.element = element;
+
+    this.ks = layer.ks;
+    this.ip = layer.ip;
+    this.op = layer.op;
+
+    this.st = st;
+    this.oip = this.st + this.ip;
+    this.oop = this.st + this.op;
+
+    this.aks = {};
+    this.kic = {};
+
+    this.preParse(register);
+  }
+
+  /**
+   * preparse keyframes
+   * @private
+   * @param {Register} register
+   */
+
+
+  createClass(Transform, [{
+    key: 'preParse',
+    value: function preParse(register) {
+      var ks = this.ks;
+      for (var key in TRANSFORM_MAP) {
+        if (ks[key] && ks[key].a) {
+          this.parseDynamic(key, register);
+        } else if (ks[key]) {
+          this.parseStatic(key);
+        }
+      }
+    }
+
+    /**
+     * preparse dynamic keyframes
+     * @private
+     * @param {string} key property
+     * @param {Register} register
+     */
+
+  }, {
+    key: 'parseDynamic',
+    value: function parseDynamic(key, register) {
+      var ksp = this.ks[key];
+      var kspk = ksp.k;
+      var last = kspk.length - 1;
+
+      ksp.ost = this.st + kspk[0].t;
+      ksp.oet = this.st + kspk[last].t;
+
+      for (var i = 0; i < last; i++) {
+        var sbk = kspk[i];
+        var sek = kspk[i + 1];
+
+        sbk.ost = this.st + sbk.t;
+        sbk.oet = this.st + sek.t;
+        if (Utils.isString(sbk.n) && sbk.ti && sbk.to) {
+          prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+          var sp = new Point(sbk.s[0], sbk.s[1]);
+          var ep = new Point(sbk.e[0], sbk.e[1]);
+          var c1 = new Point(sbk.s[0] + sbk.ti[0], sbk.s[1] + sbk.ti[1]);
+          var c2 = new Point(sbk.e[0] + sbk.to[0], sbk.e[1] + sbk.to[1]);
+          sbk.curve = new BezierCurve([sp, c1, c2, ep]);
+        } else {
+          for (var _i = 0; _i < sbk.n.length; _i++) {
+            prepareEaseing(sbk.o.x[_i], sbk.o.y[_i], sbk.i.x[_i], sbk.i.y[_i]);
+          }
+        }
+      }
+
+      if (hasExpression(ksp.x)) {
+        ksp.expression = getEX(ksp);
+        register.forever();
+      }
+      this.aks[key] = ksp;
+    }
+
+    /**
+     * preparse static keyframes
+     * @private
+     * @param {string} key property
+     */
+
+  }, {
+    key: 'parseStatic',
+    value: function parseStatic(key) {
+      var ksp = this.ks[key];
+      var kspk = ksp.k;
+      if (Utils.isNumber(kspk)) kspk = [kspk];
+
+      this.setValue(key, kspk);
+    }
+
+    /**
+     * compute child transform props
+     * @private
+     * @param {number} progress timeline progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      if (session.forever) {
+        this.element.visible = progress >= this.oip;
+      } else {
+        var visible = inRange$1(progress, this.oip, this.oop);
+        this.element.visible = visible;
+        if (!visible) return;
+      }
+
+      for (var key in this.aks) {
+        if (this.aks[key]) {
+          this.setValue(key, this.interpolation(key, progress));
+        }
+      }
+    }
+
+    /**
+     * compute value with keyframes buffer
+     * @private
+     * @param {string} key which prop
+     * @param {number} progress which prop
+     * @return {array}
+     */
+
+  }, {
+    key: 'interpolation',
+    value: function interpolation$$1(key, progress) {
+      var ak = this.aks[key];
+      return interpolation(ak, progress, this.kic, key);
+    }
+
+    /**
+     * set value to host element
+     * @private
+     * @param {string} key property
+     * @param {array} value value array
+     */
+
+  }, {
+    key: 'setValue',
+    value: function setValue(key, value) {
+      var _TRANSFORM_MAP$key = TRANSFORM_MAP[key],
+          props = _TRANSFORM_MAP$key.props,
+          translate = _TRANSFORM_MAP$key.translate;
+
+      for (var i = 0; i < props.length; i++) {
+        this.element[props[i]] = translate(value, i);
+      }
+    }
+  }]);
+  return Transform;
+}();
+
+/**
+ * Graphics class
+ * @class
+ * @private
+ */
+
+var Graphics$1 = function (_Container) {
+  inherits(Graphics, _Container);
+
+  /**
+   * Graphics constructor
+   * @param {object} layer layer data information
+   * @param {object} items items data information
+   * @param {object} session layer data information
+   */
+  function Graphics(layer, items) {
+    var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    classCallCheck(this, Graphics);
+
+    var _this = possibleConstructorReturn(this, (Graphics.__proto__ || Object.getPrototypeOf(Graphics)).call(this));
+
+    _this.fill = null;
+    _this.stroke = null;
+    _this.shape = null;
+
+    _this.layer = layer;
+    _this.itemCache = [];
+
+    _this.parseItems(items.it, session);
+    return _this;
+  }
+
+  /**
+   * parseItems
+   * @param {object} items items
+   * @param {object} session session
+   */
+
+
+  createClass(Graphics, [{
+    key: 'parseItems',
+    value: function parseItems(items, session) {
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item.ty == 'tr') {
+          var ip = this.layer.ip;
+          var op = this.layer.op;
+          this.itemCache.push(new Transform(this, { ks: item, ip: ip, op: op }, session));
+        } else if (item.ty == 'sh' || item.ty == 'el' || item.ty == 'rc' || item.ty == 'sr') {
+          var shape = getShape(item, session);
+          if (!shape) continue;
+          this.shape = shape;
+          this.itemCache.push(this.shape);
+        } else if (items[i].ty == 'fl') {
+          this.fill = new Fill(item, session);
+          this.itemCache.push(this.fill);
+        } else if (items[i].ty == 'st') {
+          this.stroke = new Stroke(item, session);
+          this.itemCache.push(this.stroke);
+        } else if (items[i].ty == 'tm') {
+          // TODO:
+        }
+      }
+    }
+
+    /**
+     * update
+     * @param {number} progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var i = 0; i < this.itemCache.length; i++) {
+        this.itemCache[i].update(progress, session);
+      }
+    }
+
+    /**
+     * render content
+     * @param {object} ctx
+     */
+
+  }, {
+    key: 'renderMe',
+    value: function renderMe(ctx) {
+      if (this.fill) this.fill.render(ctx);
+      if (this.stroke) this.stroke.render(ctx);
+      if (this.shape) {
+        ctx.beginPath();
+        this.shape.render(ctx);
+      }
+      if (this.fill) ctx.fill();
+      if (this.stroke) ctx.stroke();
+    }
+  }]);
+  return Graphics;
+}(Container);
+
+/**
+ * Shapes
+ * @class
+ * @private
+ */
+
+var Shapes = function () {
+  /**
+   * generate a keyframes buffer
+   * @param {Container} element host element
+   * @param {object} layer layer data
+   * @param {object} session now session
+   * @param {object} session.size time of pre-frame
+   * @param {number} session.st time of start position
+   */
+  function Shapes(element, layer, session) {
+    classCallCheck(this, Shapes);
+
+    this.element = element;
+    this.shapes = [];
+    this.createShapes(layer, session);
+  }
+
+  /**
+   * createShapes
+   * @param {object} layer layer data
+   * @param {object} session now session
+   */
+
+
+  createClass(Shapes, [{
+    key: 'createShapes',
+    value: function createShapes(layer, session) {
+      var shapes = layer.shapes;
+      for (var i = 0; i < shapes.length; i++) {
+        var shape = shapes[i];
+        if (shape.ty === 'gr') {
+          var ge = new Graphics$1(layer, shape, session);
+          this.element.adds(ge);
+          this.shapes.push(ge);
+        }
+      }
+    }
+
+    /**
+     * update
+     * @param {number} progress progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var i = 0; i < this.shapes.length; i++) {
+        this.shapes[i].update(progress, session);
+      }
+    }
+  }]);
+  return Shapes;
+}();
+
+/**
+ * Keyframes
+ * @class
+ * @private
+ */
+
+var Keyframes = function () {
+  /**
+   * manager
+   * @param {object} element element
+   * @param {object} layer element
+   * @param {object} session element
+   */
+  function Keyframes(element, layer, session) {
+    classCallCheck(this, Keyframes);
+
+    this.element = element;
+    this.layer = Utils.copyJSON(layer);
+    this.keyframes = [];
+
+    this.parse(element, layer, session);
+  }
+
+  /**
+   * parse
+   * @param {object} element element
+   * @param {object} layer
+   * @param {object} session
+   */
+
+
+  createClass(Keyframes, [{
+    key: 'parse',
+    value: function parse(element, layer, session) {
+      this.transform(element, layer, session);
+
+      if (layer.hasMask) this.mask(element, layer, session);
+      if (layer.shapes) this.shapes(element, layer, session);
+    }
+
+    /**
+     * transform
+     * @param {object} element element
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'transform',
+    value: function transform(element, layer, session) {
+      this.add(new Transform(element, layer, session));
+    }
+
+    /**
+     * mask
+     * @param {object} element element
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'mask',
+    value: function mask(element, layer, session) {
+      this.add(new Mask(element, layer, session));
+    }
+
+    /**
+     * shapes
+     * @param {object} element element
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'shapes',
+    value: function shapes(element, layer, session) {
+      this.add(new Shapes(element, layer, session));
+    }
+
+    /**
+     * update
+     * @param {number} progress
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'update',
+    value: function update(progress, session) {
+      for (var i = 0; i < this.keyframes.length; i++) {
+        this.keyframes[i].update(progress, session);
+      }
+    }
+
+    /**
+     * add
+     * @param {object} keyframe
+     */
+
+  }, {
+    key: 'add',
+    value: function add(keyframe) {
+      this.keyframes.push(keyframe);
+    }
+  }]);
+  return Keyframes;
+}();
+
+/**
+ * SpriteElement class
+ * @class
+ * @private
+ */
+
+var SpriteElement = function (_Sprite) {
+  inherits(SpriteElement, _Sprite);
+
+  /**
+   * SpriteElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session layer data information
+   */
+  function SpriteElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, SpriteElement);
+    var parentName = session.parentName,
+        register = session.register;
+
+
+    var texture = register.getTexture(layer.refId);
+
+    var _this = possibleConstructorReturn(this, (SpriteElement.__proto__ || Object.getPrototypeOf(SpriteElement)).call(this, { texture: texture }));
+
+    _this.name = parentName + '.' + layer.nm;
+
+    register.setLayer(_this.name, _this);
+
+    _this.initKeyFrames(layer, session);
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(SpriteElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+  }]);
+  return SpriteElement;
+}(Sprite);
+
+/**
+ * ShapeElement class
+ * @class
+ * @private
+ */
+
+var ShapeElement = function (_Container) {
+  inherits(ShapeElement, _Container);
+
+  /**
+   * ShapeElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session layer data information
+   */
+  function ShapeElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, ShapeElement);
+
+    var _this = possibleConstructorReturn(this, (ShapeElement.__proto__ || Object.getPrototypeOf(ShapeElement)).call(this));
+
+    var parentName = session.parentName,
+        register = session.register;
+
+
+    _this.name = parentName + '.' + layer.nm;
+
+    register.setLayer(_this.name, _this);
+
+    _this.initKeyFrames(layer, session);
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(ShapeElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+  }]);
+  return ShapeElement;
+}(Container);
+
+/**
+ * CompElement class
+ * @class
+ * @private
+ */
+
+var CompElement = function (_Container) {
+  inherits(CompElement, _Container);
+
+  /**
+   * CompElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session global session information
+   */
+  function CompElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, CompElement);
+
+    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this));
+
+    var assets = session.assets,
+        size = session.size,
+        prefix = session.prefix,
+        register = session.register;
+
+    var parentName = session.parentName;
+    var ist = 0;
+    var layers = [];
+
+    var mySize = {
+      w: size.w,
+      h: size.h
+    };
+    if (Utils.isArray(layer)) {
+      layers = layer;
+      _this.name = parentName;
+    } else {
+      _this.initKeyFrames(layer, session);
+      mySize.w = layer.w;
+      mySize.h = layer.h;
+      layers = getAssets(layer.refId, assets).layers;
+      ist = layer.st;
+      parentName = _this.name = parentName + '.' + layer.nm;
+    }
+
+    register.setLayer(parentName, _this);
+
+    _this.parseLayers(layers, { assets: assets, st: ist, size: mySize, prefix: prefix, register: register, parentName: parentName });
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(CompElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+
+    /**
+     * parse layers
+     * @param {array} layers layers data
+     * @param {object} session assets data
+     */
+
+  }, {
+    key: 'parseLayers',
+    value: function parseLayers(layers, session) {
+      var elementsMap = this.createElements(layers, session);
+      for (var i = layers.length - 1; i >= 0; i--) {
+        var layer = layers[i];
+        var item = elementsMap[layer.ind];
+        if (!item) continue;
+        if (layer.parent) {
+          var parent = elementsMap[layer.parent];
+          parent.adds(item);
+        } else {
+          this.adds(item);
+        }
+      }
+    }
+
+    /**
+     * createElements
+     * @param {arrya} layers layers
+     * @param {object} session object
+     * @return {object}
+     */
+
+  }, {
+    key: 'createElements',
+    value: function createElements(layers, session) {
+      var elementsMap = {};
+      for (var i = layers.length - 1; i >= 0; i--) {
+        var layer = layers[i];
+        var element = null;
+
+        switch (layer.ty) {
+          case 0:
+            element = new CompElement(layer, session);
+            break;
+          case 2:
+            element = new SpriteElement(layer, session);
+            break;
+          case 4:
+            element = new ShapeElement(layer, session);
+            break;
+          default:
+            continue;
+        }
+
+        if (element) {
+          elementsMap[layer.ind] = element;
+        }
+      }
+      return elementsMap;
+    }
+  }]);
+  return CompElement;
+}(Container);
+
+/**
+ * an animation group, store and compute frame information
+ * @class
+ */
+
+var AnimationGroup = function () {
+  /**
+   * pass a data and extra config
+   * @param {object} options config and data
+   * @param {Object} options.keyframes bodymovin data, which export from AE
+   * @param {Number} [options.repeats=0] need repeat somt times?
+   * @param {Boolean} [options.infinite=false] play this animation round and round forever
+   * @param {Boolean} [options.alternate=false] alternate direction every round
+   * @param {Number} [options.wait=0] need wait how much time to start
+   * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
+   * @param {String} [options.prefix=''] assets url prefix, like link path
+   * @param {Number} [options.timeScale=1] animation speed
+   * @param {Number} [options.autoStart=true] auto start animation after assets loaded
+   */
+  function AnimationGroup(options) {
+    var _this = this;
+
+    classCallCheck(this, AnimationGroup);
+
+    this.prefix = options.prefix || '';
+    this.keyframes = options.keyframes;
+    this.fr = this.keyframes.fr;
+    this.ip = this.keyframes.ip;
+    this.op = this.keyframes.op;
+
+    this.tpf = 1000 / this.fr;
+    this.tfs = Math.floor(this.op - this.ip);
+
+    this.living = true;
+    this.alternate = options.alternate || false;
+    this.infinite = options.infinite || false;
+    this.repeats = options.repeats || 0;
+    this.delay = options.delay || 0;
+    this.wait = options.wait || 0;
+    this.duration = this.tfs;
+    this.progress = 0;
+    this._pf = -10000;
+
+    this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
+
+    this.direction = 1;
+    this.repeatsCut = this.repeats;
+    this.delayCut = this.delay;
+    this.waitCut = this.wait;
+
+    this._paused = true;
+
+    this.register = new Register(this.keyframes.assets, this.prefix);
+
+    this.register.loader.once('complete', function () {
+      _this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
+    });
+
+    this.group = new CompElement(this.keyframes.layers, {
+      assets: this.keyframes.assets,
+      size: { w: this.keyframes.w, h: this.keyframes.h },
+      prefix: this.prefix,
+      register: this.register,
+      parentName: this.keyframes.nm
+    });
+    this.group._aniRoot = true;
+
+    this.updateSession = { forever: this.isForever() };
+  }
+
+  /**
+   * get layer by name path
+   * @param {string} name layer name path, example: root.gift.star1
+   * @return {object}
+   */
+
+
+  createClass(AnimationGroup, [{
+    key: 'getLayerByName',
+    value: function getLayerByName(name) {
+      return this.register.getLayer(name);
+    }
+
+    /**
+     * bind other animation group to this animation group with name path
+     * @param {*} name
+     * @param {*} slot
+     */
+
+  }, {
+    key: 'bindSlot',
+    value: function bindSlot(name, slot) {
+      var slotDot = this.getLayerByName(name);
+      if (slotDot) slotDot.add(slot);
+    }
+
+    /**
+     * emit frame
+     * @private
+     * @param {*} np now frame
+     */
+
+  }, {
+    key: 'emitFrame',
+    value: function emitFrame(np) {
+      this.emit('@' + np);
+    }
+
+    /**
+     * update with time snippet
+     * @private
+     * @param {number} snippetCache snippet
+     */
+
+  }, {
+    key: 'update',
+    value: function update(snippetCache) {
+      if (!this.living) return;
+
+      var isEnd = this.updateTime(snippetCache);
+
+      this.group.updateMovin(this.progress, this.updateSession);
+
+      var np = this.progress >> 0;
+      if (this._pf !== np) {
+        this.emitFrame(this.direction > 0 ? np : this._pf);
+        this._pf = np;
+      }
+      if (isEnd === false) {
+        this.emit('update', this.progress / this.duration);
+      } else if (isEnd === true) {
+        this.emit('complete');
+      }
+    }
+
+    /**
+     * update timeline with time snippet
+     * @private
+     * @param {number} snippet snippet
+     * @return {boolean} progress status
+     */
+
+  }, {
+    key: 'updateTime',
+    value: function updateTime(snippet) {
+      var snippetCache = this.direction * this.timeScale * snippet;
+      if (this.waitCut > 0) {
+        this.waitCut -= Math.abs(snippetCache);
+        return null;
+      }
+      if (this._paused || this.delayCut > 0) {
+        if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
+        return null;
+      }
+
+      this.progress += snippetCache / this.tpf;
+      var isEnd = false;
+
+      if (!this.updateSession.forever && this.spill()) {
+        if (this.repeatsCut > 0 || this.infinite) {
+          if (this.repeatsCut > 0) --this.repeatsCut;
+          this.delayCut = this.delay;
+          if (this.alternate) {
+            this.direction *= -1;
+            this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
+          } else {
+            this.direction = 1;
+            this.progress = Utils.euclideanModulo(this.progress, this.duration);
+          }
+        } else {
+          this.progress = Utils.clamp(this.progress, 0, this.duration);
+          isEnd = true;
+          this.living = false;
+        }
+      }
+
+      return isEnd;
+    }
+
+    /**
+     * check the animation group was in forever mode
+     * @private
+     * @return {boolean}
+     */
+
+  }, {
+    key: 'isForever',
+    value: function isForever() {
+      return this.register._forever;
+    }
+
+    /**
+     * is this time progress spill the range
+     * @private
+     * @return {boolean}
+     */
+
+  }, {
+    key: 'spill',
+    value: function spill() {
+      var bottomSpill = this.progress <= 0 && this.direction === -1;
+      var topSpill = this.progress >= this.duration && this.direction === 1;
+      return bottomSpill || topSpill;
+    }
+
+    /**
+     * get time
+     * @param {number} frame frame index
+     * @return {number}
+     */
+
+  }, {
+    key: 'frameToTime',
+    value: function frameToTime(frame) {
+      return frame * this.tpf;
+    }
+
+    /**
+     * set animation speed, time scale
+     * @param {number} speed
+     */
+
+  }, {
+    key: 'setSpeed',
+    value: function setSpeed(speed) {
+      this.timeScale = speed;
+    }
+
+    /**
+     * pause this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      this._paused = true;
+      return this;
+    }
+
+    /**
+     * resume or play this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this._paused = false;
+      return this;
+    }
+
+    /**
+     * play this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'play',
+    value: function play() {
+      this._paused = false;
+      return this;
+    }
+
+    /**
+     * replay this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'replay',
+    value: function replay() {
+      this._paused = false;
+      this.living = true;
+      this.progress = 0;
+      return this;
+    }
+
+    /**
+     * proxy this.group event-emit
+     * Emit an event to all registered event listeners.
+     *
+     * @param {String} event The name of the event.
+     */
+
+  }, {
+    key: 'emit',
+    value: function emit() {
+      var _group;
+
+      (_group = this.group).emit.apply(_group, arguments);
+    }
+
+    /**
+     * proxy this.group event-on
+     * Register a new EventListener for the given event.
+     *
+     * @param {String} event Name of the event.
+     * @param {Function} fn Callback function.
+     * @param {Mixed} [context=this] The context of the function.
+     */
+
+  }, {
+    key: 'on',
+    value: function on() {
+      var _group2;
+
+      (_group2 = this.group).on.apply(_group2, arguments);
+    }
+
+    /**
+     * proxy this.group event-once
+     * Add an EventListener that's only called once.
+     *
+     * @param {String} event Name of the event.
+     * @param {Function} fn Callback function.
+     * @param {Mixed} [context=this] The context of the function.
+     */
+
+  }, {
+    key: 'once',
+    value: function once() {
+      var _group3;
+
+      (_group3 = this.group).once.apply(_group3, arguments);
+    }
+
+    /**
+     * proxy this.group event-off
+     * @param {String} event The event we want to remove.
+     * @param {Function} fn The listener that we need to find.
+     * @param {Mixed} context Only remove listeners matching this context.
+     * @param {Boolean} once Only remove once listeners.
+     */
+
+  }, {
+    key: 'off',
+    value: function off() {
+      var _group4;
+
+      (_group4 = this.group).off.apply(_group4, arguments);
+    }
+
+    /**
+     * proxy this.group event-removeAllListeners
+     * Remove event listeners.
+     *
+     * @param {String} event The event we want to remove.
+     * @param {Function} fn The listener that we need to find.
+     * @param {Mixed} context Only remove listeners matching this context.
+     * @param {Boolean} once Only remove once listeners.
+     */
+
+  }, {
+    key: 'removeAllListeners',
+    value: function removeAllListeners() {
+      var _group5;
+
+      (_group5 = this.group).removeAllListeners.apply(_group5, arguments);
+    }
+  }]);
+  return AnimationGroup;
+}();
+
+/**
+ * all animation manager, manage ticker and animation groups
+ * @example
+ * var manager = new PIXI.AnimationManager(app.ticker);
+ * var ani = manager.parseAnimation({
+ *   keyframes: data,
+ *   infinite: true,
+ * });
+ * @class
+ */
+
+var AnimationManager = function () {
+  /**
+   * animation manager, optional a ticker param
+   * @param {Ticker} _ticker
+   */
+  function AnimationManager(_ticker) {
+    var _this = this;
+
+    classCallCheck(this, AnimationManager);
+
+    /**
+     * time scale, just like speed scalar
+     *
+     * @member {Number}
+     */
+    this.timeScale = 1;
+
+    /**
+     * mark the manager was pause or not
+     *
+     * @member {Boolean}
+     */
+    this.paused = false;
+
+    /**
+     * ticker engine
+     * @private
+     */
+    this.ticker = _ticker || new Ticker();
+
+    /**
+     * all animation groups
+     * @private
+     */
+    this.groups = [];
+
+    this.ticker.on('update', function (snippet) {
+      _this.update(snippet);
+    });
+  }
+
+  /**
+   * add a animationGroup child to array
+   * @param {AnimationGroup} child AnimationGroup instance
+   * @return {AnimationGroup} child
+   */
+
+
+  createClass(AnimationManager, [{
+    key: 'add',
+    value: function add(child) {
+      var argumentsLength = arguments.length;
+
+      if (argumentsLength > 1) {
+        for (var i = 0; i < argumentsLength; i++) {
+          /* eslint prefer-rest-params: 0 */
+          this.add(arguments[i]);
+        }
+      } else {
+        this.groups.push(child);
+      }
+
+      return child;
+    }
+
+    /**
+     * parser a bodymovin data, and post some config for this animation group
+     * @param {object} options bodymovin data
+     * @param {Object} options.keyframes bodymovin data, which export from AE
+     * @param {Number} [options.repeats=0] need repeat somt times?
+     * @param {Boolean} [options.infinite=false] play this animation round and round forever
+     * @param {Boolean} [options.alternate=false] alternate direction every round
+     * @param {Number} [options.wait=0] need wait how much time to start
+     * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
+     * @param {String} [options.prefix=''] assets url prefix, like link path
+     * @param {Number} [options.timeScale=1] animation speed
+     * @param {Number} [options.autoStart=true] auto start animation after assets loaded
+     * @return {AnimationGroup}
+     * @example
+     * var manager = new PIXI.AnimationManager(app.ticker);
+     * var ani = manager.parseAnimation({
+     *   keyframes: data,
+     *   infinite: true,
+     * });
+     */
+
+  }, {
+    key: 'parseAnimation',
+    value: function parseAnimation(options) {
+      var animate = new AnimationGroup(options);
+      return this.add(animate);
+    }
+
+    /**
+     * set animation speed, time scale
+     * @param {number} speed
+     */
+
+  }, {
+    key: 'setSpeed',
+    value: function setSpeed(speed) {
+      this.timeScale = speed;
+    }
+
+    /**
+     * pause all animation groups
+     * @return {this}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      this.paused = true;
+      return this;
+    }
+
+    /**
+     * pause all animation groups
+     * @return {this}
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this.paused = false;
+      return this;
+    }
+
+    /**
+     * update
+     * @private
+     * @param {number} snippet
+     */
+
+  }, {
+    key: 'update',
+    value: function update(snippet) {
+      if (this.paused) return;
+      var snippetCache = this.timeScale * snippet;
+      var length = this.groups.length;
+      for (var i = 0; i < length; i++) {
+        var animationGroup = this.groups[i];
+        animationGroup.update(snippetCache);
+      }
+    }
+  }]);
+  return AnimationManager;
+}();
 
 exports.Eventer = Eventer;
 exports.Animation = Animation;
@@ -7188,6 +9498,7 @@ exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;
 exports.ParserAnimation = ParserAnimation;
+exports.Ticker = Ticker;
 exports.Bounds = Bounds;
 exports.Point = Point;
 exports.Rectangle = Rectangle;
@@ -7200,7 +9511,10 @@ exports.DisplayObject = DisplayObject;
 exports.Container = Container;
 exports.Sprite = Sprite;
 exports.Graphics = Graphics;
-exports.Stage = Stage;
+exports.Scene = Scene;
+exports.Renderer = Renderer;
+exports.Application = Application;
+exports.AnimationManager = AnimationManager;
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
