@@ -70,21 +70,36 @@ var EXAMPLES = [{
     type: 'demo',
     link: 'demo_animation_animate'
   },
+  // {
+  //   title: 'runners动画',
+  //   type: 'demo',
+  //   link: 'demo_animation_runners'
+  // },
   {
-    title: 'runners动画',
+    title: 'AE动画1',
     type: 'demo',
-    link: 'demo_animation_runners'
+    link: 'demo_animation_ae4'
+  },
+  {
+    title: 'AE动画2',
+    type: 'demo',
+    link: 'demo_animation_ae5'
+  },
+  {
+    title: 'AE动画3',
+    type: 'demo',
+    link: 'demo_animation_ae6'
   },
   {
     title: 'runners组合动画',
     type: 'demo',
     link: 'demo_animation_combine'
   },
-  {
-    title: 'runners循环动画',
-    type: 'demo',
-    link: 'demo_animation_graphic'
-  },
+  // {
+  //   title: 'runners循环动画',
+  //   type: 'demo',
+  //   link: 'demo_animation_graphic'
+  // },
   {
     title: 'path-motion动画',
     type: 'demo',

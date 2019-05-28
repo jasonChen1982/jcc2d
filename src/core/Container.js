@@ -158,7 +158,7 @@ Container.prototype.adds = function(object) {
   if (object === this) {
     console.error('adds: object can\'t be added as a child of itself.', object);
   }
-  if ((object)) {
+  if ((object && object instanceof Container)) {
     if (object.parent !== null) {
       object.parent.remove(object);
     }

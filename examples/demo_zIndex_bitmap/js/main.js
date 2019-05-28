@@ -26,9 +26,9 @@ function Euler(x, y, z) {
   this.z = z || 0;
 }
 Euler.prototype.rotate = function () {
-  var x = JC.Utils.DTR * this.x,
-    y = JC.Utils.DTR * this.y,
-    z = JC.Utils.DTR * this.z;
+  var x = JC.Utils.DTR(this.x),
+    y = JC.Utils.DTR(this.y),
+    z = JC.Utils.DTR(this.z);
   var xc = Math.cos(x),
     xs = Math.sin(x);
   var yc = Math.cos(y),
@@ -68,7 +68,7 @@ function Sphere(row, col, radius) {
   this.col = col || 8;
   this.radius = radius || 200;
 
-  this.palstance = new Euler(0, 0);
+  this.palstance = new Euler(0, 0.1);
 }
 Sphere.prototype.createVertex = function (parent, imgs) {
   this.parent = parent;
@@ -88,9 +88,9 @@ Sphere.prototype.createVertex = function (parent, imgs) {
       shape.pivotX = shape.width >> 1;
       shape.pivotY = shape.height >> 1;
 
-      shape.x = Math.sin(degX) * Math.sin(degY) * this.radius,
-        shape.y = Math.cos(degX) * this.radius,
-        shape.zIndex = Math.sin(degX) * Math.cos(degY) * this.radius;
+      shape.x = Math.sin(degX) * Math.sin(degY) * this.radius;
+      shape.y = Math.cos(degX) * this.radius;
+      shape.zIndex = Math.sin(degX) * Math.cos(degY) * this.radius;
       this.parent.adds(shape);
       if (sb) break;
     }
