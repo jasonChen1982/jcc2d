@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.1"></a>
+## [1.7.1](https://github.com/jasonChen1982/jcc2d/compare/v1.7.0...v1.7.1) (2019-05-28)
+
+
+### Bug Fixes
+
+* **export:** remove export file ([a73e437](https://github.com/jasonChen1982/jcc2d/commit/a73e437))
+
+
+
 <a name="1.7.0"></a>
 # [1.7.0](https://github.com/jasonChen1982/jcc2d/compare/v1.6.6...v1.7.0) (2019-05-28)
 
