@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.0"></a>
+# [1.7.0](https://github.com/jasonChen1982/jcc2d/compare/v1.6.6...v1.7.0) (2019-05-28)
+
+
+### Bug Fixes
+
+* **demo:** update demo error ([37470da](https://github.com/jasonChen1982/jcc2d/commit/37470da))
+
+
+### Features
+
+* **ae:** add ae support ([2c7905d](https://github.com/jasonChen1982/jcc2d/commit/2c7905d))
+* **keyframes:** add keyframes ([88c189c](https://github.com/jasonChen1982/jcc2d/commit/88c189c))
+* **shape:** add shape support ([cfb8f21](https://github.com/jasonChen1982/jcc2d/commit/cfb8f21))
+
+
+
 <a name="1.6.6"></a>
 ## [1.6.6](https://github.com/jasonChen1982/jcc2d/compare/v1.6.5...v1.6.6) (2018-09-11)
 
