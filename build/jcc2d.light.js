@@ -1,7 +1,7 @@
 
 /**
  * jcc2d.js
- * (c) 2014-2018 jason chen
+ * (c) 2014-2019 jason chen
  * Released under the MIT License.
  */
 
@@ -2318,6 +2318,372 @@ var loaderUtil = function loaderUtil(srcMap, crossOrigin) {
 };
 
 /**
+ * ticker class
+ * @param {boolean} enableFPS
+ */
+function Ticker(enableFPS) {
+  Eventer.call(this);
+
+  /**
+   * 是否记录渲染性能
+   *
+   * @member {Boolean}
+   */
+  this.enableFPS = Utils.isBoolean(enableFPS) ? enableFPS : true;
+
+  /**
+   * 上一次绘制的时间点
+   *
+   * @member {Number}
+   * @private
+   */
+  this.pt = 0;
+
+  /**
+   * 本次渲染经历的时间片段长度
+   *
+   * @member {Number}
+   * @private
+   */
+  this.snippet = 0;
+
+  /**
+   * 平均渲染经历的时间片段长度
+   *
+   * @member {Number}
+   * @private
+   */
+  this.averageSnippet = 0;
+
+  /**
+   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
+  this.fps = 0;
+
+  /**
+   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
+   *
+   * @member {Number}
+   */
+  this.averageFps = 0;
+
+  /**
+   * 渲染总花费时间，除去被中断、被暂停等时间
+   *
+   * @member {Number}
+   * @private
+   */
+  this._takeTime = 0;
+
+  /**
+   * 渲染总次数
+   *
+   * @member {Number}
+   * @private
+   */
+  this._renderTimes = 0;
+
+  /**
+   * 是否开启 ticker
+   *
+   * @member {Boolean}
+   */
+  this.started = false;
+
+  /**
+   * 是否暂停 ticker
+   *
+   * @member {Boolean}
+   */
+  this.paused = false;
+}
+
+Ticker.prototype = Object.create(Eventer.prototype);
+
+Ticker.prototype.timeline = function () {
+  this.snippet = Date.now() - this.pt;
+  if (this.pt === 0 || this.snippet > 200) {
+    this.pt = Date.now();
+    this.snippet = Date.now() - this.pt;
+  }
+
+  if (this.enableFPS) {
+    this._renderTimes++;
+    this._takeTime += Math.max(15, this.snippet);
+    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
+    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
+  }
+
+  this.pt += this.snippet;
+};
+
+Ticker.prototype.tick = function () {
+  if (this.paused) return;
+  this.timeline();
+  this.emit('update', this.snippet);
+  this.emit('tick', this.snippet);
+};
+
+/**
+ * 渲染循环
+ *
+ * @method start
+ */
+Ticker.prototype.start = function () {
+  var _this = this;
+
+  if (this.started) return;
+  this.started = true;
+  var loop = function loop() {
+    _this.tick();
+    _this.loop = RAF(loop);
+  };
+  loop();
+};
+
+/**
+ * 渲染循环
+ *
+ * @method stop
+ */
+Ticker.prototype.stop = function () {
+  CAF(this.loop);
+  this.started = false;
+};
+
+/**
+ * 暂停触发 tick
+ *
+ * @method pause
+ */
+Ticker.prototype.pause = function () {
+  this.paused = true;
+};
+
+/**
+ * 恢复触发 tick
+ *
+ * @method resume
+ */
+Ticker.prototype.resume = function () {
+  this.paused = false;
+};
+
+/**
+ * 矩形类
+ *
+ * @class
+ * @memberof JC
+ * @param {number} x 左上角的x坐标
+ * @param {number} y 左上角的y坐标
+ * @param {number} width 矩形的宽度
+ * @param {number} height 矩形的高度
+ */
+function Rectangle(x, y, width, height) {
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.x = x || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.y = y || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.width = width || 0;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.height = height || 0;
+}
+
+/**
+ * 空矩形对象
+ *
+ * @static
+ * @constant
+ */
+Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
+
+/**
+ * 克隆一个与该举行对象同样属性的矩形
+ *
+ * @return {PIXI.Rectangle} 克隆出的矩形
+ */
+Rectangle.prototype.clone = function () {
+  return new Rectangle(this.x, this.y, this.width, this.height);
+};
+
+/**
+ * 检查坐标点是否在矩形区域内
+ *
+ * @param {number} x 坐标点的x轴位置
+ * @param {number} y 坐标点的y轴位置
+ * @return {boolean} 坐标点是否在矩形区域内
+ */
+Rectangle.prototype.contains = function (x, y) {
+  if (this.width <= 0 || this.height <= 0) {
+    return false;
+  }
+
+  if (x >= this.x && x < this.x + this.width) {
+    if (y >= this.y && y < this.y + this.height) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+/**
+ * 显示对象的包围盒子
+ *
+ * @class
+ * @memberof JC
+ * @param {Number} minX
+ * @param {Number} minY
+ * @param {Number} maxX
+ * @param {Number} maxY
+ */
+function Bounds(minX, minY, maxX, maxY) {
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.minX = Utils.isNumber(minX) ? minX : Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.minY = Utils.isNumber(minY) ? minY : Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.maxX = Utils.isNumber(maxX) ? maxX : -Infinity;
+
+  /**
+   * @member {number}
+   * @default 0
+   */
+  this.maxY = Utils.isNumber(maxY) ? maxY : -Infinity;
+
+  this.rect = null;
+}
+
+Bounds.prototype.isEmpty = function () {
+  return this.minX > this.maxX || this.minY > this.maxY;
+};
+
+Bounds.prototype.clear = function () {
+  this.minX = Infinity;
+  this.minY = Infinity;
+  this.maxX = -Infinity;
+  this.maxY = -Infinity;
+  return this;
+};
+
+/**
+ * 将包围盒子转换成矩形描述
+ *
+ * @param {JC.Rectangle} rect 待转换的矩形
+ * @return {JC.Rectangle}
+ */
+Bounds.prototype.getRectangle = function (rect) {
+  if (this.isEmpty()) {
+    return Rectangle.EMPTY;
+  }
+
+  rect = rect || new Rectangle(0, 0, 1, 1);
+
+  rect.x = this.minX;
+  rect.y = this.minY;
+  rect.width = this.maxX - this.minX;
+  rect.height = this.maxY - this.minY;
+
+  return rect;
+};
+
+/**
+ * 往包围盒增加外部顶点，更新包围盒区域
+ *
+ * @param {JC.Point} point
+ */
+Bounds.prototype.addPoint = function (point) {
+  this.minX = Math.min(this.minX, point.x);
+  this.maxX = Math.max(this.maxX, point.x);
+  this.minY = Math.min(this.minY, point.y);
+  this.maxY = Math.max(this.maxY, point.y);
+};
+
+/**
+ * 往包围盒增加矩形区域，更新包围盒区域
+ *
+ * @param {JC.Rectangle} rect
+ */
+Bounds.prototype.addRect = function (rect) {
+  this.minX = rect.x;
+  this.maxX = rect.width + rect.x;
+  this.minY = rect.y;
+  this.maxY = rect.height + rect.y;
+};
+
+/**
+ * 往包围盒增加顶点数组，更新包围盒区域
+ *
+ * @param {Array} vertices
+ */
+Bounds.prototype.addVert = function (vertices) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
+
+  for (var i = 0; i < vertices.length; i += 2) {
+    var x = vertices[i];
+    var y = vertices[i + 1];
+    minX = x < minX ? x : minX;
+    minY = y < minY ? y : minY;
+    maxX = x > maxX ? x : maxX;
+    maxY = y > maxY ? y : maxY;
+  }
+
+  this.minX = minX;
+  this.minY = minY;
+  this.maxX = maxX;
+  this.maxY = maxY;
+};
+
+/**
+ * 往包围盒增加包围盒，更新包围盒区域
+ *
+ * @param {JC.Bounds} bounds
+ */
+Bounds.prototype.addBounds = function (bounds) {
+  var minX = this.minX;
+  var minY = this.minY;
+  var maxX = this.maxX;
+  var maxY = this.maxY;
+
+  this.minX = bounds.minX < minX ? bounds.minX : minX;
+  this.minY = bounds.minY < minY ? bounds.minY : minY;
+  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
+  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
+};
+
+/**
  * 矩阵对象，用来描述和记录对象的tansform 状态信息
  *
  * @class
@@ -2524,6 +2890,85 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 };
 var IDENTITY = new Matrix();
 var TEMP_MATRIX = new Matrix();
+
+/**
+ *
+ * @class
+ * @memberof JC
+ * @param {Array}  points  array of points
+ */
+function CatmullRom(points) {
+  this.points = points;
+
+  this.passCmp = {
+    x: true,
+    y: true,
+    z: false
+  };
+
+  this.ccmp = {};
+
+  this.updateCcmp();
+}
+
+CatmullRom.prototype = Object.create(Curve.prototype);
+
+CatmullRom.prototype.updateCcmp = function () {
+  for (var i = 0; i < this.points.length; i++) {
+    var point = this.points[i];
+    for (var cmp in this.passCmp) {
+      if (this.passCmp[cmp] && !Utils.isUndefined(point[cmp])) {
+        this.ccmp[cmp] = this.ccmp[cmp] || [];
+        this.ccmp[cmp][i] = point[cmp];
+      }
+    }
+  }
+};
+
+CatmullRom.prototype.getPoint = function (k) {
+  var point = new Point();
+  for (var cmp in this.passCmp) {
+    if (this.passCmp[cmp]) {
+      point[cmp] = this.solveEachCmp(this.ccmp[cmp], k);
+    }
+  }
+  return point;
+};
+
+CatmullRom.prototype.solveEachCmp = function (v, k) {
+  var m = v.length - 1;
+  var f = m * k;
+  var i = Math.floor(f);
+  var fn = this.solve;
+
+  if (v[0] === v[m]) {
+    if (k < 0) {
+      i = Math.floor(f = m * (1 + k));
+    }
+
+    return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+  } else {
+    if (k < 0) {
+      return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+    }
+
+    if (k > 1) {
+      return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+    }
+
+    return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+  }
+};
+
+CatmullRom.prototype.solve = function (p0, p1, p2, p3, t) {
+  var v0 = (p2 - p0) * 0.5;
+  var v1 = (p3 - p1) * 0.5;
+  var t2 = t * t;
+  var t3 = t * t2;
+
+  /* eslint max-len: 0 */
+  return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+};
 
 /* eslint max-len: "off" */
 
@@ -3101,218 +3546,6 @@ DisplayObject.prototype.contains = function (global) {
   return this.eventArea && this.eventArea.contains(point.x, point.y);
 };
 
-/**
- * 矩形类
- *
- * @class
- * @memberof JC
- * @param {number} x 左上角的x坐标
- * @param {number} y 左上角的y坐标
- * @param {number} width 矩形的宽度
- * @param {number} height 矩形的高度
- */
-function Rectangle(x, y, width, height) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.width = width || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.height = height || 0;
-}
-
-/**
- * 空矩形对象
- *
- * @static
- * @constant
- */
-Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
-
-/**
- * 克隆一个与该举行对象同样属性的矩形
- *
- * @return {PIXI.Rectangle} 克隆出的矩形
- */
-Rectangle.prototype.clone = function () {
-  return new Rectangle(this.x, this.y, this.width, this.height);
-};
-
-/**
- * 检查坐标点是否在矩形区域内
- *
- * @param {number} x 坐标点的x轴位置
- * @param {number} y 坐标点的y轴位置
- * @return {boolean} 坐标点是否在矩形区域内
- */
-Rectangle.prototype.contains = function (x, y) {
-  if (this.width <= 0 || this.height <= 0) {
-    return false;
-  }
-
-  if (x >= this.x && x < this.x + this.width) {
-    if (y >= this.y && y < this.y + this.height) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-/**
- * 显示对象的包围盒子
- *
- * @class
- * @memberof JC
- * @param {Number} minX
- * @param {Number} minY
- * @param {Number} maxX
- * @param {Number} maxY
- */
-function Bounds(minX, minY, maxX, maxY) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minX = Utils.isNumber(minX) ? minX : Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minY = Utils.isNumber(minY) ? minY : Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxX = Utils.isNumber(maxX) ? maxX : -Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxY = Utils.isNumber(maxY) ? maxY : -Infinity;
-
-  this.rect = null;
-}
-
-Bounds.prototype.isEmpty = function () {
-  return this.minX > this.maxX || this.minY > this.maxY;
-};
-
-Bounds.prototype.clear = function () {
-  this.minX = Infinity;
-  this.minY = Infinity;
-  this.maxX = -Infinity;
-  this.maxY = -Infinity;
-  return this;
-};
-
-/**
- * 将包围盒子转换成矩形描述
- *
- * @param {JC.Rectangle} rect 待转换的矩形
- * @return {JC.Rectangle}
- */
-Bounds.prototype.getRectangle = function (rect) {
-  if (this.isEmpty()) {
-    return Rectangle.EMPTY;
-  }
-
-  rect = rect || new Rectangle(0, 0, 1, 1);
-
-  rect.x = this.minX;
-  rect.y = this.minY;
-  rect.width = this.maxX - this.minX;
-  rect.height = this.maxY - this.minY;
-
-  return rect;
-};
-
-/**
- * 往包围盒增加外部顶点，更新包围盒区域
- *
- * @param {JC.Point} point
- */
-Bounds.prototype.addPoint = function (point) {
-  this.minX = Math.min(this.minX, point.x);
-  this.maxX = Math.max(this.maxX, point.x);
-  this.minY = Math.min(this.minY, point.y);
-  this.maxY = Math.max(this.maxY, point.y);
-};
-
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param {JC.Rectangle} rect
- */
-Bounds.prototype.addRect = function (rect) {
-  this.minX = rect.x;
-  this.maxX = rect.width + rect.x;
-  this.minY = rect.y;
-  this.maxY = rect.height + rect.y;
-};
-
-/**
- * 往包围盒增加顶点数组，更新包围盒区域
- *
- * @param {Array} vertices
- */
-Bounds.prototype.addVert = function (vertices) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  for (var i = 0; i < vertices.length; i += 2) {
-    var x = vertices[i];
-    var y = vertices[i + 1];
-    minX = x < minX ? x : minX;
-    minY = y < minY ? y : minY;
-    maxX = x > maxX ? x : maxX;
-    maxY = y > maxY ? y : maxY;
-  }
-
-  this.minX = minX;
-  this.minY = minY;
-  this.maxX = maxX;
-  this.maxY = maxY;
-};
-
-/**
- * 往包围盒增加包围盒，更新包围盒区域
- *
- * @param {JC.Bounds} bounds
- */
-Bounds.prototype.addBounds = function (bounds) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  this.minX = bounds.minX < minX ? bounds.minX : minX;
-  this.minY = bounds.minY < minY ? bounds.minY : minY;
-  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
-  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
-};
-
 /* eslint prefer-rest-params: 0 */
 
 /**
@@ -3469,7 +3702,7 @@ Container.prototype.adds = function (object) {
   if (object === this) {
     console.error('adds: object can\'t be added as a child of itself.', object);
   }
-  if (object) {
+  if (object && object instanceof Container) {
     if (object.parent !== null) {
       object.parent.remove(object);
     }
@@ -4037,439 +4270,6 @@ Sprite.prototype.renderMe = function (ctx) {
   if (!this.ready) return;
   var frame = this.movieClip.getFrame();
   ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
-};
-
-/**
- * 解析bodymovin从ae导出的数据
- * @class
- * @memberof JC
- * @param {object} options 动画配置
- * @param {object} options.keyframes bodymovin从ae导出的动画数据
- * @param {number} [options.fr] 动画的帧率，默认会读取导出数据配置的帧率
- * @param {number} [options.repeats] 动画是否无限循环
- * @param {boolean} [options.infinite] 动画是否无限循环
- * @param {boolean} [options.alternate] 动画是否交替播放
- * @param {string} [options.prefix] 导出资源的前缀
- * @param {function} [options.onComplete] 结束回调
- * @param {function} [options.onUpdate] 更新回调
- */
-function ParserAnimation(options) {
-  this.prefix = options.prefix || '';
-  this.doc = new Container();
-  this.fr = options.fr || options.keyframes.fr;
-  this.keyframes = options.keyframes;
-  this.ip = this.keyframes.ip;
-  this.op = this.keyframes.op;
-  this.repeats = options.repeats || 0;
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.assetBox = null;
-  this.timeline = [];
-  this.parserAssets(this.keyframes.assets);
-  this.parserComposition(this.doc, this.keyframes.layers);
-
-  if (options.onComplete) {
-    this.timeline[0].on('complete', options.onComplete.bind(this));
-  }
-  if (options.onUpdate) {
-    this.timeline[0].on('update', options.onUpdate.bind(this));
-  }
-}
-
-/**
- * @private
- * @param {array} assets 资源数组
- */
-ParserAnimation.prototype.parserAssets = function (assets) {
-  var sourceMap = {};
-  var i = 0;
-  for (i = 0; i < assets.length; i++) {
-    var id = assets[i].id;
-    var up = assets[i].up;
-    var u = assets[i].u;
-    var p = assets[i].p;
-    if (up) {
-      sourceMap[id] = up;
-    } else if (u && p) {
-      sourceMap[id] = u + p;
-    } else if (!assets[i].layers) {
-      console.error('can not get asset url');
-    }
-  }
-  this.assetBox = loaderUtil(sourceMap);
-};
-
-/**
- * 创建 Sprite
- * @private
- * @param {object} layer 图层信息
- * @return {Sprite}
- */
-ParserAnimation.prototype.spriteItem = function (layer) {
-  var id = this.getAssets(layer.refId).id;
-  return new Sprite({
-    texture: this.assetBox.getById(id)
-  });
-};
-
-/**
- * 创建 Container
- * @private
- * @return {Container}
- */
-ParserAnimation.prototype.docItem = function () {
-  return new Container();
-};
-
-/**
- * 初始化合成组内的图层
- * @private
- * @param {array} layers 图层数组
- * @return {object} 该图层的所有渲染对象
- */
-ParserAnimation.prototype.initLayers = function (layers) {
-  var layersMap = {};
-  var fr = this.fr;
-  var ip = this.ip;
-  var op = this.op;
-  var repeats = this.repeats;
-  var infinite = this.infinite;
-  var alternate = this.alternate;
-
-  for (var i = layers.length - 1; i >= 0; i--) {
-    var layer = layers[i];
-    var element = null;
-    if (layer.ty === 2) {
-      element = this.spriteItem(layer);
-    } else if (layer.ty === 0) {
-      element = this.docItem();
-    } else {
-      continue;
-    }
-
-    element.name = layer.nm;
-    layersMap[layer.ind] = element;
-    this.timeline.push(element.keyFrames({
-      layer: layer,
-      fr: fr,
-      ip: ip,
-      op: op,
-      repeats: repeats,
-      infinite: infinite,
-      alternate: alternate
-    }));
-  }
-  return layersMap;
-};
-
-/**
- * 解析合成组
- * @private
- * @param {JC.Container} doc 动画元素的渲染组
- * @param {array} layers 预合成数组
- */
-ParserAnimation.prototype.parserComposition = function (doc, layers) {
-  var layersMap = this.initLayers(layers);
-  for (var i = layers.length - 1; i >= 0; i--) {
-    var layer = layers[i];
-    var item = layersMap[layer.ind];
-    if (!item) continue;
-    if (layer.parent) {
-      var parent = layersMap[layer.parent];
-      parent.adds(item);
-    } else {
-      doc.adds(item);
-    }
-    if (layer.ty === 0) {
-      var childLayers = this.getAssets(layer.refId).layers;
-      this.parserComposition(item, childLayers);
-    }
-  }
-};
-
-/**
- * @private
- * @param {string} id 资源的refid
- * @return {object} 资源配置
- */
-ParserAnimation.prototype.getAssets = function (id) {
-  var assets = this.keyframes.assets;
-  for (var i = 0; i < assets.length; i++) {
-    if (id === assets[i].id) return assets[i];
-  }
-};
-
-/**
- * 设置动画播放速度
- * @param {number} speed
- */
-ParserAnimation.prototype.setSpeed = function (speed) {
-  this.doc.setSpeed(speed);
-};
-
-/**
- * 暂停播放动画
- */
-ParserAnimation.prototype.pause = function () {
-  this.doc.pause();
-};
-
-/**
- * 恢复播放动画
- */
-ParserAnimation.prototype.restart = function () {
-  this.doc.restart();
-};
-
-/**
- * 停止播放动画
- */
-ParserAnimation.prototype.stop = function () {
-  this.timeline.forEach(function (it) {
-    it.stop();
-  });
-};
-
-/**
- * 取消播放动画
- */
-ParserAnimation.prototype.cancle = function () {
-  this.timeline.forEach(function (it) {
-    it.cancle();
-  });
-};
-
-/**
- * ticker class
- * @param {boolean} enableFPS
- */
-function Ticker(enableFPS) {
-  Eventer.call(this);
-
-  /**
-   * 是否记录渲染性能
-   *
-   * @member {Boolean}
-   */
-  this.enableFPS = Utils.isBoolean(enableFPS) ? enableFPS : true;
-
-  /**
-   * 上一次绘制的时间点
-   *
-   * @member {Number}
-   * @private
-   */
-  this.pt = 0;
-
-  /**
-   * 本次渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.snippet = 0;
-
-  /**
-   * 平均渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.averageSnippet = 0;
-
-  /**
-   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.fps = 0;
-
-  /**
-   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.averageFps = 0;
-
-  /**
-   * 渲染总花费时间，除去被中断、被暂停等时间
-   *
-   * @member {Number}
-   * @private
-   */
-  this._takeTime = 0;
-
-  /**
-   * 渲染总次数
-   *
-   * @member {Number}
-   * @private
-   */
-  this._renderTimes = 0;
-
-  /**
-   * 是否开启 ticker
-   *
-   * @member {Boolean}
-   */
-  this.started = false;
-
-  /**
-   * 是否暂停 ticker
-   *
-   * @member {Boolean}
-   */
-  this.paused = false;
-}
-
-Ticker.prototype = Object.create(Eventer.prototype);
-
-Ticker.prototype.timeline = function () {
-  this.snippet = Date.now() - this.pt;
-  if (this.pt === 0 || this.snippet > 200) {
-    this.pt = Date.now();
-    this.snippet = Date.now() - this.pt;
-  }
-
-  if (this.enableFPS) {
-    this._renderTimes++;
-    this._takeTime += Math.max(15, this.snippet);
-    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
-    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
-  }
-
-  this.pt += this.snippet;
-};
-
-Ticker.prototype.tick = function () {
-  if (this.paused) return;
-  this.timeline();
-  this.emit('update', this.snippet);
-  this.emit('tick', this.snippet);
-};
-
-/**
- * 渲染循环
- *
- * @method start
- */
-Ticker.prototype.start = function () {
-  var _this = this;
-
-  if (this.started) return;
-  this.started = true;
-  var loop = function loop() {
-    _this.tick();
-    _this.loop = RAF(loop);
-  };
-  loop();
-};
-
-/**
- * 渲染循环
- *
- * @method stop
- */
-Ticker.prototype.stop = function () {
-  CAF(this.loop);
-  this.started = false;
-};
-
-/**
- * 暂停触发 tick
- *
- * @method pause
- */
-Ticker.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复触发 tick
- *
- * @method resume
- */
-Ticker.prototype.resume = function () {
-  this.paused = false;
-};
-
-/**
- *
- * @class
- * @memberof JC
- * @param {Array}  points  array of points
- */
-function CatmullRom(points) {
-  this.points = points;
-
-  this.passCmp = {
-    x: true,
-    y: true,
-    z: false
-  };
-
-  this.ccmp = {};
-
-  this.updateCcmp();
-}
-
-CatmullRom.prototype = Object.create(Curve.prototype);
-
-CatmullRom.prototype.updateCcmp = function () {
-  for (var i = 0; i < this.points.length; i++) {
-    var point = this.points[i];
-    for (var cmp in this.passCmp) {
-      if (this.passCmp[cmp] && !Utils.isUndefined(point[cmp])) {
-        this.ccmp[cmp] = this.ccmp[cmp] || [];
-        this.ccmp[cmp][i] = point[cmp];
-      }
-    }
-  }
-};
-
-CatmullRom.prototype.getPoint = function (k) {
-  var point = new Point();
-  for (var cmp in this.passCmp) {
-    if (this.passCmp[cmp]) {
-      point[cmp] = this.solveEachCmp(this.ccmp[cmp], k);
-    }
-  }
-  return point;
-};
-
-CatmullRom.prototype.solveEachCmp = function (v, k) {
-  var m = v.length - 1;
-  var f = m * k;
-  var i = Math.floor(f);
-  var fn = this.solve;
-
-  if (v[0] === v[m]) {
-    if (k < 0) {
-      i = Math.floor(f = m * (1 + k));
-    }
-
-    return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-  } else {
-    if (k < 0) {
-      return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-    }
-
-    if (k > 1) {
-      return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-    }
-
-    return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-  }
-};
-
-CatmullRom.prototype.solve = function (p0, p1, p2, p3, t) {
-  var v0 = (p2 - p0) * 0.5;
-  var v1 = (p3 - p1) * 0.5;
-  var t2 = t * t;
-  var t3 = t * t2;
-
-  /* eslint max-len: 0 */
-  return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
 };
 
 /**
@@ -9497,7 +9297,6 @@ exports.Utils = Utils;
 exports.Texture = Texture;
 exports.Loader = Loader;
 exports.loaderUtil = loaderUtil;
-exports.ParserAnimation = ParserAnimation;
 exports.Ticker = Ticker;
 exports.Bounds = Bounds;
 exports.Point = Point;
