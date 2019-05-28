@@ -6,7 +6,7 @@ export {Animation} from './animation/Animation';
 export {Tween} from './utils/Tween';
 export {Utils} from './utils/Utils';
 export {Texture, Loader, loaderUtil} from './utils/Loader';
-export {ParserAnimation} from './utils/ParserAnimation';
+// export {ParserAnimation} from './utils/ParserAnimation';
 export {Ticker} from './utils/Ticker';
 
 export {Bounds} from './math/Bounds';
