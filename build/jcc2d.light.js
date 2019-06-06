@@ -4153,13 +4153,13 @@ function Sprite(options) {
 
   this.ready = true;
 
-  this.texture = options.texture;
-  if (this.texture.loaded) {
+  var texture = options.texture;
+  if (texture.loaded) {
     this.upTexture(options);
   } else {
     var This = this;
     this.ready = false;
-    this.texture.on('load', function () {
+    texture.on('load', function () {
       This.upTexture(options);
       This.ready = true;
     });
@@ -4176,6 +4176,7 @@ Sprite.prototype = Object.create(Container.prototype);
  * @param {json} options
  */
 Sprite.prototype.upTexture = function (options) {
+  this.texture = options.texture;
   this.naturalWidth = options.texture.naturalWidth;
   this.naturalHeight = options.texture.naturalHeight;
   this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
