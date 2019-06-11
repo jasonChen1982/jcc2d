@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.4"></a>
+## [1.7.4](https://github.com/jasonChen1982/jcc2d/compare/v1.7.3...v1.7.4) (2019-06-11)
+
+
+### Features
+
+* **resolution:** add point resolution ([6277637](https://github.com/jasonChen1982/jcc2d/commit/6277637))
+
+
+
 <a name="1.7.3"></a>
 ## [1.7.3](https://github.com/jasonChen1982/jcc2d/compare/v1.7.1...v1.7.3) (2019-06-06)
 
