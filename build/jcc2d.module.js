@@ -4831,6 +4831,9 @@ Sprite.prototype.upTexture = function (options) {
 
   this.width = options.width || this.frame.width;
   this.height = options.height || this.frame.height;
+  if (this.movieClip) {
+    this.movieClip.preFrame = null;
+  }
 };
 
 /**
