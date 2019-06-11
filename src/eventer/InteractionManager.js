@@ -917,11 +917,12 @@ class InteractionManager extends Eventer {
    * resulting value is stored in the point. This takes into account the fact that the DOM
    * element could be scaled and positioned anywhere on the screen.
    *
-   * @param  {Vector2} point - the point that the result will be stored in
+   * @param  {InteractionData} interactionData - the point that the result will be stored in
    * @param  {number} x - the x coord of the position to map
    * @param  {number} y - the y coord of the position to map
    */
-  mapPositionToPoint(point, x, y) {
+  mapPositionToPoint(interactionData, x, y) {
+    const {resolution, global} = interactionData;
     let rect;
 
     // IE 11 fix
@@ -937,10 +938,12 @@ class InteractionManager extends Eventer {
     } else {
       rect = this.interactionDOMElement.getBoundingClientRect();
     }
-    // const resolution = this.interactionDOMElement.width / rect.width;
 
-    point.x = (x - rect.left) * (this.interactionDOMElement.width / rect.width);
-    point.y = (y - rect.top) * (this.interactionDOMElement.height / rect.height);
+    resolution.x = this.interactionDOMElement.width / rect.width;
+    resolution.y = this.interactionDOMElement.height / rect.height;
+
+    global.x = (x - rect.left) * resolution.x;
+    global.y = (y - rect.top) * resolution.y;
   }
 
   /**
@@ -1609,7 +1612,7 @@ class InteractionManager extends Eventer {
   configureInteractionEventForDOMEvent(interactionEvent, pointerEvent, interactionData) {
     interactionEvent.data = interactionData;
 
-    this.mapPositionToPoint(interactionData.global, pointerEvent.clientX, pointerEvent.clientY);
+    this.mapPositionToPoint(interactionData, pointerEvent.clientX, pointerEvent.clientY);
 
     // this.raycaster.setFromCamera(interactionData.global, this.camera);
 

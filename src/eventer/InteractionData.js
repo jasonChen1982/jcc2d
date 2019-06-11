@@ -19,6 +19,13 @@ class InteractionData {
     this.global = new Point(-100000, -100000);
 
     /**
+     * This resolution
+     *
+     * @member {Point}
+     */
+    this.resolution = new Point(1, 1);
+
+    /**
      * The target DisplayObject that was interacted with
      *
      * @member {Object3D}
