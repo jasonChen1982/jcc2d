@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.5"></a>
+## [1.7.5](https://github.com/jasonChen1982/jcc2d/compare/v1.7.4...v1.7.5) (2019-06-11)
+
+
+### Bug Fixes
+
+* **texture:** update texture for frame ([92e6b1c](https://github.com/jasonChen1982/jcc2d/commit/92e6b1c))
+
+
+
 <a name="1.7.4"></a>
 ## [1.7.4](https://github.com/jasonChen1982/jcc2d/compare/v1.7.3...v1.7.4) (2019-06-11)
 
