@@ -4572,6 +4572,13 @@ var InteractionData = function () {
     this.global = new Point(-100000, -100000);
 
     /**
+     * This resolution
+     *
+     * @member {Point}
+     */
+    this.resolution = new Point(1, 1);
+
+    /**
      * The target DisplayObject that was interacted with
      *
      * @member {Object3D}
@@ -5908,14 +5915,17 @@ var InteractionManager = function (_Eventer) {
      * resulting value is stored in the point. This takes into account the fact that the DOM
      * element could be scaled and positioned anywhere on the screen.
      *
-     * @param  {Vector2} point - the point that the result will be stored in
+     * @param  {InteractionData} interactionData - the point that the result will be stored in
      * @param  {number} x - the x coord of the position to map
      * @param  {number} y - the y coord of the position to map
      */
 
   }, {
     key: 'mapPositionToPoint',
-    value: function mapPositionToPoint(point, x, y) {
+    value: function mapPositionToPoint(interactionData, x, y) {
+      var resolution = interactionData.resolution,
+          global = interactionData.global;
+
       var rect = void 0;
 
       // IE 11 fix
@@ -5931,10 +5941,12 @@ var InteractionManager = function (_Eventer) {
       } else {
         rect = this.interactionDOMElement.getBoundingClientRect();
       }
-      // const resolution = this.interactionDOMElement.width / rect.width;
 
-      point.x = (x - rect.left) * (this.interactionDOMElement.width / rect.width);
-      point.y = (y - rect.top) * (this.interactionDOMElement.height / rect.height);
+      resolution.x = this.interactionDOMElement.width / rect.width;
+      resolution.y = this.interactionDOMElement.height / rect.height;
+
+      global.x = (x - rect.left) * resolution.x;
+      global.y = (y - rect.top) * resolution.y;
     }
 
     /**
@@ -6625,7 +6637,7 @@ var InteractionManager = function (_Eventer) {
     value: function configureInteractionEventForDOMEvent(interactionEvent, pointerEvent, interactionData) {
       interactionEvent.data = interactionData;
 
-      this.mapPositionToPoint(interactionData.global, pointerEvent.clientX, pointerEvent.clientY);
+      this.mapPositionToPoint(interactionData, pointerEvent.clientX, pointerEvent.clientY);
 
       // this.raycaster.setFromCamera(interactionData.global, this.camera);
 
