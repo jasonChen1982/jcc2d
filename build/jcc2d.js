@@ -9933,7 +9933,7 @@ var CompElement = function (_Container) {
 var AnimationGroup = function () {
   /**
    * pass a data and extra config
-   * @param {object} options config and data
+   * @param {object} options config and keyframes
    * @param {Object} options.keyframes bodymovin data, which export from AE
    * @param {Number} [options.repeats=0] need repeat somt times?
    * @param {Boolean} [options.infinite=false] play this animation round and round forever
