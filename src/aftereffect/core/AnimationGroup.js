@@ -21,7 +21,7 @@ class AnimationGroup {
    * @param {Number} [options.autoStart=true] auto start animation after assets loaded
    */
   constructor(options) {
-    this.prefix = options.prefix || '';
+    this.prefix = options.prefix || options.keyframes.prefix || '';
     this.keyframes = options.keyframes;
     this.fr = this.keyframes.fr;
     this.ip = this.keyframes.ip;

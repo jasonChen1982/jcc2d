@@ -35,8 +35,9 @@ export function findStep(steps, progress) {
  * @return {string}
  */
 export function createUrl(asset, prefix) {
-  const up = (prefix ? prefix : asset.u) + asset.p;
-  const url = asset.up || up;
+  if (prefix) prefix = prefix.replace(/\/?$/, '/');
+  const up = asset.u + asset.p;
+  const url = asset.up || prefix + up;
   return url;
 }
 

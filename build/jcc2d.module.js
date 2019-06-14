@@ -1443,8 +1443,9 @@ function findStep$1(steps, progress) {
  * @return {string}
  */
 function createUrl(asset, prefix) {
-  var up = (prefix ? prefix : asset.u) + asset.p;
-  var url = asset.up || up;
+  if (prefix) prefix = prefix.replace(/\/?$/, '/');
+  var up = asset.u + asset.p;
+  var url = asset.up || prefix + up;
   return url;
 }
 
@@ -9942,7 +9943,7 @@ var AnimationGroup = function () {
 
     classCallCheck(this, AnimationGroup);
 
-    this.prefix = options.prefix || '';
+    this.prefix = options.prefix || options.keyframes.prefix || '';
     this.keyframes = options.keyframes;
     this.fr = this.keyframes.fr;
     this.ip = this.keyframes.ip;
