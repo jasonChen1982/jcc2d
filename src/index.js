@@ -28,6 +28,7 @@ export {Graphics} from './core/Graphics';
 export {TextFace} from './core/TextFace';
 export {FilterGroup} from './filters/FilterGroup';
 export {BlurFilter} from './filters/BlurFilter';
+export {FrameBuffer} from './filters/FrameBuffer';
 
 export {Scene} from './core/Scene';
 export {Renderer} from './core/Renderer';
