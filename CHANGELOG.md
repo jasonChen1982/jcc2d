@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.7.7"></a>
+## [1.7.7](https://github.com/jasonChen1982/jcc2d/compare/v1.7.6...v1.7.7) (2019-06-17)
+
+
+### Features
+
+* **framebuffer:** export framebuffer ([19d3949](https://github.com/jasonChen1982/jcc2d/commit/19d3949))
+
+
+
 <a name="1.7.6"></a>
 ## [1.7.6](https://github.com/jasonChen1982/jcc2d/compare/v1.7.5...v1.7.6) (2019-06-14)
 
