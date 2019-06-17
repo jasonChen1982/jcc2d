@@ -10477,6 +10477,7 @@ exports.Graphics = Graphics;
 exports.TextFace = TextFace;
 exports.FilterGroup = FilterGroup;
 exports.BlurFilter = BlurFilter;
+exports.FrameBuffer = FrameBuffer;
 exports.Scene = Scene;
 exports.Renderer = Renderer;
 exports.Application = Application;

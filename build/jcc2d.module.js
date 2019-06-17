@@ -10443,5 +10443,5 @@ var AnimationManager = function () {
   return AnimationManager;
 }();
 
-export { Eventer, Animation, Tween, Utils, Texture, Loader, loaderUtil, Ticker, Bounds, Point, Rectangle, Polygon, Circle, Ellipse, Matrix, IDENTITY, TEMP_MATRIX, CatmullRom, BezierCurve, SvgCurve, NURBSCurve, DisplayObject, Container, Sprite, Graphics, TextFace, FilterGroup, BlurFilter, Scene, Renderer, Application, AnimationManager };
+export { Eventer, Animation, Tween, Utils, Texture, Loader, loaderUtil, Ticker, Bounds, Point, Rectangle, Polygon, Circle, Ellipse, Matrix, IDENTITY, TEMP_MATRIX, CatmullRom, BezierCurve, SvgCurve, NURBSCurve, DisplayObject, Container, Sprite, Graphics, TextFace, FilterGroup, BlurFilter, FrameBuffer, Scene, Renderer, Application, AnimationManager };
 //# sourceMappingURL=jcc2d.module.js.map
