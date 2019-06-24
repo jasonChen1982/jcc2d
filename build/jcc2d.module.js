@@ -4829,6 +4829,7 @@ Sprite.prototype.upTexture = function (options) {
     return;
   }
 
+  this.ready = true;
   this.texture = options.texture;
   this.naturalWidth = options.texture.naturalWidth;
   this.naturalHeight = options.texture.naturalHeight;
