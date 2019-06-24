@@ -4799,7 +4799,9 @@ Object.defineProperty(MovieClip.prototype, 'interval', {
  * @param {Number} [options.height] 实际显示的高，可能会缩放图像
  * @param {Object} [options.animations] 逐帧的预置帧动画配置
  */
-function Sprite(options) {
+function Sprite() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
   Container.call(this);
 
   this._width = 0;
