@@ -6880,6 +6880,11 @@ function Renderer(options) {
   this.currentScene = null;
 }
 
+Renderer.prototype.clear = function () {
+  this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  this.ctx.clearRect(0, 0, this.width, this.height);
+};
+
 Renderer.prototype.render = function (scene, snippet) {
   this.currentScene = scene;
 
@@ -6889,10 +6894,7 @@ Renderer.prototype.render = function (scene, snippet) {
   this.emit('postupdate', snippet);
 
   this.emit('prerender', snippet);
-  if (this.autoClear) {
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.clearRect(0, 0, this.width, this.height);
-  }
+  if (this.autoClear) this.clear();
   this.currentScene.render(this.ctx);
   this.emit('postrender', snippet);
 };
