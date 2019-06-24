@@ -4800,19 +4800,9 @@ function Sprite(options) {
 
   this._height = 0;
 
-  this.ready = true;
+  this.ready = false;
 
-  var texture = options.texture;
-  if (texture.loaded) {
-    this.upTexture(options);
-  } else {
-    var This = this;
-    this.ready = false;
-    texture.on('load', function () {
-      This.upTexture(options);
-      This.ready = true;
-    });
-  }
+  this.upTexture(options);
 
   this.movieClip = new MovieClip(this, options);
 }
@@ -4825,6 +4815,18 @@ Sprite.prototype = Object.create(Container.prototype);
  * @param {json} options
  */
 Sprite.prototype.upTexture = function (options) {
+  var _this = this;
+
+  if (!options.texture) return;
+  if (!options.texture.loaded) {
+    this.ready = false;
+    options.texture.on('load', function () {
+      _this.upTexture(options);
+      _this.ready = true;
+    });
+    return;
+  }
+
   this.texture = options.texture;
   this.naturalWidth = options.texture.naturalWidth;
   this.naturalHeight = options.texture.naturalHeight;
