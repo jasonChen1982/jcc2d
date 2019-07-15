@@ -1,16 +1,14 @@
 import {Container} from '../../../core/Container';
-import {Graphics} from '../../../core/Graphics';
 import {Keyframes} from '../../keyframes/Keyframes';
-import CVShapeElement from '../../shapes/CVShapeElement';
 
 /**
- * ShapeElement class
+ * NullElement class
  * @class
  * @private
  */
-class ShapeElement extends Container {
+class NullElement extends Container {
   /**
-   * ShapeElement constructor
+   * NullElement constructor
    * @param {object} layer layer data information
    * @param {object} session layer data information
    */
@@ -20,17 +18,10 @@ class ShapeElement extends Container {
     const {parentName, register} = session;
 
     this.name = parentName + '.' + layer.nm;
-    this.bProgress = -999999;
 
     register.setLayer(this.name, this);
 
     this.initKeyFrames(layer, session);
-
-    this.shapes = new CVShapeElement(layer, session);
-    this.adds(new Graphics((ctx) => {
-      this.shapes.prepareFrame(this.bProgress);
-      this.shapes.renderFrame(ctx);
-    }));
   }
 
   /**
@@ -50,9 +41,8 @@ class ShapeElement extends Container {
    */
   updateKeyframes(progress, session) {
     if (!this.movin) return;
-    this.bProgress = progress;
     this.bodymovin.update(progress, session);
   }
 }
 
-export default ShapeElement;
+export default NullElement;

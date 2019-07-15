@@ -1,5 +1,5 @@
-import CurveData from '../shapes/CurveData';
-import {drawCurve, drawInv} from '../shapes/DrawCurve';
+import CurveData from './CurveData';
+import {drawCurve, drawInv} from './DrawCurve';
 
 
 /**

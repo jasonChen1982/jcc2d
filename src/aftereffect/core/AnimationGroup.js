@@ -1,6 +1,7 @@
 import Register from './Register';
 import {Utils} from '../../utils/Utils';
 import CompElement from './elements/CompElement';
+import DataManager from './DataManager';
 
 /**
  * an animation group, store and compute frame information
@@ -22,6 +23,7 @@ class AnimationGroup {
    */
   constructor(options) {
     this.prefix = options.prefix || options.keyframes.prefix || '';
+    DataManager(options.keyframes);
     this.keyframes = options.keyframes;
     this.fr = this.keyframes.fr;
     this.ip = this.keyframes.ip;

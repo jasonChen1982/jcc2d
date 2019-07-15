@@ -1,6 +1,6 @@
 import {Utils} from '../../utils/Utils';
 import Mask from './Mask';
-import Shapes from './Shapes';
+// import Shapes from './Shapes';
 import Transform from './Transform';
 
 /**
@@ -33,7 +33,7 @@ class Keyframes {
     this.transform(element, layer, session);
 
     if (layer.hasMask) this.mask(element, layer, session);
-    if (layer.shapes) this.shapes(element, layer, session);
+    // if (layer.shapes) this.shapes(element, layer, session);
   }
 
   /**
@@ -62,9 +62,9 @@ class Keyframes {
    * @param {object} layer
    * @param {object} session
    */
-  shapes(element, layer, session) {
-    this.add(new Shapes(element, layer, session));
-  }
+  // shapes(element, layer, session) {
+  //   this.add(new Shapes(element, layer, session));
+  // }
 
   /**
    * update

@@ -1,4 +1,4 @@
-import GraphicsMask from './graphics/GraphicsMask';
+import GraphicsMask from './mask/GraphicsMask';
 
 /**
  * Mask

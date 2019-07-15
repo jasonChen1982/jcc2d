@@ -1,36 +1,55 @@
-import {Container} from '../../../core/Container';
 import {Graphics} from '../../../core/Graphics';
 import {Keyframes} from '../../keyframes/Keyframes';
-import CVShapeElement from '../../shapes/CVShapeElement';
 
 /**
- * ShapeElement class
+ * a
+ */
+class SolidRect {
+  /**
+   * a
+   * @param {*} fillColor a
+   * @param {*} width a
+   * @param {*} height a
+   */
+  constructor(fillColor, width, height) {
+    this.fillColor = fillColor;
+    this.width = width;
+    this.height = height;
+  }
+
+  /**
+   * a
+   * @param {*} ctx a
+   */
+  render(ctx) {
+    ctx.beginPath();
+    ctx.fillStyle = this.fillColor;
+    ctx.fillRect(0, 0, this.width, this.height);
+  }
+}
+
+/**
+ * NullElement class
  * @class
  * @private
  */
-class ShapeElement extends Container {
+class SolidElement extends Graphics {
   /**
-   * ShapeElement constructor
+   * NullElement constructor
    * @param {object} layer layer data information
    * @param {object} session layer data information
    */
   constructor(layer, session = {}) {
-    super();
+    const {sc, sw, sh} = layer;
+    super(new SolidRect(sc, sw, sh));
 
     const {parentName, register} = session;
 
     this.name = parentName + '.' + layer.nm;
-    this.bProgress = -999999;
 
     register.setLayer(this.name, this);
 
     this.initKeyFrames(layer, session);
-
-    this.shapes = new CVShapeElement(layer, session);
-    this.adds(new Graphics((ctx) => {
-      this.shapes.prepareFrame(this.bProgress);
-      this.shapes.renderFrame(ctx);
-    }));
   }
 
   /**
@@ -50,9 +69,8 @@ class ShapeElement extends Container {
    */
   updateKeyframes(progress, session) {
     if (!this.movin) return;
-    this.bProgress = progress;
     this.bodymovin.update(progress, session);
   }
 }
 
-export default ShapeElement;
+export default SolidElement;

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 320px;
+      height: 480px;
+      margin: -240px 0 0 -160px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="640" height="960"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    function ShapeTest() {
+      // const path = {
+      //   "i": [ [ 0, 0 ] ],
+      //   "o": [ [ 0, 0 ] ],
+      //   "v": [ [ 448, 31 ] ],
+      //   "c": false
+      // };
+      // const path = {
+      //   "i": [
+      //     [ 11.046, 0 ],
+      //     [ 0, 0 ],
+      //     [ 0, -11.046 ],
+      //     [ 0, 0 ],
+      //     [ -11.046, 0 ],
+      //     [ 0, 0 ],
+      //     [ 0, 11.046 ],
+      //     [ 0, 0 ]
+      //   ],
+      //   "o": [
+      //     [ 0, 0 ],
+      //     [ -11.046, 0 ],
+      //     [ 0, 0 ],
+      //     [ 0, 11.046 ],
+      //     [ 0, 0 ],
+      //     [ 11.046, 0 ],
+      //     [ 0, 0 ],
+      //     [ 0, -11.046 ]
+      //   ],
+      //   "v": [
+      //     [ 291.91, -113.426 ],
+      //     [ -291.91, -113.426 ],
+      //     [ -311.91, -93.426 ],
+      //     [ -311.91, -6.574 ],
+      //     [ -291.91, 13.426 ],
+      //     [ 291.91, 13.426 ],
+      //     [ 311.91, -6.574 ],
+      //     [ 311.91, -93.426 ]
+      //   ],
+      //   "c": true
+      // };
+      const path = {
+        "i": [
+          [0, 0],
+          [0, 0],
+          [0, 0],
+          [0, 0]
+        ],
+        "o": [
+          [0, 0],
+          [0, 0],
+          [0, 0],
+          [0, 0]
+        ],
+        "v": [
+          [401.344, -89.672],
+          [-401.344, -89.672],
+          [-401.344, 89.672],
+          [401.344, 89.672]
+        ],
+        "c": true
+      };
+      this.path = path;
+      this.c = true;
+    }
+    ShapeTest.prototype.render = function(ctx) {
+      ctx.beginPath();
+      var len = this.path.v.length;
+      var start = this.path.v[0];
+      ctx.moveTo(start[0], start[1]);
+
+      var j = 1;
+      var pre = start;
+      for (; j < len; j++) {
+        var oj = this.path.o[j - 1];
+        var ij = this.path.i[j];
+        var vj = this.path.v[j];
+        ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
+        pre = vj;
+      }
+      var oj = this.path.o[j - 1];
+      var ij = this.path.i[0];
+      var vj = this.path.v[0];
+      ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
+
+      // var i = 1;
+      // for (; i < len; i++) {
+      //   ctx.bezierCurveTo(this.path.o[i - 1][0], this.path.o[i - 1][1], this.path.i[i][0], this.path.i[i][1], this.path.v[i][0], this.path.v[i][1]);
+      // }
+      // if (len === 1) {
+      //   ctx.moveTo(start[0], start[1]);
+      // }
+      // if (this.path.c && len) {
+      //   ctx.bezierCurveTo(this.path.o[i - 1][0], this.path.o[i - 1][1], this.path.i[0][0], this.path.i[0][1], this.path.v[0][0], this.path.v[0][1]);
+      // }
+
+      ctx.stroke();
+    };
+
+    var app = new JC.Application({
+      dom: '#demo_canvas'
+    });
+    var DOC = new JC.Container();
+    DOC.x = 320;
+    DOC.y = 480;
+
+    var shape = new JC.Graphics(new ShapeTest());
+    DOC.adds(shape);
+    app.scene.adds(DOC);
+
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    app.renderer.on('postrender', function () {
+      stats.update();
+    })
+
+  </script>
+</body>
+
+</html>
