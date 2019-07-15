@@ -8539,488 +8539,6 @@ var Mask = function () {
   return Mask;
 }();
 
-/**
- * CurveShape
- * @class
- * @private
- */
-
-var CurveShape = function (_CurveData) {
-  inherits(CurveShape, _CurveData);
-
-  /**
-   * CurveShape
-   * @param {object} data curve config data
-   * @param {object} session session
-   * @param {boolean} mask is mask or not
-   */
-  function CurveShape(data, session) {
-    classCallCheck(this, CurveShape);
-
-    var _this = possibleConstructorReturn(this, (CurveShape.__proto__ || Object.getPrototypeOf(CurveShape)).call(this, data, session));
-
-    _this.curve = null;
-    return _this;
-  }
-
-  /**
-   * update curve by progress
-   * @param {number} progress progress
-   */
-
-
-  createClass(CurveShape, [{
-    key: 'update',
-    value: function update(progress) {
-      this.curve = this.getCurve(progress);
-    }
-
-    /**
-     * a
-     * @param {*} ctx a
-     */
-
-  }, {
-    key: 'render',
-    value: function render(ctx) {
-      drawCurve(ctx, this.curve);
-    }
-  }]);
-  return CurveShape;
-}(CurveData);
-
-// import EllipseShape from './EllipseShape';
-// import RectShape from './RectShape';
-// import StartShape from './StartShape';
-
-/**
- * getShape
- * @ignore
- * @param {*} item data
- * @param {*} session session
- * @return {shape}
- */
-function getShape(item, session) {
-  var shape = null;
-  switch (item.ty) {
-    case 'sh':
-      shape = new CurveShape(item, session);
-      break;
-    // case 'el':
-    //   shape = new EllipseShape(item, session);
-    //   break;
-    // case 'rc':
-    //   shape = new RectShape(item, session);
-    //   break;
-    // case 'sr':
-    //   shape = new StartShape(item, session);
-    //   break;
-    default:
-      break;
-  }
-  return shape;
-}
-
-/**
- * translate rgba array to hex
- * @ignore
- * @param {array} color an array with rgba
- * @param {*} _ just a placeholder param
- * @return {hex}
- */
-function toColor(color, _) {
-  color = color.slice(0, 3);
-  return color.map(function (c) {
-    return c * 255 >> 0;
-  });
-}
-
-/**
- * just return the value * 2.55 >> 0
- * @ignore
- * @param {array} value an array with some number value
- * @param {*} _ just a placeholder param
- * @return {number}
- */
-function to255(value, _) {
-  return value[0] * 2.55 >> 0;
-}
-
-/**
- * just return the value / 100
- * @ignore
- * @param {array} value an array with some number value
- * @param {*} _ just a placeholder param
- * @return {number}
- */
-function toNormalize(value, _) {
-  return value[0] / 100;
-}
-
-/**
- * just return the value / 100 by index
- * @ignore
- * @param {array} value an array with some number value
- * @param {number} index use which value
- * @return {number}
- */
-function toNormalizeByIdx(value, index) {
-  return value[index] / 100;
-}
-
-/**
- * just return the origin value by index
- * @ignore
- * @param {array} value an array with some number value
- * @param {number} index use which value
- * @return {number}
- */
-function toBack(value, index) {
-  return value[index];
-}
-
-/**
- * translate degree to radian
- * @ignore
- * @param {array} value an array with degree value
- * @param {*} _ just a placeholder param
- * @return {number}
- */
-function toRadian(value, _) {
-  return value[0] * Math.PI / 180;
-}
-
-var FILL_MAP = {
-  o: {
-    props: ['alpha'],
-    translate: to255
-  },
-  c: {
-    props: ['color'],
-    translate: toColor
-  }
-};
-
-var STROKE_MAP = {
-  o: {
-    props: ['alpha'],
-    translate: to255
-  },
-  c: {
-    props: ['color'],
-    translate: toColor
-  },
-  w: {
-    props: ['lineWidth'],
-    translate: toBack
-  }
-};
-
-var TRANSFORM_MAP = {
-  o: {
-    props: ['alpha'],
-    translate: toNormalize
-  },
-  r: {
-    props: ['rotation'],
-    translate: toRadian
-  },
-  p: {
-    props: ['x', 'y'],
-    translate: toBack
-  },
-  a: {
-    props: ['pivotX', 'pivotY'],
-    translate: toBack
-  },
-  s: {
-    props: ['scaleX', 'scaleY'],
-    translate: toNormalizeByIdx
-  }
-};
-
-/**
- * Fill keyframes class
- * @class
- * @private
- */
-
-var Fill = function () {
-  /**
-   * generate a fill-type keyframes buffer
-   * @param {object} item item data
-   * @param {object} session now session
-   * @param {object} session.size time of pre-frame
-   * @param {number} session.st time of start position
-   */
-  function Fill(item, session) {
-    classCallCheck(this, Fill);
-    var _session$st = session.st,
-        st = _session$st === undefined ? 0 : _session$st;
-
-    this.item = item;
-
-    this.alpha = 255;
-    this.color = [0, 0, 0];
-
-    this.st = st;
-    this.aks = {};
-    this.kic = {};
-
-    this.preParse(item);
-  }
-
-  /**
-   * preParse
-   * @param {object} item fill tiem config
-   */
-
-
-  createClass(Fill, [{
-    key: 'preParse',
-    value: function preParse(item) {
-      for (var key in FILL_MAP) {
-        if (item[key] && item[key].a) {
-          this.parseDynamic(key);
-        } else if (item[key]) {
-          this.parseStatic(key);
-        }
-      }
-    }
-
-    /**
-     * parse dynamic property
-     * @param {string} key property name
-     */
-
-  }, {
-    key: 'parseDynamic',
-    value: function parseDynamic(key) {
-      var prop = this.item[key];
-      var propk = prop.k;
-      var last = propk.length - 1;
-
-      prop.ost = this.st + propk[0].t;
-      prop.oet = this.st + propk[last].t;
-
-      for (var i = 0; i < last; i++) {
-        var sbk = propk[i];
-        var sek = propk[i + 1];
-
-        sbk.ost = this.st + sbk.t;
-        sbk.oet = this.st + sek.t;
-
-        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
-      }
-      this.aks[key] = prop;
-    }
-
-    /**
-     * parse static property
-     * @param {string} key property name
-     */
-
-  }, {
-    key: 'parseStatic',
-    value: function parseStatic(key) {
-      var propk = this.item[key].k;
-      if (Utils.isNumber(propk)) propk = [propk];
-      this.setValue(key, propk);
-    }
-
-    /**
-     * update fill information
-     * @param {number} progress progress
-     * @param {object} session update session
-     */
-
-  }, {
-    key: 'update',
-    value: function update(progress, session) {
-      for (var key in this.aks) {
-        if (this.aks[key]) {
-          var value = interpolation(this.aks[key], progress, this.kic, key);
-          this.setValue(key, value);
-        }
-      }
-
-      // this.element.beginFill(this.color, this.alpha);
-    }
-
-    /**
-     * set value to host element
-     * @private
-     * @param {string} key property
-     * @param {array} value value array
-     */
-
-  }, {
-    key: 'setValue',
-    value: function setValue(key, value) {
-      var _FILL_MAP$key = FILL_MAP[key],
-          props = _FILL_MAP$key.props,
-          translate = _FILL_MAP$key.translate;
-
-      for (var i = 0; i < props.length; i++) {
-        this[props[i]] = translate(value, i);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} ctx a
-     */
-
-  }, {
-    key: 'render',
-    value: function render(ctx) {
-      ctx.fillStyle = 'rgba(' + this.color.join(', ') + ', ' + this.alpha + ')';
-    }
-  }]);
-  return Fill;
-}();
-
-/**
- * Stroke
- * @class
- * @private
- */
-
-var Stroke = function () {
-  /**
-   * generate a keyframes buffer
-   * @param {object} item item data
-   * @param {object} session now session
-   * @param {object} session.size time of pre-frame
-   * @param {number} session.st time of start position
-   */
-  function Stroke(item, session) {
-    classCallCheck(this, Stroke);
-    var _session$st = session.st,
-        st = _session$st === undefined ? 0 : _session$st;
-
-    this.item = item;
-
-    this.alpha = 255;
-    this.lineWidth = 1;
-    this.color = [0, 0, 0];
-
-    this.st = st;
-    this.aks = {};
-    this.kic = {};
-
-    this.preParse(item);
-  }
-
-  /**
-   * preParse
-   * @param {object} item fill tiem config
-   */
-
-
-  createClass(Stroke, [{
-    key: 'preParse',
-    value: function preParse(item) {
-      for (var key in STROKE_MAP) {
-        if (item[key] && item[key].a) {
-          this.parseDynamic(key);
-        } else if (item[key]) {
-          this.parseStatic(key);
-        }
-      }
-    }
-
-    /**
-     * parse dynamic property
-     * @param {string} key property name
-     */
-
-  }, {
-    key: 'parseDynamic',
-    value: function parseDynamic(key) {
-      var prop = this.item[key];
-      var propk = prop.k;
-      var last = propk.length - 1;
-
-      prop.ost = this.st + propk[0].t;
-      prop.oet = this.st + propk[last].t;
-
-      for (var i = 0; i < last; i++) {
-        var sbk = propk[i];
-        var sek = propk[i + 1];
-
-        sbk.ost = this.st + sbk.t;
-        sbk.oet = this.st + sek.t;
-
-        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
-      }
-      this.aks[key] = prop;
-    }
-
-    /**
-     * parse static property
-     * @param {string} key property name
-     */
-
-  }, {
-    key: 'parseStatic',
-    value: function parseStatic(key) {
-      var propk = this.item[key].k;
-      if (Utils.isNumber(propk)) propk = [propk];
-      this.setValue(key, propk);
-    }
-
-    /**
-     * update fill information
-     * @param {number} progress progress
-     * @param {object} session update session
-     */
-
-  }, {
-    key: 'update',
-    value: function update(progress, session) {
-      for (var key in this.aks) {
-        if (this.aks[key]) {
-          var value = interpolation(this.aks[key], progress, this.kic, key);
-          this.setValue(key, value);
-        }
-      }
-    }
-
-    /**
-     * set value to host element
-     * @private
-     * @param {string} key property
-     * @param {array} value value array
-     */
-
-  }, {
-    key: 'setValue',
-    value: function setValue(key, value) {
-      var _STROKE_MAP$key = STROKE_MAP[key],
-          props = _STROKE_MAP$key.props,
-          translate = _STROKE_MAP$key.translate;
-
-      for (var i = 0; i < props.length; i++) {
-        this[props[i]] = translate(value, i);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} ctx a
-     */
-
-  }, {
-    key: 'render',
-    value: function render(ctx) {
-      ctx.strokeStyle = 'rgba(' + this.color.join(', ') + ', ' + this.alpha + ')';
-      ctx.lineWidth = this.lineWidth;
-    }
-  }]);
-  return Stroke;
-}();
-
 var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
 var STR_REG = /["']\w+["']/;
 
@@ -9215,6 +8733,77 @@ function getEX(ksp) {
 }
 
 /**
+ * just return the value / 100
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function toNormalize(value, _) {
+  return value[0] / 100;
+}
+
+/**
+ * just return the value / 100 by index
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {number} index use which value
+ * @return {number}
+ */
+function toNormalizeByIdx(value, index) {
+  return value[index] / 100;
+}
+
+/**
+ * just return the origin value by index
+ * @ignore
+ * @param {array} value an array with some number value
+ * @param {number} index use which value
+ * @return {number}
+ */
+function toBack(value, index) {
+  return value[index];
+}
+
+/**
+ * translate degree to radian
+ * @ignore
+ * @param {array} value an array with degree value
+ * @param {*} _ just a placeholder param
+ * @return {number}
+ */
+function toRadian(value, _) {
+  return value[0] * Math.PI / 180;
+}
+
+
+
+
+
+var TRANSFORM_MAP = {
+  o: {
+    props: ['alpha'],
+    translate: toNormalize
+  },
+  r: {
+    props: ['rotation'],
+    translate: toRadian
+  },
+  p: {
+    props: ['x', 'y'],
+    translate: toBack
+  },
+  a: {
+    props: ['pivotX', 'pivotY'],
+    translate: toBack
+  },
+  s: {
+    props: ['scaleX', 'scaleY'],
+    translate: toNormalizeByIdx
+  }
+};
+
+/**
  * keyframes buffer, cache some status and progress
  * @class
  * @private
@@ -9393,167 +8982,7 @@ var Transform = function () {
   return Transform;
 }();
 
-/**
- * Graphics class
- * @class
- * @private
- */
-
-var Graphics$1 = function (_Container) {
-  inherits(Graphics, _Container);
-
-  /**
-   * Graphics constructor
-   * @param {object} layer layer data information
-   * @param {object} items items data information
-   * @param {object} session layer data information
-   */
-  function Graphics(layer, items) {
-    var session = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-    classCallCheck(this, Graphics);
-
-    var _this = possibleConstructorReturn(this, (Graphics.__proto__ || Object.getPrototypeOf(Graphics)).call(this));
-
-    _this.fill = null;
-    _this.stroke = null;
-    _this.shape = null;
-
-    _this.layer = layer;
-    _this.itemCache = [];
-
-    _this.parseItems(items.it, session);
-    return _this;
-  }
-
-  /**
-   * parseItems
-   * @param {object} items items
-   * @param {object} session session
-   */
-
-
-  createClass(Graphics, [{
-    key: 'parseItems',
-    value: function parseItems(items, session) {
-      for (var i = 0; i < items.length; i++) {
-        var item = items[i];
-        if (item.ty == 'tr') {
-          var ip = this.layer.ip;
-          var op = this.layer.op;
-          this.itemCache.push(new Transform(this, { ks: item, ip: ip, op: op }, session));
-        } else if (item.ty == 'sh' || item.ty == 'el' || item.ty == 'rc' || item.ty == 'sr') {
-          var shape = getShape(item, session);
-          if (!shape) continue;
-          this.shape = shape;
-          this.itemCache.push(this.shape);
-        } else if (items[i].ty == 'fl') {
-          this.fill = new Fill(item, session);
-          this.itemCache.push(this.fill);
-        } else if (items[i].ty == 'st') {
-          this.stroke = new Stroke(item, session);
-          this.itemCache.push(this.stroke);
-        } else if (items[i].ty == 'tm') {
-          // TODO:
-        }
-      }
-    }
-
-    /**
-     * update
-     * @param {number} progress
-     * @param {object} session update session
-     */
-
-  }, {
-    key: 'update',
-    value: function update(progress, session) {
-      for (var i = 0; i < this.itemCache.length; i++) {
-        this.itemCache[i].update(progress, session);
-      }
-    }
-
-    /**
-     * render content
-     * @param {object} ctx
-     */
-
-  }, {
-    key: 'renderMe',
-    value: function renderMe(ctx) {
-      if (this.fill) this.fill.render(ctx);
-      if (this.stroke) this.stroke.render(ctx);
-      if (this.shape) {
-        ctx.beginPath();
-        this.shape.render(ctx);
-      }
-      if (this.fill) ctx.fill();
-      if (this.stroke) ctx.stroke();
-    }
-  }]);
-  return Graphics;
-}(Container);
-
-/**
- * Shapes
- * @class
- * @private
- */
-
-var Shapes = function () {
-  /**
-   * generate a keyframes buffer
-   * @param {Container} element host element
-   * @param {object} layer layer data
-   * @param {object} session now session
-   * @param {object} session.size time of pre-frame
-   * @param {number} session.st time of start position
-   */
-  function Shapes(element, layer, session) {
-    classCallCheck(this, Shapes);
-
-    this.element = element;
-    this.shapes = [];
-    this.createShapes(layer, session);
-  }
-
-  /**
-   * createShapes
-   * @param {object} layer layer data
-   * @param {object} session now session
-   */
-
-
-  createClass(Shapes, [{
-    key: 'createShapes',
-    value: function createShapes(layer, session) {
-      var shapes = layer.shapes;
-      for (var i = 0; i < shapes.length; i++) {
-        var shape = shapes[i];
-        if (shape.ty === 'gr') {
-          var ge = new Graphics$1(layer, shape, session);
-          this.element.adds(ge);
-          this.shapes.push(ge);
-        }
-      }
-    }
-
-    /**
-     * update
-     * @param {number} progress progress
-     * @param {object} session update session
-     */
-
-  }, {
-    key: 'update',
-    value: function update(progress, session) {
-      for (var i = 0; i < this.shapes.length; i++) {
-        this.shapes[i].update(progress, session);
-      }
-    }
-  }]);
-  return Shapes;
-}();
-
+// import Shapes from './Shapes';
 /**
  * Keyframes
  * @class
@@ -9591,7 +9020,7 @@ var Keyframes = function () {
       this.transform(element, layer, session);
 
       if (layer.hasMask) this.mask(element, layer, session);
-      if (layer.shapes) this.shapes(element, layer, session);
+      // if (layer.shapes) this.shapes(element, layer, session);
     }
 
     /**
@@ -9626,12 +9055,9 @@ var Keyframes = function () {
      * @param {object} layer
      * @param {object} session
      */
-
-  }, {
-    key: 'shapes',
-    value: function shapes(element, layer, session) {
-      this.add(new Shapes(element, layer, session));
-    }
+    // shapes(element, layer, session) {
+    //   this.add(new Shapes(element, layer, session));
+    // }
 
     /**
      * update
@@ -9660,6 +9086,108 @@ var Keyframes = function () {
   }]);
   return Keyframes;
 }();
+
+/**
+ * a
+ */
+
+var SolidRect = function () {
+  /**
+   * a
+   * @param {*} fillColor a
+   * @param {*} width a
+   * @param {*} height a
+   */
+  function SolidRect(fillColor, width, height) {
+    classCallCheck(this, SolidRect);
+
+    this.fillColor = fillColor;
+    this.width = width;
+    this.height = height;
+  }
+
+  /**
+   * a
+   * @param {*} ctx a
+   */
+
+
+  createClass(SolidRect, [{
+    key: 'render',
+    value: function render(ctx) {
+      ctx.beginPath();
+      ctx.fillStyle = this.fillColor;
+      ctx.fillRect(0, 0, this.width, this.height);
+    }
+  }]);
+  return SolidRect;
+}();
+
+/**
+ * NullElement class
+ * @class
+ * @private
+ */
+
+
+var SolidElement = function (_Graphics) {
+  inherits(SolidElement, _Graphics);
+
+  /**
+   * NullElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session layer data information
+   */
+  function SolidElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, SolidElement);
+    var sc = layer.sc,
+        sw = layer.sw,
+        sh = layer.sh;
+
+    var _this = possibleConstructorReturn(this, (SolidElement.__proto__ || Object.getPrototypeOf(SolidElement)).call(this, new SolidRect(sc, sw, sh)));
+
+    var parentName = session.parentName,
+        register = session.register;
+
+
+    _this.name = parentName + '.' + layer.nm;
+
+    register.setLayer(_this.name, _this);
+
+    _this.initKeyFrames(layer, session);
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(SolidElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+  }]);
+  return SolidElement;
+}(Graphics);
 
 /**
  * SpriteElement class
@@ -9725,6 +9253,4641 @@ var SpriteElement = function (_Sprite) {
 }(Sprite);
 
 /**
+ * NullElement class
+ * @class
+ * @private
+ */
+
+var NullElement = function (_Container) {
+  inherits(NullElement, _Container);
+
+  /**
+   * NullElement constructor
+   * @param {object} layer layer data information
+   * @param {object} session layer data information
+   */
+  function NullElement(layer) {
+    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    classCallCheck(this, NullElement);
+
+    var _this = possibleConstructorReturn(this, (NullElement.__proto__ || Object.getPrototypeOf(NullElement)).call(this));
+
+    var parentName = session.parentName,
+        register = session.register;
+
+
+    _this.name = parentName + '.' + layer.nm;
+
+    register.setLayer(_this.name, _this);
+
+    _this.initKeyFrames(layer, session);
+    return _this;
+  }
+
+  /**
+   * initKeyFrames
+   * @param {object} layer layer
+   * @param {object} session session
+   */
+
+
+  createClass(NullElement, [{
+    key: 'initKeyFrames',
+    value: function initKeyFrames(layer, session) {
+      this.bodymovin = new Keyframes(this, layer, session);
+      this.movin = true;
+    }
+
+    /**
+     * initKeyFrames
+     * @param {number} progress progress
+     * @param {object} session session
+     */
+
+  }, {
+    key: 'updateKeyframes',
+    value: function updateKeyframes(progress, session) {
+      if (!this.movin) return;
+      this.bodymovin.update(progress, session);
+    }
+  }]);
+  return NullElement;
+}(Container);
+
+/**
+ * a
+ * @param {*} type a
+ * @param {*} len a
+ * @return {*}
+ */
+function createRegularArray(type, len) {
+  var i = 0;
+  var arr = [];
+  var value = void 0;
+  switch (type) {
+    case 'int16':
+    case 'uint8c':
+      value = 1;
+      break;
+    default:
+      value = 1.1;
+      break;
+  }
+  for (i = 0; i < len; i += 1) {
+    arr.push(value);
+  }
+  return arr;
+}
+
+/**
+ * a
+ * @param {*} type a
+ * @param {*} len a
+ * @return {*}
+ */
+function _createTypedArray$1(type, len) {
+  if (type === 'float32') {
+    return new Float32Array(len);
+  } else if (type === 'int16') {
+    return new Int16Array(len);
+  } else if (type === 'uint8c') {
+    return new Uint8ClampedArray(len);
+  }
+}
+
+var createTypedArray = void 0;
+//  = createTypedArray
+if (typeof Uint8ClampedArray === 'function' && typeof Float32Array === 'function') {
+  createTypedArray = _createTypedArray$1;
+} else {
+  createTypedArray = createRegularArray;
+}
+
+/**
+ * a
+ * @param {*} len a
+ * @return {*}
+ */
+function createSizedArray(len) {
+  return new Array(len);
+}
+
+/* eslint-disable */
+/*!
+ Transformation Matrix v2.0
+ (c) Epistemex 2014-2015
+ www.epistemex.com
+ By Ken Fyrstenberg
+ Contributions by leeoniya.
+ License: MIT, header required.
+ */
+
+/**
+ * 2D transformation matrix object initialized with identity matrix.
+ *
+ * The matrix can synchronize a canvas context by supplying the context
+ * as an argument, or later apply current absolute transform to an
+ * existing context.
+ *
+ * All values are handled as floating point values.
+ *
+ * @param {CanvasRenderingContext2D} [context] - Optional context to sync with Matrix
+ * @prop {number} a - scale x
+ * @prop {number} b - shear y
+ * @prop {number} c - shear x
+ * @prop {number} d - scale y
+ * @prop {number} e - translate x
+ * @prop {number} f - translate y
+ * @prop {CanvasRenderingContext2D|null} [context=null] - set or get current canvas context
+ * @constructor
+ */
+
+var Matrix$1 = function () {
+
+    var _cos = Math.cos;
+    var _sin = Math.sin;
+    var _tan = Math.tan;
+    var _rnd = Math.round;
+
+    function reset() {
+        this.props[0] = 1;
+        this.props[1] = 0;
+        this.props[2] = 0;
+        this.props[3] = 0;
+        this.props[4] = 0;
+        this.props[5] = 1;
+        this.props[6] = 0;
+        this.props[7] = 0;
+        this.props[8] = 0;
+        this.props[9] = 0;
+        this.props[10] = 1;
+        this.props[11] = 0;
+        this.props[12] = 0;
+        this.props[13] = 0;
+        this.props[14] = 0;
+        this.props[15] = 1;
+        return this;
+    }
+
+    function rotate(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    }
+
+    function rotateX(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(1, 0, 0, 0, 0, mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1);
+    }
+
+    function rotateY(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, 0, mSin, 0, 0, 1, 0, 0, -mSin, 0, mCos, 0, 0, 0, 0, 1);
+    }
+
+    function rotateZ(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    }
+
+    function shear(sx, sy) {
+        return this._t(1, sy, sx, 1, 0, 0);
+    }
+
+    function skew(ax, ay) {
+        return this.shear(_tan(ax), _tan(ay));
+    }
+
+    function skewFromAxis(ax, angle) {
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, mSin, 0, 0, -mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(1, 0, 0, 0, _tan(ax), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        //return this._t(mCos, mSin, -mSin, mCos, 0, 0)._t(1, 0, _tan(ax), 1, 0, 0)._t(mCos, -mSin, mSin, mCos, 0, 0);
+    }
+
+    function scale(sx, sy, sz) {
+        if (!sz && sz !== 0) {
+            sz = 1;
+        }
+        if (sx === 1 && sy === 1 && sz === 1) {
+            return this;
+        }
+        return this._t(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1);
+    }
+
+    function setTransform(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {
+        this.props[0] = a;
+        this.props[1] = b;
+        this.props[2] = c;
+        this.props[3] = d;
+        this.props[4] = e;
+        this.props[5] = f;
+        this.props[6] = g;
+        this.props[7] = h;
+        this.props[8] = i;
+        this.props[9] = j;
+        this.props[10] = k;
+        this.props[11] = l;
+        this.props[12] = m;
+        this.props[13] = n;
+        this.props[14] = o;
+        this.props[15] = p;
+        return this;
+    }
+
+    function translate(tx, ty, tz) {
+        tz = tz || 0;
+        if (tx !== 0 || ty !== 0 || tz !== 0) {
+            return this._t(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1);
+        }
+        return this;
+    }
+
+    function transform(a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2) {
+
+        var _p = this.props;
+
+        if (a2 === 1 && b2 === 0 && c2 === 0 && d2 === 0 && e2 === 0 && f2 === 1 && g2 === 0 && h2 === 0 && i2 === 0 && j2 === 0 && k2 === 1 && l2 === 0) {
+            //NOTE: commenting this condition because TurboFan deoptimizes code when present
+            //if(m2 !== 0 || n2 !== 0 || o2 !== 0){
+            _p[12] = _p[12] * a2 + _p[15] * m2;
+            _p[13] = _p[13] * f2 + _p[15] * n2;
+            _p[14] = _p[14] * k2 + _p[15] * o2;
+            _p[15] = _p[15] * p2;
+            //}
+            this._identityCalculated = false;
+            return this;
+        }
+
+        var a1 = _p[0];
+        var b1 = _p[1];
+        var c1 = _p[2];
+        var d1 = _p[3];
+        var e1 = _p[4];
+        var f1 = _p[5];
+        var g1 = _p[6];
+        var h1 = _p[7];
+        var i1 = _p[8];
+        var j1 = _p[9];
+        var k1 = _p[10];
+        var l1 = _p[11];
+        var m1 = _p[12];
+        var n1 = _p[13];
+        var o1 = _p[14];
+        var p1 = _p[15];
+
+        /* matrix order (canvas compatible):
+         * ace
+         * bdf
+         * 001
+         */
+        _p[0] = a1 * a2 + b1 * e2 + c1 * i2 + d1 * m2;
+        _p[1] = a1 * b2 + b1 * f2 + c1 * j2 + d1 * n2;
+        _p[2] = a1 * c2 + b1 * g2 + c1 * k2 + d1 * o2;
+        _p[3] = a1 * d2 + b1 * h2 + c1 * l2 + d1 * p2;
+
+        _p[4] = e1 * a2 + f1 * e2 + g1 * i2 + h1 * m2;
+        _p[5] = e1 * b2 + f1 * f2 + g1 * j2 + h1 * n2;
+        _p[6] = e1 * c2 + f1 * g2 + g1 * k2 + h1 * o2;
+        _p[7] = e1 * d2 + f1 * h2 + g1 * l2 + h1 * p2;
+
+        _p[8] = i1 * a2 + j1 * e2 + k1 * i2 + l1 * m2;
+        _p[9] = i1 * b2 + j1 * f2 + k1 * j2 + l1 * n2;
+        _p[10] = i1 * c2 + j1 * g2 + k1 * k2 + l1 * o2;
+        _p[11] = i1 * d2 + j1 * h2 + k1 * l2 + l1 * p2;
+
+        _p[12] = m1 * a2 + n1 * e2 + o1 * i2 + p1 * m2;
+        _p[13] = m1 * b2 + n1 * f2 + o1 * j2 + p1 * n2;
+        _p[14] = m1 * c2 + n1 * g2 + o1 * k2 + p1 * o2;
+        _p[15] = m1 * d2 + n1 * h2 + o1 * l2 + p1 * p2;
+
+        this._identityCalculated = false;
+        return this;
+    }
+
+    function isIdentity() {
+        if (!this._identityCalculated) {
+            this._identity = !(this.props[0] !== 1 || this.props[1] !== 0 || this.props[2] !== 0 || this.props[3] !== 0 || this.props[4] !== 0 || this.props[5] !== 1 || this.props[6] !== 0 || this.props[7] !== 0 || this.props[8] !== 0 || this.props[9] !== 0 || this.props[10] !== 1 || this.props[11] !== 0 || this.props[12] !== 0 || this.props[13] !== 0 || this.props[14] !== 0 || this.props[15] !== 1);
+            this._identityCalculated = true;
+        }
+        return this._identity;
+    }
+
+    function equals(matr) {
+        var i = 0;
+        while (i < 16) {
+            if (matr.props[i] !== this.props[i]) {
+                return false;
+            }
+            i += 1;
+        }
+        return true;
+    }
+
+    function clone(matr) {
+        var i;
+        for (i = 0; i < 16; i += 1) {
+            matr.props[i] = this.props[i];
+        }
+    }
+
+    function cloneFromProps(props) {
+        var i;
+        for (i = 0; i < 16; i += 1) {
+            this.props[i] = props[i];
+        }
+    }
+
+    function applyToPoint(x, y, z) {
+
+        return {
+            x: x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12],
+            y: x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13],
+            z: x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]
+        };
+        /*return {
+         x: x * me.a + y * me.c + me.e,
+         y: x * me.b + y * me.d + me.f
+         };*/
+    }
+    function applyToX(x, y, z) {
+        return x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12];
+    }
+    function applyToY(x, y, z) {
+        return x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13];
+    }
+    function applyToZ(x, y, z) {
+        return x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14];
+    }
+
+    function inversePoint(pt) {
+        var determinant = this.props[0] * this.props[5] - this.props[1] * this.props[4];
+        var a = this.props[5] / determinant;
+        var b = -this.props[1] / determinant;
+        var c = -this.props[4] / determinant;
+        var d = this.props[0] / determinant;
+        var e = (this.props[4] * this.props[13] - this.props[5] * this.props[12]) / determinant;
+        var f = -(this.props[0] * this.props[13] - this.props[1] * this.props[12]) / determinant;
+        return [pt[0] * a + pt[1] * c + e, pt[0] * b + pt[1] * d + f, 0];
+    }
+
+    function inversePoints(pts) {
+        var i,
+            len = pts.length,
+            retPts = [];
+        for (i = 0; i < len; i += 1) {
+            retPts[i] = inversePoint(pts[i]);
+        }
+        return retPts;
+    }
+
+    function applyToTriplePoints(pt1, pt2, pt3) {
+        var arr = createTypedArray('float32', 6);
+        if (this.isIdentity()) {
+            arr[0] = pt1[0];
+            arr[1] = pt1[1];
+            arr[2] = pt2[0];
+            arr[3] = pt2[1];
+            arr[4] = pt3[0];
+            arr[5] = pt3[1];
+        } else {
+            var p0 = this.props[0],
+                p1 = this.props[1],
+                p4 = this.props[4],
+                p5 = this.props[5],
+                p12 = this.props[12],
+                p13 = this.props[13];
+            arr[0] = pt1[0] * p0 + pt1[1] * p4 + p12;
+            arr[1] = pt1[0] * p1 + pt1[1] * p5 + p13;
+            arr[2] = pt2[0] * p0 + pt2[1] * p4 + p12;
+            arr[3] = pt2[0] * p1 + pt2[1] * p5 + p13;
+            arr[4] = pt3[0] * p0 + pt3[1] * p4 + p12;
+            arr[5] = pt3[0] * p1 + pt3[1] * p5 + p13;
+        }
+        return arr;
+    }
+
+    function applyToPointArray(x, y, z) {
+        var arr;
+        if (this.isIdentity()) {
+            arr = [x, y, z];
+        } else {
+            arr = [x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12], x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13], x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]];
+        }
+        return arr;
+    }
+
+    function applyToPointStringified(x, y) {
+        if (this.isIdentity()) {
+            return x + ',' + y;
+        }
+        var _p = this.props;
+        return Math.round((x * _p[0] + y * _p[4] + _p[12]) * 100) / 100 + ',' + Math.round((x * _p[1] + y * _p[5] + _p[13]) * 100) / 100;
+    }
+
+    function toCSS() {
+        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
+        /*if(this.isIdentity()) {
+            return '';
+        }*/
+        var i = 0;
+        var props = this.props;
+        var cssValue = 'matrix3d(';
+        var v = 10000;
+        while (i < 16) {
+            cssValue += _rnd(props[i] * v) / v;
+            cssValue += i === 15 ? ')' : ',';
+            i += 1;
+        }
+        return cssValue;
+    }
+
+    function roundMatrixProperty(val) {
+        var v = 10000;
+        if (val < 0.000001 && val > 0 || val > -0.000001 && val < 0) {
+            return _rnd(val * v) / v;
+        }
+        return val;
+    }
+
+    function to2dCSS() {
+        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
+        /*if(this.isIdentity()) {
+            return '';
+        }*/
+        var props = this.props;
+        var _a = roundMatrixProperty(props[0]);
+        var _b = roundMatrixProperty(props[1]);
+        var _c = roundMatrixProperty(props[4]);
+        var _d = roundMatrixProperty(props[5]);
+        var _e = roundMatrixProperty(props[12]);
+        var _f = roundMatrixProperty(props[13]);
+        return "matrix(" + _a + ',' + _b + ',' + _c + ',' + _d + ',' + _e + ',' + _f + ")";
+    }
+
+    return function () {
+        this.reset = reset;
+        this.rotate = rotate;
+        this.rotateX = rotateX;
+        this.rotateY = rotateY;
+        this.rotateZ = rotateZ;
+        this.skew = skew;
+        this.skewFromAxis = skewFromAxis;
+        this.shear = shear;
+        this.scale = scale;
+        this.setTransform = setTransform;
+        this.translate = translate;
+        this.transform = transform;
+        this.applyToPoint = applyToPoint;
+        this.applyToX = applyToX;
+        this.applyToY = applyToY;
+        this.applyToZ = applyToZ;
+        this.applyToPointArray = applyToPointArray;
+        this.applyToTriplePoints = applyToTriplePoints;
+        this.applyToPointStringified = applyToPointStringified;
+        this.toCSS = toCSS;
+        this.to2dCSS = to2dCSS;
+        this.clone = clone;
+        this.cloneFromProps = cloneFromProps;
+        this.equals = equals;
+        this.inversePoints = inversePoints;
+        this.inversePoint = inversePoint;
+        this._t = this.transform;
+        this.isIdentity = isIdentity;
+        this._identity = true;
+        this._identityCalculated = false;
+
+        this.props = createTypedArray('float32', 16);
+        this.reset();
+    };
+}();
+
+/**
+ * a
+ */
+
+var ShapeTransformManager = function () {
+  /**
+   * a
+   */
+  function ShapeTransformManager() {
+    classCallCheck(this, ShapeTransformManager);
+
+    this.sequences = {};
+    this.sequenceList = [];
+    this.transform_key_count = 0;
+  }
+
+  /**
+   * a
+   * @param {*} transforms a
+   * @return {*}
+   */
+
+
+  createClass(ShapeTransformManager, [{
+    key: 'addTransformSequence',
+    value: function addTransformSequence(transforms) {
+      var len = transforms.length;
+      var key = '_';
+      for (var i = 0; i < len; i += 1) {
+        key += transforms[i].transform.key + '_';
+      }
+      var sequence = this.sequences[key];
+      if (!sequence) {
+        sequence = {
+          transforms: [].concat(transforms),
+          finalTransform: new Matrix$1(),
+          _mdf: false
+        };
+        this.sequences[key] = sequence;
+        this.sequenceList.push(sequence);
+      }
+      return sequence;
+    }
+
+    /**
+     * a
+     * @param {*} sequence a
+     * @param {*} isFirstFrame a
+     */
+
+  }, {
+    key: 'processSequence',
+    value: function processSequence(sequence, isFirstFrame) {
+      var i = 0;
+      var _mdf = isFirstFrame;
+      var len = sequence.transforms.length;
+      while (i < len && !isFirstFrame) {
+        if (sequence.transforms[i].transform.mProps._mdf) {
+          _mdf = true;
+          break;
+        }
+        i += 1;
+      }
+      if (_mdf) {
+        var props = void 0;
+        sequence.finalTransform.reset();
+        for (i = len - 1; i >= 0; i -= 1) {
+          props = sequence.transforms[i].transform.mProps.v.props;
+          sequence.finalTransform.transform(props[0], props[1], props[2], props[3], props[4], props[5], props[6], props[7], props[8], props[9], props[10], props[11], props[12], props[13], props[14], props[15]);
+        }
+      }
+      sequence._mdf = _mdf;
+    }
+
+    /**
+     * a
+     * @param {*} isFirstFrame a
+     */
+
+  }, {
+    key: 'processSequences',
+    value: function processSequences(isFirstFrame) {
+      var len = this.sequenceList.length;
+      for (var i = 0; i < len; i += 1) {
+        this.processSequence(this.sequenceList[i], isFirstFrame);
+      }
+    }
+
+    /**
+     * a
+     * @return {*}
+     */
+
+  }, {
+    key: 'getNewKey',
+    value: function getNewKey() {
+      return '_' + this.transform_key_count++;
+    }
+  }]);
+  return ShapeTransformManager;
+}();
+
+/* eslint-disable */
+var BezierFactory = function () {
+    /**
+     * BezierEasing - use bezier curve for transition easing function
+     * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+     *
+     * Credits: is based on Firefox's nsSMILKeySpline.cpp
+     * Usage:
+     * var spline = BezierEasing([ 0.25, 0.1, 0.25, 1.0 ])
+     * spline.get(x) => returns the easing value | x must be in [0, 1] range
+     *
+     */
+
+    var ob = {};
+    ob.getBezierEasing = getBezierEasing;
+    var beziers = {};
+
+    function getBezierEasing(a, b, c, d, nm) {
+        var str = nm || ('bez_' + a + '_' + b + '_' + c + '_' + d).replace(/\./g, 'p');
+        if (beziers[str]) {
+            return beziers[str];
+        }
+        var bezEasing = new BezierEasing([a, b, c, d]);
+        beziers[str] = bezEasing;
+        return bezEasing;
+    }
+
+    // These values are established by empiricism with tests (tradeoff: performance VS precision)
+    var NEWTON_ITERATIONS = 4;
+    var NEWTON_MIN_SLOPE = 0.001;
+    var SUBDIVISION_PRECISION = 0.0000001;
+    var SUBDIVISION_MAX_ITERATIONS = 10;
+
+    var kSplineTableSize = 11;
+    var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+
+    var float32ArraySupported = typeof Float32Array === "function";
+
+    function A(aA1, aA2) {
+        return 1.0 - 3.0 * aA2 + 3.0 * aA1;
+    }
+    function B(aA1, aA2) {
+        return 3.0 * aA2 - 6.0 * aA1;
+    }
+    function C(aA1) {
+        return 3.0 * aA1;
+    }
+
+    // Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+    function calcBezier(aT, aA1, aA2) {
+        return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+    }
+
+    // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+    function getSlope(aT, aA1, aA2) {
+        return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+    }
+
+    function binarySubdivide(aX, aA, aB, mX1, mX2) {
+        var currentX,
+            currentT,
+            i = 0;
+        do {
+            currentT = aA + (aB - aA) / 2.0;
+            currentX = calcBezier(currentT, mX1, mX2) - aX;
+            if (currentX > 0.0) {
+                aB = currentT;
+            } else {
+                aA = currentT;
+            }
+        } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+        return currentT;
+    }
+
+    function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
+        for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+            var currentSlope = getSlope(aGuessT, mX1, mX2);
+            if (currentSlope === 0.0) return aGuessT;
+            var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+            aGuessT -= currentX / currentSlope;
+        }
+        return aGuessT;
+    }
+
+    /**
+     * points is an array of [ mX1, mY1, mX2, mY2 ]
+     */
+    function BezierEasing(points) {
+        this._p = points;
+        this._mSampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+        this._precomputed = false;
+
+        this.get = this.get.bind(this);
+    }
+
+    BezierEasing.prototype = {
+
+        get: function get(x) {
+            var mX1 = this._p[0],
+                mY1 = this._p[1],
+                mX2 = this._p[2],
+                mY2 = this._p[3];
+            if (!this._precomputed) this._precompute();
+            if (mX1 === mY1 && mX2 === mY2) return x; // linear
+            // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+            if (x === 0) return 0;
+            if (x === 1) return 1;
+            return calcBezier(this._getTForX(x), mY1, mY2);
+        },
+
+        // Private part
+
+        _precompute: function _precompute() {
+            var mX1 = this._p[0],
+                mY1 = this._p[1],
+                mX2 = this._p[2],
+                mY2 = this._p[3];
+            this._precomputed = true;
+            if (mX1 !== mY1 || mX2 !== mY2) this._calcSampleValues();
+        },
+
+        _calcSampleValues: function _calcSampleValues() {
+            var mX1 = this._p[0],
+                mX2 = this._p[2];
+            for (var i = 0; i < kSplineTableSize; ++i) {
+                this._mSampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
+            }
+        },
+
+        /**
+         * getTForX chose the fastest heuristic to determine the percentage value precisely from a given X projection.
+         */
+        _getTForX: function _getTForX(aX) {
+            var mX1 = this._p[0],
+                mX2 = this._p[2],
+                mSampleValues = this._mSampleValues;
+
+            var intervalStart = 0.0;
+            var currentSample = 1;
+            var lastSample = kSplineTableSize - 1;
+
+            for (; currentSample !== lastSample && mSampleValues[currentSample] <= aX; ++currentSample) {
+                intervalStart += kSampleStepSize;
+            }
+            --currentSample;
+
+            // Interpolate to provide an initial guess for t
+            var dist = (aX - mSampleValues[currentSample]) / (mSampleValues[currentSample + 1] - mSampleValues[currentSample]);
+            var guessForT = intervalStart + dist * kSampleStepSize;
+
+            var initialSlope = getSlope(guessForT, mX1, mX2);
+            if (initialSlope >= NEWTON_MIN_SLOPE) {
+                return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
+            } else if (initialSlope === 0.0) {
+                return guessForT;
+            } else {
+                return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
+            }
+        }
+    };
+
+    return ob;
+}();
+
+/**
+ * a
+ * @param {*} arr a
+ * @return {*}
+ */
+function double(arr) {
+  return arr.concat(createSizedArray(arr.length));
+}
+
+var pooling = { double: double };
+
+var pool_factory = function pool_factory(initialLength, _create, _release) {
+  var _length = 0;
+  var _maxLength = initialLength;
+  var pool = createSizedArray(_maxLength);
+
+  var ob = {
+    newElement: newElement,
+    release: release
+  };
+
+  /**
+   * a
+   * @return {*}
+   */
+  function newElement() {
+    var element = void 0;
+    if (_length) {
+      _length -= 1;
+      element = pool[_length];
+    } else {
+      element = _create();
+    }
+    return element;
+  }
+
+  /**
+   * a
+   * @param {*} element a
+   */
+  function release(element) {
+    if (_length === _maxLength) {
+      pool = pooling.double(pool);
+      _maxLength = _maxLength * 2;
+    }
+    if (_release) {
+      _release(element);
+    }
+    pool[_length] = element;
+    _length += 1;
+  }
+
+  /**
+   * @return {*}
+   */
+  // function clone() {
+  //   var clonedElement = newElement();
+  //   return _clone(clonedElement);
+  // }
+
+  return ob;
+};
+
+var defaultCurveSegments$1 = 200;
+/**
+ * a
+ * @return {*}
+ */
+function create() {
+  return {
+    addedLength: 0,
+    percents: createTypedArray('float32', defaultCurveSegments$1),
+    lengths: createTypedArray('float32', defaultCurveSegments$1)
+  };
+}
+var bezier_length_pool = pool_factory(8, create);
+
+/**
+ * @return {*}
+ */
+function create$1() {
+  return {
+    lengths: [],
+    totalLength: 0
+  };
+}
+
+/**
+ * a
+ * @param {*} element a
+ */
+function release(element) {
+  var len = element.lengths.length;
+  for (var i = 0; i < len; i += 1) {
+    bezier_length_pool.release(element.lengths[i]);
+  }
+  element.lengths.length = 0;
+}
+
+var segments_length_pool = pool_factory(8, create$1, release);
+
+// var easingFunctions = [];
+// var math = Math;
+var defaultCurveSegments = 200;
+
+/**
+ * a
+ * @param {*} x1 a
+ * @param {*} y1 a
+ * @param {*} x2 a
+ * @param {*} y2 a
+ * @param {*} x3 a
+ * @param {*} y3 a
+ * @return {*}
+ */
+function pointOnLine2D(x1, y1, x2, y2, x3, y3) {
+  var det1 = x1 * y2 + y1 * x3 + x2 * y3 - x3 * y2 - y3 * x1 - x2 * y1;
+  return det1 > -0.001 && det1 < 0.001;
+}
+
+/**
+ * a
+ * @param {*} x1 a
+ * @param {*} y1 a
+ * @param {*} z1 a
+ * @param {*} x2 a
+ * @param {*} y2 a
+ * @param {*} z2 a
+ * @param {*} x3 a
+ * @param {*} y3 a
+ * @param {*} z3 a
+ * @return {*}
+ */
+function pointOnLine3D(x1, y1, z1, x2, y2, z2, x3, y3, z3) {
+  if (z1 === 0 && z2 === 0 && z3 === 0) {
+    return pointOnLine2D(x1, y1, x2, y2, x3, y3);
+  }
+  var dist1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
+  var dist2 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2) + Math.pow(z3 - z1, 2));
+  var dist3 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2) + Math.pow(z3 - z2, 2));
+  var diffDist = void 0;
+  if (dist1 > dist2) {
+    if (dist1 > dist3) {
+      diffDist = dist1 - dist2 - dist3;
+    } else {
+      diffDist = dist3 - dist2 - dist1;
+    }
+  } else if (dist3 > dist2) {
+    diffDist = dist3 - dist2 - dist1;
+  } else {
+    diffDist = dist2 - dist1 - dist3;
+  }
+  return diffDist > -0.0001 && diffDist < 0.0001;
+}
+
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @return {*}
+ */
+function getBezierLength(pt1, pt2, pt3, pt4) {
+  var curveSegments = defaultCurveSegments || 200;
+  // var i, len;
+  var addedLength = 0;
+  var ptDistance = void 0;
+  var point = [];
+  var lastPoint = [];
+  var lengthData = bezier_length_pool.newElement();
+  var len = pt3.length;
+  for (var k = 0; k < curveSegments; k += 1) {
+    var perc = k / (curveSegments - 1);
+    ptDistance = 0;
+    for (var i = 0; i < len; i += 1) {
+      var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * pt3[i] + 3 * (1 - perc) * Math.pow(perc, 2) * pt4[i] + Math.pow(perc, 3) * pt2[i];
+      point[i] = ptCoord;
+      if (lastPoint[i] !== null) {
+        ptDistance += Math.pow(point[i] - lastPoint[i], 2);
+      }
+      lastPoint[i] = point[i];
+    }
+    if (ptDistance) {
+      ptDistance = Math.sqrt(ptDistance);
+      addedLength += ptDistance;
+    }
+    lengthData.percents[k] = perc;
+    lengthData.lengths[k] = addedLength;
+  }
+  lengthData.addedLength = addedLength;
+  return lengthData;
+}
+
+/**
+ * a
+ * @param {*} shapeData a
+ * @return {*}
+ */
+function getSegmentsLength(shapeData) {
+  var segmentsLength = segments_length_pool.newElement();
+  var closed = shapeData.c;
+  var pathV = shapeData.v;
+  var pathO = shapeData.o;
+  var pathI = shapeData.i;
+  var len = shapeData._length;
+  var lengths = segmentsLength.lengths;
+  var totalLength = 0;
+  var i = 0;
+  for (; i < len - 1; i += 1) {
+    lengths[i] = getBezierLength(pathV[i], pathV[i + 1], pathO[i], pathI[i + 1]);
+    totalLength += lengths[i].addedLength;
+  }
+  if (closed && len) {
+    lengths[i] = getBezierLength(pathV[i], pathV[0], pathO[i], pathI[0]);
+    totalLength += lengths[i].addedLength;
+  }
+  segmentsLength.totalLength = totalLength;
+  return segmentsLength;
+}
+
+/**
+ * a
+ * @param {*} length a
+ */
+function BezierData(length) {
+  this.segmentLength = 0;
+  this.points = new Array(length);
+}
+
+/**
+ * a
+ * @param {*} partial a
+ * @param {*} point a
+ */
+function PointData(partial, point) {
+  this.partialLength = partial;
+  this.point = point;
+}
+
+var storedData = {};
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @return {*}
+ */
+function buildBezierData(pt1, pt2, pt3, pt4) {
+  var bezierName = (pt1[0] + '_' + pt1[1] + '_' + pt2[0] + '_' + pt2[1] + '_' + pt3[0] + '_' + pt3[1] + '_' + pt4[0] + '_' + pt4[1]).replace(/\./g, 'p');
+  if (!storedData[bezierName]) {
+    var curveSegments = defaultCurveSegments;
+    // var k, i, len;
+    var addedLength = 0;
+    var ptDistance = void 0;
+    var point = void 0;
+    var lastPoint = null;
+    if (pt1.length === 2 && (pt1[0] != pt2[0] || pt1[1] != pt2[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt1[0] + pt3[0], pt1[1] + pt3[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt2[0] + pt4[0], pt2[1] + pt4[1])) {
+      curveSegments = 2;
+    }
+    var bezierData = new BezierData(curveSegments);
+    var len = pt3.length;
+    for (var k = 0; k < curveSegments; k += 1) {
+      point = createSizedArray(len);
+      var perc = k / (curveSegments - 1);
+      ptDistance = 0;
+      for (var i = 0; i < len; i += 1) {
+        var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * (pt1[i] + pt3[i]) + 3 * (1 - perc) * Math.pow(perc, 2) * (pt2[i] + pt4[i]) + Math.pow(perc, 3) * pt2[i];
+        point[i] = ptCoord;
+        if (lastPoint !== null) {
+          ptDistance += Math.pow(point[i] - lastPoint[i], 2);
+        }
+      }
+      ptDistance = Math.sqrt(ptDistance);
+      addedLength += ptDistance;
+      bezierData.points[k] = new PointData(ptDistance, point);
+      lastPoint = point;
+    }
+    bezierData.segmentLength = addedLength;
+    storedData[bezierName] = bezierData;
+  }
+  return storedData[bezierName];
+}
+
+/**
+ * a
+ * @param {*} perc a
+ * @param {*} bezierData a
+ * @return {*}
+ */
+function getDistancePerc(perc, bezierData) {
+  var percents = bezierData.percents;
+  var lengths = bezierData.lengths;
+  var len = percents.length;
+  var initPos = Math.floor((len - 1) * perc);
+  var lengthPos = perc * bezierData.addedLength;
+  var lPerc = 0;
+  if (initPos === len - 1 || initPos === 0 || lengthPos === lengths[initPos]) {
+    return percents[initPos];
+  } else {
+    var dir = lengths[initPos] > lengthPos ? -1 : 1;
+    var flag = true;
+    while (flag) {
+      if (lengths[initPos] <= lengthPos && lengths[initPos + 1] > lengthPos) {
+        lPerc = (lengthPos - lengths[initPos]) / (lengths[initPos + 1] - lengths[initPos]);
+        flag = false;
+      } else {
+        initPos += dir;
+      }
+      if (initPos < 0 || initPos >= len - 1) {
+        // FIX for TypedArrays that don't store floating point values with enough accuracy
+        if (initPos === len - 1) {
+          return percents[initPos];
+        }
+        flag = false;
+      }
+    }
+    return percents[initPos] + (percents[initPos + 1] - percents[initPos]) * lPerc;
+  }
+}
+
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @param {*} percent a
+ * @param {*} bezierData a
+ * @return {*}
+ */
+function getPointInSegment(pt1, pt2, pt3, pt4, percent, bezierData) {
+  var t1 = getDistancePerc(percent, bezierData);
+  // var u0 = 1;
+  var u1 = 1 - t1;
+  var ptX = Math.round((u1 * u1 * u1 * pt1[0] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[0] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[0] + t1 * t1 * t1 * pt2[0]) * 1000) / 1000;
+  var ptY = Math.round((u1 * u1 * u1 * pt1[1] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[1] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[1] + t1 * t1 * t1 * pt2[1]) * 1000) / 1000;
+  return [ptX, ptY];
+}
+
+// function getSegmentArray() {
+
+// }
+
+var bezierSegmentPoints = createTypedArray('float32', 8);
+
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @param {*} startPerc a
+ * @param {*} endPerc a
+ * @param {*} bezierData a
+ * @return {*}
+ */
+function getNewSegment(pt1, pt2, pt3, pt4, startPerc, endPerc, bezierData) {
+  startPerc = startPerc < 0 ? 0 : startPerc > 1 ? 1 : startPerc;
+  var t0 = getDistancePerc(startPerc, bezierData);
+  endPerc = endPerc > 1 ? 1 : endPerc;
+  var t1 = getDistancePerc(endPerc, bezierData);
+  var len = pt1.length;
+  var u0 = 1 - t0;
+  var u1 = 1 - t1;
+  var u0u0u0 = u0 * u0 * u0;
+  var t0u0u0_3 = t0 * u0 * u0 * 3;
+  var t0t0u0_3 = t0 * t0 * u0 * 3;
+  var t0t0t0 = t0 * t0 * t0;
+  //
+  var u0u0u1 = u0 * u0 * u1;
+  var t0u0u1_3 = t0 * u0 * u1 + u0 * t0 * u1 + u0 * u0 * t1;
+  var t0t0u1_3 = t0 * t0 * u1 + u0 * t0 * t1 + t0 * u0 * t1;
+  var t0t0t1 = t0 * t0 * t1;
+  //
+  var u0u1u1 = u0 * u1 * u1;
+  var t0u1u1_3 = t0 * u1 * u1 + u0 * t1 * u1 + u0 * u1 * t1;
+  var t0t1u1_3 = t0 * t1 * u1 + u0 * t1 * t1 + t0 * u1 * t1;
+  var t0t1t1 = t0 * t1 * t1;
+  //
+  var u1u1u1 = u1 * u1 * u1;
+  var t1u1u1_3 = t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1;
+  var t1t1u1_3 = t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1;
+  var t1t1t1 = t1 * t1 * t1;
+  for (var i = 0; i < len; i += 1) {
+    bezierSegmentPoints[i * 4] = Math.round((u0u0u0 * pt1[i] + t0u0u0_3 * pt3[i] + t0t0u0_3 * pt4[i] + t0t0t0 * pt2[i]) * 1000) / 1000;
+    bezierSegmentPoints[i * 4 + 1] = Math.round((u0u0u1 * pt1[i] + t0u0u1_3 * pt3[i] + t0t0u1_3 * pt4[i] + t0t0t1 * pt2[i]) * 1000) / 1000;
+    bezierSegmentPoints[i * 4 + 2] = Math.round((u0u1u1 * pt1[i] + t0u1u1_3 * pt3[i] + t0t1u1_3 * pt4[i] + t0t1t1 * pt2[i]) * 1000) / 1000;
+    bezierSegmentPoints[i * 4 + 3] = Math.round((u1u1u1 * pt1[i] + t1u1u1_3 * pt3[i] + t1t1u1_3 * pt4[i] + t1t1t1 * pt2[i]) * 1000) / 1000;
+  }
+
+  return bezierSegmentPoints;
+}
+
+var bez = {
+  getSegmentsLength: getSegmentsLength,
+  getNewSegment: getNewSegment,
+  getPointInSegment: getPointInSegment,
+  buildBezierData: buildBezierData,
+  pointOnLine2D: pointOnLine2D,
+  pointOnLine3D: pointOnLine3D
+};
+
+var initFrame = -999999;
+var mathAbs = Math.abs;
+var degToRads$1 = Math.PI / 180;
+
+/**
+ * based on @Toji's https://github.com/toji/gl-matrix/
+ * @param {*} a a
+ * @param {*} b a
+ * @param {*} t a
+ * @return {*}
+ */
+function slerp(a, b, t) {
+  var out = [];
+  var ax = a[0];
+  var ay = a[1];
+  var az = a[2];
+  var aw = a[3];
+  var bx = b[0];
+  var by = b[1];
+  var bz = b[2];
+  var bw = b[3];
+
+  var omega = void 0;
+  var cosom = void 0;
+  var sinom = void 0;
+  var scale0 = void 0;
+  var scale1 = void 0;
+
+  cosom = ax * bx + ay * by + az * bz + aw * bw;
+  if (cosom < 0.0) {
+    cosom = -cosom;
+    bx = -bx;
+    by = -by;
+    bz = -bz;
+    bw = -bw;
+  }
+  if (1.0 - cosom > 0.000001) {
+    omega = Math.acos(cosom);
+    sinom = Math.sin(omega);
+    scale0 = Math.sin((1.0 - t) * omega) / sinom;
+    scale1 = Math.sin(t * omega) / sinom;
+  } else {
+    scale0 = 1.0 - t;
+    scale1 = t;
+  }
+  out[0] = scale0 * ax + scale1 * bx;
+  out[1] = scale0 * ay + scale1 * by;
+  out[2] = scale0 * az + scale1 * bz;
+  out[3] = scale0 * aw + scale1 * bw;
+
+  return out;
+}
+
+/**
+ * a
+ * @param {*} out a
+ * @param {*} quat a
+ */
+function quaternionToEuler(out, quat) {
+  var qx = quat[0];
+  var qy = quat[1];
+  var qz = quat[2];
+  var qw = quat[3];
+  var heading = Math.atan2(2 * qy * qw - 2 * qx * qz, 1 - 2 * qy * qy - 2 * qz * qz);
+  var attitude = Math.asin(2 * qx * qy + 2 * qz * qw);
+  var bank = Math.atan2(2 * qx * qw - 2 * qy * qz, 1 - 2 * qx * qx - 2 * qz * qz);
+  out[0] = heading / degToRads$1;
+  out[1] = attitude / degToRads$1;
+  out[2] = bank / degToRads$1;
+}
+
+/**
+ * a
+ * @param {*} values a
+ * @return {*}
+ */
+function createQuaternion(values) {
+  var heading = values[0] * degToRads$1;
+  var attitude = values[1] * degToRads$1;
+  var bank = values[2] * degToRads$1;
+  var c1 = Math.cos(heading / 2);
+  var c2 = Math.cos(attitude / 2);
+  var c3 = Math.cos(bank / 2);
+  var s1 = Math.sin(heading / 2);
+  var s2 = Math.sin(attitude / 2);
+  var s3 = Math.sin(bank / 2);
+  var w = c1 * c2 * c3 - s1 * s2 * s3;
+  var x = s1 * s2 * c3 + c1 * c2 * s3;
+  var y = s1 * c2 * c3 + c1 * s2 * s3;
+  var z = c1 * s2 * c3 - s1 * c2 * s3;
+
+  return [x, y, z, w];
+}
+
+/**
+ * a
+ */
+
+var BaseProperty = function () {
+  /**
+   * a
+   */
+  function BaseProperty() {
+    classCallCheck(this, BaseProperty);
+
+    this.offsetTime = 0;
+    this.keyframes = null;
+    this.propType = '';
+  }
+
+  /**
+   * a
+   * @param {*} frameNum a
+   * @param {*} caching a
+   * @return {*}
+   */
+
+
+  createClass(BaseProperty, [{
+    key: 'interpolateValue',
+    value: function interpolateValue(frameNum, caching) {
+      var offsetTime = this.offsetTime;
+      var newValue = void 0;
+      if (this.propType === 'multidimensional') {
+        newValue = createTypedArray('float32', this.pv.length);
+      }
+      var iterationIndex = caching.lastIndex;
+      var i = iterationIndex;
+      var len = this.keyframes.length - 1;
+      var flag = true;
+      var keyData = void 0;
+      var nextKeyData = void 0;
+
+      while (flag) {
+        keyData = this.keyframes[i];
+        nextKeyData = this.keyframes[i + 1];
+        if (i === len - 1 && frameNum >= nextKeyData.t - offsetTime) {
+          if (keyData.h) {
+            keyData = nextKeyData;
+          }
+          iterationIndex = 0;
+          break;
+        }
+        if (nextKeyData.t - offsetTime > frameNum) {
+          iterationIndex = i;
+          break;
+        }
+        if (i < len - 1) {
+          i += 1;
+        } else {
+          iterationIndex = 0;
+          flag = false;
+        }
+      }
+
+      var k = void 0;
+      var kLen = void 0;
+      var perc = void 0;
+      var jLen = void 0;
+      var j = void 0;
+      var fnc = void 0;
+      var nextKeyTime = nextKeyData.t - offsetTime;
+      var keyTime = keyData.t - offsetTime;
+      var endValue = void 0;
+      if (keyData.to) {
+        if (!keyData.bezierData) {
+          keyData.bezierData = bez.buildBezierData(keyData.s, nextKeyData.s || keyData.e, keyData.to, keyData.ti);
+        }
+        var bezierData = keyData.bezierData;
+        if (frameNum >= nextKeyTime || frameNum < keyTime) {
+          var ind = frameNum >= nextKeyTime ? bezierData.points.length - 1 : 0;
+          kLen = bezierData.points[ind].point.length;
+          for (k = 0; k < kLen; k += 1) {
+            newValue[k] = bezierData.points[ind].point[k];
+          }
+          // caching._lastKeyframeIndex = -1;
+        } else {
+          if (keyData.__fnct) {
+            fnc = keyData.__fnct;
+          } else {
+            fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y, keyData.n).get;
+            keyData.__fnct = fnc;
+          }
+          perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+          var distanceInLine = bezierData.segmentLength * perc;
+
+          var segmentPerc = void 0;
+          var addedLength = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastAddedLength : 0;
+          j = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastPoint : 0;
+          flag = true;
+          jLen = bezierData.points.length;
+          while (flag) {
+            addedLength += bezierData.points[j].partialLength;
+            if (distanceInLine === 0 || perc === 0 || j === bezierData.points.length - 1) {
+              kLen = bezierData.points[j].point.length;
+              for (k = 0; k < kLen; k += 1) {
+                newValue[k] = bezierData.points[j].point[k];
+              }
+              break;
+            } else if (distanceInLine >= addedLength && distanceInLine < addedLength + bezierData.points[j + 1].partialLength) {
+              segmentPerc = (distanceInLine - addedLength) / bezierData.points[j + 1].partialLength;
+              kLen = bezierData.points[j].point.length;
+              for (k = 0; k < kLen; k += 1) {
+                newValue[k] = bezierData.points[j].point[k] + (bezierData.points[j + 1].point[k] - bezierData.points[j].point[k]) * segmentPerc;
+              }
+              break;
+            }
+            if (j < jLen - 1) {
+              j += 1;
+            } else {
+              flag = false;
+            }
+          }
+          caching._lastPoint = j;
+          caching._lastAddedLength = addedLength - bezierData.points[j].partialLength;
+          caching._lastKeyframeIndex = i;
+        }
+      } else {
+        var outX = void 0;
+        var outY = void 0;
+        var inX = void 0;
+        var inY = void 0;
+        var keyValue = void 0;
+        var _len = keyData.s.length;
+        endValue = nextKeyData.s || keyData.e;
+        if (this.sh && keyData.h !== 1) {
+          if (frameNum >= nextKeyTime) {
+            newValue[0] = endValue[0];
+            newValue[1] = endValue[1];
+            newValue[2] = endValue[2];
+          } else if (frameNum <= keyTime) {
+            newValue[0] = keyData.s[0];
+            newValue[1] = keyData.s[1];
+            newValue[2] = keyData.s[2];
+          } else {
+            var quatStart = createQuaternion(keyData.s);
+            var quatEnd = createQuaternion(endValue);
+            var time = (frameNum - keyTime) / (nextKeyTime - keyTime);
+            quaternionToEuler(newValue, slerp(quatStart, quatEnd, time));
+          }
+        } else {
+          for (i = 0; i < _len; i += 1) {
+            if (keyData.h !== 1) {
+              if (frameNum >= nextKeyTime) {
+                perc = 1;
+              } else if (frameNum < keyTime) {
+                perc = 0;
+              } else {
+                if (keyData.o.x.constructor === Array) {
+                  if (!keyData.__fnct) {
+                    keyData.__fnct = [];
+                  }
+                  if (!keyData.__fnct[i]) {
+                    outX = typeof keyData.o.x[i] === 'undefined' ? keyData.o.x[0] : keyData.o.x[i];
+                    outY = typeof keyData.o.y[i] === 'undefined' ? keyData.o.y[0] : keyData.o.y[i];
+                    inX = typeof keyData.i.x[i] === 'undefined' ? keyData.i.x[0] : keyData.i.x[i];
+                    inY = typeof keyData.i.y[i] === 'undefined' ? keyData.i.y[0] : keyData.i.y[i];
+                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
+                    keyData.__fnct[i] = fnc;
+                  } else {
+                    fnc = keyData.__fnct[i];
+                  }
+                } else {
+                  if (!keyData.__fnct) {
+                    outX = keyData.o.x;
+                    outY = keyData.o.y;
+                    inX = keyData.i.x;
+                    inY = keyData.i.y;
+                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
+                    keyData.__fnct = fnc;
+                  } else {
+                    fnc = keyData.__fnct;
+                  }
+                }
+                perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+              }
+            }
+
+            endValue = nextKeyData.s || keyData.e;
+            keyValue = keyData.h === 1 ? keyData.s[i] : keyData.s[i] + (endValue[i] - keyData.s[i]) * perc;
+
+            if (_len === 1) {
+              newValue = keyValue;
+            } else {
+              newValue[i] = keyValue;
+            }
+          }
+        }
+      }
+      caching.lastIndex = iterationIndex;
+      return newValue;
+    }
+
+    /**
+     * a
+     * @param {*} _frameNum a
+     * @return {*}
+     */
+
+  }, {
+    key: 'getValueAtCurrentTime',
+    value: function getValueAtCurrentTime(_frameNum) {
+      var frameNum = _frameNum - this.offsetTime;
+      var initTime = this.keyframes[0].t - this.offsetTime;
+      var endTime = this.keyframes[this.keyframes.length - 1].t - this.offsetTime;
+      if (!(frameNum === this._caching.lastFrame || this._caching.lastFrame !== initFrame && (this._caching.lastFrame >= endTime && frameNum >= endTime || this._caching.lastFrame < initTime && frameNum < initTime))) {
+        if (this._caching.lastFrame >= frameNum) {
+          this._caching._lastKeyframeIndex = -1;
+          this._caching.lastIndex = 0;
+        }
+
+        var renderResult = this.interpolateValue(frameNum, this._caching);
+        this.pv = renderResult;
+      }
+      this._caching.lastFrame = frameNum;
+      return this.pv;
+    }
+
+    /**
+     * a
+     * @param {*} val a
+     */
+
+  }, {
+    key: 'setVValue',
+    value: function setVValue(val) {
+      var multipliedValue = void 0;
+      if (this.propType === 'unidimensional') {
+        multipliedValue = val * this.mult;
+        if (mathAbs(this.v - multipliedValue) > 0.00001) {
+          this.v = multipliedValue;
+          this._mdf = true;
+        }
+      } else {
+        var i = 0;
+        var len = this.v.length;
+        while (i < len) {
+          multipliedValue = val[i] * this.mult;
+          if (mathAbs(this.v[i] - multipliedValue) > 0.00001) {
+            this.v[i] = multipliedValue;
+            this._mdf = true;
+          }
+          i += 1;
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} frameNum a
+     */
+
+  }, {
+    key: 'processEffectsSequence',
+    value: function processEffectsSequence(frameNum) {
+      if (!this.effectsSequence.length) {
+        return;
+      }
+      if (this.lock) {
+        this.setVValue(this.pv);
+        return;
+      }
+      this.lock = true;
+      this._mdf = this._isFirstFrame;
+      // var multipliedValue;
+      var len = this.effectsSequence.length;
+      var finalValue = this.kf ? this.pv : this.data.k;
+      for (var i = 0; i < len; i += 1) {
+        finalValue = this.effectsSequence[i](frameNum);
+      }
+      this.setVValue(finalValue);
+      this._isFirstFrame = false;
+      this.lock = false;
+    }
+
+    /**
+     * a
+     * @param {*} effectFunction a
+     */
+
+  }, {
+    key: 'addEffect',
+    value: function addEffect(effectFunction) {
+      this.effectsSequence.push(effectFunction);
+      this.container.addDynamicProperty(this);
+    }
+  }]);
+  return BaseProperty;
+}();
+
+/**
+ * a
+ */
+
+
+var ValueProperty = function (_BaseProperty) {
+  inherits(ValueProperty, _BaseProperty);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} mult a
+   * @param {*} container a
+   */
+  function ValueProperty(elem, data, mult, container) {
+    classCallCheck(this, ValueProperty);
+
+    var _this = possibleConstructorReturn(this, (ValueProperty.__proto__ || Object.getPrototypeOf(ValueProperty)).call(this));
+
+    _this.propType = 'unidimensional';
+    _this.mult = mult || 1;
+    _this.data = data;
+    _this.v = mult ? data.k * mult : data.k;
+    _this.pv = data.k;
+    _this._mdf = false;
+    _this.elem = elem;
+    _this.container = container;
+    _this.k = false;
+    _this.kf = false;
+    _this.vel = 0;
+    _this.effectsSequence = [];
+    _this._isFirstFrame = true;
+    _this.getValue = _this.processEffectsSequence;
+    return _this;
+  }
+
+  return ValueProperty;
+}(BaseProperty);
+
+/**
+ * a
+ */
+
+
+var MultiDimensionalProperty = function (_BaseProperty2) {
+  inherits(MultiDimensionalProperty, _BaseProperty2);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} mult a
+   * @param {*} container a
+   */
+  function MultiDimensionalProperty(elem, data, mult, container) {
+    classCallCheck(this, MultiDimensionalProperty);
+
+    var _this2 = possibleConstructorReturn(this, (MultiDimensionalProperty.__proto__ || Object.getPrototypeOf(MultiDimensionalProperty)).call(this));
+
+    _this2.propType = 'multidimensional';
+    _this2.mult = mult || 1;
+    _this2.data = data;
+    _this2._mdf = false;
+    _this2.elem = elem;
+    _this2.container = container;
+    _this2.k = false;
+    _this2.kf = false;
+    var len = data.k.length;
+    _this2.v = createTypedArray('float32', len);
+    _this2.pv = createTypedArray('float32', len);
+    // var arr = createTypedArray('float32', len);
+    _this2.vel = createTypedArray('float32', len);
+    for (var i = 0; i < len; i += 1) {
+      _this2.v[i] = data.k[i] * _this2.mult;
+      _this2.pv[i] = data.k[i];
+    }
+    _this2._isFirstFrame = true;
+    _this2.effectsSequence = [];
+    _this2.getValue = _this2.processEffectsSequence;
+    // this.setVValue = setVValue;
+    // this.addEffect = addEffect;
+    return _this2;
+  }
+
+  return MultiDimensionalProperty;
+}(BaseProperty);
+
+/**
+ * a
+ */
+
+
+var KeyframedValueProperty = function (_BaseProperty3) {
+  inherits(KeyframedValueProperty, _BaseProperty3);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} mult a
+   * @param {*} container a
+   */
+  function KeyframedValueProperty(elem, data, mult, container) {
+    classCallCheck(this, KeyframedValueProperty);
+
+    var _this3 = possibleConstructorReturn(this, (KeyframedValueProperty.__proto__ || Object.getPrototypeOf(KeyframedValueProperty)).call(this));
+
+    _this3.propType = 'unidimensional';
+    _this3.keyframes = data.k;
+    _this3.offsetTime = elem.data.st;
+    _this3._caching = {
+      lastFrame: initFrame,
+      lastIndex: 0,
+      value: 0,
+      _lastKeyframeIndex: -1
+    };
+    _this3.k = true;
+    _this3.kf = true;
+    _this3.data = data;
+    _this3.mult = mult || 1;
+    _this3.elem = elem;
+    _this3.container = container;
+    _this3.v = initFrame;
+    _this3.pv = initFrame;
+    _this3._isFirstFrame = true;
+    _this3.getValue = _this3.processEffectsSequence;
+    _this3.effectsSequence = [_this3.getValueAtCurrentTime.bind(_this3)];
+    return _this3;
+  }
+
+  return KeyframedValueProperty;
+}(BaseProperty);
+
+/**
+ * a
+ */
+
+
+var KeyframedMultidimensionalProperty = function (_BaseProperty4) {
+  inherits(KeyframedMultidimensionalProperty, _BaseProperty4);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} mult a
+   * @param {*} container a
+   */
+  function KeyframedMultidimensionalProperty(elem, data, mult, container) {
+    classCallCheck(this, KeyframedMultidimensionalProperty);
+
+    var _this4 = possibleConstructorReturn(this, (KeyframedMultidimensionalProperty.__proto__ || Object.getPrototypeOf(KeyframedMultidimensionalProperty)).call(this));
+
+    _this4.propType = 'multidimensional';
+    var len = data.k.length;
+    var s = void 0;
+    var e = void 0;
+    var to = void 0;
+    var ti = void 0;
+    for (var i = 0; i < len - 1; i += 1) {
+      if (data.k[i].to && data.k[i].s && data.k[i].e) {
+        s = data.k[i].s;
+        e = data.k[i].e;
+        to = data.k[i].to;
+        ti = data.k[i].ti;
+        if (s.length === 2 && !(s[0] === e[0] && s[1] === e[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], s[0] + to[0], s[1] + to[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], e[0] + ti[0], e[1] + ti[1]) || s.length === 3 && !(s[0] === e[0] && s[1] === e[1] && s[2] === e[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], s[0] + to[0], s[1] + to[1], s[2] + to[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], e[0] + ti[0], e[1] + ti[1], e[2] + ti[2])) {
+          data.k[i].to = null;
+          data.k[i].ti = null;
+        }
+        if (s[0] === e[0] && s[1] === e[1] && to[0] === 0 && to[1] === 0 && ti[0] === 0 && ti[1] === 0) {
+          if (s.length === 2 || s[2] === e[2] && to[2] === 0 && ti[2] === 0) {
+            data.k[i].to = null;
+            data.k[i].ti = null;
+          }
+        }
+      }
+    }
+    _this4.effectsSequence = [_this4.getValueAtCurrentTime.bind(_this4)];
+    _this4.keyframes = data.k;
+    _this4.offsetTime = elem.data.st;
+    _this4.k = true;
+    _this4.kf = true;
+    _this4._isFirstFrame = true;
+    _this4.mult = mult || 1;
+    _this4.elem = elem;
+    _this4.container = container;
+    _this4.getValue = _this4.processEffectsSequence;
+    var arrLen = data.k[0].s.length;
+    _this4.v = createTypedArray('float32', arrLen);
+    _this4.pv = createTypedArray('float32', arrLen);
+    for (var _i = 0; _i < arrLen; _i += 1) {
+      _this4.v[_i] = initFrame;
+      _this4.pv[_i] = initFrame;
+    }
+    _this4._caching = {
+      lastFrame: initFrame,
+      lastIndex: 0,
+      value: createTypedArray('float32', arrLen)
+    };
+    return _this4;
+  }
+
+  return KeyframedMultidimensionalProperty;
+}(BaseProperty);
+
+/**
+ * a
+ * @param {*} elem a
+ * @param {*} data a
+ * @param {*} type a
+ * @param {*} mult a
+ * @param {*} container a
+ * @return {*}
+ */
+
+
+function PropertyFactory(elem, data, type, mult, container) {
+  var p = void 0;
+  if (!data.k.length) {
+    p = new ValueProperty(elem, data, mult, container);
+  } else if (typeof data.k[0] === 'number') {
+    p = new MultiDimensionalProperty(elem, data, mult, container);
+  } else {
+    switch (type) {
+      case 0:
+        p = new KeyframedValueProperty(elem, data, mult, container);
+        break;
+      case 1:
+        p = new KeyframedMultidimensionalProperty(elem, data, mult, container);
+        break;
+    }
+  }
+  if (p.effectsSequence.length) {
+    container.addDynamicProperty(p);
+  }
+  return p;
+}
+
+/**
+ * a
+ * @return {*}
+ */
+function create$3() {
+  return createTypedArray('float32', 2);
+}
+var point_pool = pool_factory(8, create$3);
+
+/**
+ * a
+ */
+
+var ShapePath = function () {
+  /**
+   * a
+   */
+  function ShapePath() {
+    classCallCheck(this, ShapePath);
+
+    this.c = false;
+    this._length = 0;
+    this._maxLength = 8;
+    this.v = createSizedArray(this._maxLength);
+    this.o = createSizedArray(this._maxLength);
+    this.i = createSizedArray(this._maxLength);
+  }
+
+  /**
+   * a
+   * @param {*} closed a
+   * @param {*} len a
+   */
+
+
+  createClass(ShapePath, [{
+    key: 'setPathData',
+    value: function setPathData(closed, len) {
+      this.c = closed;
+      this.setLength(len);
+      var i = 0;
+      while (i < len) {
+        this.v[i] = point_pool.newElement();
+        this.o[i] = point_pool.newElement();
+        this.i[i] = point_pool.newElement();
+        i += 1;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} len a
+     */
+
+  }, {
+    key: 'setLength',
+    value: function setLength(len) {
+      while (this._maxLength < len) {
+        this.doubleArrayLength();
+      }
+      this._length = len;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'doubleArrayLength',
+    value: function doubleArrayLength() {
+      this.v = this.v.concat(createSizedArray(this._maxLength));
+      this.i = this.i.concat(createSizedArray(this._maxLength));
+      this.o = this.o.concat(createSizedArray(this._maxLength));
+      this._maxLength *= 2;
+    }
+
+    /**
+     * a
+     * @param {*} x a
+     * @param {*} y a
+     * @param {*} type a
+     * @param {*} pos a
+     * @param {*} replace a
+     */
+
+  }, {
+    key: 'setXYAt',
+    value: function setXYAt(x, y, type, pos, replace) {
+      var arr = void 0;
+      this._length = Math.max(this._length, pos + 1);
+      if (this._length >= this._maxLength) {
+        this.doubleArrayLength();
+      }
+      switch (type) {
+        case 'v':
+          arr = this.v;
+          break;
+        case 'i':
+          arr = this.i;
+          break;
+        case 'o':
+          arr = this.o;
+          break;
+      }
+      if (!arr[pos] || arr[pos] && !replace) {
+        arr[pos] = point_pool.newElement();
+      }
+      arr[pos][0] = x;
+      arr[pos][1] = y;
+    }
+
+    /**
+     * a
+     * @param {*} vX a
+     * @param {*} vY a
+     * @param {*} oX a
+     * @param {*} oY a
+     * @param {*} iX a
+     * @param {*} iY a
+     * @param {*} pos a
+     * @param {*} replace a
+     */
+
+  }, {
+    key: 'setTripleAt',
+    value: function setTripleAt(vX, vY, oX, oY, iX, iY, pos, replace) {
+      this.setXYAt(vX, vY, 'v', pos, replace);
+      this.setXYAt(oX, oY, 'o', pos, replace);
+      this.setXYAt(iX, iY, 'i', pos, replace);
+    }
+
+    /**
+     * a
+     * @return {*}
+     */
+
+  }, {
+    key: 'reverse',
+    value: function reverse() {
+      var newPath = new ShapePath();
+      newPath.setPathData(this.c, this._length);
+      var vertices = this.v;
+      var outPoints = this.o;
+      var inPoints = this.i;
+      var init = 0;
+      if (this.c) {
+        newPath.setTripleAt(vertices[0][0], vertices[0][1], inPoints[0][0], inPoints[0][1], outPoints[0][0], outPoints[0][1], 0, false);
+        init = 1;
+      }
+      var cnt = this._length - 1;
+      var len = this._length;
+
+      for (var i = init; i < len; i += 1) {
+        newPath.setTripleAt(vertices[cnt][0], vertices[cnt][1], inPoints[cnt][0], inPoints[cnt][1], outPoints[cnt][0], outPoints[cnt][1], i, false);
+        cnt -= 1;
+      }
+      return newPath;
+    }
+  }]);
+  return ShapePath;
+}();
+
+/**
+ * a
+ * @return {*}
+ */
+function create$2() {
+  return new ShapePath();
+}
+
+/**
+ * a
+ * @param {*} shapePath a
+ */
+function release$1(shapePath) {
+  var len = shapePath._length;
+  for (var i = 0; i < len; i += 1) {
+    point_pool.release(shapePath.v[i]);
+    point_pool.release(shapePath.i[i]);
+    point_pool.release(shapePath.o[i]);
+    shapePath.v[i] = null;
+    shapePath.i[i] = null;
+    shapePath.o[i] = null;
+  }
+  shapePath._length = 0;
+  shapePath.c = false;
+}
+
+/**
+ * a
+ * @param {*} shape a
+ * @return {*}
+ */
+function clone(shape) {
+  var cloned = shape_pool.newElement();
+  var len = shape._length === undefined ? shape.v.length : shape._length;
+  cloned.setLength(len);
+  cloned.c = shape.c;
+  // var pt;
+
+  for (var i = 0; i < len; i += 1) {
+    cloned.setTripleAt(shape.v[i][0], shape.v[i][1], shape.o[i][0], shape.o[i][1], shape.i[i][0], shape.i[i][1], i);
+  }
+  return cloned;
+}
+
+var shape_pool = pool_factory(4, create$2, release$1);
+shape_pool.clone = clone;
+
+/**
+ * a
+ */
+
+var ShapeCollection = function () {
+  /**
+   * a
+   */
+  function ShapeCollection() {
+    classCallCheck(this, ShapeCollection);
+
+    this._length = 0;
+    this._maxLength = 4;
+    this.shapes = createSizedArray(this._maxLength);
+  }
+
+  /**
+   * a
+   * @param {*} shapeData a
+   */
+
+
+  createClass(ShapeCollection, [{
+    key: 'addShape',
+    value: function addShape(shapeData) {
+      if (this._length === this._maxLength) {
+        this.shapes = this.shapes.concat(createSizedArray(this._maxLength));
+        this._maxLength *= 2;
+      }
+      this.shapes[this._length] = shapeData;
+      this._length += 1;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'releaseShapes',
+    value: function releaseShapes() {
+      for (var i = 0; i < this._length; i += 1) {
+        shape_pool.release(this.shapes[i]);
+      }
+      this._length = 0;
+    }
+  }]);
+  return ShapeCollection;
+}();
+
+var _length = 0;
+var _maxLength = 4;
+var pool = createSizedArray(_maxLength);
+
+/**
+ * a
+ * @return {*}
+ */
+function newShapeCollection() {
+  var shapeCollection = void 0;
+  if (_length) {
+    _length -= 1;
+    shapeCollection = pool[_length];
+  } else {
+    shapeCollection = new ShapeCollection();
+  }
+  return shapeCollection;
+}
+
+/**
+ * a
+ * @param {*} shapeCollection a
+ */
+function release$2(shapeCollection) {
+  var len = shapeCollection._length;
+  for (var i = 0; i < len; i += 1) {
+    shape_pool.release(shapeCollection.shapes[i]);
+  }
+  shapeCollection._length = 0;
+
+  if (_length === _maxLength) {
+    pool = pooling.double(pool);
+    _maxLength = _maxLength * 2;
+  }
+  pool[_length] = shapeCollection;
+  _length += 1;
+}
+
+var shapeCollection_pool = { newShapeCollection: newShapeCollection, release: release$2 };
+
+/**
+ * a
+ */
+var DynamicPropertyContainer = function () {
+  function DynamicPropertyContainer() {
+    classCallCheck(this, DynamicPropertyContainer);
+  }
+
+  createClass(DynamicPropertyContainer, [{
+    key: "addDynamicProperty",
+
+    /**
+     * a
+     * @param {*} prop a
+     */
+    value: function addDynamicProperty(prop) {
+      if (this.dynamicProperties.indexOf(prop) === -1) {
+        this.dynamicProperties.push(prop);
+        this.container.addDynamicProperty(this);
+        this._isAnimated = true;
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: "iterateDynamicProperties",
+    value: function iterateDynamicProperties(frameNum) {
+      this._mdf = false;
+      var len = this.dynamicProperties.length;
+      for (var i = 0; i < len; i += 1) {
+        this.dynamicProperties[i].getValue(frameNum);
+        if (this.dynamicProperties[i]._mdf) {
+          this._mdf = true;
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} container a
+     */
+
+  }, {
+    key: "initDynamicPropertyContainer",
+    value: function initDynamicPropertyContainer(container) {
+      this.container = container;
+      this.dynamicProperties = [];
+      this._mdf = false;
+      this._isAnimated = false;
+    }
+  }]);
+  return DynamicPropertyContainer;
+}();
+
+var initFrame$1 = -999999;
+var degToRads$2 = Math.PI / 180;
+
+/**
+ * a
+ */
+
+var BaseShapeProperty = function () {
+  function BaseShapeProperty() {
+    classCallCheck(this, BaseShapeProperty);
+  }
+
+  createClass(BaseShapeProperty, [{
+    key: 'interpolateShape',
+
+    /**
+     * a
+     * @param {*} frameNum a
+     * @param {*} previousValue a
+     * @param {*} caching a
+     */
+    value: function interpolateShape(frameNum, previousValue, caching) {
+      var iterationIndex = caching.lastIndex;
+      var keyPropS = void 0;
+      var keyPropE = void 0;
+      var isHold = void 0;
+      var perc = void 0;
+      var kf = this.keyframes;
+      if (frameNum < kf[0].t - this.offsetTime) {
+        keyPropS = kf[0].s[0];
+        isHold = true;
+        iterationIndex = 0;
+      } else if (frameNum >= kf[kf.length - 1].t - this.offsetTime) {
+        keyPropS = kf[kf.length - 1].s ? kf[kf.length - 1].s[0] : kf[kf.length - 2].e[0];
+        // /*if(kf[kf.length - 1].s){
+        //     keyPropS = kf[kf.length - 1].s[0];
+        // }else{
+        //     keyPropS = kf[kf.length - 2].e[0];
+        // }*/
+        isHold = true;
+      } else {
+        var i = iterationIndex;
+        var len = kf.length - 1;
+        var flag = true;
+        var keyData = void 0;
+        var nextKeyData = void 0;
+        while (flag) {
+          keyData = kf[i];
+          nextKeyData = kf[i + 1];
+          if (nextKeyData.t - this.offsetTime > frameNum) {
+            break;
+          }
+          if (i < len - 1) {
+            i += 1;
+          } else {
+            flag = false;
+          }
+        }
+        isHold = keyData.h === 1;
+        iterationIndex = i;
+        if (!isHold) {
+          if (frameNum >= nextKeyData.t - this.offsetTime) {
+            perc = 1;
+          } else if (frameNum < keyData.t - this.offsetTime) {
+            perc = 0;
+          } else {
+            var fnc = void 0;
+            if (keyData.__fnct) {
+              fnc = keyData.__fnct;
+            } else {
+              fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y).get;
+              keyData.__fnct = fnc;
+            }
+            perc = fnc((frameNum - (keyData.t - this.offsetTime)) / (nextKeyData.t - this.offsetTime - (keyData.t - this.offsetTime)));
+          }
+          keyPropE = nextKeyData.s ? nextKeyData.s[0] : keyData.e[0];
+        }
+        keyPropS = keyData.s[0];
+      }
+      var jLen = previousValue._length;
+      var kLen = keyPropS.i[0].length;
+      var vertexValue = void 0;
+      caching.lastIndex = iterationIndex;
+
+      for (var j = 0; j < jLen; j++) {
+        for (var k = 0; k < kLen; k++) {
+          vertexValue = isHold ? keyPropS.i[j][k] : keyPropS.i[j][k] + (keyPropE.i[j][k] - keyPropS.i[j][k]) * perc;
+          previousValue.i[j][k] = vertexValue;
+          vertexValue = isHold ? keyPropS.o[j][k] : keyPropS.o[j][k] + (keyPropE.o[j][k] - keyPropS.o[j][k]) * perc;
+          previousValue.o[j][k] = vertexValue;
+          vertexValue = isHold ? keyPropS.v[j][k] : keyPropS.v[j][k] + (keyPropE.v[j][k] - keyPropS.v[j][k]) * perc;
+          previousValue.v[j][k] = vertexValue;
+        }
+      }
+    }
+
+    /**
+     * a
+     * @return {*}
+     */
+
+  }, {
+    key: 'interpolateShapeCurrentTime',
+    value: function interpolateShapeCurrentTime(_frameNum) {
+      var frameNum = _frameNum - this.offsetTime;
+      var initTime = this.keyframes[0].t - this.offsetTime;
+      var endTime = this.keyframes[this.keyframes.length - 1].t - this.offsetTime;
+      var lastFrame = this._caching.lastFrame;
+      if (!(lastFrame !== initFrame$1 && (lastFrame < initTime && frameNum < initTime || lastFrame > endTime && frameNum > endTime))) {
+        this._caching.lastIndex = lastFrame < frameNum ? this._caching.lastIndex : 0;
+        this.interpolateShape(frameNum, this.pv, this._caching);
+      }
+      this._caching.lastFrame = frameNum;
+      return this.pv;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'resetShape',
+    value: function resetShape() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * a
+     * @param {*} shape1 a
+     * @param {*} shape2 a
+     * @return {*}
+     */
+
+  }, {
+    key: 'shapesEqual',
+    value: function shapesEqual(shape1, shape2) {
+      if (shape1._length !== shape2._length || shape1.c !== shape2.c) {
+        return false;
+      }
+      var len = shape1._length;
+      for (var i = 0; i < len; i += 1) {
+        if (shape1.v[i][0] !== shape2.v[i][0] || shape1.v[i][1] !== shape2.v[i][1] || shape1.o[i][0] !== shape2.o[i][0] || shape1.o[i][1] !== shape2.o[i][1] || shape1.i[i][0] !== shape2.i[i][0] || shape1.i[i][1] !== shape2.i[i][1]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * a
+     * @param {*} newPath a
+     */
+
+  }, {
+    key: 'setVValue',
+    value: function setVValue(newPath) {
+      if (!this.shapesEqual(this.v, newPath)) {
+        this.v = shape_pool.clone(newPath);
+        this.localShapeCollection.releaseShapes();
+        this.localShapeCollection.addShape(this.v);
+        this._mdf = true;
+        this.paths = this.localShapeCollection;
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'processEffectsSequence',
+    value: function processEffectsSequence() {
+      if (!this.effectsSequence.length) {
+        return;
+      }
+      if (this.lock) {
+        this.setVValue(this.pv);
+        return;
+      }
+      this.lock = true;
+      this._mdf = false;
+      var finalValue = this.kf ? this.pv : this.data.ks ? this.data.ks.k : this.data.pt.k;
+      var len = this.effectsSequence.length;
+      for (var i = 0; i < len; i += 1) {
+        finalValue = this.effectsSequence[i](finalValue);
+      }
+      this.setVValue(finalValue);
+      this.lock = false;
+    }
+  }]);
+  return BaseShapeProperty;
+}();
+
+/**
+ * a
+ */
+
+
+var ShapeProperty = function (_BaseShapeProperty) {
+  inherits(ShapeProperty, _BaseShapeProperty);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} type a
+   */
+  function ShapeProperty(elem, data, type) {
+    classCallCheck(this, ShapeProperty);
+
+    var _this = possibleConstructorReturn(this, (ShapeProperty.__proto__ || Object.getPrototypeOf(ShapeProperty)).call(this));
+
+    _this.propType = 'shape';
+    _this.container = elem;
+    _this.elem = elem;
+    _this.data = data;
+    _this.k = false;
+    _this.kf = false;
+    _this._mdf = false;
+    var pathData = type === 3 ? data.pt.k : data.ks.k;
+    _this.v = shape_pool.clone(pathData);
+    _this.pv = shape_pool.clone(_this.v);
+    _this.localShapeCollection = shapeCollection_pool.newShapeCollection();
+    _this.paths = _this.localShapeCollection;
+    _this.paths.addShape(_this.v);
+    _this.reset = _this.resetShape;
+    _this.effectsSequence = [];
+    _this.getValue = _this.processEffectsSequence;
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {*} effectFunction a
+   */
+
+
+  createClass(ShapeProperty, [{
+    key: 'addEffect',
+    value: function addEffect(effectFunction) {
+      this.effectsSequence.push(effectFunction);
+      this.container.addDynamicProperty(this);
+    }
+  }]);
+  return ShapeProperty;
+}(BaseShapeProperty);
+
+/**
+ * a
+ */
+
+
+var KeyframedShapeProperty = function (_BaseShapeProperty2) {
+  inherits(KeyframedShapeProperty, _BaseShapeProperty2);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} type a
+   */
+  function KeyframedShapeProperty(elem, data, type) {
+    classCallCheck(this, KeyframedShapeProperty);
+
+    var _this2 = possibleConstructorReturn(this, (KeyframedShapeProperty.__proto__ || Object.getPrototypeOf(KeyframedShapeProperty)).call(this));
+
+    _this2.propType = 'shape';
+    _this2.elem = elem;
+    _this2.container = elem;
+    _this2.offsetTime = elem.data.st;
+    _this2.keyframes = type === 3 ? data.pt.k : data.ks.k;
+    _this2.k = true;
+    _this2.kf = true;
+    var len = _this2.keyframes[0].s[0].i.length;
+    _this2.v = shape_pool.newElement();
+    _this2.v.setPathData(_this2.keyframes[0].s[0].c, len);
+    _this2.pv = shape_pool.clone(_this2.v);
+    _this2.localShapeCollection = shapeCollection_pool.newShapeCollection();
+    _this2.paths = _this2.localShapeCollection;
+    _this2.paths.addShape(_this2.v);
+    _this2.lastFrame = initFrame$1;
+    _this2.reset = _this2.resetShape;
+    _this2._caching = { lastFrame: initFrame$1, lastIndex: 0 };
+    _this2.effectsSequence = [_this2.interpolateShapeCurrentTime.bind(_this2)];
+    return _this2;
+  }
+
+  /**
+   * a
+   * @param {*} effectFunction a
+   */
+
+
+  createClass(KeyframedShapeProperty, [{
+    key: 'addEffect',
+    value: function addEffect(effectFunction) {
+      this.effectsSequence.push(effectFunction);
+      this.container.addDynamicProperty(this);
+    }
+  }]);
+  return KeyframedShapeProperty;
+}(BaseShapeProperty);
+
+var roundCorner = 0.5519;
+var cPoint = roundCorner;
+
+/**
+ * a
+ */
+
+var EllShapeProperty = function (_DynamicPropertyConta) {
+  inherits(EllShapeProperty, _DynamicPropertyConta);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   */
+  function EllShapeProperty(elem, data) {
+    classCallCheck(this, EllShapeProperty);
+
+    // /*this.v = {
+    //     v: createSizedArray(4),
+    //     i: createSizedArray(4),
+    //     o: createSizedArray(4),
+    //     c: true
+    // };*/
+    var _this3 = possibleConstructorReturn(this, (EllShapeProperty.__proto__ || Object.getPrototypeOf(EllShapeProperty)).call(this));
+
+    _this3.v = shape_pool.newElement();
+    _this3.v.setPathData(true, 4);
+    _this3.localShapeCollection = shapeCollection_pool.newShapeCollection();
+    _this3.paths = _this3.localShapeCollection;
+    _this3.localShapeCollection.addShape(_this3.v);
+    _this3.d = data.d;
+    _this3.elem = elem;
+    _this3.initDynamicPropertyContainer(elem);
+    _this3.p = PropertyFactory(elem, data.p, 1, 0, _this3);
+    _this3.s = PropertyFactory(elem, data.s, 1, 0, _this3);
+    if (_this3.dynamicProperties.length) {
+      _this3.k = true;
+    } else {
+      _this3.k = false;
+      _this3.convertEllToPath();
+    }
+    return _this3;
+  }
+
+  /**
+   * a
+   */
+
+
+  createClass(EllShapeProperty, [{
+    key: 'reset',
+    value: function reset() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      this.iterateDynamicProperties(frameNum);
+
+      if (this._mdf) {
+        this.convertEllToPath();
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'convertEllToPath',
+    value: function convertEllToPath() {
+      var p0 = this.p.v[0];
+      var p1 = this.p.v[1];
+      var s0 = this.s.v[0] / 2;
+      var s1 = this.s.v[1] / 2;
+      var _cw = this.d !== 3;
+      var _v = this.v;
+      _v.v[0][0] = p0;
+      _v.v[0][1] = p1 - s1;
+      _v.v[1][0] = _cw ? p0 + s0 : p0 - s0;
+      _v.v[1][1] = p1;
+      _v.v[2][0] = p0;
+      _v.v[2][1] = p1 + s1;
+      _v.v[3][0] = _cw ? p0 - s0 : p0 + s0;
+      _v.v[3][1] = p1;
+      _v.i[0][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
+      _v.i[0][1] = p1 - s1;
+      _v.i[1][0] = _cw ? p0 + s0 : p0 - s0;
+      _v.i[1][1] = p1 - s1 * cPoint;
+      _v.i[2][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
+      _v.i[2][1] = p1 + s1;
+      _v.i[3][0] = _cw ? p0 - s0 : p0 + s0;
+      _v.i[3][1] = p1 + s1 * cPoint;
+      _v.o[0][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
+      _v.o[0][1] = p1 - s1;
+      _v.o[1][0] = _cw ? p0 + s0 : p0 - s0;
+      _v.o[1][1] = p1 + s1 * cPoint;
+      _v.o[2][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
+      _v.o[2][1] = p1 + s1;
+      _v.o[3][0] = _cw ? p0 - s0 : p0 + s0;
+      _v.o[3][1] = p1 - s1 * cPoint;
+    }
+  }]);
+  return EllShapeProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * a
+ */
+
+
+var StarShapeProperty = function (_DynamicPropertyConta2) {
+  inherits(StarShapeProperty, _DynamicPropertyConta2);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   */
+  function StarShapeProperty(elem, data) {
+    classCallCheck(this, StarShapeProperty);
+
+    var _this4 = possibleConstructorReturn(this, (StarShapeProperty.__proto__ || Object.getPrototypeOf(StarShapeProperty)).call(this));
+
+    _this4.v = shape_pool.newElement();
+    _this4.v.setPathData(true, 0);
+    _this4.elem = elem;
+    _this4.data = data;
+    _this4.d = data.d;
+    _this4.initDynamicPropertyContainer(elem);
+    if (data.sy === 1) {
+      _this4.ir = PropertyFactory(elem, data.ir, 0, 0, _this4);
+      _this4.is = PropertyFactory(elem, data.is, 0, 0.01, _this4);
+      _this4.convertToPath = _this4.convertStarToPath;
+    } else {
+      _this4.convertToPath = _this4.convertPolygonToPath;
+    }
+    _this4.pt = PropertyFactory(elem, data.pt, 0, 0, _this4);
+    _this4.p = PropertyFactory(elem, data.p, 1, 0, _this4);
+    _this4.r = PropertyFactory(elem, data.r, 0, degToRads$2, _this4);
+    _this4.or = PropertyFactory(elem, data.or, 0, 0, _this4);
+    _this4.os = PropertyFactory(elem, data.os, 0, 0.01, _this4);
+    _this4.localShapeCollection = shapeCollection_pool.newShapeCollection();
+    _this4.localShapeCollection.addShape(_this4.v);
+    _this4.paths = _this4.localShapeCollection;
+    if (_this4.dynamicProperties.length) {
+      _this4.k = true;
+    } else {
+      _this4.k = false;
+      _this4.convertToPath();
+    }
+    return _this4;
+  }
+
+  /**
+   * a
+   */
+
+
+  createClass(StarShapeProperty, [{
+    key: 'reset',
+    value: function reset() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      this.iterateDynamicProperties(frameNum);
+      if (this._mdf) {
+        this.convertToPath();
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'convertStarToPath',
+    value: function convertStarToPath() {
+      var numPts = Math.floor(this.pt.v) * 2;
+      var angle = Math.PI * 2 / numPts;
+      // /*this.v.v.length = numPts;
+      // this.v.i.length = numPts;
+      // this.v.o.length = numPts;*/
+      var longFlag = true;
+      var longRad = this.or.v;
+      var shortRad = this.ir.v;
+      var longRound = this.os.v;
+      var shortRound = this.is.v;
+      var longPerimSegment = 2 * Math.PI * longRad / (numPts * 2);
+      var shortPerimSegment = 2 * Math.PI * shortRad / (numPts * 2);
+      var currentAng = -Math.PI / 2;
+      currentAng += this.r.v;
+      var dir = this.data.d === 3 ? -1 : 1;
+      this.v._length = 0;
+      for (var i = 0; i < numPts; i++) {
+        var rad = longFlag ? longRad : shortRad;
+        var roundness = longFlag ? longRound : shortRound;
+        var perimSegment = longFlag ? longPerimSegment : shortPerimSegment;
+        var x = rad * Math.cos(currentAng);
+        var y = rad * Math.sin(currentAng);
+        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
+        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
+        x += +this.p.v[0];
+        y += +this.p.v[1];
+        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
+
+        // /*this.v.v[i] = [x,y];
+        // this.v.i[i] = [x+ox*perimSegment*roundness*dir,y+oy*perimSegment*roundness*dir];
+        // this.v.o[i] = [x-ox*perimSegment*roundness*dir,y-oy*perimSegment*roundness*dir];
+        // this.v._length = numPts;*/
+        longFlag = !longFlag;
+        currentAng += angle * dir;
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'convertPolygonToPath',
+    value: function convertPolygonToPath() {
+      var numPts = Math.floor(this.pt.v);
+      var angle = Math.PI * 2 / numPts;
+      var rad = this.or.v;
+      var roundness = this.os.v;
+      var perimSegment = 2 * Math.PI * rad / (numPts * 4);
+      var currentAng = -Math.PI / 2;
+      var dir = this.data.d === 3 ? -1 : 1;
+      currentAng += this.r.v;
+      this.v._length = 0;
+      for (var i = 0; i < numPts; i++) {
+        var x = rad * Math.cos(currentAng);
+        var y = rad * Math.sin(currentAng);
+        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
+        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
+        x += +this.p.v[0];
+        y += +this.p.v[1];
+        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
+        currentAng += angle * dir;
+      }
+      this.paths.length = 0;
+      this.paths[0] = this.v;
+    }
+  }]);
+  return StarShapeProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * a
+ */
+
+
+var RectShapeProperty = function (_DynamicPropertyConta3) {
+  inherits(RectShapeProperty, _DynamicPropertyConta3);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   */
+  function RectShapeProperty(elem, data) {
+    classCallCheck(this, RectShapeProperty);
+
+    var _this5 = possibleConstructorReturn(this, (RectShapeProperty.__proto__ || Object.getPrototypeOf(RectShapeProperty)).call(this));
+
+    _this5.v = shape_pool.newElement();
+    _this5.v.c = true;
+    _this5.localShapeCollection = shapeCollection_pool.newShapeCollection();
+    _this5.localShapeCollection.addShape(_this5.v);
+    _this5.paths = _this5.localShapeCollection;
+    _this5.elem = elem;
+    _this5.d = data.d;
+    _this5.initDynamicPropertyContainer(elem);
+    _this5.p = PropertyFactory(elem, data.p, 1, 0, _this5);
+    _this5.s = PropertyFactory(elem, data.s, 1, 0, _this5);
+    _this5.r = PropertyFactory(elem, data.r, 0, 0, _this5);
+    if (_this5.dynamicProperties.length) {
+      _this5.k = true;
+    } else {
+      _this5.k = false;
+      _this5.convertRectToPath();
+    }
+    return _this5;
+  }
+
+  /**
+   * a
+   */
+
+
+  createClass(RectShapeProperty, [{
+    key: 'reset',
+    value: function reset() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'convertRectToPath',
+    value: function convertRectToPath() {
+      var p0 = this.p.v[0];
+      var p1 = this.p.v[1];
+      var v0 = this.s.v[0] / 2;
+      var v1 = this.s.v[1] / 2;
+      var round = Math.min(v0, v1, this.r.v);
+      var cPoint = round * (1 - roundCorner);
+      this.v._length = 0;
+
+      if (this.d === 2 || this.d === 1) {
+        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, 0, true);
+        this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, p0 + v0, p1 + v1 - round, 1, true);
+        if (round !== 0) {
+          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, 2, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0 + round, p1 + v1, 3, true);
+          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, 4, true);
+          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1 + round, 5, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, 6, true);
+          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, p0 + v0 - round, p1 - v1, 7, true);
+        } else {
+          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0, p1 + v1, 2);
+          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1, 3);
+        }
+      } else {
+        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, p0 + v0, p1 - v1 + round, 0, true);
+        if (round !== 0) {
+          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, 1, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0 + round, p1 - v1, 2, true);
+          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, 3, true);
+          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1 - round, 4, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, 5, true);
+          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0 - round, p1 + v1, 6, true);
+          this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, 7, true);
+        } else {
+          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0, p1 - v1, 1, true);
+          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1, 2, true);
+          this.v.setTripleAt(p0 + v0, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0, p1 + v1, 3, true);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} frameNum a
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      this.iterateDynamicProperties(frameNum);
+      if (this._mdf) {
+        this.convertRectToPath();
+      }
+    }
+  }]);
+  return RectShapeProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * a
+ * @param {*} elem a
+ * @param {*} data a
+ * @param {*} type a
+ * @return {*}
+ */
+
+
+function getShapeProp(elem, data, type) {
+  var prop = void 0;
+  if (type === 3 || type === 4) {
+    var dataProp = type === 3 ? data.pt : data.ks;
+    var keys = dataProp.k;
+    if (keys.length) {
+      prop = new KeyframedShapeProperty(elem, data, type);
+    } else {
+      prop = new ShapeProperty(elem, data, type);
+    }
+  } else if (type === 5) {
+    prop = new RectShapeProperty(elem, data);
+  } else if (type === 6) {
+    prop = new EllShapeProperty(elem, data);
+  } else if (type === 7) {
+    prop = new StarShapeProperty(elem, data);
+  }
+  if (prop.k) {
+    elem.addDynamicProperty(prop);
+  }
+  return prop;
+}
+
+/**
+ * a
+ * @return {*}
+ */
+function getConstructorFunction() {
+  return ShapeProperty;
+}
+
+/**
+ * a
+ * @return {*}
+ */
+function getKeyframedConstructorFunction() {
+  return KeyframedShapeProperty;
+}
+
+var ShapePropertyFactory = { getShapeProp: getShapeProp, getConstructorFunction: getConstructorFunction, getKeyframedConstructorFunction: getKeyframedConstructorFunction };
+
+/**
+ * a
+ */
+
+var CVShapeData = function () {
+  /**
+   * a
+   * @param {*} element a
+   * @param {*} data a
+   * @param {*} styles a
+   * @param {*} transformsManager a
+   */
+  function CVShapeData(element, data, styles, transformsManager) {
+    classCallCheck(this, CVShapeData);
+
+    this.styledShapes = [];
+    this.tr = [0, 0, 0, 0, 0, 0];
+    var ty = 4;
+    if (data.ty == 'rc') {
+      ty = 5;
+    } else if (data.ty == 'el') {
+      ty = 6;
+    } else if (data.ty == 'sr') {
+      ty = 7;
+    }
+    this.sh = ShapePropertyFactory.getShapeProp(element, data, ty, element);
+    var len = styles.length;
+    var styledShape = void 0;
+    for (var i = 0; i < len; i += 1) {
+      if (!styles[i].closed) {
+        styledShape = {
+          transforms: transformsManager.addTransformSequence(styles[i].transforms),
+          trNodes: []
+        };
+        this.styledShapes.push(styledShape);
+        styles[i].elements.push(styledShape);
+      }
+    }
+  }
+
+  /**
+   * a
+   */
+
+
+  createClass(CVShapeData, [{
+    key: 'setAsAnimated',
+    value: function setAsAnimated() {
+      this._isAnimated = true;
+    }
+  }]);
+  return CVShapeData;
+}();
+
+var degToRads$3 = Math.PI / 180;
+
+/**
+ * a
+ */
+
+var TransformProperty = function (_DynamicPropertyConta) {
+  inherits(TransformProperty, _DynamicPropertyConta);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} container a
+   */
+  function TransformProperty(elem, data, container) {
+    classCallCheck(this, TransformProperty);
+
+    var _this = possibleConstructorReturn(this, (TransformProperty.__proto__ || Object.getPrototypeOf(TransformProperty)).call(this));
+
+    _this.elem = elem;
+    _this.frameId = -1;
+    _this.propType = 'transform';
+    _this.data = data;
+    _this.v = new Matrix$1();
+    // Precalculated matrix with non animated properties
+    _this.pre = new Matrix$1();
+    _this.appliedTransformations = 0;
+    _this.initDynamicPropertyContainer(container || elem);
+    if (data.p && data.p.s) {
+      _this.px = PropertyFactory(elem, data.p.x, 0, 0, _this);
+      _this.py = PropertyFactory(elem, data.p.y, 0, 0, _this);
+      if (data.p.z) {
+        _this.pz = PropertyFactory(elem, data.p.z, 0, 0, _this);
+      }
+    } else {
+      _this.p = PropertyFactory(elem, data.p || { k: [0, 0, 0] }, 1, 0, _this);
+    }
+    if (data.rx) {
+      _this.rx = PropertyFactory(elem, data.rx, 0, degToRads$3, _this);
+      _this.ry = PropertyFactory(elem, data.ry, 0, degToRads$3, _this);
+      _this.rz = PropertyFactory(elem, data.rz, 0, degToRads$3, _this);
+      if (data.or.k[0].ti) {
+        var len = data.or.k.length;
+        for (var i = 0; i < len; i += 1) {
+          data.or.k[i].to = data.or.k[i].ti = null;
+        }
+      }
+      _this.or = PropertyFactory(elem, data.or, 1, degToRads$3, _this);
+      // sh Indicates it needs to be capped between -180 and 180
+      _this.or.sh = true;
+    } else {
+      _this.r = PropertyFactory(elem, data.r || { k: 0 }, 0, degToRads$3, _this);
+    }
+    if (data.sk) {
+      _this.sk = PropertyFactory(elem, data.sk, 0, degToRads$3, _this);
+      _this.sa = PropertyFactory(elem, data.sa, 0, degToRads$3, _this);
+    }
+    _this.a = PropertyFactory(elem, data.a || { k: [0, 0, 0] }, 1, 0, _this);
+    _this.s = PropertyFactory(elem, data.s || { k: [100, 100, 100] }, 1, 0.01, _this);
+    // Opacity is not part of the transform properties, that's why it won't use this.dynamicProperties. That way transforms won't get updated if opacity changes.
+    if (data.o) {
+      _this.o = PropertyFactory(elem, data.o, 0, 0.01, elem);
+    } else {
+      _this.o = { _mdf: false, v: 1 };
+    }
+    _this._isDirty = true;
+    if (!_this.dynamicProperties.length) {
+      _this.getValue(-999999, true);
+    }
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {*} prop a
+   */
+
+
+  createClass(TransformProperty, [{
+    key: '_addDynamicProperty',
+    value: function _addDynamicProperty(prop) {
+      if (this.dynamicProperties.indexOf(prop) === -1) {
+        this.dynamicProperties.push(prop);
+        this.container.addDynamicProperty(this);
+        this._isAnimated = true;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} prop a
+     */
+
+  }, {
+    key: 'addDynamicProperty',
+    value: function addDynamicProperty(prop) {
+      this._addDynamicProperty(prop);
+      this.elem.addDynamicProperty(prop);
+      this._isDirty = true;
+    }
+
+    /**
+     * a
+     * @param {*} forceRender a
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum, forceRender) {
+      if (this._isDirty) {
+        this.precalculateMatrix();
+        this._isDirty = false;
+      }
+
+      this.iterateDynamicProperties(frameNum);
+
+      if (this._mdf || forceRender) {
+        this.v.cloneFromProps(this.pre.props);
+        if (this.appliedTransformations < 1) {
+          this.v.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+        }
+        if (this.appliedTransformations < 2) {
+          this.v.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+        }
+        if (this.sk && this.appliedTransformations < 3) {
+          this.v.skewFromAxis(-this.sk.v, this.sa.v);
+        }
+        if (this.r && this.appliedTransformations < 4) {
+          this.v.rotate(-this.r.v);
+        } else if (!this.r && this.appliedTransformations < 4) {
+          this.v.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+        }
+        if (this.autoOriented) {
+          var v1 = void 0;
+          var v2 = void 0;
+          var frameRate = this.elem.globalData.frameRate;
+          if (this.p && this.p.keyframes && this.p.getValueAtTime) {
+            if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
+              v1 = this.p.getValueAtTime((this.p.keyframes[0].t + 0.01) / frameRate, 0);
+              v2 = this.p.getValueAtTime(this.p.keyframes[0].t / frameRate, 0);
+            } else if (this.p._caching.lastFrame + this.p.offsetTime >= this.p.keyframes[this.p.keyframes.length - 1].t) {
+              v1 = this.p.getValueAtTime(this.p.keyframes[this.p.keyframes.length - 1].t / frameRate, 0);
+              v2 = this.p.getValueAtTime((this.p.keyframes[this.p.keyframes.length - 1].t - 0.01) / frameRate, 0);
+            } else {
+              v1 = this.p.pv;
+              v2 = this.p.getValueAtTime((this.p._caching.lastFrame + this.p.offsetTime - 0.01) / frameRate, this.p.offsetTime);
+            }
+          } else if (this.px && this.px.keyframes && this.py.keyframes && this.px.getValueAtTime && this.py.getValueAtTime) {
+            v1 = [];
+            v2 = [];
+            var px = this.px;
+            var py = this.py;
+            // frameRate;
+            if (px._caching.lastFrame + px.offsetTime <= px.keyframes[0].t) {
+              v1[0] = px.getValueAtTime((px.keyframes[0].t + 0.01) / frameRate, 0);
+              v1[1] = py.getValueAtTime((py.keyframes[0].t + 0.01) / frameRate, 0);
+              v2[0] = px.getValueAtTime(px.keyframes[0].t / frameRate, 0);
+              v2[1] = py.getValueAtTime(py.keyframes[0].t / frameRate, 0);
+            } else if (px._caching.lastFrame + px.offsetTime >= px.keyframes[px.keyframes.length - 1].t) {
+              v1[0] = px.getValueAtTime(px.keyframes[px.keyframes.length - 1].t / frameRate, 0);
+              v1[1] = py.getValueAtTime(py.keyframes[py.keyframes.length - 1].t / frameRate, 0);
+              v2[0] = px.getValueAtTime((px.keyframes[px.keyframes.length - 1].t - 0.01) / frameRate, 0);
+              v2[1] = py.getValueAtTime((py.keyframes[py.keyframes.length - 1].t - 0.01) / frameRate, 0);
+            } else {
+              v1 = [px.pv, py.pv];
+              v2[0] = px.getValueAtTime((px._caching.lastFrame + px.offsetTime - 0.01) / frameRate, px.offsetTime);
+              v2[1] = py.getValueAtTime((py._caching.lastFrame + py.offsetTime - 0.01) / frameRate, py.offsetTime);
+            }
+          }
+          this.v.rotate(-Math.atan2(v1[1] - v2[1], v1[0] - v2[0]));
+        }
+        if (this.data.p && this.data.p.s) {
+          if (this.data.p.z) {
+            this.v.translate(this.px.v, this.py.v, -this.pz.v);
+          } else {
+            this.v.translate(this.px.v, this.py.v, 0);
+          }
+        } else {
+          this.v.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
+        }
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'precalculateMatrix',
+    value: function precalculateMatrix() {
+      if (!this.a.k) {
+        this.pre.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+        this.appliedTransformations = 1;
+      } else {
+        return;
+      }
+      if (!this.s.effectsSequence.length) {
+        this.pre.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+        this.appliedTransformations = 2;
+      } else {
+        return;
+      }
+      if (this.sk) {
+        if (!this.sk.effectsSequence.length && !this.sa.effectsSequence.length) {
+          this.pre.skewFromAxis(-this.sk.v, this.sa.v);
+          this.appliedTransformations = 3;
+        } else {
+          return;
+        }
+      }
+      if (this.r) {
+        if (!this.r.effectsSequence.length) {
+          this.pre.rotate(-this.r.v);
+          this.appliedTransformations = 4;
+        } else {
+          return;
+        }
+      } else if (!this.rz.effectsSequence.length && !this.ry.effectsSequence.length && !this.rx.effectsSequence.length && !this.or.effectsSequence.length) {
+        this.pre.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+        this.appliedTransformations = 4;
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'autoOrient',
+    value: function autoOrient() {}
+  }]);
+  return TransformProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * a
+ * @param {*} elem a
+ * @param {*} data a
+ * @param {*} container a
+ * @return {*}
+ */
+
+
+function getTransformProperty(elem, data, container) {
+  return new TransformProperty(elem, data, container);
+}
+
+var TransformPropertyFactory = { getTransformProperty: getTransformProperty };
+
+/**
+ * a
+ */
+
+var ShapeModifier = function (_DynamicPropertyConta) {
+  inherits(ShapeModifier, _DynamicPropertyConta);
+
+  function ShapeModifier() {
+    classCallCheck(this, ShapeModifier);
+    return possibleConstructorReturn(this, (ShapeModifier.__proto__ || Object.getPrototypeOf(ShapeModifier)).apply(this, arguments));
+  }
+
+  createClass(ShapeModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * a
+     */
+    value: function initModifierProperties() {}
+    /**
+     * a
+     */
+
+  }, {
+    key: 'addShapeToModifier',
+    value: function addShapeToModifier() {}
+    /**
+     * a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'addShape',
+    value: function addShape(data) {
+      if (!this.closed) {
+        var shapeData = { shape: data.sh, data: data, localShapeCollection: shapeCollection_pool.newShapeCollection() };
+        this.shapes.push(shapeData);
+        this.addShapeToModifier(shapeData);
+        if (this._isAnimated) {
+          data.setAsAnimated();
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'init',
+    value: function init(elem, data) {
+      this.shapes = [];
+      this.elem = elem;
+      this.initDynamicPropertyContainer(elem);
+      this.initModifierProperties(elem, data);
+      this.closed = false;
+      this.k = false;
+      if (this.dynamicProperties.length) {
+        this.k = true;
+      } else {
+        this.getValue(-999999, true);
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'processKeys',
+    value: function processKeys(frameNum) {
+      this.iterateDynamicProperties(frameNum);
+    }
+  }]);
+  return ShapeModifier;
+}(DynamicPropertyContainer);
+
+// import { registerModifier } from './ShapeModifiers';
+/**
+ * a
+ */
+
+var TrimModifier = function (_ShapeModifier) {
+  inherits(TrimModifier, _ShapeModifier);
+
+  function TrimModifier() {
+    classCallCheck(this, TrimModifier);
+    return possibleConstructorReturn(this, (TrimModifier.__proto__ || Object.getPrototypeOf(TrimModifier)).apply(this, arguments));
+  }
+
+  createClass(TrimModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+    value: function initModifierProperties(elem, data) {
+      this.s = PropertyFactory(elem, data.s, 0, 0.01, this);
+      this.e = PropertyFactory(elem, data.e, 0, 0.01, this);
+      this.o = PropertyFactory(elem, data.o, 0, 0, this);
+      this.sValue = 0;
+      this.eValue = 0;
+      this.getValue = this.processKeys;
+      this.m = data.m;
+      this._isAnimated = !!this.s.effectsSequence.length || !!this.e.effectsSequence.length || !!this.o.effectsSequence.length;
+    }
+
+    /**
+     * a
+     * @param {*} shapeData a
+     */
+
+  }, {
+    key: 'addShapeToModifier',
+    value: function addShapeToModifier(shapeData) {
+      shapeData.pathsData = [];
+    }
+
+    /**
+     * a
+     * @param {*} s a
+     * @param {*} e a
+     * @param {*} shapeLength a
+     * @param {*} addedLength a
+     * @param {*} totalModifierLength a
+     * @return {*}
+     */
+
+  }, {
+    key: 'calculateShapeEdges',
+    value: function calculateShapeEdges(s, e, shapeLength, addedLength, totalModifierLength) {
+      var segments = [];
+      if (e <= 1) {
+        segments.push({
+          s: s,
+          e: e
+        });
+      } else if (s >= 1) {
+        segments.push({
+          s: s - 1,
+          e: e - 1
+        });
+      } else {
+        segments.push({
+          s: s,
+          e: 1
+        });
+        segments.push({
+          s: 0,
+          e: e - 1
+        });
+      }
+      var shapeSegments = [];
+      var len = segments.length;
+      for (var i = 0; i < len; i += 1) {
+        var segmentOb = segments[i];
+        if (segmentOb.e * totalModifierLength < addedLength || segmentOb.s * totalModifierLength > addedLength + shapeLength) {
+          continue;
+        } else {
+          var shapeS = void 0;
+          var shapeE = void 0;
+          if (segmentOb.s * totalModifierLength <= addedLength) {
+            shapeS = 0;
+          } else {
+            shapeS = (segmentOb.s * totalModifierLength - addedLength) / shapeLength;
+          }
+          if (segmentOb.e * totalModifierLength >= addedLength + shapeLength) {
+            shapeE = 1;
+          } else {
+            shapeE = (segmentOb.e * totalModifierLength - addedLength) / shapeLength;
+          }
+          shapeSegments.push([shapeS, shapeE]);
+        }
+      }
+      if (!shapeSegments.length) {
+        shapeSegments.push([0, 0]);
+      }
+      return shapeSegments;
+    }
+
+    /**
+     * a
+     * @param {*} pathsData a
+     * @return {*}
+     */
+
+  }, {
+    key: 'releasePathsData',
+    value: function releasePathsData(pathsData) {
+      var len = pathsData.length;
+      for (var i = 0; i < len; i += 1) {
+        segments_length_pool.release(pathsData[i]);
+      }
+      pathsData.length = 0;
+      return pathsData;
+    }
+
+    /**
+     * a
+     * @param {*} _isFirstFrame a
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes(_isFirstFrame) {
+      var s = void 0;
+      var e = void 0;
+      if (this._mdf || _isFirstFrame) {
+        var o = this.o.v % 360 / 360;
+        if (o < 0) {
+          o += 1;
+        }
+        s = (this.s.v > 1 ? 1 : this.s.v < 0 ? 0 : this.s.v) + o;
+        e = (this.e.v > 1 ? 1 : this.e.v < 0 ? 0 : this.e.v) + o;
+        // if (s === e) {}
+        if (s > e) {
+          var _s = s;
+          s = e;
+          e = _s;
+        }
+        s = Math.round(s * 10000) * 0.0001;
+        e = Math.round(e * 10000) * 0.0001;
+        this.sValue = s;
+        this.eValue = e;
+      } else {
+        s = this.sValue;
+        e = this.eValue;
+      }
+      var shapePaths = void 0;
+      var len = this.shapes.length;
+      var pathsData = void 0;
+      var pathData = void 0;
+      var totalShapeLength = void 0;
+      var totalModifierLength = 0;
+
+      if (e === s) {
+        for (var i = 0; i < len; i += 1) {
+          this.shapes[i].localShapeCollection.releaseShapes();
+          this.shapes[i].shape._mdf = true;
+          this.shapes[i].shape.paths = this.shapes[i].localShapeCollection;
+        }
+      } else if (!(e === 1 && s === 0 || e === 0 && s === 1)) {
+        var segments = [];
+        var shapeData = void 0;
+        var localShapeCollection = void 0;
+        for (var _i = 0; _i < len; _i += 1) {
+          shapeData = this.shapes[_i];
+          // if shape hasn't changed and trim properties haven't changed, cached previous path can be used
+          if (!shapeData.shape._mdf && !this._mdf && !_isFirstFrame && this.m !== 2) {
+            shapeData.shape.paths = shapeData.localShapeCollection;
+          } else {
+            shapePaths = shapeData.shape.paths;
+            var jLen = shapePaths._length;
+            totalShapeLength = 0;
+            if (!shapeData.shape._mdf && shapeData.pathsData.length) {
+              totalShapeLength = shapeData.totalShapeLength;
+            } else {
+              pathsData = this.releasePathsData(shapeData.pathsData);
+              for (var j = 0; j < jLen; j += 1) {
+                pathData = bez.getSegmentsLength(shapePaths.shapes[j]);
+                pathsData.push(pathData);
+                totalShapeLength += pathData.totalLength;
+              }
+              shapeData.totalShapeLength = totalShapeLength;
+              shapeData.pathsData = pathsData;
+            }
+
+            totalModifierLength += totalShapeLength;
+            shapeData.shape._mdf = true;
+          }
+        }
+        var shapeS = s;
+        var shapeE = e;
+        var addedLength = 0;
+        var edges = void 0;
+        for (var _i2 = len - 1; _i2 >= 0; _i2 -= 1) {
+          shapeData = this.shapes[_i2];
+          if (shapeData.shape._mdf) {
+            localShapeCollection = shapeData.localShapeCollection;
+            localShapeCollection.releaseShapes();
+            // if m === 2 means paths are trimmed individually so edges need to be found for this specific shape relative to whoel group
+            if (this.m === 2 && len > 1) {
+              edges = this.calculateShapeEdges(s, e, shapeData.totalShapeLength, addedLength, totalModifierLength);
+              addedLength += shapeData.totalShapeLength;
+            } else {
+              edges = [[shapeS, shapeE]];
+            }
+            var _jLen = edges.length;
+            for (var _j = 0; _j < _jLen; _j += 1) {
+              shapeS = edges[_j][0];
+              shapeE = edges[_j][1];
+              segments.length = 0;
+              if (shapeE <= 1) {
+                segments.push({
+                  s: shapeData.totalShapeLength * shapeS,
+                  e: shapeData.totalShapeLength * shapeE
+                });
+              } else if (shapeS >= 1) {
+                segments.push({
+                  s: shapeData.totalShapeLength * (shapeS - 1),
+                  e: shapeData.totalShapeLength * (shapeE - 1)
+                });
+              } else {
+                segments.push({
+                  s: shapeData.totalShapeLength * shapeS,
+                  e: shapeData.totalShapeLength
+                });
+                segments.push({
+                  s: 0,
+                  e: shapeData.totalShapeLength * (shapeE - 1)
+                });
+              }
+              var newShapesData = this.addShapes(shapeData, segments[0]);
+              if (segments[0].s !== segments[0].e) {
+                if (segments.length > 1) {
+                  var lastShapeInCollection = shapeData.shape.paths.shapes[shapeData.shape.paths._length - 1];
+                  if (lastShapeInCollection.c) {
+                    var lastShape = newShapesData.pop();
+                    this.addPaths(newShapesData, localShapeCollection);
+                    newShapesData = this.addShapes(shapeData, segments[1], lastShape);
+                  } else {
+                    this.addPaths(newShapesData, localShapeCollection);
+                    newShapesData = this.addShapes(shapeData, segments[1]);
+                  }
+                }
+                this.addPaths(newShapesData, localShapeCollection);
+              }
+            }
+            shapeData.shape.paths = localShapeCollection;
+          }
+        }
+      } else if (this._mdf) {
+        for (var _i3 = 0; _i3 < len; _i3 += 1) {
+          // Releasign Trim Cached paths data when no trim applied in case shapes are modified inbetween.
+          // Don't remove this even if it's losing cached info.
+          this.shapes[_i3].pathsData.length = 0;
+          this.shapes[_i3].shape._mdf = true;
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} newPaths a
+     * @param {*} localShapeCollection a
+     */
+
+  }, {
+    key: 'addPaths',
+    value: function addPaths(newPaths, localShapeCollection) {
+      var len = newPaths.length;
+      for (var i = 0; i < len; i += 1) {
+        localShapeCollection.addShape(newPaths[i]);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} pt1 a
+     * @param {*} pt2 a
+     * @param {*} pt3 a
+     * @param {*} pt4 a
+     * @param {*} shapePath a
+     * @param {*} pos a
+     * @param {*} newShape a
+     */
+
+  }, {
+    key: 'addSegment',
+    value: function addSegment(pt1, pt2, pt3, pt4, shapePath, pos, newShape) {
+      shapePath.setXYAt(pt2[0], pt2[1], 'o', pos);
+      shapePath.setXYAt(pt3[0], pt3[1], 'i', pos + 1);
+      if (newShape) {
+        shapePath.setXYAt(pt1[0], pt1[1], 'v', pos);
+      }
+      shapePath.setXYAt(pt4[0], pt4[1], 'v', pos + 1);
+    }
+
+    /**
+     * a
+     * @param {*} points a
+     * @param {*} shapePath a
+     * @param {*} pos a
+     * @param {*} newShape a
+     */
+
+  }, {
+    key: 'addSegmentFromArray',
+    value: function addSegmentFromArray(points, shapePath, pos, newShape) {
+      shapePath.setXYAt(points[1], points[5], 'o', pos);
+      shapePath.setXYAt(points[2], points[6], 'i', pos + 1);
+      if (newShape) {
+        shapePath.setXYAt(points[0], points[4], 'v', pos);
+      }
+      shapePath.setXYAt(points[3], points[7], 'v', pos + 1);
+    }
+
+    /**
+     * a
+     * @param {*} shapeData a
+     * @param {*} shapeSegment a
+     * @param {*} shapePath a
+     * @return {*}
+     */
+
+  }, {
+    key: 'addShapes',
+    value: function addShapes(shapeData, shapeSegment, shapePath) {
+      var pathsData = shapeData.pathsData;
+      var shapePaths = shapeData.shape.paths.shapes;
+      var len = shapeData.shape.paths._length;
+      var addedLength = 0;
+      var currentLengthData = void 0;
+      var segmentCount = void 0;
+      var lengths = void 0;
+      var segment = void 0;
+      var shapes = [];
+      var initPos = void 0;
+      var newShape = true;
+      if (!shapePath) {
+        shapePath = shape_pool.newElement();
+        segmentCount = 0;
+        initPos = 0;
+      } else {
+        segmentCount = shapePath._length;
+        initPos = shapePath._length;
+      }
+      shapes.push(shapePath);
+      for (var i = 0; i < len; i += 1) {
+        lengths = pathsData[i].lengths;
+        shapePath.c = shapePaths[i].c;
+        var jLen = shapePaths[i].c ? lengths.length : lengths.length + 1;
+        var j = 1;
+        for (; j < jLen; j += 1) {
+          currentLengthData = lengths[j - 1];
+          if (addedLength + currentLengthData.addedLength < shapeSegment.s) {
+            addedLength += currentLengthData.addedLength;
+            shapePath.c = false;
+          } else if (addedLength > shapeSegment.e) {
+            shapePath.c = false;
+            break;
+          } else {
+            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + currentLengthData.addedLength) {
+              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[j], shapePaths[i].v[j], shapePath, segmentCount, newShape);
+              newShape = false;
+            } else {
+              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[j], shapePaths[i].o[j - 1], shapePaths[i].i[j], (shapeSegment.s - addedLength) / currentLengthData.addedLength, (shapeSegment.e - addedLength) / currentLengthData.addedLength, lengths[j - 1]);
+              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
+              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
+              newShape = false;
+              shapePath.c = false;
+            }
+            addedLength += currentLengthData.addedLength;
+            segmentCount += 1;
+          }
+        }
+        if (shapePaths[i].c && lengths.length) {
+          currentLengthData = lengths[j - 1];
+          if (addedLength <= shapeSegment.e) {
+            var segmentLength = lengths[j - 1].addedLength;
+            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + segmentLength) {
+              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[0], shapePaths[i].v[0], shapePath, segmentCount, newShape);
+              newShape = false;
+            } else {
+              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[0], shapePaths[i].o[j - 1], shapePaths[i].i[0], (shapeSegment.s - addedLength) / segmentLength, (shapeSegment.e - addedLength) / segmentLength, lengths[j - 1]);
+              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
+              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
+              newShape = false;
+              shapePath.c = false;
+            }
+          } else {
+            shapePath.c = false;
+          }
+          addedLength += currentLengthData.addedLength;
+          segmentCount += 1;
+        }
+        if (shapePath._length) {
+          shapePath.setXYAt(shapePath.v[initPos][0], shapePath.v[initPos][1], 'i', initPos);
+          shapePath.setXYAt(shapePath.v[shapePath._length - 1][0], shapePath.v[shapePath._length - 1][1], 'o', shapePath._length - 1);
+        }
+        if (addedLength > shapeSegment.e) {
+          break;
+        }
+        if (i < len - 1) {
+          shapePath = shape_pool.newElement();
+          newShape = true;
+          shapes.push(shapePath);
+          segmentCount = 0;
+        }
+      }
+      return shapes;
+    }
+  }]);
+  return TrimModifier;
+}(ShapeModifier);
+
+// import { registerModifier } from './ShapeModifiers';
+var roundCorner$1 = 0.5519;
+
+/**
+ * a
+ */
+
+var RoundCornersModifier = function (_ShapeModifier) {
+  inherits(RoundCornersModifier, _ShapeModifier);
+
+  function RoundCornersModifier() {
+    classCallCheck(this, RoundCornersModifier);
+    return possibleConstructorReturn(this, (RoundCornersModifier.__proto__ || Object.getPrototypeOf(RoundCornersModifier)).apply(this, arguments));
+  }
+
+  createClass(RoundCornersModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+    value: function initModifierProperties(elem, data) {
+      this.getValue = this.processKeys;
+      this.rd = PropertyFactory.getProp(elem, data.r, 0, null, this);
+      this._isAnimated = !!this.rd.effectsSequence.length;
+    }
+
+    /**
+     * a
+     * @param {*} path a
+     * @param {*} round a
+     * @return {*}
+     */
+
+  }, {
+    key: 'processPath',
+    value: function processPath(path, round) {
+      var cloned_path = shape_pool.newElement();
+      cloned_path.c = path.c;
+      var len = path._length;
+      var currentV = void 0;
+      var currentI = void 0;
+      var currentO = void 0;
+      var closerV = void 0;
+      var distance = void 0;
+      var newPosPerc = void 0;
+      var index = 0;
+      var vX = void 0;
+      var vY = void 0;
+      var oX = void 0;
+      var oY = void 0;
+      var iX = void 0;
+      var iY = void 0;
+      for (var i = 0; i < len; i++) {
+        currentV = path.v[i];
+        currentO = path.o[i];
+        currentI = path.i[i];
+        if (currentV[0] === currentO[0] && currentV[1] === currentO[1] && currentV[0] === currentI[0] && currentV[1] === currentI[1]) {
+          if ((i === 0 || i === len - 1) && !path.c) {
+            cloned_path.setTripleAt(currentV[0], currentV[1], currentO[0], currentO[1], currentI[0], currentI[1], index);
+            // /*cloned_path.v[index] = currentV;
+            // cloned_path.o[index] = currentO;
+            // cloned_path.i[index] = currentI;*/
+            index += 1;
+          } else {
+            if (i === 0) {
+              closerV = path.v[len - 1];
+            } else {
+              closerV = path.v[i - 1];
+            }
+            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
+            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
+            vX = iX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
+            vY = iY = currentV[1] - (currentV[1] - closerV[1]) * newPosPerc;
+            oX = vX - (vX - currentV[0]) * roundCorner$1;
+            oY = vY - (vY - currentV[1]) * roundCorner$1;
+            cloned_path.setTripleAt(vX, vY, oX, oY, iX, iY, index);
+            index += 1;
+
+            if (i === len - 1) {
+              closerV = path.v[0];
+            } else {
+              closerV = path.v[i + 1];
+            }
+            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
+            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
+            vX = oX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
+            vY = oY = currentV[1] + (closerV[1] - currentV[1]) * newPosPerc;
+            iX = vX - (vX - currentV[0]) * roundCorner$1;
+            iY = vY - (vY - currentV[1]) * roundCorner$1;
+            cloned_path.setTripleAt(vX, vY, oX, oY, iX, iY, index);
+            index += 1;
+          }
+        } else {
+          cloned_path.setTripleAt(path.v[i][0], path.v[i][1], path.o[i][0], path.o[i][1], path.i[i][0], path.i[i][1], index);
+          index += 1;
+        }
+      }
+      return cloned_path;
+    }
+
+    /**
+     * a
+     * @param {*} _isFirstFrame a
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes(_isFirstFrame) {
+      var shapePaths = void 0;
+      var len = this.shapes.length;
+      var rd = this.rd.v;
+
+      if (rd !== 0) {
+        var shapeData = void 0;
+        // let newPaths;
+        var localShapeCollection = void 0;
+        for (var i = 0; i < len; i++) {
+          shapeData = this.shapes[i];
+          // newPaths = shapeData.shape.paths;
+          localShapeCollection = shapeData.localShapeCollection;
+          if (!(!shapeData.shape._mdf && !this._mdf && !_isFirstFrame)) {
+            localShapeCollection.releaseShapes();
+            shapeData.shape._mdf = true;
+            shapePaths = shapeData.shape.paths.shapes;
+            var jLen = shapeData.shape.paths._length;
+            for (var j = 0; j < jLen; j += 1) {
+              localShapeCollection.addShape(this.processPath(shapePaths[j], rd));
+            }
+          }
+          shapeData.shape.paths = shapeData.localShapeCollection;
+        }
+      }
+      if (!this.dynamicProperties.length) {
+        this._mdf = false;
+      }
+    }
+  }]);
+  return RoundCornersModifier;
+}(ShapeModifier);
+
+var modifiers = {};
+
+/**
+ * a
+ * @param {*} nm a
+ * @param {*} factory a
+ */
+function registerModifier(nm, factory) {
+  if (!modifiers[nm]) {
+    modifiers[nm] = factory;
+  }
+}
+
+/**
+ * a
+ * @param {*} nm a
+ * @param {*} elem a
+ * @param {*} data a
+ * @return {*}
+ */
+function getModifier(nm, elem, data) {
+  return new modifiers[nm](elem, data);
+}
+
+registerModifier('tm', TrimModifier);
+registerModifier('rd', RoundCornersModifier);
+
+var degToRads = Math.PI / 180;
+
+/**
+ * a
+ * @param {*} element a
+ * @param {*} position a
+ */
+function ProcessedElement(element, position) {
+  this.elem = element;
+  this.pos = position;
+}
+
+/**
+ * a
+ */
+
+var CVShapeElement = function () {
+  /**
+   * a
+   * @param {*} data a
+   */
+  function CVShapeElement(data) {
+    classCallCheck(this, CVShapeElement);
+
+    this.data = data;
+    this.shapes = [];
+    this.shapesData = data.shapes;
+    this.stylesList = [];
+    this.itemsData = [];
+    this.prevViewData = [];
+    this.shapeModifiers = [];
+    this.processedElements = [];
+    this.transformsManager = new ShapeTransformManager();
+    this.lcEnum = {
+      '1': 'butt',
+      '2': 'round',
+      '3': 'square'
+    };
+    this.ljEnum = {
+      '1': 'miter',
+      '2': 'round',
+      '3': 'bevel'
+    };
+
+    // set to true when inpoint is rendered
+    this._isFirstFrame = true;
+    // list of animated properties
+    this.dynamicProperties = [];
+    // If layer has been modified in current tick this will be true
+    this._mdf = false;
+
+    this.finalTransform = {
+      mProp: this.data.ks ? TransformPropertyFactory.getTransformProperty(this, this.data.ks, this) : { o: 0 },
+      _matMdf: false,
+      _opMdf: false,
+      mat: new Matrix$1()
+    };
+    if (this.data.ao) {
+      this.finalTransform.mProp.autoOriented = true;
+    }
+
+    this.transformHelper = { opacity: 1, _opMdf: false };
+    this.createContent();
+  }
+
+  /**
+   * a
+   * @param {*} elem a
+   */
+
+
+  createClass(CVShapeElement, [{
+    key: 'searchProcessedElement',
+    value: function searchProcessedElement(elem) {
+      var elements = this.processedElements;
+      var i = 0;
+      var len = elements.length;
+      while (i < len) {
+        if (elements[i].elem === elem) {
+          return elements[i].pos;
+        }
+        i += 1;
+      }
+      return 0;
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} pos a
+     */
+
+  }, {
+    key: 'addProcessedElement',
+    value: function addProcessedElement(elem, pos) {
+      var elements = this.processedElements;
+      var i = elements.length;
+      while (i) {
+        i -= 1;
+        if (elements[i].elem === elem) {
+          elements[i].pos = pos;
+          return;
+        }
+      }
+      elements.push(new ProcessedElement(elem, pos));
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'addShapeToModifiers',
+    value: function addShapeToModifiers(data) {
+      var i = void 0;
+      var len = this.shapeModifiers.length;
+      for (i = 0; i < len; i += 1) {
+        this.shapeModifiers[i].addShape(data);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} num a
+     */
+
+  }, {
+    key: 'prepareFrame',
+    value: function prepareFrame(num) {
+      this.prepareProperties(num);
+    }
+
+    /**
+     * @function
+     * Calculates all dynamic values
+     *
+     * @param {number} num current frame number in Layer's time
+     * @param {boolean} isVisible if layers is currently in range
+     *
+     */
+
+  }, {
+    key: 'prepareProperties',
+    value: function prepareProperties(num) {
+      var i = void 0;
+      var len = this.dynamicProperties.length;
+      for (i = 0; i < len; i += 1) {
+        this.dynamicProperties[i].getValue(num);
+        if (this.dynamicProperties[i]._mdf) {
+          this._mdf = true;
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} prop a
+     */
+
+  }, {
+    key: 'addDynamicProperty',
+    value: function addDynamicProperty(prop) {
+      if (this.dynamicProperties.indexOf(prop) === -1) {
+        this.dynamicProperties.push(prop);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'renderFrame',
+    value: function renderFrame(ctx) {
+      if (this.data.hd) {
+        return;
+      }
+      this.renderInnerContent(ctx);
+      if (this._isFirstFrame) {
+        this._isFirstFrame = false;
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'createContent',
+    value: function createContent() {
+      this.searchShapes(this.shapesData, this.itemsData, this.prevViewData, true, []);
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     * @param {*} transforms a
+     * @return {*}
+     */
+
+  }, {
+    key: 'createStyleElement',
+    value: function createStyleElement(data, transforms) {
+      var styleElem = {
+        data: data,
+        type: data.ty,
+        preTransforms: this.transformsManager.addTransformSequence(transforms),
+        transforms: [],
+        elements: [],
+        closed: data.hd === true
+      };
+      var elementData = {};
+      if (data.ty == 'fl' || data.ty == 'st') {
+        elementData.c = PropertyFactory(this, data.c, 1, 255, this);
+        if (!elementData.c.k) {
+          styleElem.co = 'rgb(' + Math.floor(elementData.c.v[0]) + ',' + Math.floor(elementData.c.v[1]) + ',' + Math.floor(elementData.c.v[2]) + ')';
+        }
+      } else if (data.ty === 'gf' || data.ty === 'gs') {
+        elementData.s = PropertyFactory(this, data.s, 1, null, this);
+        elementData.e = PropertyFactory(this, data.e, 1, null, this);
+        elementData.h = PropertyFactory(this, data.h || { k: 0 }, 0, 0.01, this);
+        elementData.a = PropertyFactory(this, data.a || { k: 0 }, 0, degToRads, this);
+        // elementData.g = new GradientProperty(this, data.g, this);
+      }
+      elementData.o = PropertyFactory(this, data.o, 0, 0.01, this);
+      if (data.ty == 'st' || data.ty == 'gs') {
+        styleElem.lc = this.lcEnum[data.lc] || 'round';
+        styleElem.lj = this.ljEnum[data.lj] || 'round';
+        if (data.lj == 1) {
+          styleElem.ml = data.ml;
+        }
+        elementData.w = PropertyFactory(this, data.w, 0, null, this);
+        if (!elementData.w.k) {
+          styleElem.wi = elementData.w.v;
+        }
+        // if (data.d) {
+        //   const d = new DashProperty(this, data.d, 'canvas', this);
+        //   elementData.d = d;
+        //   if (!elementData.d.k) {
+        //     styleElem.da = elementData.d.dashArray;
+        //     styleElem.do = elementData.d.dashoffset[0];
+        //   }
+        // }
+      } else {
+        styleElem.r = data.r === 2 ? 'evenodd' : 'nonzero';
+      }
+      this.stylesList.push(styleElem);
+      elementData.style = styleElem;
+      return elementData;
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     * @return {*}
+     */
+
+  }, {
+    key: 'createGroupElement',
+    value: function createGroupElement() {
+      return {
+        it: [],
+        prevViewData: []
+      };
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     * @return {*}
+     */
+
+  }, {
+    key: 'createTransformElement',
+    value: function createTransformElement(data) {
+      return {
+        transform: {
+          opacity: 1,
+          _opMdf: false,
+          key: this.transformsManager.getNewKey(),
+          op: PropertyFactory(this, data.o, 0, 0.01, this),
+          mProps: TransformPropertyFactory.getTransformProperty(this, data, this)
+        }
+      };
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     * @return {*}
+     */
+
+  }, {
+    key: 'createShapeElement',
+    value: function createShapeElement(data) {
+      var elementData = new CVShapeData(this, data, this.stylesList, this.transformsManager);
+
+      this.shapes.push(elementData);
+      this.addShapeToModifiers(elementData);
+      return elementData;
+    }
+
+    /**
+     * a
+     * @param {*} transform a
+     */
+
+  }, {
+    key: 'addTransformToStyleList',
+    value: function addTransformToStyleList(transform) {
+      var len = this.stylesList.length;
+      for (var i = 0; i < len; i += 1) {
+        if (!this.stylesList[i].closed) {
+          this.stylesList[i].transforms.push(transform);
+        }
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'removeTransformFromStyleList',
+    value: function removeTransformFromStyleList() {
+      var len = this.stylesList.length;
+      for (var i = 0; i < len; i += 1) {
+        if (!this.stylesList[i].closed) {
+          this.stylesList[i].transforms.pop();
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styles a
+     */
+
+  }, {
+    key: 'closeStyles',
+    value: function closeStyles(styles) {
+      var len = styles.length;
+      for (var i = 0; i < len; i += 1) {
+        styles[i].closed = true;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} arr a
+     * @param {*} itemsData a
+     * @param {*} prevViewData a
+     * @param {*} shouldRender a
+     * @param {*} transforms a
+     */
+
+  }, {
+    key: 'searchShapes',
+    value: function searchShapes(arr, itemsData, prevViewData, shouldRender, transforms) {
+      var len = arr.length - 1;
+      var ownStyles = [];
+      var ownModifiers = [];
+      var processedPos = void 0;
+      var modifier = void 0;
+      var ownTransforms = [].concat(transforms);
+      for (var i = len; i >= 0; i -= 1) {
+        processedPos = this.searchProcessedElement(arr[i]);
+        if (!processedPos) {
+          arr[i]._shouldRender = shouldRender;
+        } else {
+          itemsData[i] = prevViewData[processedPos - 1];
+        }
+        if (arr[i].ty == 'fl' || arr[i].ty == 'st' || arr[i].ty == 'gf' || arr[i].ty == 'gs') {
+          if (!processedPos) {
+            itemsData[i] = this.createStyleElement(arr[i], ownTransforms);
+          } else {
+            itemsData[i].style.closed = false;
+          }
+          ownStyles.push(itemsData[i].style);
+        } else if (arr[i].ty == 'gr') {
+          if (!processedPos) {
+            itemsData[i] = this.createGroupElement(arr[i]);
+          } else {
+            var jLen = itemsData[i].it.length;
+            for (var j = 0; j < jLen; j += 1) {
+              itemsData[i].prevViewData[j] = itemsData[i].it[j];
+            }
+          }
+          this.searchShapes(arr[i].it, itemsData[i].it, itemsData[i].prevViewData, shouldRender, ownTransforms);
+        } else if (arr[i].ty == 'tr') {
+          if (!processedPos) {
+            var currentTransform = this.createTransformElement(arr[i]);
+            itemsData[i] = currentTransform;
+          }
+          ownTransforms.push(itemsData[i]);
+          this.addTransformToStyleList(itemsData[i]);
+        } else if (arr[i].ty == 'sh' || arr[i].ty == 'rc' || arr[i].ty == 'el' || arr[i].ty == 'sr') {
+          if (!processedPos) {
+            itemsData[i] = this.createShapeElement(arr[i]);
+          }
+        } else if (arr[i].ty == 'tm' || arr[i].ty == 'rd') {
+          if (!processedPos) {
+            modifier = getModifier(arr[i].ty);
+            modifier.init(this, arr[i]);
+            itemsData[i] = modifier;
+            this.shapeModifiers.push(modifier);
+          } else {
+            modifier = itemsData[i];
+            modifier.closed = false;
+          }
+          ownModifiers.push(modifier);
+        } else if (arr[i].ty == 'rp') {
+          if (!processedPos) {
+            modifier = getModifier(arr[i].ty);
+            itemsData[i] = modifier;
+            modifier.init(this, arr, i, itemsData);
+            this.shapeModifiers.push(modifier);
+            shouldRender = false;
+          } else {
+            modifier = itemsData[i];
+            modifier.closed = true;
+          }
+          ownModifiers.push(modifier);
+        }
+        this.addProcessedElement(arr[i], i + 1);
+      }
+      this.removeTransformFromStyleList();
+      this.closeStyles(ownStyles);
+      var olen = ownModifiers.length;
+      for (var _i = 0; _i < olen; _i += 1) {
+        ownModifiers[_i].closed = true;
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'renderModifiers',
+    value: function renderModifiers() {
+      if (!this.shapeModifiers.length) return;
+      var len = this.shapes.length;
+      for (var _i2 = 0; _i2 < len; _i2 += 1) {
+        this.shapes[_i2].sh.reset();
+      }
+
+      var i = this.shapeModifiers.length - 1;
+      for (; i >= 0; i -= 1) {
+        this.shapeModifiers[i].processShapes(this._isFirstFrame);
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'renderInnerContent',
+    value: function renderInnerContent(ctx) {
+      this.transformHelper.opacity = 1;
+      this.transformHelper._opMdf = false;
+      this.renderModifiers();
+      this.transformsManager.processSequences(this._isFirstFrame);
+      this.renderShape(this.transformHelper, this.shapesData, this.itemsData, ctx);
+    }
+
+    /**
+     * a
+     * @param {*} parentTransform a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'renderShapeTransform',
+    value: function renderShapeTransform(parentTransform, groupTransform) {
+      if (parentTransform._opMdf || groupTransform.op._mdf || this._isFirstFrame) {
+        groupTransform.opacity = parentTransform.opacity;
+        groupTransform.opacity *= groupTransform.op.v;
+        groupTransform._opMdf = true;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} parentTransform a
+     * @param {*} items a
+     * @param {*} data a
+     * @param {*} ctx a
+     */
+
+  }, {
+    key: 'renderShape',
+    value: function renderShape(parentTransform, items, data, ctx) {
+      var len = items.length - 1;
+      var groupTransform = parentTransform;
+      for (var i = len; i >= 0; i -= 1) {
+        if (items[i].ty == 'tr') {
+          groupTransform = data[i].transform;
+          this.renderShapeTransform(parentTransform, groupTransform);
+        } else if (items[i].ty == 'sh' || items[i].ty == 'el' || items[i].ty == 'rc' || items[i].ty == 'sr') {
+          this.renderPath(items[i], data[i]);
+        } else if (items[i].ty == 'fl') {
+          this.renderFill(items[i], data[i], groupTransform);
+        } else if (items[i].ty == 'st') {
+          this.renderStroke(items[i], data[i], groupTransform);
+        } else if (items[i].ty == 'gf' || items[i].ty == 'gs') {
+          this.renderGradientFill(items[i], data[i], groupTransform);
+        } else if (items[i].ty == 'gr') {
+          this.renderShape(groupTransform, items[i].it, data[i].it);
+        }
+      }
+      if (ctx) {
+        this.drawLayer(ctx);
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'drawLayer',
+    value: function drawLayer(ctx) {
+      var len = this.stylesList.length;
+      for (var i = 0; i < len; i += 1) {
+        var currentStyle = this.stylesList[i];
+        var type = currentStyle.type;
+
+        // Skipping style when
+        // Stroke width equals 0
+        // style should not be rendered (extra unused repeaters)
+        // current opacity equals 0
+        // global opacity equals 0
+        if ((type === 'st' || type === 'gs') && currentStyle.wi === 0 || !currentStyle.data._shouldRender || currentStyle.coOp === 0) {
+          continue;
+        }
+        ctx.save();
+        var elems = currentStyle.elements;
+        if (type === 'st' || type === 'gs') {
+          ctx.strokeStyle = type === 'st' ? currentStyle.co : currentStyle.grd;
+          ctx.lineWidth = currentStyle.wi;
+          ctx.lineCap = currentStyle.lc;
+          ctx.lineJoin = currentStyle.lj;
+          ctx.miterLimit = currentStyle.ml || 0;
+        } else {
+          ctx.fillStyle = type === 'fl' ? currentStyle.co : currentStyle.grd;
+        }
+        ctx.globalAlpha = currentStyle.coOp * this.finalTransform.mProp.o.v;
+        if (type !== 'st' && type !== 'gs') {
+          ctx.beginPath();
+        }
+        var trProps = currentStyle.preTransforms.finalTransform.props;
+        ctx.transform(trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]);
+        var jLen = elems.length;
+        for (var j = 0; j < jLen; j += 1) {
+          if (type === 'st' || type === 'gs') {
+            ctx.beginPath();
+            if (currentStyle.da) {
+              ctx.setLineDash(currentStyle.da);
+              ctx.lineDashOffset = currentStyle.do;
+            }
+          }
+          var nodes = elems[j].trNodes;
+          var kLen = nodes.length;
+
+          for (var k = 0; k < kLen; k++) {
+            if (nodes[k].t == 'm') {
+              ctx.moveTo(nodes[k].p[0], nodes[k].p[1]);
+            } else if (nodes[k].t == 'c') {
+              ctx.bezierCurveTo(nodes[k].pts[0], nodes[k].pts[1], nodes[k].pts[2], nodes[k].pts[3], nodes[k].pts[4], nodes[k].pts[5]);
+            } else {
+              ctx.closePath();
+            }
+          }
+          if (type === 'st' || type === 'gs') {
+            ctx.stroke();
+            if (currentStyle.da) {
+              ctx.setLineDash(this.dashResetter);
+            }
+          }
+        }
+        if (type !== 'st' && type !== 'gs') {
+          ctx.fill(currentStyle.r);
+        }
+        ctx.restore();
+      }
+    }
+
+    /**
+     * a
+     * @param {*} pathData a
+     * @param {*} itemData a
+     */
+
+  }, {
+    key: 'renderPath',
+    value: function renderPath(pathData, itemData) {
+      if (pathData.hd !== true && pathData._shouldRender) {
+        var len = itemData.styledShapes.length;
+        for (var i = 0; i < len; i += 1) {
+          this.renderStyledShape(itemData.styledShapes[i], itemData.sh);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styledShape a
+     * @param {*} shape a
+     */
+
+  }, {
+    key: 'renderStyledShape',
+    value: function renderStyledShape(styledShape, shape) {
+      if (this._isFirstFrame || shape._mdf || styledShape.transforms._mdf) {
+        var shapeNodes = styledShape.trNodes;
+        var paths = shape.paths;
+        var jLen = paths._length;
+        shapeNodes.length = 0;
+        var groupTransformMat = styledShape.transforms.finalTransform;
+        for (var j = 0; j < jLen; j += 1) {
+          var pathNodes = paths.shapes[j];
+          if (pathNodes && pathNodes.v) {
+            var i = 1;
+            var len = pathNodes._length;
+            for (; i < len; i += 1) {
+              if (i === 1) {
+                shapeNodes.push({
+                  t: 'm',
+                  p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
+                });
+              }
+              shapeNodes.push({
+                t: 'c',
+                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[i], pathNodes.v[i])
+              });
+            }
+            if (len === 1) {
+              shapeNodes.push({
+                t: 'm',
+                p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
+              });
+            }
+            if (pathNodes.c && len) {
+              shapeNodes.push({
+                t: 'c',
+                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[0], pathNodes.v[0])
+              });
+              shapeNodes.push({
+                t: 'z'
+              });
+            }
+          }
+        }
+        styledShape.trNodes = shapeNodes;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styleData a
+     * @param {*} itemData a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'renderFill',
+    value: function renderFill(styleData, itemData, groupTransform) {
+      var styleElem = itemData.style;
+
+      if (itemData.c._mdf || this._isFirstFrame) {
+        styleElem.co = 'rgb(' + Math.floor(itemData.c.v[0]) + ',' + Math.floor(itemData.c.v[1]) + ',' + Math.floor(itemData.c.v[2]) + ')';
+      }
+      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
+        styleElem.coOp = itemData.o.v * groupTransform.opacity;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styleData a
+     * @param {*} itemData a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'renderGradientFill',
+    value: function renderGradientFill(styleData, itemData, groupTransform) {
+      var styleElem = itemData.style;
+      if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf)) {
+        var ctx = this.renderer;
+        var grd = void 0;
+        var pt1 = itemData.s.v;
+        var pt2 = itemData.e.v;
+        if (styleData.t === 1) {
+          grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
+        } else {
+          var rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
+          var ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
+
+          var percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99 : itemData.h.v;
+          var dist = rad * percent;
+          var x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
+          var y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
+          grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
+        }
+
+        var len = styleData.g.p;
+        var cValues = itemData.g.c;
+        var opacity = 1;
+
+        for (var i = 0; i < len; i += 1) {
+          if (itemData.g._hasOpacity && itemData.g._collapsable) {
+            opacity = itemData.g.o[i * 2 + 1];
+          }
+          grd.addColorStop(cValues[i * 4] / 100, 'rgba(' + cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ',' + cValues[i * 4 + 3] + ',' + opacity + ')');
+        }
+        styleElem.grd = grd;
+      }
+      styleElem.coOp = itemData.o.v * groupTransform.opacity;
+    }
+
+    /**
+     * a
+     * @param {*} styleData a
+     * @param {*} itemData a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'renderStroke',
+    value: function renderStroke(styleData, itemData, groupTransform) {
+      var styleElem = itemData.style;
+      var d = itemData.d;
+      if (d && (d._mdf || this._isFirstFrame)) {
+        styleElem.da = d.dashArray;
+        styleElem.do = d.dashoffset[0];
+      }
+      if (itemData.c._mdf || this._isFirstFrame) {
+        styleElem.co = 'rgb(' + Math.floor(itemData.c.v[0]) + ',' + Math.floor(itemData.c.v[1]) + ',' + Math.floor(itemData.c.v[2]) + ')';
+      }
+      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
+        styleElem.coOp = itemData.o.v * groupTransform.opacity;
+      }
+      if (itemData.w._mdf || this._isFirstFrame) {
+        styleElem.wi = itemData.w.v;
+      }
+    }
+  }]);
+  return CVShapeElement;
+}();
+
+/**
  * ShapeElement class
  * @class
  * @private
@@ -9749,10 +13912,17 @@ var ShapeElement = function (_Container) {
 
 
     _this.name = parentName + '.' + layer.nm;
+    _this.bProgress = -999999;
 
     register.setLayer(_this.name, _this);
 
     _this.initKeyFrames(layer, session);
+
+    _this.shapes = new CVShapeElement(layer, session);
+    _this.adds(new Graphics(function (ctx) {
+      _this.shapes.prepareFrame(_this.bProgress);
+      _this.shapes.renderFrame(ctx);
+    }));
     return _this;
   }
 
@@ -9780,6 +13950,7 @@ var ShapeElement = function (_Container) {
     key: 'updateKeyframes',
     value: function updateKeyframes(progress, session) {
       if (!this.movin) return;
+      this.bProgress = progress;
       this.bodymovin.update(progress, session);
     }
   }]);
@@ -9906,8 +14077,14 @@ var CompElement = function (_Container) {
           case 0:
             element = new CompElement(layer, session);
             break;
+          case 1:
+            element = new SolidElement(layer, session);
+            break;
           case 2:
             element = new SpriteElement(layer, session);
+            break;
+          case 3:
+            element = new NullElement(layer, session);
             break;
           case 4:
             element = new ShapeElement(layer, session);
@@ -9925,6 +14102,362 @@ var CompElement = function (_Container) {
   }]);
   return CompElement;
 }(Container);
+
+/* eslint-disable */
+
+function completeLayers(layers, comps, fontManager) {
+  var layerData;
+  var i,
+      len = layers.length;
+  var j, jLen, k, kLen;
+  for (i = 0; i < len; i += 1) {
+    layerData = layers[i];
+    if (!('ks' in layerData) || layerData.completed) {
+      continue;
+    }
+    layerData.completed = true;
+    if (layerData.tt) {
+      layers[i - 1].td = layerData.tt;
+    }
+    if (layerData.hasMask) {
+      var maskProps = layerData.masksProperties;
+      jLen = maskProps.length;
+      for (j = 0; j < jLen; j += 1) {
+        if (maskProps[j].pt.k.i) {
+          convertPathsToAbsoluteValues(maskProps[j].pt.k);
+        } else {
+          kLen = maskProps[j].pt.k.length;
+          for (k = 0; k < kLen; k += 1) {
+            if (maskProps[j].pt.k[k].s) {
+              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].s[0]);
+            }
+            if (maskProps[j].pt.k[k].e) {
+              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].e[0]);
+            }
+          }
+        }
+      }
+    }
+    if (layerData.ty === 0) {
+      layerData.layers = findCompLayers(layerData.refId, comps);
+      completeLayers(layerData.layers, comps, fontManager);
+    } else if (layerData.ty === 4) {
+      completeShapes(layerData.shapes);
+    } else if (layerData.ty == 5) {
+      completeText(layerData, fontManager);
+    }
+  }
+}
+
+function findCompLayers(id, comps) {
+  var i = 0,
+      len = comps.length;
+  while (i < len) {
+    if (comps[i].id === id) {
+      if (!comps[i].layers.__used) {
+        comps[i].layers.__used = true;
+        return comps[i].layers;
+      }
+      return JSON.parse(JSON.stringify(comps[i].layers));
+    }
+    i += 1;
+  }
+}
+
+function completeShapes(arr) {
+  var i,
+      len = arr.length;
+  var j, jLen;
+  // var hasPaths = false;
+  for (i = len - 1; i >= 0; i -= 1) {
+    if (arr[i].ty == 'sh') {
+      if (arr[i].ks.k.i) {
+        convertPathsToAbsoluteValues(arr[i].ks.k);
+      } else {
+        jLen = arr[i].ks.k.length;
+        for (j = 0; j < jLen; j += 1) {
+          if (arr[i].ks.k[j].s) {
+            convertPathsToAbsoluteValues(arr[i].ks.k[j].s[0]);
+          }
+          if (arr[i].ks.k[j].e) {
+            convertPathsToAbsoluteValues(arr[i].ks.k[j].e[0]);
+          }
+        }
+      }
+      // hasPaths = true;
+    } else if (arr[i].ty == 'gr') {
+      completeShapes(arr[i].it);
+    }
+  }
+  /*if(hasPaths){
+      //mx: distance
+      //ss: sensitivity
+      //dc: decay
+      arr.splice(arr.length-1,0,{
+          "ty": "ms",
+          "mx":20,
+          "ss":10,
+            "dc":0.001,
+          "maxDist":200
+      });
+  }*/
+}
+
+function completeText(data) {
+  if (data.t.a.length === 0 && !('m' in data.t.p)) {
+    data.singleShape = true;
+  }
+}
+
+function convertPathsToAbsoluteValues(path) {
+  var i,
+      len = path.i.length;
+  for (i = 0; i < len; i += 1) {
+    path.i[i][0] += path.v[i][0];
+    path.i[i][1] += path.v[i][1];
+    path.o[i][0] += path.v[i][0];
+    path.o[i][1] += path.v[i][1];
+  }
+}
+
+function checkVersion(minimum, animVersionString) {
+  var animVersion = animVersionString ? animVersionString.split('.') : [100, 100, 100];
+  if (minimum[0] > animVersion[0]) {
+    return true;
+  } else if (animVersion[0] > minimum[0]) {
+    return false;
+  }
+  if (minimum[1] > animVersion[1]) {
+    return true;
+  } else if (animVersion[1] > minimum[1]) {
+    return false;
+  }
+  if (minimum[2] > animVersion[2]) {
+    return true;
+  } else if (animVersion[2] > minimum[2]) {
+    return false;
+  }
+}
+
+var checkText = function () {
+  var minimumVersion = [4, 4, 14];
+
+  function updateTextLayer(textLayer) {
+    var documentData = textLayer.t.d;
+    textLayer.t.d = {
+      k: [{
+        s: documentData,
+        t: 0
+      }]
+    };
+  }
+
+  function iterateLayers(layers) {
+    var i,
+        len = layers.length;
+    for (i = 0; i < len; i += 1) {
+      if (layers[i].ty === 5) {
+        updateTextLayer(layers[i]);
+      }
+    }
+  }
+
+  return function (animationData) {
+    if (checkVersion(minimumVersion, animationData.v)) {
+      iterateLayers(animationData.layers);
+      if (animationData.assets) {
+        var i,
+            len = animationData.assets.length;
+        for (i = 0; i < len; i += 1) {
+          if (animationData.assets[i].layers) {
+            iterateLayers(animationData.assets[i].layers);
+          }
+        }
+      }
+    }
+  };
+}();
+
+var checkChars = function () {
+  var minimumVersion = [4, 7, 99];
+  return function (animationData) {
+    if (animationData.chars && !checkVersion(minimumVersion, animationData.v)) {
+      var i,
+          len = animationData.chars.length,
+          j,
+          jLen;
+      var pathData, paths;
+      for (i = 0; i < len; i += 1) {
+        if (animationData.chars[i].data && animationData.chars[i].data.shapes) {
+          paths = animationData.chars[i].data.shapes[0].it;
+          jLen = paths.length;
+
+          for (j = 0; j < jLen; j += 1) {
+            pathData = paths[j].ks.k;
+            if (!pathData.__converted) {
+              convertPathsToAbsoluteValues(paths[j].ks.k);
+              pathData.__converted = true;
+            }
+          }
+        }
+      }
+    }
+  };
+}();
+
+var checkColors = function () {
+  var minimumVersion = [4, 1, 9];
+
+  function iterateShapes(shapes) {
+    var i,
+        len = shapes.length;
+    var j, jLen;
+    for (i = 0; i < len; i += 1) {
+      if (shapes[i].ty === 'gr') {
+        iterateShapes(shapes[i].it);
+      } else if (shapes[i].ty === 'fl' || shapes[i].ty === 'st') {
+        if (shapes[i].c.k && shapes[i].c.k[0].i) {
+          jLen = shapes[i].c.k.length;
+          for (j = 0; j < jLen; j += 1) {
+            if (shapes[i].c.k[j].s) {
+              shapes[i].c.k[j].s[0] /= 255;
+              shapes[i].c.k[j].s[1] /= 255;
+              shapes[i].c.k[j].s[2] /= 255;
+              shapes[i].c.k[j].s[3] /= 255;
+            }
+            if (shapes[i].c.k[j].e) {
+              shapes[i].c.k[j].e[0] /= 255;
+              shapes[i].c.k[j].e[1] /= 255;
+              shapes[i].c.k[j].e[2] /= 255;
+              shapes[i].c.k[j].e[3] /= 255;
+            }
+          }
+        } else {
+          shapes[i].c.k[0] /= 255;
+          shapes[i].c.k[1] /= 255;
+          shapes[i].c.k[2] /= 255;
+          shapes[i].c.k[3] /= 255;
+        }
+      }
+    }
+  }
+
+  function iterateLayers(layers) {
+    var i,
+        len = layers.length;
+    for (i = 0; i < len; i += 1) {
+      if (layers[i].ty === 4) {
+        iterateShapes(layers[i].shapes);
+      }
+    }
+  }
+
+  return function (animationData) {
+    if (checkVersion(minimumVersion, animationData.v)) {
+      iterateLayers(animationData.layers);
+      if (animationData.assets) {
+        var i,
+            len = animationData.assets.length;
+        for (i = 0; i < len; i += 1) {
+          if (animationData.assets[i].layers) {
+            iterateLayers(animationData.assets[i].layers);
+          }
+        }
+      }
+    }
+  };
+}();
+
+var checkShapes = function () {
+  var minimumVersion = [4, 4, 18];
+
+  function completeShapes(arr) {
+    var i,
+        len = arr.length;
+    var j, jLen;
+    // var hasPaths = false;
+    for (i = len - 1; i >= 0; i -= 1) {
+      if (arr[i].ty == 'sh') {
+        if (arr[i].ks.k.i) {
+          arr[i].ks.k.c = arr[i].closed;
+        } else {
+          jLen = arr[i].ks.k.length;
+          for (j = 0; j < jLen; j += 1) {
+            if (arr[i].ks.k[j].s) {
+              arr[i].ks.k[j].s[0].c = arr[i].closed;
+            }
+            if (arr[i].ks.k[j].e) {
+              arr[i].ks.k[j].e[0].c = arr[i].closed;
+            }
+          }
+        }
+        // hasPaths = true;
+      } else if (arr[i].ty == 'gr') {
+        completeShapes(arr[i].it);
+      }
+    }
+  }
+
+  function iterateLayers(layers) {
+    var layerData;
+    var i,
+        len = layers.length;
+    var j, jLen, k, kLen;
+    for (i = 0; i < len; i += 1) {
+      layerData = layers[i];
+      if (layerData.hasMask) {
+        var maskProps = layerData.masksProperties;
+        jLen = maskProps.length;
+        for (j = 0; j < jLen; j += 1) {
+          if (maskProps[j].pt.k.i) {
+            maskProps[j].pt.k.c = maskProps[j].cl;
+          } else {
+            kLen = maskProps[j].pt.k.length;
+            for (k = 0; k < kLen; k += 1) {
+              if (maskProps[j].pt.k[k].s) {
+                maskProps[j].pt.k[k].s[0].c = maskProps[j].cl;
+              }
+              if (maskProps[j].pt.k[k].e) {
+                maskProps[j].pt.k[k].e[0].c = maskProps[j].cl;
+              }
+            }
+          }
+        }
+      }
+      if (layerData.ty === 4) {
+        completeShapes(layerData.shapes);
+      }
+    }
+  }
+
+  return function (animationData) {
+    if (checkVersion(minimumVersion, animationData.v)) {
+      iterateLayers(animationData.layers);
+      if (animationData.assets) {
+        var i,
+            len = animationData.assets.length;
+        for (i = 0; i < len; i += 1) {
+          if (animationData.assets[i].layers) {
+            iterateLayers(animationData.assets[i].layers);
+          }
+        }
+      }
+    }
+  };
+}();
+
+function completeData(animationData, fontManager) {
+  if (animationData.__complete) {
+    return;
+  }
+  checkColors(animationData);
+  checkText(animationData);
+  checkChars(animationData);
+  checkShapes(animationData);
+  completeLayers(animationData.layers, animationData.assets, fontManager);
+  animationData.__complete = true;
+  //blitAnimation(animationData, animationData.assets, fontManager);
+}
 
 /**
  * an animation group, store and compute frame information
@@ -9951,6 +14484,7 @@ var AnimationGroup = function () {
     classCallCheck(this, AnimationGroup);
 
     this.prefix = options.prefix || options.keyframes.prefix || '';
+    completeData(options.keyframes);
     this.keyframes = options.keyframes;
     this.fr = this.keyframes.fr;
     this.ip = this.keyframes.ip;
@@ -9980,9 +14514,16 @@ var AnimationGroup = function () {
 
     this.register = new Register(this.keyframes.assets, this.prefix);
 
-    this.register.loader.once('complete', function () {
-      _this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
+    var images = this.keyframes.assets.filter(function (it) {
+      return it.u && it.p;
     });
+    if (images.length > 0) {
+      this.register.loader.once('complete', function () {
+        _this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
+      });
+    } else {
+      this._paused = false;
+    }
 
     this.group = new CompElement(this.keyframes.layers, {
       assets: this.keyframes.assets,
