@@ -55,9 +55,16 @@ class AnimationGroup {
 
     this.register = new Register(this.keyframes.assets, this.prefix);
 
-    this.register.loader.once('complete', () => {
-      this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
+    const images = this.keyframes.assets.filter((it) => {
+      return it.u && it.p;
     });
+    if (images.length > 0) {
+      this.register.loader.once('complete', () => {
+        this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
+      });
+    } else {
+      this._paused = false;
+    }
 
     this.group = new CompElement(this.keyframes.layers, {
       assets: this.keyframes.assets,

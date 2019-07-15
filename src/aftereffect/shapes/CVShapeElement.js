@@ -3,6 +3,7 @@ import PropertyFactory from './PropertyFactory';
 import CVShapeData from './CVShapeData';
 import TransformPropertyFactory from './TransformProperty';
 import getModifier from './shapes/ShapeModifiers';
+import Matrix from './lib/transformation-matrix';
 
 const degToRads = Math.PI/180;
 
@@ -51,6 +52,16 @@ export default class CVShapeElement {
     this.dynamicProperties = [];
     // If layer has been modified in current tick this will be true
     this._mdf = false;
+
+    this.finalTransform = {
+      mProp: this.data.ks ? TransformPropertyFactory.getTransformProperty(this, this.data.ks, this) : {o: 0},
+      _matMdf: false,
+      _opMdf: false,
+      mat: new Matrix(),
+    };
+    if (this.data.ao) {
+      this.finalTransform.mProp.autoOriented = true;
+    }
 
     this.transformHelper = { opacity: 1, _opMdf: false };
     this.createContent();
@@ -478,7 +489,7 @@ export default class CVShapeElement {
       } else {
         ctx.fillStyle = type === 'fl' ? currentStyle.co : currentStyle.grd;
       }
-      ctx.globalAlpha = currentStyle.coOp;
+      ctx.globalAlpha = currentStyle.coOp * this.finalTransform.mProp.o.v;
       if (type !== 'st' && type !== 'gs') {
         ctx.beginPath();
       }

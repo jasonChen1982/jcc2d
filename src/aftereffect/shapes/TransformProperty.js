@@ -64,7 +64,19 @@ class TransformProperty extends DynamicPropertyContainer {
     }
     this._isDirty = true;
     if (!this.dynamicProperties.length) {
-      this.getValue(true);
+      this.getValue(-999999, true);
+    }
+  }
+
+  /**
+   * a
+   * @param {*} prop a
+   */
+  _addDynamicProperty(prop) {
+    if (this.dynamicProperties.indexOf(prop) === -1) {
+      this.dynamicProperties.push(prop);
+      this.container.addDynamicProperty(this);
+      this._isAnimated = true;
     }
   }
 
