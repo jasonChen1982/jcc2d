@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.1-beta.0"></a>
+## [1.8.1-beta.0](https://github.com/jasonChen1982/jcc2d/compare/v1.8.0...v1.8.1-beta.0) (2019-07-15)
+
+
+### Bug Fixes
+
+* **transform:** adjust transform ([d05521b](https://github.com/jasonChen1982/jcc2d/commit/d05521b))
+
+
+### Features
+
+* **shapes:** support more shapes ([5f8cf62](https://github.com/jasonChen1982/jcc2d/commit/5f8cf62))
+
+
+
 <a name="1.8.0"></a>
 # [1.8.0](https://github.com/jasonChen1982/jcc2d/compare/v1.7.10...v1.8.0) (2019-06-24)
 
