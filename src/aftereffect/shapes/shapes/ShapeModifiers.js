@@ -1,5 +1,7 @@
 import TrimModifier from './TrimModifier';
 import RoundCornersModifier from './RoundCornersModifier';
+import RepeaterModifier from './RepeaterModifier';
+import MouseModifier from './MouseModifier';
 
 const modifiers = {};
 
@@ -27,5 +29,7 @@ function getModifier(nm, elem, data) {
 
 registerModifier('tm', TrimModifier);
 registerModifier('rd', RoundCornersModifier);
+registerModifier('rp', RepeaterModifier);
+registerModifier('ms', MouseModifier);
 
 export default getModifier;

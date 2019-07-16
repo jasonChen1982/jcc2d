@@ -20,6 +20,7 @@ class AnimationGroup {
    * @param {String} [options.prefix=''] assets url prefix, like link path
    * @param {Number} [options.timeScale=1] animation speed
    * @param {Number} [options.autoStart=true] auto start animation after assets loaded
+   * @param {Boolean} [options.mask=false] auto start animation after assets loaded
    */
   constructor(options) {
     this.prefix = options.prefix || options.keyframes.prefix || '';
@@ -66,14 +67,30 @@ class AnimationGroup {
       this._paused = false;
     }
 
-    this.group = new CompElement(this.keyframes.layers, {
-      assets: this.keyframes.assets,
-      size: {w: this.keyframes.w, h: this.keyframes.h},
+    const {layers, w, h, nm, assets} = this.keyframes;
+
+    this.group = new CompElement(layers, {
+      assets: assets,
+      size: {w: w, h: h},
       prefix: this.prefix,
       register: this.register,
-      parentName: this.keyframes.nm,
+      parentName: nm,
     });
     this.group._aniRoot = true;
+
+    /**
+     * generate a mask for animation
+     */
+    if (options.mask) {
+      const mask = {
+        render(ctx) {
+          ctx.beginPath();
+          ctx.rect(0, 0, w, h);
+          ctx.clip();
+        },
+      };
+      this.group.mask = mask;
+    }
 
     this.updateSession = {forever: this.isForever()};
   }

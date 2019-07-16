@@ -78,11 +78,9 @@ class CompElement extends Container {
       const item = elementsMap[layer.ind];
       if (!item) continue;
       if (layer.parent) {
-        const parent = elementsMap[layer.parent];
-        parent.adds(item);
-      } else {
-        this.adds(item);
+        item.hierarchy = elementsMap[layer.parent];
       }
+      this.adds(item);
     }
   }
 

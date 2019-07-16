@@ -9,18 +9,16 @@ export function drawCurve(ctx, data) {
   ctx.moveTo(start[0], start[1]);
   const jLen = data.v.length;
   let j = 1;
-  let pre = start;
   for (; j < jLen; j++) {
     const oj = data.o[j - 1];
     const ij = data.i[j];
     const vj = data.v[j];
-    ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
-    pre = vj;
+    ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
   }
   const oj = data.o[j - 1];
   const ij = data.i[0];
   const vj = data.v[0];
-  ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
+  ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
 }
 
 /**

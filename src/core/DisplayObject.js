@@ -456,7 +456,7 @@ DisplayObject.prototype.setProps = function(props) {
  * @method updateTransform
  */
 DisplayObject.prototype.updateTransform = function(rootMatrix) {
-  const pt = rootMatrix || (this.parent && this.parent.worldTransform) || IDENTITY;
+  const pt = rootMatrix || (this.hierarchy && this.hierarchy.worldTransform) || (this.parent && this.parent.worldTransform) || IDENTITY;
   const wt = this.worldTransform;
   const worldAlpha = (this.parent && this.parent.worldAlpha) || 1;
 

@@ -247,6 +247,7 @@ class KeyframedShapeProperty extends BaseShapeProperty {
     this.reset = this.resetShape;
     this._caching = { lastFrame: initFrame, lastIndex: 0 };
     this.effectsSequence = [this.interpolateShapeCurrentTime.bind(this)];
+    this.getValue = this.processEffectsSequence;
   }
 
   /**

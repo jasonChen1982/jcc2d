@@ -121,6 +121,7 @@ class TransformProperty extends DynamicPropertyContainer {
       if (this.autoOriented) {
         let v1;
         let v2;
+        // TODO: 需要从外部传入
         const frameRate = this.elem.globalData.frameRate;
         if (this.p && this.p.keyframes && this.p.getValueAtTime) {
           if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
