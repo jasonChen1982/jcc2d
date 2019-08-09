@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.1"></a>
+## [1.8.1](https://github.com/jasonChen1982/jcc2d/compare/v1.8.1-beta.0...v1.8.1) (2019-08-09)
+
+
+### Bug Fixes
+
+* **mask:** fixed mask curve data ([0206aa8](https://github.com/jasonChen1982/jcc2d/commit/0206aa8))
+
+
+### Features
+
+* **shape:** support shapes ([dfc1d14](https://github.com/jasonChen1982/jcc2d/commit/dfc1d14))
+
+
+
 <a name="1.8.1-beta.0"></a>
 ## [1.8.1-beta.0](https://github.com/jasonChen1982/jcc2d/compare/v1.8.0...v1.8.1-beta.0) (2019-07-15)
 
