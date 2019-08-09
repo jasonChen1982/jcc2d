@@ -3425,7 +3425,7 @@ DisplayObject.prototype.setProps = function (props) {
  * @method updateTransform
  */
 DisplayObject.prototype.updateTransform = function (rootMatrix) {
-  var pt = rootMatrix || this.parent && this.parent.worldTransform || IDENTITY;
+  var pt = rootMatrix || this.hierarchy && this.hierarchy.worldTransform || this.parent && this.parent.worldTransform || IDENTITY;
   var wt = this.worldTransform;
   var worldAlpha = this.parent && this.parent.worldAlpha || 1;
 
@@ -7269,18 +7269,16 @@ function drawCurve(ctx, data) {
   ctx.moveTo(start[0], start[1]);
   var jLen = data.v.length;
   var j = 1;
-  var pre = start;
   for (; j < jLen; j++) {
     var _oj = data.o[j - 1];
     var _ij = data.i[j];
     var _vj = data.v[j];
-    ctx.bezierCurveTo(pre[0] + _oj[0], pre[1] + _oj[1], _vj[0] + _ij[0], _vj[1] + _ij[1], _vj[0], _vj[1]);
-    pre = _vj;
+    ctx.bezierCurveTo(_oj[0], _oj[1], _ij[0], _ij[1], _vj[0], _vj[1]);
   }
   var oj = data.o[j - 1];
   var ij = data.i[0];
   var vj = data.v[0];
-  ctx.bezierCurveTo(pre[0] + oj[0], pre[1] + oj[1], vj[0] + ij[0], vj[1] + ij[1], vj[0], vj[1]);
+  ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
 }
 
 /**
@@ -10579,6 +10577,7 @@ var KeyframedShapeProperty = function (_BaseShapeProperty2) {
     _this2.reset = _this2.resetShape;
     _this2._caching = { lastFrame: initFrame$1, lastIndex: 0 };
     _this2.effectsSequence = [_this2.interpolateShapeCurrentTime.bind(_this2)];
+    _this2.getValue = _this2.processEffectsSequence;
     return _this2;
   }
 
@@ -11212,6 +11211,7 @@ var TransformProperty = function (_DynamicPropertyConta) {
         if (this.autoOriented) {
           var v1 = void 0;
           var v2 = void 0;
+          // TODO: 需要从外部传入
           var frameRate = this.elem.globalData.frameRate;
           if (this.p && this.p.keyframes && this.p.getValueAtTime) {
             if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
@@ -11969,6 +11969,522 @@ var RoundCornersModifier = function (_ShapeModifier) {
   return RoundCornersModifier;
 }(ShapeModifier);
 
+/**
+ * a
+ */
+
+var RepeaterModifier = function (_ShapeModifier) {
+  inherits(RepeaterModifier, _ShapeModifier);
+
+  function RepeaterModifier() {
+    classCallCheck(this, RepeaterModifier);
+    return possibleConstructorReturn(this, (RepeaterModifier.__proto__ || Object.getPrototypeOf(RepeaterModifier)).apply(this, arguments));
+  }
+
+  createClass(RepeaterModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+    value: function initModifierProperties(elem, data) {
+      this.getValue = this.processKeys;
+      this.c = PropertyFactory.getProp(elem, data.c, 0, null, this);
+      this.o = PropertyFactory.getProp(elem, data.o, 0, null, this);
+      this.tr = TransformPropertyFactory.getTransformProperty(elem, data.tr, this);
+      this.so = PropertyFactory.getProp(elem, data.tr.so, 0, 0.01, this);
+      this.eo = PropertyFactory.getProp(elem, data.tr.eo, 0, 0.01, this);
+      this.data = data;
+      if (!this.dynamicProperties.length) {
+        this.getValue(true);
+      }
+      this._isAnimated = !!this.dynamicProperties.length;
+      this.pMatrix = new Matrix$1();
+      this.rMatrix = new Matrix$1();
+      this.sMatrix = new Matrix$1();
+      this.tMatrix = new Matrix$1();
+      this.matrix = new Matrix$1();
+    }
+
+    /**
+     * a
+     * @param {*} pMatrix a
+     * @param {*} rMatrix a
+     * @param {*} sMatrix a
+     * @param {*} transform a
+     * @param {*} perc a
+     * @param {*} inv a
+     */
+
+  }, {
+    key: 'applyTransforms',
+    value: function applyTransforms(pMatrix, rMatrix, sMatrix, transform, perc, inv) {
+      var dir = inv ? -1 : 1;
+      var scaleX = transform.s.v[0] + (1 - transform.s.v[0]) * (1 - perc);
+      var scaleY = transform.s.v[1] + (1 - transform.s.v[1]) * (1 - perc);
+      pMatrix.translate(transform.p.v[0] * dir * perc, transform.p.v[1] * dir * perc, transform.p.v[2]);
+      rMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
+      rMatrix.rotate(-transform.r.v * dir * perc);
+      rMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
+      sMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
+      sMatrix.scale(inv ? 1 / scaleX : scaleX, inv ? 1 / scaleY : scaleY);
+      sMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} arr a
+     * @param {*} pos a
+     * @param {*} elemsData a
+     */
+
+  }, {
+    key: 'init',
+    value: function init(elem, arr, pos, elemsData) {
+      this.elem = elem;
+      this.arr = arr;
+      this.pos = pos;
+      this.elemsData = elemsData;
+      this._currentCopies = 0;
+      this._elements = [];
+      this._groups = [];
+      this.frameId = -1;
+      this.initDynamicPropertyContainer(elem);
+      this.initModifierProperties(elem, arr[pos]);
+      while (pos > 0) {
+        pos -= 1;
+        // this._elements.unshift(arr.splice(pos,1)[0]);
+        this._elements.unshift(arr[pos]);
+      }
+      if (this.dynamicProperties.length) {
+        this.k = true;
+      } else {
+        this.getValue(true);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elements a
+     */
+
+  }, {
+    key: 'resetElements',
+    value: function resetElements(elements) {
+      var len = elements.length;
+      for (var i = 0; i < len; i += 1) {
+        elements[i]._processed = false;
+        if (elements[i].ty === 'gr') {
+          this.resetElements(elements[i].it);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elements a
+     */
+
+  }, {
+    key: 'cloneElements',
+    value: function cloneElements(elements) {
+      var newElements = JSON.parse(JSON.stringify(elements));
+      this.resetElements(newElements);
+      return newElements;
+    }
+
+    /**
+     * a
+     * @param {*} elements a
+     * @param {*} renderFlag a
+     */
+
+  }, {
+    key: 'changeGroupRender',
+    value: function changeGroupRender(elements, renderFlag) {
+      var len = elements.length;
+      for (var i = 0; i < len; i += 1) {
+        elements[i]._render = renderFlag;
+        if (elements[i].ty === 'gr') {
+          this.changeGroupRender(elements[i].it, renderFlag);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} _isFirstFrame a
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes(_isFirstFrame) {
+      // let items, itemsTransform, i, dir, cont;
+      if (this._mdf || _isFirstFrame) {
+        var copies = Math.ceil(this.c.v);
+        if (this._groups.length < copies) {
+          while (this._groups.length < copies) {
+            var group = {
+              it: this.cloneElements(this._elements),
+              ty: 'gr'
+            };
+            group.it.push({ 'a': { 'a': 0, 'ix': 1, 'k': [0, 0] }, 'nm': 'Transform', 'o': { 'a': 0, 'ix': 7, 'k': 100 }, 'p': { 'a': 0, 'ix': 2, 'k': [0, 0] }, 'r': { 'a': 1, 'ix': 6, 'k': [{ s: 0, e: 0, t: 0 }, { s: 0, e: 0, t: 1 }] }, 's': { 'a': 0, 'ix': 3, 'k': [100, 100] }, 'sa': { 'a': 0, 'ix': 5, 'k': 0 }, 'sk': { 'a': 0, 'ix': 4, 'k': 0 }, 'ty': 'tr' });
+
+            this.arr.splice(0, 0, group);
+            this._groups.splice(0, 0, group);
+            this._currentCopies += 1;
+          }
+          this.elem.reloadShapes();
+        }
+        var cont = 0;
+        var i = void 0;
+        var renderFlag = void 0;
+        for (i = 0; i <= this._groups.length - 1; i += 1) {
+          renderFlag = cont < copies;
+          this._groups[i]._render = renderFlag;
+          this.changeGroupRender(this._groups[i].it, renderFlag);
+          cont += 1;
+        }
+
+        this._currentCopies = copies;
+        // //
+
+        var offset = this.o.v;
+        var offsetModulo = offset % 1;
+        var roundOffset = offset > 0 ? Math.floor(offset) : Math.ceil(offset);
+        // let k;
+        // let tMat = this.tr.v.props;
+        var pProps = this.pMatrix.props;
+        var rProps = this.rMatrix.props;
+        var sProps = this.sMatrix.props;
+        this.pMatrix.reset();
+        this.rMatrix.reset();
+        this.sMatrix.reset();
+        this.tMatrix.reset();
+        this.matrix.reset();
+        var iteration = 0;
+
+        if (offset > 0) {
+          while (iteration < roundOffset) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
+            iteration += 1;
+          }
+          if (offsetModulo) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, offsetModulo, false);
+            iteration += offsetModulo;
+          }
+        } else if (offset < 0) {
+          while (iteration > roundOffset) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, true);
+            iteration -= 1;
+          }
+          if (offsetModulo) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, -offsetModulo, true);
+            iteration -= offsetModulo;
+          }
+        }
+        i = this.data.m === 1 ? 0 : this._currentCopies - 1;
+        var dir = this.data.m === 1 ? 1 : -1;
+        cont = this._currentCopies;
+        while (cont) {
+          var items = this.elemsData[i].it;
+          var itemsTransform = items[items.length - 1].transform.mProps.v.props;
+          var jLen = itemsTransform.length;
+          items[items.length - 1].transform.mProps._mdf = true;
+          items[items.length - 1].transform.op._mdf = true;
+          items[items.length - 1].transform.op.v = this.so.v + (this.eo.v - this.so.v) * (i / (this._currentCopies - 1));
+          if (iteration !== 0) {
+            if (i !== 0 && dir === 1 || i !== this._currentCopies - 1 && dir === -1) {
+              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
+            }
+            this.matrix.transform(rProps[0], rProps[1], rProps[2], rProps[3], rProps[4], rProps[5], rProps[6], rProps[7], rProps[8], rProps[9], rProps[10], rProps[11], rProps[12], rProps[13], rProps[14], rProps[15]);
+            this.matrix.transform(sProps[0], sProps[1], sProps[2], sProps[3], sProps[4], sProps[5], sProps[6], sProps[7], sProps[8], sProps[9], sProps[10], sProps[11], sProps[12], sProps[13], sProps[14], sProps[15]);
+            this.matrix.transform(pProps[0], pProps[1], pProps[2], pProps[3], pProps[4], pProps[5], pProps[6], pProps[7], pProps[8], pProps[9], pProps[10], pProps[11], pProps[12], pProps[13], pProps[14], pProps[15]);
+
+            for (var j = 0; j < jLen; j += 1) {
+              itemsTransform[j] = this.matrix.props[j];
+            }
+            this.matrix.reset();
+          } else {
+            this.matrix.reset();
+            for (var _j = 0; _j < jLen; _j += 1) {
+              itemsTransform[_j] = this.matrix.props[_j];
+            }
+          }
+          iteration += 1;
+          cont -= 1;
+          i += dir;
+        }
+      } else {
+        var _cont = this._currentCopies;
+        var _i = 0;
+        var _dir = 1;
+        while (_cont) {
+          var _items = this.elemsData[_i].it;
+          // const itemsTransform = items[items.length - 1].transform.mProps.v.props;
+          _items[_items.length - 1].transform.mProps._mdf = false;
+          _items[_items.length - 1].transform.op._mdf = false;
+          _cont -= 1;
+          _i += _dir;
+        }
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'addShape',
+    value: function addShape() {}
+  }]);
+  return RepeaterModifier;
+}(ShapeModifier);
+
+/**
+ * a
+ */
+
+var MouseModifier = function (_ShapeModifier) {
+  inherits(MouseModifier, _ShapeModifier);
+
+  function MouseModifier() {
+    classCallCheck(this, MouseModifier);
+    return possibleConstructorReturn(this, (MouseModifier.__proto__ || Object.getPrototypeOf(MouseModifier)).apply(this, arguments));
+  }
+
+  createClass(MouseModifier, [{
+    key: 'processKeys',
+
+    /**
+     * a
+     * @param {*} forceRender a
+     */
+    value: function processKeys(forceRender) {
+      if (this.elem.globalData.frameId === this.frameId && !forceRender) {
+        return;
+      }
+      this._mdf = true;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'addShapeToModifier',
+    value: function addShapeToModifier() {
+      this.positions.push([]);
+    }
+
+    /**
+     * a
+     * @param {*} path a
+     * @param {*} mouseCoords a
+     * @param {*} positions a
+     */
+
+  }, {
+    key: 'processPath',
+    value: function processPath(path, mouseCoords, positions) {
+      var len = path.v.length;
+      var vValues = [];
+      var oValues = [];
+      var iValues = [];
+      // let dist;
+      var theta = void 0;
+      var x = void 0;
+      var y = void 0;
+      // // OPTION A
+      for (var i = 0; i < len; i += 1) {
+        if (!positions.v[i]) {
+          positions.v[i] = [path.v[i][0], path.v[i][1]];
+          positions.o[i] = [path.o[i][0], path.o[i][1]];
+          positions.i[i] = [path.i[i][0], path.i[i][1]];
+          positions.distV[i] = 0;
+          positions.distO[i] = 0;
+          positions.distI[i] = 0;
+        }
+        theta = Math.atan2(path.v[i][1] - mouseCoords[1], path.v[i][0] - mouseCoords[0]);
+
+        x = mouseCoords[0] - positions.v[i][0];
+        y = mouseCoords[1] - positions.v[i][1];
+        var distance = Math.sqrt(x * x + y * y);
+        positions.distV[i] += (distance - positions.distV[i]) * this.data.dc;
+
+        positions.v[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][0];
+        positions.v[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][1];
+
+        theta = Math.atan2(path.o[i][1] - mouseCoords[1], path.o[i][0] - mouseCoords[0]);
+
+        x = mouseCoords[0] - positions.o[i][0];
+        y = mouseCoords[1] - positions.o[i][1];
+        distance = Math.sqrt(x * x + y * y);
+        positions.distO[i] += (distance - positions.distO[i]) * this.data.dc;
+
+        positions.o[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][0];
+        positions.o[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][1];
+
+        theta = Math.atan2(path.i[i][1] - mouseCoords[1], path.i[i][0] - mouseCoords[0]);
+
+        x = mouseCoords[0] - positions.i[i][0];
+        y = mouseCoords[1] - positions.i[i][1];
+        distance = Math.sqrt(x * x + y * y);
+        positions.distI[i] += (distance - positions.distI[i]) * this.data.dc;
+
+        positions.i[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][0];
+        positions.i[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][1];
+
+        // ///OPTION 1
+        vValues.push(positions.v[i]);
+        oValues.push(positions.o[i]);
+        iValues.push(positions.i[i]);
+
+        // ///OPTION 2
+        // vValues.push(positions.v[i]);
+        // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
+        // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
+
+
+        // ///OPTION 3
+        // vValues.push(positions.v[i]);
+        // iValues.push(path.i[i]);
+        // oValues.push(path.o[i]);
+
+
+        // ///OPTION 4
+        // vValues.push(path.v[i]);
+        // oValues.push(positions.o[i]);
+        // iValues.push(positions.i[i]);
+      }
+
+      // // OPTION B
+      /* for(i=0;i<len;i+=1){
+          if(!positions.v[i]){
+              positions.v[i] = [path.v[i][0],path.v[i][1]];
+              positions.o[i] = [path.o[i][0],path.o[i][1]];
+              positions.i[i] = [path.i[i][0],path.i[i][1]];
+              positions.distV[i] = 0;
+           }
+          theta = Math.atan2(
+              positions.v[i][1] - mouseCoords[1],
+              positions.v[i][0] - mouseCoords[0]
+          );
+          x = mouseCoords[0] - positions.v[i][0];
+          y = mouseCoords[1] - positions.v[i][1];
+          var distance = this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+           positions.v[i][0] += Math.cos(theta) * distance + (path.v[i][0] - positions.v[i][0]) * this.data.dc;
+          positions.v[i][1] += Math.sin(theta) * distance + (path.v[i][1] - positions.v[i][1]) * this.data.dc;
+            theta = Math.atan2(
+              positions.o[i][1] - mouseCoords[1],
+              positions.o[i][0] - mouseCoords[0]
+          );
+          x = mouseCoords[0] - positions.o[i][0];
+          y = mouseCoords[1] - positions.o[i][1];
+          var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+           positions.o[i][0] += Math.cos(theta) * distance + (path.o[i][0] - positions.o[i][0]) * this.data.dc;
+          positions.o[i][1] += Math.sin(theta) * distance + (path.o[i][1] - positions.o[i][1]) * this.data.dc;
+            theta = Math.atan2(
+              positions.i[i][1] - mouseCoords[1],
+              positions.i[i][0] - mouseCoords[0]
+          );
+          x = mouseCoords[0] - positions.i[i][0];
+          y = mouseCoords[1] - positions.i[i][1];
+          var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+           positions.i[i][0] += Math.cos(theta) * distance + (path.i[i][0] - positions.i[i][0]) * this.data.dc;
+          positions.i[i][1] += Math.sin(theta) * distance + (path.i[i][1] - positions.i[i][1]) * this.data.dc;
+           /////OPTION 1
+          //vValues.push(positions.v[i]);
+          // oValues.push(positions.o[i]);
+          // iValues.push(positions.i[i]);
+            /////OPTION 2
+          //vValues.push(positions.v[i]);
+          // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
+          // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
+            /////OPTION 3
+          //vValues.push(positions.v[i]);
+          //iValues.push(path.i[i]);
+          //oValues.push(path.o[i]);
+            /////OPTION 4
+          //vValues.push(path.v[i]);
+          // oValues.push(positions.o[i]);
+          // iValues.push(positions.i[i]);
+      }*/
+
+      return {
+        v: vValues,
+        o: oValues,
+        i: iValues,
+        c: path.c
+      };
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes() {
+      var mouseX = this.elem.globalData.mouseX;
+      var mouseY = this.elem.globalData.mouseY;
+      var shapePaths = void 0;
+      var len = this.shapes.length;
+      // let j, jLen;
+
+      if (mouseX) {
+        var localMouseCoords = this.elem.globalToLocal([mouseX, mouseY, 0]);
+
+        var shapeData = void 0;
+        var newPaths = [];
+        for (var i = 0; i < len; i += 1) {
+          shapeData = this.shapes[i];
+          if (!shapeData.shape._mdf && !this._mdf) {
+            shapeData.shape.paths = shapeData.last;
+          } else {
+            shapeData.shape._mdf = true;
+            shapePaths = shapeData.shape.paths;
+            var jLen = shapePaths.length;
+            for (var j = 0; j < jLen; j += 1) {
+              if (!this.positions[i][j]) {
+                this.positions[i][j] = {
+                  v: [],
+                  o: [],
+                  i: [],
+                  distV: [],
+                  distO: [],
+                  distI: []
+                };
+              }
+              newPaths.push(this.processPath(shapePaths[j], localMouseCoords, this.positions[i][j]));
+            }
+            shapeData.shape.paths = newPaths;
+            shapeData.last = newPaths;
+          }
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'initModifierProperties',
+    value: function initModifierProperties(elem, data) {
+      this.getValue = this.processKeys;
+      this.data = data;
+      this.positions = [];
+    }
+  }]);
+  return MouseModifier;
+}(ShapeModifier);
+
 var modifiers = {};
 
 /**
@@ -11995,6 +12511,8 @@ function getModifier(nm, elem, data) {
 
 registerModifier('tm', TrimModifier);
 registerModifier('rd', RoundCornersModifier);
+registerModifier('rp', RepeaterModifier);
+registerModifier('ms', MouseModifier);
 
 var degToRads = Math.PI / 180;
 
@@ -12914,11 +13432,9 @@ var CompElement = function (_Container) {
         var item = elementsMap[layer.ind];
         if (!item) continue;
         if (layer.parent) {
-          var parent = elementsMap[layer.parent];
-          parent.adds(item);
-        } else {
-          this.adds(item);
+          item.hierarchy = elementsMap[layer.parent];
         }
+        this.adds(item);
       }
     }
 
@@ -13341,6 +13857,7 @@ var AnimationGroup = function () {
    * @param {String} [options.prefix=''] assets url prefix, like link path
    * @param {Number} [options.timeScale=1] animation speed
    * @param {Number} [options.autoStart=true] auto start animation after assets loaded
+   * @param {Boolean} [options.mask=false] auto start animation after assets loaded
    */
   function AnimationGroup(options) {
     var _this = this;
@@ -13389,14 +13906,36 @@ var AnimationGroup = function () {
       this._paused = false;
     }
 
-    this.group = new CompElement(this.keyframes.layers, {
-      assets: this.keyframes.assets,
-      size: { w: this.keyframes.w, h: this.keyframes.h },
+    var _keyframes = this.keyframes,
+        layers = _keyframes.layers,
+        w = _keyframes.w,
+        h = _keyframes.h,
+        nm = _keyframes.nm,
+        assets = _keyframes.assets;
+
+
+    this.group = new CompElement(layers, {
+      assets: assets,
+      size: { w: w, h: h },
       prefix: this.prefix,
       register: this.register,
-      parentName: this.keyframes.nm
+      parentName: nm
     });
     this.group._aniRoot = true;
+
+    /**
+     * generate a mask for animation
+     */
+    if (options.mask) {
+      var mask = {
+        render: function render(ctx) {
+          ctx.beginPath();
+          ctx.rect(0, 0, w, h);
+          ctx.clip();
+        }
+      };
+      this.group.mask = mask;
+    }
 
     this.updateSession = { forever: this.isForever() };
   }
