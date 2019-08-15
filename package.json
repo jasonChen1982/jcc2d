@@ -2,8 +2,7 @@
   "name": "jcc2d",
   "version": "1.8.1",
   "description": "a light weight canvas 2d render & an awesome animator",
-  "main": "build/jcc2d.min.js",
-  "module": "esm/jcc2d.js",
+  "main": "build/jcc2d.js",
   "directories": {
     "example": "examples"
   },

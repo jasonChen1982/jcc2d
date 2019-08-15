@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    #demo_canvas {
+      width: 100%;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="750" height="1334"></canvas>
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript" src="../libs/dat.gui.min.js"></script>
+  <script type="text/javascript">
+    var w = window.innerWidth,
+    h = window.innerHeight,
+    pic,
+    boundBox,
+    app = new JC.Application({
+      dom: 'demo_canvas'
+    }),
+    DOC = new JC.Container();
+
+    var shapes = [{
+        "translateText": "口",
+        "text": "口",
+        "polygon": [19.444444444444443, 0, 19.444444444444443, 38.19444444444444, 75, 38.19444444444444, 75, 0]
+    }, {
+        "translateText": "图灵社区：www.iturng.com.cn",
+        "text": "图灵社区：www.iturng.com.cn",
+        "polygon": [10.416666666666666, 251.38888888888889, 10.416666666666666, 283.3333333333333, 466.66666666666663, 280.55555555555554, 466.66666666666663, 248.61111111111111]
+    }, {
+        "translateText": "@图灵教育",
+        "text": "@图灵教育",
+        "polygon": [161.11111111111111, 295.13888888888886, 161.11111111111111, 327.77777777777777, 353.47222222222223, 327.77777777777777, 353.47222222222223, 295.13888888888886]
+    }, {
+        "translateText": "@图灵社区",
+        "text": "@图灵社区",
+        "polygon": [365.97222222222223, 295.13888888888886, 365.97222222222223, 326.38888888888886, 534.7222222222222, 326.38888888888886, 534.7222222222222, 295.13888888888886]
+    }, {
+        "translateText": "新浪微博：",
+        "text": "新浪微博：",
+        "polygon": [7.638888888888888, 296.52777777777777, 7.638888888888888, 328.47222222222223, 164.58333333333331, 328.47222222222223, 164.58333333333331, 296.52777777777777]
+    }, {
+        "translateText": "反馈/投稿/推荐信箱：contact@turingbook.com",
+        "text": "反馈/投稿/推荐信箱：contact@turingbook.com",
+        "polygon": [7.638888888888888, 343.75, 7.638888888888888, 377.0833333333333, 732.6388888888889, 377.0833333333333, 732.6388888888889, 343.75]
+    }, {
+        "translateText": "热线：(010)51095186转604",
+        "text": "热线：(010)51095186转604",
+        "polygon": [6.25, 392.3611111111111, 6.25, 426.38888888888886, 421.52777777777777, 422.91666666666663, 421.52777777777777, 389.5833333333333]
+    }, {
+        "translateText": "计算机/程序设计/移动开发",
+        "text": "计算机/程序设计/移动开发",
+        "polygon": [231.94444444444443, 461.80555555555554, 231.25, 497.91666666666663, 711.8055555555555, 502.0833333333333, 711.8055555555555, 465.97222222222223]
+    }, {
+        "translateText": "分类建议",
+        "text": "分类建议",
+        "polygon": [25.694444444444443, 464.5833333333333, 25.694444444444443, 503.47222222222223, 185.41666666666666, 503.47222222222223, 185.41666666666666, 464.5833333333333]
+    }, {
+        "translateText": "人民邮电出版社网址：www.ptpress.com.cn",
+        "text": "人民邮电出版社网址：www.ptpress.com.cn",
+        "polygon": [6.944444444444445, 538.8888888888889, 6.25, 573.6111111111111, 736.1111111111111, 584.0277777777777, 736.8055555555555, 548.6111111111111]
+    }];
+
+    function Shape(shape) {
+      this.polygon = shape.polygon;
+    }
+    Shape.prototype.render = function(ctx) {
+      ctx.strokeStyle = '#eb1983';
+      ctx.beginPath();
+      var polygon = this.polygon;
+      var l = polygon.length >> 1;
+      for (var i = 0; i < l; i++) {
+        var x = polygon[i * 2],
+          y = polygon[i * 2 + 1];
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.lineWidth = 2;
+      ctx.closePath();
+      ctx.stroke();
+    }
+
+
+    for (var i = 0; i < shapes.length; i++) {
+      var shape = shapes[i];
+      var display = new JC.Graphics(new Shape(shape));
+      display.setArea(new JC.Polygon(shape.polygon));
+      display.on('click', function() {
+        console.log('click');
+      });
+      DOC.adds(display);
+    }
+    app.scene.adds(DOC);
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    app.renderer.on('postrender', function () {
+      stats.update();
+    });
+
+    window.onresize = function () {
+      resize();
+    };
+    function resize() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      app.renderer.resize(w, h);
+    }
+
+  </script>
+</body>
+
+</html>

@@ -2192,7 +2192,7 @@ Object.defineProperty(Texture.prototype, 'height', {
  */
 Object.defineProperty(Texture.prototype, 'naturalWidth', {
   get: function get() {
-    return this.texture ? this.texture.naturalWidth : 0;
+    return this.texture ? this.texture.naturalWidth || this.texture.width : 0;
   }
 });
 
@@ -2205,7 +2205,7 @@ Object.defineProperty(Texture.prototype, 'naturalWidth', {
  */
 Object.defineProperty(Texture.prototype, 'naturalHeight', {
   get: function get() {
-    return this.texture ? this.texture.naturalHeight : 0;
+    return this.texture ? this.texture.naturalHeight || this.texture.height : 0;
   }
 });
 
