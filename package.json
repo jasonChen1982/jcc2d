@@ -1,6 +1,6 @@
 {
   "name": "jcc2d",
-  "version": "1.8.1",
+  "version": "1.8.2-beta.0",
   "description": "a light weight canvas 2d render & an awesome animator",
   "main": "build/jcc2d.js",
   "directories": {
