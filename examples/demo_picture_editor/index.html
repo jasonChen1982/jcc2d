@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+
+  </style>
+  <script src="//image.uc.cn/s/uae/g/0n/test/vconsole.min.js"></script>
+  <script>
+    // init vConsole
+    var vConsole = new VConsole();
+    window.onload = function() {
+      document.querySelector('.vc-switch').setAttribute('style', 'font-size:12px !important');
+      document.querySelector('.vc-mask').setAttribute('style', 'font-size:12px !important');
+      document.querySelector('.vc-panel').setAttribute('style', 'font-size:12px !important');
+    };
+  </script>
+</head>
+
+<body>
+  <canvas id="demo_canvas"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+    var width = 750;
+    var height = window.innerHeight * width / window.innerWidth;
+    var app = new JC.Application({
+      dom: 'demo_canvas',
+      width,
+      height,
+    });
+    var DOC = new JC.Container();
+    DOC.x = width / 2;
+    DOC.y = height / 2;
+    DOC.scale = 0.5;
+
+    var material = new JC.Sprite();
+    var texture = new JC.Texture('https://img.alicdn.com/imgextra/i1/1749795092/O1CN01FEmAUI1nUBJsgp53r_!!1749795092-0-quark.jpg');
+    texture.on('load', () => {
+      material.upTexture({ texture });
+      material.x = -texture.width / 2;
+      material.y = -texture.height / 2;
+
+      material.on('touchstart', onStart);
+      material.on('touchmove', onMove);
+      material.on('touchend', onEnd);
+      material.on('touchcancle', onEnd);
+    });
+
+    var mode = '';
+    var startTouches = [];
+    var moveTouches = [];
+    var initScale = 1;
+    var initPosition = { x:0, y: 0 };
+    function onStart(ev) {
+      const event = ev.data.originalEvent;
+      const resolution = ev.data.resolution;
+      const length = event.touches.length;
+      if (length > 0 && length <= 2) {
+        startTouches.length = length;
+        for (var i = 0; i < length; i++) {
+          const touch = event.touches[i];
+          startTouches[i] = { x: touch.pageX * resolution.x, y: touch.pageY * resolution.x };
+        }
+        initPosition.x = DOC.x;
+        initPosition.y = DOC.y;
+        if (length === 1) {
+          mode = 'drag';
+        } else {
+          initScale = material.scale;
+          mode = 'scale';
+          var startCenter = { x: (startTouches[0].x + startTouches[1].x) / 2, y: (startTouches[0].y + startTouches[1].y) / 2 };
+          var origin = material.worldTransform.applyInverse(startCenter, {});
+          material.originX = origin.x;
+          material.originY = origin.y;
+        }
+      }
+    }
+
+    function onMove(ev) {
+      const event = ev.data.originalEvent;
+      event.preventDefault();
+      const resolution = ev.data.resolution;
+      const length = startTouches.length;
+      for (var i = 0; i < length; i++) {
+        const touch = event.touches[i];
+        moveTouches[i] = { x: touch.pageX * resolution.x, y: touch.pageY * resolution.x };
+      }
+      if (length === 2) {
+        var startLength = Math.max(getLength(startTouches), 10);
+        var moveLength = Math.max(getLength(moveTouches), 10);
+        var scale = moveLength / startLength;
+        material.scale = initScale * scale;
+
+        var startCenter = { x: (startTouches[0].x + startTouches[1].x) / 2, y: (startTouches[0].y + startTouches[1].y) / 2 };
+        var moveCenter = { x: (moveTouches[0].x + moveTouches[1].x) / 2, y: (moveTouches[0].y + moveTouches[1].y) / 2 };
+
+        var distance = getDistance(startCenter, moveCenter);
+        DOC.x = initPosition.x + distance.x;
+        DOC.y = initPosition.y + distance.y;
+      }
+      if (length === 1) {
+        var distance = getDistance(startTouches[0], moveTouches[0]);
+        DOC.x = initPosition.x + distance.x;
+        DOC.y = initPosition.y + distance.y;
+      }
+    }
+
+    function onEnd(ev) {
+      var event = ev.data.originalEvent;
+      var tp = material.worldTransform.apply({ x: 0, y: 0 });
+      DOC.scale *= material.scale;
+      material.scale = 1;
+      DOC.updatePosture();
+      var np = material.worldTransform.apply({ x: 0, y: 0 });
+      DOC.x += tp.x - np.x;
+      DOC.y += tp.y - np.y;
+    }
+
+
+    function getDistance(begin, end) {
+      var distance = { x: 0, y: 0 };
+      distance.x = end.x - begin.x;
+      distance.y = end.y - begin.y;
+      return distance;
+    }
+
+
+    function getLength(points) {
+      var dx = points[0].x - points[1].x;
+      var dx2 = dx * dx;
+      var dy = points[0].y - points[1].y;
+      var dy2 = dy * dy;
+      return Math.sqrt(dx2 + dy2);
+    }
+
+
+    DOC.adds(material);
+    app.scene.adds(DOC);
+
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    app.renderer.on('postrender', function () {
+      stats.update();
+    })
+
+  </script>
+</body>
+
+</html>

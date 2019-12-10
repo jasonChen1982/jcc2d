@@ -83,6 +83,7 @@ Matrix.prototype.apply = function(pos, newPos) {
  * @return {object} 变换之后的点
  */
 Matrix.prototype.applyInverse = function(pos, newPos) {
+  newPos = newPos || {};
   let id = 1 / (this.a * this.d + this.c * -this.b);
   newPos.x = this.d * id * pos.x
              +

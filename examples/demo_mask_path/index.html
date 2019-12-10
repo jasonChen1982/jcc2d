@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    #demo_canvas {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 320px;
+      height: 568px;
+      margin: -284px 0 0 -160px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="750" height="1334"></canvas>
+
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript">
+
+const MASK_DATA = {
+  i: [
+    [ -5.465999999999999, 289.25 ],
+    [ -238.663, 154.48 ],
+    [ -252.999, 139.878 ],
+    [ -252.999, -129.662 ],
+    [ -247.53400000000002, -149.39 ],
+    [ -14.337, -284.161 ],
+    [ 5.462999999999999, -289.288 ],
+    [ 238.659, -154.517 ],
+    [ 252.995, -139.916 ],
+    [ 252.995, 129.625 ],
+    [ 247.53, 149.35299999999998 ],
+    [ 14.334, 284.123 ],
+  ],
+  o: [
+    [ -14.337, 284.123 ],
+    [ -247.53400000000002, 149.35299999999998 ],
+    [ -252.999, 129.625 ],
+    [ -252.999, -139.916 ],
+    [ -238.663, -154.517 ],
+    [ -5.465999999999999, -289.288 ],
+    [ 14.334, -284.161 ],
+    [ 247.53, -149.39 ],
+    [ 252.995, -129.662 ],
+    [ 252.995, 139.878 ],
+    [ 238.659, 154.48 ],
+    [ 5.462999999999999, 289.25 ],
+  ],
+  v: [
+    [ -14.337, 284.123 ],
+    [ -238.663, 154.48 ],
+    [ -252.999, 129.625 ],
+    [ -252.999, -129.662 ],
+    [ -238.663, -154.517 ],
+    [ -14.337, -284.161 ],
+    [ 14.334, -284.161 ],
+    [ 238.659, -154.517 ],
+    [ 252.995, -129.662 ],
+    [ 252.995, 129.625 ],
+    [ 238.659, 154.48 ],
+    [ 14.334, 284.123 ],
+  ],
+  c: true,
+};
+
+    var app = new JC.Application({
+      dom: 'demo_canvas'
+    });
+    var DOC = new JC.Container();
+    var width = 750;
+    var height = 1334;
+    var grahpics = new JC.Graphics(function(ctx) {
+      ctx.beginPath();
+
+      // draw outline
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.moveTo(0, 0);
+      ctx.lineTo(width, 0);
+      ctx.lineTo(width, height);
+      ctx.lineTo(0, height);
+      ctx.lineTo(0, 0);
+
+      // ctx.drawRect(0, 0, width, height);
+
+      const hw = width / 2;
+      const hh = height / 2;
+
+      ctx.moveTo(hw - 100, hh - 100);
+      ctx.lineTo(hw - 100, hh + 100);
+      ctx.lineTo(hw + 100, hh + 100);
+      ctx.lineTo(hw + 100, hh - 100);
+      ctx.lineTo(hw - 100, hh - 100);
+
+      // draw innerBox
+      // const data = MASK_DATA;
+      // const start = data.v[0];
+      // ctx.moveTo(start[0] + hw, start[1] + hh);
+      // const jLen = data.v.length;
+      // let j = 1;
+      // for (; j < jLen; j++) {
+      //   const oj = data.o[j - 1];
+      //   const ij = data.i[j];
+      //   const vj = data.v[j];
+      //   ctx.bezierCurveTo(oj[0] + hw, oj[1] + hh, ij[0] + hw, ij[1] + hh, vj[0] + hw, vj[1] + hh);
+      // }
+      // const oj = data.o[j - 1];
+      // const ij = data.i[0];
+      // const vj = data.v[0];
+      // ctx.bezierCurveTo(oj[0] + hw, oj[1] + hh, ij[0] + hw, ij[1] + hh, vj[0] + hw, vj[1] + hh);
+      ctx.fill();
+    });
+    DOC.adds(grahpics);
+    app.scene.adds(DOC);
+
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    app.renderer.on('postrender', function () {
+      stats.update();
+    })
+
+  </script>
+</body>
+
+</html>
