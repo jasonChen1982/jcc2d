@@ -1,7 +1,7 @@
 
 /**
  * jcc2d.js
- * (c) 2014-2019 jason chen
+ * (c) 2014-2020 jason chen
  * Released under the MIT License.
  */
 
@@ -2422,7 +2422,9 @@ Ticker.prototype.timeline = function () {
 
 Ticker.prototype.tick = function () {
   if (this.paused) return;
+  this.emit('pretimeline');
   this.timeline();
+  this.emit('posttimeline', this.snippet);
   this.emit('update', this.snippet);
   this.emit('tick', this.snippet);
 };
@@ -2977,6 +2979,7 @@ Matrix.prototype.apply = function (pos, newPos) {
  * @return {object} 变换之后的点
  */
 Matrix.prototype.applyInverse = function (pos, newPos) {
+  newPos = newPos || {};
   var id = 1 / (this.a * this.d + this.c * -this.b);
   newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
   newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
