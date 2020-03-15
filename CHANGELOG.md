@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.3"></a>
+## [1.8.3](https://github.com/jasonChen1982/jcc2d/compare/v1.8.2...v1.8.3) (2020-03-15)
+
+
+### Features
+
+* **bounds:** update bounds ([ce5be26](https://github.com/jasonChen1982/jcc2d/commit/ce5be26))
+
+
+
 <a name="1.8.2"></a>
 ## [1.8.2](https://github.com/jasonChen1982/jcc2d/compare/v1.8.2-beta.0...v1.8.2) (2020-01-16)
 
