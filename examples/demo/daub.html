@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>JC_demo</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      background-color: #fff;
+    }
+    #democanvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <img src="https://img.alicdn.com/imgextra/i3/6000000002024/O1CN01CTLNmi1Qp2DwDmj9p_!!6000000002024-0-quark.jpg" width="623"> -->
+  <canvas id="democanvas"></canvas>
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script>
+    var width = 750;
+    var height = window.innerHeight * 750 / window.innerWidth;
+
+
+    var application = new JC.Application({
+      dom: '#democanvas',
+      width,
+      height,
+    });
+
+    class PathLine {
+      constructor(point) {
+        this.points = [];
+        this.add(point);
+      }
+
+      add(point) {
+        this.points.push(point);
+      }
+
+      length() {
+        return this.points.length;
+      }
+
+      invalid() {
+        this.length() <= 1;
+      }
+    }
+
+    class DrawPath {
+      constructor() {
+        this.paths = [];
+        this.lineWidth = 60;
+        this.currentPath = null;
+      }
+
+      beginPath(point) {
+        this.currentPath = new PathLine(point);
+      }
+
+      pathTo(point) {
+        this.currentPath.add(point);
+      }
+
+      closePath() {
+        if (this.currentPath && !this.currentPath.invalid()) {
+          this.paths.push(this.currentPath);
+        }
+        this.currentPath = null;
+      }
+
+      render(ctx) {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, width, height);
+        const length = this.paths.length;
+        if (length <= 0 && (!this.currentPath || this.currentPath.invalid())) return;
+
+        ctx.lineCap = 'round';
+        ctx.lineWidth = this.lineWidth;
+        ctx.strokeStyle = '#000';
+        ctx.globalCompositeOperation = "destination-out";
+
+        ctx.beginPath();
+
+        for (let i = 0; i < length; i++) {
+          this.drawPathLine(ctx, this.paths[i]);
+        }
+        if (this.currentPath && !this.currentPath.invalid()) this.drawPathLine(ctx, this.currentPath);
+
+        ctx.stroke();
+        ctx.globalCompositeOperation = "";
+      }
+
+      drawPathLine(ctx, pathLine) {
+        const length = pathLine.length();
+        const { x, y } = pathLine.points[0];
+        const oldPoint = new JC.Point(x, y);
+        const oMidPoint = new JC.Point(x, y);
+        const midPoint = new JC.Point();
+
+        for (let i = 1; i < length; i++) {
+          const point = pathLine.points[i];
+          midPoint.x = (oldPoint.x + point.x) / 2;
+          midPoint.y = (oldPoint.y + point.y) / 2;
+
+          ctx.moveTo(midPoint.x, midPoint.y);
+          ctx.quadraticCurveTo(oldPoint.x, oldPoint.y, oMidPoint.x, oMidPoint.y);
+
+          oldPoint.x = point.x;
+          oldPoint.y = point.y;
+          oMidPoint.x = midPoint.x;
+          oMidPoint.y = midPoint.y;
+        }
+      }
+    }
+
+    var drawPath = new DrawPath();
+    var grap = new JC.Graphics(drawPath);
+    // grap.alpha = 0.5;
+
+
+    // var loadBox = JC.loaderUtil({
+    //   pic: './images/card.jpg'
+    // });
+
+    // loadBox.on('complete', function () {
+    //   resize();
+    var pic = new JC.Sprite({
+      texture: new JC.Texture('./images/card.jpg'),
+    });
+    pic.x = width / 2;
+    pic.y = height / 2;
+    pic.pivotX = 320;
+    pic.pivotY = 210;
+
+    application.scene.adds(pic, grap);
+
+    var startPoint = { x: 0, y: 0 };
+    var oMidPoint = { x: 0, y: 0 };
+    application.renderer.on('touchstart', ev => {
+      drawPath.beginPath(new JC.Point(ev.data.global.x, ev.data.global.y));
+    });
+    application.renderer.on('touchmove', ev => {
+      drawPath.pathTo(new JC.Point(ev.data.global.x, ev.data.global.y));
+    });
+    application.renderer.on('touchend', () => {
+      drawPath.closePath();
+    });
+
+  </script>
+</body>
+
+</html>
