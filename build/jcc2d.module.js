@@ -2631,10 +2631,22 @@ Bounds.prototype.addPoint = function (point) {
  * @param {JC.Rectangle} rect
  */
 Bounds.prototype.addRect = function (rect) {
-  this.minX = rect.x;
-  this.maxX = rect.width + rect.x;
-  this.minY = rect.y;
-  this.maxY = rect.height + rect.y;
+  this.minX = Math.min(this.minX, rect.x);
+  this.maxX = Math.max(this.maxX, rect.width + rect.x);
+  this.minY = Math.min(this.minY, rect.y);
+  this.maxY = Math.max(this.maxY, rect.height + rect.y);
+};
+
+/**
+ * 往包围盒增加矩形区域，更新包围盒区域
+ *
+ * @param {JC.Circle} circle
+ */
+Bounds.prototype.addCircle = function (circle) {
+  this.minX = Math.min(this.minX, circle.x - circle.radius);
+  this.maxX = Math.max(this.maxX, circle.x + circle.radius);
+  this.minY = Math.min(this.minY, circle.y - circle.radius);
+  this.maxY = Math.max(this.maxY, circle.y + circle.radius);
 };
 
 /**
