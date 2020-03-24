@@ -1376,6 +1376,7 @@ class InteractionManager extends Eventer {
       this.cursor = null;
     }
 
+    const timeId = Date.now();
     const eventLen = events.length;
 
     for (let i = 0; i < eventLen; i++) {
@@ -1385,6 +1386,7 @@ class InteractionManager extends Eventer {
 
       const interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
 
+      interactionEvent.timeId = timeId;
       interactionEvent.data.originalEvent = originalEvent;
 
       const interactive = event.pointerType === 'touch' ? this.moveWhenInside : true;

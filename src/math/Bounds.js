@@ -44,7 +44,7 @@ function Bounds(minX, minY, maxX, maxY) {
     maxY:
     -Infinity;
 
-  this.rect = null;
+  // this.rect = null;
 }
 
 Bounds.prototype.isEmpty = function() {
