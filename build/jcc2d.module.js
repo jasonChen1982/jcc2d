@@ -2577,7 +2577,7 @@ function Bounds(minX, minY, maxX, maxY) {
    */
   this.maxY = Utils.isNumber(maxY) ? maxY : -Infinity;
 
-  this.rect = null;
+  // this.rect = null;
 }
 
 Bounds.prototype.isEmpty = function () {
@@ -7550,6 +7550,7 @@ var InteractionManager = function (_Eventer) {
         this.cursor = null;
       }
 
+      var timeId = Date.now();
       var eventLen = events.length;
 
       for (var i = 0; i < eventLen; i++) {
@@ -7559,6 +7560,7 @@ var InteractionManager = function (_Eventer) {
 
         var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event3, interactionData);
 
+        interactionEvent.timeId = timeId;
         interactionEvent.data.originalEvent = originalEvent;
 
         var interactive = _event3.pointerType === 'touch' ? this.moveWhenInside : true;
