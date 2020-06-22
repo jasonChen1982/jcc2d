@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>fling and spring</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      background-color: #fff;
+    }
+    #democanvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <img src="https://img.alicdn.com/imgextra/i3/6000000002024/O1CN01CTLNmi1Qp2DwDmj9p_!!6000000002024-0-quark.jpg" width="623"> -->
+  <canvas id="democanvas"></canvas>
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="./js/scrollerview.js"></script>
+  <script>
+    var width = 640;
+    var height = window.innerHeight * width / window.innerWidth;
+    var cssRatio = window.innerWidth / width;
+
+    var application = new JC.Application({
+      dom: '#democanvas',
+      width,
+      height,
+    });
+
+    var doc = new Container();
+    doc.x = width / 2;
+    doc.y = height / 2;
+
+    // var texture = new JC.Texture('http://img.alicdn.com/imgextra/i1/6000000006146/O1CN01KO3tOn1vGuoN3yIaw_!!6000000006146-0-quark.jpg', { crossOrigin: '*' });
+    var texture = new JC.Texture('http://img.alicdn.com/imgextra/i3/6000000007557/O1CN01xSXbz625h9ew4upqY_!!6000000007557-0-quark.jpg', { crossOrigin: '*' });
+
+    var scrollerView = new ScrollerView({
+      width,
+      height,
+      cssRatio,
+      padding: [0, 0, 0, 0],
+      // fillMode: FillMode.withwidth,
+      fillMode: FillMode.withheight,
+    });
+    scrollerView.pivotX = width / 2;
+    scrollerView.pivotY = height / 2;
+
+    texture.on('load', () => {
+      console.log(texture.width, texture.height);
+      scrollerView.updatePosture();
+      scrollerView.setMaterial({ texture });
+    });
+
+    doc.adds(scrollerView);
+    application.scene.adds(doc);
+  </script>
+</body>
+
+</html>
