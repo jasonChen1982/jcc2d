@@ -55,6 +55,7 @@
     "eslint": "^4.11.0",
     "eslint-config-google": "^0.9.1",
     "http-server": "^0.10.0",
+    "jaguarjs-jsdoc": "^1.1.0",
     "jsdoc": "^3.5.5",
     "karma": "^1.7.1",
     "karma-chai": "^0.1.0",

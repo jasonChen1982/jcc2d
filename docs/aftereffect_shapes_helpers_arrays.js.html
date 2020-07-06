@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Source: aftereffect/shapes/helpers/arrays.js</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":false,"cleverLinks":false,"default":{"outputSourceFiles":true},"applicationName":"jcc2d","footer":"Made with ♥ by Jason Chen (http://www.jason82.com)","copyright":"jcc2d Copyright © 2013-2017 Jason Chen.","disqus":"","googleAnalytics":"","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    </script>
+    
+
+    
+</head>
+<body>
+<div id="wrap" class="clearfix">
+    
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">jcc2d</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="JC.Loader">
+            <span class="title">
+                <a href="JC.Loader.html">JC.Loader</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Loader.progress"><a href="JC.Loader.html#.progress">progress</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Tween">
+            <span class="title">
+                <a href="JC.Tween.html">JC.Tween</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Utils">
+            <span class="title">
+                <a href="JC.Utils.html">JC.Utils</a>
+                
+                <span class="static">static</span>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Utils.clamp"><a href="JC.Utils.html#.clamp">clamp</a></li>
+            
+                <li data-name="JC.Utils.codomainBounce"><a href="JC.Utils.html#.codomainBounce">codomainBounce</a></li>
+            
+                <li data-name="JC.Utils.copyJSON"><a href="JC.Utils.html#.copyJSON">copyJSON</a></li>
+            
+                <li data-name="JC.Utils.DTR"><a href="JC.Utils.html#.DTR">DTR</a></li>
+            
+                <li data-name="JC.Utils.euclideanModulo"><a href="JC.Utils.html#.euclideanModulo">euclideanModulo</a></li>
+            
+                <li data-name="JC.Utils.isArray"><a href="JC.Utils.html#.isArray">isArray</a></li>
+            
+                <li data-name="JC.Utils.isBoolean"><a href="JC.Utils.html#.isBoolean">isBoolean</a></li>
+            
+                <li data-name="JC.Utils.isFunction"><a href="JC.Utils.html#.isFunction">isFunction</a></li>
+            
+                <li data-name="JC.Utils.isNumber"><a href="JC.Utils.html#.isNumber">isNumber</a></li>
+            
+                <li data-name="JC.Utils.isObject"><a href="JC.Utils.html#.isObject">isObject</a></li>
+            
+                <li data-name="JC.Utils.isString"><a href="JC.Utils.html#.isString">isString</a></li>
+            
+                <li data-name="JC.Utils.isUndefined"><a href="JC.Utils.html#.isUndefined">isUndefined</a></li>
+            
+                <li data-name="JC.Utils.linear"><a href="JC.Utils.html#.linear">linear</a></li>
+            
+                <li data-name="JC.Utils.random"><a href="JC.Utils.html#.random">random</a></li>
+            
+                <li data-name="JC.Utils.RTD"><a href="JC.Utils.html#.RTD">RTD</a></li>
+            
+                <li data-name="JC.Utils.smootherstep"><a href="JC.Utils.html#.smootherstep">smootherstep</a></li>
+            
+                <li data-name="JC.Utils.smoothstep"><a href="JC.Utils.html#.smoothstep">smoothstep</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="AnimationGroup">
+            <span class="title">
+                <a href="AnimationGroup.html">AnimationGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="AnimationGroup#bindSlot"><a href="AnimationGroup.html#bindSlot">bindSlot</a></li>
+            
+                <li data-name="AnimationGroup#emit"><a href="AnimationGroup.html#emit">emit</a></li>
+            
+                <li data-name="AnimationGroup#frameToTime"><a href="AnimationGroup.html#frameToTime">frameToTime</a></li>
+            
+                <li data-name="AnimationGroup#getLayerByName"><a href="AnimationGroup.html#getLayerByName">getLayerByName</a></li>
+            
+                <li data-name="AnimationGroup#off"><a href="AnimationGroup.html#off">off</a></li>
+            
+                <li data-name="AnimationGroup#on"><a href="AnimationGroup.html#on">on</a></li>
+            
+                <li data-name="AnimationGroup#once"><a href="AnimationGroup.html#once">once</a></li>
+            
+                <li data-name="AnimationGroup#pause"><a href="AnimationGroup.html#pause">pause</a></li>
+            
+                <li data-name="AnimationGroup#play"><a href="AnimationGroup.html#play">play</a></li>
+            
+                <li data-name="AnimationGroup#removeAllListeners"><a href="AnimationGroup.html#removeAllListeners">removeAllListeners</a></li>
+            
+                <li data-name="AnimationGroup#replay"><a href="AnimationGroup.html#replay">replay</a></li>
+            
+                <li data-name="AnimationGroup#resume"><a href="AnimationGroup.html#resume">resume</a></li>
+            
+                <li data-name="AnimationGroup#setSpeed"><a href="AnimationGroup.html#setSpeed">setSpeed</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="AnimationManager">
+            <span class="title">
+                <a href="AnimationManager.html">AnimationManager</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="AnimationManager#paused"><a href="AnimationManager.html#paused">paused</a></li>
+            
+                <li data-name="AnimationManager#timeScale"><a href="AnimationManager.html#timeScale">timeScale</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="AnimationManager#add"><a href="AnimationManager.html#add">add</a></li>
+            
+                <li data-name="AnimationManager#parseAnimation"><a href="AnimationManager.html#parseAnimation">parseAnimation</a></li>
+            
+                <li data-name="AnimationManager#pause"><a href="AnimationManager.html#pause">pause</a></li>
+            
+                <li data-name="AnimationManager#resume"><a href="AnimationManager.html#resume">resume</a></li>
+            
+                <li data-name="AnimationManager#setSpeed"><a href="AnimationManager.html#setSpeed">setSpeed</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BaseProperty">
+            <span class="title">
+                <a href="BaseProperty.html">BaseProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="BaseProperty#addEffect"><a href="BaseProperty.html#addEffect">addEffect</a></li>
+            
+                <li data-name="BaseProperty#getValueAtCurrentTime"><a href="BaseProperty.html#getValueAtCurrentTime">getValueAtCurrentTime</a></li>
+            
+                <li data-name="BaseProperty#interpolateValue"><a href="BaseProperty.html#interpolateValue">interpolateValue</a></li>
+            
+                <li data-name="BaseProperty#processEffectsSequence"><a href="BaseProperty.html#processEffectsSequence">processEffectsSequence</a></li>
+            
+                <li data-name="BaseProperty#setVValue"><a href="BaseProperty.html#setVValue">setVValue</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="BaseShapeProperty">
+            <span class="title">
+                <a href="BaseShapeProperty.html">BaseShapeProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="BaseShapeProperty#interpolateShape"><a href="BaseShapeProperty.html#interpolateShape">interpolateShape</a></li>
+            
+                <li data-name="BaseShapeProperty#interpolateShapeCurrentTime"><a href="BaseShapeProperty.html#interpolateShapeCurrentTime">interpolateShapeCurrentTime</a></li>
+            
+                <li data-name="BaseShapeProperty#processEffectsSequence"><a href="BaseShapeProperty.html#processEffectsSequence">processEffectsSequence</a></li>
+            
+                <li data-name="BaseShapeProperty#resetShape"><a href="BaseShapeProperty.html#resetShape">resetShape</a></li>
+            
+                <li data-name="BaseShapeProperty#setVValue"><a href="BaseShapeProperty.html#setVValue">setVValue</a></li>
+            
+                <li data-name="BaseShapeProperty#shapesEqual"><a href="BaseShapeProperty.html#shapesEqual">shapesEqual</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="EllShapeProperty">
+            <span class="title">
+                <a href="EllShapeProperty.html">EllShapeProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="EllShapeProperty#convertEllToPath"><a href="EllShapeProperty.html#convertEllToPath">convertEllToPath</a></li>
+            
+                <li data-name="EllShapeProperty#getValue"><a href="EllShapeProperty.html#getValue">getValue</a></li>
+            
+                <li data-name="EllShapeProperty#reset"><a href="EllShapeProperty.html#reset">reset</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="InteractionData">
+            <span class="title">
+                <a href="InteractionData.html">InteractionData</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="InteractionData#button"><a href="InteractionData.html#button">button</a></li>
+            
+                <li data-name="InteractionData#buttons"><a href="InteractionData.html#buttons">buttons</a></li>
+            
+                <li data-name="InteractionData#global"><a href="InteractionData.html#global">global</a></li>
+            
+                <li data-name="InteractionData#height"><a href="InteractionData.html#height">height</a></li>
+            
+                <li data-name="InteractionData#identifier"><a href="InteractionData.html#identifier">identifier</a></li>
+            
+                <li data-name="InteractionData#isPrimary"><a href="InteractionData.html#isPrimary">isPrimary</a></li>
+            
+                <li data-name="InteractionData#originalEvent"><a href="InteractionData.html#originalEvent">originalEvent</a></li>
+            
+                <li data-name="InteractionData#pointerId"><a href="InteractionData.html#pointerId">pointerId</a></li>
+            
+                <li data-name="InteractionData#pointerType"><a href="InteractionData.html#pointerType">pointerType</a></li>
+            
+                <li data-name="InteractionData#pressure"><a href="InteractionData.html#pressure">pressure</a></li>
+            
+                <li data-name="InteractionData#resolution"><a href="InteractionData.html#resolution">resolution</a></li>
+            
+                <li data-name="InteractionData#rotationAngle"><a href="InteractionData.html#rotationAngle">rotationAngle</a></li>
+            
+                <li data-name="InteractionData#tangentialPressure"><a href="InteractionData.html#tangentialPressure">tangentialPressure</a></li>
+            
+                <li data-name="InteractionData#target"><a href="InteractionData.html#target">target</a></li>
+            
+                <li data-name="InteractionData#tiltX"><a href="InteractionData.html#tiltX">tiltX</a></li>
+            
+                <li data-name="InteractionData#tiltY"><a href="InteractionData.html#tiltY">tiltY</a></li>
+            
+                <li data-name="InteractionData#twist"><a href="InteractionData.html#twist">twist</a></li>
+            
+                <li data-name="InteractionData#width"><a href="InteractionData.html#width">width</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="InteractionEvent">
+            <span class="title">
+                <a href="InteractionEvent.html">InteractionEvent</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="InteractionEvent#currentTarget"><a href="InteractionEvent.html#currentTarget">currentTarget</a></li>
+            
+                <li data-name="InteractionEvent#data"><a href="InteractionEvent.html#data">data</a></li>
+            
+                <li data-name="InteractionEvent#stopped"><a href="InteractionEvent.html#stopped">stopped</a></li>
+            
+                <li data-name="InteractionEvent#target"><a href="InteractionEvent.html#target">target</a></li>
+            
+                <li data-name="InteractionEvent#type"><a href="InteractionEvent.html#type">type</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="InteractionEvent#stopPropagation"><a href="InteractionEvent.html#stopPropagation">stopPropagation</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Animate">
+            <span class="title">
+                <a href="JC.Animate.html">JC.Animate</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Animate#cancle"><a href="JC.Animate.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.Animate#pause"><a href="JC.Animate.html#pause">pause</a></li>
+            
+                <li data-name="JC.Animate#restart"><a href="JC.Animate.html#restart">restart</a></li>
+            
+                <li data-name="JC.Animate#setSpeed"><a href="JC.Animate.html#setSpeed">setSpeed</a></li>
+            
+                <li data-name="JC.Animate#stop"><a href="JC.Animate.html#stop">stop</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Animation">
+            <span class="title">
+                <a href="JC.Animation.html">JC.Animation</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Animation#animates"><a href="JC.Animation.html#animates">animates</a></li>
+            
+                <li data-name="JC.Animation#paused"><a href="JC.Animation.html#paused">paused</a></li>
+            
+                <li data-name="JC.Animation#timeScale"><a href="JC.Animation.html#timeScale">timeScale</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Animation#pause"><a href="JC.Animation.html#pause">pause</a></li>
+            
+                <li data-name="JC.Animation#restart"><a href="JC.Animation.html#restart">restart</a></li>
+            
+                <li data-name="JC.Animation#setSpeed"><a href="JC.Animation.html#setSpeed">setSpeed</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.BezierCurve">
+            <span class="title">
+                <a href="JC.BezierCurve.html">JC.BezierCurve</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.BezierEasing">
+            <span class="title">
+                <a href="JC.BezierEasing.html">JC.BezierEasing</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.BezierEasing#get"><a href="JC.BezierEasing.html#get">get</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.BlurFilter">
+            <span class="title">
+                <a href="JC.BlurFilter.html">JC.BlurFilter</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.BlurFilter#blur"><a href="JC.BlurFilter.html#blur">blur</a></li>
+            
+                <li data-name="JC.BlurFilter#blurX"><a href="JC.BlurFilter.html#blurX">blurX</a></li>
+            
+                <li data-name="JC.BlurFilter#blurY"><a href="JC.BlurFilter.html#blurY">blurY</a></li>
+            
+                <li data-name="JC.BlurFilter#quality"><a href="JC.BlurFilter.html#quality">quality</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Bounds">
+            <span class="title">
+                <a href="JC.Bounds.html">JC.Bounds</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Bounds#maxX"><a href="JC.Bounds.html#maxX">maxX</a></li>
+            
+                <li data-name="JC.Bounds#maxY"><a href="JC.Bounds.html#maxY">maxY</a></li>
+            
+                <li data-name="JC.Bounds#minX"><a href="JC.Bounds.html#minX">minX</a></li>
+            
+                <li data-name="JC.Bounds#minY"><a href="JC.Bounds.html#minY">minY</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Bounds#addBounds"><a href="JC.Bounds.html#addBounds">addBounds</a></li>
+            
+                <li data-name="JC.Bounds#addCircle"><a href="JC.Bounds.html#addCircle">addCircle</a></li>
+            
+                <li data-name="JC.Bounds#addPoint"><a href="JC.Bounds.html#addPoint">addPoint</a></li>
+            
+                <li data-name="JC.Bounds#addRect"><a href="JC.Bounds.html#addRect">addRect</a></li>
+            
+                <li data-name="JC.Bounds#addVert"><a href="JC.Bounds.html#addVert">addVert</a></li>
+            
+                <li data-name="JC.Bounds#getRectangle"><a href="JC.Bounds.html#getRectangle">getRectangle</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.CatmullRom">
+            <span class="title">
+                <a href="JC.CatmullRom.html">JC.CatmullRom</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Circle">
+            <span class="title">
+                <a href="JC.Circle.html">JC.Circle</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Circle#radius"><a href="JC.Circle.html#radius">radius</a></li>
+            
+                <li data-name="JC.Circle#x"><a href="JC.Circle.html#x">x</a></li>
+            
+                <li data-name="JC.Circle#y"><a href="JC.Circle.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Circle#clone"><a href="JC.Circle.html#clone">clone</a></li>
+            
+                <li data-name="JC.Circle#contains"><a href="JC.Circle.html#contains">contains</a></li>
+            
+                <li data-name="JC.Circle#getBounds"><a href="JC.Circle.html#getBounds">getBounds</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Container">
+            <span class="title">
+                <a href="JC.Container.html">JC.Container</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Container#alpha"><a href="JC.Container.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Container#bounds"><a href="JC.Container.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Container#childs"><a href="JC.Container.html#childs">childs</a></li>
+            
+                <li data-name="JC.Container#cursor"><a href="JC.Container.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Container#interactive"><a href="JC.Container.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.Container#mask"><a href="JC.Container.html#mask">mask</a></li>
+            
+                <li data-name="JC.Container#originX"><a href="JC.Container.html#originX">originX</a></li>
+            
+                <li data-name="JC.Container#originY"><a href="JC.Container.html#originY">originY</a></li>
+            
+                <li data-name="JC.Container#passEvent"><a href="JC.Container.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Container#paused"><a href="JC.Container.html#paused">paused</a></li>
+            
+                <li data-name="JC.Container#pivotX"><a href="JC.Container.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Container#pivotY"><a href="JC.Container.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Container#rotation"><a href="JC.Container.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Container#scale"><a href="JC.Container.html#scale">scale</a></li>
+            
+                <li data-name="JC.Container#scaleX"><a href="JC.Container.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Container#scaleY"><a href="JC.Container.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Container#skewX"><a href="JC.Container.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Container#skewY"><a href="JC.Container.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Container#souldSort"><a href="JC.Container.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Container#timeScale"><a href="JC.Container.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Container#visible"><a href="JC.Container.html#visible">visible</a></li>
+            
+                <li data-name="JC.Container#x"><a href="JC.Container.html#x">x</a></li>
+            
+                <li data-name="JC.Container#y"><a href="JC.Container.html#y">y</a></li>
+            
+                <li data-name="JC.Container#zIndex"><a href="JC.Container.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Container#adds"><a href="JC.Container.html#adds">adds</a></li>
+            
+                <li data-name="JC.Container#animate"><a href="JC.Container.html#animate">animate</a></li>
+            
+                <li data-name="JC.Container#contains"><a href="JC.Container.html#contains">contains</a></li>
+            
+                <li data-name="JC.Container#emit"><a href="JC.Container.html#emit">emit</a></li>
+            
+                <li data-name="JC.Container#getGlobalPos"><a href="JC.Container.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Container#isVisible"><a href="JC.Container.html#isVisible">isVisible</a></li>
+            
+                <li data-name="JC.Container#keyFrames"><a href="JC.Container.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Container#motion"><a href="JC.Container.html#motion">motion</a></li>
+            
+                <li data-name="JC.Container#off"><a href="JC.Container.html#off">off</a></li>
+            
+                <li data-name="JC.Container#on"><a href="JC.Container.html#on">on</a></li>
+            
+                <li data-name="JC.Container#once"><a href="JC.Container.html#once">once</a></li>
+            
+                <li data-name="JC.Container#pause"><a href="JC.Container.html#pause">pause</a></li>
+            
+                <li data-name="JC.Container#queues"><a href="JC.Container.html#queues">queues</a></li>
+            
+                <li data-name="JC.Container#remove"><a href="JC.Container.html#remove">remove</a></li>
+            
+                <li data-name="JC.Container#removeMask"><a href="JC.Container.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Container#restart"><a href="JC.Container.html#restart">restart</a></li>
+            
+                <li data-name="JC.Container#runners"><a href="JC.Container.html#runners">runners</a></li>
+            
+                <li data-name="JC.Container#setArea"><a href="JC.Container.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Container#setBounds"><a href="JC.Container.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Container#setSpeed"><a href="JC.Container.html#setSpeed">setSpeed</a></li>
+            
+                <li data-name="JC.Container#updateMovin"><a href="JC.Container.html#updateMovin">updateMovin</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Curve">
+            <span class="title">
+                <a href="JC.Curve.html">JC.Curve</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.DisplayObject">
+            <span class="title">
+                <a href="JC.DisplayObject.html">JC.DisplayObject</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.DisplayObject#alpha"><a href="JC.DisplayObject.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.DisplayObject#cursor"><a href="JC.DisplayObject.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.DisplayObject#interactive"><a href="JC.DisplayObject.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.DisplayObject#mask"><a href="JC.DisplayObject.html#mask">mask</a></li>
+            
+                <li data-name="JC.DisplayObject#originX"><a href="JC.DisplayObject.html#originX">originX</a></li>
+            
+                <li data-name="JC.DisplayObject#originY"><a href="JC.DisplayObject.html#originY">originY</a></li>
+            
+                <li data-name="JC.DisplayObject#passEvent"><a href="JC.DisplayObject.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.DisplayObject#pivotX"><a href="JC.DisplayObject.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.DisplayObject#pivotY"><a href="JC.DisplayObject.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.DisplayObject#rotation"><a href="JC.DisplayObject.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.DisplayObject#scale"><a href="JC.DisplayObject.html#scale">scale</a></li>
+            
+                <li data-name="JC.DisplayObject#scale"><a href="JC.DisplayObject.html#scale">scale</a></li>
+            
+                <li data-name="JC.DisplayObject#scaleX"><a href="JC.DisplayObject.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.DisplayObject#scaleY"><a href="JC.DisplayObject.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.DisplayObject#skewX"><a href="JC.DisplayObject.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.DisplayObject#skewY"><a href="JC.DisplayObject.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.DisplayObject#visible"><a href="JC.DisplayObject.html#visible">visible</a></li>
+            
+                <li data-name="JC.DisplayObject#x"><a href="JC.DisplayObject.html#x">x</a></li>
+            
+                <li data-name="JC.DisplayObject#y"><a href="JC.DisplayObject.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.DisplayObject#animate"><a href="JC.DisplayObject.html#animate">animate</a></li>
+            
+                <li data-name="JC.DisplayObject#contains"><a href="JC.DisplayObject.html#contains">contains</a></li>
+            
+                <li data-name="JC.DisplayObject#emit"><a href="JC.DisplayObject.html#emit">emit</a></li>
+            
+                <li data-name="JC.DisplayObject#getGlobalPos"><a href="JC.DisplayObject.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.DisplayObject#isVisible"><a href="JC.DisplayObject.html#isVisible">isVisible</a></li>
+            
+                <li data-name="JC.DisplayObject#keyFrames"><a href="JC.DisplayObject.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.DisplayObject#motion"><a href="JC.DisplayObject.html#motion">motion</a></li>
+            
+                <li data-name="JC.DisplayObject#off"><a href="JC.DisplayObject.html#off">off</a></li>
+            
+                <li data-name="JC.DisplayObject#on"><a href="JC.DisplayObject.html#on">on</a></li>
+            
+                <li data-name="JC.DisplayObject#once"><a href="JC.DisplayObject.html#once">once</a></li>
+            
+                <li data-name="JC.DisplayObject#queues"><a href="JC.DisplayObject.html#queues">queues</a></li>
+            
+                <li data-name="JC.DisplayObject#removeMask"><a href="JC.DisplayObject.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.DisplayObject#runners"><a href="JC.DisplayObject.html#runners">runners</a></li>
+            
+                <li data-name="JC.DisplayObject#setArea"><a href="JC.DisplayObject.html#setArea">setArea</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Ellipse">
+            <span class="title">
+                <a href="JC.Ellipse.html">JC.Ellipse</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Ellipse#height"><a href="JC.Ellipse.html#height">height</a></li>
+            
+                <li data-name="JC.Ellipse#width"><a href="JC.Ellipse.html#width">width</a></li>
+            
+                <li data-name="JC.Ellipse#x"><a href="JC.Ellipse.html#x">x</a></li>
+            
+                <li data-name="JC.Ellipse#y"><a href="JC.Ellipse.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Ellipse#clone"><a href="JC.Ellipse.html#clone">clone</a></li>
+            
+                <li data-name="JC.Ellipse#contains"><a href="JC.Ellipse.html#contains">contains</a></li>
+            
+                <li data-name="JC.Ellipse#getBounds"><a href="JC.Ellipse.html#getBounds">getBounds</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Eventer">
+            <span class="title">
+                <a href="JC.Eventer.html">JC.Eventer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Eventer#emit"><a href="JC.Eventer.html#emit">emit</a></li>
+            
+                <li data-name="JC.Eventer#off"><a href="JC.Eventer.html#off">off</a></li>
+            
+                <li data-name="JC.Eventer#on"><a href="JC.Eventer.html#on">on</a></li>
+            
+                <li data-name="JC.Eventer#once"><a href="JC.Eventer.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FilterGroup">
+            <span class="title">
+                <a href="JC.FilterGroup.html">JC.FilterGroup</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.FilterGroup#autoUpdateBuffer"><a href="JC.FilterGroup.html#autoUpdateBuffer">autoUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#filters"><a href="JC.FilterGroup.html#filters">filters</a></li>
+            
+                <li data-name="JC.FilterGroup#frameBuffer"><a href="JC.FilterGroup.html#frameBuffer">frameBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#needUpdateBuffer"><a href="JC.FilterGroup.html#needUpdateBuffer">needUpdateBuffer</a></li>
+            
+                <li data-name="JC.FilterGroup#padding"><a href="JC.FilterGroup.html#padding">padding</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.FrameBuffer">
+            <span class="title">
+                <a href="JC.FrameBuffer.html">JC.FrameBuffer</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.FrameBuffer#clear"><a href="JC.FrameBuffer.html#clear">clear</a></li>
+            
+                <li data-name="JC.FrameBuffer#getBuffer"><a href="JC.FrameBuffer.html#getBuffer">getBuffer</a></li>
+            
+                <li data-name="JC.FrameBuffer#putBuffer"><a href="JC.FrameBuffer.html#putBuffer">putBuffer</a></li>
+            
+                <li data-name="JC.FrameBuffer#setSize"><a href="JC.FrameBuffer.html#setSize">setSize</a></li>
+            
+                <li data-name="JC.FrameBuffer#setTransform"><a href="JC.FrameBuffer.html#setTransform">setTransform</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Graphics">
+            <span class="title">
+                <a href="JC.Graphics.html">JC.Graphics</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Graphics#alpha"><a href="JC.Graphics.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Graphics#bounds"><a href="JC.Graphics.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Graphics#childs"><a href="JC.Graphics.html#childs">childs</a></li>
+            
+                <li data-name="JC.Graphics#cursor"><a href="JC.Graphics.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Graphics#interactive"><a href="JC.Graphics.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.Graphics#mask"><a href="JC.Graphics.html#mask">mask</a></li>
+            
+                <li data-name="JC.Graphics#originX"><a href="JC.Graphics.html#originX">originX</a></li>
+            
+                <li data-name="JC.Graphics#originY"><a href="JC.Graphics.html#originY">originY</a></li>
+            
+                <li data-name="JC.Graphics#passEvent"><a href="JC.Graphics.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Graphics#paused"><a href="JC.Graphics.html#paused">paused</a></li>
+            
+                <li data-name="JC.Graphics#pivotX"><a href="JC.Graphics.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Graphics#pivotY"><a href="JC.Graphics.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Graphics#rotation"><a href="JC.Graphics.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Graphics#scale"><a href="JC.Graphics.html#scale">scale</a></li>
+            
+                <li data-name="JC.Graphics#scaleX"><a href="JC.Graphics.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Graphics#scaleY"><a href="JC.Graphics.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Graphics#skewX"><a href="JC.Graphics.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Graphics#skewY"><a href="JC.Graphics.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Graphics#souldSort"><a href="JC.Graphics.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Graphics#timeScale"><a href="JC.Graphics.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Graphics#visible"><a href="JC.Graphics.html#visible">visible</a></li>
+            
+                <li data-name="JC.Graphics#x"><a href="JC.Graphics.html#x">x</a></li>
+            
+                <li data-name="JC.Graphics#y"><a href="JC.Graphics.html#y">y</a></li>
+            
+                <li data-name="JC.Graphics#zIndex"><a href="JC.Graphics.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Graphics#adds"><a href="JC.Graphics.html#adds">adds</a></li>
+            
+                <li data-name="JC.Graphics#animate"><a href="JC.Graphics.html#animate">animate</a></li>
+            
+                <li data-name="JC.Graphics#contains"><a href="JC.Graphics.html#contains">contains</a></li>
+            
+                <li data-name="JC.Graphics#emit"><a href="JC.Graphics.html#emit">emit</a></li>
+            
+                <li data-name="JC.Graphics#getGlobalPos"><a href="JC.Graphics.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Graphics#isVisible"><a href="JC.Graphics.html#isVisible">isVisible</a></li>
+            
+                <li data-name="JC.Graphics#keyFrames"><a href="JC.Graphics.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Graphics#motion"><a href="JC.Graphics.html#motion">motion</a></li>
+            
+                <li data-name="JC.Graphics#off"><a href="JC.Graphics.html#off">off</a></li>
+            
+                <li data-name="JC.Graphics#on"><a href="JC.Graphics.html#on">on</a></li>
+            
+                <li data-name="JC.Graphics#once"><a href="JC.Graphics.html#once">once</a></li>
+            
+                <li data-name="JC.Graphics#pause"><a href="JC.Graphics.html#pause">pause</a></li>
+            
+                <li data-name="JC.Graphics#queues"><a href="JC.Graphics.html#queues">queues</a></li>
+            
+                <li data-name="JC.Graphics#remove"><a href="JC.Graphics.html#remove">remove</a></li>
+            
+                <li data-name="JC.Graphics#removeMask"><a href="JC.Graphics.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Graphics#restart"><a href="JC.Graphics.html#restart">restart</a></li>
+            
+                <li data-name="JC.Graphics#runners"><a href="JC.Graphics.html#runners">runners</a></li>
+            
+                <li data-name="JC.Graphics#setArea"><a href="JC.Graphics.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Graphics#setBounds"><a href="JC.Graphics.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Graphics#setSpeed"><a href="JC.Graphics.html#setSpeed">setSpeed</a></li>
+            
+                <li data-name="JC.Graphics#updateMovin"><a href="JC.Graphics.html#updateMovin">updateMovin</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.KeyFrames">
+            <span class="title">
+                <a href="JC.KeyFrames.html">JC.KeyFrames</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Matrix">
+            <span class="title">
+                <a href="JC.Matrix.html">JC.Matrix</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Matrix#append"><a href="JC.Matrix.html#append">append</a></li>
+            
+                <li data-name="JC.Matrix#apply"><a href="JC.Matrix.html#apply">apply</a></li>
+            
+                <li data-name="JC.Matrix#applyInverse"><a href="JC.Matrix.html#applyInverse">applyInverse</a></li>
+            
+                <li data-name="JC.Matrix#fromArray"><a href="JC.Matrix.html#fromArray">fromArray</a></li>
+            
+                <li data-name="JC.Matrix#identity"><a href="JC.Matrix.html#identity">identity</a></li>
+            
+                <li data-name="JC.Matrix#rotate"><a href="JC.Matrix.html#rotate">rotate</a></li>
+            
+                <li data-name="JC.Matrix#scale"><a href="JC.Matrix.html#scale">scale</a></li>
+            
+                <li data-name="JC.Matrix#setTransform"><a href="JC.Matrix.html#setTransform">setTransform</a></li>
+            
+                <li data-name="JC.Matrix#toArray"><a href="JC.Matrix.html#toArray">toArray</a></li>
+            
+                <li data-name="JC.Matrix#translate"><a href="JC.Matrix.html#translate">translate</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.MovieClip">
+            <span class="title">
+                <a href="JC.MovieClip.html">JC.MovieClip</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.MovieClip#cancle"><a href="JC.MovieClip.html#cancle">cancle</a></li>
+            
+                <li data-name="JC.MovieClip#emit"><a href="JC.MovieClip.html#emit">emit</a></li>
+            
+                <li data-name="JC.MovieClip#off"><a href="JC.MovieClip.html#off">off</a></li>
+            
+                <li data-name="JC.MovieClip#on"><a href="JC.MovieClip.html#on">on</a></li>
+            
+                <li data-name="JC.MovieClip#once"><a href="JC.MovieClip.html#once">once</a></li>
+            
+                <li data-name="JC.MovieClip#pause"><a href="JC.MovieClip.html#pause">pause</a></li>
+            
+                <li data-name="JC.MovieClip#playMovie"><a href="JC.MovieClip.html#playMovie">playMovie</a></li>
+            
+                <li data-name="JC.MovieClip#restart"><a href="JC.MovieClip.html#restart">restart</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.NURBSCurve">
+            <span class="title">
+                <a href="JC.NURBSCurve.html">JC.NURBSCurve</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.PathMotion">
+            <span class="title">
+                <a href="JC.PathMotion.html">JC.PathMotion</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Point">
+            <span class="title">
+                <a href="JC.Point.html">JC.Point</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Point#w"><a href="JC.Point.html#w">w</a></li>
+            
+                <li data-name="JC.Point#x"><a href="JC.Point.html#x">x</a></li>
+            
+                <li data-name="JC.Point#y"><a href="JC.Point.html#y">y</a></li>
+            
+                <li data-name="JC.Point#z"><a href="JC.Point.html#z">z</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Point#clone"><a href="JC.Point.html#clone">clone</a></li>
+            
+                <li data-name="JC.Point#copy"><a href="JC.Point.html#copy">copy</a></li>
+            
+                <li data-name="JC.Point#set"><a href="JC.Point.html#set">set</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Polygon">
+            <span class="title">
+                <a href="JC.Polygon.html">JC.Polygon</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Polygon#clone"><a href="JC.Polygon.html#clone">clone</a></li>
+            
+                <li data-name="JC.Polygon#contains"><a href="JC.Polygon.html#contains">contains</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Queues">
+            <span class="title">
+                <a href="JC.Queues.html">JC.Queues</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Rectangle">
+            <span class="title">
+                <a href="JC.Rectangle.html">JC.Rectangle</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Rectangle.EMPTY"><a href="JC.Rectangle.html#.EMPTY">EMPTY</a></li>
+            
+                <li data-name="JC.Rectangle#height"><a href="JC.Rectangle.html#height">height</a></li>
+            
+                <li data-name="JC.Rectangle#width"><a href="JC.Rectangle.html#width">width</a></li>
+            
+                <li data-name="JC.Rectangle#x"><a href="JC.Rectangle.html#x">x</a></li>
+            
+                <li data-name="JC.Rectangle#y"><a href="JC.Rectangle.html#y">y</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Rectangle#clone"><a href="JC.Rectangle.html#clone">clone</a></li>
+            
+                <li data-name="JC.Rectangle#contains"><a href="JC.Rectangle.html#contains">contains</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Scene">
+            <span class="title">
+                <a href="JC.Scene.html">JC.Scene</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Scene#alpha"><a href="JC.Scene.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Scene#bounds"><a href="JC.Scene.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Scene#childs"><a href="JC.Scene.html#childs">childs</a></li>
+            
+                <li data-name="JC.Scene#cursor"><a href="JC.Scene.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Scene#interactive"><a href="JC.Scene.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.Scene#mask"><a href="JC.Scene.html#mask">mask</a></li>
+            
+                <li data-name="JC.Scene#originX"><a href="JC.Scene.html#originX">originX</a></li>
+            
+                <li data-name="JC.Scene#originY"><a href="JC.Scene.html#originY">originY</a></li>
+            
+                <li data-name="JC.Scene#passEvent"><a href="JC.Scene.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Scene#paused"><a href="JC.Scene.html#paused">paused</a></li>
+            
+                <li data-name="JC.Scene#pivotX"><a href="JC.Scene.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Scene#pivotY"><a href="JC.Scene.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Scene#rotation"><a href="JC.Scene.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Scene#scale"><a href="JC.Scene.html#scale">scale</a></li>
+            
+                <li data-name="JC.Scene#scaleX"><a href="JC.Scene.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Scene#scaleY"><a href="JC.Scene.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Scene#skewX"><a href="JC.Scene.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Scene#skewY"><a href="JC.Scene.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Scene#souldSort"><a href="JC.Scene.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Scene#timeScale"><a href="JC.Scene.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Scene#visible"><a href="JC.Scene.html#visible">visible</a></li>
+            
+                <li data-name="JC.Scene#x"><a href="JC.Scene.html#x">x</a></li>
+            
+                <li data-name="JC.Scene#y"><a href="JC.Scene.html#y">y</a></li>
+            
+                <li data-name="JC.Scene#zIndex"><a href="JC.Scene.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Scene#adds"><a href="JC.Scene.html#adds">adds</a></li>
+            
+                <li data-name="JC.Scene#animate"><a href="JC.Scene.html#animate">animate</a></li>
+            
+                <li data-name="JC.Scene#contains"><a href="JC.Scene.html#contains">contains</a></li>
+            
+                <li data-name="JC.Scene#emit"><a href="JC.Scene.html#emit">emit</a></li>
+            
+                <li data-name="JC.Scene#getGlobalPos"><a href="JC.Scene.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Scene#isVisible"><a href="JC.Scene.html#isVisible">isVisible</a></li>
+            
+                <li data-name="JC.Scene#keyFrames"><a href="JC.Scene.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Scene#motion"><a href="JC.Scene.html#motion">motion</a></li>
+            
+                <li data-name="JC.Scene#off"><a href="JC.Scene.html#off">off</a></li>
+            
+                <li data-name="JC.Scene#on"><a href="JC.Scene.html#on">on</a></li>
+            
+                <li data-name="JC.Scene#once"><a href="JC.Scene.html#once">once</a></li>
+            
+                <li data-name="JC.Scene#pause"><a href="JC.Scene.html#pause">pause</a></li>
+            
+                <li data-name="JC.Scene#queues"><a href="JC.Scene.html#queues">queues</a></li>
+            
+                <li data-name="JC.Scene#remove"><a href="JC.Scene.html#remove">remove</a></li>
+            
+                <li data-name="JC.Scene#removeMask"><a href="JC.Scene.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Scene#restart"><a href="JC.Scene.html#restart">restart</a></li>
+            
+                <li data-name="JC.Scene#runners"><a href="JC.Scene.html#runners">runners</a></li>
+            
+                <li data-name="JC.Scene#setArea"><a href="JC.Scene.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Scene#setBounds"><a href="JC.Scene.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Scene#setSpeed"><a href="JC.Scene.html#setSpeed">setSpeed</a></li>
+            
+                <li data-name="JC.Scene#updateMovin"><a href="JC.Scene.html#updateMovin">updateMovin</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Sprite">
+            <span class="title">
+                <a href="JC.Sprite.html">JC.Sprite</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Sprite#alpha"><a href="JC.Sprite.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.Sprite#bounds"><a href="JC.Sprite.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.Sprite#childs"><a href="JC.Sprite.html#childs">childs</a></li>
+            
+                <li data-name="JC.Sprite#cursor"><a href="JC.Sprite.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.Sprite#height"><a href="JC.Sprite.html#height">height</a></li>
+            
+                <li data-name="JC.Sprite#interactive"><a href="JC.Sprite.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.Sprite#mask"><a href="JC.Sprite.html#mask">mask</a></li>
+            
+                <li data-name="JC.Sprite#originX"><a href="JC.Sprite.html#originX">originX</a></li>
+            
+                <li data-name="JC.Sprite#originY"><a href="JC.Sprite.html#originY">originY</a></li>
+            
+                <li data-name="JC.Sprite#passEvent"><a href="JC.Sprite.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.Sprite#paused"><a href="JC.Sprite.html#paused">paused</a></li>
+            
+                <li data-name="JC.Sprite#pivotX"><a href="JC.Sprite.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.Sprite#pivotY"><a href="JC.Sprite.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.Sprite#rotation"><a href="JC.Sprite.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.Sprite#scale"><a href="JC.Sprite.html#scale">scale</a></li>
+            
+                <li data-name="JC.Sprite#scaleX"><a href="JC.Sprite.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.Sprite#scaleY"><a href="JC.Sprite.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.Sprite#skewX"><a href="JC.Sprite.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.Sprite#skewY"><a href="JC.Sprite.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.Sprite#souldSort"><a href="JC.Sprite.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.Sprite#timeScale"><a href="JC.Sprite.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.Sprite#visible"><a href="JC.Sprite.html#visible">visible</a></li>
+            
+                <li data-name="JC.Sprite#width"><a href="JC.Sprite.html#width">width</a></li>
+            
+                <li data-name="JC.Sprite#x"><a href="JC.Sprite.html#x">x</a></li>
+            
+                <li data-name="JC.Sprite#y"><a href="JC.Sprite.html#y">y</a></li>
+            
+                <li data-name="JC.Sprite#zIndex"><a href="JC.Sprite.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Sprite#adds"><a href="JC.Sprite.html#adds">adds</a></li>
+            
+                <li data-name="JC.Sprite#animate"><a href="JC.Sprite.html#animate">animate</a></li>
+            
+                <li data-name="JC.Sprite#contains"><a href="JC.Sprite.html#contains">contains</a></li>
+            
+                <li data-name="JC.Sprite#emit"><a href="JC.Sprite.html#emit">emit</a></li>
+            
+                <li data-name="JC.Sprite#getGlobalPos"><a href="JC.Sprite.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.Sprite#isVisible"><a href="JC.Sprite.html#isVisible">isVisible</a></li>
+            
+                <li data-name="JC.Sprite#keyFrames"><a href="JC.Sprite.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.Sprite#motion"><a href="JC.Sprite.html#motion">motion</a></li>
+            
+                <li data-name="JC.Sprite#off"><a href="JC.Sprite.html#off">off</a></li>
+            
+                <li data-name="JC.Sprite#on"><a href="JC.Sprite.html#on">on</a></li>
+            
+                <li data-name="JC.Sprite#once"><a href="JC.Sprite.html#once">once</a></li>
+            
+                <li data-name="JC.Sprite#pause"><a href="JC.Sprite.html#pause">pause</a></li>
+            
+                <li data-name="JC.Sprite#playMovie"><a href="JC.Sprite.html#playMovie">playMovie</a></li>
+            
+                <li data-name="JC.Sprite#queues"><a href="JC.Sprite.html#queues">queues</a></li>
+            
+                <li data-name="JC.Sprite#remove"><a href="JC.Sprite.html#remove">remove</a></li>
+            
+                <li data-name="JC.Sprite#removeMask"><a href="JC.Sprite.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.Sprite#restart"><a href="JC.Sprite.html#restart">restart</a></li>
+            
+                <li data-name="JC.Sprite#runners"><a href="JC.Sprite.html#runners">runners</a></li>
+            
+                <li data-name="JC.Sprite#setArea"><a href="JC.Sprite.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.Sprite#setBounds"><a href="JC.Sprite.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.Sprite#setSpeed"><a href="JC.Sprite.html#setSpeed">setSpeed</a></li>
+            
+                <li data-name="JC.Sprite#updateMovin"><a href="JC.Sprite.html#updateMovin">updateMovin</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.SvgCurve">
+            <span class="title">
+                <a href="JC.SvgCurve.html">JC.SvgCurve</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.TextFace">
+            <span class="title">
+                <a href="JC.TextFace.html">JC.TextFace</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.TextFace#alpha"><a href="JC.TextFace.html#alpha">alpha</a></li>
+            
+                <li data-name="JC.TextFace#bounds"><a href="JC.TextFace.html#bounds">bounds</a></li>
+            
+                <li data-name="JC.TextFace#childs"><a href="JC.TextFace.html#childs">childs</a></li>
+            
+                <li data-name="JC.TextFace#cursor"><a href="JC.TextFace.html#cursor">cursor</a></li>
+            
+                <li data-name="JC.TextFace#interactive"><a href="JC.TextFace.html#interactive">interactive</a></li>
+            
+                <li data-name="JC.TextFace#mask"><a href="JC.TextFace.html#mask">mask</a></li>
+            
+                <li data-name="JC.TextFace#originX"><a href="JC.TextFace.html#originX">originX</a></li>
+            
+                <li data-name="JC.TextFace#originY"><a href="JC.TextFace.html#originY">originY</a></li>
+            
+                <li data-name="JC.TextFace#passEvent"><a href="JC.TextFace.html#passEvent">passEvent</a></li>
+            
+                <li data-name="JC.TextFace#paused"><a href="JC.TextFace.html#paused">paused</a></li>
+            
+                <li data-name="JC.TextFace#pivotX"><a href="JC.TextFace.html#pivotX">pivotX</a></li>
+            
+                <li data-name="JC.TextFace#pivotY"><a href="JC.TextFace.html#pivotY">pivotY</a></li>
+            
+                <li data-name="JC.TextFace#rotation"><a href="JC.TextFace.html#rotation">rotation</a></li>
+            
+                <li data-name="JC.TextFace#scale"><a href="JC.TextFace.html#scale">scale</a></li>
+            
+                <li data-name="JC.TextFace#scaleX"><a href="JC.TextFace.html#scaleX">scaleX</a></li>
+            
+                <li data-name="JC.TextFace#scaleY"><a href="JC.TextFace.html#scaleY">scaleY</a></li>
+            
+                <li data-name="JC.TextFace#skewX"><a href="JC.TextFace.html#skewX">skewX</a></li>
+            
+                <li data-name="JC.TextFace#skewY"><a href="JC.TextFace.html#skewY">skewY</a></li>
+            
+                <li data-name="JC.TextFace#souldSort"><a href="JC.TextFace.html#souldSort">souldSort</a></li>
+            
+                <li data-name="JC.TextFace#timeScale"><a href="JC.TextFace.html#timeScale">timeScale</a></li>
+            
+                <li data-name="JC.TextFace#visible"><a href="JC.TextFace.html#visible">visible</a></li>
+            
+                <li data-name="JC.TextFace#x"><a href="JC.TextFace.html#x">x</a></li>
+            
+                <li data-name="JC.TextFace#y"><a href="JC.TextFace.html#y">y</a></li>
+            
+                <li data-name="JC.TextFace#zIndex"><a href="JC.TextFace.html#zIndex">zIndex</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.TextFace#adds"><a href="JC.TextFace.html#adds">adds</a></li>
+            
+                <li data-name="JC.TextFace#animate"><a href="JC.TextFace.html#animate">animate</a></li>
+            
+                <li data-name="JC.TextFace#contains"><a href="JC.TextFace.html#contains">contains</a></li>
+            
+                <li data-name="JC.TextFace#emit"><a href="JC.TextFace.html#emit">emit</a></li>
+            
+                <li data-name="JC.TextFace#getGlobalPos"><a href="JC.TextFace.html#getGlobalPos">getGlobalPos</a></li>
+            
+                <li data-name="JC.TextFace#isVisible"><a href="JC.TextFace.html#isVisible">isVisible</a></li>
+            
+                <li data-name="JC.TextFace#keyFrames"><a href="JC.TextFace.html#keyFrames">keyFrames</a></li>
+            
+                <li data-name="JC.TextFace#motion"><a href="JC.TextFace.html#motion">motion</a></li>
+            
+                <li data-name="JC.TextFace#off"><a href="JC.TextFace.html#off">off</a></li>
+            
+                <li data-name="JC.TextFace#on"><a href="JC.TextFace.html#on">on</a></li>
+            
+                <li data-name="JC.TextFace#once"><a href="JC.TextFace.html#once">once</a></li>
+            
+                <li data-name="JC.TextFace#pause"><a href="JC.TextFace.html#pause">pause</a></li>
+            
+                <li data-name="JC.TextFace#queues"><a href="JC.TextFace.html#queues">queues</a></li>
+            
+                <li data-name="JC.TextFace#remove"><a href="JC.TextFace.html#remove">remove</a></li>
+            
+                <li data-name="JC.TextFace#removeMask"><a href="JC.TextFace.html#removeMask">removeMask</a></li>
+            
+                <li data-name="JC.TextFace#restart"><a href="JC.TextFace.html#restart">restart</a></li>
+            
+                <li data-name="JC.TextFace#runners"><a href="JC.TextFace.html#runners">runners</a></li>
+            
+                <li data-name="JC.TextFace#setArea"><a href="JC.TextFace.html#setArea">setArea</a></li>
+            
+                <li data-name="JC.TextFace#setBounds"><a href="JC.TextFace.html#setBounds">setBounds</a></li>
+            
+                <li data-name="JC.TextFace#setSpeed"><a href="JC.TextFace.html#setSpeed">setSpeed</a></li>
+            
+                <li data-name="JC.TextFace#updateMovin"><a href="JC.TextFace.html#updateMovin">updateMovin</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Texture">
+            <span class="title">
+                <a href="JC.Texture.html">JC.Texture</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="JC.Texture.height"><a href="JC.Texture.html#.height">height</a></li>
+            
+                <li data-name="JC.Texture.naturalHeight"><a href="JC.Texture.html#.naturalHeight">naturalHeight</a></li>
+            
+                <li data-name="JC.Texture.naturalWidth"><a href="JC.Texture.html#.naturalWidth">naturalWidth</a></li>
+            
+                <li data-name="JC.Texture.width"><a href="JC.Texture.html#.width">width</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="JC.Texture#emit"><a href="JC.Texture.html#emit">emit</a></li>
+            
+                <li data-name="JC.Texture#listen"><a href="JC.Texture.html#listen">listen</a></li>
+            
+                <li data-name="JC.Texture#load"><a href="JC.Texture.html#load">load</a></li>
+            
+                <li data-name="JC.Texture#off"><a href="JC.Texture.html#off">off</a></li>
+            
+                <li data-name="JC.Texture#on"><a href="JC.Texture.html#on">on</a></li>
+            
+                <li data-name="JC.Texture#once"><a href="JC.Texture.html#once">once</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="JC.Transition">
+            <span class="title">
+                <a href="JC.Transition.html">JC.Transition</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="KeyframedMultidimensionalProperty">
+            <span class="title">
+                <a href="KeyframedMultidimensionalProperty.html">KeyframedMultidimensionalProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="KeyframedShapeProperty">
+            <span class="title">
+                <a href="KeyframedShapeProperty.html">KeyframedShapeProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="KeyframedShapeProperty#addEffect"><a href="KeyframedShapeProperty.html#addEffect">addEffect</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="KeyframedValueProperty">
+            <span class="title">
+                <a href="KeyframedValueProperty.html">KeyframedValueProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Matrix">
+            <span class="title">
+                <a href="Matrix.html">Matrix</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="module.exports">
+            <span class="title">
+                <a href="module.exports.html">module.exports</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MultiDimensionalProperty">
+            <span class="title">
+                <a href="MultiDimensionalProperty.html">MultiDimensionalProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="RectShapeProperty">
+            <span class="title">
+                <a href="RectShapeProperty.html">RectShapeProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="RectShapeProperty#convertRectToPath"><a href="RectShapeProperty.html#convertRectToPath">convertRectToPath</a></li>
+            
+                <li data-name="RectShapeProperty#getValue"><a href="RectShapeProperty.html#getValue">getValue</a></li>
+            
+                <li data-name="RectShapeProperty#reset"><a href="RectShapeProperty.html#reset">reset</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ShapeProperty">
+            <span class="title">
+                <a href="ShapeProperty.html">ShapeProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ShapeProperty#addEffect"><a href="ShapeProperty.html#addEffect">addEffect</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="SolidRect">
+            <span class="title">
+                <a href="SolidRect.html">SolidRect</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="SolidRect#render"><a href="SolidRect.html#render">render</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="StarShapeProperty">
+            <span class="title">
+                <a href="StarShapeProperty.html">StarShapeProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="StarShapeProperty#convertPolygonToPath"><a href="StarShapeProperty.html#convertPolygonToPath">convertPolygonToPath</a></li>
+            
+                <li data-name="StarShapeProperty#convertStarToPath"><a href="StarShapeProperty.html#convertStarToPath">convertStarToPath</a></li>
+            
+                <li data-name="StarShapeProperty#getValue"><a href="StarShapeProperty.html#getValue">getValue</a></li>
+            
+                <li data-name="StarShapeProperty#reset"><a href="StarShapeProperty.html#reset">reset</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="TransformProperty">
+            <span class="title">
+                <a href="TransformProperty.html">TransformProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="TransformProperty#_addDynamicProperty"><a href="TransformProperty.html#_addDynamicProperty">_addDynamicProperty</a></li>
+            
+                <li data-name="TransformProperty#addDynamicProperty"><a href="TransformProperty.html#addDynamicProperty">addDynamicProperty</a></li>
+            
+                <li data-name="TransformProperty#autoOrient"><a href="TransformProperty.html#autoOrient">autoOrient</a></li>
+            
+                <li data-name="TransformProperty#getValue"><a href="TransformProperty.html#getValue">getValue</a></li>
+            
+                <li data-name="TransformProperty#precalculateMatrix"><a href="TransformProperty.html#precalculateMatrix">precalculateMatrix</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ValueProperty">
+            <span class="title">
+                <a href="ValueProperty.html">ValueProperty</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+    <div class="main">
+        <h1 class="page-title" data-filename="aftereffect_shapes_helpers_arrays.js.html">Source: aftereffect/shapes/helpers/arrays.js</h1>
+        
+
+
+    
+    <section>
+        <article>
+            <pre id="source-code" class="prettyprint source linenums"><code>
+/**
+ * a
+ * @param {*} type a
+ * @param {*} len a
+ * @return {*}
+ */
+function createRegularArray(type, len) {
+  let i = 0;
+  const arr = [];
+  let value;
+  switch (type) {
+  case 'int16':
+  case 'uint8c':
+    value = 1;
+    break;
+  default:
+    value = 1.1;
+    break;
+  }
+  for (i = 0; i &lt; len; i += 1) {
+    arr.push(value);
+  }
+  return arr;
+}
+
+/**
+ * a
+ * @param {*} type a
+ * @param {*} len a
+ * @return {*}
+ */
+function _createTypedArray(type, len) {
+  if (type === 'float32') {
+    return new Float32Array(len);
+  } else if (type === 'int16') {
+    return new Int16Array(len);
+  } else if (type === 'uint8c') {
+    return new Uint8ClampedArray(len);
+  }
+}
+
+let createTypedArray;
+//  = createTypedArray
+if (typeof Uint8ClampedArray === 'function' &amp;&amp; typeof Float32Array === 'function') {
+  createTypedArray = _createTypedArray;
+} else {
+  createTypedArray = createRegularArray;
+}
+
+/**
+ * a
+ * @param {*} len a
+ * @return {*}
+ */
+function createSizedArray(len) {
+  return new Array(len);
+}
+
+export { createTypedArray, createSizedArray };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+
+        
+
+        <footer>
+            Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Mon Jul 06 2020 18:24:08 GMT+0800 (GMT+08:00)
+        </footer>
+    </div>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/jaguar.js"></script>
+</body>
+</html>
