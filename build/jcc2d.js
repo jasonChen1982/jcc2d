@@ -2314,7 +2314,9 @@ Object.defineProperty(Loader.prototype, 'progress', {
  * @param {String} crossOrigin cross-origin config
  * @return {JC.Loader}
  */
-var loaderUtil = function loaderUtil(srcMap, crossOrigin) {
+var loaderUtil = function loaderUtil(srcMap) {
+  var crossOrigin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '*';
+
   return new Loader(crossOrigin).load(srcMap);
 };
 
@@ -8209,26 +8211,28 @@ var Register = function () {
    * register
    * @param {array} assets assets array
    * @param {string} prefix assets array
+   * @param {string} crossOrigin assets array
    */
-  function Register(assets, prefix) {
+  function Register(assets, prefix, crossOrigin) {
     classCallCheck(this, Register);
 
     this.layers = {};
     this._forever = false;
-    this.loader = this.loadAssets(assets, prefix);
+    this.loader = this.loadAssets(assets, prefix, crossOrigin);
   }
 
   /**
    * load assets base pixi loader
    * @param {array} assets assets array
    * @param {string} prefix assets array
+   * @param {string} crossOrigin assets array
    * @return {loader}
    */
 
 
   createClass(Register, [{
     key: 'loadAssets',
-    value: function loadAssets(assets, prefix) {
+    value: function loadAssets(assets, prefix, crossOrigin) {
       var urls = {};
       assets.filter(function (it) {
         return it.u && it.p;
@@ -8236,7 +8240,7 @@ var Register = function () {
         var url = createUrl(it, prefix);
         urls[it.id] = url;
       });
-      return loaderUtil(urls);
+      return loaderUtil(urls, crossOrigin);
     }
 
     /**
@@ -15017,6 +15021,7 @@ var AnimationGroup = function () {
    * @param {Number} [options.timeScale=1] animation speed
    * @param {Number} [options.autoStart=true] auto start animation after assets loaded
    * @param {Boolean} [options.mask=false] auto start animation after assets loaded
+   * @param {Boolean} [options.crossOrigin='*'] auto start animation after assets loaded
    */
   function AnimationGroup(options) {
     var _this = this;
@@ -15052,7 +15057,8 @@ var AnimationGroup = function () {
 
     this._paused = true;
 
-    this.register = new Register(this.keyframes.assets, this.prefix);
+    var crossOrigin = Utils.isNumber(options.crossOrigin) ? options.crossOrigin : '*';
+    this.register = new Register(this.keyframes.assets, this.prefix, crossOrigin);
 
     var images = this.keyframes.assets.filter(function (it) {
       return it.u && it.p;
