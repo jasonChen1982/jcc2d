@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.5"></a>
+## [1.8.5](https://github.com/jasonChen1982/jcc2d/compare/v1.8.4...v1.8.5) (2020-07-17)
+
+
+### Features
+
+* **demo:** add some demo ([0fdf5c6](https://github.com/jasonChen1982/jcc2d/commit/0fdf5c6))
+* **loader:** add crossOrigin for lottie image ([0c95b6b](https://github.com/jasonChen1982/jcc2d/commit/0c95b6b))
+
+
+
 <a name="1.8.4"></a>
 ## [1.8.4](https://github.com/jasonChen1982/jcc2d/compare/v1.8.3...v1.8.4) (2020-03-24)
 
