@@ -250,7 +250,7 @@ Object.defineProperty(Loader.prototype, 'progress', {
  * @param {String} crossOrigin cross-origin config
  * @return {JC.Loader}
  */
-let loaderUtil = function(srcMap, crossOrigin) {
+let loaderUtil = function(srcMap, crossOrigin = '*') {
   return new Loader(crossOrigin).load(srcMap);
 };
 

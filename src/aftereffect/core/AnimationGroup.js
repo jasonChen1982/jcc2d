@@ -21,6 +21,7 @@ class AnimationGroup {
    * @param {Number} [options.timeScale=1] animation speed
    * @param {Number} [options.autoStart=true] auto start animation after assets loaded
    * @param {Boolean} [options.mask=false] auto start animation after assets loaded
+   * @param {Boolean} [options.crossOrigin='*'] auto start animation after assets loaded
    */
   constructor(options) {
     this.prefix = options.prefix || options.keyframes.prefix || '';
@@ -54,7 +55,8 @@ class AnimationGroup {
 
     this._paused = true;
 
-    this.register = new Register(this.keyframes.assets, this.prefix);
+    const crossOrigin = Utils.isNumber(options.crossOrigin) ? options.crossOrigin : '*';
+    this.register = new Register(this.keyframes.assets, this.prefix, crossOrigin);
 
     const images = this.keyframes.assets.filter((it) => {
       return it.u && it.p;

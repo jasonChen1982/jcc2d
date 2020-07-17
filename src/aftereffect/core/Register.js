@@ -11,20 +11,22 @@ class Register {
    * register
    * @param {array} assets assets array
    * @param {string} prefix assets array
+   * @param {string} crossOrigin assets array
    */
-  constructor(assets, prefix) {
+  constructor(assets, prefix, crossOrigin) {
     this.layers = {};
     this._forever = false;
-    this.loader = this.loadAssets(assets, prefix);
+    this.loader = this.loadAssets(assets, prefix, crossOrigin);
   }
 
   /**
    * load assets base pixi loader
    * @param {array} assets assets array
    * @param {string} prefix assets array
+   * @param {string} crossOrigin assets array
    * @return {loader}
    */
-  loadAssets(assets, prefix) {
+  loadAssets(assets, prefix, crossOrigin) {
     const urls = {};
     assets.filter((it) => {
       return it.u && it.p;
@@ -32,7 +34,7 @@ class Register {
       const url = createUrl(it, prefix);
       urls[it.id] = url;
     });
-    return loaderUtil(urls);
+    return loaderUtil(urls, crossOrigin);
   }
 
   /**
