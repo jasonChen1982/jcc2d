@@ -1414,9 +1414,7 @@ BezierCurve.prototype.getPoint = function (t, points) {
  * @param {number} max upper
  * @return {boolean} in [min, max] range ?
  */
-function inRange$1(v, min, max) {
-  return v >= min && v <= max;
-}
+
 
 /**
  * detect current frame index
@@ -1425,15 +1423,7 @@ function inRange$1(v, min, max) {
  * @param {number} progress current time
  * @return {number} which frame index
  */
-function findStep$1(steps, progress) {
-  var last = steps.length - 1;
-  for (var i = 0; i < last; i++) {
-    var step = steps[i];
-    if (inRange$1(progress, step.ost, step.oet)) {
-      return i;
-    }
-  }
-}
+
 
 /**
  * prefix
@@ -1442,12 +1432,7 @@ function findStep$1(steps, progress) {
  * @param {string} prefix prefix
  * @return {string}
  */
-function createUrl(asset, prefix) {
-  if (prefix) prefix = prefix.replace(/\/?$/, '/');
-  var up = asset.u + asset.p;
-  var url = asset.up || prefix + up;
-  return url;
-}
+
 
 /**
  * get assets from keyframes assets
@@ -1456,12 +1441,6 @@ function createUrl(asset, prefix) {
  * @param {object} assets assets object
  * @return {object} asset object
  */
-function getAssets(id, assets) {
-  for (var i = 0; i < assets.length; i++) {
-    if (id === assets[i].id) return assets[i];
-  }
-  return {};
-}
 
 var bezierPool = {};
 
@@ -1513,41 +1492,6 @@ function getEaseingPath(curve, nm, p) {
   var rate = bezierPool[nm].get(p);
   var point = curve.getPointAt(rate);
   return [point.x, point.y, point.z];
-}
-
-/**
- * interpolation keyframes and return value
- * @ignore
- * @param {object} keyframes keyframes with special prop
- * @param {number} progress progress
- * @param {object} indexCache index cache
- * @param {string} key prop name
- * @return {array}
- */
-function interpolation(keyframes, progress, indexCache, key) {
-  var aksk = keyframes.k;
-  if (keyframes.expression) {
-    progress = keyframes.expression.update(progress);
-  }
-  if (progress <= keyframes.ost) {
-    return aksk[0].s;
-  } else if (progress >= keyframes.oet) {
-    var last = aksk.length - 2;
-    return aksk[last].e;
-  } else {
-    var ick = indexCache[key];
-    var frame = aksk[ick];
-    if (!Utils.isNumber(ick) || !inRange$1(progress, frame.ost, frame.oet)) {
-      ick = indexCache[key] = findStep$1(aksk, progress);
-      frame = aksk[ick];
-    }
-    var rate = (progress - frame.ost) / (frame.oet - frame.ost);
-    if (frame.curve) {
-      return getEaseingPath(frame.curve, frame.n, rate);
-    } else {
-      return getEaseing(frame.s, frame.e, frame.n, rate);
-    }
-  }
 }
 
 /* eslint guard-for-in: "off" */
@@ -1781,6 +1725,8133 @@ KeyFrames.prototype.setValue = function (key, value) {
   }
 };
 
+/**
+ * get the type by Object.prototype.toString
+ * @ignore
+ * @param {*} val
+ * @return {String} type string value
+ */
+function _rt$1(val) {
+  return Object.prototype.toString.call(val);
+}
+
+/**
+ * some useful toolkit
+ * @namespace
+ */
+var Tools = {
+  /**
+   * simple copy a json data
+   * @method
+   * @param {JSON} json source data
+   * @return {JSON} object
+   */
+  copyJSON: function copyJSON(json) {
+    return JSON.parse(JSON.stringify(json));
+  },
+
+  /**
+   * detect the variable is array type
+   * @method
+   * @param {Array} variable input variable
+   * @return {Boolean} result
+   */
+  isArray: function () {
+    var ks = _rt$1([]);
+    return function (variable) {
+      return _rt$1(variable) === ks;
+    };
+  }(),
+
+  /**
+   * detect the variable is string type
+   * @method
+   * @param {String} variable input variable
+   * @return {Boolean} result
+   */
+  isString: function () {
+    var ks = _rt$1('s');
+    return function (variable) {
+      return _rt$1(variable) === ks;
+    };
+  }(),
+
+  /**
+   * detect the variable is number type
+   * @method
+   * @param {Number} variable input variable
+   * @return {Boolean} result
+   */
+  isNumber: function () {
+    var ks = _rt$1(1);
+    return function (variable) {
+      return _rt$1(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为函数类型
+   * @method
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isFunction: function () {
+    var ks = _rt$1(function () {});
+    return function (variable) {
+      return _rt$1(variable) === ks;
+    };
+  }(),
+
+  /**
+   * 判断变量是否为undefined
+   * @method
+   * @param {Function} variable 待判断的变量
+   * @return {Boolean} 判断的结果
+   */
+  isUndefined: function isUndefined(variable) {
+    return typeof variable === 'undefined';
+  },
+
+  /**
+   * detect the variable is boolean type
+   * @method
+   * @param {Boolean} variable input variable
+   * @return {Boolean} result
+   */
+  isBoolean: function () {
+    var ks = _rt$1(true);
+    return function (variable) {
+      return _rt$1(variable) === ks;
+    };
+  }(),
+
+  /**
+   * detect the variable is object type
+   * @method
+   * @param {Object} variable input variable
+   * @return {Boolean} result
+   */
+  isObject: function () {
+    var ks = _rt$1({});
+    return function (variable) {
+      return _rt$1(variable) === ks;
+    };
+  }(),
+
+  /**
+   * euclidean modulo
+   * @method
+   * @param {Number} n input value
+   * @param {Number} m modulo
+   * @return {Number} re-map to modulo area
+   */
+  euclideanModulo: function euclideanModulo(n, m) {
+    return (n % m + m) % m;
+  },
+
+  /**
+   * bounce value when value spill codomain
+   * @method
+   * @param {Number} n input value
+   * @param {Number} min lower boundary
+   * @param {Number} max upper boundary
+   * @return {Number} bounce back to boundary area
+   */
+  codomainBounce: function codomainBounce(n, min, max) {
+    if (n < min) return 2 * min - n;
+    if (n > max) return 2 * max - n;
+    return n;
+  },
+
+  /**
+   * clamp a value in range
+   * @method
+   * @param {Number} x input value
+   * @param {Number} a lower boundary
+   * @param {Number} b upper boundary
+   * @return {Number} clamp in range
+   */
+  clamp: function clamp(x, a, b) {
+    return x < a ? a : x > b ? b : x;
+  },
+
+  /**
+   * detect number was in [min, max]
+   * @method
+   * @param {number} v   value
+   * @param {number} min lower
+   * @param {number} max upper
+   * @return {boolean} in [min, max] range ?
+   */
+  inRange: function inRange(v, min, max) {
+    return v >= min && v <= max;
+  },
+
+
+  /**
+   * get assets from keyframes assets
+   * @method
+   * @param {string} id assets refid
+   * @param {object} assets assets object
+   * @return {object} asset object
+   */
+  getAssets: function getAssets(id, assets) {
+    for (var i = 0; i < assets.length; i++) {
+      if (id === assets[i].id) return assets[i];
+    }
+    console.error('have not assets name as', id);
+    return {};
+  },
+
+
+  /**
+   * get hex number from rgb array
+   * @param {array} rgb rgb array
+   * @return {number}
+   */
+  rgb2hex: function rgb2hex(rgb) {
+    return (rgb[0] << 16) + (rgb[1] << 8) + (rgb[2] | 0);
+  }
+};
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+/**
+ * a
+ */
+
+var Eventer$1 = function () {
+  /**
+   * a
+   */
+  function Eventer() {
+    classCallCheck(this, Eventer);
+
+    /**
+     * 事件监听列表
+     *
+     * @member {Object}
+     * @private
+     */
+    this.listeners = {};
+  }
+
+  /**
+   * 事件对象的事件绑定函数
+   *
+   * @param {String} type 事件类型
+   * @param {Function} fn 回调函数
+   * @return {this}
+   */
+
+
+  createClass(Eventer, [{
+    key: 'on',
+    value: function on(type, fn) {
+      if (!Tools.isFunction(fn)) return this;
+      if (Tools.isUndefined(this.listeners[type])) this.listeners[type] = [];
+      this.listeners[type].push(fn);
+      return this;
+    }
+
+    /**
+     * 事件对象的事件解绑函数
+     *
+     * @param {String} type 事件类型
+     * @param {Function} fn 注册时回调函数的引用
+     * @return {this}
+     */
+
+  }, {
+    key: 'off',
+    value: function off(type, fn) {
+      if (Tools.isUndefined(this.listeners[type])) return this;
+      var cbs = this.listeners[type];
+      var i = cbs.length;
+      if (i > 0) {
+        if (fn) {
+          while (i--) {
+            if (cbs[i] === fn) {
+              cbs.splice(i, 1);
+            }
+          }
+        } else {
+          cbs.length = 0;
+        }
+      }
+      return this;
+    }
+
+    /**
+     * 事件对象的一次性事件绑定函数
+     *
+     * @param {String} type 事件类型
+     * @param {Function} fn 回调函数
+     * @return {this}
+     */
+
+  }, {
+    key: 'once',
+    value: function once(type, fn) {
+      var _this = this;
+
+      if (!Tools.isFunction(fn)) return this;
+      var cb = function cb(ev) {
+        fn(ev);
+        _this.off(type, cb);
+      };
+      this.on(type, cb);
+      return this;
+    }
+
+    /**
+     * 事件对象的触发事件函数
+     *
+     * @param {String} type 事件类型
+     * @param {Object} ev 事件数据
+     * @return {this}
+     */
+
+  }, {
+    key: 'emit',
+    value: function emit(type) {
+      if (Tools.isUndefined(this.listeners[type])) return this;
+      var cbs = this.listeners[type] || [];
+      var cache = cbs.slice(0);
+
+      for (var _len = arguments.length, reset = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        reset[_key - 1] = arguments[_key];
+      }
+
+      for (var i = 0; i < cache.length; i++) {
+        cache[i].apply(this, reset);
+      }
+      return this;
+    }
+  }]);
+  return Eventer;
+}();
+
+/**
+ * register class
+ * @class
+ * @private
+ */
+var Register = function () {
+  /**
+   * register
+   */
+  function Register() {
+    classCallCheck(this, Register);
+
+    this.layers = {};
+    // this._forever = false;
+  }
+
+  /**
+   * registe layer
+   * @private
+   * @param {string} name layer name path
+   * @param {object} layer layer object
+   */
+
+
+  createClass(Register, [{
+    key: 'setLayer',
+    value: function setLayer(name, layer) {
+      if (!name) return;
+      if (this.layers[name]) console.warn('动画层命名冲突', name);
+      this.layers[name] = layer;
+    }
+
+    // /**
+    //  * registe layer
+    //  * @private
+    //  */
+    // forever() {
+    //   if (this._forever) return;
+    //   this._forever = true;
+    // }
+
+    /**
+     * get layer by name path
+     * @param {string} name layer name path, example: root.gift.star1
+     * @return {object}
+     */
+
+  }, {
+    key: 'getLayer',
+    value: function getLayer(name) {
+      return this.layers[name];
+    }
+  }]);
+  return Register;
+}();
+
+var LoaderClass = null;
+
+/**
+ * register an image loader
+ * @param {*} _LoaderClass a
+ */
+function registerLoader(_LoaderClass) {
+  LoaderClass = _LoaderClass;
+}
+
+/**
+ * a
+ * @return {Loader}
+ */
+function getLoader() {
+  if (!LoaderClass) {
+    console.warn('must register an image loader, before you parse an animation');
+  }
+  return LoaderClass;
+}
+
+var LoaderRegister = { registerLoader: registerLoader, getLoader: getLoader };
+
+/**
+ * complete layers
+ * @param {*} layers
+ * @param {*} comps
+ * @param {*} fontManager
+ */
+function completeLayers(layers, comps, fontManager) {
+  var layerData = void 0;
+  // let animArray; let lastFrame;
+  var i = void 0;var len = layers.length;
+  var j = void 0;var jLen = void 0;var k = void 0;var kLen = void 0;
+  for (i = 0; i < len; i += 1) {
+    layerData = layers[i];
+    if (!('ks' in layerData) || layerData.completed) {
+      continue;
+    }
+    layerData.completed = true;
+    if (layerData.tt) {
+      layers[i - 1].td = layerData.tt;
+    }
+    // animArray = [];
+    // lastFrame = -1;
+    if (layerData.hasMask) {
+      var maskProps = layerData.masksProperties;
+      jLen = maskProps.length;
+      for (j = 0; j < jLen; j += 1) {
+        if (maskProps[j].pt.k.i) {
+          convertPathsToAbsoluteValues(maskProps[j].pt.k);
+        } else {
+          kLen = maskProps[j].pt.k.length;
+          for (k = 0; k < kLen; k += 1) {
+            if (maskProps[j].pt.k[k].s) {
+              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].s[0]);
+            }
+            if (maskProps[j].pt.k[k].e) {
+              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].e[0]);
+            }
+          }
+        }
+      }
+    }
+    if (layerData.ty === 0) {
+      layerData.layers = findCompLayers(layerData.refId, comps);
+      completeLayers(layerData.layers, comps, fontManager);
+    } else if (layerData.ty === 4) {
+      completeShapes(layerData.shapes);
+    } else if (layerData.ty == 5) {
+      completeText(layerData, fontManager);
+    }
+  }
+}
+
+/**
+ * findComp Layers
+ * @param {*} id layer id
+ * @param {*} comps comps
+ * @return {Array}
+ */
+function findCompLayers(id, comps) {
+  var i = 0;var len = comps.length;
+  while (i < len) {
+    if (comps[i].id === id) {
+      if (!comps[i].layers.__used) {
+        comps[i].layers.__used = true;
+        return comps[i].layers;
+      }
+      return JSON.parse(JSON.stringify(comps[i].layers));
+    }
+    i += 1;
+  }
+}
+
+/**
+ * completeShapes
+ * @param {*} arr shapes
+ */
+function completeShapes(arr) {
+  var i = void 0;var len = arr.length;
+  var j = void 0;var jLen = void 0;
+  // let hasPaths = false;
+  for (i = len - 1; i >= 0; i -= 1) {
+    if (arr[i].ty == 'sh') {
+      if (arr[i].ks.k.i) {
+        convertPathsToAbsoluteValues(arr[i].ks.k);
+      } else {
+        jLen = arr[i].ks.k.length;
+        for (j = 0; j < jLen; j += 1) {
+          if (arr[i].ks.k[j].s) {
+            convertPathsToAbsoluteValues(arr[i].ks.k[j].s[0]);
+          }
+          if (arr[i].ks.k[j].e) {
+            convertPathsToAbsoluteValues(arr[i].ks.k[j].e[0]);
+          }
+        }
+      }
+      // hasPaths = true;
+    } else if (arr[i].ty == 'gr') {
+      completeShapes(arr[i].it);
+    }
+  }
+  /* if(hasPaths){
+            //mx: distance
+            //ss: sensitivity
+            //dc: decay
+            arr.splice(arr.length-1,0,{
+                "ty": "ms",
+                "mx":20,
+                "ss":10,
+                 "dc":0.001,
+                "maxDist":200
+            });
+        }*/
+}
+
+/**
+ * convert relative position to absolute
+ * @param {path} path path data
+ */
+function convertPathsToAbsoluteValues(path) {
+  var i = void 0;var len = path.i.length;
+  for (i = 0; i < len; i += 1) {
+    path.i[i][0] += path.v[i][0];
+    path.i[i][1] += path.v[i][1];
+    path.o[i][0] += path.v[i][0];
+    path.o[i][1] += path.v[i][1];
+  }
+}
+
+/**
+ * checkVersion
+ * @param {*} minimum minimum version
+ * @param {*} animVersionString animate data version
+ * @return {Boolean}
+ */
+function checkVersion(minimum, animVersionString) {
+  var animVersion = animVersionString ? animVersionString.split('.') : [100, 100, 100];
+  if (minimum[0] > animVersion[0]) {
+    return true;
+  } else if (animVersion[0] > minimum[0]) {
+    return false;
+  }
+  if (minimum[1] > animVersion[1]) {
+    return true;
+  } else if (animVersion[1] > minimum[1]) {
+    return false;
+  }
+  if (minimum[2] > animVersion[2]) {
+    return true;
+  } else if (animVersion[2] > minimum[2]) {
+    return false;
+  }
+}
+
+var checkText = function () {
+  var minimumVersion = [4, 4, 14];
+
+  /**
+   * updateTextLayer
+   * @param {*} textLayer textLayer
+   */
+  function updateTextLayer(textLayer) {
+    var documentData = textLayer.t.d;
+    textLayer.t.d = {
+      k: [{
+        s: documentData,
+        t: 0
+      }]
+    };
+  }
+
+  /**
+   * iterateLayers
+   * @param {*} layers layers
+   */
+  function iterateLayers(layers) {
+    var i = void 0;var len = layers.length;
+    for (i = 0; i < len; i += 1) {
+      if (layers[i].ty === 5) {
+        updateTextLayer(layers[i]);
+      }
+    }
+  }
+
+  return function (animationData) {
+    if (checkVersion(minimumVersion, animationData.v)) {
+      iterateLayers(animationData.layers);
+      if (animationData.assets) {
+        var i = void 0;var len = animationData.assets.length;
+        for (i = 0; i < len; i += 1) {
+          if (animationData.assets[i].layers) {
+            iterateLayers(animationData.assets[i].layers);
+          }
+        }
+      }
+    }
+  };
+}();
+
+var checkChars = function () {
+  var minimumVersion = [4, 7, 99];
+  return function (animationData) {
+    if (animationData.chars && !checkVersion(minimumVersion, animationData.v)) {
+      var i = void 0;var len = animationData.chars.length;var j = void 0;var jLen = void 0; // let k; let kLen;
+      var pathData = void 0;var paths = void 0;
+      for (i = 0; i < len; i += 1) {
+        if (animationData.chars[i].data && animationData.chars[i].data.shapes) {
+          paths = animationData.chars[i].data.shapes[0].it;
+          jLen = paths.length;
+
+          for (j = 0; j < jLen; j += 1) {
+            pathData = paths[j].ks.k;
+            if (!pathData.__converted) {
+              convertPathsToAbsoluteValues(paths[j].ks.k);
+              pathData.__converted = true;
+            }
+          }
+        }
+      }
+    }
+  };
+}();
+
+var checkColors = function () {
+  var minimumVersion = [4, 1, 9];
+
+  /**
+   * iterateShapes
+   * @param {*} shapes shapes
+   */
+  function iterateShapes(shapes) {
+    var i = void 0;var len = shapes.length;
+    var j = void 0;var jLen = void 0;
+    for (i = 0; i < len; i += 1) {
+      if (shapes[i].ty === 'gr') {
+        iterateShapes(shapes[i].it);
+      } else if (shapes[i].ty === 'fl' || shapes[i].ty === 'st') {
+        if (shapes[i].c.k && shapes[i].c.k[0].i) {
+          jLen = shapes[i].c.k.length;
+          for (j = 0; j < jLen; j += 1) {
+            if (shapes[i].c.k[j].s) {
+              shapes[i].c.k[j].s[0] /= 255;
+              shapes[i].c.k[j].s[1] /= 255;
+              shapes[i].c.k[j].s[2] /= 255;
+              shapes[i].c.k[j].s[3] /= 255;
+            }
+            if (shapes[i].c.k[j].e) {
+              shapes[i].c.k[j].e[0] /= 255;
+              shapes[i].c.k[j].e[1] /= 255;
+              shapes[i].c.k[j].e[2] /= 255;
+              shapes[i].c.k[j].e[3] /= 255;
+            }
+          }
+        } else {
+          shapes[i].c.k[0] /= 255;
+          shapes[i].c.k[1] /= 255;
+          shapes[i].c.k[2] /= 255;
+          shapes[i].c.k[3] /= 255;
+        }
+      }
+    }
+  }
+
+  /**
+   * iterateLayers
+   * @param {*} layers layers
+   */
+  function iterateLayers(layers) {
+    var i = void 0;var len = layers.length;
+    for (i = 0; i < len; i += 1) {
+      if (layers[i].ty === 4) {
+        iterateShapes(layers[i].shapes);
+      }
+    }
+  }
+
+  return function (animationData) {
+    if (checkVersion(minimumVersion, animationData.v)) {
+      iterateLayers(animationData.layers);
+      if (animationData.assets) {
+        var i = void 0;var len = animationData.assets.length;
+        for (i = 0; i < len; i += 1) {
+          if (animationData.assets[i].layers) {
+            iterateLayers(animationData.assets[i].layers);
+          }
+        }
+      }
+    }
+  };
+}();
+
+var checkShapes = function () {
+  var minimumVersion = [4, 4, 18];
+
+  /**
+   * completeShapes
+   * @param {*} arr arr
+   */
+  function completeShapes(arr) {
+    var i = void 0;var len = arr.length;
+    var j = void 0;var jLen = void 0;
+    // let hasPaths = false;
+    for (i = len - 1; i >= 0; i -= 1) {
+      if (arr[i].ty == 'sh') {
+        if (arr[i].ks.k.i) {
+          arr[i].ks.k.c = arr[i].closed;
+        } else {
+          jLen = arr[i].ks.k.length;
+          for (j = 0; j < jLen; j += 1) {
+            if (arr[i].ks.k[j].s) {
+              arr[i].ks.k[j].s[0].c = arr[i].closed;
+            }
+            if (arr[i].ks.k[j].e) {
+              arr[i].ks.k[j].e[0].c = arr[i].closed;
+            }
+          }
+        }
+        // hasPaths = true;
+      } else if (arr[i].ty == 'gr') {
+        completeShapes(arr[i].it);
+      }
+    }
+  }
+
+  /**
+   * iterateLayers
+   * @param {*} layers layers
+   */
+  function iterateLayers(layers) {
+    var layerData = void 0;
+    var i = void 0;var len = layers.length;
+    var j = void 0;var jLen = void 0;var k = void 0;var kLen = void 0;
+    for (i = 0; i < len; i += 1) {
+      layerData = layers[i];
+      if (layerData.hasMask) {
+        var maskProps = layerData.masksProperties;
+        jLen = maskProps.length;
+        for (j = 0; j < jLen; j += 1) {
+          if (maskProps[j].pt.k.i) {
+            maskProps[j].pt.k.c = maskProps[j].cl;
+          } else {
+            kLen = maskProps[j].pt.k.length;
+            for (k = 0; k < kLen; k += 1) {
+              if (maskProps[j].pt.k[k].s) {
+                maskProps[j].pt.k[k].s[0].c = maskProps[j].cl;
+              }
+              if (maskProps[j].pt.k[k].e) {
+                maskProps[j].pt.k[k].e[0].c = maskProps[j].cl;
+              }
+            }
+          }
+        }
+      }
+      if (layerData.ty === 4) {
+        completeShapes(layerData.shapes);
+      }
+    }
+  }
+
+  return function (animationData) {
+    if (checkVersion(minimumVersion, animationData.v)) {
+      iterateLayers(animationData.layers);
+      if (animationData.assets) {
+        var i = void 0;var len = animationData.assets.length;
+        for (i = 0; i < len; i += 1) {
+          if (animationData.assets[i].layers) {
+            iterateLayers(animationData.assets[i].layers);
+          }
+        }
+      }
+    }
+  };
+}();
+
+/**
+ * completeData
+ * @param {*} animationData animationData
+ * @param {*} fontManager fontManager
+ */
+function completeData(animationData, fontManager) {
+  if (animationData.__complete) {
+    return;
+  }
+  checkColors(animationData);
+  checkText(animationData);
+  checkChars(animationData);
+  checkShapes(animationData);
+  completeLayers(animationData.layers, animationData.assets, fontManager);
+  animationData.__complete = true;
+  // blitAnimation(animationData, animationData.assets, fontManager);
+}
+
+/**
+ * completeText
+ * @param {*} data data
+ * @param {*} fontManager fontManager
+ */
+function completeText(data, fontManager) {
+  if (data.t.a.length === 0 && !('m' in data.t.p)) {
+    data.singleShape = true;
+  }
+}
+
+var DataManager = {
+  completeData: completeData,
+  checkColors: checkColors,
+  checkChars: checkChars,
+  checkShapes: checkShapes,
+  completeLayers: completeLayers
+};
+
+/**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+
+var NEWTON_ITERATIONS$1 = 4;
+var NEWTON_MIN_SLOPE$1 = 0.001;
+var SUBDIVISION_PRECISION$1 = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS$1 = 10;
+
+var kSplineTableSize$1 = 11;
+var kSampleStepSize$1 = 1.0 / (kSplineTableSize$1 - 1.0);
+
+var float32ArraySupported$1 = typeof Float32Array === 'function';
+
+/* eslint new-cap: 0 */
+
+/**
+ * 公因式A
+ *
+ * @param {number} aA1 控制分量
+ * @param {number} aA2 控制分量
+ * @return {number} 整个公式中的A公因式的值
+ */
+function A$1(aA1, aA2) {
+  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
+}
+
+/**
+ * 公因式B
+ *
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 整个公式中的B公因式的值
+ */
+function B$1(aA1, aA2) {
+  return 3.0 * aA2 - 6.0 * aA1;
+}
+
+/**
+ * 公因式C
+ *
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 整个公式中的C公因式的值
+ */
+function C$1(aA1) {
+  return 3.0 * aA1;
+}
+
+/**
+ * 获取aT处的值
+ *
+ * @param {number} aT 三次贝塞尔曲线的t自变量
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 三次贝塞尔公式的因变量
+ */
+function calcBezier$1(aT, aA1, aA2) {
+  return ((A$1(aA1, aA2) * aT + B$1(aA1, aA2)) * aT + C$1(aA1)) * aT;
+}
+
+/**
+ * 获取aT处的斜率
+ * @param {number} aT 三次贝塞尔曲线的t自变量
+ * @param {number} aA1 控制分量1
+ * @param {number} aA2 控制分量2
+ * @return {number} 三次贝塞尔公式的导数
+ */
+function getSlope$1(aT, aA1, aA2) {
+  return 3.0 * A$1(aA1, aA2) * aT * aT + 2.0 * B$1(aA1, aA2) * aT + C$1(aA1);
+}
+
+/**
+ *
+ * @param {number} aX
+ * @param {number} aA
+ * @param {number} aB
+ * @param {number} mX1
+ * @param {number} mX2
+ * @return {number} 二分法猜测t的值
+ */
+function binarySubdivide$1(aX, aA, aB, mX1, mX2) {
+  var currentX = void 0;
+  var currentT = void 0;
+  var i = 0;
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier$1(currentT, mX1, mX2) - aX;
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION$1 && ++i < SUBDIVISION_MAX_ITERATIONS$1);
+  return currentT;
+}
+
+/**
+ * 牛顿迭代算法，进一步的获取精确的T值
+ * @param {number} aX
+ * @param {number} aGuessT
+ * @param {number} mX1
+ * @param {number} mX2
+ * @return {number} 获取更精确的T值
+ */
+function newtonRaphsonIterate$1(aX, aGuessT, mX1, mX2) {
+  for (var i = 0; i < NEWTON_ITERATIONS$1; ++i) {
+    var currentSlope = getSlope$1(aGuessT, mX1, mX2);
+    if (currentSlope === 0.0) {
+      return aGuessT;
+    }
+    var currentX = calcBezier$1(aGuessT, mX1, mX2) - aX;
+    aGuessT -= currentX / currentSlope;
+  }
+  return aGuessT;
+}
+
+/**
+ * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
+ *
+ * @class
+ * @param {number} mX1 控制点1的x分量
+ * @param {number} mY1 控制点1的y分量
+ * @param {number} mX2 控制点2的x分量
+ * @param {number} mY2 控制点2的y分量
+ */
+function BezierEasing$1(mX1, mY1, mX2, mY2) {
+  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+  this.mX1 = mX1;
+  this.mY1 = mY1;
+  this.mX2 = mX2;
+  this.mY2 = mY2;
+  this.sampleValues = float32ArraySupported$1 ? new Float32Array(kSplineTableSize$1) : new Array(kSplineTableSize$1);
+
+  this._preCompute();
+
+  this.get = this.get.bind(this);
+}
+
+BezierEasing$1.prototype._preCompute = function () {
+  // Precompute samples table
+  if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
+    for (var i = 0; i < kSplineTableSize$1; ++i) {
+      this.sampleValues[i] = calcBezier$1(i * kSampleStepSize$1, this.mX1, this.mX2);
+    }
+  }
+};
+
+BezierEasing$1.prototype._getTForX = function (aX) {
+  var intervalStart = 0.0;
+  var currentSample = 1;
+  var lastSample = kSplineTableSize$1 - 1;
+
+  for (; currentSample !== lastSample && this.sampleValues[currentSample] <= aX; ++currentSample) {
+    intervalStart += kSampleStepSize$1;
+  }
+  --currentSample;
+
+  // Interpolate to provide an initial guess for t
+  var dist = (aX - this.sampleValues[currentSample]) / (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
+  var guessForT = intervalStart + dist * kSampleStepSize$1;
+
+  var initialSlope = getSlope$1(guessForT, this.mX1, this.mX2);
+  if (initialSlope >= NEWTON_MIN_SLOPE$1) {
+    return newtonRaphsonIterate$1(aX, guessForT, this.mX1, this.mX2);
+  } else if (initialSlope === 0.0) {
+    return guessForT;
+  } else {
+    return binarySubdivide$1(aX, intervalStart, intervalStart + kSampleStepSize$1, this.mX1, this.mX2);
+  }
+};
+
+/**
+ * 通过x轴近似获取y的值
+ *
+ * @param {number} x x轴的偏移量
+ * @return {number} y 与输入值x对应的y值
+ */
+BezierEasing$1.prototype.get = function (x) {
+  if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
+  if (x === 0) {
+    return 0;
+  }
+  if (x === 1) {
+    return 1;
+  }
+  return calcBezier$1(this._getTForX(x), this.mY1, this.mY2);
+};
+
+var beziers = {};
+
+/**
+ * get a bezierEasing from real time or cache
+ * @param {*} a in control point x component
+ * @param {*} b in control point y component
+ * @param {*} c out control point x component
+ * @param {*} d out control point y component
+ * @param {*} [nm] curver name
+ * @return {BezierEasing}
+ */
+function getBezierEasing(a, b, c, d, nm) {
+  var str = nm || ('bez_' + a + '_' + b + '_' + c + '_' + d).replace(/\./g, 'p');
+  if (beziers[str]) {
+    return beziers[str];
+  }
+  var bezEasing = new BezierEasing$1(a, b, c, d);
+  beziers[str] = bezEasing;
+  return bezEasing;
+}
+
+var BezierFactory = { getBezierEasing: getBezierEasing };
+
+/**
+ * a
+ * @param {*} type a
+ * @param {*} len a
+ * @return {*}
+ */
+function createRegularArray(type, len) {
+  var i = 0;
+  var arr = [];
+  var value = void 0;
+  switch (type) {
+    case 'int16':
+    case 'uint8c':
+      value = 1;
+      break;
+    default:
+      value = 1.1;
+      break;
+  }
+  for (i = 0; i < len; i += 1) {
+    arr.push(value);
+  }
+  return arr;
+}
+
+/**
+ * a
+ * @param {*} type a
+ * @param {*} len a
+ * @return {*}
+ */
+function _createTypedArray$1(type, len) {
+  if (type === 'float32') {
+    return new Float32Array(len);
+  } else if (type === 'int16') {
+    return new Int16Array(len);
+  } else if (type === 'uint8c') {
+    return new Uint8ClampedArray(len);
+  }
+}
+
+var createTypedArray = void 0;
+//  = createTypedArray
+if (typeof Uint8ClampedArray === 'function' && typeof Float32Array === 'function') {
+  createTypedArray = _createTypedArray$1;
+} else {
+  createTypedArray = createRegularArray;
+}
+
+/**
+ * a
+ * @param {*} len a
+ * @return {*}
+ */
+function createSizedArray(len) {
+  return new Array(len);
+}
+
+/**
+ * a
+ * @param {*} arr a
+ * @return {*}
+ */
+function double(arr) {
+  return arr.concat(createSizedArray(arr.length));
+}
+
+var pooling = { double: double };
+
+var PoolFactory = function PoolFactory(initialLength, _create, _release) {
+  var _length = 0;
+  var _maxLength = initialLength;
+  var pool = createSizedArray(_maxLength);
+
+  var ob = {
+    newElement: newElement,
+    release: release
+  };
+
+  /**
+   * a
+   * @return {*}
+   */
+  function newElement() {
+    var element = void 0;
+    if (_length) {
+      _length -= 1;
+      element = pool[_length];
+    } else {
+      element = _create();
+    }
+    return element;
+  }
+
+  /**
+   * a
+   * @param {*} element a
+   */
+  function release(element) {
+    if (_length === _maxLength) {
+      pool = pooling.double(pool);
+      _maxLength = _maxLength * 2;
+    }
+    if (_release) {
+      _release(element);
+    }
+    pool[_length] = element;
+    _length += 1;
+  }
+
+  /**
+   * @return {*}
+   */
+  // function clone() {
+  //   var clonedElement = newElement();
+  //   return _clone(clonedElement);
+  // }
+
+  return ob;
+};
+
+/**
+ * a
+ * @return {*}
+ */
+function create$1() {
+  return createTypedArray('float32', 2);
+}
+var PointPool = PoolFactory(8, create$1);
+
+/**
+ * a shape path
+ */
+
+var ShapePath = function () {
+  /**
+   * shape path constructor
+   */
+  function ShapePath() {
+    classCallCheck(this, ShapePath);
+
+    this.c = false;
+    this._length = 0;
+    this._maxLength = 8;
+    this.v = createSizedArray(this._maxLength);
+    this.o = createSizedArray(this._maxLength);
+    this.i = createSizedArray(this._maxLength);
+  }
+
+  /**
+   * set path data
+   * @param {*} closed path is closed ?
+   * @param {*} len path vertex data length
+   */
+
+
+  createClass(ShapePath, [{
+    key: 'setPathData',
+    value: function setPathData(closed, len) {
+      this.c = closed;
+      this.setLength(len);
+      var i = 0;
+      while (i < len) {
+        this.v[i] = PointPool.newElement();
+        this.o[i] = PointPool.newElement();
+        this.i[i] = PointPool.newElement();
+        i += 1;
+      }
+    }
+
+    /**
+     * set array pool size
+     * @param {*} len array length
+     */
+
+  }, {
+    key: 'setLength',
+    value: function setLength(len) {
+      while (this._maxLength < len) {
+        this.doubleArrayLength();
+      }
+      this._length = len;
+    }
+
+    /**
+     * double array pool size
+     */
+
+  }, {
+    key: 'doubleArrayLength',
+    value: function doubleArrayLength() {
+      this.v = this.v.concat(createSizedArray(this._maxLength));
+      this.i = this.i.concat(createSizedArray(this._maxLength));
+      this.o = this.o.concat(createSizedArray(this._maxLength));
+      this._maxLength *= 2;
+    }
+
+    /**
+     * set x y to this.v | this.i | this.o
+     * @param {*} x x component
+     * @param {*} y y component
+     * @param {*} type data type v | i | o
+     * @param {*} pos data index
+     * @param {*} replace need replace a new point
+     */
+
+  }, {
+    key: 'setXYAt',
+    value: function setXYAt(x, y, type, pos, replace) {
+      var arr = void 0;
+      this._length = Math.max(this._length, pos + 1);
+      if (this._length >= this._maxLength) {
+        this.doubleArrayLength();
+      }
+      switch (type) {
+        case 'v':
+          arr = this.v;
+          break;
+        case 'i':
+          arr = this.i;
+          break;
+        case 'o':
+          arr = this.o;
+          break;
+      }
+      if (!arr[pos] || arr[pos] && !replace) {
+        arr[pos] = PointPool.newElement();
+      }
+      arr[pos][0] = x;
+      arr[pos][1] = y;
+    }
+
+    /**
+     * setTripleAt
+     * @param {*} vX vertex x
+     * @param {*} vY vertex y
+     * @param {*} oX out control x
+     * @param {*} oY out control y
+     * @param {*} iX in control x
+     * @param {*} iY in control x
+     * @param {*} pos index of pool
+     * @param {*} replace replace point
+     */
+
+  }, {
+    key: 'setTripleAt',
+    value: function setTripleAt(vX, vY, oX, oY, iX, iY, pos, replace) {
+      this.setXYAt(vX, vY, 'v', pos, replace);
+      this.setXYAt(oX, oY, 'o', pos, replace);
+      this.setXYAt(iX, iY, 'i', pos, replace);
+    }
+
+    /**
+     * reverse point
+     * @return {*} renturn new shape path
+     */
+
+  }, {
+    key: 'reverse',
+    value: function reverse() {
+      var newPath = new ShapePath();
+      newPath.setPathData(this.c, this._length);
+      var vertices = this.v;
+      var outPoints = this.o;
+      var inPoints = this.i;
+      var init = 0;
+      if (this.c) {
+        newPath.setTripleAt(vertices[0][0], vertices[0][1], inPoints[0][0], inPoints[0][1], outPoints[0][0], outPoints[0][1], 0, false);
+        init = 1;
+      }
+      var cnt = this._length - 1;
+      var len = this._length;
+
+      for (var i = init; i < len; i += 1) {
+        newPath.setTripleAt(vertices[cnt][0], vertices[cnt][1], inPoints[cnt][0], inPoints[cnt][1], outPoints[cnt][0], outPoints[cnt][1], i, false);
+        cnt -= 1;
+      }
+      return newPath;
+    }
+  }]);
+  return ShapePath;
+}();
+
+/**
+ * a
+ * @return {*}
+ */
+function create() {
+  return new ShapePath();
+}
+
+/**
+ * a
+ * FIXME: 这里可能不需要这么深度的做 release
+ * @param {*} shapePath a
+ */
+function release(shapePath) {
+  var len = shapePath._length;
+  for (var i = 0; i < len; i += 1) {
+    PointPool.release(shapePath.v[i]);
+    PointPool.release(shapePath.i[i]);
+    PointPool.release(shapePath.o[i]);
+    shapePath.v[i] = null;
+    shapePath.i[i] = null;
+    shapePath.o[i] = null;
+  }
+  shapePath._length = 0;
+  shapePath.c = false;
+}
+
+/**
+ * a
+ * @param {*} shape a
+ * @return {*}
+ */
+function clone(shape) {
+  var cloned = ShapePool.newElement();
+  var len = shape._length === undefined ? shape.v.length : shape._length;
+  cloned.setLength(len);
+  cloned.c = shape.c;
+  // var pt;
+
+  for (var i = 0; i < len; i += 1) {
+    cloned.setTripleAt(shape.v[i][0], shape.v[i][1], shape.o[i][0], shape.o[i][1], shape.i[i][0], shape.i[i][1], i);
+  }
+  return cloned;
+}
+
+var ShapePool = PoolFactory(4, create, release);
+ShapePool.clone = clone;
+
+/**
+ * shape collection
+ */
+
+var ShapeCollection = function () {
+  /**
+   * constructor shape collection
+   */
+  function ShapeCollection() {
+    classCallCheck(this, ShapeCollection);
+
+    this._length = 0;
+    this._maxLength = 4;
+    this.shapes = createSizedArray(this._maxLength);
+  }
+
+  /**
+   * add shape to collection
+   * @param {*} shapeData shape data
+   */
+
+
+  createClass(ShapeCollection, [{
+    key: 'addShape',
+    value: function addShape(shapeData) {
+      if (this._length === this._maxLength) {
+        this.shapes = this.shapes.concat(createSizedArray(this._maxLength));
+        this._maxLength *= 2;
+      }
+      this.shapes[this._length] = shapeData;
+      this._length += 1;
+    }
+
+    /**
+     * release shapes form shape pool
+     */
+
+  }, {
+    key: 'releaseShapes',
+    value: function releaseShapes() {
+      for (var i = 0; i < this._length; i += 1) {
+        ShapePool.release(this.shapes[i]);
+      }
+      this._length = 0;
+    }
+  }]);
+  return ShapeCollection;
+}();
+
+var _length = 0;
+var _maxLength = 4;
+var pool = createSizedArray(_maxLength);
+
+/**
+ * a
+ * @return {*}
+ */
+function newShapeCollection() {
+  var shapeCollection = void 0;
+  if (_length) {
+    _length -= 1;
+    shapeCollection = pool[_length];
+  } else {
+    shapeCollection = new ShapeCollection();
+  }
+  return shapeCollection;
+}
+
+/**
+ * a
+ * @param {*} shapeCollection a
+ */
+function release$1(shapeCollection) {
+  var len = shapeCollection._length;
+  for (var i = 0; i < len; i += 1) {
+    ShapePool.release(shapeCollection.shapes[i]);
+  }
+  shapeCollection._length = 0;
+
+  if (_length === _maxLength) {
+    pool = pooling.double(pool);
+    _maxLength = _maxLength * 2;
+  }
+  pool[_length] = shapeCollection;
+  _length += 1;
+}
+
+var ShapeCollectionPool = { newShapeCollection: newShapeCollection, release: release$1 };
+
+/**
+ * a
+ */
+var DynamicPropertyContainer = function () {
+  function DynamicPropertyContainer() {
+    classCallCheck(this, DynamicPropertyContainer);
+  }
+
+  createClass(DynamicPropertyContainer, [{
+    key: "outTypeExpressionMode",
+
+    /**
+     * a
+     */
+    value: function outTypeExpressionMode() {
+      this._hasOutTypeExpression = true;
+      if (this.container) this.container.outTypeExpressionMode();
+    }
+
+    /**
+     * a
+     * @param {*} prop a
+     */
+
+  }, {
+    key: "addDynamicProperty",
+    value: function addDynamicProperty(prop) {
+      if (this.dynamicProperties.indexOf(prop) === -1) {
+        this.dynamicProperties.push(prop);
+        this.container.addDynamicProperty(this);
+        this._isAnimated = true;
+        if (prop._hasOutTypeExpression) this.outTypeExpressionMode();
+      }
+    }
+
+    /**
+     * a
+     * @param {*} frameNum a
+     */
+
+  }, {
+    key: "iterateDynamicProperties",
+    value: function iterateDynamicProperties(frameNum) {
+      this._mdf = false;
+      var len = this.dynamicProperties.length;
+      for (var i = 0; i < len; i += 1) {
+        this.dynamicProperties[i].getValue(frameNum);
+        if (this.dynamicProperties[i]._mdf) {
+          this._mdf = true;
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} container a
+     */
+
+  }, {
+    key: "initDynamicPropertyContainer",
+    value: function initDynamicPropertyContainer(container) {
+      this.container = container;
+      this.dynamicProperties = [];
+      this._mdf = false;
+      this._isAnimated = false;
+      this._hasOutTypeExpression = false;
+    }
+  }]);
+  return DynamicPropertyContainer;
+}();
+
+var defaultCurveSegments$1 = 200;
+/**
+ * a
+ * @return {*}
+ */
+function create$2() {
+  return {
+    addedLength: 0,
+    percents: createTypedArray('float32', defaultCurveSegments$1),
+    lengths: createTypedArray('float32', defaultCurveSegments$1)
+  };
+}
+var BezierLengthPool = PoolFactory(8, create$2);
+
+/**
+ * @return {*}
+ */
+function create$3() {
+  return {
+    lengths: [],
+    totalLength: 0
+  };
+}
+
+/**
+ * a
+ * @param {*} element a
+ */
+function release$2(element) {
+  var len = element.lengths.length;
+  for (var i = 0; i < len; i += 1) {
+    BezierLengthPool.release(element.lengths[i]);
+  }
+  element.lengths.length = 0;
+}
+
+var SegmentsLengthPool = PoolFactory(8, create$3, release$2);
+
+// var easingFunctions = [];
+// var math = Math;
+var defaultCurveSegments = 200;
+
+/**
+ * a
+ * @param {*} x1 a
+ * @param {*} y1 a
+ * @param {*} x2 a
+ * @param {*} y2 a
+ * @param {*} x3 a
+ * @param {*} y3 a
+ * @return {*}
+ */
+function pointOnLine2D(x1, y1, x2, y2, x3, y3) {
+  var det1 = x1 * y2 + y1 * x3 + x2 * y3 - x3 * y2 - y3 * x1 - x2 * y1;
+  return det1 > -0.001 && det1 < 0.001;
+}
+
+/**
+ * a
+ * @param {*} x1 a
+ * @param {*} y1 a
+ * @param {*} z1 a
+ * @param {*} x2 a
+ * @param {*} y2 a
+ * @param {*} z2 a
+ * @param {*} x3 a
+ * @param {*} y3 a
+ * @param {*} z3 a
+ * @return {*}
+ */
+function pointOnLine3D(x1, y1, z1, x2, y2, z2, x3, y3, z3) {
+  if (z1 === 0 && z2 === 0 && z3 === 0) {
+    return pointOnLine2D(x1, y1, x2, y2, x3, y3);
+  }
+  var dist1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
+  var dist2 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2) + Math.pow(z3 - z1, 2));
+  var dist3 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2) + Math.pow(z3 - z2, 2));
+  var diffDist = void 0;
+  if (dist1 > dist2) {
+    if (dist1 > dist3) {
+      diffDist = dist1 - dist2 - dist3;
+    } else {
+      diffDist = dist3 - dist2 - dist1;
+    }
+  } else if (dist3 > dist2) {
+    diffDist = dist3 - dist2 - dist1;
+  } else {
+    diffDist = dist2 - dist1 - dist3;
+  }
+  return diffDist > -0.0001 && diffDist < 0.0001;
+}
+
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @return {*}
+ */
+function getBezierLength(pt1, pt2, pt3, pt4) {
+  var curveSegments = defaultCurveSegments || 200;
+  // var i, len;
+  var addedLength = 0;
+  var ptDistance = void 0;
+  var point = [];
+  var lastPoint = [];
+  var lengthData = BezierLengthPool.newElement();
+  var len = pt3.length;
+  for (var k = 0; k < curveSegments; k += 1) {
+    var perc = k / (curveSegments - 1);
+    ptDistance = 0;
+    for (var i = 0; i < len; i += 1) {
+      var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * pt3[i] + 3 * (1 - perc) * Math.pow(perc, 2) * pt4[i] + Math.pow(perc, 3) * pt2[i];
+      point[i] = ptCoord;
+      if (lastPoint[i] !== null) {
+        ptDistance += Math.pow(point[i] - lastPoint[i], 2);
+      }
+      lastPoint[i] = point[i];
+    }
+    if (ptDistance) {
+      ptDistance = Math.sqrt(ptDistance);
+      addedLength += ptDistance;
+    }
+    lengthData.percents[k] = perc;
+    lengthData.lengths[k] = addedLength;
+  }
+  lengthData.addedLength = addedLength;
+  return lengthData;
+}
+
+/**
+ * a
+ * @param {*} shapeData a
+ * @return {*}
+ */
+function getSegmentsLength(shapeData) {
+  var segmentsLength = SegmentsLengthPool.newElement();
+  var closed = shapeData.c;
+  var pathV = shapeData.v;
+  var pathO = shapeData.o;
+  var pathI = shapeData.i;
+  var len = shapeData._length;
+  var lengths = segmentsLength.lengths;
+  var totalLength = 0;
+  var i = 0;
+  for (; i < len - 1; i += 1) {
+    lengths[i] = getBezierLength(pathV[i], pathV[i + 1], pathO[i], pathI[i + 1]);
+    totalLength += lengths[i].addedLength;
+  }
+  if (closed && len) {
+    lengths[i] = getBezierLength(pathV[i], pathV[0], pathO[i], pathI[0]);
+    totalLength += lengths[i].addedLength;
+  }
+  segmentsLength.totalLength = totalLength;
+  return segmentsLength;
+}
+
+/**
+ * a
+ * @param {*} length a
+ */
+function BezierData(length) {
+  this.segmentLength = 0;
+  this.points = new Array(length);
+}
+
+/**
+ * a
+ * @param {*} partial a
+ * @param {*} point a
+ */
+function PointData(partial, point) {
+  this.partialLength = partial;
+  this.point = point;
+}
+
+var storedData = {};
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @return {*}
+ */
+function buildBezierData(pt1, pt2, pt3, pt4) {
+  var bezierName = (pt1[0] + '_' + pt1[1] + '_' + pt2[0] + '_' + pt2[1] + '_' + pt3[0] + '_' + pt3[1] + '_' + pt4[0] + '_' + pt4[1]).replace(/\./g, 'p');
+  if (!storedData[bezierName]) {
+    var curveSegments = defaultCurveSegments;
+    // var k, i, len;
+    var addedLength = 0;
+    var ptDistance = void 0;
+    var point = void 0;
+    var lastPoint = null;
+    if (pt1.length === 2 && (pt1[0] != pt2[0] || pt1[1] != pt2[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt1[0] + pt3[0], pt1[1] + pt3[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt2[0] + pt4[0], pt2[1] + pt4[1])) {
+      curveSegments = 2;
+    }
+    var bezierData = new BezierData(curveSegments);
+    var len = pt3.length;
+    for (var k = 0; k < curveSegments; k += 1) {
+      point = createSizedArray(len);
+      var perc = k / (curveSegments - 1);
+      ptDistance = 0;
+      for (var i = 0; i < len; i += 1) {
+        var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * (pt1[i] + pt3[i]) + 3 * (1 - perc) * Math.pow(perc, 2) * (pt2[i] + pt4[i]) + Math.pow(perc, 3) * pt2[i];
+        point[i] = ptCoord;
+        if (lastPoint !== null) {
+          ptDistance += Math.pow(point[i] - lastPoint[i], 2);
+        }
+      }
+      ptDistance = Math.sqrt(ptDistance);
+      addedLength += ptDistance;
+      bezierData.points[k] = new PointData(ptDistance, point);
+      lastPoint = point;
+    }
+    bezierData.segmentLength = addedLength;
+    storedData[bezierName] = bezierData;
+  }
+  return storedData[bezierName];
+}
+
+/**
+ * a
+ * @param {*} perc a
+ * @param {*} bezierData a
+ * @return {*}
+ */
+function getDistancePerc(perc, bezierData) {
+  var percents = bezierData.percents;
+  var lengths = bezierData.lengths;
+  var len = percents.length;
+  var initPos = Math.floor((len - 1) * perc);
+  var lengthPos = perc * bezierData.addedLength;
+  var lPerc = 0;
+  if (initPos === len - 1 || initPos === 0 || lengthPos === lengths[initPos]) {
+    return percents[initPos];
+  } else {
+    var dir = lengths[initPos] > lengthPos ? -1 : 1;
+    var flag = true;
+    while (flag) {
+      if (lengths[initPos] <= lengthPos && lengths[initPos + 1] > lengthPos) {
+        lPerc = (lengthPos - lengths[initPos]) / (lengths[initPos + 1] - lengths[initPos]);
+        flag = false;
+      } else {
+        initPos += dir;
+      }
+      if (initPos < 0 || initPos >= len - 1) {
+        // FIX for TypedArrays that don't store floating point values with enough accuracy
+        if (initPos === len - 1) {
+          return percents[initPos];
+        }
+        flag = false;
+      }
+    }
+    return percents[initPos] + (percents[initPos + 1] - percents[initPos]) * lPerc;
+  }
+}
+
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @param {*} percent a
+ * @param {*} bezierData a
+ * @return {*}
+ */
+function getPointInSegment(pt1, pt2, pt3, pt4, percent, bezierData) {
+  var t1 = getDistancePerc(percent, bezierData);
+  // var u0 = 1;
+  var u1 = 1 - t1;
+  var ptX = Math.round((u1 * u1 * u1 * pt1[0] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[0] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[0] + t1 * t1 * t1 * pt2[0]) * 1000) / 1000;
+  var ptY = Math.round((u1 * u1 * u1 * pt1[1] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[1] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[1] + t1 * t1 * t1 * pt2[1]) * 1000) / 1000;
+  return [ptX, ptY];
+}
+
+// function getSegmentArray() {
+
+// }
+
+var bezierSegmentPoints = createTypedArray('float32', 8);
+
+/**
+ * a
+ * @param {*} pt1 a
+ * @param {*} pt2 a
+ * @param {*} pt3 a
+ * @param {*} pt4 a
+ * @param {*} startPerc a
+ * @param {*} endPerc a
+ * @param {*} bezierData a
+ * @return {*}
+ */
+function getNewSegment(pt1, pt2, pt3, pt4, startPerc, endPerc, bezierData) {
+  /* eslint camelcase: 0 */
+  startPerc = startPerc < 0 ? 0 : startPerc > 1 ? 1 : startPerc;
+  var t0 = getDistancePerc(startPerc, bezierData);
+  endPerc = endPerc > 1 ? 1 : endPerc;
+  var t1 = getDistancePerc(endPerc, bezierData);
+  var len = pt1.length;
+  var u0 = 1 - t0;
+  var u1 = 1 - t1;
+  var u0u0u0 = u0 * u0 * u0;
+  var t0u0u0_3 = t0 * u0 * u0 * 3;
+  var t0t0u0_3 = t0 * t0 * u0 * 3;
+  var t0t0t0 = t0 * t0 * t0;
+  //
+  var u0u0u1 = u0 * u0 * u1;
+  var t0u0u1_3 = t0 * u0 * u1 + u0 * t0 * u1 + u0 * u0 * t1;
+  var t0t0u1_3 = t0 * t0 * u1 + u0 * t0 * t1 + t0 * u0 * t1;
+  var t0t0t1 = t0 * t0 * t1;
+  //
+  var u0u1u1 = u0 * u1 * u1;
+  var t0u1u1_3 = t0 * u1 * u1 + u0 * t1 * u1 + u0 * u1 * t1;
+  var t0t1u1_3 = t0 * t1 * u1 + u0 * t1 * t1 + t0 * u1 * t1;
+  var t0t1t1 = t0 * t1 * t1;
+  //
+  var u1u1u1 = u1 * u1 * u1;
+  var t1u1u1_3 = t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1;
+  var t1t1u1_3 = t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1;
+  var t1t1t1 = t1 * t1 * t1;
+  for (var i = 0; i < len; i += 1) {
+    bezierSegmentPoints[i * 4] = Math.round((u0u0u0 * pt1[i] + t0u0u0_3 * pt3[i] + t0t0u0_3 * pt4[i] + t0t0t0 * pt2[i]) * 1000) / 1000;
+    bezierSegmentPoints[i * 4 + 1] = Math.round((u0u0u1 * pt1[i] + t0u0u1_3 * pt3[i] + t0t0u1_3 * pt4[i] + t0t0t1 * pt2[i]) * 1000) / 1000;
+    bezierSegmentPoints[i * 4 + 2] = Math.round((u0u1u1 * pt1[i] + t0u1u1_3 * pt3[i] + t0t1u1_3 * pt4[i] + t0t1t1 * pt2[i]) * 1000) / 1000;
+    bezierSegmentPoints[i * 4 + 3] = Math.round((u1u1u1 * pt1[i] + t1u1u1_3 * pt3[i] + t1t1u1_3 * pt4[i] + t1t1t1 * pt2[i]) * 1000) / 1000;
+  }
+
+  return bezierSegmentPoints;
+}
+
+var bez = {
+  getSegmentsLength: getSegmentsLength,
+  getNewSegment: getNewSegment,
+  getPointInSegment: getPointInSegment,
+  buildBezierData: buildBezierData,
+  pointOnLine2D: pointOnLine2D,
+  pointOnLine3D: pointOnLine3D
+};
+
+var initialDefaultFrame = -999999;
+var degToRads = Math.PI / 180;
+
+var defaultVector = [0, 0];
+
+var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
+var STR_REG = /["']\w+["']/;
+
+/**
+ * Cycle
+ * @class
+ * @private
+ */
+
+var Cycle = function () {
+  /**
+   * Pingpong
+   * @param {*} type Pingpong
+   * @param {*} begin Pingpong
+   * @param {*} end Pingpong
+   */
+  function Cycle(type, begin, end) {
+    classCallCheck(this, Cycle);
+
+    this.begin = begin;
+    this.end = end;
+    this.total = this.end - this.begin;
+    this.type = type;
+  }
+
+  /**
+   * progress
+   * @param {number} progress progress
+   * @return {number} progress
+   */
+
+
+  createClass(Cycle, [{
+    key: 'update',
+    value: function update(progress) {
+      if (this.type === 'in') {
+        if (progress >= this.begin) return progress;
+        return this.end - Tools.euclideanModulo(this.begin - progress, this.total);
+      } else if (this.type === 'out') {
+        if (progress <= this.end) return progress;
+        return this.begin + Tools.euclideanModulo(progress - this.end, this.total);
+      }
+    }
+  }]);
+  return Cycle;
+}();
+
+/**
+ * Pingpong
+ * @class
+ * @private
+ */
+
+
+var Pingpong = function () {
+  /**
+   * Pingpong
+   * @param {*} type Pingpong
+   * @param {*} begin Pingpong
+   * @param {*} end Pingpong
+   */
+  function Pingpong(type, begin, end) {
+    classCallCheck(this, Pingpong);
+
+    this.begin = begin;
+    this.end = end;
+    this.total = this.end - this.begin;
+    this.type = type;
+  }
+
+  /**
+   * progress
+   * @param {number} progress progress
+   * @return {number} progress
+   */
+
+
+  createClass(Pingpong, [{
+    key: 'update',
+    value: function update(progress) {
+      if (this.type === 'in' && progress < this.begin || this.type === 'out' && progress > this.end) {
+        var space = progress - this.end;
+        return this.pingpong(space);
+      }
+      return progress;
+    }
+
+    /**
+     * pingpong
+     * @param {number} space
+     * @return {number}
+     */
+
+  }, {
+    key: 'pingpong',
+    value: function pingpong(space) {
+      var dir = Math.floor(space / this.total) % 2;
+      if (dir) {
+        return this.begin + Tools.euclideanModulo(space, this.total);
+      } else {
+        return this.end - Tools.euclideanModulo(space, this.total);
+      }
+    }
+  }]);
+  return Pingpong;
+}();
+
+var FN_MAPS = {
+  loopIn: function loopIn(datak, mode, offset) {
+    var begin = datak[0].t;
+    var end = datak[offset].t;
+    switch (mode) {
+      case 'cycle':
+        return new Cycle('in', begin, end);
+      case 'pingpong':
+        return new Pingpong('in', begin, end);
+      default:
+        break;
+    }
+    return null;
+  },
+  loopOut: function loopOut(datak, mode, offset) {
+    var last = datak.length - 1;
+    var begin = datak[last - offset].t;
+    var end = datak[last].t;
+    switch (mode) {
+      case 'cycle':
+        return new Cycle('out', begin, end);
+      case 'pingpong':
+        return new Pingpong('out', begin, end);
+      default:
+        break;
+    }
+    return null;
+  }
+};
+
+/**
+ * parseParams
+ * @ignore
+ * @param {string} pStr string
+ * @return {array}
+ */
+function parseParams(pStr) {
+  var params = pStr.split(/\s*,\s*/);
+  return params.map(function (it) {
+    if (STR_REG.test(it)) return it.replace(/"|'/g, '');
+    return parseInt(it);
+  });
+}
+
+/**
+ * parseEx
+ * @ignore
+ * @param {string} ex string
+ * @return {object}
+ */
+function parseEx(ex) {
+  var rs = ex.match(EX_REG);
+  var ps = parseParams(rs[2]);
+  return {
+    name: rs[1],
+    mode: ps[0],
+    offset: ps[1]
+  };
+}
+
+/**
+ * hasSupportExpression
+ * @ignore
+ * @param {string} ksp string
+ * @return {boolean}
+ */
+function hasSupportExpression(ksp) {
+  return ksp.x && EX_REG.test(ksp.x);
+}
+
+/**
+ * getExpression
+ * @ignore
+ * @param {object} ksp ksp
+ * @return {object}
+ */
+function getExpression(ksp) {
+  var _parseEx = parseEx(ksp.x),
+      name = _parseEx.name,
+      mode = _parseEx.mode,
+      offset = _parseEx.offset;
+
+  var _offset = offset === 0 ? ksp.k.length - 1 : offset;
+  return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
+}
+
+var Expression = { hasSupportExpression: hasSupportExpression, getExpression: getExpression };
+
+/**
+ * based on @Toji's https://github.com/toji/gl-matrix/
+ * slerp with quaternion
+ * @param {*} a from a
+ * @param {*} b to b
+ * @param {*} t progress
+ * @return {Array}
+ */
+function slerp(a, b, t) {
+  var out = [];
+  var ax = a[0];
+  var ay = a[1];
+  var az = a[2];
+  var aw = a[3];
+  var bx = b[0];
+  var by = b[1];
+  var bz = b[2];
+  var bw = b[3];
+
+  var omega = void 0;
+  var cosom = void 0;
+  var sinom = void 0;
+  var scale0 = void 0;
+  var scale1 = void 0;
+
+  cosom = ax * bx + ay * by + az * bz + aw * bw;
+  if (cosom < 0.0) {
+    cosom = -cosom;
+    bx = -bx;
+    by = -by;
+    bz = -bz;
+    bw = -bw;
+  }
+  if (1.0 - cosom > 0.000001) {
+    omega = Math.acos(cosom);
+    sinom = Math.sin(omega);
+    scale0 = Math.sin((1.0 - t) * omega) / sinom;
+    scale1 = Math.sin(t * omega) / sinom;
+  } else {
+    scale0 = 1.0 - t;
+    scale1 = t;
+  }
+  out[0] = scale0 * ax + scale1 * bx;
+  out[1] = scale0 * ay + scale1 * by;
+  out[2] = scale0 * az + scale1 * bz;
+  out[3] = scale0 * aw + scale1 * bw;
+
+  return out;
+}
+
+/**
+ * quaternion to euler
+ * @param {Array} out out euler pointer
+ * @param {Array} quat origin quaternion
+ */
+function quaternionToEuler(out, quat) {
+  var qx = quat[0];
+  var qy = quat[1];
+  var qz = quat[2];
+  var qw = quat[3];
+  var heading = Math.atan2(2 * qy * qw - 2 * qx * qz, 1 - 2 * qy * qy - 2 * qz * qz);
+  var attitude = Math.asin(2 * qx * qy + 2 * qz * qw);
+  var bank = Math.atan2(2 * qx * qw - 2 * qy * qz, 1 - 2 * qx * qx - 2 * qz * qz);
+  out[0] = heading / degToRads;
+  out[1] = attitude / degToRads;
+  out[2] = bank / degToRads;
+}
+
+/**
+ * create a quaternion from euler
+ * @param {Array} values origin euler
+ * @return {Array} quaternion
+ */
+function createQuaternion(values) {
+  var heading = values[0] * degToRads;
+  var attitude = values[1] * degToRads;
+  var bank = values[2] * degToRads;
+  var c1 = Math.cos(heading / 2);
+  var c2 = Math.cos(attitude / 2);
+  var c3 = Math.cos(bank / 2);
+  var s1 = Math.sin(heading / 2);
+  var s2 = Math.sin(attitude / 2);
+  var s3 = Math.sin(bank / 2);
+  var w = c1 * c2 * c3 - s1 * s2 * s3;
+  var x = s1 * s2 * c3 + c1 * c2 * s3;
+  var y = s1 * c2 * c3 + c1 * s2 * s3;
+  var z = c1 * s2 * c3 - s1 * c2 * s3;
+
+  return [x, y, z, w];
+}
+
+/**
+ * basic property for animate property unit
+ */
+
+var BaseProperty = function () {
+  function BaseProperty() {
+    classCallCheck(this, BaseProperty);
+  }
+
+  createClass(BaseProperty, [{
+    key: 'interpolateValue',
+
+    /**
+     * interpolate value
+     * @param {Number} frameNum now frame
+     * @param {Object} caching caching object
+     * @return {Array} newValue
+     */
+    value: function interpolateValue(frameNum, caching) {
+      // const offsetTime = this.offsetTime;
+      var newValue = void 0;
+      if (this.propType === 'multidimensional') {
+        newValue = createTypedArray('float32', this.pv.length);
+      }
+      var iterationIndex = caching.lastIndex;
+      var i = iterationIndex;
+      var len = this.keyframes.length - 1;
+      var flag = true;
+      var keyData = void 0;var nextKeyData = void 0;
+
+      while (flag) {
+        keyData = this.keyframes[i];
+        nextKeyData = this.keyframes[i + 1];
+        if (i === len - 1 && frameNum >= nextKeyData.t) {
+          if (keyData.h) {
+            keyData = nextKeyData;
+          }
+          iterationIndex = 0;
+          break;
+        }
+        if (nextKeyData.t > frameNum) {
+          iterationIndex = i;
+          break;
+        }
+        if (i < len - 1) {
+          i += 1;
+        } else {
+          iterationIndex = 0;
+          flag = false;
+        }
+      }
+
+      var k = void 0;var kLen = void 0;var perc = void 0;var jLen = void 0;var j = void 0;var fnc = void 0;
+      var nextKeyTime = nextKeyData.t;
+      var keyTime = keyData.t;
+      var endValue = void 0;
+      if (keyData.to) {
+        if (!keyData.bezierData) {
+          keyData.bezierData = bez.buildBezierData(keyData.s, nextKeyData.s || keyData.e, keyData.to, keyData.ti);
+        }
+        var bezierData = keyData.bezierData;
+        if (frameNum >= nextKeyTime || frameNum < keyTime) {
+          var ind = frameNum >= nextKeyTime ? bezierData.points.length - 1 : 0;
+          kLen = bezierData.points[ind].point.length;
+          for (k = 0; k < kLen; k += 1) {
+            newValue[k] = bezierData.points[ind].point[k];
+          }
+          // caching._lastKeyframeIndex = -1;
+        } else {
+          if (keyData.__fnct) {
+            fnc = keyData.__fnct;
+          } else {
+            fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y, keyData.n).get;
+            keyData.__fnct = fnc;
+          }
+          perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+          var distanceInLine = bezierData.segmentLength * perc;
+
+          var segmentPerc = void 0;
+          var addedLength = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastAddedLength : 0;
+          j = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastPoint : 0;
+          flag = true;
+          jLen = bezierData.points.length;
+          while (flag) {
+            addedLength += bezierData.points[j].partialLength;
+            if (distanceInLine === 0 || perc === 0 || j === bezierData.points.length - 1) {
+              kLen = bezierData.points[j].point.length;
+              for (k = 0; k < kLen; k += 1) {
+                newValue[k] = bezierData.points[j].point[k];
+              }
+              break;
+            } else if (distanceInLine >= addedLength && distanceInLine < addedLength + bezierData.points[j + 1].partialLength) {
+              segmentPerc = (distanceInLine - addedLength) / bezierData.points[j + 1].partialLength;
+              kLen = bezierData.points[j].point.length;
+              for (k = 0; k < kLen; k += 1) {
+                newValue[k] = bezierData.points[j].point[k] + (bezierData.points[j + 1].point[k] - bezierData.points[j].point[k]) * segmentPerc;
+              }
+              break;
+            }
+            if (j < jLen - 1) {
+              j += 1;
+            } else {
+              flag = false;
+            }
+          }
+          caching._lastPoint = j;
+          caching._lastAddedLength = addedLength - bezierData.points[j].partialLength;
+          caching._lastKeyframeIndex = i;
+        }
+      } else {
+        var outX = void 0;var outY = void 0;var inX = void 0;var inY = void 0;var keyValue = void 0;
+        len = keyData.s.length;
+        endValue = nextKeyData.s || keyData.e;
+        if (this.sh && keyData.h !== 1) {
+          if (frameNum >= nextKeyTime) {
+            newValue[0] = endValue[0];
+            newValue[1] = endValue[1];
+            newValue[2] = endValue[2];
+          } else if (frameNum <= keyTime) {
+            newValue[0] = keyData.s[0];
+            newValue[1] = keyData.s[1];
+            newValue[2] = keyData.s[2];
+          } else {
+            var quatStart = createQuaternion(keyData.s);
+            var quatEnd = createQuaternion(endValue);
+            var time = (frameNum - keyTime) / (nextKeyTime - keyTime);
+            quaternionToEuler(newValue, slerp(quatStart, quatEnd, time));
+          }
+        } else {
+          for (i = 0; i < len; i += 1) {
+            if (keyData.h !== 1) {
+              if (frameNum >= nextKeyTime) {
+                perc = 1;
+              } else if (frameNum < keyTime) {
+                perc = 0;
+              } else {
+                if (keyData.o.x.constructor === Array) {
+                  if (!keyData.__fnct) {
+                    keyData.__fnct = [];
+                  }
+                  if (!keyData.__fnct[i]) {
+                    outX = typeof keyData.o.x[i] === 'undefined' ? keyData.o.x[0] : keyData.o.x[i];
+                    outY = typeof keyData.o.y[i] === 'undefined' ? keyData.o.y[0] : keyData.o.y[i];
+                    inX = typeof keyData.i.x[i] === 'undefined' ? keyData.i.x[0] : keyData.i.x[i];
+                    inY = typeof keyData.i.y[i] === 'undefined' ? keyData.i.y[0] : keyData.i.y[i];
+                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
+                    keyData.__fnct[i] = fnc;
+                  } else {
+                    fnc = keyData.__fnct[i];
+                  }
+                } else {
+                  if (!keyData.__fnct) {
+                    outX = keyData.o.x;
+                    outY = keyData.o.y;
+                    inX = keyData.i.x;
+                    inY = keyData.i.y;
+                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
+                    keyData.__fnct = fnc;
+                  } else {
+                    fnc = keyData.__fnct;
+                  }
+                }
+                perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+              }
+            }
+
+            endValue = nextKeyData.s || keyData.e;
+            keyValue = keyData.h === 1 ? keyData.s[i] : keyData.s[i] + (endValue[i] - keyData.s[i]) * perc;
+
+            if (this.propType === 'multidimensional') {
+              newValue[i] = keyValue;
+            } else {
+              newValue = keyValue;
+            }
+          }
+        }
+      }
+      caching.lastIndex = iterationIndex;
+      return newValue;
+    }
+
+    /**
+     * get value at comp frame
+     * @param {*} frameNum a
+     * @return {Array|Number}
+     */
+
+  }, {
+    key: 'getValueAtCurrentTime',
+    value: function getValueAtCurrentTime(frameNum) {
+      // let frameNum = this.comp.renderedFrame;
+      var initTime = this.keyframes[0].t;
+      var endTime = this.keyframes[this.keyframes.length - 1].t;
+      if (!(frameNum === this._caching.lastFrame || this._caching.lastFrame !== initialDefaultFrame && (this._caching.lastFrame >= endTime && frameNum >= endTime || this._caching.lastFrame < initTime && frameNum < initTime))) {
+        if (this._caching.lastFrame >= frameNum) {
+          this._caching._lastKeyframeIndex = -1;
+          this._caching.lastIndex = 0;
+        }
+
+        var renderResult = this.interpolateValue(frameNum, this._caching);
+        this.pv = renderResult;
+      }
+      this._caching.lastFrame = frameNum;
+      return this.pv;
+    }
+
+    /**
+     * set value to this.v prop
+     * @param {Array|Number} val value
+     */
+
+  }, {
+    key: 'setVValue',
+    value: function setVValue(val) {
+      var multipliedValue = void 0;
+      if (this.propType === 'unidimensional') {
+        multipliedValue = val * this.mult;
+        if (Math.abs(this.v - multipliedValue) > 0.00001) {
+          this.v = multipliedValue;
+          this._mdf = true;
+        }
+      } else {
+        var i = 0;
+        var len = this.v.length;
+        while (i < len) {
+          multipliedValue = val[i] * this.mult;
+          if (Math.abs(this.v[i] - multipliedValue) > 0.00001) {
+            this.v[i] = multipliedValue;
+            this._mdf = true;
+          }
+          i += 1;
+        }
+      }
+    }
+
+    /**
+     * process effects sequence
+     * @param {*} frameNum a
+     */
+
+  }, {
+    key: 'processEffectsSequence',
+    value: function processEffectsSequence(frameNum) {
+      if (this.expression) {
+        frameNum = this.expression.update(frameNum);
+      }
+      if (frameNum === this.frameId || !this.effectsSequence.length) {
+        return;
+      }
+      if (this.lock) {
+        this.setVValue(this.pv);
+        return;
+      }
+      this.lock = true;
+      this._mdf = this._isFirstFrame;
+      // let multipliedValue;
+      var i = void 0;var len = this.effectsSequence.length;
+      var finalValue = this.kf ? this.pv : this.data.k;
+      for (i = 0; i < len; i += 1) {
+        finalValue = this.effectsSequence[i](frameNum);
+      }
+      this.setVValue(finalValue);
+      this._isFirstFrame = false;
+      this.lock = false;
+      this.frameId = frameNum;
+    }
+
+    /**
+     * a
+     * @param {*} effectFunction a
+     */
+
+  }, {
+    key: 'addEffect',
+    value: function addEffect(effectFunction) {
+      this.effectsSequence.push(effectFunction);
+      this.container.addDynamicProperty(this);
+    }
+  }]);
+  return BaseProperty;
+}();
+
+/**
+ * unidimensional value property
+ */
+
+
+var ValueProperty = function (_BaseProperty) {
+  inherits(ValueProperty, _BaseProperty);
+
+  /**
+   * constructor unidimensional value property
+   * @param {*} elem element node
+   * @param {*} data unidimensional value property data
+   * @param {*} mult data mult scale
+   * @param {*} container value property container
+   */
+  function ValueProperty(elem, data, mult, container) {
+    classCallCheck(this, ValueProperty);
+
+    var _this = possibleConstructorReturn(this, (ValueProperty.__proto__ || Object.getPrototypeOf(ValueProperty)).call(this));
+
+    _this.propType = 'unidimensional';
+    _this.mult = mult || 1;
+    _this.data = data;
+    _this.v = mult ? data.k * mult : data.k;
+    _this.pv = data.k;
+    _this._mdf = false;
+    _this.elem = elem;
+    _this.container = container;
+    _this.k = false;
+    _this.kf = false;
+    _this.vel = 0;
+    _this.effectsSequence = [];
+    _this._isFirstFrame = true;
+    _this.getValue = _this.processEffectsSequence;
+    return _this;
+  }
+
+  return ValueProperty;
+}(BaseProperty);
+
+/**
+ * multidimensional value property
+ */
+
+
+var MultiDimensionalProperty = function (_BaseProperty2) {
+  inherits(MultiDimensionalProperty, _BaseProperty2);
+
+  /**
+   * constructor multidimensional value property
+   * @param {*} elem element node
+   * @param {*} data multidimensional value property data
+   * @param {*} mult data mult scale
+   * @param {*} container value property container
+   */
+  function MultiDimensionalProperty(elem, data, mult, container) {
+    classCallCheck(this, MultiDimensionalProperty);
+
+    var _this2 = possibleConstructorReturn(this, (MultiDimensionalProperty.__proto__ || Object.getPrototypeOf(MultiDimensionalProperty)).call(this));
+
+    _this2.propType = 'multidimensional';
+    _this2.mult = mult || 1;
+    _this2.data = data;
+    _this2._mdf = false;
+    _this2.elem = elem;
+    _this2.container = container;
+    _this2.comp = elem.comp;
+    _this2.k = false;
+    _this2.kf = false;
+    _this2.frameId = -1;
+    var len = data.k.length;
+    _this2.v = createTypedArray('float32', len);
+    _this2.pv = createTypedArray('float32', len);
+    // var arr = createTypedArray('float32', len);
+    _this2.vel = createTypedArray('float32', len);
+    for (var i = 0; i < len; i += 1) {
+      _this2.v[i] = data.k[i] * _this2.mult;
+      _this2.pv[i] = data.k[i];
+    }
+    _this2._isFirstFrame = true;
+    _this2.effectsSequence = [];
+    _this2.getValue = _this2.processEffectsSequence;
+    return _this2;
+  }
+
+  return MultiDimensionalProperty;
+}(BaseProperty);
+
+/**
+ * keyframed unidimensional value property
+ */
+
+
+var KeyframedValueProperty = function (_BaseProperty3) {
+  inherits(KeyframedValueProperty, _BaseProperty3);
+
+  /**
+   * constructor keyframed unidimensional value property
+   * @param {*} elem element node
+   * @param {*} data keyframed unidimensional value property data
+   * @param {*} mult data mult scale
+   * @param {*} container value property container
+   */
+  function KeyframedValueProperty(elem, data, mult, container) {
+    classCallCheck(this, KeyframedValueProperty);
+
+    var _this3 = possibleConstructorReturn(this, (KeyframedValueProperty.__proto__ || Object.getPrototypeOf(KeyframedValueProperty)).call(this));
+
+    _this3.propType = 'unidimensional';
+    _this3.keyframes = data.k;
+    // this.offsetTime = elem.data.st;
+    _this3.frameId = -1;
+    _this3._caching = { lastFrame: initialDefaultFrame, lastIndex: 0, value: 0, _lastKeyframeIndex: -1 };
+    _this3.k = true;
+    _this3.kf = true;
+    _this3.data = data;
+    _this3.mult = mult || 1;
+    _this3.elem = elem;
+    _this3.container = container;
+    _this3.comp = elem.comp;
+    _this3.v = initialDefaultFrame;
+    _this3.pv = initialDefaultFrame;
+    _this3._isFirstFrame = true;
+    _this3.getValue = _this3.processEffectsSequence;
+    // this.setVValue = setVValue;
+    // this.interpolateValue = interpolateValue;
+    _this3.effectsSequence = [_this3.getValueAtCurrentTime.bind(_this3)];
+    // this.addEffect = addEffect;
+
+    _this3._hasOutTypeExpression = false;
+    if (Expression.hasSupportExpression(data)) {
+      _this3.expression = Expression.getExpression(data);
+      _this3._hasOutTypeExpression = _this3.expression.type === 'out';
+    }
+    return _this3;
+  }
+
+  return KeyframedValueProperty;
+}(BaseProperty);
+
+/**
+ * keyframed multidimensional value property
+ */
+
+
+var KeyframedMultidimensionalProperty = function (_BaseProperty4) {
+  inherits(KeyframedMultidimensionalProperty, _BaseProperty4);
+
+  /**
+   * constructor keyframed multidimensional value property
+   * @param {*} elem element node
+   * @param {*} data keyframed multidimensional value property data
+   * @param {*} mult data mult scale
+   * @param {*} container value property container
+   */
+  function KeyframedMultidimensionalProperty(elem, data, mult, container) {
+    classCallCheck(this, KeyframedMultidimensionalProperty);
+
+    var _this4 = possibleConstructorReturn(this, (KeyframedMultidimensionalProperty.__proto__ || Object.getPrototypeOf(KeyframedMultidimensionalProperty)).call(this));
+
+    _this4.propType = 'multidimensional';
+    var i = void 0;var len = data.k.length;
+    var s = void 0;var e = void 0;var to = void 0;var ti = void 0;
+    for (i = 0; i < len - 1; i += 1) {
+      if (data.k[i].to && data.k[i].s && data.k[i + 1] && data.k[i + 1].s) {
+        s = data.k[i].s;
+        e = data.k[i + 1].s;
+        to = data.k[i].to;
+        ti = data.k[i].ti;
+        if (s.length === 2 && !(s[0] === e[0] && s[1] === e[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], s[0] + to[0], s[1] + to[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], e[0] + ti[0], e[1] + ti[1]) || s.length === 3 && !(s[0] === e[0] && s[1] === e[1] && s[2] === e[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], s[0] + to[0], s[1] + to[1], s[2] + to[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], e[0] + ti[0], e[1] + ti[1], e[2] + ti[2])) {
+          data.k[i].to = null;
+          data.k[i].ti = null;
+        }
+        if (s[0] === e[0] && s[1] === e[1] && to[0] === 0 && to[1] === 0 && ti[0] === 0 && ti[1] === 0) {
+          if (s.length === 2 || s[2] === e[2] && to[2] === 0 && ti[2] === 0) {
+            data.k[i].to = null;
+            data.k[i].ti = null;
+          }
+        }
+      }
+    }
+    _this4.effectsSequence = [_this4.getValueAtCurrentTime.bind(_this4)];
+    _this4.keyframes = data.k;
+    // this.offsetTime = elem.data.st;
+    _this4.k = true;
+    _this4.kf = true;
+    _this4._isFirstFrame = true;
+    _this4.mult = mult || 1;
+    _this4.elem = elem;
+    _this4.container = container;
+    _this4.comp = elem.comp;
+    _this4.getValue = _this4.processEffectsSequence;
+    // this.setVValue = setVValue;
+    // this.interpolateValue = interpolateValue;
+    _this4.frameId = -1;
+    var arrLen = data.k[0].s.length;
+    _this4.v = createTypedArray('float32', arrLen);
+    _this4.pv = createTypedArray('float32', arrLen);
+    for (i = 0; i < arrLen; i += 1) {
+      _this4.v[i] = initialDefaultFrame;
+      _this4.pv[i] = initialDefaultFrame;
+    }
+    _this4._caching = { lastFrame: initialDefaultFrame, lastIndex: 0, value: createTypedArray('float32', arrLen) };
+    // this.addEffect = addEffect;
+
+    _this4._hasOutTypeExpression = false;
+    if (Expression.hasSupportExpression(data)) {
+      _this4.expression = Expression.getExpression(data);
+      _this4._hasOutTypeExpression = _this4.expression.type === 'out';
+    }
+    return _this4;
+  }
+
+  return KeyframedMultidimensionalProperty;
+}(BaseProperty);
+
+/**
+ * getProp by data
+ * @param {*} elem element node
+ * @param {*} data keyframed multidimensional value property data
+ * @param {*} type keyframed type or not
+ * @param {*} mult data mult scale
+ * @param {*} container value property container
+ * @return {ValueProperty|MultiDimensionalProperty|KeyframedValueProperty|KeyframedMultidimensionalProperty}
+ */
+
+
+function getProp(elem, data, type, mult, container) {
+  var p = void 0;
+  if (!data.k.length) {
+    p = new ValueProperty(elem, data, mult, container);
+  } else if (typeof data.k[0] === 'number') {
+    p = new MultiDimensionalProperty(elem, data, mult, container);
+  } else {
+    switch (type) {
+      case 0:
+        p = new KeyframedValueProperty(elem, data, mult, container);
+        break;
+      case 1:
+        p = new KeyframedMultidimensionalProperty(elem, data, mult, container);
+        break;
+    }
+  }
+  if (p.effectsSequence.length) {
+    container.addDynamicProperty(p);
+  }
+  return p;
+}
+
+var PropertyFactory = { getProp: getProp };
+
+// import { hasExpression, getExpression } from '../../utils/Expression';
+// const initFrame = -999999;
+// const degToRads = Math.PI/180;
+
+/**
+ * basic shape property
+ */
+
+var BaseShapeProperty = function () {
+  function BaseShapeProperty() {
+    classCallCheck(this, BaseShapeProperty);
+  }
+
+  createClass(BaseShapeProperty, [{
+    key: 'interpolateShape',
+
+    /**
+     * interpolate shape
+     * @param {*} frameNum frame number
+     * @param {*} previousValue previous value
+     * @param {*} caching caching object
+     */
+    value: function interpolateShape(frameNum, previousValue, caching) {
+      var iterationIndex = caching.lastIndex;
+      var keyPropS = void 0;var keyPropE = void 0;var isHold = void 0;var j = void 0;var k = void 0;var jLen = void 0;var kLen = void 0;var perc = void 0;var vertexValue = void 0;
+      var kf = this.keyframes;
+      if (frameNum < kf[0].t) {
+        keyPropS = kf[0].s[0];
+        isHold = true;
+        iterationIndex = 0;
+      } else if (frameNum >= kf[kf.length - 1].t) {
+        keyPropS = kf[kf.length - 1].s ? kf[kf.length - 1].s[0] : kf[kf.length - 2].e[0];
+        /* if(kf[kf.length - 1].s){
+                  keyPropS = kf[kf.length - 1].s[0];
+              }else{
+                  keyPropS = kf[kf.length - 2].e[0];
+              }*/
+        isHold = true;
+      } else {
+        var i = iterationIndex;
+        var len = kf.length - 1;var flag = true;var keyData = void 0;var nextKeyData = void 0;
+        while (flag) {
+          keyData = kf[i];
+          nextKeyData = kf[i + 1];
+          if (nextKeyData.t > frameNum) {
+            break;
+          }
+          if (i < len - 1) {
+            i += 1;
+          } else {
+            flag = false;
+          }
+        }
+        isHold = keyData.h === 1;
+        iterationIndex = i;
+        if (!isHold) {
+          if (frameNum >= nextKeyData.t) {
+            perc = 1;
+          } else if (frameNum < keyData.t) {
+            perc = 0;
+          } else {
+            var fnc = void 0;
+            if (keyData.__fnct) {
+              fnc = keyData.__fnct;
+            } else {
+              fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y).get;
+              keyData.__fnct = fnc;
+            }
+            perc = fnc((frameNum - keyData.t) / (nextKeyData.t - keyData.t));
+          }
+          keyPropE = nextKeyData.s ? nextKeyData.s[0] : keyData.e[0];
+        }
+        keyPropS = keyData.s[0];
+      }
+      jLen = previousValue._length;
+      kLen = keyPropS.i[0].length;
+      caching.lastIndex = iterationIndex;
+
+      for (j = 0; j < jLen; j += 1) {
+        for (k = 0; k < kLen; k += 1) {
+          vertexValue = isHold ? keyPropS.i[j][k] : keyPropS.i[j][k] + (keyPropE.i[j][k] - keyPropS.i[j][k]) * perc;
+          previousValue.i[j][k] = vertexValue;
+          vertexValue = isHold ? keyPropS.o[j][k] : keyPropS.o[j][k] + (keyPropE.o[j][k] - keyPropS.o[j][k]) * perc;
+          previousValue.o[j][k] = vertexValue;
+          vertexValue = isHold ? keyPropS.v[j][k] : keyPropS.v[j][k] + (keyPropE.v[j][k] - keyPropS.v[j][k]) * perc;
+          previousValue.v[j][k] = vertexValue;
+        }
+      }
+    }
+
+    /**
+     * interpolate shape with currentTime
+     * @param {*} frameNum frame number
+     * @return {*}
+     */
+
+  }, {
+    key: 'interpolateShapeCurrentTime',
+    value: function interpolateShapeCurrentTime(frameNum) {
+      var initTime = this.keyframes[0].t;
+      var endTime = this.keyframes[this.keyframes.length - 1].t;
+      var lastFrame = this._caching.lastFrame;
+      if (!(lastFrame !== initialDefaultFrame && (lastFrame < initTime && frameNum < initTime || lastFrame > endTime && frameNum > endTime))) {
+        // //
+        this._caching.lastIndex = lastFrame < frameNum ? this._caching.lastIndex : 0;
+        this.interpolateShape(frameNum, this.pv, this._caching);
+        // //
+      }
+      this._caching.lastFrame = frameNum;
+      return this.pv;
+    }
+
+    /**
+     * reset shape
+     */
+
+  }, {
+    key: 'resetShape',
+    value: function resetShape() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * is shapes is equal
+     * @param {*} shape1 shape1
+     * @param {*} shape2 shape2
+     * @return {*}
+     */
+
+  }, {
+    key: 'shapesEqual',
+    value: function shapesEqual(shape1, shape2) {
+      if (shape1._length !== shape2._length || shape1.c !== shape2.c) {
+        return false;
+      }
+      var i = void 0;var len = shape1._length;
+      for (i = 0; i < len; i += 1) {
+        if (shape1.v[i][0] !== shape2.v[i][0] || shape1.v[i][1] !== shape2.v[i][1] || shape1.o[i][0] !== shape2.o[i][0] || shape1.o[i][1] !== shape2.o[i][1] || shape1.i[i][0] !== shape2.i[i][0] || shape1.i[i][1] !== shape2.i[i][1]) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /**
+     * set new path to this.v
+     * @param {*} newPath new path
+     */
+
+  }, {
+    key: 'setVValue',
+    value: function setVValue(newPath) {
+      if (!this.shapesEqual(this.v, newPath)) {
+        this.v = ShapePool.clone(newPath);
+        this.localShapeCollection.releaseShapes();
+        this.localShapeCollection.addShape(this.v);
+        this._mdf = true;
+        this.paths = this.localShapeCollection;
+      }
+    }
+
+    /**
+     * process effects sequence
+     * @param {*} frameNum frame number
+     */
+
+  }, {
+    key: 'processEffectsSequence',
+    value: function processEffectsSequence(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      } else if (!this.effectsSequence.length) {
+        this._mdf = false;
+        return;
+      }
+      if (this.lock) {
+        this.setVValue(this.pv);
+        return;
+      }
+      this.lock = true;
+      this._mdf = false;
+      var finalValue = this.kf ? this.pv : this.data.ks ? this.data.ks.k : this.data.pt.k;
+      var i = void 0;var len = this.effectsSequence.length;
+      for (i = 0; i < len; i += 1) {
+        finalValue = this.effectsSequence[i](frameNum);
+      }
+      this.setVValue(finalValue);
+      this.lock = false;
+      this.frameId = frameNum;
+    }
+
+    /**
+     * add effect
+     * @param {*} effectFunction effect funstion
+     */
+
+  }, {
+    key: 'addEffect',
+    value: function addEffect(effectFunction) {
+      console.log('addEffect', effectFunction);
+      this.effectsSequence.push(effectFunction);
+      this.container.addDynamicProperty(this);
+    }
+  }]);
+  return BaseShapeProperty;
+}();
+
+/**
+ * shape property
+ */
+
+
+var ShapeProperty = function (_BaseShapeProperty) {
+  inherits(ShapeProperty, _BaseShapeProperty);
+
+  /**
+   * constructor shape property
+   * @param {*} elem element node
+   * @param {*} data shape value property data
+   * @param {*} type shape propType
+   */
+  function ShapeProperty(elem, data, type) {
+    classCallCheck(this, ShapeProperty);
+
+    var _this = possibleConstructorReturn(this, (ShapeProperty.__proto__ || Object.getPrototypeOf(ShapeProperty)).call(this));
+
+    _this.propType = 'shape';
+    _this.comp = elem.comp;
+    _this.container = elem;
+    _this.elem = elem;
+    _this.data = data;
+    _this.k = false;
+    _this.kf = false;
+    _this._mdf = false;
+    var pathData = type === 3 ? data.pt.k : data.ks.k;
+    _this.v = ShapePool.clone(pathData);
+    _this.pv = ShapePool.clone(_this.v);
+    _this.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+    _this.paths = _this.localShapeCollection;
+    _this.paths.addShape(_this.v);
+    _this.reset = _this.resetShape;
+    _this.effectsSequence = [];
+    _this.getValue = _this.processEffectsSequence;
+    return _this;
+  }
+
+  return ShapeProperty;
+}(BaseShapeProperty);
+
+/**
+ * keyframed shape property
+ */
+
+
+var KeyframedShapeProperty = function (_BaseShapeProperty2) {
+  inherits(KeyframedShapeProperty, _BaseShapeProperty2);
+
+  /**
+   * constructor keyframed shape property
+   * @param {*} elem element node
+   * @param {*} data shape value property data
+   * @param {*} type shape propType
+   */
+  function KeyframedShapeProperty(elem, data, type) {
+    classCallCheck(this, KeyframedShapeProperty);
+
+    var _this2 = possibleConstructorReturn(this, (KeyframedShapeProperty.__proto__ || Object.getPrototypeOf(KeyframedShapeProperty)).call(this));
+
+    _this2.propType = 'shape';
+    _this2.comp = elem.comp;
+    _this2.elem = elem;
+    _this2.container = elem;
+    // this.offsetTime = elem.data.st;
+    _this2.keyframes = type === 3 ? data.pt.k : data.ks.k;
+    _this2.k = true;
+    _this2.kf = true;
+    var len = _this2.keyframes[0].s[0].i.length;
+    // let jLen = this.keyframes[0].s[0].i[0].length;
+    _this2.v = ShapePool.newElement();
+    _this2.v.setPathData(_this2.keyframes[0].s[0].c, len);
+    _this2.pv = ShapePool.clone(_this2.v);
+    _this2.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+    _this2.paths = _this2.localShapeCollection;
+    _this2.paths.addShape(_this2.v);
+    _this2.lastFrame = initialDefaultFrame;
+    _this2.reset = _this2.resetShape;
+    _this2._caching = { lastFrame: initialDefaultFrame, lastIndex: 0 };
+    _this2.effectsSequence = [_this2.interpolateShapeCurrentTime.bind(_this2)];
+    _this2.getValue = _this2.processEffectsSequence;
+
+    _this2._hasOutTypeExpression = false;
+    if (Expression.hasSupportExpression(data)) {
+      _this2.expression = Expression.getExpression(data);
+      _this2._hasOutTypeExpression = _this2.expression.type === 'out';
+    }
+    return _this2;
+  }
+
+  return KeyframedShapeProperty;
+}(BaseShapeProperty);
+
+/**
+ * ellipse shape property
+ */
+
+
+var EllShapeProperty = function (_DynamicPropertyConta) {
+  inherits(EllShapeProperty, _DynamicPropertyConta);
+
+  /**
+   * constructor ellipse shape property
+   * @param {*} elem element node
+   * @param {*} data shape value property data
+   */
+  function EllShapeProperty(elem, data) {
+    classCallCheck(this, EllShapeProperty);
+
+    // this.v = {
+    //   v: createSizedArray(4),
+    //   i: createSizedArray(4),
+    //   o: createSizedArray(4),
+    //   c: true
+    // };
+    var _this3 = possibleConstructorReturn(this, (EllShapeProperty.__proto__ || Object.getPrototypeOf(EllShapeProperty)).call(this));
+
+    _this3.v = ShapePool.newElement();
+    _this3.v.setPathData(true, 4);
+    _this3.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+    _this3.paths = _this3.localShapeCollection;
+    _this3.localShapeCollection.addShape(_this3.v);
+    _this3.d = data.d;
+    _this3.elem = elem;
+    _this3.comp = elem.comp;
+    _this3.frameId = -1;
+    _this3.initDynamicPropertyContainer(elem);
+    _this3.p = PropertyFactory.getProp(elem, data.p, 1, 0, _this3);
+    _this3.s = PropertyFactory.getProp(elem, data.s, 1, 0, _this3);
+    if (_this3.dynamicProperties.length) {
+      _this3.k = true;
+    } else {
+      _this3.k = false;
+      _this3.convertEllToPath();
+    }
+    return _this3;
+  }
+
+  /**
+   * reset shape
+   */
+
+
+  createClass(EllShapeProperty, [{
+    key: 'reset',
+    value: function reset() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * get point with frameId
+     * @param {*} frameNum frame number
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+      this.iterateDynamicProperties(frameNum);
+      this.frameId = frameNum;
+
+      if (this._mdf) {
+        this.convertEllToPath();
+      }
+    }
+
+    /**
+     * convert ellipse to path
+     */
+
+  }, {
+    key: 'convertEllToPath',
+    value: function convertEllToPath() {
+      var p0 = this.p.v[0];
+      var p1 = this.p.v[1];
+      var s0 = this.s.v[0] / 2;
+      var s1 = this.s.v[1] / 2;
+      var _cw = this.d !== 3;
+      var _v = this.v;
+      _v.v[0][0] = p0;
+      _v.v[0][1] = p1 - s1;
+      _v.v[1][0] = _cw ? p0 + s0 : p0 - s0;
+      _v.v[1][1] = p1;
+      _v.v[2][0] = p0;
+      _v.v[2][1] = p1 + s1;
+      _v.v[3][0] = _cw ? p0 - s0 : p0 + s0;
+      _v.v[3][1] = p1;
+      _v.i[0][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
+      _v.i[0][1] = p1 - s1;
+      _v.i[1][0] = _cw ? p0 + s0 : p0 - s0;
+      _v.i[1][1] = p1 - s1 * cPoint;
+      _v.i[2][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
+      _v.i[2][1] = p1 + s1;
+      _v.i[3][0] = _cw ? p0 - s0 : p0 + s0;
+      _v.i[3][1] = p1 + s1 * cPoint;
+      _v.o[0][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
+      _v.o[0][1] = p1 - s1;
+      _v.o[1][0] = _cw ? p0 + s0 : p0 - s0;
+      _v.o[1][1] = p1 + s1 * cPoint;
+      _v.o[2][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
+      _v.o[2][1] = p1 + s1;
+      _v.o[3][0] = _cw ? p0 - s0 : p0 + s0;
+      _v.o[3][1] = p1 - s1 * cPoint;
+    }
+  }]);
+  return EllShapeProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * star shape property
+ */
+
+
+var StarShapeProperty = function (_DynamicPropertyConta2) {
+  inherits(StarShapeProperty, _DynamicPropertyConta2);
+
+  /**
+   * constructor star shape property
+   * @param {*} elem element node
+   * @param {*} data shape value property data
+   */
+  function StarShapeProperty(elem, data) {
+    classCallCheck(this, StarShapeProperty);
+
+    var _this4 = possibleConstructorReturn(this, (StarShapeProperty.__proto__ || Object.getPrototypeOf(StarShapeProperty)).call(this));
+
+    _this4.v = ShapePool.newElement();
+    _this4.v.setPathData(true, 0);
+    _this4.elem = elem;
+    _this4.comp = elem.comp;
+    _this4.data = data;
+    _this4.frameId = -1;
+    _this4.d = data.d;
+    _this4.initDynamicPropertyContainer(elem);
+    if (data.sy === 1) {
+      _this4.ir = PropertyFactory.getProp(elem, data.ir, 0, 0, _this4);
+      _this4.is = PropertyFactory.getProp(elem, data.is, 0, 0.01, _this4);
+      _this4.convertToPath = _this4.convertStarToPath;
+    } else {
+      _this4.convertToPath = _this4.convertPolygonToPath;
+    }
+    _this4.pt = PropertyFactory.getProp(elem, data.pt, 0, 0, _this4);
+    _this4.p = PropertyFactory.getProp(elem, data.p, 1, 0, _this4);
+    _this4.r = PropertyFactory.getProp(elem, data.r, 0, degToRads, _this4);
+    _this4.or = PropertyFactory.getProp(elem, data.or, 0, 0, _this4);
+    _this4.os = PropertyFactory.getProp(elem, data.os, 0, 0.01, _this4);
+    _this4.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+    _this4.localShapeCollection.addShape(_this4.v);
+    _this4.paths = _this4.localShapeCollection;
+    if (_this4.dynamicProperties.length) {
+      _this4.k = true;
+    } else {
+      _this4.k = false;
+      _this4.convertToPath();
+    }
+    return _this4;
+  }
+
+  /**
+   * reset shape
+   */
+
+
+  createClass(StarShapeProperty, [{
+    key: 'reset',
+    value: function reset() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * get point with frameId
+     * @param {*} frameNum frame number
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+      this.frameId = frameNum;
+      this.iterateDynamicProperties(frameNum);
+
+      if (this._mdf) {
+        this.convertToPath();
+      }
+    }
+
+    /**
+     * convert star to path
+     */
+
+  }, {
+    key: 'convertStarToPath',
+    value: function convertStarToPath() {
+      var numPts = Math.floor(this.pt.v) * 2;
+      var angle = Math.PI * 2 / numPts;
+      /* this.v.v.length = numPts;
+              this.v.i.length = numPts;
+              this.v.o.length = numPts;*/
+      var longFlag = true;
+      var longRad = this.or.v;
+      var shortRad = this.ir.v;
+      var longRound = this.os.v;
+      var shortRound = this.is.v;
+      var longPerimSegment = 2 * Math.PI * longRad / (numPts * 2);
+      var shortPerimSegment = 2 * Math.PI * shortRad / (numPts * 2);
+      var i = void 0;var rad = void 0;var roundness = void 0;var perimSegment = void 0;var currentAng = -Math.PI / 2;
+      currentAng += this.r.v;
+      var dir = this.data.d === 3 ? -1 : 1;
+      this.v._length = 0;
+      for (i = 0; i < numPts; i += 1) {
+        rad = longFlag ? longRad : shortRad;
+        roundness = longFlag ? longRound : shortRound;
+        perimSegment = longFlag ? longPerimSegment : shortPerimSegment;
+        var x = rad * Math.cos(currentAng);
+        var y = rad * Math.sin(currentAng);
+        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
+        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
+        x += +this.p.v[0];
+        y += +this.p.v[1];
+        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
+
+        /* this.v.v[i] = [x,y];
+                  this.v.i[i] = [x+ox*perimSegment*roundness*dir,y+oy*perimSegment*roundness*dir];
+                  this.v.o[i] = [x-ox*perimSegment*roundness*dir,y-oy*perimSegment*roundness*dir];
+                  this.v._length = numPts;*/
+        longFlag = !longFlag;
+        currentAng += angle * dir;
+      }
+    }
+
+    /**
+     * convert polygon to path
+     */
+
+  }, {
+    key: 'convertPolygonToPath',
+    value: function convertPolygonToPath() {
+      var numPts = Math.floor(this.pt.v);
+      var angle = Math.PI * 2 / numPts;
+      var rad = this.or.v;
+      var roundness = this.os.v;
+      var perimSegment = 2 * Math.PI * rad / (numPts * 4);
+      var i = void 0;var currentAng = -Math.PI / 2;
+      var dir = this.data.d === 3 ? -1 : 1;
+      currentAng += this.r.v;
+      this.v._length = 0;
+      for (i = 0; i < numPts; i += 1) {
+        var x = rad * Math.cos(currentAng);
+        var y = rad * Math.sin(currentAng);
+        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
+        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
+        x += +this.p.v[0];
+        y += +this.p.v[1];
+        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
+        currentAng += angle * dir;
+      }
+      this.paths.length = 0;
+      this.paths[0] = this.v;
+    }
+  }]);
+  return StarShapeProperty;
+}(DynamicPropertyContainer);
+
+var roundCorner = 0.5519;
+var cPoint = roundCorner;
+
+/**
+ * rect shape property
+ */
+
+var RectShapeProperty = function (_DynamicPropertyConta3) {
+  inherits(RectShapeProperty, _DynamicPropertyConta3);
+
+  /**
+   * constructor rect shape property
+   * @param {*} elem element node
+   * @param {*} data shape value property data
+   */
+  function RectShapeProperty(elem, data) {
+    classCallCheck(this, RectShapeProperty);
+
+    var _this5 = possibleConstructorReturn(this, (RectShapeProperty.__proto__ || Object.getPrototypeOf(RectShapeProperty)).call(this));
+
+    _this5.v = ShapePool.newElement();
+    _this5.v.c = true;
+    _this5.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+    _this5.localShapeCollection.addShape(_this5.v);
+    _this5.paths = _this5.localShapeCollection;
+    _this5.elem = elem;
+    _this5.comp = elem.comp;
+    _this5.frameId = -1;
+    _this5.d = data.d;
+    _this5.initDynamicPropertyContainer(elem);
+    _this5.p = PropertyFactory.getProp(elem, data.p, 1, 0, _this5);
+    _this5.s = PropertyFactory.getProp(elem, data.s, 1, 0, _this5);
+    _this5.r = PropertyFactory.getProp(elem, data.r, 0, 0, _this5);
+    if (_this5.dynamicProperties.length) {
+      _this5.k = true;
+    } else {
+      _this5.k = false;
+      _this5.convertRectToPath();
+    }
+    return _this5;
+  }
+
+  /**
+   * reset shape
+   */
+
+
+  createClass(RectShapeProperty, [{
+    key: 'reset',
+    value: function reset() {
+      this.paths = this.localShapeCollection;
+    }
+
+    /**
+     * get point with frameId
+     * @param {*} frameNum frame number
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+      this.frameId = frameNum;
+      this.iterateDynamicProperties(frameNum);
+
+      if (this._mdf) {
+        this.convertRectToPath();
+      }
+    }
+
+    /**
+     * convert rect to path
+     */
+
+  }, {
+    key: 'convertRectToPath',
+    value: function convertRectToPath() {
+      var p0 = this.p.v[0];var p1 = this.p.v[1];var v0 = this.s.v[0] / 2;var v1 = this.s.v[1] / 2;
+      var round = Math.min(v0, v1, this.r.v);
+      var cPoint = round * (1 - roundCorner);
+      this.v._length = 0;
+
+      if (this.d === 2 || this.d === 1) {
+        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, 0, true);
+        this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, p0 + v0, p1 + v1 - round, 1, true);
+        if (round !== 0) {
+          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, 2, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0 + round, p1 + v1, 3, true);
+          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, 4, true);
+          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1 + round, 5, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, 6, true);
+          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, p0 + v0 - round, p1 - v1, 7, true);
+        } else {
+          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0, p1 + v1, 2);
+          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1, 3);
+        }
+      } else {
+        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, p0 + v0, p1 - v1 + round, 0, true);
+        if (round !== 0) {
+          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, 1, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0 + round, p1 - v1, 2, true);
+          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, 3, true);
+          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1 - round, 4, true);
+          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, 5, true);
+          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0 - round, p1 + v1, 6, true);
+          this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, 7, true);
+        } else {
+          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0, p1 - v1, 1, true);
+          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1, 2, true);
+          this.v.setTripleAt(p0 + v0, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0, p1 + v1, 3, true);
+        }
+      }
+    }
+  }]);
+  return RectShapeProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * get shape prop with data
+ * @param {*} elem element node
+ * @param {*} data shape value property data
+ * @param {*} type lottie shape type
+ * @return {*}
+ */
+
+
+function getShapeProp(elem, data, type) {
+  var prop = void 0;
+  if (type === 3 || type === 4) {
+    var dataProp = type === 3 ? data.pt : data.ks;
+    var keys = dataProp.k;
+    if (keys.length) {
+      prop = new KeyframedShapeProperty(elem, data, type);
+    } else {
+      prop = new ShapeProperty(elem, data, type);
+    }
+  } else if (type === 5) {
+    prop = new RectShapeProperty(elem, data);
+  } else if (type === 6) {
+    prop = new EllShapeProperty(elem, data);
+  } else if (type === 7) {
+    prop = new StarShapeProperty(elem, data);
+  }
+  if (prop.k) {
+    // FIXME: maybe not needed
+    elem.addDynamicProperty(prop);
+  }
+  return prop;
+}
+
+/**
+ * get ShapeProperty class
+ * @return {ShapeProperty}
+ */
+function getConstructorFunction() {
+  return ShapeProperty;
+}
+
+/**
+ * get KeyframedShapeProperty class
+ * @return {KeyframedShapeProperty}
+ */
+function getKeyframedConstructorFunction() {
+  return KeyframedShapeProperty;
+}
+
+var ShapePropertyFactory = { getShapeProp: getShapeProp, getConstructorFunction: getConstructorFunction, getKeyframedConstructorFunction: getKeyframedConstructorFunction };
+
+// import {
+//   Graphics,
+// } from 'pixi.js';
+/**
+ * a
+ */
+
+var MaskFrames = function (_DynamicPropertyConta) {
+  inherits(MaskFrames, _DynamicPropertyConta);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} masksProperties a
+   * @param {*} session a
+   */
+  function MaskFrames(elem, masksProperties, session) {
+    classCallCheck(this, MaskFrames);
+
+    var _this = possibleConstructorReturn(this, (MaskFrames.__proto__ || Object.getPrototypeOf(MaskFrames)).call(this));
+
+    _this.frameId = -1;
+    _this.elem = elem;
+    _this.session = session;
+    _this.masksProperties = masksProperties || [];
+    _this.initDynamicPropertyContainer(elem);
+    _this.viewData = createSizedArray(_this.masksProperties.length);
+    var len = _this.masksProperties.length;
+    var hasMasks = false;
+    for (var i = 0; i < len; i++) {
+      if (_this.masksProperties[i].mode !== 'n') {
+        hasMasks = true;
+      }
+      _this.viewData[i] = ShapePropertyFactory.getShapeProp(_this, _this.masksProperties[i], 3);
+      _this.viewData[i].inv = _this.masksProperties[i].inv;
+    }
+    _this.hasMasks = hasMasks;
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {number} frameNum frameNum
+   */
+
+
+  createClass(MaskFrames, [{
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+
+      this.iterateDynamicProperties(frameNum);
+
+      this.frameId = frameNum;
+    }
+  }]);
+  return MaskFrames;
+}(DynamicPropertyContainer);
+
+/* eslint-disable */
+/*!
+ Transformation Matrix v2.0
+ (c) Epistemex 2014-2015
+ www.epistemex.com
+ By Ken Fyrstenberg
+ Contributions by leeoniya.
+ License: MIT, header required.
+ */
+
+/**
+ * 2D transformation matrix object initialized with identity matrix.
+ *
+ * The matrix can synchronize a canvas context by supplying the context
+ * as an argument, or later apply current absolute transform to an
+ * existing context.
+ *
+ * All values are handled as floating point values.
+ *
+ * @param {CanvasRenderingContext2D} [context] - Optional context to sync with Matrix
+ * @prop {number} a - scale x
+ * @prop {number} b - shear y
+ * @prop {number} c - shear x
+ * @prop {number} d - scale y
+ * @prop {number} e - translate x
+ * @prop {number} f - translate y
+ * @prop {CanvasRenderingContext2D|null} [context=null] - set or get current canvas context
+ * @constructor
+ */
+
+var Matrix = function () {
+
+    var _cos = Math.cos;
+    var _sin = Math.sin;
+    var _tan = Math.tan;
+    var _rnd = Math.round;
+
+    function reset() {
+        this.props[0] = 1;
+        this.props[1] = 0;
+        this.props[2] = 0;
+        this.props[3] = 0;
+        this.props[4] = 0;
+        this.props[5] = 1;
+        this.props[6] = 0;
+        this.props[7] = 0;
+        this.props[8] = 0;
+        this.props[9] = 0;
+        this.props[10] = 1;
+        this.props[11] = 0;
+        this.props[12] = 0;
+        this.props[13] = 0;
+        this.props[14] = 0;
+        this.props[15] = 1;
+        return this;
+    }
+
+    function rotate(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    }
+
+    function rotateX(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(1, 0, 0, 0, 0, mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1);
+    }
+
+    function rotateY(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, 0, mSin, 0, 0, 1, 0, 0, -mSin, 0, mCos, 0, 0, 0, 0, 1);
+    }
+
+    function rotateZ(angle) {
+        if (angle === 0) {
+            return this;
+        }
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    }
+
+    function shear(sx, sy) {
+        return this._t(1, sy, sx, 1, 0, 0);
+    }
+
+    function skew(ax, ay) {
+        return this.shear(_tan(ax), _tan(ay));
+    }
+
+    function skewFromAxis(ax, angle) {
+        var mCos = _cos(angle);
+        var mSin = _sin(angle);
+        return this._t(mCos, mSin, 0, 0, -mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(1, 0, 0, 0, _tan(ax), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        //return this._t(mCos, mSin, -mSin, mCos, 0, 0)._t(1, 0, _tan(ax), 1, 0, 0)._t(mCos, -mSin, mSin, mCos, 0, 0);
+    }
+
+    function scale(sx, sy, sz) {
+        if (!sz && sz !== 0) {
+            sz = 1;
+        }
+        if (sx === 1 && sy === 1 && sz === 1) {
+            return this;
+        }
+        return this._t(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1);
+    }
+
+    function setTransform(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {
+        this.props[0] = a;
+        this.props[1] = b;
+        this.props[2] = c;
+        this.props[3] = d;
+        this.props[4] = e;
+        this.props[5] = f;
+        this.props[6] = g;
+        this.props[7] = h;
+        this.props[8] = i;
+        this.props[9] = j;
+        this.props[10] = k;
+        this.props[11] = l;
+        this.props[12] = m;
+        this.props[13] = n;
+        this.props[14] = o;
+        this.props[15] = p;
+        return this;
+    }
+
+    function translate(tx, ty, tz) {
+        tz = tz || 0;
+        if (tx !== 0 || ty !== 0 || tz !== 0) {
+            return this._t(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1);
+        }
+        return this;
+    }
+
+    function transform(a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2) {
+
+        var _p = this.props;
+
+        if (a2 === 1 && b2 === 0 && c2 === 0 && d2 === 0 && e2 === 0 && f2 === 1 && g2 === 0 && h2 === 0 && i2 === 0 && j2 === 0 && k2 === 1 && l2 === 0) {
+            //NOTE: commenting this condition because TurboFan deoptimizes code when present
+            //if(m2 !== 0 || n2 !== 0 || o2 !== 0){
+            _p[12] = _p[12] * a2 + _p[15] * m2;
+            _p[13] = _p[13] * f2 + _p[15] * n2;
+            _p[14] = _p[14] * k2 + _p[15] * o2;
+            _p[15] = _p[15] * p2;
+            //}
+            this._identityCalculated = false;
+            return this;
+        }
+
+        var a1 = _p[0];
+        var b1 = _p[1];
+        var c1 = _p[2];
+        var d1 = _p[3];
+        var e1 = _p[4];
+        var f1 = _p[5];
+        var g1 = _p[6];
+        var h1 = _p[7];
+        var i1 = _p[8];
+        var j1 = _p[9];
+        var k1 = _p[10];
+        var l1 = _p[11];
+        var m1 = _p[12];
+        var n1 = _p[13];
+        var o1 = _p[14];
+        var p1 = _p[15];
+
+        /* matrix order (canvas compatible):
+         * ace
+         * bdf
+         * 001
+         */
+        _p[0] = a1 * a2 + b1 * e2 + c1 * i2 + d1 * m2;
+        _p[1] = a1 * b2 + b1 * f2 + c1 * j2 + d1 * n2;
+        _p[2] = a1 * c2 + b1 * g2 + c1 * k2 + d1 * o2;
+        _p[3] = a1 * d2 + b1 * h2 + c1 * l2 + d1 * p2;
+
+        _p[4] = e1 * a2 + f1 * e2 + g1 * i2 + h1 * m2;
+        _p[5] = e1 * b2 + f1 * f2 + g1 * j2 + h1 * n2;
+        _p[6] = e1 * c2 + f1 * g2 + g1 * k2 + h1 * o2;
+        _p[7] = e1 * d2 + f1 * h2 + g1 * l2 + h1 * p2;
+
+        _p[8] = i1 * a2 + j1 * e2 + k1 * i2 + l1 * m2;
+        _p[9] = i1 * b2 + j1 * f2 + k1 * j2 + l1 * n2;
+        _p[10] = i1 * c2 + j1 * g2 + k1 * k2 + l1 * o2;
+        _p[11] = i1 * d2 + j1 * h2 + k1 * l2 + l1 * p2;
+
+        _p[12] = m1 * a2 + n1 * e2 + o1 * i2 + p1 * m2;
+        _p[13] = m1 * b2 + n1 * f2 + o1 * j2 + p1 * n2;
+        _p[14] = m1 * c2 + n1 * g2 + o1 * k2 + p1 * o2;
+        _p[15] = m1 * d2 + n1 * h2 + o1 * l2 + p1 * p2;
+
+        this._identityCalculated = false;
+        return this;
+    }
+
+    function isIdentity() {
+        if (!this._identityCalculated) {
+            this._identity = !(this.props[0] !== 1 || this.props[1] !== 0 || this.props[2] !== 0 || this.props[3] !== 0 || this.props[4] !== 0 || this.props[5] !== 1 || this.props[6] !== 0 || this.props[7] !== 0 || this.props[8] !== 0 || this.props[9] !== 0 || this.props[10] !== 1 || this.props[11] !== 0 || this.props[12] !== 0 || this.props[13] !== 0 || this.props[14] !== 0 || this.props[15] !== 1);
+            this._identityCalculated = true;
+        }
+        return this._identity;
+    }
+
+    function equals(matr) {
+        var i = 0;
+        while (i < 16) {
+            if (matr.props[i] !== this.props[i]) {
+                return false;
+            }
+            i += 1;
+        }
+        return true;
+    }
+
+    function clone(matr) {
+        var i;
+        for (i = 0; i < 16; i += 1) {
+            matr.props[i] = this.props[i];
+        }
+    }
+
+    function cloneFromProps(props) {
+        var i;
+        for (i = 0; i < 16; i += 1) {
+            this.props[i] = props[i];
+        }
+    }
+
+    function applyToPoint(x, y, z) {
+
+        return {
+            x: x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12],
+            y: x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13],
+            z: x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]
+        };
+        /*return {
+         x: x * me.a + y * me.c + me.e,
+         y: x * me.b + y * me.d + me.f
+         };*/
+    }
+    function applyToX(x, y, z) {
+        return x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12];
+    }
+    function applyToY(x, y, z) {
+        return x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13];
+    }
+    function applyToZ(x, y, z) {
+        return x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14];
+    }
+
+    function inversePoint(pt) {
+        var determinant = this.props[0] * this.props[5] - this.props[1] * this.props[4];
+        var a = this.props[5] / determinant;
+        var b = -this.props[1] / determinant;
+        var c = -this.props[4] / determinant;
+        var d = this.props[0] / determinant;
+        var e = (this.props[4] * this.props[13] - this.props[5] * this.props[12]) / determinant;
+        var f = -(this.props[0] * this.props[13] - this.props[1] * this.props[12]) / determinant;
+        return [pt[0] * a + pt[1] * c + e, pt[0] * b + pt[1] * d + f, 0];
+    }
+
+    function inversePoints(pts) {
+        var i,
+            len = pts.length,
+            retPts = [];
+        for (i = 0; i < len; i += 1) {
+            retPts[i] = inversePoint(pts[i]);
+        }
+        return retPts;
+    }
+
+    function applyToTriplePoints(pt1, pt2, pt3) {
+        var arr = createTypedArray('float32', 6);
+        if (this.isIdentity()) {
+            arr[0] = pt1[0];
+            arr[1] = pt1[1];
+            arr[2] = pt2[0];
+            arr[3] = pt2[1];
+            arr[4] = pt3[0];
+            arr[5] = pt3[1];
+        } else {
+            var p0 = this.props[0],
+                p1 = this.props[1],
+                p4 = this.props[4],
+                p5 = this.props[5],
+                p12 = this.props[12],
+                p13 = this.props[13];
+            arr[0] = pt1[0] * p0 + pt1[1] * p4 + p12;
+            arr[1] = pt1[0] * p1 + pt1[1] * p5 + p13;
+            arr[2] = pt2[0] * p0 + pt2[1] * p4 + p12;
+            arr[3] = pt2[0] * p1 + pt2[1] * p5 + p13;
+            arr[4] = pt3[0] * p0 + pt3[1] * p4 + p12;
+            arr[5] = pt3[0] * p1 + pt3[1] * p5 + p13;
+        }
+        return arr;
+    }
+
+    function applyToPointArray(x, y, z) {
+        var arr;
+        if (this.isIdentity()) {
+            arr = [x, y, z];
+        } else {
+            arr = [x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12], x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13], x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]];
+        }
+        return arr;
+    }
+
+    function applyToPointStringified(x, y) {
+        if (this.isIdentity()) {
+            return x + ',' + y;
+        }
+        var _p = this.props;
+        return Math.round((x * _p[0] + y * _p[4] + _p[12]) * 100) / 100 + ',' + Math.round((x * _p[1] + y * _p[5] + _p[13]) * 100) / 100;
+    }
+
+    function toCSS() {
+        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
+        /*if(this.isIdentity()) {
+            return '';
+        }*/
+        var i = 0;
+        var props = this.props;
+        var cssValue = 'matrix3d(';
+        var v = 10000;
+        while (i < 16) {
+            cssValue += _rnd(props[i] * v) / v;
+            cssValue += i === 15 ? ')' : ',';
+            i += 1;
+        }
+        return cssValue;
+    }
+
+    function roundMatrixProperty(val) {
+        var v = 10000;
+        if (val < 0.000001 && val > 0 || val > -0.000001 && val < 0) {
+            return _rnd(val * v) / v;
+        }
+        return val;
+    }
+
+    function to2dCSS() {
+        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
+        /*if(this.isIdentity()) {
+            return '';
+        }*/
+        var props = this.props;
+        var _a = roundMatrixProperty(props[0]);
+        var _b = roundMatrixProperty(props[1]);
+        var _c = roundMatrixProperty(props[4]);
+        var _d = roundMatrixProperty(props[5]);
+        var _e = roundMatrixProperty(props[12]);
+        var _f = roundMatrixProperty(props[13]);
+        return "matrix(" + _a + ',' + _b + ',' + _c + ',' + _d + ',' + _e + ',' + _f + ")";
+    }
+
+    return function () {
+        this.reset = reset;
+        this.rotate = rotate;
+        this.rotateX = rotateX;
+        this.rotateY = rotateY;
+        this.rotateZ = rotateZ;
+        this.skew = skew;
+        this.skewFromAxis = skewFromAxis;
+        this.shear = shear;
+        this.scale = scale;
+        this.setTransform = setTransform;
+        this.translate = translate;
+        this.transform = transform;
+        this.applyToPoint = applyToPoint;
+        this.applyToX = applyToX;
+        this.applyToY = applyToY;
+        this.applyToZ = applyToZ;
+        this.applyToPointArray = applyToPointArray;
+        this.applyToTriplePoints = applyToTriplePoints;
+        this.applyToPointStringified = applyToPointStringified;
+        this.toCSS = toCSS;
+        this.to2dCSS = to2dCSS;
+        this.clone = clone;
+        this.cloneFromProps = cloneFromProps;
+        this.equals = equals;
+        this.inversePoints = inversePoints;
+        this.inversePoint = inversePoint;
+        this._t = this.transform;
+        this.isIdentity = isIdentity;
+        this._identity = true;
+        this._identityCalculated = false;
+
+        this.props = createTypedArray('float32', 16);
+        this.reset();
+    };
+}();
+
+/**
+ * a
+ */
+
+var ShapeTransformManager = function () {
+  /**
+   * a
+   */
+  function ShapeTransformManager() {
+    classCallCheck(this, ShapeTransformManager);
+
+    this.sequences = {};
+    this.sequenceList = [];
+    this.transform_key_count = 0;
+  }
+
+  /**
+   * a
+   * @param {*} transforms a
+   * @return {*}
+   */
+
+
+  createClass(ShapeTransformManager, [{
+    key: 'addTransformSequence',
+    value: function addTransformSequence(transforms) {
+      var len = transforms.length;
+      var key = '_';
+      for (var i = 0; i < len; i += 1) {
+        key += transforms[i].transform.key + '_';
+      }
+      var sequence = this.sequences[key];
+      if (!sequence) {
+        sequence = {
+          transforms: [].concat(transforms),
+          finalTransform: new Matrix(),
+          _mdf: false
+        };
+        this.sequences[key] = sequence;
+        this.sequenceList.push(sequence);
+      }
+      return sequence;
+    }
+
+    /**
+     * a
+     * @param {*} sequence a
+     * @param {*} isFirstFrame a
+     */
+
+  }, {
+    key: 'processSequence',
+    value: function processSequence(sequence, isFirstFrame) {
+      var i = 0;
+      var _mdf = isFirstFrame;
+      var len = sequence.transforms.length;
+      while (i < len && !isFirstFrame) {
+        if (sequence.transforms[i].transform.mProps._mdf) {
+          _mdf = true;
+          break;
+        }
+        i += 1;
+      }
+      if (_mdf) {
+        var props = void 0;
+        sequence.finalTransform.reset();
+        for (i = len - 1; i >= 0; i -= 1) {
+          props = sequence.transforms[i].transform.mProps.v.props;
+          sequence.finalTransform.transform(props[0], props[1], props[2], props[3], props[4], props[5], props[6], props[7], props[8], props[9], props[10], props[11], props[12], props[13], props[14], props[15]);
+        }
+      }
+      sequence._mdf = _mdf;
+    }
+
+    /**
+     * a
+     * @param {*} isFirstFrame a
+     */
+
+  }, {
+    key: 'processSequences',
+    value: function processSequences(isFirstFrame) {
+      var len = this.sequenceList.length;
+      for (var i = 0; i < len; i += 1) {
+        this.processSequence(this.sequenceList[i], isFirstFrame);
+      }
+    }
+
+    /**
+     * a
+     * @return {*}
+     */
+
+  }, {
+    key: 'getNewKey',
+    value: function getNewKey() {
+      return '_' + this.transform_key_count++;
+    }
+  }]);
+  return ShapeTransformManager;
+}();
+
+/**
+ * ProcessedElement class
+ */
+var ProcessedElement =
+/**
+ * constructor processed elem
+ * @param {*} elem
+ * @param {*} position
+ */
+function ProcessedElement(elem, position) {
+  classCallCheck(this, ProcessedElement);
+
+  this.elem = elem;
+  this.pos = position;
+};
+
+/**
+ * ShapeData class
+ */
+
+var ShapeData = function () {
+  /**
+   * constructor ShapeData
+   * @param {*} element a
+   * @param {*} data a
+   * @param {*} styles a
+   * @param {*} transformsManager a
+   */
+  function ShapeData(element, data, styles, transformsManager) {
+    classCallCheck(this, ShapeData);
+
+    this.styledShapes = [];
+    this.tr = [0, 0, 0, 0, 0, 0];
+    var ty = 4;
+    if (data.ty == 'rc') {
+      ty = 5;
+    } else if (data.ty == 'el') {
+      ty = 6;
+    } else if (data.ty == 'sr') {
+      ty = 7;
+    }
+    this.sh = ShapePropertyFactory.getShapeProp(element, data, ty);
+    var len = styles.length;
+    for (var i = 0; i < len; i += 1) {
+      if (!styles[i].closed) {
+        var styledShape = {
+          transforms: transformsManager.addTransformSequence(styles[i].transforms),
+          trNodes: []
+        };
+        this.styledShapes.push(styledShape);
+        styles[i].elements.push(styledShape);
+      }
+    }
+  }
+
+  /**
+   * set as animated
+   */
+
+
+  createClass(ShapeData, [{
+    key: 'setAsAnimated',
+    value: function setAsAnimated() {
+      this._isAnimated = true;
+    }
+  }]);
+  return ShapeData;
+}();
+
+var display = {};
+var Type = {
+  Null: 'Null',
+  Path: 'Path',
+  Shape: 'Shape',
+  Solid: 'Solid',
+  Sprite: 'Sprite',
+  Container: 'Container'
+};
+
+/**
+ * setDisplayByType
+ * @param {*} type a
+ * @param {*} classFn a
+ */
+function setDisplayByType(type, classFn) {
+  display[type] = classFn;
+}
+
+/**
+ * a
+ * @param {*} type a
+ * @return {display}
+ */
+function getDisplayByType(type) {
+  return display[type];
+}
+
+var DisplayRegister = { Type: Type, setDisplayByType: setDisplayByType, getDisplayByType: getDisplayByType };
+
+/**
+ * a
+ */
+
+var PathPaint = function () {
+  /**
+   * constructor style element
+   * @param {*} elem item data
+   * @param {*} data item data
+   * @param {*} transforms transforms array
+   */
+  function PathPaint(elem, data, transforms) {
+    classCallCheck(this, PathPaint);
+
+    this.elem = elem;
+    this.data = data;
+    this.type = data.ty;
+    this.preTransforms = transforms;
+    this.transforms = [];
+    this.elements = [];
+    this.closed = data.hd === true;
+
+    this.displayType = DisplayRegister.Type.Path;
+    var classFn = DisplayRegister.getDisplayByType(this.displayType);
+    this.display = new classFn(this, data);
+    this.elem.display.addChild(this.display);
+  }
+
+  /**
+   * a
+   */
+
+
+  createClass(PathPaint, [{
+    key: 'updateGrahpics',
+    value: function updateGrahpics() {
+      this.display.updateLottieGrahpics(this);
+    }
+  }]);
+  return PathPaint;
+}();
+
+/**
+ * transform property origin from tr
+ */
+var TransformProperty = function (_DynamicPropertyConta) {
+  inherits(TransformProperty, _DynamicPropertyConta);
+
+  /**
+   * constructor about transform property
+   * @param {*} elem element node
+   * @param {*} data multidimensional value property data
+   * @param {*} container value property container
+   */
+  function TransformProperty(elem, data, container) {
+    classCallCheck(this, TransformProperty);
+
+    var _this = possibleConstructorReturn(this, (TransformProperty.__proto__ || Object.getPrototypeOf(TransformProperty)).call(this));
+
+    _this.elem = elem;
+    _this.frameId = -1;
+    _this.propType = 'transform';
+    _this.data = data;
+    _this.v = new Matrix();
+    // Precalculated matrix with non animated properties
+    _this.pre = new Matrix();
+    _this.appliedTransformations = 0;
+    _this.initDynamicPropertyContainer(container || elem);
+    if (data.p && data.p.s) {
+      _this.px = PropertyFactory.getProp(elem, data.p.x, 0, 0, _this);
+      _this.py = PropertyFactory.getProp(elem, data.p.y, 0, 0, _this);
+      if (data.p.z) {
+        _this.pz = PropertyFactory.getProp(elem, data.p.z, 0, 0, _this);
+      }
+    } else {
+      _this.p = PropertyFactory.getProp(elem, data.p || { k: [0, 0, 0] }, 1, 0, _this);
+    }
+    if (data.rx) {
+      _this.rx = PropertyFactory.getProp(elem, data.rx, 0, degToRads, _this);
+      _this.ry = PropertyFactory.getProp(elem, data.ry, 0, degToRads, _this);
+      _this.rz = PropertyFactory.getProp(elem, data.rz, 0, degToRads, _this);
+      if (data.or.k[0].ti) {
+        var i = void 0;var len = data.or.k.length;
+        for (i = 0; i < len; i += 1) {
+          data.or.k[i].to = data.or.k[i].ti = null;
+        }
+      }
+      _this.or = PropertyFactory.getProp(elem, data.or, 1, degToRads, _this);
+      // sh Indicates it needs to be capped between -180 and 180
+      _this.or.sh = true;
+    } else {
+      _this.r = PropertyFactory.getProp(elem, data.r || { k: 0 }, 0, degToRads, _this);
+    }
+    if (data.sk) {
+      _this.sk = PropertyFactory.getProp(elem, data.sk, 0, degToRads, _this);
+      _this.sa = PropertyFactory.getProp(elem, data.sa, 0, degToRads, _this);
+    }
+    _this.a = PropertyFactory.getProp(elem, data.a || { k: [0, 0, 0] }, 1, 0, _this);
+    _this.s = PropertyFactory.getProp(elem, data.s || { k: [100, 100, 100] }, 1, 0.01, _this);
+    // Opacity is not part of the transform properties, that's why it won't use this.dynamicProperties. That way transforms won't get updated if opacity changes.
+    if (data.o) {
+      _this.o = PropertyFactory.getProp(elem, data.o, 0, 0.01, elem);
+    } else {
+      _this.o = { _mdf: false, v: 1 };
+    }
+    _this._isDirty = true;
+    if (!_this.dynamicProperties.length) {
+      _this.getValue(initialDefaultFrame, true);
+    }
+    return _this;
+  }
+
+  /**
+   * add Dynamic Property
+   * @param {*} prop Dynamic Property
+   */
+  // addDynamicProperty(prop) {
+  //   super.addDynamicProperty(prop);
+  //   this.elem.addDynamicProperty(prop);
+  //   this._isDirty = true;
+  // }
+
+  /**
+   * get transform
+   * @param {*} frameNum a
+   * @param {Boolean} forceRender force render
+   */
+
+
+  createClass(TransformProperty, [{
+    key: 'getValue',
+    value: function getValue(frameNum, forceRender) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+      if (this._isDirty) {
+        this.precalculateMatrix();
+        this._isDirty = false;
+      }
+
+      this.iterateDynamicProperties();
+
+      if (this._mdf || forceRender) {
+        this.v.cloneFromProps(this.pre.props);
+        if (this.appliedTransformations < 1) {
+          this.v.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+        }
+        if (this.appliedTransformations < 2) {
+          this.v.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+        }
+        if (this.sk && this.appliedTransformations < 3) {
+          this.v.skewFromAxis(-this.sk.v, this.sa.v);
+        }
+        if (this.r && this.appliedTransformations < 4) {
+          this.v.rotate(-this.r.v);
+        } else if (!this.r && this.appliedTransformations < 4) {
+          this.v.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+        }
+        if (this.autoOriented) {
+          var v1 = void 0;var v2 = void 0;
+          // FIXME: should use frame interval
+          var frameRate = this.elem.globalData.frameRate;
+          if (this.p && this.p.keyframes && this.p.getValueAtTime) {
+            if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
+              v1 = this.p.getValueAtTime((this.p.keyframes[0].t + 0.01) / frameRate, 0);
+              v2 = this.p.getValueAtTime(this.p.keyframes[0].t / frameRate, 0);
+            } else if (this.p._caching.lastFrame + this.p.offsetTime >= this.p.keyframes[this.p.keyframes.length - 1].t) {
+              v1 = this.p.getValueAtTime(this.p.keyframes[this.p.keyframes.length - 1].t / frameRate, 0);
+              v2 = this.p.getValueAtTime((this.p.keyframes[this.p.keyframes.length - 1].t - 0.05) / frameRate, 0);
+            } else {
+              v1 = this.p.pv;
+              v2 = this.p.getValueAtTime((this.p._caching.lastFrame + this.p.offsetTime - 0.01) / frameRate, this.p.offsetTime);
+            }
+          } else if (this.px && this.px.keyframes && this.py.keyframes && this.px.getValueAtTime && this.py.getValueAtTime) {
+            v1 = [];
+            v2 = [];
+            var px = this.px;var py = this.py;
+            if (px._caching.lastFrame + px.offsetTime <= px.keyframes[0].t) {
+              v1[0] = px.getValueAtTime((px.keyframes[0].t + 0.01) / frameRate, 0);
+              v1[1] = py.getValueAtTime((py.keyframes[0].t + 0.01) / frameRate, 0);
+              v2[0] = px.getValueAtTime(px.keyframes[0].t / frameRate, 0);
+              v2[1] = py.getValueAtTime(py.keyframes[0].t / frameRate, 0);
+            } else if (px._caching.lastFrame + px.offsetTime >= px.keyframes[px.keyframes.length - 1].t) {
+              v1[0] = px.getValueAtTime(px.keyframes[px.keyframes.length - 1].t / frameRate, 0);
+              v1[1] = py.getValueAtTime(py.keyframes[py.keyframes.length - 1].t / frameRate, 0);
+              v2[0] = px.getValueAtTime((px.keyframes[px.keyframes.length - 1].t - 0.01) / frameRate, 0);
+              v2[1] = py.getValueAtTime((py.keyframes[py.keyframes.length - 1].t - 0.01) / frameRate, 0);
+            } else {
+              v1 = [px.pv, py.pv];
+              v2[0] = px.getValueAtTime((px._caching.lastFrame + px.offsetTime - 0.01) / frameRate, px.offsetTime);
+              v2[1] = py.getValueAtTime((py._caching.lastFrame + py.offsetTime - 0.01) / frameRate, py.offsetTime);
+            }
+          } else {
+            v1 = v2 = defaultVector;
+          }
+          this.v.rotate(-Math.atan2(v1[1] - v2[1], v1[0] - v2[0]));
+        }
+        if (this.data.p && this.data.p.s) {
+          if (this.data.p.z) {
+            this.v.translate(this.px.v, this.py.v, -this.pz.v);
+          } else {
+            this.v.translate(this.px.v, this.py.v, 0);
+          }
+        } else {
+          this.v.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
+        }
+      }
+      this.frameId = frameNum;
+    }
+
+    /**
+     * pre calculate matrix for performance
+     */
+
+  }, {
+    key: 'precalculateMatrix',
+    value: function precalculateMatrix() {
+      if (!this.a.k) {
+        this.pre.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+        this.appliedTransformations = 1;
+      } else {
+        return;
+      }
+      if (!this.s.effectsSequence.length) {
+        this.pre.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+        this.appliedTransformations = 2;
+      } else {
+        return;
+      }
+      if (this.sk) {
+        if (!this.sk.effectsSequence.length && !this.sa.effectsSequence.length) {
+          this.pre.skewFromAxis(-this.sk.v, this.sa.v);
+          this.appliedTransformations = 3;
+        } else {
+          return;
+        }
+      }
+      if (this.r) {
+        if (!this.r.effectsSequence.length) {
+          this.pre.rotate(-this.r.v);
+          this.appliedTransformations = 4;
+        } else {
+          return;
+        }
+      } else if (!this.rz.effectsSequence.length && !this.ry.effectsSequence.length && !this.rx.effectsSequence.length && !this.or.effectsSequence.length) {
+        this.pre.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+        this.appliedTransformations = 4;
+      }
+    }
+
+    /**
+     * apply a matrix
+     * @param {*} mat matrix
+     */
+
+  }, {
+    key: 'applyToMatrix',
+    value: function applyToMatrix(mat) {
+      var _mdf = this._mdf;
+      this.iterateDynamicProperties();
+      this._mdf = this._mdf || _mdf;
+      if (this.a) {
+        mat.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+      }
+      if (this.s) {
+        mat.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+      }
+      if (this.sk) {
+        mat.skewFromAxis(-this.sk.v, this.sa.v);
+      }
+      if (this.r) {
+        mat.rotate(-this.r.v);
+      } else {
+        mat.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+      }
+      if (this.data.p.s) {
+        if (this.data.p.z) {
+          mat.translate(this.px.v, this.py.v, -this.pz.v);
+        } else {
+          mat.translate(this.px.v, this.py.v, 0);
+        }
+      } else {
+        mat.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
+      }
+    }
+  }]);
+  return TransformProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * get a transform property
+ * @param {*} elem element node
+ * @param {*} data multidimensional value property data
+ * @param {*} container value property container
+ * @return {TransformProperty}
+ */
+function getTransformProperty(elem, data, container) {
+  return new TransformProperty(elem, data, container);
+}
+
+// export default { getTransformProperty };
+
+/**
+ * a
+ */
+
+var ShapeModifier = function (_DynamicPropertyConta) {
+  inherits(ShapeModifier, _DynamicPropertyConta);
+
+  function ShapeModifier() {
+    classCallCheck(this, ShapeModifier);
+    return possibleConstructorReturn(this, (ShapeModifier.__proto__ || Object.getPrototypeOf(ShapeModifier)).apply(this, arguments));
+  }
+
+  createClass(ShapeModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * a
+     */
+    value: function initModifierProperties() {}
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'addShapeToModifier',
+    value: function addShapeToModifier() {}
+
+    /**
+     * a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'addShape',
+    value: function addShape(data) {
+      if (!this.closed) {
+        // Adding shape to dynamic properties. It covers the case where a shape has no effects applied, to reset it's _mdf state on every tick.
+        data.sh.container.addDynamicProperty(data.sh);
+
+        var shapeData = { shape: data.sh, data: data, localShapeCollection: ShapeCollectionPool.newShapeCollection() };
+        this.shapes.push(shapeData);
+        this.addShapeToModifier(shapeData);
+        if (this._isAnimated) {
+          data.setAsAnimated();
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'init',
+    value: function init(elem, data) {
+      this.shapes = [];
+      this.elem = elem;
+      this.initDynamicPropertyContainer(elem);
+      this.initModifierProperties(elem, data);
+      this.frameId = initialDefaultFrame;
+      this.closed = false;
+      this.k = false;
+      if (this.dynamicProperties.length) {
+        this.k = true;
+      } else {
+        this.getValue(true);
+      }
+    }
+
+    /**
+     * process keys
+     * @param {number} frameNum frameNum
+     */
+
+  }, {
+    key: 'processKeys',
+    value: function processKeys(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+      this.frameId = frameNum;
+      this.iterateDynamicProperties(frameNum);
+    }
+  }]);
+  return ShapeModifier;
+}(DynamicPropertyContainer);
+
+// import { registerModifier } from './ShapeModifiers';
+/**
+ * TrimModifier class
+ */
+
+var TrimModifier = function (_ShapeModifier) {
+  inherits(TrimModifier, _ShapeModifier);
+
+  function TrimModifier() {
+    classCallCheck(this, TrimModifier);
+    return possibleConstructorReturn(this, (TrimModifier.__proto__ || Object.getPrototypeOf(TrimModifier)).apply(this, arguments));
+  }
+
+  createClass(TrimModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * init modifier properties
+     * @param {*} elem element node
+     * @param {*} data trim value property data
+     */
+    value: function initModifierProperties(elem, data) {
+      this.s = PropertyFactory.getProp(elem, data.s, 0, 0.01, this);
+      this.e = PropertyFactory.getProp(elem, data.e, 0, 0.01, this);
+      this.o = PropertyFactory.getProp(elem, data.o, 0, 0, this);
+      this.sValue = 0;
+      this.eValue = 0;
+      this.getValue = this.processKeys;
+      this.m = data.m;
+      this._isAnimated = !!this.s.effectsSequence.length || !!this.e.effectsSequence.length || !!this.o.effectsSequence.length;
+    }
+
+    /**
+     * add shape to modifier
+     * @param {*} shapeData shape data
+     */
+
+  }, {
+    key: 'addShapeToModifier',
+    value: function addShapeToModifier(shapeData) {
+      shapeData.pathsData = [];
+    }
+
+    /**
+     * calculate shape edges
+     * @param {*} s trim start
+     * @param {*} e trim end
+     * @param {*} shapeLength shape length
+     * @param {*} addedLength added length
+     * @param {*} totalModifierLength total modifier length
+     * @return {*}
+     */
+
+  }, {
+    key: 'calculateShapeEdges',
+    value: function calculateShapeEdges(s, e, shapeLength, addedLength, totalModifierLength) {
+      var segments = [];
+      if (e <= 1) {
+        segments.push({
+          s: s,
+          e: e
+        });
+      } else if (s >= 1) {
+        segments.push({
+          s: s - 1,
+          e: e - 1
+        });
+      } else {
+        segments.push({
+          s: s,
+          e: 1
+        });
+        segments.push({
+          s: 0,
+          e: e - 1
+        });
+      }
+      var shapeSegments = [];
+      var i = void 0;var len = segments.length;var segmentOb = void 0;
+      for (i = 0; i < len; i += 1) {
+        segmentOb = segments[i];
+        if (segmentOb.e * totalModifierLength < addedLength || segmentOb.s * totalModifierLength > addedLength + shapeLength) {
+          // do nothing
+        } else {
+          var shapeS = void 0;var shapeE = void 0;
+          if (segmentOb.s * totalModifierLength <= addedLength) {
+            shapeS = 0;
+          } else {
+            shapeS = (segmentOb.s * totalModifierLength - addedLength) / shapeLength;
+          }
+          if (segmentOb.e * totalModifierLength >= addedLength + shapeLength) {
+            shapeE = 1;
+          } else {
+            shapeE = (segmentOb.e * totalModifierLength - addedLength) / shapeLength;
+          }
+          shapeSegments.push([shapeS, shapeE]);
+        }
+      }
+      if (!shapeSegments.length) {
+        shapeSegments.push([0, 0]);
+      }
+      return shapeSegments;
+    }
+
+    /**
+     * release paths data
+     * @param {*} pathsData paths data
+     * @return {*}
+     */
+
+  }, {
+    key: 'releasePathsData',
+    value: function releasePathsData(pathsData) {
+      var len = pathsData.length;
+      for (var i = 0; i < len; i += 1) {
+        SegmentsLengthPool.release(pathsData[i]);
+      }
+      pathsData.length = 0;
+      return pathsData;
+    }
+
+    /**
+     * a
+     * @param {*} _isFirstFrame a
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes(_isFirstFrame) {
+      var s = void 0;var e = void 0;
+      if (this._mdf || _isFirstFrame) {
+        var o = this.o.v % 360 / 360;
+        if (o < 0) {
+          o += 1;
+        }
+        s = (this.s.v > 1 ? 1 : this.s.v < 0 ? 0 : this.s.v) + o;
+        e = (this.e.v > 1 ? 1 : this.e.v < 0 ? 0 : this.e.v) + o;
+        if (s === e) {
+          // do nothing
+        }
+        if (s > e) {
+          var _s = s;
+          s = e;
+          e = _s;
+        }
+        s = Math.round(s * 10000) * 0.0001;
+        e = Math.round(e * 10000) * 0.0001;
+        this.sValue = s;
+        this.eValue = e;
+      } else {
+        s = this.sValue;
+        e = this.eValue;
+      }
+      var shapePaths = void 0;
+      var i = void 0;var len = this.shapes.length;var j = void 0;var jLen = void 0;
+      var pathsData = void 0;var pathData = void 0;var totalShapeLength = void 0;var totalModifierLength = 0;
+
+      if (e === s) {
+        for (i = 0; i < len; i += 1) {
+          this.shapes[i].localShapeCollection.releaseShapes();
+          this.shapes[i].shape._mdf = true;
+          this.shapes[i].shape.paths = this.shapes[i].localShapeCollection;
+          if (this._mdf) {
+            this.shapes[i].pathsData.length = 0;
+          }
+        }
+      } else if (!(e === 1 && s === 0 || e === 0 && s === 1)) {
+        var segments = [];var shapeData = void 0;var localShapeCollection = void 0;
+        for (i = 0; i < len; i += 1) {
+          shapeData = this.shapes[i];
+          // if shape hasn't changed and trim properties haven't changed, cached previous path can be used
+          if (!shapeData.shape._mdf && !this._mdf && !_isFirstFrame && this.m !== 2) {
+            shapeData.shape.paths = shapeData.localShapeCollection;
+          } else {
+            shapePaths = shapeData.shape.paths;
+            jLen = shapePaths._length;
+            totalShapeLength = 0;
+            if (!shapeData.shape._mdf && shapeData.pathsData.length) {
+              totalShapeLength = shapeData.totalShapeLength;
+            } else {
+              pathsData = this.releasePathsData(shapeData.pathsData);
+              for (j = 0; j < jLen; j += 1) {
+                pathData = bez.getSegmentsLength(shapePaths.shapes[j]);
+                pathsData.push(pathData);
+                totalShapeLength += pathData.totalLength;
+              }
+              shapeData.totalShapeLength = totalShapeLength;
+              shapeData.pathsData = pathsData;
+            }
+
+            totalModifierLength += totalShapeLength;
+            shapeData.shape._mdf = true;
+          }
+        }
+        var shapeS = s;var shapeE = e;var addedLength = 0;var edges = void 0;
+        for (i = len - 1; i >= 0; i -= 1) {
+          shapeData = this.shapes[i];
+          if (shapeData.shape._mdf) {
+            localShapeCollection = shapeData.localShapeCollection;
+            localShapeCollection.releaseShapes();
+            // if m === 2 means paths are trimmed individually so edges need to be found for this specific shape relative to whoel group
+            if (this.m === 2 && len > 1) {
+              edges = this.calculateShapeEdges(s, e, shapeData.totalShapeLength, addedLength, totalModifierLength);
+              addedLength += shapeData.totalShapeLength;
+            } else {
+              edges = [[shapeS, shapeE]];
+            }
+            jLen = edges.length;
+            for (j = 0; j < jLen; j += 1) {
+              shapeS = edges[j][0];
+              shapeE = edges[j][1];
+              segments.length = 0;
+              if (shapeE <= 1) {
+                segments.push({
+                  s: shapeData.totalShapeLength * shapeS,
+                  e: shapeData.totalShapeLength * shapeE
+                });
+              } else if (shapeS >= 1) {
+                segments.push({
+                  s: shapeData.totalShapeLength * (shapeS - 1),
+                  e: shapeData.totalShapeLength * (shapeE - 1)
+                });
+              } else {
+                segments.push({
+                  s: shapeData.totalShapeLength * shapeS,
+                  e: shapeData.totalShapeLength
+                });
+                segments.push({
+                  s: 0,
+                  e: shapeData.totalShapeLength * (shapeE - 1)
+                });
+              }
+              var newShapesData = this.addShapes(shapeData, segments[0]);
+              if (segments[0].s !== segments[0].e) {
+                if (segments.length > 1) {
+                  var lastShapeInCollection = shapeData.shape.paths.shapes[shapeData.shape.paths._length - 1];
+                  if (lastShapeInCollection.c) {
+                    var lastShape = newShapesData.pop();
+                    this.addPaths(newShapesData, localShapeCollection);
+                    newShapesData = this.addShapes(shapeData, segments[1], lastShape);
+                  } else {
+                    this.addPaths(newShapesData, localShapeCollection);
+                    newShapesData = this.addShapes(shapeData, segments[1]);
+                  }
+                }
+                this.addPaths(newShapesData, localShapeCollection);
+              }
+            }
+            shapeData.shape.paths = localShapeCollection;
+          }
+        }
+      } else if (this._mdf) {
+        for (i = 0; i < len; i += 1) {
+          // Releasign Trim Cached paths data when no trim applied in case shapes are modified inbetween.
+          // Don't remove this even if it's losing cached info.
+          this.shapes[i].pathsData.length = 0;
+          this.shapes[i].shape._mdf = true;
+        }
+      }
+    }
+
+    /**
+     * add paths
+     * @param {*} newPaths new paths
+     * @param {*} localShapeCollection local shape collection
+     */
+
+  }, {
+    key: 'addPaths',
+    value: function addPaths(newPaths, localShapeCollection) {
+      var len = newPaths.length;
+      for (var i = 0; i < len; i += 1) {
+        localShapeCollection.addShape(newPaths[i]);
+      }
+    }
+
+    /**
+     * add segment
+     * @param {*} pt1 point1
+     * @param {*} pt2 point2
+     * @param {*} pt3 point3
+     * @param {*} pt4 point4
+     * @param {*} shapePath target shape path
+     * @param {*} pos data index
+     * @param {*} newShape is new shape ?
+     */
+
+  }, {
+    key: 'addSegment',
+    value: function addSegment(pt1, pt2, pt3, pt4, shapePath, pos, newShape) {
+      shapePath.setXYAt(pt2[0], pt2[1], 'o', pos);
+      shapePath.setXYAt(pt3[0], pt3[1], 'i', pos + 1);
+      if (newShape) {
+        shapePath.setXYAt(pt1[0], pt1[1], 'v', pos);
+      }
+      shapePath.setXYAt(pt4[0], pt4[1], 'v', pos + 1);
+    }
+
+    /**
+     * add segment from points array
+     * @param {*} points points
+     * @param {*} shapePath target shape path
+     * @param {*} pos data index
+     * @param {*} newShape is new shape ?
+     */
+
+  }, {
+    key: 'addSegmentFromArray',
+    value: function addSegmentFromArray(points, shapePath, pos, newShape) {
+      shapePath.setXYAt(points[1], points[5], 'o', pos);
+      shapePath.setXYAt(points[2], points[6], 'i', pos + 1);
+      if (newShape) {
+        shapePath.setXYAt(points[0], points[4], 'v', pos);
+      }
+      shapePath.setXYAt(points[3], points[7], 'v', pos + 1);
+    }
+
+    /**
+     * add shapes to this modifier
+     * @param {*} shapeData shape data
+     * @param {*} shapeSegment shape segment
+     * @param {*} shapePath shape path
+     * @return {*}
+     */
+
+  }, {
+    key: 'addShapes',
+    value: function addShapes(shapeData, shapeSegment, shapePath) {
+      var pathsData = shapeData.pathsData;
+      var shapePaths = shapeData.shape.paths.shapes;
+      var i = void 0;var len = shapeData.shape.paths._length;var j = void 0;var jLen = void 0;
+      var addedLength = 0;
+      var currentLengthData = void 0;var segmentCount = void 0;
+      var lengths = void 0;
+      var segment = void 0;
+      var shapes = [];
+      var initPos = void 0;
+      var newShape = true;
+      if (!shapePath) {
+        shapePath = ShapePool.newElement();
+        segmentCount = 0;
+        initPos = 0;
+      } else {
+        segmentCount = shapePath._length;
+        initPos = shapePath._length;
+      }
+      shapes.push(shapePath);
+      for (i = 0; i < len; i += 1) {
+        lengths = pathsData[i].lengths;
+        shapePath.c = shapePaths[i].c;
+        jLen = shapePaths[i].c ? lengths.length : lengths.length + 1;
+        for (j = 1; j < jLen; j += 1) {
+          currentLengthData = lengths[j - 1];
+          if (addedLength + currentLengthData.addedLength < shapeSegment.s) {
+            addedLength += currentLengthData.addedLength;
+            shapePath.c = false;
+          } else if (addedLength > shapeSegment.e) {
+            shapePath.c = false;
+            break;
+          } else {
+            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + currentLengthData.addedLength) {
+              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[j], shapePaths[i].v[j], shapePath, segmentCount, newShape);
+              newShape = false;
+            } else {
+              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[j], shapePaths[i].o[j - 1], shapePaths[i].i[j], (shapeSegment.s - addedLength) / currentLengthData.addedLength, (shapeSegment.e - addedLength) / currentLengthData.addedLength, lengths[j - 1]);
+              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
+              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
+              newShape = false;
+              shapePath.c = false;
+            }
+            addedLength += currentLengthData.addedLength;
+            segmentCount += 1;
+          }
+        }
+        if (shapePaths[i].c && lengths.length) {
+          currentLengthData = lengths[j - 1];
+          if (addedLength <= shapeSegment.e) {
+            var segmentLength = lengths[j - 1].addedLength;
+            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + segmentLength) {
+              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[0], shapePaths[i].v[0], shapePath, segmentCount, newShape);
+              newShape = false;
+            } else {
+              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[0], shapePaths[i].o[j - 1], shapePaths[i].i[0], (shapeSegment.s - addedLength) / segmentLength, (shapeSegment.e - addedLength) / segmentLength, lengths[j - 1]);
+              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
+              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
+              newShape = false;
+              shapePath.c = false;
+            }
+          } else {
+            shapePath.c = false;
+          }
+          addedLength += currentLengthData.addedLength;
+          segmentCount += 1;
+        }
+        if (shapePath._length) {
+          shapePath.setXYAt(shapePath.v[initPos][0], shapePath.v[initPos][1], 'i', initPos);
+          shapePath.setXYAt(shapePath.v[shapePath._length - 1][0], shapePath.v[shapePath._length - 1][1], 'o', shapePath._length - 1);
+        }
+        if (addedLength > shapeSegment.e) {
+          break;
+        }
+        if (i < len - 1) {
+          shapePath = ShapePool.newElement();
+          newShape = true;
+          shapes.push(shapePath);
+          segmentCount = 0;
+        }
+      }
+      return shapes;
+    }
+  }]);
+  return TrimModifier;
+}(ShapeModifier);
+
+var roundCorner$1 = 0.5519;
+
+/**
+ * a
+ */
+
+var RoundCornersModifier = function (_ShapeModifier) {
+  inherits(RoundCornersModifier, _ShapeModifier);
+
+  function RoundCornersModifier() {
+    classCallCheck(this, RoundCornersModifier);
+    return possibleConstructorReturn(this, (RoundCornersModifier.__proto__ || Object.getPrototypeOf(RoundCornersModifier)).apply(this, arguments));
+  }
+
+  createClass(RoundCornersModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * init modifier properties
+     * @param {*} elem element node
+     * @param {*} data round corners value property data
+     */
+    value: function initModifierProperties(elem, data) {
+      this.getValue = this.processKeys;
+      this.rd = PropertyFactory.getProp(elem, data.r, 0, null, this);
+      this._isAnimated = !!this.rd.effectsSequence.length;
+    }
+
+    /**
+     * process path
+     * @param {*} path path
+     * @param {*} round round
+     * @return {*}
+     */
+
+  }, {
+    key: 'processPath',
+    value: function processPath(path, round) {
+      var clonedPath = ShapePool.newElement();
+      clonedPath.c = path.c;
+      var i = void 0;var len = path._length;
+      var currentV = void 0;
+      var currentI = void 0;
+      var currentO = void 0;
+      var closerV = void 0;
+      // let newV;
+      // let newO;
+      // let newI;
+      var distance = void 0;
+      var newPosPerc = void 0;
+      var index = 0;
+      var vX = void 0;var vY = void 0;var oX = void 0;var oY = void 0;var iX = void 0;var iY = void 0;
+      for (i = 0; i < len; i += 1) {
+        currentV = path.v[i];
+        currentO = path.o[i];
+        currentI = path.i[i];
+        if (currentV[0] === currentO[0] && currentV[1] === currentO[1] && currentV[0] === currentI[0] && currentV[1] === currentI[1]) {
+          if ((i === 0 || i === len - 1) && !path.c) {
+            clonedPath.setTripleAt(currentV[0], currentV[1], currentO[0], currentO[1], currentI[0], currentI[1], index);
+            /* clonedPath.v[index] = currentV;
+                  clonedPath.o[index] = currentO;
+                  clonedPath.i[index] = currentI;*/
+            index += 1;
+          } else {
+            if (i === 0) {
+              closerV = path.v[len - 1];
+            } else {
+              closerV = path.v[i - 1];
+            }
+            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
+            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
+            vX = iX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
+            vY = iY = currentV[1] - (currentV[1] - closerV[1]) * newPosPerc;
+            oX = vX - (vX - currentV[0]) * roundCorner$1;
+            oY = vY - (vY - currentV[1]) * roundCorner$1;
+            clonedPath.setTripleAt(vX, vY, oX, oY, iX, iY, index);
+            index += 1;
+
+            if (i === len - 1) {
+              closerV = path.v[0];
+            } else {
+              closerV = path.v[i + 1];
+            }
+            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
+            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
+            vX = oX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
+            vY = oY = currentV[1] + (closerV[1] - currentV[1]) * newPosPerc;
+            iX = vX - (vX - currentV[0]) * roundCorner$1;
+            iY = vY - (vY - currentV[1]) * roundCorner$1;
+            clonedPath.setTripleAt(vX, vY, oX, oY, iX, iY, index);
+            index += 1;
+          }
+        } else {
+          clonedPath.setTripleAt(path.v[i][0], path.v[i][1], path.o[i][0], path.o[i][1], path.i[i][0], path.i[i][1], index);
+          index += 1;
+        }
+      }
+      return clonedPath;
+    }
+
+    /**
+     * process shapes
+     * @param {*} _isFirstFrame is first frame
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes(_isFirstFrame) {
+      var shapePaths = void 0;
+      var i = void 0;var len = this.shapes.length;
+      var j = void 0;var jLen = void 0;
+      var rd = this.rd.v;
+
+      if (rd !== 0) {
+        var shapeData = void 0;
+        // let newPaths;
+        var localShapeCollection = void 0;
+        for (i = 0; i < len; i += 1) {
+          shapeData = this.shapes[i];
+          // newPaths = shapeData.shape.paths;
+          localShapeCollection = shapeData.localShapeCollection;
+          if (!(!shapeData.shape._mdf && !this._mdf && !_isFirstFrame)) {
+            localShapeCollection.releaseShapes();
+            shapeData.shape._mdf = true;
+            shapePaths = shapeData.shape.paths.shapes;
+            jLen = shapeData.shape.paths._length;
+            for (j = 0; j < jLen; j += 1) {
+              localShapeCollection.addShape(this.processPath(shapePaths[j], rd));
+            }
+          }
+          shapeData.shape.paths = shapeData.localShapeCollection;
+        }
+      }
+      if (!this.dynamicProperties.length) {
+        this._mdf = false;
+      }
+    }
+  }]);
+  return RoundCornersModifier;
+}(ShapeModifier);
+
+/**
+ * a
+ */
+
+var RepeaterModifier = function (_ShapeModifier) {
+  inherits(RepeaterModifier, _ShapeModifier);
+
+  function RepeaterModifier() {
+    classCallCheck(this, RepeaterModifier);
+    return possibleConstructorReturn(this, (RepeaterModifier.__proto__ || Object.getPrototypeOf(RepeaterModifier)).apply(this, arguments));
+  }
+
+  createClass(RepeaterModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} data a
+     */
+    value: function initModifierProperties(elem, data) {
+      this.getValue = this.processKeys;
+      this.c = PropertyFactory.getProp(elem, data.c, 0, null, this);
+      this.o = PropertyFactory.getProp(elem, data.o, 0, null, this);
+      this.tr = getTransformProperty(elem, data.tr, this);
+      this.so = PropertyFactory.getProp(elem, data.tr.so, 0, 0.01, this);
+      this.eo = PropertyFactory.getProp(elem, data.tr.eo, 0, 0.01, this);
+      this.data = data;
+      if (!this.dynamicProperties.length) {
+        this.getValue(true);
+      }
+      this._isAnimated = !!this.dynamicProperties.length;
+      this.pMatrix = new Matrix();
+      this.rMatrix = new Matrix();
+      this.sMatrix = new Matrix();
+      this.tMatrix = new Matrix();
+      this.matrix = new Matrix();
+    }
+
+    /**
+     * a
+     * @param {*} pMatrix a
+     * @param {*} rMatrix a
+     * @param {*} sMatrix a
+     * @param {*} transform a
+     * @param {*} perc a
+     * @param {*} inv a
+     */
+
+  }, {
+    key: 'applyTransforms',
+    value: function applyTransforms(pMatrix, rMatrix, sMatrix, transform, perc, inv) {
+      var dir = inv ? -1 : 1;
+      var scaleX = transform.s.v[0] + (1 - transform.s.v[0]) * (1 - perc);
+      var scaleY = transform.s.v[1] + (1 - transform.s.v[1]) * (1 - perc);
+      pMatrix.translate(transform.p.v[0] * dir * perc, transform.p.v[1] * dir * perc, transform.p.v[2]);
+      rMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
+      rMatrix.rotate(-transform.r.v * dir * perc);
+      rMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
+      sMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
+      sMatrix.scale(inv ? 1 / scaleX : scaleX, inv ? 1 / scaleY : scaleY);
+      sMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} arr a
+     * @param {*} pos a
+     * @param {*} elemsData a
+     */
+
+  }, {
+    key: 'init',
+    value: function init(elem, arr, pos, elemsData) {
+      this.elem = elem;
+      this.arr = arr;
+      this.pos = pos;
+      this.elemsData = elemsData;
+      this._currentCopies = 0;
+      this._elements = [];
+      this._groups = [];
+      this.frameId = -1;
+      this.initDynamicPropertyContainer(elem);
+      this.initModifierProperties(elem, arr[pos]);
+      while (pos > 0) {
+        pos -= 1;
+        // this._elements.unshift(arr.splice(pos,1)[0]);
+        this._elements.unshift(arr[pos]);
+      }
+      if (this.dynamicProperties.length) {
+        this.k = true;
+      } else {
+        this.getValue(true);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elements a
+     */
+
+  }, {
+    key: 'resetElements',
+    value: function resetElements(elements) {
+      var len = elements.length;
+      for (var i = 0; i < len; i += 1) {
+        elements[i]._processed = false;
+        if (elements[i].ty === 'gr') {
+          this.resetElements(elements[i].it);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elements a
+     * @return {*}
+     */
+
+  }, {
+    key: 'cloneElements',
+    value: function cloneElements(elements) {
+      var newElements = JSON.parse(JSON.stringify(elements));
+      this.resetElements(newElements);
+      return newElements;
+    }
+
+    /**
+     * a
+     * @param {*} elements a
+     * @param {*} renderFlag a
+     */
+
+  }, {
+    key: 'changeGroupRender',
+    value: function changeGroupRender(elements, renderFlag) {
+      var len = elements.length;
+      for (var i = 0; i < len; i += 1) {
+        elements[i]._render = renderFlag;
+        if (elements[i].ty === 'gr') {
+          this.changeGroupRender(elements[i].it, renderFlag);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} _isFirstFrame a
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes(_isFirstFrame) {
+      // let items, itemsTransform, i, dir, cont;
+      if (this._mdf || _isFirstFrame) {
+        var copies = Math.ceil(this.c.v);
+        if (this._groups.length < copies) {
+          while (this._groups.length < copies) {
+            var group = {
+              it: this.cloneElements(this._elements),
+              ty: 'gr'
+            };
+            group.it.push({ 'a': { 'a': 0, 'ix': 1, 'k': [0, 0] }, 'nm': 'Transform', 'o': { 'a': 0, 'ix': 7, 'k': 100 }, 'p': { 'a': 0, 'ix': 2, 'k': [0, 0] }, 'r': { 'a': 1, 'ix': 6, 'k': [{ s: 0, e: 0, t: 0 }, { s: 0, e: 0, t: 1 }] }, 's': { 'a': 0, 'ix': 3, 'k': [100, 100] }, 'sa': { 'a': 0, 'ix': 5, 'k': 0 }, 'sk': { 'a': 0, 'ix': 4, 'k': 0 }, 'ty': 'tr' });
+
+            this.arr.splice(0, 0, group);
+            this._groups.splice(0, 0, group);
+            this._currentCopies += 1;
+          }
+          this.elem.reloadShapes();
+        }
+        var cont = 0;
+        var i = void 0;
+        var renderFlag = void 0;
+        for (i = 0; i <= this._groups.length - 1; i += 1) {
+          renderFlag = cont < copies;
+          this._groups[i]._render = renderFlag;
+          this.changeGroupRender(this._groups[i].it, renderFlag);
+          cont += 1;
+        }
+
+        this._currentCopies = copies;
+        // //
+
+        var offset = this.o.v;
+        var offsetModulo = offset % 1;
+        var roundOffset = offset > 0 ? Math.floor(offset) : Math.ceil(offset);
+        // let k;
+        // let tMat = this.tr.v.props;
+        var pProps = this.pMatrix.props;
+        var rProps = this.rMatrix.props;
+        var sProps = this.sMatrix.props;
+        this.pMatrix.reset();
+        this.rMatrix.reset();
+        this.sMatrix.reset();
+        this.tMatrix.reset();
+        this.matrix.reset();
+        var iteration = 0;
+
+        if (offset > 0) {
+          while (iteration < roundOffset) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
+            iteration += 1;
+          }
+          if (offsetModulo) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, offsetModulo, false);
+            iteration += offsetModulo;
+          }
+        } else if (offset < 0) {
+          while (iteration > roundOffset) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, true);
+            iteration -= 1;
+          }
+          if (offsetModulo) {
+            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, -offsetModulo, true);
+            iteration -= offsetModulo;
+          }
+        }
+        i = this.data.m === 1 ? 0 : this._currentCopies - 1;
+        var dir = this.data.m === 1 ? 1 : -1;
+        cont = this._currentCopies;
+        while (cont) {
+          var items = this.elemsData[i].it;
+          var itemsTransform = items[items.length - 1].transform.mProps.v.props;
+          var jLen = itemsTransform.length;
+          items[items.length - 1].transform.mProps._mdf = true;
+          items[items.length - 1].transform.op._mdf = true;
+          items[items.length - 1].transform.op.v = this.so.v + (this.eo.v - this.so.v) * (i / (this._currentCopies - 1));
+          if (iteration !== 0) {
+            if (i !== 0 && dir === 1 || i !== this._currentCopies - 1 && dir === -1) {
+              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
+            }
+            this.matrix.transform(rProps[0], rProps[1], rProps[2], rProps[3], rProps[4], rProps[5], rProps[6], rProps[7], rProps[8], rProps[9], rProps[10], rProps[11], rProps[12], rProps[13], rProps[14], rProps[15]);
+            this.matrix.transform(sProps[0], sProps[1], sProps[2], sProps[3], sProps[4], sProps[5], sProps[6], sProps[7], sProps[8], sProps[9], sProps[10], sProps[11], sProps[12], sProps[13], sProps[14], sProps[15]);
+            this.matrix.transform(pProps[0], pProps[1], pProps[2], pProps[3], pProps[4], pProps[5], pProps[6], pProps[7], pProps[8], pProps[9], pProps[10], pProps[11], pProps[12], pProps[13], pProps[14], pProps[15]);
+
+            for (var j = 0; j < jLen; j += 1) {
+              itemsTransform[j] = this.matrix.props[j];
+            }
+            this.matrix.reset();
+          } else {
+            this.matrix.reset();
+            for (var _j = 0; _j < jLen; _j += 1) {
+              itemsTransform[_j] = this.matrix.props[_j];
+            }
+          }
+          iteration += 1;
+          cont -= 1;
+          i += dir;
+        }
+      } else {
+        var _cont = this._currentCopies;
+        var _i = 0;
+        var _dir = 1;
+        while (_cont) {
+          var _items = this.elemsData[_i].it;
+          // const itemsTransform = items[items.length - 1].transform.mProps.v.props;
+          _items[_items.length - 1].transform.mProps._mdf = false;
+          _items[_items.length - 1].transform.op._mdf = false;
+          _cont -= 1;
+          _i += _dir;
+        }
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'addShape',
+    value: function addShape() {}
+  }]);
+  return RepeaterModifier;
+}(ShapeModifier);
+
+/**
+ * MouseModifier class
+ */
+
+var MouseModifier = function (_ShapeModifier) {
+  inherits(MouseModifier, _ShapeModifier);
+
+  function MouseModifier() {
+    classCallCheck(this, MouseModifier);
+    return possibleConstructorReturn(this, (MouseModifier.__proto__ || Object.getPrototypeOf(MouseModifier)).apply(this, arguments));
+  }
+
+  createClass(MouseModifier, [{
+    key: 'initModifierProperties',
+
+    /**
+     * init modifier properties
+     * @param {*} elem element node
+     * @param {*} data mouse value property data
+     */
+    value: function initModifierProperties(elem, data) {
+      this.getValue = this.processKeys;
+      this.data = data;
+      this.positions = [];
+    }
+
+    /**
+     * process keys
+     * @param {number} frameNum frameNum
+     * @param {*} forceRender force render
+     */
+
+  }, {
+    key: 'processKeys',
+    value: function processKeys(frameNum, forceRender) {
+      if (frameNum === this.frameId && !forceRender) {
+        return;
+      }
+      this._mdf = true;
+    }
+
+    /**
+     * add shape to modifier
+     */
+
+  }, {
+    key: 'addShapeToModifier',
+    value: function addShapeToModifier() {
+      this.positions.push([]);
+    }
+
+    /**
+     * a
+     * @param {*} path a
+     * @param {*} mouseCoords a
+     * @param {*} positions a
+     * @return {*}
+     */
+
+  }, {
+    key: 'processPath',
+    value: function processPath(path, mouseCoords, positions) {
+      var i = void 0;var len = path.v.length;
+      var vValues = [];var oValues = [];var iValues = [];
+      // let dist;
+      var theta = void 0;var x = void 0;var y = void 0;
+      // // OPTION A
+      for (i = 0; i < len; i += 1) {
+        if (!positions.v[i]) {
+          positions.v[i] = [path.v[i][0], path.v[i][1]];
+          positions.o[i] = [path.o[i][0], path.o[i][1]];
+          positions.i[i] = [path.i[i][0], path.i[i][1]];
+          positions.distV[i] = 0;
+          positions.distO[i] = 0;
+          positions.distI[i] = 0;
+        }
+        theta = Math.atan2(path.v[i][1] - mouseCoords[1], path.v[i][0] - mouseCoords[0]);
+
+        x = mouseCoords[0] - positions.v[i][0];
+        y = mouseCoords[1] - positions.v[i][1];
+        var distance = Math.sqrt(x * x + y * y);
+        positions.distV[i] += (distance - positions.distV[i]) * this.data.dc;
+
+        positions.v[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][0];
+        positions.v[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][1];
+
+        theta = Math.atan2(path.o[i][1] - mouseCoords[1], path.o[i][0] - mouseCoords[0]);
+
+        x = mouseCoords[0] - positions.o[i][0];
+        y = mouseCoords[1] - positions.o[i][1];
+        distance = Math.sqrt(x * x + y * y);
+        positions.distO[i] += (distance - positions.distO[i]) * this.data.dc;
+
+        positions.o[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][0];
+        positions.o[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][1];
+
+        theta = Math.atan2(path.i[i][1] - mouseCoords[1], path.i[i][0] - mouseCoords[0]);
+
+        x = mouseCoords[0] - positions.i[i][0];
+        y = mouseCoords[1] - positions.i[i][1];
+        distance = Math.sqrt(x * x + y * y);
+        positions.distI[i] += (distance - positions.distI[i]) * this.data.dc;
+
+        positions.i[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][0];
+        positions.i[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][1];
+
+        // ///OPTION 1
+        vValues.push(positions.v[i]);
+        oValues.push(positions.o[i]);
+        iValues.push(positions.i[i]);
+
+        // ///OPTION 2
+        // vValues.push(positions.v[i]);
+        // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
+        // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
+
+
+        // ///OPTION 3
+        // vValues.push(positions.v[i]);
+        // iValues.push(path.i[i]);
+        // oValues.push(path.o[i]);
+
+
+        // ///OPTION 4
+        // vValues.push(path.v[i]);
+        // oValues.push(positions.o[i]);
+        // iValues.push(positions.i[i]);
+      }
+
+      // // OPTION B
+      /* for(i=0;i<len;i+=1){
+            if(!positions.v[i]){
+                positions.v[i] = [path.v[i][0],path.v[i][1]];
+                positions.o[i] = [path.o[i][0],path.o[i][1]];
+                positions.i[i] = [path.i[i][0],path.i[i][1]];
+                positions.distV[i] = 0;
+             }
+            theta = Math.atan2(
+                positions.v[i][1] - mouseCoords[1],
+                positions.v[i][0] - mouseCoords[0]
+            );
+            x = mouseCoords[0] - positions.v[i][0];
+            y = mouseCoords[1] - positions.v[i][1];
+            var distance = this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+             positions.v[i][0] += Math.cos(theta) * distance + (path.v[i][0] - positions.v[i][0]) * this.data.dc;
+            positions.v[i][1] += Math.sin(theta) * distance + (path.v[i][1] - positions.v[i][1]) * this.data.dc;
+              theta = Math.atan2(
+                positions.o[i][1] - mouseCoords[1],
+                positions.o[i][0] - mouseCoords[0]
+            );
+            x = mouseCoords[0] - positions.o[i][0];
+            y = mouseCoords[1] - positions.o[i][1];
+            var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+             positions.o[i][0] += Math.cos(theta) * distance + (path.o[i][0] - positions.o[i][0]) * this.data.dc;
+            positions.o[i][1] += Math.sin(theta) * distance + (path.o[i][1] - positions.o[i][1]) * this.data.dc;
+              theta = Math.atan2(
+                positions.i[i][1] - mouseCoords[1],
+                positions.i[i][0] - mouseCoords[0]
+            );
+            x = mouseCoords[0] - positions.i[i][0];
+            y = mouseCoords[1] - positions.i[i][1];
+            var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+             positions.i[i][0] += Math.cos(theta) * distance + (path.i[i][0] - positions.i[i][0]) * this.data.dc;
+            positions.i[i][1] += Math.sin(theta) * distance + (path.i[i][1] - positions.i[i][1]) * this.data.dc;
+             /////OPTION 1
+            //vValues.push(positions.v[i]);
+            // oValues.push(positions.o[i]);
+            // iValues.push(positions.i[i]);
+              /////OPTION 2
+            //vValues.push(positions.v[i]);
+            // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
+            // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
+              /////OPTION 3
+            //vValues.push(positions.v[i]);
+            //iValues.push(path.i[i]);
+            //oValues.push(path.o[i]);
+              /////OPTION 4
+            //vValues.push(path.v[i]);
+            // oValues.push(positions.o[i]);
+            // iValues.push(positions.i[i]);
+        }*/
+
+      return {
+        v: vValues,
+        o: oValues,
+        i: iValues,
+        c: path.c
+      };
+    }
+
+    /**
+     * process shapes
+     */
+
+  }, {
+    key: 'processShapes',
+    value: function processShapes() {
+      // FIXME: mouse modifier data
+      var mouseX = this.elem.globalData.mouseX;
+      var mouseY = this.elem.globalData.mouseY;
+      var shapePaths = void 0;
+      var i = void 0;var len = this.shapes.length;
+      var j = void 0;var jLen = void 0;
+
+      if (mouseX) {
+        var localMouseCoords = this.elem.globalToLocal([mouseX, mouseY, 0]);
+
+        var shapeData = void 0;var newPaths = [];
+        for (i = 0; i < len; i += 1) {
+          shapeData = this.shapes[i];
+          if (!shapeData.shape._mdf && !this._mdf) {
+            shapeData.shape.paths = shapeData.last;
+          } else {
+            shapeData.shape._mdf = true;
+            shapePaths = shapeData.shape.paths;
+            jLen = shapePaths.length;
+            for (j = 0; j < jLen; j += 1) {
+              if (!this.positions[i][j]) {
+                this.positions[i][j] = {
+                  v: [],
+                  o: [],
+                  i: [],
+                  distV: [],
+                  distO: [],
+                  distI: []
+                };
+              }
+              newPaths.push(this.processPath(shapePaths[j], localMouseCoords, this.positions[i][j]));
+            }
+            shapeData.shape.paths = newPaths;
+            shapeData.last = newPaths;
+          }
+        }
+      }
+    }
+  }]);
+  return MouseModifier;
+}(ShapeModifier);
+
+var modifiers = {};
+
+/**
+ * a
+ * @param {*} nm a
+ * @param {*} factory a
+ */
+function registerModifier(nm, factory) {
+  if (!modifiers[nm]) {
+    modifiers[nm] = factory;
+  }
+}
+
+/**
+ * a
+ * @param {*} nm a
+ * @param {*} elem a
+ * @param {*} data a
+ * @return {*}
+ */
+function getModifier(nm, elem, data) {
+  return new modifiers[nm](elem, data);
+}
+
+registerModifier('tm', TrimModifier);
+registerModifier('rd', RoundCornersModifier);
+registerModifier('rp', RepeaterModifier);
+registerModifier('ms', MouseModifier);
+
+var ShapeModifiers = { getModifier: getModifier };
+
+/**
+ * a
+ */
+
+var DashProperty = function (_DynamicPropertyConta) {
+  inherits(DashProperty, _DynamicPropertyConta);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} data a
+   * @param {*} container a
+   */
+  function DashProperty(elem, data, container) {
+    classCallCheck(this, DashProperty);
+
+    var _this = possibleConstructorReturn(this, (DashProperty.__proto__ || Object.getPrototypeOf(DashProperty)).call(this));
+
+    _this.elem = elem;
+    _this.frameId = -1;
+    _this.dataProps = createSizedArray(data.length);
+    // this.renderer = renderer;
+    _this.k = false;
+    // this.dashStr = '';
+    _this.dashArray = createTypedArray('float32', data.length ? data.length - 1 : 0);
+    _this.dashoffset = createTypedArray('float32', 1);
+    _this.initDynamicPropertyContainer(container);
+    var i = void 0;var len = data.length || 0;var prop = void 0;
+    for (i = 0; i < len; i += 1) {
+      prop = PropertyFactory.getProp(elem, data[i].v, 0, 0, _this);
+      _this.k = prop.k || _this.k;
+      _this.dataProps[i] = { n: data[i].n, p: prop };
+    }
+    if (!_this.k) {
+      _this.getValue(true);
+    }
+    _this._isAnimated = _this.k;
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {number} frameNum frameNum
+   * @param {*} forceRender a
+   */
+
+
+  createClass(DashProperty, [{
+    key: 'getValue',
+    value: function getValue(frameNum, forceRender) {
+      if (frameNum === this.frameId && !forceRender) {
+        return;
+      }
+      this.frameId = frameNum;
+      this.iterateDynamicProperties();
+      this._mdf = this._mdf || forceRender;
+      if (this._mdf) {
+        var _i = 0;var _len = this.dataProps.length;
+        // if (this.renderer === 'svg') {
+        //   this.dashStr = '';
+        // }
+        for (_i = 0; _i < _len; _i += 1) {
+          if (this.dataProps[_i].n != 'o') {
+            // if (this.renderer === 'svg') {
+            //   this.dashStr += ' ' + this.dataProps[i].p.v;
+            // } else {
+            //   this.dashArray[i] = this.dataProps[i].p.v;
+            // }
+            this.dashArray[_i] = this.dataProps[_i].p.v;
+          } else {
+            this.dashoffset[0] = this.dataProps[_i].p.v;
+          }
+        }
+      }
+    }
+  }]);
+  return DashProperty;
+}(DynamicPropertyContainer);
+
+/**
+ * GradientProperty class
+ */
+
+var GradientProperty = function (_DynamicPropertyConta) {
+  inherits(GradientProperty, _DynamicPropertyConta);
+
+  /**
+   * constructor GradientProperty
+   * @param {*} elem element node
+   * @param {*} data gradient property data
+   * @param {*} container container
+   */
+  function GradientProperty(elem, data, container) {
+    classCallCheck(this, GradientProperty);
+
+    var _this = possibleConstructorReturn(this, (GradientProperty.__proto__ || Object.getPrototypeOf(GradientProperty)).call(this));
+
+    _this.data = data;
+    _this.c = createTypedArray('uint8c', data.p * 4);
+    var cLength = data.k.k[0].s ? data.k.k[0].s.length - data.p * 4 : data.k.k.length - data.p * 4;
+    _this.o = createTypedArray('float32', cLength);
+    _this._cmdf = false;
+    _this._omdf = false;
+    _this._collapsable = _this.checkCollapsable();
+    _this._hasOpacity = cLength;
+    _this.initDynamicPropertyContainer(container);
+    _this.prop = PropertyFactory.getProp(elem, data.k, 1, null, _this);
+    _this.k = _this.prop.k;
+    _this.getValue(true);
+    return _this;
+  }
+
+  /**
+   * compare points
+   * @param {*} values values
+   * @param {*} points points
+   * @return {*}
+   */
+
+
+  createClass(GradientProperty, [{
+    key: 'comparePoints',
+    value: function comparePoints(values, points) {
+      var i = 0;var len = this.o.length / 2;var diff = void 0;
+      while (i < len) {
+        diff = Math.abs(values[i * 4] - values[points * 4 + i * 2]);
+        if (diff > 0.01) {
+          return false;
+        }
+        i += 1;
+      }
+      return true;
+    }
+
+    /**
+     * check collapsable
+     * @return {*}
+     */
+
+  }, {
+    key: 'checkCollapsable',
+    value: function checkCollapsable() {
+      if (this.o.length / 2 !== this.c.length / 4) {
+        return false;
+      }
+      if (this.data.k.k[0].s) {
+        var i = 0;var len = this.data.k.k.length;
+        while (i < len) {
+          if (!this.comparePoints(this.data.k.k[i].s, this.data.p)) {
+            return false;
+          }
+          i += 1;
+        }
+      } else if (!this.comparePoints(this.data.k.k, this.data.p)) {
+        return false;
+      }
+      return true;
+    }
+
+    /**
+     * get value
+     * @param {*} forceRender a
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(forceRender) {
+      this.prop.getValue();
+      this._mdf = false;
+      this._cmdf = false;
+      this._omdf = false;
+      if (this.prop._mdf || forceRender) {
+        var i = void 0;var len = this.data.p * 4;
+        var mult = void 0;var val = void 0;
+        for (i = 0; i < len; i += 1) {
+          mult = i % 4 === 0 ? 100 : 255;
+          val = Math.round(this.prop.v[i] * mult);
+          if (this.c[i] !== val) {
+            this.c[i] = val;
+            this._cmdf = !forceRender;
+          }
+        }
+        if (this.o.length) {
+          len = this.prop.v.length;
+          for (i = this.data.p * 4; i < len; i += 1) {
+            mult = i % 2 === 0 ? 100 : 1;
+            val = i % 2 === 0 ? Math.round(this.prop.v[i] * 100) : this.prop.v[i];
+            if (this.o[i - this.data.p * 4] !== val) {
+              this.o[i - this.data.p * 4] = val;
+              this._omdf = !forceRender;
+            }
+          }
+        }
+        this._mdf = !forceRender;
+      }
+    }
+  }]);
+  return GradientProperty;
+}(DynamicPropertyContainer);
+
+// import StyleElement from '../shapes/StyleElement';
+// import Matrix from '../utils/lib/transformation-matrix';
+// import displayManager from '../displayManager';
+
+/**
+ * ShapesFrames class
+ */
+
+var ShapesFrames = function (_DynamicPropertyConta) {
+  inherits(ShapesFrames, _DynamicPropertyConta);
+
+  /**
+   * a
+   * @param {*} keyframesManager a
+   * @param {*} shapes a
+   * @param {*} session a
+   */
+  function ShapesFrames(keyframesManager, shapes, session) {
+    classCallCheck(this, ShapesFrames);
+
+    var _this = possibleConstructorReturn(this, (ShapesFrames.__proto__ || Object.getPrototypeOf(ShapesFrames)).call(this));
+
+    _this.frameId = -1;
+    _this.keyframesManager = keyframesManager;
+    _this.elem = keyframesManager.elem;
+    _this.session = session;
+    _this.shapes = [];
+    _this.shapesData = shapes;
+    _this.stylesList = [];
+    _this.itemsData = [];
+    _this.prevViewData = [];
+    _this.shapeModifiers = [];
+    _this.processedElements = [];
+    _this.transformsManager = new ShapeTransformManager();
+    _this.initDynamicPropertyContainer(keyframesManager);
+
+    _this.lcEnum = {
+      '1': 'butt',
+      '2': 'round',
+      '3': 'square'
+    };
+    _this.ljEnum = {
+      '1': 'miter',
+      '2': 'round',
+      '3': 'bevel'
+    };
+
+    // set to true when inpoint is rendered
+    _this._isFirstFrame = true;
+
+    _this.transformHelper = { opacity: 1, _opMdf: false };
+    _this.searchShapes(_this.shapesData, _this.itemsData, _this.prevViewData, true, []);
+    if (!_this._isAnimated) {
+      _this.transformHelper.opacity = 1;
+      _this.transformHelper._opMdf = false;
+      _this.updateModifiers(_this.frameId);
+      _this.transformsManager.processSequences(_this._isFirstFrame);
+      _this.updateShape(_this.transformHelper, _this.shapesData, _this.itemsData);
+
+      _this.updateGrahpics();
+    }
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {number} frameNum frameNum
+   */
+  // prepareProperties(frameNum) {
+  //   let i;
+  //   const len = this.dynamicProperties.length;
+  //   for (i = 0; i < len; i += 1) {
+  //     this.dynamicProperties[i].getValue(frameNum);
+  //     if (this.dynamicProperties[i]._mdf) {
+  //       this._mdf = true;
+  //     }
+  //   }
+  // }
+
+  /**
+   * a
+   * @param {*} prop a
+   */
+  // addDynamicProperty(prop) {
+  //   if (this.dynamicProperties.indexOf(prop) === -1) {
+  //     this.dynamicProperties.push(prop);
+  //   }
+  // }
+
+  /**
+   * create style element
+   * @param {*} data style item data
+   * @param {*} transforms transforms array
+   * @return {*}
+   */
+
+
+  createClass(ShapesFrames, [{
+    key: 'createStyleElement',
+    value: function createStyleElement(data, transforms) {
+      // let styleElem = {
+      //   data: data,
+      //   type: data.ty,
+      //   preTransforms: this.transformsManager.addTransformSequence(transforms),
+      //   transforms: [],
+      //   elements: [],
+      //   closed: data.hd === true,
+      // };
+      var styleElem = new PathPaint(this.elem, data, this.transformsManager.addTransformSequence(transforms));
+      var elementData = {};
+      if (data.ty == 'fl' || data.ty == 'st') {
+        elementData.c = PropertyFactory.getProp(this, data.c, 1, 255, this);
+        if (!elementData.c.k) {
+          styleElem.co = elementData.c.v; // 'rgb('+bm_floor(elementData.c.v[0])+','+bm_floor(elementData.c.v[1])+','+bm_floor(elementData.c.v[2])+')';
+        }
+      } else if (data.ty === 'gf' || data.ty === 'gs') {
+        elementData.s = PropertyFactory.getProp(this, data.s, 1, null, this);
+        elementData.e = PropertyFactory.getProp(this, data.e, 1, null, this);
+        elementData.h = PropertyFactory.getProp(this, data.h || { k: 0 }, 0, 0.01, this);
+        elementData.a = PropertyFactory.getProp(this, data.a || { k: 0 }, 0, degToRads, this);
+        elementData.g = new GradientProperty(this, data.g, this);
+      }
+      elementData.o = PropertyFactory.getProp(this, data.o, 0, 0.01, this);
+      if (data.ty == 'st' || data.ty == 'gs') {
+        styleElem.lc = this.lcEnum[data.lc] || 'round';
+        styleElem.lj = this.ljEnum[data.lj] || 'round';
+        if (data.lj == 1) {
+          styleElem.ml = data.ml;
+        }
+        elementData.w = PropertyFactory.getProp(this, data.w, 0, null, this);
+        if (!elementData.w.k) {
+          styleElem.wi = elementData.w.v;
+        }
+        if (data.d) {
+          var d = new DashProperty(this, data.d, 'canvas', this);
+          elementData.d = d;
+          if (!elementData.d.k) {
+            styleElem.da = elementData.d.dashArray;
+            styleElem.do = elementData.d.dashoffset[0];
+          }
+        }
+      } else {
+        styleElem.r = data.r === 2 ? 'evenodd' : 'nonzero';
+      }
+      this.stylesList.push(styleElem);
+      elementData.style = styleElem;
+      return elementData;
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'addShapeToModifiers',
+    value: function addShapeToModifiers(data) {
+      var i = void 0;var len = this.shapeModifiers.length;
+      for (i = 0; i < len; i += 1) {
+        this.shapeModifiers[i].addShape(data);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     * @return {Boolean}
+     */
+
+  }, {
+    key: 'isShapeInAnimatedModifiers',
+    value: function isShapeInAnimatedModifiers(data) {
+      var i = 0;var len = this.shapeModifiers.length;
+      while (i < len) {
+        if (this.shapeModifiers[i].isAnimatedWithShape(data)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    /**
+     * a
+     * @param {number} frameNum frameNum
+     */
+
+  }, {
+    key: 'updateModifiers',
+    value: function updateModifiers(frameNum) {
+      if (!this.shapeModifiers.length) {
+        return;
+      }
+      var i = void 0;var len = this.shapes.length;
+      for (i = 0; i < len; i += 1) {
+        this.shapes[i].sh.reset();
+      }
+
+      len = this.shapeModifiers.length;
+      for (i = len - 1; i >= 0; i -= 1) {
+        this.shapeModifiers[i].processShapes(frameNum, this._isFirstFrame);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @return {number}
+     */
+
+  }, {
+    key: 'searchProcessedElement',
+    value: function searchProcessedElement(elem) {
+      var elements = this.processedElements;
+      var i = 0;var len = elements.length;
+      while (i < len) {
+        if (elements[i].elem === elem) {
+          return elements[i].pos;
+        }
+        i += 1;
+      }
+      return 0;
+    }
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} pos a
+     */
+
+  }, {
+    key: 'addProcessedElement',
+    value: function addProcessedElement(elem, pos) {
+      var elements = this.processedElements;
+      var i = elements.length;
+      while (i) {
+        i -= 1;
+        if (elements[i].elem === elem) {
+          elements[i].pos = pos;
+          return;
+        }
+      }
+      elements.push(new ProcessedElement(elem, pos));
+    }
+
+    /**
+     * create group element
+     * @return {*}
+     */
+
+  }, {
+    key: 'createGroupElement',
+    value: function createGroupElement() {
+      return {
+        it: [],
+        prevViewData: []
+      };
+    }
+
+    /**
+     * create transform element
+     * @param {*} data a
+     * @return {*}
+     */
+
+  }, {
+    key: 'createTransformElement',
+    value: function createTransformElement(data) {
+      return {
+        transform: {
+          opacity: 1,
+          _opMdf: false,
+          key: this.transformsManager.getNewKey(),
+          op: PropertyFactory.getProp(this, data.o, 0, 0.01, this),
+          mProps: getTransformProperty(this, data, this)
+        }
+      };
+    }
+
+    /**
+     * a
+     * @param {*} data a
+     * @return {*}
+     */
+
+  }, {
+    key: 'createShapeElement',
+    value: function createShapeElement(data) {
+      var elementData = new ShapeData(this, data, this.stylesList, this.transformsManager);
+
+      this.shapes.push(elementData);
+      this.addShapeToModifiers(elementData);
+      return elementData;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'reloadShapes',
+    value: function reloadShapes() {
+      this._isFirstFrame = true;
+      var i = void 0;var len = this.itemsData.length;
+      for (i = 0; i < len; i += 1) {
+        this.prevViewData[i] = this.itemsData[i];
+      }
+      this.searchShapes(this.shapesData, this.itemsData, this.prevViewData, true, []);
+      len = this.dynamicProperties.length;
+      for (i = 0; i < len; i += 1) {
+        this.dynamicProperties[i].getValue();
+      }
+      this.updateModifiers();
+      this.transformsManager.processSequences(this._isFirstFrame);
+    }
+
+    /**
+     * a
+     * @param {*} transform a
+     */
+
+  }, {
+    key: 'addTransformToStyleList',
+    value: function addTransformToStyleList(transform) {
+      var len = this.stylesList.length;
+      for (var i = 0; i < len; i += 1) {
+        if (!this.stylesList[i].closed) {
+          this.stylesList[i].transforms.push(transform);
+        }
+      }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'removeTransformFromStyleList',
+    value: function removeTransformFromStyleList() {
+      var len = this.stylesList.length;
+      for (var i = 0; i < len; i += 1) {
+        if (!this.stylesList[i].closed) {
+          this.stylesList[i].transforms.pop();
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styles a
+     */
+
+  }, {
+    key: 'closeStyles',
+    value: function closeStyles(styles) {
+      var len = styles.length;
+      for (var i = 0; i < len; i += 1) {
+        styles[i].closed = true;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} arr a
+     * @param {*} itemsData a
+     * @param {*} prevViewData a
+     * @param {*} shouldRender a
+     * @param {*} transforms a
+     */
+
+  }, {
+    key: 'searchShapes',
+    value: function searchShapes(arr, itemsData, prevViewData, shouldRender, transforms) {
+      var i = void 0;var len = arr.length - 1;
+      var j = void 0;var jLen = void 0;
+      var ownStyles = [];var ownModifiers = [];var processedPos = void 0;var modifier = void 0;var currentTransform = void 0;
+      var ownTransforms = [].concat(transforms);
+      for (i = len; i >= 0; i -= 1) {
+        processedPos = this.searchProcessedElement(arr[i]);
+        if (!processedPos) {
+          arr[i]._shouldRender = shouldRender;
+        } else {
+          itemsData[i] = prevViewData[processedPos - 1];
+        }
+        if (arr[i].ty == 'fl' || arr[i].ty == 'st' || arr[i].ty == 'gf' || arr[i].ty == 'gs') {
+          if (!processedPos) {
+            itemsData[i] = this.createStyleElement(arr[i], ownTransforms);
+          } else {
+            itemsData[i].style.closed = false;
+          }
+
+          ownStyles.push(itemsData[i].style);
+        } else if (arr[i].ty == 'gr') {
+          if (!processedPos) {
+            itemsData[i] = this.createGroupElement(arr[i]);
+          } else {
+            jLen = itemsData[i].it.length;
+            for (j = 0; j < jLen; j += 1) {
+              itemsData[i].prevViewData[j] = itemsData[i].it[j];
+            }
+          }
+          this.searchShapes(arr[i].it, itemsData[i].it, itemsData[i].prevViewData, shouldRender, ownTransforms);
+        } else if (arr[i].ty == 'tr') {
+          if (!processedPos) {
+            currentTransform = this.createTransformElement(arr[i]);
+            itemsData[i] = currentTransform;
+          }
+          ownTransforms.push(itemsData[i]);
+          this.addTransformToStyleList(itemsData[i]);
+        } else if (arr[i].ty == 'sh' || arr[i].ty == 'rc' || arr[i].ty == 'el' || arr[i].ty == 'sr') {
+          if (!processedPos) {
+            itemsData[i] = this.createShapeElement(arr[i]);
+          }
+        } else if (arr[i].ty == 'tm' || arr[i].ty == 'rd') {
+          if (!processedPos) {
+            modifier = ShapeModifiers.getModifier(arr[i].ty);
+            modifier.init(this, arr[i]);
+            itemsData[i] = modifier;
+            this.shapeModifiers.push(modifier);
+          } else {
+            modifier = itemsData[i];
+            modifier.closed = false;
+          }
+          ownModifiers.push(modifier);
+        } else if (arr[i].ty == 'rp') {
+          if (!processedPos) {
+            modifier = ShapeModifiers.getModifier(arr[i].ty);
+            itemsData[i] = modifier;
+            modifier.init(this, arr, i, itemsData);
+            this.shapeModifiers.push(modifier);
+            shouldRender = false;
+          } else {
+            modifier = itemsData[i];
+            modifier.closed = true;
+          }
+          ownModifiers.push(modifier);
+        }
+        this.addProcessedElement(arr[i], i + 1);
+      }
+      this.removeTransformFromStyleList();
+      this.closeStyles(ownStyles);
+      len = ownModifiers.length;
+      for (i = 0; i < len; i += 1) {
+        ownModifiers[i].closed = true;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} parentTransform a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'updateShapeTransform',
+    value: function updateShapeTransform(parentTransform, groupTransform) {
+      if (parentTransform._opMdf || groupTransform.op._mdf || this._isFirstFrame) {
+        groupTransform.opacity = parentTransform.opacity;
+        groupTransform.opacity *= groupTransform.op.v;
+        groupTransform._opMdf = true;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styledShape a
+     * @param {*} shape a
+     */
+
+  }, {
+    key: 'updateStyledShape',
+    value: function updateStyledShape(styledShape, shape) {
+      if (this._isFirstFrame || shape._mdf || styledShape.transforms._mdf) {
+        var shapeNodes = styledShape.trNodes;
+        var paths = shape.paths;
+        var i = void 0;var len = void 0;var j = void 0;var jLen = paths._length;
+        shapeNodes.length = 0;
+        var groupTransformMat = styledShape.transforms.finalTransform;
+        for (j = 0; j < jLen; j += 1) {
+          var pathNodes = paths.shapes[j];
+          if (pathNodes && pathNodes.v) {
+            len = pathNodes._length;
+            for (i = 1; i < len; i += 1) {
+              if (i === 1) {
+                shapeNodes.push({
+                  t: 'm',
+                  p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
+                });
+              }
+              shapeNodes.push({
+                t: 'c',
+                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[i], pathNodes.v[i])
+              });
+            }
+            if (len === 1) {
+              shapeNodes.push({
+                t: 'm',
+                p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
+              });
+            }
+            if (pathNodes.c && len) {
+              shapeNodes.push({
+                t: 'c',
+                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[0], pathNodes.v[0])
+              });
+              shapeNodes.push({
+                t: 'z'
+              });
+            }
+          }
+        }
+        styledShape.trNodes = shapeNodes;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} pathData a
+     * @param {*} itemData a
+     */
+
+  }, {
+    key: 'updatePath',
+    value: function updatePath(pathData, itemData) {
+      if (pathData.hd !== true && pathData._shouldRender) {
+        var i = void 0;var len = itemData.styledShapes.length;
+        for (i = 0; i < len; i += 1) {
+          this.updateStyledShape(itemData.styledShapes[i], itemData.sh);
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styleData a
+     * @param {*} itemData a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'updateFill',
+    value: function updateFill(styleData, itemData, groupTransform) {
+      var styleElem = itemData.style;
+
+      if (itemData.c._mdf || this._isFirstFrame) {
+        // styleElem.co = 'rgb('
+        // + Math.floor(itemData.c.v[0]) + ','
+        // + Math.floor(itemData.c.v[1]) + ','
+        // + Math.floor(itemData.c.v[2]) + ')';
+        styleElem.co = itemData.c.v; // rgb2hex(itemData.c.v);
+      }
+      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
+        styleElem.coOp = itemData.o.v * groupTransform.opacity;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styleData a
+     * @param {*} itemData aa
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'updateStroke',
+    value: function updateStroke(styleData, itemData, groupTransform) {
+      var styleElem = itemData.style;
+      var d = itemData.d;
+      if (d && (d._mdf || this._isFirstFrame)) {
+        styleElem.da = d.dashArray;
+        styleElem.do = d.dashoffset[0];
+      }
+      if (itemData.c._mdf || this._isFirstFrame) {
+        styleElem.co = itemData.c.v; // 'rgb('+bm_floor(itemData.c.v[0])+','+bm_floor(itemData.c.v[1])+','+bm_floor(itemData.c.v[2])+')';
+      }
+      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
+        styleElem.coOp = itemData.o.v * groupTransform.opacity;
+      }
+      if (itemData.w._mdf || this._isFirstFrame) {
+        styleElem.wi = itemData.w.v;
+      }
+    }
+
+    /**
+     * a
+     * @param {*} styleData a
+     * @param {*} itemData a
+     * @param {*} groupTransform a
+     */
+
+  }, {
+    key: 'updateGradientFill',
+    value: function updateGradientFill(styleData, itemData, groupTransform) {
+      var styleElem = itemData.style;
+      if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf)) {
+        var ctx = this.globalData.canvasContext;
+        var grd = void 0;
+        var pt1 = itemData.s.v;var pt2 = itemData.e.v;
+        if (styleData.t === 1) {
+          grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
+        } else {
+          var rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
+          var ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
+
+          var percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99 : itemData.h.v;
+          var dist = rad * percent;
+          var x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
+          var y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
+          grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
+        }
+
+        var i = void 0;var len = styleData.g.p;
+        var cValues = itemData.g.c;
+        var opacity = 1;
+
+        for (i = 0; i < len; i += 1) {
+          if (itemData.g._hasOpacity && itemData.g._collapsable) {
+            opacity = itemData.g.o[i * 2 + 1];
+          }
+          grd.addColorStop(cValues[i * 4] / 100, 'rgba(' + cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ',' + cValues[i * 4 + 3] + ',' + opacity + ')');
+        }
+        styleElem.grd = grd;
+      }
+      styleElem.coOp = itemData.o.v * groupTransform.opacity;
+    }
+
+    /**
+     * a
+     * @param {*} parentTransform a
+     * @param {*} items a
+     * @param {*} data a
+     */
+
+  }, {
+    key: 'updateShape',
+    value: function updateShape(parentTransform, items, data) {
+      var len = items.length - 1;
+      var groupTransform = parentTransform;
+      for (var i = len; i >= 0; i -= 1) {
+        if (items[i].ty == 'tr') {
+          groupTransform = data[i].transform;
+          this.updateShapeTransform(parentTransform, groupTransform);
+        } else if (items[i].ty == 'sh' || items[i].ty == 'el' || items[i].ty == 'rc' || items[i].ty == 'sr') {
+          this.updatePath(items[i], data[i]);
+        } else if (items[i].ty == 'fl') {
+          this.updateFill(items[i], data[i], groupTransform);
+        } else if (items[i].ty == 'st') {
+          this.updateStroke(items[i], data[i], groupTransform);
+        } else if (items[i].ty == 'gf' || items[i].ty == 'gs') {
+          this.updateGradientFill(items[i], data[i], groupTransform);
+        } else if (items[i].ty == 'gr') {
+          this.updateShape(groupTransform, items[i].it, data[i].it);
+        }
+      }
+      // if (isMain) {
+      //   this.drawLayer();
+      // }
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'updateGrahpics',
+    value: function updateGrahpics() {
+      var len = this.stylesList.length;
+      for (var i = 0; i < len; i += 1) {
+        var currentStyle = this.stylesList[i];
+        currentStyle.updateGrahpics();
+      }
+    }
+
+    /**
+     * a
+     * @param {number} frameNum frameNum
+     */
+
+  }, {
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+      this.iterateDynamicProperties(frameNum);
+      this.transformHelper.opacity = 1;
+      this.transformHelper._opMdf = false;
+      this.updateModifiers(frameNum);
+      this.transformsManager.processSequences(this._isFirstFrame);
+      this.updateShape(this.transformHelper, this.shapesData, this.itemsData);
+
+      this.updateGrahpics();
+
+      this.frameId = frameNum;
+    }
+  }]);
+  return ShapesFrames;
+}(DynamicPropertyContainer);
+
+/**
+ * a
+ */
+
+var TransformFrames = function (_TransformProperty) {
+  inherits(TransformFrames, _TransformProperty);
+
+  /**
+   * a
+   * @param {*} elem a
+   * @param {*} hs a
+   * @param {*} session a
+   */
+  function TransformFrames(elem, hs, session) {
+    classCallCheck(this, TransformFrames);
+
+    var _this = possibleConstructorReturn(this, (TransformFrames.__proto__ || Object.getPrototypeOf(TransformFrames)).call(this, elem, hs));
+
+    _this.frameId = -1;
+    _this.hs = hs;
+    _this.session = session;
+    return _this;
+  }
+
+  /**
+   * get transform
+   * @param {number} frameNum frameNum
+   */
+
+
+  createClass(TransformFrames, [{
+    key: 'getValue',
+    value: function getValue(frameNum) {
+      if (frameNum === this.frameId) {
+        return;
+      }
+
+      this.iterateDynamicProperties(frameNum);
+
+      this.frameId = frameNum;
+    }
+
+    /**
+     * get position x
+     */
+
+  }, {
+    key: 'x',
+    get: function get$$1() {
+      return this.p ? this.p.v[0] : this.px.v;
+    }
+
+    /**
+     * get position x
+     */
+
+  }, {
+    key: 'y',
+    get: function get$$1() {
+      return this.p ? this.p.v[1] : this.py.v;
+    }
+
+    /**
+     * get anchor x
+     */
+
+  }, {
+    key: 'anchorX',
+    get: function get$$1() {
+      return this.a.v[0];
+    }
+
+    /**
+     * get anchor x
+     */
+
+  }, {
+    key: 'anchorY',
+    get: function get$$1() {
+      return this.a.v[1];
+    }
+
+    /**
+     * get scale x
+     */
+
+  }, {
+    key: 'scaleX',
+    get: function get$$1() {
+      return this.s.v[0];
+    }
+
+    /**
+     * get scale x
+     */
+
+  }, {
+    key: 'scaleY',
+    get: function get$$1() {
+      return this.s.v[1];
+    }
+
+    /**
+     * get rotation
+     */
+
+  }, {
+    key: 'rotation',
+    get: function get$$1() {
+      return this.r.v;
+    }
+
+    /**
+     * get alpha
+     */
+
+  }, {
+    key: 'alpha',
+    get: function get$$1() {
+      return this.o.v;
+    }
+  }]);
+  return TransformFrames;
+}(TransformProperty);
+
+/**
+ * KeyframesManager
+ * @class
+ * @private
+ */
+
+var KeyframesManager = function () {
+  /**
+   * manager
+   * @param {object} elem elem
+   */
+  function KeyframesManager(elem) {
+    classCallCheck(this, KeyframesManager);
+
+    // const { st, config } = session;
+
+    this.elem = elem;
+    // this.layer = layer;
+
+    // const opst = this.layer.op + st;
+
+    // this.isOverSide = opst >= config.op;
+
+    // this.keyframes = [];
+
+    // set to true when inpoint is rendered
+    this._isFirstFrame = false;
+
+    // list of animated properties
+    this.dynamicProperties = [];
+
+    // If layer has been modified in current tick this will be true
+    this._mdf = false;
+
+    this.transform = null;
+
+    this.masks = null;
+
+    this.shapes = null;
+
+    this._hasOutTypeExpression = false;
+
+    this.needUpdateOverlap = false;
+
+    this.isOverlapMode = false;
+
+    this.visible = true;
+  }
+
+  /**
+   * manager
+   * @param {object} layer elem
+   * @param {object} session elem
+   */
+
+
+  createClass(KeyframesManager, [{
+    key: 'initFrame',
+    value: function initFrame(layer, session) {
+      // this.elem = elem;
+      this.layer = layer;
+
+      var local = session.local,
+          global = session.global;
+
+      this.session = session;
+
+      // const opst = this.layer.op + st;
+
+      // ip, op, st session
+      this.isOverlapLayer = this.layer.op >= local.op - local.st;
+
+      this.isOverlapMode = global.overlapMode;
+
+      this.parseLayer(layer, session);
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'outTypeExpressionMode',
+    value: function outTypeExpressionMode() {
+      this._hasOutTypeExpression = true;
+      if (this.isOverlapLayer) {
+        this.needUpdateOverlap = true;
+      }
+    }
+
+    /**
+     * Calculates all dynamic values
+     * @param {number} frameNum current frame number in Layer's time
+     * @param {boolean} isVisible if layers is currently in range
+     */
+
+  }, {
+    key: 'prepareProperties',
+    value: function prepareProperties(frameNum, isVisible) {
+      var i = void 0;var len = this.dynamicProperties.length;
+      for (i = 0; i < len; i += 1) {
+        if (isVisible || this.needUpdateOverlap || this.elem._isParent && this.dynamicProperties[i].propType === 'transform') {
+          this.dynamicProperties[i].getValue(frameNum);
+          if (this.dynamicProperties[i]._mdf) {
+            // this.globalData._mdf = true;
+            this._mdf = true;
+          }
+        }
+      }
+    }
+
+    /**
+     * a
+     * @param {*} prop a
+     */
+
+  }, {
+    key: 'addDynamicProperty',
+    value: function addDynamicProperty(prop) {
+      if (this.dynamicProperties.indexOf(prop) === -1) {
+        this.dynamicProperties.push(prop);
+      }
+    }
+
+    /**
+     * parse
+     * @param {object} layer
+     * @param {object} session
+     */
+
+  }, {
+    key: 'parseLayer',
+    value: function parseLayer(_ref, session) {
+      var ks = _ref.ks,
+          hasMask = _ref.hasMask,
+          masksProperties = _ref.masksProperties,
+          shapes = _ref.shapes,
+          tm = _ref.tm;
+
+      if (ks) {
+        this.transform = new TransformFrames(this, ks, session);
+        // ao logic
+      }
+
+      if (hasMask) {
+        this.masks = new MaskFrames(this, masksProperties, session);
+      }
+      if (shapes) {
+        this.shapes = new ShapesFrames(this, shapes, session);
+      }
+
+      if (tm) {
+        var frameRate = session.global.frameRate;
+
+        this.tm = PropertyFactory.getProp(this, tm, 0, frameRate, this);
+      }
+    }
+
+    /**
+     * update
+     * @param {number} frameNum frameNum
+     * @param {object} session update session
+     */
+
+  }, {
+    key: 'updateFrame',
+    value: function updateFrame(frameNum, session) {
+      this._mdf = false;
+      var inIpOpRange = Tools.inRange(frameNum, this.layer.ip, this.layer.op);
+      if (this.isOverlapMode && this.isOverlapLayer) {
+        this.visible = frameNum >= this.layer.ip;
+      } else {
+        this.visible = inIpOpRange;
+      }
+
+      this.prepareProperties(frameNum, inIpOpRange);
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      var display = this.elem.display;
+      if (!this.elem._isRoot) {
+        if (this.visible) {
+          display.show();
+        } else {
+          display.hide();
+        }
+      }
+      if (this.transform) display.updateLottieTransform(this.transform);
+      if (this.masks) display.updateLottieMasks(this.masks);
+    }
+  }]);
+  return KeyframesManager;
+}();
+
+/**
+ * a
+ */
+
+var BaseElement = function () {
+  /**
+   * a
+   * @param {*} layer layer
+   */
+  function BaseElement(layer) {
+    classCallCheck(this, BaseElement);
+
+    this.data = layer;
+    if (this.data.sr === undefined) {
+      this.data.sr = 1;
+    }
+    this.offsetTime = layer.st || 0;
+    this.bodymovin = new KeyframesManager(this);
+    this.displayType = '';
+    this.display = null;
+    this.hierarchy = null;
+
+    this.lottieTreeParent = null;
+  }
+
+  /**
+   * set hierarchy
+   * @param {*} elem elem
+   */
+
+
+  createClass(BaseElement, [{
+    key: 'setHierarchy',
+    value: function setHierarchy(elem) {
+      this.hierarchy = elem;
+      this.display.setHierarchy(elem.display);
+    }
+
+    /**
+     * a
+     * @param {*} type a
+     * @param {*} data a
+     * @return {DisplayInstance}
+     */
+
+  }, {
+    key: 'initDisplayInstance',
+    value: function initDisplayInstance(type, data) {
+      var classFn = DisplayRegister.getDisplayByType(type);
+      var instance = new classFn(this, data);
+      return instance;
+    }
+
+    /**
+     * a
+     * @param {*} frameNum a
+     */
+
+  }, {
+    key: 'updateFrame',
+    value: function updateFrame(frameNum) {
+      this.bodymovin.updateFrame(frameNum);
+      this.bodymovin.updateDisplay();
+    }
+  }]);
+  return BaseElement;
+}();
+
+/**
+ * a
+ */
+
+var CompElement = function (_BaseElement) {
+  inherits(CompElement, _BaseElement);
+
+  /**
+   * a
+   * @param {*} layer a
+   * @param {*} session a
+   */
+  function CompElement(layer, session) {
+    classCallCheck(this, CompElement);
+
+    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this, layer));
+
+    var maskComp = session.global.maskComp,
+        _session$local = session.local,
+        w = _session$local.w,
+        h = _session$local.h;
+
+    _this.session = session;
+
+    var config = {
+      layer: layer,
+      session: session
+    };
+
+    if (maskComp) {
+      config.maskComp = maskComp;
+      config.viewport = { x: 0, y: 0, width: w, height: h };
+    }
+    _this.config = config;
+
+    _this.childNodes = [];
+
+    _this.displayType = DisplayRegister.Type.Container;
+
+    _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+    _this.bodymovin.initFrame(layer, session);
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {*} frameNum a
+   */
+
+
+  createClass(CompElement, [{
+    key: 'updateFrame',
+    value: function updateFrame(frameNum) {
+      this.bodymovin.updateFrame(frameNum);
+      this.bodymovin.updateDisplay();
+
+      frameNum -= this.offsetTime;
+
+      if (this.bodymovin.tm) {
+        var timeRemapped = this.bodymovin.tm.v;
+        if (timeRemapped === this.data.op) {
+          timeRemapped = this.data.op - 1;
+        }
+        frameNum = timeRemapped;
+      } else {
+        frameNum = frameNum / this.data.sr;
+      }
+      for (var i = 0; i < this.childNodes.length; i++) {
+        this.childNodes[i].updateFrame(frameNum);
+      }
+    }
+
+    /**
+     * a
+     * @param {*} node a
+     */
+
+  }, {
+    key: 'addChild',
+    value: function addChild(node) {
+      node.lottieTreeParent = this;
+      this.childNodes.push(node);
+      this.display.addChild(node.display);
+    }
+  }]);
+  return CompElement;
+}(BaseElement);
+
+/**
+ * a
+ */
+
+var SolidElement = function (_BaseElement) {
+  inherits(SolidElement, _BaseElement);
+
+  /**
+   * a
+   * @param {*} layer a
+   * @param {*} session a
+   */
+  function SolidElement(layer, session) {
+    classCallCheck(this, SolidElement);
+
+    var _this = possibleConstructorReturn(this, (SolidElement.__proto__ || Object.getPrototypeOf(SolidElement)).call(this, layer));
+
+    var config = {
+      layer: layer,
+      session: session,
+      rect: { x: 0, y: 0, width: layer.sw, height: layer.sh },
+      color: layer.sc
+    };
+    _this.config = config;
+    _this.session = session;
+
+    _this.displayType = DisplayRegister.Type.Solid;
+
+    _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+    _this.bodymovin.initFrame(layer, session);
+    return _this;
+  }
+
+  return SolidElement;
+}(BaseElement);
+
+/**
+ * a
+ */
+
+var SpriteElement = function (_BaseElement) {
+  inherits(SpriteElement, _BaseElement);
+
+  /**
+   * a
+   * @param {*} layer a
+   * @param {*} session a
+   */
+  function SpriteElement(layer, session) {
+    classCallCheck(this, SpriteElement);
+
+    var _this = possibleConstructorReturn(this, (SpriteElement.__proto__ || Object.getPrototypeOf(SpriteElement)).call(this, layer));
+
+    var _session$global = session.global,
+        loader = _session$global.loader,
+        assets = _session$global.assets;
+
+    var asset = Tools.getAssets(layer.refId, assets);
+
+    var config = {
+      layer: layer,
+      session: session,
+      texture: loader.getTextureById(asset.id),
+      asset: asset
+    };
+    _this.config = config;
+    _this.session = session;
+
+    _this.displayType = DisplayRegister.Type.Sprite;
+
+    _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+    _this.bodymovin.initFrame(layer, session);
+    return _this;
+  }
+
+  return SpriteElement;
+}(BaseElement);
+
+/**
+ * a
+ */
+
+var ShapeElement = function (_BaseElement) {
+  inherits(ShapeElement, _BaseElement);
+
+  /**
+   * a
+   * @param {*} layer a
+   * @param {*} session a
+   */
+  function ShapeElement(layer, session) {
+    classCallCheck(this, ShapeElement);
+
+    var _this = possibleConstructorReturn(this, (ShapeElement.__proto__ || Object.getPrototypeOf(ShapeElement)).call(this, layer));
+
+    var config = {
+      layer: layer,
+      session: session
+    };
+    _this.config = config;
+    _this.session = session;
+
+    _this.displayType = DisplayRegister.Type.Container;
+
+    _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+    _this.bodymovin.initFrame(layer, session);
+    return _this;
+  }
+
+  return ShapeElement;
+}(BaseElement);
+
+/**
+ * a
+ */
+
+var NullElement = function (_BaseElement) {
+  inherits(NullElement, _BaseElement);
+
+  /**
+   * a
+   * @param {*} layer a
+   * @param {*} session a
+   */
+  function NullElement(layer, session) {
+    classCallCheck(this, NullElement);
+
+    var _this = possibleConstructorReturn(this, (NullElement.__proto__ || Object.getPrototypeOf(NullElement)).call(this, layer));
+
+    var config = {
+      layer: layer,
+      session: session
+    };
+    _this.config = config;
+    _this.session = session;
+
+    _this.displayType = DisplayRegister.Type.Container;
+
+    _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+    _this.bodymovin.initFrame(layer, session);
+    return _this;
+  }
+
+  return NullElement;
+}(BaseElement);
+
+// import Loader from '../utils/Loader';
+/**
+ * an animation group, store and compute frame information
+ * @class
+ */
+
+var AnimationGroup = function (_Eventer) {
+  inherits(AnimationGroup, _Eventer);
+
+  /**
+   * parser a bodymovin data, and post some config for this animation group
+   * @param {object} options animation config
+   * @param {Object} options.keyframes bodymovin data, which export from AE by bodymovin
+   * @param {Number} [options.repeats=0] need repeat some times?
+   * @param {Boolean} [options.infinite=false] play this animation round and round forever
+   * @param {Boolean} [options.alternate=false] alternate play direction every round
+   * @param {Number} [options.wait=0] need wait how much millisecond to start
+   * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
+   * @param {Number} [options.timeScale=1] animation speed, time scale factor
+   * @param {Boolean} [options.autoLoad=true] auto load assets, if this animation have
+   * @param {Boolean} [options.autoStart=true] auto start animation after assets loaded
+   * @param {Boolean} [options.overlapMode=false] enable overlap mode, it is useful when you have a overlap expression
+   * @param {Object} [options.segments={}] animation segments, splite by start and end keyframe number
+   * @param {Boolean} [options.initSegment=''] animation segments, init finite state machine
+   * @param {Boolean} [options.maskComp=false] auto start animation after assets loaded
+   * @param {String} [options.prefix=''] assets url prefix, look like link path
+   * @param {class} LoaderClass loader class
+   */
+  function AnimationGroup(options, LoaderClass) {
+    classCallCheck(this, AnimationGroup);
+
+    /**
+     * 动画是否是激活状态
+     * @member {boolean}
+     */
+    var _this = possibleConstructorReturn(this, (AnimationGroup.__proto__ || Object.getPrototypeOf(AnimationGroup)).call(this));
+
+    _this.living = true;
+
+    /**
+     * 动画无限循环播放
+     * @member {boolean}
+     */
+    _this.infinite = options.infinite || false;
+
+    /**
+     * 动画循环多少次
+     * @member {number}
+     */
+    _this.repeats = options.repeats || 0;
+
+    /**
+     * 动画交替播放
+     * @member {boolean}
+     */
+    _this.alternate = options.alternate || false;
+
+    /**
+     * 动画延迟多长时间启动
+     * @member {number}
+     */
+    _this.wait = options.wait || 0;
+
+    /**
+     * 动画延迟多长时间开始
+     * @member {number}
+     */
+    _this.delay = options.delay || 0;
+
+    /**
+     * 动画是否启动 overlap 模式
+     * @member {number}
+     */
+    _this.overlapMode = options.overlapMode || false;
+
+    /**
+     * 动画速度
+     * @member {number}
+     */
+    _this.timeScale = Tools.isNumber(options.timeScale) ? options.timeScale : 1;
+
+    /**
+     * 总帧数
+     * @member {number}
+     */
+    _this.frameNum = 0;
+
+    /**
+     * 记录帧位，初始值随意设置为负无穷大
+     * @member {number}
+     * @private
+     */
+    _this._pf = -Infinity;
+
+    /**
+     * 动画方向，1 or -1
+     * @member {number}
+     * @private
+     */
+    _this.direction = 1;
+
+    /**
+     * 缓存重复多少次
+     * @member {number}
+     * @private
+     */
+    _this._repeatsCut = _this.repeats;
+
+    /**
+     * 缓存延迟多少时间
+     * @member {number}
+     * @private
+     */
+    _this._delayCut = _this.delay;
+
+    /**
+     * 缓存等待多少时间
+     * @member {number}
+     * @private
+     */
+    _this._waitCut = _this.wait;
+
+    /**
+     * 是否暂停状态，可以使用
+     * @member {number}
+     * @private
+     */
+    _this._paused = true;
+
+    var keyframes = Tools.copyJSON(options.keyframes);
+    DataManager.completeData(keyframes);
+
+    /**
+     * 提取全局信息
+     */
+    var fr = keyframes.fr,
+        ip = keyframes.ip,
+        op = keyframes.op,
+        assets = keyframes.assets,
+        prefix = keyframes.prefix;
+
+    /**
+     * 帧率
+     * @member {number}
+     * @private
+     */
+
+    _this.frameRate = fr;
+
+    /**
+     * 帧素
+     * @member {number}
+     * @private
+     */
+    _this.frameMult = fr / 1000;
+
+    /**
+     * 动画数据
+     * @private
+     */
+    _this.keyframes = keyframes;
+
+    /**
+     * 默认动画配置
+     * @private
+     */
+    _this.defaultSegment = [ip, op];
+
+    /**
+     * 分段动画配置，和 segmentName 参数配合使用
+     * @private
+     */
+    _this.segments = options.segments || {};
+
+    /**
+     * 有限状态机，当前状态机，和 segments 参数配合使用
+     * @private
+     */
+    var segmentName = options.initSegment || '';
+
+    // 获取初始化分段
+    var segment = segmentName && _this.segments[segmentName] || _this.defaultSegment;
+
+    /**
+     * 当前segment播放的开始帧
+     * @private
+     */
+    _this.beginFrame = segment[0];
+
+    /**
+     * 当前segment播放的结束帧
+     * @private
+     */
+    _this.endFrame = segment[1];
+
+    /**
+     * 资源相对地址前缀
+     * @private
+     */
+    _this.prefix = options.prefix || prefix || '';
+
+    /**
+     * 每帧时间
+     * @member {number}
+     * @private
+     */
+    _this._tpf = 1000 / fr;
+
+    /**
+     * 总帧数
+     * @member {number}
+     */
+    _this.duration = Math.floor(_this.endFrame - _this.beginFrame);
+
+    var autoLoad = Tools.isBoolean(options.autoLoad) ? options.autoLoad : true;
+    var autoStart = Tools.isBoolean(options.autoStart) ? options.autoStart : true;
+
+    var loader = null;
+    var images = assets.filter(function (it) {
+      return it.u && it.p;
+    });
+    if (images.length > 0) {
+      var _LoaderClass = LoaderRegister.getLoader();
+      _this.loader = loader = new _LoaderClass(images, { prefix: _this.prefix, autoLoad: autoLoad });
+      _this._imageLoadHandle = function () {
+        _this._paused = !autoStart;
+      };
+      _this._cancelImageLoadHandle = function () {
+        loader.off('complete', _this._imageLoadHandle);
+      };
+      loader.once('complete', _this._imageLoadHandle);
+    } else {
+      _this._cancelImageLoadHandle = null;
+      _this._paused = !autoStart;
+    }
+
+    // 注册图层
+    var register = new Register();
+
+    /**
+     * 该动画组注册的信息
+     * @member {LayerRegister}
+     * @private
+     */
+    _this.register = register;
+
+    var maskComp = Tools.isBoolean(options.maskComp) ? options.maskComp : true;
+    var session = {
+      global: {
+        assets: assets,
+        loader: loader,
+        register: register,
+        maskComp: maskComp,
+        frameRate: fr,
+        overlapMode: _this.overlapMode
+      },
+      local: {
+        parentName: ''
+      }
+    };
+
+    /**
+     * 该动画组的根对象
+     * @member {CompElement}
+     */
+    _this.root = _this.extraCompositions(_this.keyframes, session);
+    _this.root._isRoot = true;
+    _this.group = _this.rootDisplay = _this.root.display;
+    return _this;
+  }
+
+  /**
+   * a
+   * @param {object} data layers
+   * @param {object} assets object
+   * @return {container}
+   */
+
+
+  createClass(AnimationGroup, [{
+    key: 'extraCompositions',
+    value: function extraCompositions(data, _ref) {
+      var global = _ref.global,
+          local = _ref.local;
+      var w = data.w,
+          h = data.h,
+          ip = data.ip,
+          op = data.op,
+          _data$st = data.st,
+          st = _data$st === undefined ? 0 : _data$st,
+          _data$nm = data.nm,
+          nm = _data$nm === undefined ? 'null' : _data$nm;
+
+      var parentName = local.parentName ? local.parentName + '.' + nm : nm;
+      var container = new CompElement(data, { global: global, local: local });
+      var layers = data.layers || Tools.getAssets(data.refId, global.assets).layers;
+
+      var session = {
+        global: global,
+        local: {
+          w: w, h: h, ip: ip, op: op, st: st,
+          parentName: parentName
+        }
+      };
+
+      var elementsMap = this.createElements(layers, session);
+      for (var i = layers.length - 1; i >= 0; i--) {
+        var layer = layers[i];
+        var item = elementsMap[layer.ind];
+        if (!item) continue;
+        if (layer.parent) {
+          var parent = elementsMap[layer.parent];
+          parent._isParent = true;
+          item.setHierarchy(parent);
+        }
+        var nameHierarchy = parentName + '.' + item.name;
+        global.register.setLayer(nameHierarchy, item);
+        container.addChild(item);
+      }
+      return container;
+    }
+
+    /**
+     * createElements
+     * @param {arrya} layers layers
+     * @param {object} session object
+     * @return {object}
+     */
+
+  }, {
+    key: 'createElements',
+    value: function createElements(layers, session) {
+      var elementsMap = {};
+      for (var i = layers.length - 1; i >= 0; i--) {
+        var layer = layers[i];
+        var element = null;
+
+        if (layer.td !== undefined) continue;
+
+        switch (layer.ty) {
+          case 0:
+            element = this.extraCompositions(layer, session);
+            break;
+          case 1:
+            element = new SolidElement(layer, session);
+            break;
+          case 2:
+            element = new SpriteElement(layer, session);
+            break;
+          case 3:
+            element = new NullElement(layer, session);
+            break;
+          case 4:
+            element = new ShapeElement(layer, session);
+            break;
+          default:
+            continue;
+        }
+
+        if (element) {
+          if (layer.ind === undefined) layer.ind = i;
+          elementsMap[layer.ind] = element;
+          element.name = layer.nm || 'null';
+        }
+      }
+      return elementsMap;
+    }
+
+    /**
+     * get layer by name path
+     * @param {string} name layer name path, example: root.gift.star1
+     * @return {object}
+     */
+
+  }, {
+    key: 'getDisplayByName',
+    value: function getDisplayByName(name) {
+      var layer = this.register.getLayer(name);
+      if (layer.display) return layer.display;
+      console.warn('can not find display name as ', name);
+      return null;
+    }
+
+    /**
+     * bind other animation-group or display-object to this animation-group with name path
+     * @param {*} name
+     * @param {*} slot
+     */
+
+  }, {
+    key: 'bindSlot',
+    value: function bindSlot(name, slot) {
+      var slotDisplay = this.getDisplayByName(name);
+      slotDisplay.addChild(slot);
+    }
+
+    /**
+     * emit frame
+     * @private
+     * @param {*} np now frame
+     */
+
+  }, {
+    key: 'emitFrame',
+    value: function emitFrame(np) {
+      this.emit('@' + np);
+    }
+
+    /**
+     * update with time snippet
+     * @private
+     * @param {number} snippetCache snippet
+     */
+
+  }, {
+    key: 'update',
+    value: function update(snippetCache) {
+      if (!this.living) return;
+
+      var isEnd = this.updateTime(snippetCache);
+
+      var correctedFrameNum = this.beginFrame + this.frameNum;
+      this.root.updateFrame(correctedFrameNum);
+
+      var np = correctedFrameNum >> 0;
+      if (this._pf !== np) {
+        this.emitFrame(this.direction > 0 ? np : this._pf);
+        this._pf = np;
+      }
+      if (isEnd === false) {
+        this.emit('update', this.frameNum / this.duration);
+      } else if (this.hadEnded !== isEnd && isEnd === true) {
+        this.emit('complete');
+      }
+      this.hadEnded = isEnd;
+    }
+
+    /**
+     * update timeline with time snippet
+     * @private
+     * @param {number} snippet snippet
+     * @return {boolean} frameNum status
+     */
+
+  }, {
+    key: 'updateTime',
+    value: function updateTime(snippet) {
+      var snippetCache = this.direction * this.timeScale * snippet;
+      if (this._waitCut > 0) {
+        this._waitCut -= Math.abs(snippetCache);
+        return null;
+      }
+      if (this._paused || this._delayCut > 0) {
+        if (this._delayCut > 0) this._delayCut -= Math.abs(snippetCache);
+        return null;
+      }
+
+      this.frameNum += snippetCache / this._tpf;
+      var isEnd = false;
+
+      if (this.spill()) {
+        if (this._repeatsCut > 0 || this.infinite) {
+          if (this._repeatsCut > 0) --this._repeatsCut;
+          this._delayCut = this.delay;
+          if (this.alternate) {
+            this.direction *= -1;
+            this.frameNum = Tools.codomainBounce(this.frameNum, 0, this.duration);
+          } else {
+            this.direction = 1;
+            this.frameNum = Tools.euclideanModulo(this.frameNum, this.duration);
+          }
+        } else {
+          if (!this.overlapMode) {
+            this.frameNum = Tools.clamp(this.frameNum, 0, this.duration);
+            this.living = false;
+          }
+          isEnd = true;
+        }
+      }
+
+      return isEnd;
+    }
+
+    /**
+     * is this time frameNum spill the range
+     * @private
+     * @return {boolean}
+     */
+
+  }, {
+    key: 'spill',
+    value: function spill() {
+      var bottomSpill = this.frameNum <= 0 && this.direction === -1;
+      var topSpill = this.frameNum >= this.duration && this.direction === 1;
+      return bottomSpill || topSpill;
+    }
+
+    /**
+     * get time
+     * @param {number} frame frame index
+     * @return {number}
+     */
+
+  }, {
+    key: 'frameToTime',
+    value: function frameToTime(frame) {
+      return frame * this._tpf;
+    }
+
+    /**
+     * set animation speed, time scale
+     * @param {number} speed
+     */
+
+  }, {
+    key: 'setSpeed',
+    value: function setSpeed(speed) {
+      this.timeScale = speed;
+    }
+
+    /**
+     * set finite state machine
+     * @param {String|Array} name segment name which define in segments props, you can also pass an array like [10, 30]
+     * @param {Object} options animation config
+     * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
+     * @param {Number} [options.repeats=0] need repeat somt times?
+     * @param {Boolean} [options.infinite=false] play this animation round and round forever
+     * @param {Boolean} [options.alternate=false] alternate direction every round
+     * @param {Number} [options.wait=0] need wait how much millisecond to start
+     * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
+     */
+
+  }, {
+    key: 'playSegment',
+    value: function playSegment(name) {
+      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+      if (!name) return;
+
+      var segment = null;
+      if (Tools.isArray(name)) {
+        segment = name;
+      } else if (Tools.isString(name)) {
+        segment = this.segments[name];
+      }
+
+      if (!segment) return;
+
+      this.beginFrame = segment[0];
+      this.endFrame = segment[1];
+
+      if (Tools.isNumber(options.delay)) this.delay = options.delay;
+      if (Tools.isNumber(options.repeats)) this.repeats = options.repeats;
+      if (Tools.isBoolean(options.infinite)) this.infinite = options.infinite;
+      if (Tools.isBoolean(options.alternate)) this.alternate = options.alternate;
+      if (Tools.isNumber(options.wait)) this.wait = options.wait;
+      if (Tools.isNumber(options.delay)) this.delay = options.delay;
+
+      this.replay();
+    }
+
+    /**
+     * pause this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
+      this._paused = true;
+      return this;
+    }
+
+    /**
+     * resume or play this animation group
+     * @return {this}
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
+      this._paused = false;
+      return this;
+    }
+
+    /**
+     * replay this animation group from begin frame
+     * @return {this}
+     */
+
+  }, {
+    key: 'replay',
+    value: function replay() {
+      if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
+      this._paused = false;
+      this._repeatsCut = this.repeats;
+      this._delayCut = this.delay;
+      this.living = true;
+      this.frameNum = 0;
+      this.duration = Math.floor(this.endFrame - this.beginFrame);
+      this.direction = 1;
+      return this;
+    }
+  }]);
+  return AnimationGroup;
+}(Eventer$1);
+
+/**
+ * all lottie animation manager, manage update loop and animation groups
+ * @example
+ * const manager = new PIXI.AnimationManager(app);
+ * const ani = manager.parseAnimation({
+ *   keyframes: data,
+ *   infinite: true,
+ * });
+ * @class
+ */
+
+var AnimationManager = function (_Eventer) {
+  inherits(AnimationManager, _Eventer);
+
+  /**
+   * animation manager, a ticker instance
+   * @param {Application} app app object
+   */
+  function AnimationManager(app) {
+    classCallCheck(this, AnimationManager);
+
+    /**
+     * pre-time cache
+     *
+     * @member {Number}
+     * @private
+     */
+    var _this = possibleConstructorReturn(this, (AnimationManager.__proto__ || Object.getPrototypeOf(AnimationManager)).call(this));
+
+    _this.pt = 0;
+
+    /**
+     * how long the time through, at this tick
+     *
+     * @member {Number}
+     * @private
+     */
+    _this.snippet = 0;
+
+    /**
+     * time scale, just like speed scalar
+     *
+     * @member {Number}
+     */
+    _this.timeScale = 1;
+
+    /**
+     * mark the manager was pause or not
+     *
+     * @member {Boolean}
+     */
+    _this.paused = false;
+
+    /**
+     * get shared ticker from app object
+     * @private
+     */
+    _this.ticker = app.ticker ? app.ticker : app;
+
+    /**
+     * all animation groups
+     * @private
+     */
+    _this.groups = [];
+
+    _this.update = _this.update.bind(_this);
+
+    if (_this.ticker) _this.start();
+    return _this;
+  }
+
+  /**
+   * add a animationGroup child to array
+   * @param {AnimationGroup} child AnimationGroup instance
+   * @return {AnimationGroup} child
+   */
+
+
+  createClass(AnimationManager, [{
+    key: 'add',
+    value: function add(child) {
+      var argumentsLength = arguments.length;
+
+      if (argumentsLength > 1) {
+        for (var i = 0; i < argumentsLength; i++) {
+          /* eslint prefer-rest-params: 0 */
+          this.add(arguments[i]);
+        }
+      } else {
+        this.groups.push(child);
+      }
+
+      return child;
+    }
+
+    /**
+     * parser a bodymovin data, and post some config for this animation group
+     * @param {object} options animation config
+     * @param {Object} options.keyframes bodymovin data, which export from AE by bodymovin
+     * @param {Number} [options.repeats=0] need repeat some times?
+     * @param {Boolean} [options.infinite=false] play this animation round and round forever
+     * @param {Boolean} [options.alternate=false] alternate play direction every round
+     * @param {Number} [options.wait=0] need wait how much millisecond to start
+     * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
+     * @param {Number} [options.timeScale=1] animation speed, time scale factor
+     * @param {Boolean} [options.autoLoad=true] auto load assets, if this animation have
+     * @param {Boolean} [options.autoStart=true] auto start animation after assets loaded
+     * @param {Boolean} [options.overlapMode=false] enable overlap mode, it is useful when you have a overlap expression
+     * @param {Object} [options.segments={}] animation segments, splite by start and end keyframe number
+     * @param {Boolean} [options.initSegment=''] animation segments, init finite state machine
+     * @param {Boolean} [options.maskComp=false] auto start animation after assets loaded
+     * @param {String} [options.prefix=''] assets url prefix, look like link path
+     * @return {AnimationGroup}
+     * @example
+     * const manager = new PIXI.AnimationManager(app);
+     * const ani = manager.parseAnimation({
+     *   keyframes: data,
+     *   infinite: true,
+     * });
+     */
+
+  }, {
+    key: 'parseAnimation',
+    value: function parseAnimation(options) {
+      var animate = new AnimationGroup(options);
+      return this.add(animate);
+    }
+
+    /**
+     * set animation speed, time scale
+     * @param {number} speed
+     */
+
+  }, {
+    key: 'setSpeed',
+    value: function setSpeed(speed) {
+      this.timeScale = speed;
+    }
+
+    /**
+     * start update loop
+     * @return {this}
+     */
+
+  }, {
+    key: 'start',
+    value: function start() {
+      this.pt = Date.now();
+      this.ticker.on('update', this.update);
+      return this;
+    }
+
+    /**
+     * stop update loop
+     * @return {this}
+     */
+
+  }, {
+    key: 'stop',
+    value: function stop() {
+      this.ticker.off('update', this.update);
+      return this;
+    }
+
+    /**
+     * pause all animation groups
+     * @return {this}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      this.paused = true;
+      return this;
+    }
+
+    /**
+     * pause all animation groups
+     * @return {this}
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this.paused = false;
+      return this;
+    }
+
+    /**
+     * update all active animation
+     * @private
+     */
+
+  }, {
+    key: 'update',
+    value: function update() {
+      this.timeline();
+      if (this.paused) return;
+      var snippetCache = this.timeScale * this.snippet;
+      var length = this.groups.length;
+      for (var i = 0; i < length; i++) {
+        var animationGroup = this.groups[i];
+        animationGroup.update(snippetCache);
+      }
+      this.emit('update', this.snippet);
+    }
+
+    /**
+     * get timeline snippet
+     * @private
+     */
+
+  }, {
+    key: 'timeline',
+    value: function timeline() {
+      var snippet = Date.now() - this.pt;
+      if (!this.pt || snippet > 200) {
+        this.pt = Date.now();
+        snippet = Date.now() - this.pt;
+      }
+      this.pt += snippet;
+      this.snippet = snippet;
+    }
+  }]);
+  return AnimationManager;
+}(Eventer$1);
+
+/* eslint guard-for-in: "off" */
+
+/**
+ * Bodymovin 类型动画对象
+ *
+ * @class
+ * @private
+ * @param {object} options 动画所具备的特性
+ */
+function Bodymovin(options) {
+  Animate.call(this, options);
+
+  // list of animated properties
+  this.dynamicProperties = [];
+
+  // If layer has been modified in current tick this will be true
+  this._mdf = false;
+
+  this.keyframes = Tools.copyJSON(options.keyframes);
+  this.frameRate = options.frameRate || 30;
+  this.tpf = 1000 / this.frameRate;
+  // this.frameNum = -1;
+
+  this.ip = Tools.isUndefined(options.ip) ? this.keyframes.ip : options.ip;
+  this.op = Tools.isUndefined(options.ip) ? this.keyframes.op : options.op;
+
+  this.tfs = this.op - this.ip;
+  this.duration = this.tfs * this.tpf;
+
+  this.ignoreProps = Tools.isArray(options.ignoreProps) ? options.ignoreProps : [];
+
+  this.transform = new TransformFrames(this, this.keyframes.ks);
+}
+Bodymovin.prototype = Object.create(Animate.prototype);
+
+/**
+ * Calculates all dynamic values
+ * @param {number} frameNum current frame number in Layer's time
+ */
+Bodymovin.prototype.prepareProperties = function (frameNum) {
+  var i = void 0;var len = this.dynamicProperties.length;
+  for (i = 0; i < len; i += 1) {
+    this.dynamicProperties[i].getValue(frameNum);
+    if (this.dynamicProperties[i]._mdf) {
+      this._mdf = true;
+    }
+  }
+};
+
+/**
+ * add dynamic property
+ * @param {*} prop dynamic property
+ */
+Bodymovin.prototype.addDynamicProperty = function (prop) {
+  if (this.dynamicProperties.indexOf(prop) === -1) {
+    this.dynamicProperties.push(prop);
+  }
+};
+
+/**
+ * 计算下一帧状态
+ * @private
+ * @return {object}
+ */
+Bodymovin.prototype.nextPose = function () {
+  var pose = {};
+  var frameNum = this.ip + this.progress / this.tpf;
+  this.prepareProperties(frameNum);
+
+  if (this.ignoreProps.indexOf('position') === -1) {
+    if (this.ignoreProps.indexOf('x') === -1) {
+      pose.x = this.element.x = this.transform.x;
+    }
+    if (this.ignoreProps.indexOf('y') === -1) {
+      pose.y = this.element.y = this.transform.y;
+    }
+  }
+
+  if (this.ignoreProps.indexOf('pivot') === -1) {
+    if (this.ignoreProps.indexOf('pivotX') === -1) {
+      pose.pivotX = this.element.pivotX = this.transform.anchorX;
+    }
+    if (this.ignoreProps.indexOf('pivotY') === -1) {
+      pose.pivotY = this.element.pivotY = this.transform.anchorY;
+    }
+  }
+
+  if (this.ignoreProps.indexOf('scale') === -1) {
+    if (this.ignoreProps.indexOf('scaleX') === -1) {
+      pose.scaleX = this.element.scaleX = this.transform.scaleX;
+    }
+    if (this.ignoreProps.indexOf('scaleY') === -1) {
+      pose.scaleY = this.element.scaleY = this.transform.scaleY;
+    }
+  }
+
+  if (this.ignoreProps.indexOf('rotation') === -1) {
+    pose.rotation = this.element.rotation = this.transform.rotation;
+  }
+
+  if (this.ignoreProps.indexOf('alpha') === -1) {
+    pose.alpha = this.element.alpha = this.transform.alpha;
+  }
+
+  return pose;
+};
+
 // import {Utils} from '../utils/Utils';
 
 /**
@@ -1916,7 +9987,6 @@ Queues.prototype.spill = function () {
   return topSpill;
 };
 
-// import {AnimateRunner} from './AnimateRunner';
 /**
  * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
  *
@@ -2016,6 +10086,18 @@ Animation.prototype.queues = function (runner, options, clear) {
 Animation.prototype.keyFrames = function (options, clear) {
   options.element = this.element;
   return this._addMove(new KeyFrames(options), clear);
+};
+
+/**
+ * 创建一个`keyFrames`动画
+ * @private
+ * @param {object} options 动画配置
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.Bodymovin}
+ */
+Animation.prototype.bodymovin = function (options, clear) {
+  options.element = this.element;
+  return this._addMove(new Bodymovin(options), clear);
 };
 
 /**
@@ -2312,6 +10394,94 @@ var loaderUtil = function loaderUtil(srcMap) {
   var crossOrigin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '*';
 
   return new Loader(crossOrigin).load(srcMap);
+};
+
+/**
+ * prefix
+ * @method
+ * @param {object} asset asset
+ * @param {string} prefix prefix
+ * @return {string}
+ */
+function createUrl$1(asset, prefix) {
+  if (prefix) prefix = prefix.replace(/\/?$/, '/');
+  var up = asset.u + asset.p;
+  var url = asset.up || prefix + up;
+  return url;
+}
+
+/**
+ * an texture loader
+ * @param {array} assets assets
+ * @param {object} options options
+ * @param {string} [options.prefix] prefix
+ * @param {boolean} [options.autoLoad=true] prefix
+ */
+function LottieLoader(assets, _ref) {
+  var prefix = _ref.prefix,
+      _ref$autoLoad = _ref.autoLoad,
+      autoLoad = _ref$autoLoad === undefined ? true : _ref$autoLoad,
+      _ref$crossOrigin = _ref.crossOrigin,
+      crossOrigin = _ref$crossOrigin === undefined ? '*' : _ref$crossOrigin;
+
+  Eventer.call(this);
+  this.assets = assets;
+  this.prefix = prefix || '';
+  this.crossOrigin = crossOrigin;
+  this.textures = {};
+  this._total = 0;
+  this._failed = 0;
+  this._received = 0;
+  if (autoLoad) this._load();
+}
+
+LottieLoader.prototype = Object.create(Eventer.prototype);
+
+/**
+ * load assets
+ */
+LottieLoader.prototype.load = function () {
+  this._load();
+};
+
+/**
+ * a load function
+ * @private
+ */
+LottieLoader.prototype._load = function () {
+  var _this2 = this;
+
+  this.assets.forEach(function (asset) {
+    var id = asset.id;
+    var url = createUrl$1(asset, _this2.prefix);
+    var texture = new Texture(url, { crossOrigin: _this2.crossOrigin });
+    _this2.textures[id] = texture;
+    if (texture.loaded) {
+      _this2._received++;
+      _this2.emit('update');
+      if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+    } else {
+      texture.once('load', function () {
+        _this2._received++;
+        _this2.emit('update');
+        if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+      });
+      texture.once('error', function () {
+        _this2._failed++;
+        _this2.emit('update');
+        if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+      });
+    }
+  });
+};
+
+/**
+ * get texture by id
+ * @param {string} id id
+ * @return {Texture} texture
+ */
+LottieLoader.prototype.getTextureById = function (id) {
+  return this.textures[id];
 };
 
 /**
@@ -2909,7 +11079,7 @@ Ellipse.prototype.getBounds = function () {
  * @class
  * @memberof JC
  */
-function Matrix() {
+function Matrix$2() {
   this.a = 1;
   this.b = 0;
   this.c = 0;
@@ -2923,12 +11093,12 @@ function Matrix() {
  *
  * @param {array} array
  */
-Matrix.prototype.fromArray = function (array) {
+Matrix$2.prototype.fromArray = function (array) {
   this.a = array[0];
   this.b = array[1];
-  this.c = array[3];
-  this.d = array[4];
-  this.tx = array[2];
+  this.c = array[2];
+  this.d = array[3];
+  this.tx = array[4];
   this.ty = array[5];
 };
 
@@ -2938,7 +11108,7 @@ Matrix.prototype.fromArray = function (array) {
  * @param {boolean} transpose 是否对矩阵进行转置
  * @return {number[]} 返回数组
  */
-Matrix.prototype.toArray = function (transpose) {
+Matrix$2.prototype.toArray = function (transpose) {
   if (!this.array) this.array = new Float32Array(9);
   var array = this.array;
 
@@ -2973,7 +11143,7 @@ Matrix.prototype.toArray = function (transpose) {
  * @param {object} newPos 变换之后的点
  * @return {object} 返回数组
  */
-Matrix.prototype.apply = function (pos, newPos) {
+Matrix$2.prototype.apply = function (pos, newPos) {
   newPos = newPos || {};
   newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
   newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
@@ -2986,7 +11156,7 @@ Matrix.prototype.apply = function (pos, newPos) {
  * @param {object} newPos 变换之后的点
  * @return {object} 变换之后的点
  */
-Matrix.prototype.applyInverse = function (pos, newPos) {
+Matrix$2.prototype.applyInverse = function (pos, newPos) {
   newPos = newPos || {};
   var id = 1 / (this.a * this.d + this.c * -this.b);
   newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
@@ -2999,7 +11169,7 @@ Matrix.prototype.applyInverse = function (pos, newPos) {
  * @param {number} y
  * @return {this}
  */
-Matrix.prototype.translate = function (x, y) {
+Matrix$2.prototype.translate = function (x, y) {
   this.tx += x;
   this.ty += y;
   return this;
@@ -3010,7 +11180,7 @@ Matrix.prototype.translate = function (x, y) {
  * @param {number} y
  * @return {this}
  */
-Matrix.prototype.scale = function (x, y) {
+Matrix$2.prototype.scale = function (x, y) {
   this.a *= x;
   this.d *= y;
   this.c *= x;
@@ -3024,7 +11194,7 @@ Matrix.prototype.scale = function (x, y) {
  * @param {number} angle
  * @return {this}
  */
-Matrix.prototype.rotate = function (angle) {
+Matrix$2.prototype.rotate = function (angle) {
   var cos = Math.cos(angle);
   var sin = Math.sin(angle);
   var a1 = this.a;
@@ -3043,7 +11213,7 @@ Matrix.prototype.rotate = function (angle) {
  * @param {matrix} matrix
  * @return {this}
  */
-Matrix.prototype.append = function (matrix) {
+Matrix$2.prototype.append = function (matrix) {
   var a1 = this.a;
   var b1 = this.b;
   var c1 = this.c;
@@ -3061,7 +11231,7 @@ Matrix.prototype.append = function (matrix) {
  *
  * @return {this}
  */
-Matrix.prototype.identity = function () {
+Matrix$2.prototype.identity = function () {
   this.a = 1;
   this.b = 0;
   this.c = 0;
@@ -3085,7 +11255,7 @@ Matrix.prototype.identity = function () {
  * @param {number} originY
  * @return {this}
  */
-Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
+Matrix$2.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
   var sr = Math.sin(rotation);
   var cr = Math.cos(rotation);
   var sy = Math.tan(skewY);
@@ -3109,8 +11279,8 @@ Matrix.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, 
 
   return this;
 };
-var IDENTITY = new Matrix();
-var TEMP_MATRIX = new Matrix();
+var IDENTITY = new Matrix$2();
+var TEMP_MATRIX = new Matrix$2();
 
 /**
  *
@@ -3771,7 +11941,7 @@ function DisplayObject() {
    * @private
    * @member {JC.Matrix}
    */
-  this.worldTransform = new Matrix();
+  this.worldTransform = new Matrix$2();
 
   /**
    * 当前对象的事件管家
@@ -3984,6 +12154,40 @@ DisplayObject.prototype.motion = function (options, clear) {
  */
 DisplayObject.prototype.keyFrames = function (options, clear) {
   return this.animation.keyFrames(options, clear);
+};
+
+/**
+ * 播放一个bodymovin动画
+ *
+ * ```js
+ * import data from './animations/data.js';
+ * display.bodymovin({
+ *   keyframes: data.layers[3],
+ *   frameRate: data.fr,
+ *   ignoreProps: [ 'position', 'scaleX ],
+ * }, clear).on('complete', function() {
+ *   console.log('end queues');
+ * });
+ * ```
+ *
+ * @memberof JC.DisplayObject
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.keyframes lottie 动画数据
+ * @param {Number} [options.frameRate] lottie 动画帧率，对应 json 里面的 fr
+ * @param {Array} [options.ignoreProps] 忽略 keyframes 动画数据中的哪些属性的动画描述 position|x|y|pivot|pivotX|pivotY|scale|scaleX|scaleY|rotation|alpha
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限循环，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否清除该对象上之前所有的动画
+ * @return {Bodymovin}
+ */
+DisplayObject.prototype.bodymovin = function (options, clear) {
+  return this.animation.bodymovin(options, clear);
 };
 
 /**
@@ -5330,7 +13534,7 @@ FilterGroup.prototype.filtersRunner = function (buffer) {
   });
 };
 
-var __tmpMatrix = new Matrix();
+var __tmpMatrix = new Matrix$2();
 
 /**
  *
@@ -5628,88 +13832,6 @@ Scene.prototype.updatePosture = function (rootMatrix) {
     i++;
   }
   this.emit('postposture');
-};
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
-
-
-
-
-
-
-
-
-
-
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
 };
 
 // import {Vector2} from 'three';
@@ -7974,7 +16096,7 @@ function Renderer(options) {
   /**
    * 整个场景的初始矩阵
    */
-  this.rootMatrix = new Matrix();
+  this.rootMatrix = new Matrix$2();
 
   /**
    * 场景分辨率
@@ -8195,303 +16317,35 @@ Application.prototype.update = function (snippet) {
 };
 
 /**
- * register class
- * @class
- * @private
- */
-
-var Register = function () {
-  /**
-   * register
-   * @param {array} assets assets array
-   * @param {string} prefix assets array
-   * @param {string} crossOrigin assets array
-   */
-  function Register(assets, prefix, crossOrigin) {
-    classCallCheck(this, Register);
-
-    this.layers = {};
-    this._forever = false;
-    this.loader = this.loadAssets(assets, prefix, crossOrigin);
-  }
-
-  /**
-   * load assets base pixi loader
-   * @param {array} assets assets array
-   * @param {string} prefix assets array
-   * @param {string} crossOrigin assets array
-   * @return {loader}
-   */
-
-
-  createClass(Register, [{
-    key: 'loadAssets',
-    value: function loadAssets(assets, prefix, crossOrigin) {
-      var urls = {};
-      assets.filter(function (it) {
-        return it.u && it.p;
-      }).forEach(function (it) {
-        var url = createUrl(it, prefix);
-        urls[it.id] = url;
-      });
-      return loaderUtil(urls, crossOrigin);
-    }
-
-    /**
-     * get texture by id
-     * @param {string} id id name
-     * @return {Texture}
-     */
-
-  }, {
-    key: 'getTexture',
-    value: function getTexture(id) {
-      return this.loader.getById(id);
-    }
-
-    /**
-     * registe layer
-     * @private
-     * @param {string} name layer name path
-     * @param {object} layer layer object
-     */
-
-  }, {
-    key: 'setLayer',
-    value: function setLayer(name, layer) {
-      if (!name) return;
-      if (this.layers[name]) console.warn('动画层命名冲突', name);
-      this.layers[name] = layer;
-    }
-
-    /**
-     * registe layer
-     * @private
-     */
-
-  }, {
-    key: 'forever',
-    value: function forever() {
-      if (this._forever) return;
-      this._forever = true;
-    }
-
-    /**
-     * get layer by name path
-     * @param {string} name layer name path, example: root.gift.star1
-     * @return {object}
-     */
-
-  }, {
-    key: 'getLayer',
-    value: function getLayer(name) {
-      return this.layers[name];
-    }
-  }]);
-  return Register;
-}();
-
-/**
- * CurveData
- * @class
- * @private
- */
-
-var CurveData = function () {
-  /**
-   * the primitive curve data object
-   * @param {object} data curve config data
-   * @param {object} session session
-   * @param {boolean} mask is mask
-   */
-  function CurveData(data, session, mask) {
-    classCallCheck(this, CurveData);
-    var _session$st = session.st,
-        st = _session$st === undefined ? 0 : _session$st;
-
-    this.inv = data.inv;
-
-    this.data = mask ? data.pt : data.ks;
-
-    this.dynamic = this.data.a === 1;
-
-    this.st = st;
-
-    this.kic = 0;
-
-    if (this.dynamic) this.prepare();
-  }
-
-  /**
-   * prepare some data for faster calculation
-   */
-
-
-  createClass(CurveData, [{
-    key: 'prepare',
-    value: function prepare() {
-      var datak = this.data.k;
-      var last = datak.length - 1;
-
-      this.ost = this.st + datak[0].t;
-      this.oet = this.st + datak[last].t;
-
-      for (var i = 0; i < last; i++) {
-        var sbk = datak[i];
-        var sek = datak[i + 1];
-
-        sbk.ost = this.st + sbk.t;
-        sbk.oet = this.st + sek.t;
-
-        // TODO: 是否需要预先 修正坐标值，i、o 相对值 转换成 绝对值
-
-        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
-      }
-    }
-
-    /**
-     * get the curve frame by this progress
-     * @param {number} progress timeline progress
-     * @return {object}
-     */
-
-  }, {
-    key: 'getCurve',
-    value: function getCurve(progress) {
-      if (!this.dynamic) return this.data.k;
-      return this.interpolation(progress);
-    }
-
-    /**
-     * compute value with keyframes buffer
-     * @private
-     * @param {number} progress progress
-     * @return {array}
-     */
-
-  }, {
-    key: 'interpolation',
-    value: function interpolation$$1(progress) {
-      var datak = this.data.k;
-
-      if (progress <= this.ost) {
-        return datak[0].s[0];
-      } else if (progress >= this.oet) {
-        var last = datak.length - 2;
-        return datak[last].e[0];
-      } else {
-        var path = {
-          i: [],
-          o: [],
-          v: []
-        };
-        var frame = datak[this.kic];
-        if (!inRange$1(progress, frame.ost, frame.oet)) {
-          this.kic = findStep$1(datak, progress);
-          frame = datak[this.kic];
-        }
-        var rate = (progress - frame.ost) / (frame.oet - frame.ost);
-        var nm = [frame.n, frame.n];
-
-        var s0 = frame.s[0];
-        var e0 = frame.e[0];
-        for (var prop in path) {
-          if (path[prop]) {
-            var sp = s0[prop];
-            var ep = e0[prop];
-            var vv = [];
-            for (var i = 0; i < sp.length; i++) {
-              var s = sp[i];
-              var e = ep[i];
-              vv[i] = getEaseing(s, e, nm, rate);
-            }
-            path[prop] = vv;
-          }
-        }
-        path.c = s0.c;
-        return path;
-      }
-    }
-  }]);
-  return CurveData;
-}();
-
-/**
- * a
- * @param {*} ctx a
- * @param {*} data a
- */
-function drawCurve(ctx, data) {
-  var start = data.v[0];
-  ctx.moveTo(start[0], start[1]);
-  var jLen = data.v.length;
-  var j = 1;
-  for (; j < jLen; j++) {
-    var _oj = data.o[j - 1];
-    var _ij = data.i[j];
-    var _vj = data.v[j];
-    ctx.bezierCurveTo(_oj[0], _oj[1], _ij[0], _ij[1], _vj[0], _vj[1]);
-  }
-  var oj = data.o[j - 1];
-  var ij = data.i[0];
-  var vj = data.v[0];
-  ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
-}
-
-/**
- * a
- * @param {*} ctx a
- * @param {*} size a
- */
-function drawInv(ctx, size) {
-  ctx.moveTo(0, 0);
-  ctx.lineTo(size.w, 0);
-  ctx.lineTo(size.w, size.h);
-  ctx.lineTo(0, size.h);
-  ctx.lineTo(0, 0);
-}
-
-/**
  * GraphicsMask class
  * @class
  * @private
  */
-
 var GraphicsMask = function () {
   /**
    * GraphicsMask constructor
-   * @param {object} masksProperties layer data information
-   * @param {object} session layer data information
+   * @param {object} elem elem
+   * @param {object} config layer data information
    */
-  function GraphicsMask(masksProperties) {
-    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  function GraphicsMask(elem, config) {
     classCallCheck(this, GraphicsMask);
 
-    this.maskData = masksProperties.filter(function (it) {
-      return it.mode !== 'n';
-    });
+    this.elem = elem;
+    this.config = config;
 
-    this.shapes = this.maskData.map(function (it) {
-      return new CurveData(it, session, true);
-    });
-
-    this.session = session;
-
-    this.curves = [];
+    this.masks = [];
   }
 
   /**
-   * updateShape
-   * @param {number} progress
+   * a
+   * @param {*} masks a
    */
 
 
   createClass(GraphicsMask, [{
-    key: 'update',
-    value: function update(progress) {
-      for (var i = 0; i < this.shapes.length; i++) {
-        this.curves[i] = this.shapes[i].getCurve(progress);
-      }
+    key: "updateLottieMasks",
+    value: function updateLottieMasks(masks) {
+      this.masks = masks;
     }
 
     /**
@@ -8500,12 +16354,35 @@ var GraphicsMask = function () {
      */
 
   }, {
-    key: 'render',
+    key: "render",
     value: function render(ctx) {
+      if (this.masks.length <= 0) return;
       ctx.beginPath();
-      for (var i = 0; i < this.shapes.length; i++) {
-        if (this.shapes[i].inv) drawInv(ctx, this.session.size);
-        drawCurve(ctx, this.curves[i]);
+      var masks = this.masks;
+      for (var i = 0; i < masks.viewData.length; i++) {
+        if (masks.viewData[i].inv) {
+          var size = this.config.session.local;
+          ctx.moveTo(0, 0);
+          ctx.lineTo(size.w, 0);
+          ctx.lineTo(size.w, size.h);
+          ctx.lineTo(0, size.h);
+          ctx.lineTo(0, 0);
+        }
+        var data = masks.viewData[i].v;
+        var start = data.v[0];
+        ctx.moveTo(start[0], start[1]);
+        var jLen = data._length;
+        var j = 1;
+        for (; j < jLen; j++) {
+          var _oj = data.o[j - 1];
+          var _ij = data.i[j];
+          var _vj = data.v[j];
+          ctx.bezierCurveTo(_oj[0], _oj[1], _ij[0], _ij[1], _vj[0], _vj[1]);
+        }
+        var oj = data.o[j - 1];
+        var ij = data.i[0];
+        var vj = data.v[0];
+        ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
       }
       ctx.clip();
     }
@@ -8513,599 +16390,304 @@ var GraphicsMask = function () {
   return GraphicsMask;
 }();
 
+// import {
+//   Container,
+//   Graphics,
+//   // Sprite,
+//   // Rectangle,
+//   // Matrix,
+// } from 'pixi.js';
 /**
- * Mask
+ * NullElement class
  * @class
  * @private
  */
 
-var Mask = function () {
+var CompElement$2 = function (_Container) {
+  inherits(CompElement, _Container);
+
   /**
-   * generate a keyframes buffer
-   * @param {Container} element host element
-   * @param {object} layer layer data
-   * @param {object} session now session
-   * @param {object} session.size time of pre-frame
-   * @param {number} session.st time of start position
+   * NullElement constructor
+   * @param {object} elem layer data information
+   * @param {object} config layer data information
    */
-  function Mask(element, layer, session) {
-    classCallCheck(this, Mask);
+  function CompElement(elem, config) {
+    classCallCheck(this, CompElement);
 
-    this.element = element;
+    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this));
 
-    this.masksProperties = layer.masksProperties || [];
-
-    this.session = session;
-
-    this.mask = new GraphicsMask(this.masksProperties, session);
-
-    this.element.mask = this.mask;
+    _this.elem = elem;
+    _this.config = config;
+    _this.graphicsMasks = new GraphicsMask(elem, config);
+    _this.addChild = _this.adds;
+    return _this;
   }
 
   /**
-   * update
-   * @param {number} progress progress
-   * @param {object} session update session
+   * a
+   * @param {*} parent a
    */
 
 
-  createClass(Mask, [{
-    key: 'update',
-    value: function update(progress, session) {
-      this.mask.update(progress);
-    }
-  }]);
-  return Mask;
-}();
-
-var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
-var STR_REG = /["']\w+["']/;
-
-/**
- * Cycle
- * @class
- * @private
- */
-
-var Cycle = function () {
-  /**
-   * Pingpong
-   * @param {*} type Pingpong
-   * @param {*} begin Pingpong
-   * @param {*} end Pingpong
-   */
-  function Cycle(type, begin, end) {
-    classCallCheck(this, Cycle);
-
-    this.begin = begin;
-    this.end = end;
-    this.total = this.end - this.begin;
-    this.type = type;
-  }
-
-  /**
-   * progress
-   * @param {number} progress progress
-   * @return {number} progress
-   */
-
-
-  createClass(Cycle, [{
-    key: 'update',
-    value: function update(progress) {
-      if (this.type === 'in') {
-        if (progress >= this.begin) return progress;
-        return this.end - Utils.euclideanModulo(this.begin - progress, this.total);
-      } else if (this.type === 'out') {
-        if (progress <= this.end) return progress;
-        return this.begin + Utils.euclideanModulo(progress - this.end, this.total);
-      }
-    }
-  }]);
-  return Cycle;
-}();
-
-/**
- * Pingpong
- * @class
- * @private
- */
-
-
-var Pingpong = function () {
-  /**
-   * Pingpong
-   * @param {*} type Pingpong
-   * @param {*} begin Pingpong
-   * @param {*} end Pingpong
-   */
-  function Pingpong(type, begin, end) {
-    classCallCheck(this, Pingpong);
-
-    this.begin = begin;
-    this.end = end;
-    this.total = this.end - this.begin;
-    this.type = type;
-  }
-
-  /**
-   * progress
-   * @param {number} progress progress
-   * @return {number} progress
-   */
-
-
-  createClass(Pingpong, [{
-    key: 'update',
-    value: function update(progress) {
-      if (this.type === 'in' && progress < this.begin || this.type === 'out' && progress > this.end) {
-        var space = progress - this.end;
-        return this.pingpong(space);
-      }
-      return progress;
+  createClass(CompElement, [{
+    key: 'setHierarchy',
+    value: function setHierarchy(parent) {
+      this.hierarchy = parent;
     }
 
     /**
-     * pingpong
-     * @param {number} space
-     * @return {number}
+     * a
      */
 
   }, {
-    key: 'pingpong',
-    value: function pingpong(space) {
-      var dir = Math.floor(space / this.total) % 2;
-      if (dir) {
-        return this.begin + Utils.euclideanModulo(space, this.total);
+    key: 'show',
+    value: function show() {
+      this.visible = true;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.visible = false;
+    }
+
+    /**
+     * a
+     * @param {*} transform
+     */
+
+  }, {
+    key: 'updateLottieTransform',
+    value: function updateLottieTransform(transform) {
+      this.x = transform.x;
+      this.y = transform.y;
+      this.pivotX = transform.anchorX;
+      this.pivotY = transform.anchorY;
+      this.scaleX = transform.scaleX;
+      this.scaleY = transform.scaleY;
+      this.rotation = transform.rotation;
+      this.alpha = transform.alpha;
+    }
+
+    /**
+     * a
+     * @param {*} masks a
+     */
+
+  }, {
+    key: 'updateLottieMasks',
+    value: function updateLottieMasks(masks) {
+      if (!this.mask) {
+        this.mask = this.graphicsMasks;
+      }
+      this.mask.updateLottieMasks(masks);
+    }
+  }]);
+  return CompElement;
+}(Container);
+
+/**
+ * a
+ * @param {*} v a
+ * @return {string}
+ */
+function rgbaToColor(v) {
+  return 'rgba(' + v.join(',') + ')';
+}
+
+/**
+ * a
+ */
+
+var DrawShape = function () {
+  /**
+   * a
+   */
+  function DrawShape() {
+    classCallCheck(this, DrawShape);
+
+    this.primitive = null;
+    this.dashResetter = [];
+  }
+
+  /**
+   * a
+   * @param {*} ctx a
+   */
+
+
+  createClass(DrawShape, [{
+    key: 'render',
+    value: function render(ctx) {
+      if (!this.primitive) return;
+      var primitive = this.primitive;
+      var type = primitive.type;
+
+      // Skipping style when
+      // Stroke width equals 0
+      // style should not be rendered (extra unused repeaters)
+      // current opacity equals 0
+      // global opacity equals 0
+      if ((type === 'st' || type === 'gs') && primitive.wi === 0 || !primitive.data._shouldRender || primitive.coOp === 0) {
+        return;
+      }
+      ctx.save();
+      var elems = primitive.elements;
+      if (type === 'st' || type === 'gs') {
+        ctx.strokeStyle = type === 'st' ? rgbaToColor(primitive.co) : primitive.grd;
+        ctx.lineWidth = primitive.wi;
+        ctx.lineCap = primitive.lc;
+        ctx.lineJoin = primitive.lj;
+        ctx.miterLimit = primitive.ml || 0;
       } else {
-        return this.end - Utils.euclideanModulo(space, this.total);
+        ctx.fillStyle = type === 'fl' ? rgbaToColor(primitive.co) : primitive.grd;
       }
-    }
-  }]);
-  return Pingpong;
-}();
-
-var FN_MAPS = {
-  loopIn: function loopIn(datak, mode, offset) {
-    var begin = datak[0].t;
-    var end = datak[offset].t;
-    switch (mode) {
-      case 'cycle':
-        return new Cycle('in', begin, end);
-      case 'pingpong':
-        return new Pingpong('in', begin, end);
-      default:
-        break;
-    }
-    return null;
-  },
-  loopOut: function loopOut(datak, mode, offset) {
-    var last = datak.length - 1;
-    var begin = datak[last - offset].t;
-    var end = datak[last].t;
-    switch (mode) {
-      case 'cycle':
-        return new Cycle('out', begin, end);
-      case 'pingpong':
-        return new Pingpong('out', begin, end);
-      default:
-        break;
-    }
-    return null;
-  }
-};
-
-/**
- * parseParams
- * @ignore
- * @param {string} pStr string
- * @return {array}
- */
-function parseParams(pStr) {
-  var params = pStr.split(/\s*,\s*/);
-  return params.map(function (it) {
-    if (STR_REG.test(it)) return it.replace(/"|'/g, '');
-    return parseInt(it);
-  });
-}
-
-/**
- * parseEx
- * @ignore
- * @param {string} ex string
- * @return {object}
- */
-function parseEx(ex) {
-  var rs = ex.match(EX_REG);
-  var ps = parseParams(rs[2]);
-  return {
-    name: rs[1],
-    mode: ps[0],
-    offset: ps[1]
-  };
-}
-
-/**
- * hasExpression
- * @ignore
- * @param {string} ex string
- * @return {boolean}
- */
-function hasExpression(ex) {
-  return EX_REG.test(ex);
-}
-
-/**
- * getEX
- * @ignore
- * @param {object} ksp ksp
- * @return {object}
- */
-function getEX(ksp) {
-  var _parseEx = parseEx(ksp.x),
-      name = _parseEx.name,
-      mode = _parseEx.mode,
-      offset = _parseEx.offset;
-
-  var _offset = offset === 0 ? ksp.k.length - 1 : offset;
-  return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
-}
-
-/**
- * just return the value / 100
- * @ignore
- * @param {array} value an array with some number value
- * @param {*} _ just a placeholder param
- * @return {number}
- */
-function toNormalize(value, _) {
-  return value[0] / 100;
-}
-
-/**
- * just return the value / 100 by index
- * @ignore
- * @param {array} value an array with some number value
- * @param {number} index use which value
- * @return {number}
- */
-function toNormalizeByIdx(value, index) {
-  return value[index] / 100;
-}
-
-/**
- * just return the origin value by index
- * @ignore
- * @param {array} value an array with some number value
- * @param {number} index use which value
- * @return {number}
- */
-function toBack(value, index) {
-  return value[index];
-}
-
-/**
- * translate degree to radian
- * @ignore
- * @param {array} value an array with degree value
- * @param {*} _ just a placeholder param
- * @return {number}
- */
-function toRadian(value, _) {
-  return value[0] * Math.PI / 180;
-}
-
-
-
-
-
-var TRANSFORM_MAP = {
-  o: {
-    props: ['alpha'],
-    translate: toNormalize
-  },
-  r: {
-    props: ['rotation'],
-    translate: toRadian
-  },
-  p: {
-    props: ['x', 'y'],
-    translate: toBack
-  },
-  a: {
-    props: ['pivotX', 'pivotY'],
-    translate: toBack
-  },
-  s: {
-    props: ['scaleX', 'scaleY'],
-    translate: toNormalizeByIdx
-  }
-};
-
-/**
- * keyframes buffer, cache some status and progress
- * @class
- * @private
- */
-
-var Transform = function () {
-  /**
-   * generate a keyframes buffer
-   * @param {Container} element host element
-   * @param {object} layer layer data
-   * @param {object} session now session
-   * @param {number} session.st time of start position
-   */
-  function Transform(element, layer, session) {
-    classCallCheck(this, Transform);
-    var _session$st = session.st,
-        st = _session$st === undefined ? 0 : _session$st,
-        register = session.register;
-
-
-    this.element = element;
-
-    this.ks = layer.ks;
-    this.ip = layer.ip;
-    this.op = layer.op;
-
-    this.st = st;
-    this.oip = this.st + this.ip;
-    this.oop = this.st + this.op;
-
-    this.aks = {};
-    this.kic = {};
-
-    this.preParse(register);
-  }
-
-  /**
-   * preparse keyframes
-   * @private
-   * @param {Register} register
-   */
-
-
-  createClass(Transform, [{
-    key: 'preParse',
-    value: function preParse(register) {
-      var ks = this.ks;
-      for (var key in TRANSFORM_MAP) {
-        if (ks[key] && ks[key].a) {
-          this.parseDynamic(key, register);
-        } else if (ks[key]) {
-          this.parseStatic(key);
+      // ctx.globalAlpha = primitive.coOp * this.finalTransform.mProp.o.v;
+      if (type !== 'st' && type !== 'gs') {
+        ctx.beginPath();
+      }
+      // const trProps = primitive.preTransforms.finalTransform.props;
+      // ctx.transform(trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]);
+      var jLen = elems.length;
+      for (var j = 0; j < jLen; j += 1) {
+        if (type === 'st' || type === 'gs') {
+          ctx.beginPath();
+          if (primitive.da) {
+            ctx.setLineDash(primitive.da);
+            ctx.lineDashOffset = primitive.do;
+          }
         }
-      }
-    }
+        var nodes = elems[j].trNodes;
+        var kLen = nodes.length;
 
-    /**
-     * preparse dynamic keyframes
-     * @private
-     * @param {string} key property
-     * @param {Register} register
-     */
-
-  }, {
-    key: 'parseDynamic',
-    value: function parseDynamic(key, register) {
-      var ksp = this.ks[key];
-      var kspk = ksp.k;
-      var last = kspk.length - 1;
-
-      ksp.ost = this.st + kspk[0].t;
-      ksp.oet = this.st + kspk[last].t;
-
-      for (var i = 0; i < last; i++) {
-        var sbk = kspk[i];
-        var sek = kspk[i + 1];
-
-        sbk.ost = this.st + sbk.t;
-        sbk.oet = this.st + sek.t;
-        if (Utils.isString(sbk.n) && sbk.ti && sbk.to) {
-          prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
-          var sp = new Point(sbk.s[0], sbk.s[1]);
-          var ep = new Point(sbk.e[0], sbk.e[1]);
-          var c1 = new Point(sbk.s[0] + sbk.ti[0], sbk.s[1] + sbk.ti[1]);
-          var c2 = new Point(sbk.e[0] + sbk.to[0], sbk.e[1] + sbk.to[1]);
-          sbk.curve = new BezierCurve([sp, c1, c2, ep]);
-        } else {
-          for (var _i = 0; _i < sbk.n.length; _i++) {
-            prepareEaseing(sbk.o.x[_i], sbk.o.y[_i], sbk.i.x[_i], sbk.i.y[_i]);
+        for (var k = 0; k < kLen; k++) {
+          if (nodes[k].t == 'm') {
+            ctx.moveTo(nodes[k].p[0], nodes[k].p[1]);
+          } else if (nodes[k].t == 'c') {
+            ctx.bezierCurveTo(nodes[k].pts[0], nodes[k].pts[1], nodes[k].pts[2], nodes[k].pts[3], nodes[k].pts[4], nodes[k].pts[5]);
+          } else {
+            ctx.closePath();
+          }
+        }
+        if (type === 'st' || type === 'gs') {
+          ctx.stroke();
+          if (primitive.da) {
+            ctx.setLineDash(this.dashResetter);
           }
         }
       }
-
-      if (hasExpression(ksp.x)) {
-        ksp.expression = getEX(ksp);
-        register.forever();
+      if (type !== 'st' && type !== 'gs') {
+        ctx.fill(primitive.r);
       }
-      this.aks[key] = ksp;
-    }
-
-    /**
-     * preparse static keyframes
-     * @private
-     * @param {string} key property
-     */
-
-  }, {
-    key: 'parseStatic',
-    value: function parseStatic(key) {
-      var ksp = this.ks[key];
-      var kspk = ksp.k;
-      if (Utils.isNumber(kspk)) kspk = [kspk];
-
-      this.setValue(key, kspk);
-    }
-
-    /**
-     * compute child transform props
-     * @private
-     * @param {number} progress timeline progress
-     * @param {object} session update session
-     */
-
-  }, {
-    key: 'update',
-    value: function update(progress, session) {
-      if (session.forever) {
-        this.element.visible = progress >= this.oip;
-      } else {
-        var visible = inRange$1(progress, this.oip, this.oop);
-        this.element.visible = visible;
-        if (!visible) return;
-      }
-
-      for (var key in this.aks) {
-        if (this.aks[key]) {
-          this.setValue(key, this.interpolation(key, progress));
-        }
-      }
-    }
-
-    /**
-     * compute value with keyframes buffer
-     * @private
-     * @param {string} key which prop
-     * @param {number} progress which prop
-     * @return {array}
-     */
-
-  }, {
-    key: 'interpolation',
-    value: function interpolation$$1(key, progress) {
-      var ak = this.aks[key];
-      return interpolation(ak, progress, this.kic, key);
-    }
-
-    /**
-     * set value to host element
-     * @private
-     * @param {string} key property
-     * @param {array} value value array
-     */
-
-  }, {
-    key: 'setValue',
-    value: function setValue(key, value) {
-      var _TRANSFORM_MAP$key = TRANSFORM_MAP[key],
-          props = _TRANSFORM_MAP$key.props,
-          translate = _TRANSFORM_MAP$key.translate;
-
-      for (var i = 0; i < props.length; i++) {
-        this.element[props[i]] = translate(value, i);
-      }
+      ctx.restore();
     }
   }]);
-  return Transform;
+  return DrawShape;
 }();
 
-// import Shapes from './Shapes';
 /**
- * Keyframes
+ * NullElement class
  * @class
  * @private
  */
 
-var Keyframes = function () {
+
+var PathPrimitive = function (_Graphics) {
+  inherits(PathPrimitive, _Graphics);
+
   /**
-   * manager
-   * @param {object} element element
-   * @param {object} layer element
-   * @param {object} session element
+   * NullElement constructor
+   * @param {object} elem layer data information
+   * @param {object} config layer data information
    */
-  function Keyframes(element, layer, session) {
-    classCallCheck(this, Keyframes);
+  function PathPrimitive(elem, config) {
+    classCallCheck(this, PathPrimitive);
 
-    this.element = element;
-    this.layer = Utils.copyJSON(layer);
-    this.keyframes = [];
+    var drawShape = new DrawShape();
 
-    this.parse(element, layer, session);
+    var _this = possibleConstructorReturn(this, (PathPrimitive.__proto__ || Object.getPrototypeOf(PathPrimitive)).call(this, drawShape));
+
+    _this.elem = elem;
+    _this.config = config;
+
+    _this.passMatrix = new Matrix$2();
+    _this.drawShape = drawShape;
+    return _this;
   }
 
   /**
-   * parse
-   * @param {object} element element
-   * @param {object} layer
-   * @param {object} session
+   * a
    */
 
 
-  createClass(Keyframes, [{
-    key: 'parse',
-    value: function parse(element, layer, session) {
-      this.transform(element, layer, session);
+  createClass(PathPrimitive, [{
+    key: 'setSelfTransform',
+    value: function setSelfTransform() {
+      var trProps = this.elem.preTransforms.finalTransform.props;
 
-      if (layer.hasMask) this.mask(element, layer, session);
-      // if (layer.shapes) this.shapes(element, layer, session);
-    }
-
-    /**
-     * transform
-     * @param {object} element element
-     * @param {object} layer
-     * @param {object} session
-     */
-
-  }, {
-    key: 'transform',
-    value: function transform(element, layer, session) {
-      this.add(new Transform(element, layer, session));
-    }
-
-    /**
-     * mask
-     * @param {object} element element
-     * @param {object} layer
-     * @param {object} session
-     */
-
-  }, {
-    key: 'mask',
-    value: function mask(element, layer, session) {
-      this.add(new Mask(element, layer, session));
-    }
-
-    /**
-     * shapes
-     * @param {object} element element
-     * @param {object} layer
-     * @param {object} session
-     */
-    // shapes(element, layer, session) {
-    //   this.add(new Shapes(element, layer, session));
-    // }
-
-    /**
-     * update
-     * @param {number} progress
-     * @param {object} session update session
-     */
-
-  }, {
-    key: 'update',
-    value: function update(progress, session) {
-      for (var i = 0; i < this.keyframes.length; i++) {
-        this.keyframes[i].update(progress, session);
+      if (window.acid > 0) {
+        window.acid--;
+        console.log(trProps);
+        console.log([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
       }
+      this.passMatrix.fromArray([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
+      // this.transform.setFromMatrix(this.passMatrix);
     }
 
     /**
-     * add
-     * @param {object} keyframe
+     * 更新对象本身的矩阵姿态以及透明度
+     *
+     * @private
+     * @param {Matrix} rootMatrix
      */
 
   }, {
-    key: 'add',
-    value: function add(keyframe) {
-      this.keyframes.push(keyframe);
+    key: 'updateTransform',
+    value: function updateTransform(rootMatrix) {
+      this.setSelfTransform();
+
+      var pt = rootMatrix || this.hierarchy && this.hierarchy.worldTransform || this.parent && this.parent.worldTransform || IDENTITY;
+      var worldAlpha = this.parent && this.parent.worldAlpha || 1;
+
+      var st = this.passMatrix;
+      var wt = this.worldTransform;
+      wt.a = st.a * pt.a + st.b * pt.c;
+      wt.b = st.a * pt.b + st.b * pt.d;
+      wt.c = st.c * pt.a + st.d * pt.c;
+      wt.d = st.c * pt.b + st.d * pt.d;
+      wt.tx = st.tx * pt.a + st.ty * pt.c + pt.tx;
+      wt.ty = st.tx * pt.b + st.ty * pt.d + pt.ty;
+
+      // multiply the alphas..
+      this.worldAlpha = this.alpha * worldAlpha;
+    }
+
+    /**
+     * a
+     * @param {*} grahpics a
+     */
+
+  }, {
+    key: 'updateLottieGrahpics',
+    value: function updateLottieGrahpics(grahpics) {
+      this.drawShape.primitive = grahpics;
+      this.alpha = grahpics.coOp;
     }
   }]);
-  return Keyframes;
-}();
+  return PathPrimitive;
+}(Graphics);
 
+// import {
+//   // Container,
+//   Graphics,
+//   // Sprite,
+//   // Rectangle,
+//   // Matrix,
+// } from 'pixi.js';
 /**
  * a
  */
@@ -9149,6409 +16731,208 @@ var SolidRect = function () {
  */
 
 
-var SolidElement = function (_Graphics) {
+var SolidElement$2 = function (_Graphics) {
   inherits(SolidElement, _Graphics);
 
   /**
    * NullElement constructor
-   * @param {object} layer layer data information
-   * @param {object} session layer data information
+   * @param {object} elem layer data information
+   * @param {object} config layer data information
    */
-  function SolidElement(layer) {
-    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  function SolidElement(elem, config) {
     classCallCheck(this, SolidElement);
-    var sc = layer.sc,
-        sw = layer.sw,
-        sh = layer.sh;
+    var color = config.color,
+        rect = config.rect;
 
-    var _this = possibleConstructorReturn(this, (SolidElement.__proto__ || Object.getPrototypeOf(SolidElement)).call(this, new SolidRect(sc, sw, sh)));
+    var _this = possibleConstructorReturn(this, (SolidElement.__proto__ || Object.getPrototypeOf(SolidElement)).call(this, new SolidRect(color, rect.width, rect.height)));
 
-    var parentName = session.parentName,
-        register = session.register;
-
-
-    _this.name = parentName + '.' + layer.nm;
-
-    register.setLayer(_this.name, _this);
-
-    _this.initKeyFrames(layer, session);
+    _this.elem = elem;
+    _this.config = config;
+    _this.mask = new GraphicsMask(elem, config);
+    _this.addChild = _this.adds;
     return _this;
   }
 
   /**
-   * initKeyFrames
-   * @param {object} layer layer
-   * @param {object} session session
+   * a
+   * @param {*} parent a
    */
 
 
   createClass(SolidElement, [{
-    key: 'initKeyFrames',
-    value: function initKeyFrames(layer, session) {
-      this.bodymovin = new Keyframes(this, layer, session);
-      this.movin = true;
+    key: 'setHierarchy',
+    value: function setHierarchy(parent) {
+      this.hierarchy = parent;
     }
 
     /**
-     * initKeyFrames
-     * @param {number} progress progress
-     * @param {object} session session
+     * a
      */
 
   }, {
-    key: 'updateKeyframes',
-    value: function updateKeyframes(progress, session) {
-      if (!this.movin) return;
-      this.bodymovin.update(progress, session);
+    key: 'show',
+    value: function show() {
+      this.visible = true;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.visible = false;
+    }
+
+    /**
+     * a
+     * @param {*} transform
+     */
+
+  }, {
+    key: 'updateLottieTransform',
+    value: function updateLottieTransform(transform) {
+      this.x = transform.x;
+      this.y = transform.y;
+      this.pivotX = transform.anchorX;
+      this.pivotY = transform.anchorY;
+      this.scaleX = transform.scaleX;
+      this.scaleY = transform.scaleY;
+      this.rotation = transform.rotation;
+      this.alpha = transform.alpha;
+    }
+
+    /**
+     * a
+     * @param {*} masks a
+     */
+
+  }, {
+    key: 'updateLottieMasks',
+    value: function updateLottieMasks(masks) {
+      if (!this.mask) {
+        this.mask = this.graphicsMasks;
+      }
+      this.mask.updateLottieMasks(masks);
     }
   }]);
   return SolidElement;
 }(Graphics);
 
+// import {
+//   // Container,
+//   Graphics,
+//   Sprite,
+//   Rectangle,
+//   // Matrix,
+// } from 'pixi.js';
 /**
  * SpriteElement class
  * @class
  * @private
  */
 
-var SpriteElement = function (_Sprite) {
+var SpriteElement$2 = function (_Sprite) {
   inherits(SpriteElement, _Sprite);
 
   /**
-   * SpriteElement constructor
-   * @param {object} layer layer data information
-   * @param {object} session layer data information
+   * NullElement constructor
+   * @param {object} elem layer data information
+   * @param {object} config layer data information
    */
-  function SpriteElement(layer) {
-    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  function SpriteElement(elem, config) {
     classCallCheck(this, SpriteElement);
-    var parentName = session.parentName,
-        register = session.register;
-
-
-    var texture = register.getTexture(layer.refId);
+    var texture = config.texture;
 
     var _this = possibleConstructorReturn(this, (SpriteElement.__proto__ || Object.getPrototypeOf(SpriteElement)).call(this, { texture: texture }));
 
-    _this.name = parentName + '.' + layer.nm;
-
-    register.setLayer(_this.name, _this);
-
-    _this.initKeyFrames(layer, session);
+    _this.elem = elem;
+    _this.config = config;
+    _this.graphicsMasks = new GraphicsMask(elem, config);
+    _this.addChild = _this.adds;
     return _this;
   }
 
   /**
-   * initKeyFrames
-   * @param {object} layer layer
-   * @param {object} session session
+   * a
+   * @param {*} parent a
    */
 
 
   createClass(SpriteElement, [{
-    key: 'initKeyFrames',
-    value: function initKeyFrames(layer, session) {
-      this.bodymovin = new Keyframes(this, layer, session);
-      this.movin = true;
+    key: 'setHierarchy',
+    value: function setHierarchy(parent) {
+      this.hierarchy = parent;
     }
 
     /**
-     * initKeyFrames
-     * @param {number} progress progress
-     * @param {object} session session
+     * a
      */
 
   }, {
-    key: 'updateKeyframes',
-    value: function updateKeyframes(progress, session) {
-      if (!this.movin) return;
-      this.bodymovin.update(progress, session);
+    key: 'show',
+    value: function show() {
+      this.visible = true;
+    }
+
+    /**
+     * a
+     */
+
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this.visible = false;
+    }
+
+    /**
+     * a
+     * @param {*} transform
+     */
+
+  }, {
+    key: 'updateLottieTransform',
+    value: function updateLottieTransform(transform) {
+      this.x = transform.x;
+      this.y = transform.y;
+      this.pivotX = transform.anchorX;
+      this.pivotY = transform.anchorY;
+      this.scaleX = transform.scaleX;
+      this.scaleY = transform.scaleY;
+      this.rotation = transform.rotation;
+      this.alpha = transform.alpha;
+    }
+
+    /**
+     * a
+     * @param {*} masks a
+     */
+
+  }, {
+    key: 'updateLottieMasks',
+    value: function updateLottieMasks(masks) {
+      if (!this.mask) {
+        this.mask = this.graphicsMasks;
+      }
+      this.mask.updateLottieMasks(masks);
     }
   }]);
   return SpriteElement;
 }(Sprite);
 
-/**
- * NullElement class
- * @class
- * @private
- */
-
-var NullElement = function (_Container) {
-  inherits(NullElement, _Container);
-
-  /**
-   * NullElement constructor
-   * @param {object} layer layer data information
-   * @param {object} session layer data information
-   */
-  function NullElement(layer) {
-    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    classCallCheck(this, NullElement);
-
-    var _this = possibleConstructorReturn(this, (NullElement.__proto__ || Object.getPrototypeOf(NullElement)).call(this));
-
-    var parentName = session.parentName,
-        register = session.register;
-
-
-    _this.name = parentName + '.' + layer.nm;
-
-    register.setLayer(_this.name, _this);
-
-    _this.initKeyFrames(layer, session);
-    return _this;
-  }
-
-  /**
-   * initKeyFrames
-   * @param {object} layer layer
-   * @param {object} session session
-   */
-
-
-  createClass(NullElement, [{
-    key: 'initKeyFrames',
-    value: function initKeyFrames(layer, session) {
-      this.bodymovin = new Keyframes(this, layer, session);
-      this.movin = true;
-    }
-
-    /**
-     * initKeyFrames
-     * @param {number} progress progress
-     * @param {object} session session
-     */
-
-  }, {
-    key: 'updateKeyframes',
-    value: function updateKeyframes(progress, session) {
-      if (!this.movin) return;
-      this.bodymovin.update(progress, session);
-    }
-  }]);
-  return NullElement;
-}(Container);
-
-/**
- * a
- * @param {*} type a
- * @param {*} len a
- * @return {*}
- */
-function createRegularArray(type, len) {
-  var i = 0;
-  var arr = [];
-  var value = void 0;
-  switch (type) {
-    case 'int16':
-    case 'uint8c':
-      value = 1;
-      break;
-    default:
-      value = 1.1;
-      break;
-  }
-  for (i = 0; i < len; i += 1) {
-    arr.push(value);
-  }
-  return arr;
-}
-
-/**
- * a
- * @param {*} type a
- * @param {*} len a
- * @return {*}
- */
-function _createTypedArray$1(type, len) {
-  if (type === 'float32') {
-    return new Float32Array(len);
-  } else if (type === 'int16') {
-    return new Int16Array(len);
-  } else if (type === 'uint8c') {
-    return new Uint8ClampedArray(len);
-  }
-}
-
-var createTypedArray = void 0;
-//  = createTypedArray
-if (typeof Uint8ClampedArray === 'function' && typeof Float32Array === 'function') {
-  createTypedArray = _createTypedArray$1;
-} else {
-  createTypedArray = createRegularArray;
-}
-
-/**
- * a
- * @param {*} len a
- * @return {*}
- */
-function createSizedArray(len) {
-  return new Array(len);
-}
-
-/* eslint-disable */
-/*!
- Transformation Matrix v2.0
- (c) Epistemex 2014-2015
- www.epistemex.com
- By Ken Fyrstenberg
- Contributions by leeoniya.
- License: MIT, header required.
- */
-
-/**
- * 2D transformation matrix object initialized with identity matrix.
- *
- * The matrix can synchronize a canvas context by supplying the context
- * as an argument, or later apply current absolute transform to an
- * existing context.
- *
- * All values are handled as floating point values.
- *
- * @param {CanvasRenderingContext2D} [context] - Optional context to sync with Matrix
- * @prop {number} a - scale x
- * @prop {number} b - shear y
- * @prop {number} c - shear x
- * @prop {number} d - scale y
- * @prop {number} e - translate x
- * @prop {number} f - translate y
- * @prop {CanvasRenderingContext2D|null} [context=null] - set or get current canvas context
- * @constructor
- */
-
-var Matrix$1 = function () {
-
-    var _cos = Math.cos;
-    var _sin = Math.sin;
-    var _tan = Math.tan;
-    var _rnd = Math.round;
-
-    function reset() {
-        this.props[0] = 1;
-        this.props[1] = 0;
-        this.props[2] = 0;
-        this.props[3] = 0;
-        this.props[4] = 0;
-        this.props[5] = 1;
-        this.props[6] = 0;
-        this.props[7] = 0;
-        this.props[8] = 0;
-        this.props[9] = 0;
-        this.props[10] = 1;
-        this.props[11] = 0;
-        this.props[12] = 0;
-        this.props[13] = 0;
-        this.props[14] = 0;
-        this.props[15] = 1;
-        return this;
-    }
-
-    function rotate(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    }
-
-    function rotateX(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(1, 0, 0, 0, 0, mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1);
-    }
-
-    function rotateY(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, 0, mSin, 0, 0, 1, 0, 0, -mSin, 0, mCos, 0, 0, 0, 0, 1);
-    }
-
-    function rotateZ(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    }
-
-    function shear(sx, sy) {
-        return this._t(1, sy, sx, 1, 0, 0);
-    }
-
-    function skew(ax, ay) {
-        return this.shear(_tan(ax), _tan(ay));
-    }
-
-    function skewFromAxis(ax, angle) {
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, mSin, 0, 0, -mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(1, 0, 0, 0, _tan(ax), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        //return this._t(mCos, mSin, -mSin, mCos, 0, 0)._t(1, 0, _tan(ax), 1, 0, 0)._t(mCos, -mSin, mSin, mCos, 0, 0);
-    }
-
-    function scale(sx, sy, sz) {
-        if (!sz && sz !== 0) {
-            sz = 1;
-        }
-        if (sx === 1 && sy === 1 && sz === 1) {
-            return this;
-        }
-        return this._t(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1);
-    }
-
-    function setTransform(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {
-        this.props[0] = a;
-        this.props[1] = b;
-        this.props[2] = c;
-        this.props[3] = d;
-        this.props[4] = e;
-        this.props[5] = f;
-        this.props[6] = g;
-        this.props[7] = h;
-        this.props[8] = i;
-        this.props[9] = j;
-        this.props[10] = k;
-        this.props[11] = l;
-        this.props[12] = m;
-        this.props[13] = n;
-        this.props[14] = o;
-        this.props[15] = p;
-        return this;
-    }
-
-    function translate(tx, ty, tz) {
-        tz = tz || 0;
-        if (tx !== 0 || ty !== 0 || tz !== 0) {
-            return this._t(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1);
-        }
-        return this;
-    }
-
-    function transform(a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2) {
-
-        var _p = this.props;
-
-        if (a2 === 1 && b2 === 0 && c2 === 0 && d2 === 0 && e2 === 0 && f2 === 1 && g2 === 0 && h2 === 0 && i2 === 0 && j2 === 0 && k2 === 1 && l2 === 0) {
-            //NOTE: commenting this condition because TurboFan deoptimizes code when present
-            //if(m2 !== 0 || n2 !== 0 || o2 !== 0){
-            _p[12] = _p[12] * a2 + _p[15] * m2;
-            _p[13] = _p[13] * f2 + _p[15] * n2;
-            _p[14] = _p[14] * k2 + _p[15] * o2;
-            _p[15] = _p[15] * p2;
-            //}
-            this._identityCalculated = false;
-            return this;
-        }
-
-        var a1 = _p[0];
-        var b1 = _p[1];
-        var c1 = _p[2];
-        var d1 = _p[3];
-        var e1 = _p[4];
-        var f1 = _p[5];
-        var g1 = _p[6];
-        var h1 = _p[7];
-        var i1 = _p[8];
-        var j1 = _p[9];
-        var k1 = _p[10];
-        var l1 = _p[11];
-        var m1 = _p[12];
-        var n1 = _p[13];
-        var o1 = _p[14];
-        var p1 = _p[15];
-
-        /* matrix order (canvas compatible):
-         * ace
-         * bdf
-         * 001
-         */
-        _p[0] = a1 * a2 + b1 * e2 + c1 * i2 + d1 * m2;
-        _p[1] = a1 * b2 + b1 * f2 + c1 * j2 + d1 * n2;
-        _p[2] = a1 * c2 + b1 * g2 + c1 * k2 + d1 * o2;
-        _p[3] = a1 * d2 + b1 * h2 + c1 * l2 + d1 * p2;
-
-        _p[4] = e1 * a2 + f1 * e2 + g1 * i2 + h1 * m2;
-        _p[5] = e1 * b2 + f1 * f2 + g1 * j2 + h1 * n2;
-        _p[6] = e1 * c2 + f1 * g2 + g1 * k2 + h1 * o2;
-        _p[7] = e1 * d2 + f1 * h2 + g1 * l2 + h1 * p2;
-
-        _p[8] = i1 * a2 + j1 * e2 + k1 * i2 + l1 * m2;
-        _p[9] = i1 * b2 + j1 * f2 + k1 * j2 + l1 * n2;
-        _p[10] = i1 * c2 + j1 * g2 + k1 * k2 + l1 * o2;
-        _p[11] = i1 * d2 + j1 * h2 + k1 * l2 + l1 * p2;
-
-        _p[12] = m1 * a2 + n1 * e2 + o1 * i2 + p1 * m2;
-        _p[13] = m1 * b2 + n1 * f2 + o1 * j2 + p1 * n2;
-        _p[14] = m1 * c2 + n1 * g2 + o1 * k2 + p1 * o2;
-        _p[15] = m1 * d2 + n1 * h2 + o1 * l2 + p1 * p2;
-
-        this._identityCalculated = false;
-        return this;
-    }
-
-    function isIdentity() {
-        if (!this._identityCalculated) {
-            this._identity = !(this.props[0] !== 1 || this.props[1] !== 0 || this.props[2] !== 0 || this.props[3] !== 0 || this.props[4] !== 0 || this.props[5] !== 1 || this.props[6] !== 0 || this.props[7] !== 0 || this.props[8] !== 0 || this.props[9] !== 0 || this.props[10] !== 1 || this.props[11] !== 0 || this.props[12] !== 0 || this.props[13] !== 0 || this.props[14] !== 0 || this.props[15] !== 1);
-            this._identityCalculated = true;
-        }
-        return this._identity;
-    }
-
-    function equals(matr) {
-        var i = 0;
-        while (i < 16) {
-            if (matr.props[i] !== this.props[i]) {
-                return false;
-            }
-            i += 1;
-        }
-        return true;
-    }
-
-    function clone(matr) {
-        var i;
-        for (i = 0; i < 16; i += 1) {
-            matr.props[i] = this.props[i];
-        }
-    }
-
-    function cloneFromProps(props) {
-        var i;
-        for (i = 0; i < 16; i += 1) {
-            this.props[i] = props[i];
-        }
-    }
-
-    function applyToPoint(x, y, z) {
-
-        return {
-            x: x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12],
-            y: x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13],
-            z: x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]
-        };
-        /*return {
-         x: x * me.a + y * me.c + me.e,
-         y: x * me.b + y * me.d + me.f
-         };*/
-    }
-    function applyToX(x, y, z) {
-        return x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12];
-    }
-    function applyToY(x, y, z) {
-        return x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13];
-    }
-    function applyToZ(x, y, z) {
-        return x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14];
-    }
-
-    function inversePoint(pt) {
-        var determinant = this.props[0] * this.props[5] - this.props[1] * this.props[4];
-        var a = this.props[5] / determinant;
-        var b = -this.props[1] / determinant;
-        var c = -this.props[4] / determinant;
-        var d = this.props[0] / determinant;
-        var e = (this.props[4] * this.props[13] - this.props[5] * this.props[12]) / determinant;
-        var f = -(this.props[0] * this.props[13] - this.props[1] * this.props[12]) / determinant;
-        return [pt[0] * a + pt[1] * c + e, pt[0] * b + pt[1] * d + f, 0];
-    }
-
-    function inversePoints(pts) {
-        var i,
-            len = pts.length,
-            retPts = [];
-        for (i = 0; i < len; i += 1) {
-            retPts[i] = inversePoint(pts[i]);
-        }
-        return retPts;
-    }
-
-    function applyToTriplePoints(pt1, pt2, pt3) {
-        var arr = createTypedArray('float32', 6);
-        if (this.isIdentity()) {
-            arr[0] = pt1[0];
-            arr[1] = pt1[1];
-            arr[2] = pt2[0];
-            arr[3] = pt2[1];
-            arr[4] = pt3[0];
-            arr[5] = pt3[1];
-        } else {
-            var p0 = this.props[0],
-                p1 = this.props[1],
-                p4 = this.props[4],
-                p5 = this.props[5],
-                p12 = this.props[12],
-                p13 = this.props[13];
-            arr[0] = pt1[0] * p0 + pt1[1] * p4 + p12;
-            arr[1] = pt1[0] * p1 + pt1[1] * p5 + p13;
-            arr[2] = pt2[0] * p0 + pt2[1] * p4 + p12;
-            arr[3] = pt2[0] * p1 + pt2[1] * p5 + p13;
-            arr[4] = pt3[0] * p0 + pt3[1] * p4 + p12;
-            arr[5] = pt3[0] * p1 + pt3[1] * p5 + p13;
-        }
-        return arr;
-    }
-
-    function applyToPointArray(x, y, z) {
-        var arr;
-        if (this.isIdentity()) {
-            arr = [x, y, z];
-        } else {
-            arr = [x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12], x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13], x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]];
-        }
-        return arr;
-    }
-
-    function applyToPointStringified(x, y) {
-        if (this.isIdentity()) {
-            return x + ',' + y;
-        }
-        var _p = this.props;
-        return Math.round((x * _p[0] + y * _p[4] + _p[12]) * 100) / 100 + ',' + Math.round((x * _p[1] + y * _p[5] + _p[13]) * 100) / 100;
-    }
-
-    function toCSS() {
-        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
-        /*if(this.isIdentity()) {
-            return '';
-        }*/
-        var i = 0;
-        var props = this.props;
-        var cssValue = 'matrix3d(';
-        var v = 10000;
-        while (i < 16) {
-            cssValue += _rnd(props[i] * v) / v;
-            cssValue += i === 15 ? ')' : ',';
-            i += 1;
-        }
-        return cssValue;
-    }
-
-    function roundMatrixProperty(val) {
-        var v = 10000;
-        if (val < 0.000001 && val > 0 || val > -0.000001 && val < 0) {
-            return _rnd(val * v) / v;
-        }
-        return val;
-    }
-
-    function to2dCSS() {
-        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
-        /*if(this.isIdentity()) {
-            return '';
-        }*/
-        var props = this.props;
-        var _a = roundMatrixProperty(props[0]);
-        var _b = roundMatrixProperty(props[1]);
-        var _c = roundMatrixProperty(props[4]);
-        var _d = roundMatrixProperty(props[5]);
-        var _e = roundMatrixProperty(props[12]);
-        var _f = roundMatrixProperty(props[13]);
-        return "matrix(" + _a + ',' + _b + ',' + _c + ',' + _d + ',' + _e + ',' + _f + ")";
-    }
-
-    return function () {
-        this.reset = reset;
-        this.rotate = rotate;
-        this.rotateX = rotateX;
-        this.rotateY = rotateY;
-        this.rotateZ = rotateZ;
-        this.skew = skew;
-        this.skewFromAxis = skewFromAxis;
-        this.shear = shear;
-        this.scale = scale;
-        this.setTransform = setTransform;
-        this.translate = translate;
-        this.transform = transform;
-        this.applyToPoint = applyToPoint;
-        this.applyToX = applyToX;
-        this.applyToY = applyToY;
-        this.applyToZ = applyToZ;
-        this.applyToPointArray = applyToPointArray;
-        this.applyToTriplePoints = applyToTriplePoints;
-        this.applyToPointStringified = applyToPointStringified;
-        this.toCSS = toCSS;
-        this.to2dCSS = to2dCSS;
-        this.clone = clone;
-        this.cloneFromProps = cloneFromProps;
-        this.equals = equals;
-        this.inversePoints = inversePoints;
-        this.inversePoint = inversePoint;
-        this._t = this.transform;
-        this.isIdentity = isIdentity;
-        this._identity = true;
-        this._identityCalculated = false;
-
-        this.props = createTypedArray('float32', 16);
-        this.reset();
-    };
-}();
-
-/**
- * a
- */
-
-var ShapeTransformManager = function () {
-  /**
-   * a
-   */
-  function ShapeTransformManager() {
-    classCallCheck(this, ShapeTransformManager);
-
-    this.sequences = {};
-    this.sequenceList = [];
-    this.transform_key_count = 0;
-  }
-
-  /**
-   * a
-   * @param {*} transforms a
-   * @return {*}
-   */
-
-
-  createClass(ShapeTransformManager, [{
-    key: 'addTransformSequence',
-    value: function addTransformSequence(transforms) {
-      var len = transforms.length;
-      var key = '_';
-      for (var i = 0; i < len; i += 1) {
-        key += transforms[i].transform.key + '_';
-      }
-      var sequence = this.sequences[key];
-      if (!sequence) {
-        sequence = {
-          transforms: [].concat(transforms),
-          finalTransform: new Matrix$1(),
-          _mdf: false
-        };
-        this.sequences[key] = sequence;
-        this.sequenceList.push(sequence);
-      }
-      return sequence;
-    }
-
-    /**
-     * a
-     * @param {*} sequence a
-     * @param {*} isFirstFrame a
-     */
-
-  }, {
-    key: 'processSequence',
-    value: function processSequence(sequence, isFirstFrame) {
-      var i = 0;
-      var _mdf = isFirstFrame;
-      var len = sequence.transforms.length;
-      while (i < len && !isFirstFrame) {
-        if (sequence.transforms[i].transform.mProps._mdf) {
-          _mdf = true;
-          break;
-        }
-        i += 1;
-      }
-      if (_mdf) {
-        var props = void 0;
-        sequence.finalTransform.reset();
-        for (i = len - 1; i >= 0; i -= 1) {
-          props = sequence.transforms[i].transform.mProps.v.props;
-          sequence.finalTransform.transform(props[0], props[1], props[2], props[3], props[4], props[5], props[6], props[7], props[8], props[9], props[10], props[11], props[12], props[13], props[14], props[15]);
-        }
-      }
-      sequence._mdf = _mdf;
-    }
-
-    /**
-     * a
-     * @param {*} isFirstFrame a
-     */
-
-  }, {
-    key: 'processSequences',
-    value: function processSequences(isFirstFrame) {
-      var len = this.sequenceList.length;
-      for (var i = 0; i < len; i += 1) {
-        this.processSequence(this.sequenceList[i], isFirstFrame);
-      }
-    }
-
-    /**
-     * a
-     * @return {*}
-     */
-
-  }, {
-    key: 'getNewKey',
-    value: function getNewKey() {
-      return '_' + this.transform_key_count++;
-    }
-  }]);
-  return ShapeTransformManager;
-}();
-
-/* eslint-disable */
-var BezierFactory = function () {
-    /**
-     * BezierEasing - use bezier curve for transition easing function
-     * by Gaëtan Renaudeau 2014 - 2015 – MIT License
-     *
-     * Credits: is based on Firefox's nsSMILKeySpline.cpp
-     * Usage:
-     * var spline = BezierEasing([ 0.25, 0.1, 0.25, 1.0 ])
-     * spline.get(x) => returns the easing value | x must be in [0, 1] range
-     *
-     */
-
-    var ob = {};
-    ob.getBezierEasing = getBezierEasing;
-    var beziers = {};
-
-    function getBezierEasing(a, b, c, d, nm) {
-        var str = nm || ('bez_' + a + '_' + b + '_' + c + '_' + d).replace(/\./g, 'p');
-        if (beziers[str]) {
-            return beziers[str];
-        }
-        var bezEasing = new BezierEasing([a, b, c, d]);
-        beziers[str] = bezEasing;
-        return bezEasing;
-    }
-
-    // These values are established by empiricism with tests (tradeoff: performance VS precision)
-    var NEWTON_ITERATIONS = 4;
-    var NEWTON_MIN_SLOPE = 0.001;
-    var SUBDIVISION_PRECISION = 0.0000001;
-    var SUBDIVISION_MAX_ITERATIONS = 10;
-
-    var kSplineTableSize = 11;
-    var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
-
-    var float32ArraySupported = typeof Float32Array === "function";
-
-    function A(aA1, aA2) {
-        return 1.0 - 3.0 * aA2 + 3.0 * aA1;
-    }
-    function B(aA1, aA2) {
-        return 3.0 * aA2 - 6.0 * aA1;
-    }
-    function C(aA1) {
-        return 3.0 * aA1;
-    }
-
-    // Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
-    function calcBezier(aT, aA1, aA2) {
-        return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
-    }
-
-    // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
-    function getSlope(aT, aA1, aA2) {
-        return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
-    }
-
-    function binarySubdivide(aX, aA, aB, mX1, mX2) {
-        var currentX,
-            currentT,
-            i = 0;
-        do {
-            currentT = aA + (aB - aA) / 2.0;
-            currentX = calcBezier(currentT, mX1, mX2) - aX;
-            if (currentX > 0.0) {
-                aB = currentT;
-            } else {
-                aA = currentT;
-            }
-        } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
-        return currentT;
-    }
-
-    function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
-        for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
-            var currentSlope = getSlope(aGuessT, mX1, mX2);
-            if (currentSlope === 0.0) return aGuessT;
-            var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
-            aGuessT -= currentX / currentSlope;
-        }
-        return aGuessT;
-    }
-
-    /**
-     * points is an array of [ mX1, mY1, mX2, mY2 ]
-     */
-    function BezierEasing(points) {
-        this._p = points;
-        this._mSampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
-        this._precomputed = false;
-
-        this.get = this.get.bind(this);
-    }
-
-    BezierEasing.prototype = {
-
-        get: function get(x) {
-            var mX1 = this._p[0],
-                mY1 = this._p[1],
-                mX2 = this._p[2],
-                mY2 = this._p[3];
-            if (!this._precomputed) this._precompute();
-            if (mX1 === mY1 && mX2 === mY2) return x; // linear
-            // Because JavaScript number are imprecise, we should guarantee the extremes are right.
-            if (x === 0) return 0;
-            if (x === 1) return 1;
-            return calcBezier(this._getTForX(x), mY1, mY2);
-        },
-
-        // Private part
-
-        _precompute: function _precompute() {
-            var mX1 = this._p[0],
-                mY1 = this._p[1],
-                mX2 = this._p[2],
-                mY2 = this._p[3];
-            this._precomputed = true;
-            if (mX1 !== mY1 || mX2 !== mY2) this._calcSampleValues();
-        },
-
-        _calcSampleValues: function _calcSampleValues() {
-            var mX1 = this._p[0],
-                mX2 = this._p[2];
-            for (var i = 0; i < kSplineTableSize; ++i) {
-                this._mSampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
-            }
-        },
-
-        /**
-         * getTForX chose the fastest heuristic to determine the percentage value precisely from a given X projection.
-         */
-        _getTForX: function _getTForX(aX) {
-            var mX1 = this._p[0],
-                mX2 = this._p[2],
-                mSampleValues = this._mSampleValues;
-
-            var intervalStart = 0.0;
-            var currentSample = 1;
-            var lastSample = kSplineTableSize - 1;
-
-            for (; currentSample !== lastSample && mSampleValues[currentSample] <= aX; ++currentSample) {
-                intervalStart += kSampleStepSize;
-            }
-            --currentSample;
-
-            // Interpolate to provide an initial guess for t
-            var dist = (aX - mSampleValues[currentSample]) / (mSampleValues[currentSample + 1] - mSampleValues[currentSample]);
-            var guessForT = intervalStart + dist * kSampleStepSize;
-
-            var initialSlope = getSlope(guessForT, mX1, mX2);
-            if (initialSlope >= NEWTON_MIN_SLOPE) {
-                return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
-            } else if (initialSlope === 0.0) {
-                return guessForT;
-            } else {
-                return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
-            }
-        }
-    };
-
-    return ob;
-}();
-
-/**
- * a
- * @param {*} arr a
- * @return {*}
- */
-function double(arr) {
-  return arr.concat(createSizedArray(arr.length));
-}
-
-var pooling = { double: double };
-
-var pool_factory = function pool_factory(initialLength, _create, _release) {
-  var _length = 0;
-  var _maxLength = initialLength;
-  var pool = createSizedArray(_maxLength);
-
-  var ob = {
-    newElement: newElement,
-    release: release
-  };
-
-  /**
-   * a
-   * @return {*}
-   */
-  function newElement() {
-    var element = void 0;
-    if (_length) {
-      _length -= 1;
-      element = pool[_length];
-    } else {
-      element = _create();
-    }
-    return element;
-  }
-
-  /**
-   * a
-   * @param {*} element a
-   */
-  function release(element) {
-    if (_length === _maxLength) {
-      pool = pooling.double(pool);
-      _maxLength = _maxLength * 2;
-    }
-    if (_release) {
-      _release(element);
-    }
-    pool[_length] = element;
-    _length += 1;
-  }
-
-  /**
-   * @return {*}
-   */
-  // function clone() {
-  //   var clonedElement = newElement();
-  //   return _clone(clonedElement);
-  // }
-
-  return ob;
-};
-
-var defaultCurveSegments$1 = 200;
-/**
- * a
- * @return {*}
- */
-function create() {
-  return {
-    addedLength: 0,
-    percents: createTypedArray('float32', defaultCurveSegments$1),
-    lengths: createTypedArray('float32', defaultCurveSegments$1)
-  };
-}
-var bezier_length_pool = pool_factory(8, create);
-
-/**
- * @return {*}
- */
-function create$1() {
-  return {
-    lengths: [],
-    totalLength: 0
-  };
-}
-
-/**
- * a
- * @param {*} element a
- */
-function release(element) {
-  var len = element.lengths.length;
-  for (var i = 0; i < len; i += 1) {
-    bezier_length_pool.release(element.lengths[i]);
-  }
-  element.lengths.length = 0;
-}
-
-var segments_length_pool = pool_factory(8, create$1, release);
-
-// var easingFunctions = [];
-// var math = Math;
-var defaultCurveSegments = 200;
-
-/**
- * a
- * @param {*} x1 a
- * @param {*} y1 a
- * @param {*} x2 a
- * @param {*} y2 a
- * @param {*} x3 a
- * @param {*} y3 a
- * @return {*}
- */
-function pointOnLine2D(x1, y1, x2, y2, x3, y3) {
-  var det1 = x1 * y2 + y1 * x3 + x2 * y3 - x3 * y2 - y3 * x1 - x2 * y1;
-  return det1 > -0.001 && det1 < 0.001;
-}
-
-/**
- * a
- * @param {*} x1 a
- * @param {*} y1 a
- * @param {*} z1 a
- * @param {*} x2 a
- * @param {*} y2 a
- * @param {*} z2 a
- * @param {*} x3 a
- * @param {*} y3 a
- * @param {*} z3 a
- * @return {*}
- */
-function pointOnLine3D(x1, y1, z1, x2, y2, z2, x3, y3, z3) {
-  if (z1 === 0 && z2 === 0 && z3 === 0) {
-    return pointOnLine2D(x1, y1, x2, y2, x3, y3);
-  }
-  var dist1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
-  var dist2 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2) + Math.pow(z3 - z1, 2));
-  var dist3 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2) + Math.pow(z3 - z2, 2));
-  var diffDist = void 0;
-  if (dist1 > dist2) {
-    if (dist1 > dist3) {
-      diffDist = dist1 - dist2 - dist3;
-    } else {
-      diffDist = dist3 - dist2 - dist1;
-    }
-  } else if (dist3 > dist2) {
-    diffDist = dist3 - dist2 - dist1;
-  } else {
-    diffDist = dist2 - dist1 - dist3;
-  }
-  return diffDist > -0.0001 && diffDist < 0.0001;
-}
-
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @return {*}
- */
-function getBezierLength(pt1, pt2, pt3, pt4) {
-  var curveSegments = defaultCurveSegments || 200;
-  // var i, len;
-  var addedLength = 0;
-  var ptDistance = void 0;
-  var point = [];
-  var lastPoint = [];
-  var lengthData = bezier_length_pool.newElement();
-  var len = pt3.length;
-  for (var k = 0; k < curveSegments; k += 1) {
-    var perc = k / (curveSegments - 1);
-    ptDistance = 0;
-    for (var i = 0; i < len; i += 1) {
-      var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * pt3[i] + 3 * (1 - perc) * Math.pow(perc, 2) * pt4[i] + Math.pow(perc, 3) * pt2[i];
-      point[i] = ptCoord;
-      if (lastPoint[i] !== null) {
-        ptDistance += Math.pow(point[i] - lastPoint[i], 2);
-      }
-      lastPoint[i] = point[i];
-    }
-    if (ptDistance) {
-      ptDistance = Math.sqrt(ptDistance);
-      addedLength += ptDistance;
-    }
-    lengthData.percents[k] = perc;
-    lengthData.lengths[k] = addedLength;
-  }
-  lengthData.addedLength = addedLength;
-  return lengthData;
-}
-
-/**
- * a
- * @param {*} shapeData a
- * @return {*}
- */
-function getSegmentsLength(shapeData) {
-  var segmentsLength = segments_length_pool.newElement();
-  var closed = shapeData.c;
-  var pathV = shapeData.v;
-  var pathO = shapeData.o;
-  var pathI = shapeData.i;
-  var len = shapeData._length;
-  var lengths = segmentsLength.lengths;
-  var totalLength = 0;
-  var i = 0;
-  for (; i < len - 1; i += 1) {
-    lengths[i] = getBezierLength(pathV[i], pathV[i + 1], pathO[i], pathI[i + 1]);
-    totalLength += lengths[i].addedLength;
-  }
-  if (closed && len) {
-    lengths[i] = getBezierLength(pathV[i], pathV[0], pathO[i], pathI[0]);
-    totalLength += lengths[i].addedLength;
-  }
-  segmentsLength.totalLength = totalLength;
-  return segmentsLength;
-}
-
-/**
- * a
- * @param {*} length a
- */
-function BezierData(length) {
-  this.segmentLength = 0;
-  this.points = new Array(length);
-}
-
-/**
- * a
- * @param {*} partial a
- * @param {*} point a
- */
-function PointData(partial, point) {
-  this.partialLength = partial;
-  this.point = point;
-}
-
-var storedData = {};
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @return {*}
- */
-function buildBezierData(pt1, pt2, pt3, pt4) {
-  var bezierName = (pt1[0] + '_' + pt1[1] + '_' + pt2[0] + '_' + pt2[1] + '_' + pt3[0] + '_' + pt3[1] + '_' + pt4[0] + '_' + pt4[1]).replace(/\./g, 'p');
-  if (!storedData[bezierName]) {
-    var curveSegments = defaultCurveSegments;
-    // var k, i, len;
-    var addedLength = 0;
-    var ptDistance = void 0;
-    var point = void 0;
-    var lastPoint = null;
-    if (pt1.length === 2 && (pt1[0] != pt2[0] || pt1[1] != pt2[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt1[0] + pt3[0], pt1[1] + pt3[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt2[0] + pt4[0], pt2[1] + pt4[1])) {
-      curveSegments = 2;
-    }
-    var bezierData = new BezierData(curveSegments);
-    var len = pt3.length;
-    for (var k = 0; k < curveSegments; k += 1) {
-      point = createSizedArray(len);
-      var perc = k / (curveSegments - 1);
-      ptDistance = 0;
-      for (var i = 0; i < len; i += 1) {
-        var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * (pt1[i] + pt3[i]) + 3 * (1 - perc) * Math.pow(perc, 2) * (pt2[i] + pt4[i]) + Math.pow(perc, 3) * pt2[i];
-        point[i] = ptCoord;
-        if (lastPoint !== null) {
-          ptDistance += Math.pow(point[i] - lastPoint[i], 2);
-        }
-      }
-      ptDistance = Math.sqrt(ptDistance);
-      addedLength += ptDistance;
-      bezierData.points[k] = new PointData(ptDistance, point);
-      lastPoint = point;
-    }
-    bezierData.segmentLength = addedLength;
-    storedData[bezierName] = bezierData;
-  }
-  return storedData[bezierName];
-}
-
-/**
- * a
- * @param {*} perc a
- * @param {*} bezierData a
- * @return {*}
- */
-function getDistancePerc(perc, bezierData) {
-  var percents = bezierData.percents;
-  var lengths = bezierData.lengths;
-  var len = percents.length;
-  var initPos = Math.floor((len - 1) * perc);
-  var lengthPos = perc * bezierData.addedLength;
-  var lPerc = 0;
-  if (initPos === len - 1 || initPos === 0 || lengthPos === lengths[initPos]) {
-    return percents[initPos];
-  } else {
-    var dir = lengths[initPos] > lengthPos ? -1 : 1;
-    var flag = true;
-    while (flag) {
-      if (lengths[initPos] <= lengthPos && lengths[initPos + 1] > lengthPos) {
-        lPerc = (lengthPos - lengths[initPos]) / (lengths[initPos + 1] - lengths[initPos]);
-        flag = false;
-      } else {
-        initPos += dir;
-      }
-      if (initPos < 0 || initPos >= len - 1) {
-        // FIX for TypedArrays that don't store floating point values with enough accuracy
-        if (initPos === len - 1) {
-          return percents[initPos];
-        }
-        flag = false;
-      }
-    }
-    return percents[initPos] + (percents[initPos + 1] - percents[initPos]) * lPerc;
-  }
-}
-
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @param {*} percent a
- * @param {*} bezierData a
- * @return {*}
- */
-function getPointInSegment(pt1, pt2, pt3, pt4, percent, bezierData) {
-  var t1 = getDistancePerc(percent, bezierData);
-  // var u0 = 1;
-  var u1 = 1 - t1;
-  var ptX = Math.round((u1 * u1 * u1 * pt1[0] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[0] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[0] + t1 * t1 * t1 * pt2[0]) * 1000) / 1000;
-  var ptY = Math.round((u1 * u1 * u1 * pt1[1] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[1] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[1] + t1 * t1 * t1 * pt2[1]) * 1000) / 1000;
-  return [ptX, ptY];
-}
-
-// function getSegmentArray() {
-
-// }
-
-var bezierSegmentPoints = createTypedArray('float32', 8);
-
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @param {*} startPerc a
- * @param {*} endPerc a
- * @param {*} bezierData a
- * @return {*}
- */
-function getNewSegment(pt1, pt2, pt3, pt4, startPerc, endPerc, bezierData) {
-  startPerc = startPerc < 0 ? 0 : startPerc > 1 ? 1 : startPerc;
-  var t0 = getDistancePerc(startPerc, bezierData);
-  endPerc = endPerc > 1 ? 1 : endPerc;
-  var t1 = getDistancePerc(endPerc, bezierData);
-  var len = pt1.length;
-  var u0 = 1 - t0;
-  var u1 = 1 - t1;
-  var u0u0u0 = u0 * u0 * u0;
-  var t0u0u0_3 = t0 * u0 * u0 * 3;
-  var t0t0u0_3 = t0 * t0 * u0 * 3;
-  var t0t0t0 = t0 * t0 * t0;
-  //
-  var u0u0u1 = u0 * u0 * u1;
-  var t0u0u1_3 = t0 * u0 * u1 + u0 * t0 * u1 + u0 * u0 * t1;
-  var t0t0u1_3 = t0 * t0 * u1 + u0 * t0 * t1 + t0 * u0 * t1;
-  var t0t0t1 = t0 * t0 * t1;
-  //
-  var u0u1u1 = u0 * u1 * u1;
-  var t0u1u1_3 = t0 * u1 * u1 + u0 * t1 * u1 + u0 * u1 * t1;
-  var t0t1u1_3 = t0 * t1 * u1 + u0 * t1 * t1 + t0 * u1 * t1;
-  var t0t1t1 = t0 * t1 * t1;
-  //
-  var u1u1u1 = u1 * u1 * u1;
-  var t1u1u1_3 = t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1;
-  var t1t1u1_3 = t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1;
-  var t1t1t1 = t1 * t1 * t1;
-  for (var i = 0; i < len; i += 1) {
-    bezierSegmentPoints[i * 4] = Math.round((u0u0u0 * pt1[i] + t0u0u0_3 * pt3[i] + t0t0u0_3 * pt4[i] + t0t0t0 * pt2[i]) * 1000) / 1000;
-    bezierSegmentPoints[i * 4 + 1] = Math.round((u0u0u1 * pt1[i] + t0u0u1_3 * pt3[i] + t0t0u1_3 * pt4[i] + t0t0t1 * pt2[i]) * 1000) / 1000;
-    bezierSegmentPoints[i * 4 + 2] = Math.round((u0u1u1 * pt1[i] + t0u1u1_3 * pt3[i] + t0t1u1_3 * pt4[i] + t0t1t1 * pt2[i]) * 1000) / 1000;
-    bezierSegmentPoints[i * 4 + 3] = Math.round((u1u1u1 * pt1[i] + t1u1u1_3 * pt3[i] + t1t1u1_3 * pt4[i] + t1t1t1 * pt2[i]) * 1000) / 1000;
-  }
-
-  return bezierSegmentPoints;
-}
-
-var bez = {
-  getSegmentsLength: getSegmentsLength,
-  getNewSegment: getNewSegment,
-  getPointInSegment: getPointInSegment,
-  buildBezierData: buildBezierData,
-  pointOnLine2D: pointOnLine2D,
-  pointOnLine3D: pointOnLine3D
-};
-
-var initFrame = -999999;
-var mathAbs = Math.abs;
-var degToRads$1 = Math.PI / 180;
-
-/**
- * based on @Toji's https://github.com/toji/gl-matrix/
- * @param {*} a a
- * @param {*} b a
- * @param {*} t a
- * @return {*}
- */
-function slerp(a, b, t) {
-  var out = [];
-  var ax = a[0];
-  var ay = a[1];
-  var az = a[2];
-  var aw = a[3];
-  var bx = b[0];
-  var by = b[1];
-  var bz = b[2];
-  var bw = b[3];
-
-  var omega = void 0;
-  var cosom = void 0;
-  var sinom = void 0;
-  var scale0 = void 0;
-  var scale1 = void 0;
-
-  cosom = ax * bx + ay * by + az * bz + aw * bw;
-  if (cosom < 0.0) {
-    cosom = -cosom;
-    bx = -bx;
-    by = -by;
-    bz = -bz;
-    bw = -bw;
-  }
-  if (1.0 - cosom > 0.000001) {
-    omega = Math.acos(cosom);
-    sinom = Math.sin(omega);
-    scale0 = Math.sin((1.0 - t) * omega) / sinom;
-    scale1 = Math.sin(t * omega) / sinom;
-  } else {
-    scale0 = 1.0 - t;
-    scale1 = t;
-  }
-  out[0] = scale0 * ax + scale1 * bx;
-  out[1] = scale0 * ay + scale1 * by;
-  out[2] = scale0 * az + scale1 * bz;
-  out[3] = scale0 * aw + scale1 * bw;
-
-  return out;
-}
-
-/**
- * a
- * @param {*} out a
- * @param {*} quat a
- */
-function quaternionToEuler(out, quat) {
-  var qx = quat[0];
-  var qy = quat[1];
-  var qz = quat[2];
-  var qw = quat[3];
-  var heading = Math.atan2(2 * qy * qw - 2 * qx * qz, 1 - 2 * qy * qy - 2 * qz * qz);
-  var attitude = Math.asin(2 * qx * qy + 2 * qz * qw);
-  var bank = Math.atan2(2 * qx * qw - 2 * qy * qz, 1 - 2 * qx * qx - 2 * qz * qz);
-  out[0] = heading / degToRads$1;
-  out[1] = attitude / degToRads$1;
-  out[2] = bank / degToRads$1;
-}
-
-/**
- * a
- * @param {*} values a
- * @return {*}
- */
-function createQuaternion(values) {
-  var heading = values[0] * degToRads$1;
-  var attitude = values[1] * degToRads$1;
-  var bank = values[2] * degToRads$1;
-  var c1 = Math.cos(heading / 2);
-  var c2 = Math.cos(attitude / 2);
-  var c3 = Math.cos(bank / 2);
-  var s1 = Math.sin(heading / 2);
-  var s2 = Math.sin(attitude / 2);
-  var s3 = Math.sin(bank / 2);
-  var w = c1 * c2 * c3 - s1 * s2 * s3;
-  var x = s1 * s2 * c3 + c1 * c2 * s3;
-  var y = s1 * c2 * c3 + c1 * s2 * s3;
-  var z = c1 * s2 * c3 - s1 * c2 * s3;
-
-  return [x, y, z, w];
-}
-
-/**
- * a
- */
-
-var BaseProperty = function () {
-  /**
-   * a
-   */
-  function BaseProperty() {
-    classCallCheck(this, BaseProperty);
-
-    this.offsetTime = 0;
-    this.keyframes = null;
-    this.propType = '';
-  }
-
-  /**
-   * a
-   * @param {*} frameNum a
-   * @param {*} caching a
-   * @return {*}
-   */
-
-
-  createClass(BaseProperty, [{
-    key: 'interpolateValue',
-    value: function interpolateValue(frameNum, caching) {
-      var offsetTime = this.offsetTime;
-      var newValue = void 0;
-      if (this.propType === 'multidimensional') {
-        newValue = createTypedArray('float32', this.pv.length);
-      }
-      var iterationIndex = caching.lastIndex;
-      var i = iterationIndex;
-      var len = this.keyframes.length - 1;
-      var flag = true;
-      var keyData = void 0;
-      var nextKeyData = void 0;
-
-      while (flag) {
-        keyData = this.keyframes[i];
-        nextKeyData = this.keyframes[i + 1];
-        if (i === len - 1 && frameNum >= nextKeyData.t - offsetTime) {
-          if (keyData.h) {
-            keyData = nextKeyData;
-          }
-          iterationIndex = 0;
-          break;
-        }
-        if (nextKeyData.t - offsetTime > frameNum) {
-          iterationIndex = i;
-          break;
-        }
-        if (i < len - 1) {
-          i += 1;
-        } else {
-          iterationIndex = 0;
-          flag = false;
-        }
-      }
-
-      var k = void 0;
-      var kLen = void 0;
-      var perc = void 0;
-      var jLen = void 0;
-      var j = void 0;
-      var fnc = void 0;
-      var nextKeyTime = nextKeyData.t - offsetTime;
-      var keyTime = keyData.t - offsetTime;
-      var endValue = void 0;
-      if (keyData.to) {
-        if (!keyData.bezierData) {
-          keyData.bezierData = bez.buildBezierData(keyData.s, nextKeyData.s || keyData.e, keyData.to, keyData.ti);
-        }
-        var bezierData = keyData.bezierData;
-        if (frameNum >= nextKeyTime || frameNum < keyTime) {
-          var ind = frameNum >= nextKeyTime ? bezierData.points.length - 1 : 0;
-          kLen = bezierData.points[ind].point.length;
-          for (k = 0; k < kLen; k += 1) {
-            newValue[k] = bezierData.points[ind].point[k];
-          }
-          // caching._lastKeyframeIndex = -1;
-        } else {
-          if (keyData.__fnct) {
-            fnc = keyData.__fnct;
-          } else {
-            fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y, keyData.n).get;
-            keyData.__fnct = fnc;
-          }
-          perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
-          var distanceInLine = bezierData.segmentLength * perc;
-
-          var segmentPerc = void 0;
-          var addedLength = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastAddedLength : 0;
-          j = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastPoint : 0;
-          flag = true;
-          jLen = bezierData.points.length;
-          while (flag) {
-            addedLength += bezierData.points[j].partialLength;
-            if (distanceInLine === 0 || perc === 0 || j === bezierData.points.length - 1) {
-              kLen = bezierData.points[j].point.length;
-              for (k = 0; k < kLen; k += 1) {
-                newValue[k] = bezierData.points[j].point[k];
-              }
-              break;
-            } else if (distanceInLine >= addedLength && distanceInLine < addedLength + bezierData.points[j + 1].partialLength) {
-              segmentPerc = (distanceInLine - addedLength) / bezierData.points[j + 1].partialLength;
-              kLen = bezierData.points[j].point.length;
-              for (k = 0; k < kLen; k += 1) {
-                newValue[k] = bezierData.points[j].point[k] + (bezierData.points[j + 1].point[k] - bezierData.points[j].point[k]) * segmentPerc;
-              }
-              break;
-            }
-            if (j < jLen - 1) {
-              j += 1;
-            } else {
-              flag = false;
-            }
-          }
-          caching._lastPoint = j;
-          caching._lastAddedLength = addedLength - bezierData.points[j].partialLength;
-          caching._lastKeyframeIndex = i;
-        }
-      } else {
-        var outX = void 0;
-        var outY = void 0;
-        var inX = void 0;
-        var inY = void 0;
-        var keyValue = void 0;
-        var _len = keyData.s.length;
-        endValue = nextKeyData.s || keyData.e;
-        if (this.sh && keyData.h !== 1) {
-          if (frameNum >= nextKeyTime) {
-            newValue[0] = endValue[0];
-            newValue[1] = endValue[1];
-            newValue[2] = endValue[2];
-          } else if (frameNum <= keyTime) {
-            newValue[0] = keyData.s[0];
-            newValue[1] = keyData.s[1];
-            newValue[2] = keyData.s[2];
-          } else {
-            var quatStart = createQuaternion(keyData.s);
-            var quatEnd = createQuaternion(endValue);
-            var time = (frameNum - keyTime) / (nextKeyTime - keyTime);
-            quaternionToEuler(newValue, slerp(quatStart, quatEnd, time));
-          }
-        } else {
-          for (i = 0; i < _len; i += 1) {
-            if (keyData.h !== 1) {
-              if (frameNum >= nextKeyTime) {
-                perc = 1;
-              } else if (frameNum < keyTime) {
-                perc = 0;
-              } else {
-                if (keyData.o.x.constructor === Array) {
-                  if (!keyData.__fnct) {
-                    keyData.__fnct = [];
-                  }
-                  if (!keyData.__fnct[i]) {
-                    outX = typeof keyData.o.x[i] === 'undefined' ? keyData.o.x[0] : keyData.o.x[i];
-                    outY = typeof keyData.o.y[i] === 'undefined' ? keyData.o.y[0] : keyData.o.y[i];
-                    inX = typeof keyData.i.x[i] === 'undefined' ? keyData.i.x[0] : keyData.i.x[i];
-                    inY = typeof keyData.i.y[i] === 'undefined' ? keyData.i.y[0] : keyData.i.y[i];
-                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
-                    keyData.__fnct[i] = fnc;
-                  } else {
-                    fnc = keyData.__fnct[i];
-                  }
-                } else {
-                  if (!keyData.__fnct) {
-                    outX = keyData.o.x;
-                    outY = keyData.o.y;
-                    inX = keyData.i.x;
-                    inY = keyData.i.y;
-                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
-                    keyData.__fnct = fnc;
-                  } else {
-                    fnc = keyData.__fnct;
-                  }
-                }
-                perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
-              }
-            }
-
-            endValue = nextKeyData.s || keyData.e;
-            keyValue = keyData.h === 1 ? keyData.s[i] : keyData.s[i] + (endValue[i] - keyData.s[i]) * perc;
-
-            if (_len === 1) {
-              newValue = keyValue;
-            } else {
-              newValue[i] = keyValue;
-            }
-          }
-        }
-      }
-      caching.lastIndex = iterationIndex;
-      return newValue;
-    }
-
-    /**
-     * a
-     * @param {*} _frameNum a
-     * @return {*}
-     */
-
-  }, {
-    key: 'getValueAtCurrentTime',
-    value: function getValueAtCurrentTime(_frameNum) {
-      var frameNum = _frameNum - this.offsetTime;
-      var initTime = this.keyframes[0].t - this.offsetTime;
-      var endTime = this.keyframes[this.keyframes.length - 1].t - this.offsetTime;
-      if (!(frameNum === this._caching.lastFrame || this._caching.lastFrame !== initFrame && (this._caching.lastFrame >= endTime && frameNum >= endTime || this._caching.lastFrame < initTime && frameNum < initTime))) {
-        if (this._caching.lastFrame >= frameNum) {
-          this._caching._lastKeyframeIndex = -1;
-          this._caching.lastIndex = 0;
-        }
-
-        var renderResult = this.interpolateValue(frameNum, this._caching);
-        this.pv = renderResult;
-      }
-      this._caching.lastFrame = frameNum;
-      return this.pv;
-    }
-
-    /**
-     * a
-     * @param {*} val a
-     */
-
-  }, {
-    key: 'setVValue',
-    value: function setVValue(val) {
-      var multipliedValue = void 0;
-      if (this.propType === 'unidimensional') {
-        multipliedValue = val * this.mult;
-        if (mathAbs(this.v - multipliedValue) > 0.00001) {
-          this.v = multipliedValue;
-          this._mdf = true;
-        }
-      } else {
-        var i = 0;
-        var len = this.v.length;
-        while (i < len) {
-          multipliedValue = val[i] * this.mult;
-          if (mathAbs(this.v[i] - multipliedValue) > 0.00001) {
-            this.v[i] = multipliedValue;
-            this._mdf = true;
-          }
-          i += 1;
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} frameNum a
-     */
-
-  }, {
-    key: 'processEffectsSequence',
-    value: function processEffectsSequence(frameNum) {
-      if (!this.effectsSequence.length) {
-        return;
-      }
-      if (this.lock) {
-        this.setVValue(this.pv);
-        return;
-      }
-      this.lock = true;
-      this._mdf = this._isFirstFrame;
-      // var multipliedValue;
-      var len = this.effectsSequence.length;
-      var finalValue = this.kf ? this.pv : this.data.k;
-      for (var i = 0; i < len; i += 1) {
-        finalValue = this.effectsSequence[i](frameNum);
-      }
-      this.setVValue(finalValue);
-      this._isFirstFrame = false;
-      this.lock = false;
-    }
-
-    /**
-     * a
-     * @param {*} effectFunction a
-     */
-
-  }, {
-    key: 'addEffect',
-    value: function addEffect(effectFunction) {
-      this.effectsSequence.push(effectFunction);
-      this.container.addDynamicProperty(this);
-    }
-  }]);
-  return BaseProperty;
-}();
-
-/**
- * a
- */
-
-
-var ValueProperty = function (_BaseProperty) {
-  inherits(ValueProperty, _BaseProperty);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} mult a
-   * @param {*} container a
-   */
-  function ValueProperty(elem, data, mult, container) {
-    classCallCheck(this, ValueProperty);
-
-    var _this = possibleConstructorReturn(this, (ValueProperty.__proto__ || Object.getPrototypeOf(ValueProperty)).call(this));
-
-    _this.propType = 'unidimensional';
-    _this.mult = mult || 1;
-    _this.data = data;
-    _this.v = mult ? data.k * mult : data.k;
-    _this.pv = data.k;
-    _this._mdf = false;
-    _this.elem = elem;
-    _this.container = container;
-    _this.k = false;
-    _this.kf = false;
-    _this.vel = 0;
-    _this.effectsSequence = [];
-    _this._isFirstFrame = true;
-    _this.getValue = _this.processEffectsSequence;
-    return _this;
-  }
-
-  return ValueProperty;
-}(BaseProperty);
-
-/**
- * a
- */
-
-
-var MultiDimensionalProperty = function (_BaseProperty2) {
-  inherits(MultiDimensionalProperty, _BaseProperty2);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} mult a
-   * @param {*} container a
-   */
-  function MultiDimensionalProperty(elem, data, mult, container) {
-    classCallCheck(this, MultiDimensionalProperty);
-
-    var _this2 = possibleConstructorReturn(this, (MultiDimensionalProperty.__proto__ || Object.getPrototypeOf(MultiDimensionalProperty)).call(this));
-
-    _this2.propType = 'multidimensional';
-    _this2.mult = mult || 1;
-    _this2.data = data;
-    _this2._mdf = false;
-    _this2.elem = elem;
-    _this2.container = container;
-    _this2.k = false;
-    _this2.kf = false;
-    var len = data.k.length;
-    _this2.v = createTypedArray('float32', len);
-    _this2.pv = createTypedArray('float32', len);
-    // var arr = createTypedArray('float32', len);
-    _this2.vel = createTypedArray('float32', len);
-    for (var i = 0; i < len; i += 1) {
-      _this2.v[i] = data.k[i] * _this2.mult;
-      _this2.pv[i] = data.k[i];
-    }
-    _this2._isFirstFrame = true;
-    _this2.effectsSequence = [];
-    _this2.getValue = _this2.processEffectsSequence;
-    // this.setVValue = setVValue;
-    // this.addEffect = addEffect;
-    return _this2;
-  }
-
-  return MultiDimensionalProperty;
-}(BaseProperty);
-
-/**
- * a
- */
-
-
-var KeyframedValueProperty = function (_BaseProperty3) {
-  inherits(KeyframedValueProperty, _BaseProperty3);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} mult a
-   * @param {*} container a
-   */
-  function KeyframedValueProperty(elem, data, mult, container) {
-    classCallCheck(this, KeyframedValueProperty);
-
-    var _this3 = possibleConstructorReturn(this, (KeyframedValueProperty.__proto__ || Object.getPrototypeOf(KeyframedValueProperty)).call(this));
-
-    _this3.propType = 'unidimensional';
-    _this3.keyframes = data.k;
-    _this3.offsetTime = elem.data.st;
-    _this3._caching = {
-      lastFrame: initFrame,
-      lastIndex: 0,
-      value: 0,
-      _lastKeyframeIndex: -1
-    };
-    _this3.k = true;
-    _this3.kf = true;
-    _this3.data = data;
-    _this3.mult = mult || 1;
-    _this3.elem = elem;
-    _this3.container = container;
-    _this3.v = initFrame;
-    _this3.pv = initFrame;
-    _this3._isFirstFrame = true;
-    _this3.getValue = _this3.processEffectsSequence;
-    _this3.effectsSequence = [_this3.getValueAtCurrentTime.bind(_this3)];
-    return _this3;
-  }
-
-  return KeyframedValueProperty;
-}(BaseProperty);
-
-/**
- * a
- */
-
-
-var KeyframedMultidimensionalProperty = function (_BaseProperty4) {
-  inherits(KeyframedMultidimensionalProperty, _BaseProperty4);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} mult a
-   * @param {*} container a
-   */
-  function KeyframedMultidimensionalProperty(elem, data, mult, container) {
-    classCallCheck(this, KeyframedMultidimensionalProperty);
-
-    var _this4 = possibleConstructorReturn(this, (KeyframedMultidimensionalProperty.__proto__ || Object.getPrototypeOf(KeyframedMultidimensionalProperty)).call(this));
-
-    _this4.propType = 'multidimensional';
-    var len = data.k.length;
-    var s = void 0;
-    var e = void 0;
-    var to = void 0;
-    var ti = void 0;
-    for (var i = 0; i < len - 1; i += 1) {
-      if (data.k[i].to && data.k[i].s && data.k[i].e) {
-        s = data.k[i].s;
-        e = data.k[i].e;
-        to = data.k[i].to;
-        ti = data.k[i].ti;
-        if (s.length === 2 && !(s[0] === e[0] && s[1] === e[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], s[0] + to[0], s[1] + to[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], e[0] + ti[0], e[1] + ti[1]) || s.length === 3 && !(s[0] === e[0] && s[1] === e[1] && s[2] === e[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], s[0] + to[0], s[1] + to[1], s[2] + to[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], e[0] + ti[0], e[1] + ti[1], e[2] + ti[2])) {
-          data.k[i].to = null;
-          data.k[i].ti = null;
-        }
-        if (s[0] === e[0] && s[1] === e[1] && to[0] === 0 && to[1] === 0 && ti[0] === 0 && ti[1] === 0) {
-          if (s.length === 2 || s[2] === e[2] && to[2] === 0 && ti[2] === 0) {
-            data.k[i].to = null;
-            data.k[i].ti = null;
-          }
-        }
-      }
-    }
-    _this4.effectsSequence = [_this4.getValueAtCurrentTime.bind(_this4)];
-    _this4.keyframes = data.k;
-    _this4.offsetTime = elem.data.st;
-    _this4.k = true;
-    _this4.kf = true;
-    _this4._isFirstFrame = true;
-    _this4.mult = mult || 1;
-    _this4.elem = elem;
-    _this4.container = container;
-    _this4.getValue = _this4.processEffectsSequence;
-    var arrLen = data.k[0].s.length;
-    _this4.v = createTypedArray('float32', arrLen);
-    _this4.pv = createTypedArray('float32', arrLen);
-    for (var _i = 0; _i < arrLen; _i += 1) {
-      _this4.v[_i] = initFrame;
-      _this4.pv[_i] = initFrame;
-    }
-    _this4._caching = {
-      lastFrame: initFrame,
-      lastIndex: 0,
-      value: createTypedArray('float32', arrLen)
-    };
-    return _this4;
-  }
-
-  return KeyframedMultidimensionalProperty;
-}(BaseProperty);
-
-/**
- * a
- * @param {*} elem a
- * @param {*} data a
- * @param {*} type a
- * @param {*} mult a
- * @param {*} container a
- * @return {*}
- */
-
-
-function PropertyFactory(elem, data, type, mult, container) {
-  var p = void 0;
-  if (!data.k.length) {
-    p = new ValueProperty(elem, data, mult, container);
-  } else if (typeof data.k[0] === 'number') {
-    p = new MultiDimensionalProperty(elem, data, mult, container);
-  } else {
-    switch (type) {
-      case 0:
-        p = new KeyframedValueProperty(elem, data, mult, container);
-        break;
-      case 1:
-        p = new KeyframedMultidimensionalProperty(elem, data, mult, container);
-        break;
-    }
-  }
-  if (p.effectsSequence.length) {
-    container.addDynamicProperty(p);
-  }
-  return p;
-}
-
-/**
- * a
- * @return {*}
- */
-function create$3() {
-  return createTypedArray('float32', 2);
-}
-var point_pool = pool_factory(8, create$3);
-
-/**
- * a
- */
-
-var ShapePath = function () {
-  /**
-   * a
-   */
-  function ShapePath() {
-    classCallCheck(this, ShapePath);
-
-    this.c = false;
-    this._length = 0;
-    this._maxLength = 8;
-    this.v = createSizedArray(this._maxLength);
-    this.o = createSizedArray(this._maxLength);
-    this.i = createSizedArray(this._maxLength);
-  }
-
-  /**
-   * a
-   * @param {*} closed a
-   * @param {*} len a
-   */
-
-
-  createClass(ShapePath, [{
-    key: 'setPathData',
-    value: function setPathData(closed, len) {
-      this.c = closed;
-      this.setLength(len);
-      var i = 0;
-      while (i < len) {
-        this.v[i] = point_pool.newElement();
-        this.o[i] = point_pool.newElement();
-        this.i[i] = point_pool.newElement();
-        i += 1;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} len a
-     */
-
-  }, {
-    key: 'setLength',
-    value: function setLength(len) {
-      while (this._maxLength < len) {
-        this.doubleArrayLength();
-      }
-      this._length = len;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'doubleArrayLength',
-    value: function doubleArrayLength() {
-      this.v = this.v.concat(createSizedArray(this._maxLength));
-      this.i = this.i.concat(createSizedArray(this._maxLength));
-      this.o = this.o.concat(createSizedArray(this._maxLength));
-      this._maxLength *= 2;
-    }
-
-    /**
-     * a
-     * @param {*} x a
-     * @param {*} y a
-     * @param {*} type a
-     * @param {*} pos a
-     * @param {*} replace a
-     */
-
-  }, {
-    key: 'setXYAt',
-    value: function setXYAt(x, y, type, pos, replace) {
-      var arr = void 0;
-      this._length = Math.max(this._length, pos + 1);
-      if (this._length >= this._maxLength) {
-        this.doubleArrayLength();
-      }
-      switch (type) {
-        case 'v':
-          arr = this.v;
-          break;
-        case 'i':
-          arr = this.i;
-          break;
-        case 'o':
-          arr = this.o;
-          break;
-      }
-      if (!arr[pos] || arr[pos] && !replace) {
-        arr[pos] = point_pool.newElement();
-      }
-      arr[pos][0] = x;
-      arr[pos][1] = y;
-    }
-
-    /**
-     * a
-     * @param {*} vX a
-     * @param {*} vY a
-     * @param {*} oX a
-     * @param {*} oY a
-     * @param {*} iX a
-     * @param {*} iY a
-     * @param {*} pos a
-     * @param {*} replace a
-     */
-
-  }, {
-    key: 'setTripleAt',
-    value: function setTripleAt(vX, vY, oX, oY, iX, iY, pos, replace) {
-      this.setXYAt(vX, vY, 'v', pos, replace);
-      this.setXYAt(oX, oY, 'o', pos, replace);
-      this.setXYAt(iX, iY, 'i', pos, replace);
-    }
-
-    /**
-     * a
-     * @return {*}
-     */
-
-  }, {
-    key: 'reverse',
-    value: function reverse() {
-      var newPath = new ShapePath();
-      newPath.setPathData(this.c, this._length);
-      var vertices = this.v;
-      var outPoints = this.o;
-      var inPoints = this.i;
-      var init = 0;
-      if (this.c) {
-        newPath.setTripleAt(vertices[0][0], vertices[0][1], inPoints[0][0], inPoints[0][1], outPoints[0][0], outPoints[0][1], 0, false);
-        init = 1;
-      }
-      var cnt = this._length - 1;
-      var len = this._length;
-
-      for (var i = init; i < len; i += 1) {
-        newPath.setTripleAt(vertices[cnt][0], vertices[cnt][1], inPoints[cnt][0], inPoints[cnt][1], outPoints[cnt][0], outPoints[cnt][1], i, false);
-        cnt -= 1;
-      }
-      return newPath;
-    }
-  }]);
-  return ShapePath;
-}();
-
-/**
- * a
- * @return {*}
- */
-function create$2() {
-  return new ShapePath();
-}
-
-/**
- * a
- * @param {*} shapePath a
- */
-function release$1(shapePath) {
-  var len = shapePath._length;
-  for (var i = 0; i < len; i += 1) {
-    point_pool.release(shapePath.v[i]);
-    point_pool.release(shapePath.i[i]);
-    point_pool.release(shapePath.o[i]);
-    shapePath.v[i] = null;
-    shapePath.i[i] = null;
-    shapePath.o[i] = null;
-  }
-  shapePath._length = 0;
-  shapePath.c = false;
-}
-
-/**
- * a
- * @param {*} shape a
- * @return {*}
- */
-function clone(shape) {
-  var cloned = shape_pool.newElement();
-  var len = shape._length === undefined ? shape.v.length : shape._length;
-  cloned.setLength(len);
-  cloned.c = shape.c;
-  // var pt;
-
-  for (var i = 0; i < len; i += 1) {
-    cloned.setTripleAt(shape.v[i][0], shape.v[i][1], shape.o[i][0], shape.o[i][1], shape.i[i][0], shape.i[i][1], i);
-  }
-  return cloned;
-}
-
-var shape_pool = pool_factory(4, create$2, release$1);
-shape_pool.clone = clone;
-
-/**
- * a
- */
-
-var ShapeCollection = function () {
-  /**
-   * a
-   */
-  function ShapeCollection() {
-    classCallCheck(this, ShapeCollection);
-
-    this._length = 0;
-    this._maxLength = 4;
-    this.shapes = createSizedArray(this._maxLength);
-  }
-
-  /**
-   * a
-   * @param {*} shapeData a
-   */
-
-
-  createClass(ShapeCollection, [{
-    key: 'addShape',
-    value: function addShape(shapeData) {
-      if (this._length === this._maxLength) {
-        this.shapes = this.shapes.concat(createSizedArray(this._maxLength));
-        this._maxLength *= 2;
-      }
-      this.shapes[this._length] = shapeData;
-      this._length += 1;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'releaseShapes',
-    value: function releaseShapes() {
-      for (var i = 0; i < this._length; i += 1) {
-        shape_pool.release(this.shapes[i]);
-      }
-      this._length = 0;
-    }
-  }]);
-  return ShapeCollection;
-}();
-
-var _length = 0;
-var _maxLength = 4;
-var pool = createSizedArray(_maxLength);
-
-/**
- * a
- * @return {*}
- */
-function newShapeCollection() {
-  var shapeCollection = void 0;
-  if (_length) {
-    _length -= 1;
-    shapeCollection = pool[_length];
-  } else {
-    shapeCollection = new ShapeCollection();
-  }
-  return shapeCollection;
-}
-
-/**
- * a
- * @param {*} shapeCollection a
- */
-function release$2(shapeCollection) {
-  var len = shapeCollection._length;
-  for (var i = 0; i < len; i += 1) {
-    shape_pool.release(shapeCollection.shapes[i]);
-  }
-  shapeCollection._length = 0;
-
-  if (_length === _maxLength) {
-    pool = pooling.double(pool);
-    _maxLength = _maxLength * 2;
-  }
-  pool[_length] = shapeCollection;
-  _length += 1;
-}
-
-var shapeCollection_pool = { newShapeCollection: newShapeCollection, release: release$2 };
-
-/**
- * a
- */
-var DynamicPropertyContainer = function () {
-  function DynamicPropertyContainer() {
-    classCallCheck(this, DynamicPropertyContainer);
-  }
-
-  createClass(DynamicPropertyContainer, [{
-    key: "addDynamicProperty",
-
-    /**
-     * a
-     * @param {*} prop a
-     */
-    value: function addDynamicProperty(prop) {
-      if (this.dynamicProperties.indexOf(prop) === -1) {
-        this.dynamicProperties.push(prop);
-        this.container.addDynamicProperty(this);
-        this._isAnimated = true;
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: "iterateDynamicProperties",
-    value: function iterateDynamicProperties(frameNum) {
-      this._mdf = false;
-      var len = this.dynamicProperties.length;
-      for (var i = 0; i < len; i += 1) {
-        this.dynamicProperties[i].getValue(frameNum);
-        if (this.dynamicProperties[i]._mdf) {
-          this._mdf = true;
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} container a
-     */
-
-  }, {
-    key: "initDynamicPropertyContainer",
-    value: function initDynamicPropertyContainer(container) {
-      this.container = container;
-      this.dynamicProperties = [];
-      this._mdf = false;
-      this._isAnimated = false;
-    }
-  }]);
-  return DynamicPropertyContainer;
-}();
-
-var initFrame$1 = -999999;
-var degToRads$2 = Math.PI / 180;
-
-/**
- * a
- */
-
-var BaseShapeProperty = function () {
-  function BaseShapeProperty() {
-    classCallCheck(this, BaseShapeProperty);
-  }
-
-  createClass(BaseShapeProperty, [{
-    key: 'interpolateShape',
-
-    /**
-     * a
-     * @param {*} frameNum a
-     * @param {*} previousValue a
-     * @param {*} caching a
-     */
-    value: function interpolateShape(frameNum, previousValue, caching) {
-      var iterationIndex = caching.lastIndex;
-      var keyPropS = void 0;
-      var keyPropE = void 0;
-      var isHold = void 0;
-      var perc = void 0;
-      var kf = this.keyframes;
-      if (frameNum < kf[0].t - this.offsetTime) {
-        keyPropS = kf[0].s[0];
-        isHold = true;
-        iterationIndex = 0;
-      } else if (frameNum >= kf[kf.length - 1].t - this.offsetTime) {
-        keyPropS = kf[kf.length - 1].s ? kf[kf.length - 1].s[0] : kf[kf.length - 2].e[0];
-        // /*if(kf[kf.length - 1].s){
-        //     keyPropS = kf[kf.length - 1].s[0];
-        // }else{
-        //     keyPropS = kf[kf.length - 2].e[0];
-        // }*/
-        isHold = true;
-      } else {
-        var i = iterationIndex;
-        var len = kf.length - 1;
-        var flag = true;
-        var keyData = void 0;
-        var nextKeyData = void 0;
-        while (flag) {
-          keyData = kf[i];
-          nextKeyData = kf[i + 1];
-          if (nextKeyData.t - this.offsetTime > frameNum) {
-            break;
-          }
-          if (i < len - 1) {
-            i += 1;
-          } else {
-            flag = false;
-          }
-        }
-        isHold = keyData.h === 1;
-        iterationIndex = i;
-        if (!isHold) {
-          if (frameNum >= nextKeyData.t - this.offsetTime) {
-            perc = 1;
-          } else if (frameNum < keyData.t - this.offsetTime) {
-            perc = 0;
-          } else {
-            var fnc = void 0;
-            if (keyData.__fnct) {
-              fnc = keyData.__fnct;
-            } else {
-              fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y).get;
-              keyData.__fnct = fnc;
-            }
-            perc = fnc((frameNum - (keyData.t - this.offsetTime)) / (nextKeyData.t - this.offsetTime - (keyData.t - this.offsetTime)));
-          }
-          keyPropE = nextKeyData.s ? nextKeyData.s[0] : keyData.e[0];
-        }
-        keyPropS = keyData.s[0];
-      }
-      var jLen = previousValue._length;
-      var kLen = keyPropS.i[0].length;
-      var vertexValue = void 0;
-      caching.lastIndex = iterationIndex;
-
-      for (var j = 0; j < jLen; j++) {
-        for (var k = 0; k < kLen; k++) {
-          vertexValue = isHold ? keyPropS.i[j][k] : keyPropS.i[j][k] + (keyPropE.i[j][k] - keyPropS.i[j][k]) * perc;
-          previousValue.i[j][k] = vertexValue;
-          vertexValue = isHold ? keyPropS.o[j][k] : keyPropS.o[j][k] + (keyPropE.o[j][k] - keyPropS.o[j][k]) * perc;
-          previousValue.o[j][k] = vertexValue;
-          vertexValue = isHold ? keyPropS.v[j][k] : keyPropS.v[j][k] + (keyPropE.v[j][k] - keyPropS.v[j][k]) * perc;
-          previousValue.v[j][k] = vertexValue;
-        }
-      }
-    }
-
-    /**
-     * a
-     * @return {*}
-     */
-
-  }, {
-    key: 'interpolateShapeCurrentTime',
-    value: function interpolateShapeCurrentTime(_frameNum) {
-      var frameNum = _frameNum - this.offsetTime;
-      var initTime = this.keyframes[0].t - this.offsetTime;
-      var endTime = this.keyframes[this.keyframes.length - 1].t - this.offsetTime;
-      var lastFrame = this._caching.lastFrame;
-      if (!(lastFrame !== initFrame$1 && (lastFrame < initTime && frameNum < initTime || lastFrame > endTime && frameNum > endTime))) {
-        this._caching.lastIndex = lastFrame < frameNum ? this._caching.lastIndex : 0;
-        this.interpolateShape(frameNum, this.pv, this._caching);
-      }
-      this._caching.lastFrame = frameNum;
-      return this.pv;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'resetShape',
-    value: function resetShape() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * a
-     * @param {*} shape1 a
-     * @param {*} shape2 a
-     * @return {*}
-     */
-
-  }, {
-    key: 'shapesEqual',
-    value: function shapesEqual(shape1, shape2) {
-      if (shape1._length !== shape2._length || shape1.c !== shape2.c) {
-        return false;
-      }
-      var len = shape1._length;
-      for (var i = 0; i < len; i += 1) {
-        if (shape1.v[i][0] !== shape2.v[i][0] || shape1.v[i][1] !== shape2.v[i][1] || shape1.o[i][0] !== shape2.o[i][0] || shape1.o[i][1] !== shape2.o[i][1] || shape1.i[i][0] !== shape2.i[i][0] || shape1.i[i][1] !== shape2.i[i][1]) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    /**
-     * a
-     * @param {*} newPath a
-     */
-
-  }, {
-    key: 'setVValue',
-    value: function setVValue(newPath) {
-      if (!this.shapesEqual(this.v, newPath)) {
-        this.v = shape_pool.clone(newPath);
-        this.localShapeCollection.releaseShapes();
-        this.localShapeCollection.addShape(this.v);
-        this._mdf = true;
-        this.paths = this.localShapeCollection;
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'processEffectsSequence',
-    value: function processEffectsSequence() {
-      if (!this.effectsSequence.length) {
-        return;
-      }
-      if (this.lock) {
-        this.setVValue(this.pv);
-        return;
-      }
-      this.lock = true;
-      this._mdf = false;
-      var finalValue = this.kf ? this.pv : this.data.ks ? this.data.ks.k : this.data.pt.k;
-      var len = this.effectsSequence.length;
-      for (var i = 0; i < len; i += 1) {
-        finalValue = this.effectsSequence[i](finalValue);
-      }
-      this.setVValue(finalValue);
-      this.lock = false;
-    }
-  }]);
-  return BaseShapeProperty;
-}();
-
-/**
- * a
- */
-
-
-var ShapeProperty = function (_BaseShapeProperty) {
-  inherits(ShapeProperty, _BaseShapeProperty);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} type a
-   */
-  function ShapeProperty(elem, data, type) {
-    classCallCheck(this, ShapeProperty);
-
-    var _this = possibleConstructorReturn(this, (ShapeProperty.__proto__ || Object.getPrototypeOf(ShapeProperty)).call(this));
-
-    _this.propType = 'shape';
-    _this.container = elem;
-    _this.elem = elem;
-    _this.data = data;
-    _this.k = false;
-    _this.kf = false;
-    _this._mdf = false;
-    var pathData = type === 3 ? data.pt.k : data.ks.k;
-    _this.v = shape_pool.clone(pathData);
-    _this.pv = shape_pool.clone(_this.v);
-    _this.localShapeCollection = shapeCollection_pool.newShapeCollection();
-    _this.paths = _this.localShapeCollection;
-    _this.paths.addShape(_this.v);
-    _this.reset = _this.resetShape;
-    _this.effectsSequence = [];
-    _this.getValue = _this.processEffectsSequence;
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {*} effectFunction a
-   */
-
-
-  createClass(ShapeProperty, [{
-    key: 'addEffect',
-    value: function addEffect(effectFunction) {
-      this.effectsSequence.push(effectFunction);
-      this.container.addDynamicProperty(this);
-    }
-  }]);
-  return ShapeProperty;
-}(BaseShapeProperty);
-
-/**
- * a
- */
-
-
-var KeyframedShapeProperty = function (_BaseShapeProperty2) {
-  inherits(KeyframedShapeProperty, _BaseShapeProperty2);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} type a
-   */
-  function KeyframedShapeProperty(elem, data, type) {
-    classCallCheck(this, KeyframedShapeProperty);
-
-    var _this2 = possibleConstructorReturn(this, (KeyframedShapeProperty.__proto__ || Object.getPrototypeOf(KeyframedShapeProperty)).call(this));
-
-    _this2.propType = 'shape';
-    _this2.elem = elem;
-    _this2.container = elem;
-    _this2.offsetTime = elem.data.st;
-    _this2.keyframes = type === 3 ? data.pt.k : data.ks.k;
-    _this2.k = true;
-    _this2.kf = true;
-    var len = _this2.keyframes[0].s[0].i.length;
-    _this2.v = shape_pool.newElement();
-    _this2.v.setPathData(_this2.keyframes[0].s[0].c, len);
-    _this2.pv = shape_pool.clone(_this2.v);
-    _this2.localShapeCollection = shapeCollection_pool.newShapeCollection();
-    _this2.paths = _this2.localShapeCollection;
-    _this2.paths.addShape(_this2.v);
-    _this2.lastFrame = initFrame$1;
-    _this2.reset = _this2.resetShape;
-    _this2._caching = { lastFrame: initFrame$1, lastIndex: 0 };
-    _this2.effectsSequence = [_this2.interpolateShapeCurrentTime.bind(_this2)];
-    _this2.getValue = _this2.processEffectsSequence;
-    return _this2;
-  }
-
-  /**
-   * a
-   * @param {*} effectFunction a
-   */
-
-
-  createClass(KeyframedShapeProperty, [{
-    key: 'addEffect',
-    value: function addEffect(effectFunction) {
-      this.effectsSequence.push(effectFunction);
-      this.container.addDynamicProperty(this);
-    }
-  }]);
-  return KeyframedShapeProperty;
-}(BaseShapeProperty);
-
-var roundCorner = 0.5519;
-var cPoint = roundCorner;
-
-/**
- * a
- */
-
-var EllShapeProperty = function (_DynamicPropertyConta) {
-  inherits(EllShapeProperty, _DynamicPropertyConta);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   */
-  function EllShapeProperty(elem, data) {
-    classCallCheck(this, EllShapeProperty);
-
-    // /*this.v = {
-    //     v: createSizedArray(4),
-    //     i: createSizedArray(4),
-    //     o: createSizedArray(4),
-    //     c: true
-    // };*/
-    var _this3 = possibleConstructorReturn(this, (EllShapeProperty.__proto__ || Object.getPrototypeOf(EllShapeProperty)).call(this));
-
-    _this3.v = shape_pool.newElement();
-    _this3.v.setPathData(true, 4);
-    _this3.localShapeCollection = shapeCollection_pool.newShapeCollection();
-    _this3.paths = _this3.localShapeCollection;
-    _this3.localShapeCollection.addShape(_this3.v);
-    _this3.d = data.d;
-    _this3.elem = elem;
-    _this3.initDynamicPropertyContainer(elem);
-    _this3.p = PropertyFactory(elem, data.p, 1, 0, _this3);
-    _this3.s = PropertyFactory(elem, data.s, 1, 0, _this3);
-    if (_this3.dynamicProperties.length) {
-      _this3.k = true;
-    } else {
-      _this3.k = false;
-      _this3.convertEllToPath();
-    }
-    return _this3;
-  }
-
-  /**
-   * a
-   */
-
-
-  createClass(EllShapeProperty, [{
-    key: 'reset',
-    value: function reset() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      this.iterateDynamicProperties(frameNum);
-
-      if (this._mdf) {
-        this.convertEllToPath();
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'convertEllToPath',
-    value: function convertEllToPath() {
-      var p0 = this.p.v[0];
-      var p1 = this.p.v[1];
-      var s0 = this.s.v[0] / 2;
-      var s1 = this.s.v[1] / 2;
-      var _cw = this.d !== 3;
-      var _v = this.v;
-      _v.v[0][0] = p0;
-      _v.v[0][1] = p1 - s1;
-      _v.v[1][0] = _cw ? p0 + s0 : p0 - s0;
-      _v.v[1][1] = p1;
-      _v.v[2][0] = p0;
-      _v.v[2][1] = p1 + s1;
-      _v.v[3][0] = _cw ? p0 - s0 : p0 + s0;
-      _v.v[3][1] = p1;
-      _v.i[0][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
-      _v.i[0][1] = p1 - s1;
-      _v.i[1][0] = _cw ? p0 + s0 : p0 - s0;
-      _v.i[1][1] = p1 - s1 * cPoint;
-      _v.i[2][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
-      _v.i[2][1] = p1 + s1;
-      _v.i[3][0] = _cw ? p0 - s0 : p0 + s0;
-      _v.i[3][1] = p1 + s1 * cPoint;
-      _v.o[0][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
-      _v.o[0][1] = p1 - s1;
-      _v.o[1][0] = _cw ? p0 + s0 : p0 - s0;
-      _v.o[1][1] = p1 + s1 * cPoint;
-      _v.o[2][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
-      _v.o[2][1] = p1 + s1;
-      _v.o[3][0] = _cw ? p0 - s0 : p0 + s0;
-      _v.o[3][1] = p1 - s1 * cPoint;
-    }
-  }]);
-  return EllShapeProperty;
-}(DynamicPropertyContainer);
-
-/**
- * a
- */
-
-
-var StarShapeProperty = function (_DynamicPropertyConta2) {
-  inherits(StarShapeProperty, _DynamicPropertyConta2);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   */
-  function StarShapeProperty(elem, data) {
-    classCallCheck(this, StarShapeProperty);
-
-    var _this4 = possibleConstructorReturn(this, (StarShapeProperty.__proto__ || Object.getPrototypeOf(StarShapeProperty)).call(this));
-
-    _this4.v = shape_pool.newElement();
-    _this4.v.setPathData(true, 0);
-    _this4.elem = elem;
-    _this4.data = data;
-    _this4.d = data.d;
-    _this4.initDynamicPropertyContainer(elem);
-    if (data.sy === 1) {
-      _this4.ir = PropertyFactory(elem, data.ir, 0, 0, _this4);
-      _this4.is = PropertyFactory(elem, data.is, 0, 0.01, _this4);
-      _this4.convertToPath = _this4.convertStarToPath;
-    } else {
-      _this4.convertToPath = _this4.convertPolygonToPath;
-    }
-    _this4.pt = PropertyFactory(elem, data.pt, 0, 0, _this4);
-    _this4.p = PropertyFactory(elem, data.p, 1, 0, _this4);
-    _this4.r = PropertyFactory(elem, data.r, 0, degToRads$2, _this4);
-    _this4.or = PropertyFactory(elem, data.or, 0, 0, _this4);
-    _this4.os = PropertyFactory(elem, data.os, 0, 0.01, _this4);
-    _this4.localShapeCollection = shapeCollection_pool.newShapeCollection();
-    _this4.localShapeCollection.addShape(_this4.v);
-    _this4.paths = _this4.localShapeCollection;
-    if (_this4.dynamicProperties.length) {
-      _this4.k = true;
-    } else {
-      _this4.k = false;
-      _this4.convertToPath();
-    }
-    return _this4;
-  }
-
-  /**
-   * a
-   */
-
-
-  createClass(StarShapeProperty, [{
-    key: 'reset',
-    value: function reset() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      this.iterateDynamicProperties(frameNum);
-      if (this._mdf) {
-        this.convertToPath();
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'convertStarToPath',
-    value: function convertStarToPath() {
-      var numPts = Math.floor(this.pt.v) * 2;
-      var angle = Math.PI * 2 / numPts;
-      // /*this.v.v.length = numPts;
-      // this.v.i.length = numPts;
-      // this.v.o.length = numPts;*/
-      var longFlag = true;
-      var longRad = this.or.v;
-      var shortRad = this.ir.v;
-      var longRound = this.os.v;
-      var shortRound = this.is.v;
-      var longPerimSegment = 2 * Math.PI * longRad / (numPts * 2);
-      var shortPerimSegment = 2 * Math.PI * shortRad / (numPts * 2);
-      var currentAng = -Math.PI / 2;
-      currentAng += this.r.v;
-      var dir = this.data.d === 3 ? -1 : 1;
-      this.v._length = 0;
-      for (var i = 0; i < numPts; i++) {
-        var rad = longFlag ? longRad : shortRad;
-        var roundness = longFlag ? longRound : shortRound;
-        var perimSegment = longFlag ? longPerimSegment : shortPerimSegment;
-        var x = rad * Math.cos(currentAng);
-        var y = rad * Math.sin(currentAng);
-        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
-        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
-        x += +this.p.v[0];
-        y += +this.p.v[1];
-        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
-
-        // /*this.v.v[i] = [x,y];
-        // this.v.i[i] = [x+ox*perimSegment*roundness*dir,y+oy*perimSegment*roundness*dir];
-        // this.v.o[i] = [x-ox*perimSegment*roundness*dir,y-oy*perimSegment*roundness*dir];
-        // this.v._length = numPts;*/
-        longFlag = !longFlag;
-        currentAng += angle * dir;
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'convertPolygonToPath',
-    value: function convertPolygonToPath() {
-      var numPts = Math.floor(this.pt.v);
-      var angle = Math.PI * 2 / numPts;
-      var rad = this.or.v;
-      var roundness = this.os.v;
-      var perimSegment = 2 * Math.PI * rad / (numPts * 4);
-      var currentAng = -Math.PI / 2;
-      var dir = this.data.d === 3 ? -1 : 1;
-      currentAng += this.r.v;
-      this.v._length = 0;
-      for (var i = 0; i < numPts; i++) {
-        var x = rad * Math.cos(currentAng);
-        var y = rad * Math.sin(currentAng);
-        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
-        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
-        x += +this.p.v[0];
-        y += +this.p.v[1];
-        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
-        currentAng += angle * dir;
-      }
-      this.paths.length = 0;
-      this.paths[0] = this.v;
-    }
-  }]);
-  return StarShapeProperty;
-}(DynamicPropertyContainer);
-
-/**
- * a
- */
-
-
-var RectShapeProperty = function (_DynamicPropertyConta3) {
-  inherits(RectShapeProperty, _DynamicPropertyConta3);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   */
-  function RectShapeProperty(elem, data) {
-    classCallCheck(this, RectShapeProperty);
-
-    var _this5 = possibleConstructorReturn(this, (RectShapeProperty.__proto__ || Object.getPrototypeOf(RectShapeProperty)).call(this));
-
-    _this5.v = shape_pool.newElement();
-    _this5.v.c = true;
-    _this5.localShapeCollection = shapeCollection_pool.newShapeCollection();
-    _this5.localShapeCollection.addShape(_this5.v);
-    _this5.paths = _this5.localShapeCollection;
-    _this5.elem = elem;
-    _this5.d = data.d;
-    _this5.initDynamicPropertyContainer(elem);
-    _this5.p = PropertyFactory(elem, data.p, 1, 0, _this5);
-    _this5.s = PropertyFactory(elem, data.s, 1, 0, _this5);
-    _this5.r = PropertyFactory(elem, data.r, 0, 0, _this5);
-    if (_this5.dynamicProperties.length) {
-      _this5.k = true;
-    } else {
-      _this5.k = false;
-      _this5.convertRectToPath();
-    }
-    return _this5;
-  }
-
-  /**
-   * a
-   */
-
-
-  createClass(RectShapeProperty, [{
-    key: 'reset',
-    value: function reset() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'convertRectToPath',
-    value: function convertRectToPath() {
-      var p0 = this.p.v[0];
-      var p1 = this.p.v[1];
-      var v0 = this.s.v[0] / 2;
-      var v1 = this.s.v[1] / 2;
-      var round = Math.min(v0, v1, this.r.v);
-      var cPoint = round * (1 - roundCorner);
-      this.v._length = 0;
-
-      if (this.d === 2 || this.d === 1) {
-        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, 0, true);
-        this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, p0 + v0, p1 + v1 - round, 1, true);
-        if (round !== 0) {
-          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, 2, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0 + round, p1 + v1, 3, true);
-          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, 4, true);
-          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1 + round, 5, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, 6, true);
-          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, p0 + v0 - round, p1 - v1, 7, true);
-        } else {
-          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0, p1 + v1, 2);
-          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1, 3);
-        }
-      } else {
-        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, p0 + v0, p1 - v1 + round, 0, true);
-        if (round !== 0) {
-          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, 1, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0 + round, p1 - v1, 2, true);
-          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, 3, true);
-          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1 - round, 4, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, 5, true);
-          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0 - round, p1 + v1, 6, true);
-          this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, 7, true);
-        } else {
-          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0, p1 - v1, 1, true);
-          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1, 2, true);
-          this.v.setTripleAt(p0 + v0, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0, p1 + v1, 3, true);
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} frameNum a
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      this.iterateDynamicProperties(frameNum);
-      if (this._mdf) {
-        this.convertRectToPath();
-      }
-    }
-  }]);
-  return RectShapeProperty;
-}(DynamicPropertyContainer);
-
-/**
- * a
- * @param {*} elem a
- * @param {*} data a
- * @param {*} type a
- * @return {*}
- */
-
-
-function getShapeProp(elem, data, type) {
-  var prop = void 0;
-  if (type === 3 || type === 4) {
-    var dataProp = type === 3 ? data.pt : data.ks;
-    var keys = dataProp.k;
-    if (keys.length) {
-      prop = new KeyframedShapeProperty(elem, data, type);
-    } else {
-      prop = new ShapeProperty(elem, data, type);
-    }
-  } else if (type === 5) {
-    prop = new RectShapeProperty(elem, data);
-  } else if (type === 6) {
-    prop = new EllShapeProperty(elem, data);
-  } else if (type === 7) {
-    prop = new StarShapeProperty(elem, data);
-  }
-  if (prop.k) {
-    elem.addDynamicProperty(prop);
-  }
-  return prop;
-}
-
-/**
- * a
- * @return {*}
- */
-function getConstructorFunction() {
-  return ShapeProperty;
-}
-
-/**
- * a
- * @return {*}
- */
-function getKeyframedConstructorFunction() {
-  return KeyframedShapeProperty;
-}
-
-var ShapePropertyFactory = { getShapeProp: getShapeProp, getConstructorFunction: getConstructorFunction, getKeyframedConstructorFunction: getKeyframedConstructorFunction };
-
-/**
- * a
- */
-
-var CVShapeData = function () {
-  /**
-   * a
-   * @param {*} element a
-   * @param {*} data a
-   * @param {*} styles a
-   * @param {*} transformsManager a
-   */
-  function CVShapeData(element, data, styles, transformsManager) {
-    classCallCheck(this, CVShapeData);
-
-    this.styledShapes = [];
-    this.tr = [0, 0, 0, 0, 0, 0];
-    var ty = 4;
-    if (data.ty == 'rc') {
-      ty = 5;
-    } else if (data.ty == 'el') {
-      ty = 6;
-    } else if (data.ty == 'sr') {
-      ty = 7;
-    }
-    this.sh = ShapePropertyFactory.getShapeProp(element, data, ty, element);
-    var len = styles.length;
-    var styledShape = void 0;
-    for (var i = 0; i < len; i += 1) {
-      if (!styles[i].closed) {
-        styledShape = {
-          transforms: transformsManager.addTransformSequence(styles[i].transforms),
-          trNodes: []
-        };
-        this.styledShapes.push(styledShape);
-        styles[i].elements.push(styledShape);
-      }
-    }
-  }
-
-  /**
-   * a
-   */
-
-
-  createClass(CVShapeData, [{
-    key: 'setAsAnimated',
-    value: function setAsAnimated() {
-      this._isAnimated = true;
-    }
-  }]);
-  return CVShapeData;
-}();
-
-var degToRads$3 = Math.PI / 180;
-
-/**
- * a
- */
-
-var TransformProperty = function (_DynamicPropertyConta) {
-  inherits(TransformProperty, _DynamicPropertyConta);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} container a
-   */
-  function TransformProperty(elem, data, container) {
-    classCallCheck(this, TransformProperty);
-
-    var _this = possibleConstructorReturn(this, (TransformProperty.__proto__ || Object.getPrototypeOf(TransformProperty)).call(this));
-
-    _this.elem = elem;
-    _this.frameId = -1;
-    _this.propType = 'transform';
-    _this.data = data;
-    _this.v = new Matrix$1();
-    // Precalculated matrix with non animated properties
-    _this.pre = new Matrix$1();
-    _this.appliedTransformations = 0;
-    _this.initDynamicPropertyContainer(container || elem);
-    if (data.p && data.p.s) {
-      _this.px = PropertyFactory(elem, data.p.x, 0, 0, _this);
-      _this.py = PropertyFactory(elem, data.p.y, 0, 0, _this);
-      if (data.p.z) {
-        _this.pz = PropertyFactory(elem, data.p.z, 0, 0, _this);
-      }
-    } else {
-      _this.p = PropertyFactory(elem, data.p || { k: [0, 0, 0] }, 1, 0, _this);
-    }
-    if (data.rx) {
-      _this.rx = PropertyFactory(elem, data.rx, 0, degToRads$3, _this);
-      _this.ry = PropertyFactory(elem, data.ry, 0, degToRads$3, _this);
-      _this.rz = PropertyFactory(elem, data.rz, 0, degToRads$3, _this);
-      if (data.or.k[0].ti) {
-        var len = data.or.k.length;
-        for (var i = 0; i < len; i += 1) {
-          data.or.k[i].to = data.or.k[i].ti = null;
-        }
-      }
-      _this.or = PropertyFactory(elem, data.or, 1, degToRads$3, _this);
-      // sh Indicates it needs to be capped between -180 and 180
-      _this.or.sh = true;
-    } else {
-      _this.r = PropertyFactory(elem, data.r || { k: 0 }, 0, degToRads$3, _this);
-    }
-    if (data.sk) {
-      _this.sk = PropertyFactory(elem, data.sk, 0, degToRads$3, _this);
-      _this.sa = PropertyFactory(elem, data.sa, 0, degToRads$3, _this);
-    }
-    _this.a = PropertyFactory(elem, data.a || { k: [0, 0, 0] }, 1, 0, _this);
-    _this.s = PropertyFactory(elem, data.s || { k: [100, 100, 100] }, 1, 0.01, _this);
-    // Opacity is not part of the transform properties, that's why it won't use this.dynamicProperties. That way transforms won't get updated if opacity changes.
-    if (data.o) {
-      _this.o = PropertyFactory(elem, data.o, 0, 0.01, elem);
-    } else {
-      _this.o = { _mdf: false, v: 1 };
-    }
-    _this._isDirty = true;
-    if (!_this.dynamicProperties.length) {
-      _this.getValue(-999999, true);
-    }
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {*} prop a
-   */
-
-
-  createClass(TransformProperty, [{
-    key: '_addDynamicProperty',
-    value: function _addDynamicProperty(prop) {
-      if (this.dynamicProperties.indexOf(prop) === -1) {
-        this.dynamicProperties.push(prop);
-        this.container.addDynamicProperty(this);
-        this._isAnimated = true;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} prop a
-     */
-
-  }, {
-    key: 'addDynamicProperty',
-    value: function addDynamicProperty(prop) {
-      this._addDynamicProperty(prop);
-      this.elem.addDynamicProperty(prop);
-      this._isDirty = true;
-    }
-
-    /**
-     * a
-     * @param {*} forceRender a
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum, forceRender) {
-      if (this._isDirty) {
-        this.precalculateMatrix();
-        this._isDirty = false;
-      }
-
-      this.iterateDynamicProperties(frameNum);
-
-      if (this._mdf || forceRender) {
-        this.v.cloneFromProps(this.pre.props);
-        if (this.appliedTransformations < 1) {
-          this.v.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
-        }
-        if (this.appliedTransformations < 2) {
-          this.v.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
-        }
-        if (this.sk && this.appliedTransformations < 3) {
-          this.v.skewFromAxis(-this.sk.v, this.sa.v);
-        }
-        if (this.r && this.appliedTransformations < 4) {
-          this.v.rotate(-this.r.v);
-        } else if (!this.r && this.appliedTransformations < 4) {
-          this.v.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
-        }
-        if (this.autoOriented) {
-          var v1 = void 0;
-          var v2 = void 0;
-          // TODO: 需要从外部传入
-          var frameRate = this.elem.globalData.frameRate;
-          if (this.p && this.p.keyframes && this.p.getValueAtTime) {
-            if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
-              v1 = this.p.getValueAtTime((this.p.keyframes[0].t + 0.01) / frameRate, 0);
-              v2 = this.p.getValueAtTime(this.p.keyframes[0].t / frameRate, 0);
-            } else if (this.p._caching.lastFrame + this.p.offsetTime >= this.p.keyframes[this.p.keyframes.length - 1].t) {
-              v1 = this.p.getValueAtTime(this.p.keyframes[this.p.keyframes.length - 1].t / frameRate, 0);
-              v2 = this.p.getValueAtTime((this.p.keyframes[this.p.keyframes.length - 1].t - 0.01) / frameRate, 0);
-            } else {
-              v1 = this.p.pv;
-              v2 = this.p.getValueAtTime((this.p._caching.lastFrame + this.p.offsetTime - 0.01) / frameRate, this.p.offsetTime);
-            }
-          } else if (this.px && this.px.keyframes && this.py.keyframes && this.px.getValueAtTime && this.py.getValueAtTime) {
-            v1 = [];
-            v2 = [];
-            var px = this.px;
-            var py = this.py;
-            // frameRate;
-            if (px._caching.lastFrame + px.offsetTime <= px.keyframes[0].t) {
-              v1[0] = px.getValueAtTime((px.keyframes[0].t + 0.01) / frameRate, 0);
-              v1[1] = py.getValueAtTime((py.keyframes[0].t + 0.01) / frameRate, 0);
-              v2[0] = px.getValueAtTime(px.keyframes[0].t / frameRate, 0);
-              v2[1] = py.getValueAtTime(py.keyframes[0].t / frameRate, 0);
-            } else if (px._caching.lastFrame + px.offsetTime >= px.keyframes[px.keyframes.length - 1].t) {
-              v1[0] = px.getValueAtTime(px.keyframes[px.keyframes.length - 1].t / frameRate, 0);
-              v1[1] = py.getValueAtTime(py.keyframes[py.keyframes.length - 1].t / frameRate, 0);
-              v2[0] = px.getValueAtTime((px.keyframes[px.keyframes.length - 1].t - 0.01) / frameRate, 0);
-              v2[1] = py.getValueAtTime((py.keyframes[py.keyframes.length - 1].t - 0.01) / frameRate, 0);
-            } else {
-              v1 = [px.pv, py.pv];
-              v2[0] = px.getValueAtTime((px._caching.lastFrame + px.offsetTime - 0.01) / frameRate, px.offsetTime);
-              v2[1] = py.getValueAtTime((py._caching.lastFrame + py.offsetTime - 0.01) / frameRate, py.offsetTime);
-            }
-          }
-          this.v.rotate(-Math.atan2(v1[1] - v2[1], v1[0] - v2[0]));
-        }
-        if (this.data.p && this.data.p.s) {
-          if (this.data.p.z) {
-            this.v.translate(this.px.v, this.py.v, -this.pz.v);
-          } else {
-            this.v.translate(this.px.v, this.py.v, 0);
-          }
-        } else {
-          this.v.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
-        }
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'precalculateMatrix',
-    value: function precalculateMatrix() {
-      if (!this.a.k) {
-        this.pre.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
-        this.appliedTransformations = 1;
-      } else {
-        return;
-      }
-      if (!this.s.effectsSequence.length) {
-        this.pre.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
-        this.appliedTransformations = 2;
-      } else {
-        return;
-      }
-      if (this.sk) {
-        if (!this.sk.effectsSequence.length && !this.sa.effectsSequence.length) {
-          this.pre.skewFromAxis(-this.sk.v, this.sa.v);
-          this.appliedTransformations = 3;
-        } else {
-          return;
-        }
-      }
-      if (this.r) {
-        if (!this.r.effectsSequence.length) {
-          this.pre.rotate(-this.r.v);
-          this.appliedTransformations = 4;
-        } else {
-          return;
-        }
-      } else if (!this.rz.effectsSequence.length && !this.ry.effectsSequence.length && !this.rx.effectsSequence.length && !this.or.effectsSequence.length) {
-        this.pre.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
-        this.appliedTransformations = 4;
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'autoOrient',
-    value: function autoOrient() {}
-  }]);
-  return TransformProperty;
-}(DynamicPropertyContainer);
-
-/**
- * a
- * @param {*} elem a
- * @param {*} data a
- * @param {*} container a
- * @return {*}
- */
-
-
-function getTransformProperty(elem, data, container) {
-  return new TransformProperty(elem, data, container);
-}
-
-var TransformPropertyFactory = { getTransformProperty: getTransformProperty };
-
-/**
- * a
- */
-
-var ShapeModifier = function (_DynamicPropertyConta) {
-  inherits(ShapeModifier, _DynamicPropertyConta);
-
-  function ShapeModifier() {
-    classCallCheck(this, ShapeModifier);
-    return possibleConstructorReturn(this, (ShapeModifier.__proto__ || Object.getPrototypeOf(ShapeModifier)).apply(this, arguments));
-  }
-
-  createClass(ShapeModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * a
-     */
-    value: function initModifierProperties() {}
-    /**
-     * a
-     */
-
-  }, {
-    key: 'addShapeToModifier',
-    value: function addShapeToModifier() {}
-    /**
-     * a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'addShape',
-    value: function addShape(data) {
-      if (!this.closed) {
-        var shapeData = { shape: data.sh, data: data, localShapeCollection: shapeCollection_pool.newShapeCollection() };
-        this.shapes.push(shapeData);
-        this.addShapeToModifier(shapeData);
-        if (this._isAnimated) {
-          data.setAsAnimated();
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'init',
-    value: function init(elem, data) {
-      this.shapes = [];
-      this.elem = elem;
-      this.initDynamicPropertyContainer(elem);
-      this.initModifierProperties(elem, data);
-      this.closed = false;
-      this.k = false;
-      if (this.dynamicProperties.length) {
-        this.k = true;
-      } else {
-        this.getValue(-999999, true);
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'processKeys',
-    value: function processKeys(frameNum) {
-      this.iterateDynamicProperties(frameNum);
-    }
-  }]);
-  return ShapeModifier;
-}(DynamicPropertyContainer);
-
-// import { registerModifier } from './ShapeModifiers';
-/**
- * a
- */
-
-var TrimModifier = function (_ShapeModifier) {
-  inherits(TrimModifier, _ShapeModifier);
-
-  function TrimModifier() {
-    classCallCheck(this, TrimModifier);
-    return possibleConstructorReturn(this, (TrimModifier.__proto__ || Object.getPrototypeOf(TrimModifier)).apply(this, arguments));
-  }
-
-  createClass(TrimModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} data a
-     */
-    value: function initModifierProperties(elem, data) {
-      this.s = PropertyFactory(elem, data.s, 0, 0.01, this);
-      this.e = PropertyFactory(elem, data.e, 0, 0.01, this);
-      this.o = PropertyFactory(elem, data.o, 0, 0, this);
-      this.sValue = 0;
-      this.eValue = 0;
-      this.getValue = this.processKeys;
-      this.m = data.m;
-      this._isAnimated = !!this.s.effectsSequence.length || !!this.e.effectsSequence.length || !!this.o.effectsSequence.length;
-    }
-
-    /**
-     * a
-     * @param {*} shapeData a
-     */
-
-  }, {
-    key: 'addShapeToModifier',
-    value: function addShapeToModifier(shapeData) {
-      shapeData.pathsData = [];
-    }
-
-    /**
-     * a
-     * @param {*} s a
-     * @param {*} e a
-     * @param {*} shapeLength a
-     * @param {*} addedLength a
-     * @param {*} totalModifierLength a
-     * @return {*}
-     */
-
-  }, {
-    key: 'calculateShapeEdges',
-    value: function calculateShapeEdges(s, e, shapeLength, addedLength, totalModifierLength) {
-      var segments = [];
-      if (e <= 1) {
-        segments.push({
-          s: s,
-          e: e
-        });
-      } else if (s >= 1) {
-        segments.push({
-          s: s - 1,
-          e: e - 1
-        });
-      } else {
-        segments.push({
-          s: s,
-          e: 1
-        });
-        segments.push({
-          s: 0,
-          e: e - 1
-        });
-      }
-      var shapeSegments = [];
-      var len = segments.length;
-      for (var i = 0; i < len; i += 1) {
-        var segmentOb = segments[i];
-        if (segmentOb.e * totalModifierLength < addedLength || segmentOb.s * totalModifierLength > addedLength + shapeLength) {
-          continue;
-        } else {
-          var shapeS = void 0;
-          var shapeE = void 0;
-          if (segmentOb.s * totalModifierLength <= addedLength) {
-            shapeS = 0;
-          } else {
-            shapeS = (segmentOb.s * totalModifierLength - addedLength) / shapeLength;
-          }
-          if (segmentOb.e * totalModifierLength >= addedLength + shapeLength) {
-            shapeE = 1;
-          } else {
-            shapeE = (segmentOb.e * totalModifierLength - addedLength) / shapeLength;
-          }
-          shapeSegments.push([shapeS, shapeE]);
-        }
-      }
-      if (!shapeSegments.length) {
-        shapeSegments.push([0, 0]);
-      }
-      return shapeSegments;
-    }
-
-    /**
-     * a
-     * @param {*} pathsData a
-     * @return {*}
-     */
-
-  }, {
-    key: 'releasePathsData',
-    value: function releasePathsData(pathsData) {
-      var len = pathsData.length;
-      for (var i = 0; i < len; i += 1) {
-        segments_length_pool.release(pathsData[i]);
-      }
-      pathsData.length = 0;
-      return pathsData;
-    }
-
-    /**
-     * a
-     * @param {*} _isFirstFrame a
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes(_isFirstFrame) {
-      var s = void 0;
-      var e = void 0;
-      if (this._mdf || _isFirstFrame) {
-        var o = this.o.v % 360 / 360;
-        if (o < 0) {
-          o += 1;
-        }
-        s = (this.s.v > 1 ? 1 : this.s.v < 0 ? 0 : this.s.v) + o;
-        e = (this.e.v > 1 ? 1 : this.e.v < 0 ? 0 : this.e.v) + o;
-        // if (s === e) {}
-        if (s > e) {
-          var _s = s;
-          s = e;
-          e = _s;
-        }
-        s = Math.round(s * 10000) * 0.0001;
-        e = Math.round(e * 10000) * 0.0001;
-        this.sValue = s;
-        this.eValue = e;
-      } else {
-        s = this.sValue;
-        e = this.eValue;
-      }
-      var shapePaths = void 0;
-      var len = this.shapes.length;
-      var pathsData = void 0;
-      var pathData = void 0;
-      var totalShapeLength = void 0;
-      var totalModifierLength = 0;
-
-      if (e === s) {
-        for (var i = 0; i < len; i += 1) {
-          this.shapes[i].localShapeCollection.releaseShapes();
-          this.shapes[i].shape._mdf = true;
-          this.shapes[i].shape.paths = this.shapes[i].localShapeCollection;
-        }
-      } else if (!(e === 1 && s === 0 || e === 0 && s === 1)) {
-        var segments = [];
-        var shapeData = void 0;
-        var localShapeCollection = void 0;
-        for (var _i = 0; _i < len; _i += 1) {
-          shapeData = this.shapes[_i];
-          // if shape hasn't changed and trim properties haven't changed, cached previous path can be used
-          if (!shapeData.shape._mdf && !this._mdf && !_isFirstFrame && this.m !== 2) {
-            shapeData.shape.paths = shapeData.localShapeCollection;
-          } else {
-            shapePaths = shapeData.shape.paths;
-            var jLen = shapePaths._length;
-            totalShapeLength = 0;
-            if (!shapeData.shape._mdf && shapeData.pathsData.length) {
-              totalShapeLength = shapeData.totalShapeLength;
-            } else {
-              pathsData = this.releasePathsData(shapeData.pathsData);
-              for (var j = 0; j < jLen; j += 1) {
-                pathData = bez.getSegmentsLength(shapePaths.shapes[j]);
-                pathsData.push(pathData);
-                totalShapeLength += pathData.totalLength;
-              }
-              shapeData.totalShapeLength = totalShapeLength;
-              shapeData.pathsData = pathsData;
-            }
-
-            totalModifierLength += totalShapeLength;
-            shapeData.shape._mdf = true;
-          }
-        }
-        var shapeS = s;
-        var shapeE = e;
-        var addedLength = 0;
-        var edges = void 0;
-        for (var _i2 = len - 1; _i2 >= 0; _i2 -= 1) {
-          shapeData = this.shapes[_i2];
-          if (shapeData.shape._mdf) {
-            localShapeCollection = shapeData.localShapeCollection;
-            localShapeCollection.releaseShapes();
-            // if m === 2 means paths are trimmed individually so edges need to be found for this specific shape relative to whoel group
-            if (this.m === 2 && len > 1) {
-              edges = this.calculateShapeEdges(s, e, shapeData.totalShapeLength, addedLength, totalModifierLength);
-              addedLength += shapeData.totalShapeLength;
-            } else {
-              edges = [[shapeS, shapeE]];
-            }
-            var _jLen = edges.length;
-            for (var _j = 0; _j < _jLen; _j += 1) {
-              shapeS = edges[_j][0];
-              shapeE = edges[_j][1];
-              segments.length = 0;
-              if (shapeE <= 1) {
-                segments.push({
-                  s: shapeData.totalShapeLength * shapeS,
-                  e: shapeData.totalShapeLength * shapeE
-                });
-              } else if (shapeS >= 1) {
-                segments.push({
-                  s: shapeData.totalShapeLength * (shapeS - 1),
-                  e: shapeData.totalShapeLength * (shapeE - 1)
-                });
-              } else {
-                segments.push({
-                  s: shapeData.totalShapeLength * shapeS,
-                  e: shapeData.totalShapeLength
-                });
-                segments.push({
-                  s: 0,
-                  e: shapeData.totalShapeLength * (shapeE - 1)
-                });
-              }
-              var newShapesData = this.addShapes(shapeData, segments[0]);
-              if (segments[0].s !== segments[0].e) {
-                if (segments.length > 1) {
-                  var lastShapeInCollection = shapeData.shape.paths.shapes[shapeData.shape.paths._length - 1];
-                  if (lastShapeInCollection.c) {
-                    var lastShape = newShapesData.pop();
-                    this.addPaths(newShapesData, localShapeCollection);
-                    newShapesData = this.addShapes(shapeData, segments[1], lastShape);
-                  } else {
-                    this.addPaths(newShapesData, localShapeCollection);
-                    newShapesData = this.addShapes(shapeData, segments[1]);
-                  }
-                }
-                this.addPaths(newShapesData, localShapeCollection);
-              }
-            }
-            shapeData.shape.paths = localShapeCollection;
-          }
-        }
-      } else if (this._mdf) {
-        for (var _i3 = 0; _i3 < len; _i3 += 1) {
-          // Releasign Trim Cached paths data when no trim applied in case shapes are modified inbetween.
-          // Don't remove this even if it's losing cached info.
-          this.shapes[_i3].pathsData.length = 0;
-          this.shapes[_i3].shape._mdf = true;
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} newPaths a
-     * @param {*} localShapeCollection a
-     */
-
-  }, {
-    key: 'addPaths',
-    value: function addPaths(newPaths, localShapeCollection) {
-      var len = newPaths.length;
-      for (var i = 0; i < len; i += 1) {
-        localShapeCollection.addShape(newPaths[i]);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} pt1 a
-     * @param {*} pt2 a
-     * @param {*} pt3 a
-     * @param {*} pt4 a
-     * @param {*} shapePath a
-     * @param {*} pos a
-     * @param {*} newShape a
-     */
-
-  }, {
-    key: 'addSegment',
-    value: function addSegment(pt1, pt2, pt3, pt4, shapePath, pos, newShape) {
-      shapePath.setXYAt(pt2[0], pt2[1], 'o', pos);
-      shapePath.setXYAt(pt3[0], pt3[1], 'i', pos + 1);
-      if (newShape) {
-        shapePath.setXYAt(pt1[0], pt1[1], 'v', pos);
-      }
-      shapePath.setXYAt(pt4[0], pt4[1], 'v', pos + 1);
-    }
-
-    /**
-     * a
-     * @param {*} points a
-     * @param {*} shapePath a
-     * @param {*} pos a
-     * @param {*} newShape a
-     */
-
-  }, {
-    key: 'addSegmentFromArray',
-    value: function addSegmentFromArray(points, shapePath, pos, newShape) {
-      shapePath.setXYAt(points[1], points[5], 'o', pos);
-      shapePath.setXYAt(points[2], points[6], 'i', pos + 1);
-      if (newShape) {
-        shapePath.setXYAt(points[0], points[4], 'v', pos);
-      }
-      shapePath.setXYAt(points[3], points[7], 'v', pos + 1);
-    }
-
-    /**
-     * a
-     * @param {*} shapeData a
-     * @param {*} shapeSegment a
-     * @param {*} shapePath a
-     * @return {*}
-     */
-
-  }, {
-    key: 'addShapes',
-    value: function addShapes(shapeData, shapeSegment, shapePath) {
-      var pathsData = shapeData.pathsData;
-      var shapePaths = shapeData.shape.paths.shapes;
-      var len = shapeData.shape.paths._length;
-      var addedLength = 0;
-      var currentLengthData = void 0;
-      var segmentCount = void 0;
-      var lengths = void 0;
-      var segment = void 0;
-      var shapes = [];
-      var initPos = void 0;
-      var newShape = true;
-      if (!shapePath) {
-        shapePath = shape_pool.newElement();
-        segmentCount = 0;
-        initPos = 0;
-      } else {
-        segmentCount = shapePath._length;
-        initPos = shapePath._length;
-      }
-      shapes.push(shapePath);
-      for (var i = 0; i < len; i += 1) {
-        lengths = pathsData[i].lengths;
-        shapePath.c = shapePaths[i].c;
-        var jLen = shapePaths[i].c ? lengths.length : lengths.length + 1;
-        var j = 1;
-        for (; j < jLen; j += 1) {
-          currentLengthData = lengths[j - 1];
-          if (addedLength + currentLengthData.addedLength < shapeSegment.s) {
-            addedLength += currentLengthData.addedLength;
-            shapePath.c = false;
-          } else if (addedLength > shapeSegment.e) {
-            shapePath.c = false;
-            break;
-          } else {
-            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + currentLengthData.addedLength) {
-              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[j], shapePaths[i].v[j], shapePath, segmentCount, newShape);
-              newShape = false;
-            } else {
-              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[j], shapePaths[i].o[j - 1], shapePaths[i].i[j], (shapeSegment.s - addedLength) / currentLengthData.addedLength, (shapeSegment.e - addedLength) / currentLengthData.addedLength, lengths[j - 1]);
-              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
-              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
-              newShape = false;
-              shapePath.c = false;
-            }
-            addedLength += currentLengthData.addedLength;
-            segmentCount += 1;
-          }
-        }
-        if (shapePaths[i].c && lengths.length) {
-          currentLengthData = lengths[j - 1];
-          if (addedLength <= shapeSegment.e) {
-            var segmentLength = lengths[j - 1].addedLength;
-            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + segmentLength) {
-              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[0], shapePaths[i].v[0], shapePath, segmentCount, newShape);
-              newShape = false;
-            } else {
-              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[0], shapePaths[i].o[j - 1], shapePaths[i].i[0], (shapeSegment.s - addedLength) / segmentLength, (shapeSegment.e - addedLength) / segmentLength, lengths[j - 1]);
-              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
-              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
-              newShape = false;
-              shapePath.c = false;
-            }
-          } else {
-            shapePath.c = false;
-          }
-          addedLength += currentLengthData.addedLength;
-          segmentCount += 1;
-        }
-        if (shapePath._length) {
-          shapePath.setXYAt(shapePath.v[initPos][0], shapePath.v[initPos][1], 'i', initPos);
-          shapePath.setXYAt(shapePath.v[shapePath._length - 1][0], shapePath.v[shapePath._length - 1][1], 'o', shapePath._length - 1);
-        }
-        if (addedLength > shapeSegment.e) {
-          break;
-        }
-        if (i < len - 1) {
-          shapePath = shape_pool.newElement();
-          newShape = true;
-          shapes.push(shapePath);
-          segmentCount = 0;
-        }
-      }
-      return shapes;
-    }
-  }]);
-  return TrimModifier;
-}(ShapeModifier);
-
-// import { registerModifier } from './ShapeModifiers';
-var roundCorner$1 = 0.5519;
-
-/**
- * a
- */
-
-var RoundCornersModifier = function (_ShapeModifier) {
-  inherits(RoundCornersModifier, _ShapeModifier);
-
-  function RoundCornersModifier() {
-    classCallCheck(this, RoundCornersModifier);
-    return possibleConstructorReturn(this, (RoundCornersModifier.__proto__ || Object.getPrototypeOf(RoundCornersModifier)).apply(this, arguments));
-  }
-
-  createClass(RoundCornersModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} data a
-     */
-    value: function initModifierProperties(elem, data) {
-      this.getValue = this.processKeys;
-      this.rd = PropertyFactory.getProp(elem, data.r, 0, null, this);
-      this._isAnimated = !!this.rd.effectsSequence.length;
-    }
-
-    /**
-     * a
-     * @param {*} path a
-     * @param {*} round a
-     * @return {*}
-     */
-
-  }, {
-    key: 'processPath',
-    value: function processPath(path, round) {
-      var cloned_path = shape_pool.newElement();
-      cloned_path.c = path.c;
-      var len = path._length;
-      var currentV = void 0;
-      var currentI = void 0;
-      var currentO = void 0;
-      var closerV = void 0;
-      var distance = void 0;
-      var newPosPerc = void 0;
-      var index = 0;
-      var vX = void 0;
-      var vY = void 0;
-      var oX = void 0;
-      var oY = void 0;
-      var iX = void 0;
-      var iY = void 0;
-      for (var i = 0; i < len; i++) {
-        currentV = path.v[i];
-        currentO = path.o[i];
-        currentI = path.i[i];
-        if (currentV[0] === currentO[0] && currentV[1] === currentO[1] && currentV[0] === currentI[0] && currentV[1] === currentI[1]) {
-          if ((i === 0 || i === len - 1) && !path.c) {
-            cloned_path.setTripleAt(currentV[0], currentV[1], currentO[0], currentO[1], currentI[0], currentI[1], index);
-            // /*cloned_path.v[index] = currentV;
-            // cloned_path.o[index] = currentO;
-            // cloned_path.i[index] = currentI;*/
-            index += 1;
-          } else {
-            if (i === 0) {
-              closerV = path.v[len - 1];
-            } else {
-              closerV = path.v[i - 1];
-            }
-            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
-            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
-            vX = iX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
-            vY = iY = currentV[1] - (currentV[1] - closerV[1]) * newPosPerc;
-            oX = vX - (vX - currentV[0]) * roundCorner$1;
-            oY = vY - (vY - currentV[1]) * roundCorner$1;
-            cloned_path.setTripleAt(vX, vY, oX, oY, iX, iY, index);
-            index += 1;
-
-            if (i === len - 1) {
-              closerV = path.v[0];
-            } else {
-              closerV = path.v[i + 1];
-            }
-            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
-            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
-            vX = oX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
-            vY = oY = currentV[1] + (closerV[1] - currentV[1]) * newPosPerc;
-            iX = vX - (vX - currentV[0]) * roundCorner$1;
-            iY = vY - (vY - currentV[1]) * roundCorner$1;
-            cloned_path.setTripleAt(vX, vY, oX, oY, iX, iY, index);
-            index += 1;
-          }
-        } else {
-          cloned_path.setTripleAt(path.v[i][0], path.v[i][1], path.o[i][0], path.o[i][1], path.i[i][0], path.i[i][1], index);
-          index += 1;
-        }
-      }
-      return cloned_path;
-    }
-
-    /**
-     * a
-     * @param {*} _isFirstFrame a
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes(_isFirstFrame) {
-      var shapePaths = void 0;
-      var len = this.shapes.length;
-      var rd = this.rd.v;
-
-      if (rd !== 0) {
-        var shapeData = void 0;
-        // let newPaths;
-        var localShapeCollection = void 0;
-        for (var i = 0; i < len; i++) {
-          shapeData = this.shapes[i];
-          // newPaths = shapeData.shape.paths;
-          localShapeCollection = shapeData.localShapeCollection;
-          if (!(!shapeData.shape._mdf && !this._mdf && !_isFirstFrame)) {
-            localShapeCollection.releaseShapes();
-            shapeData.shape._mdf = true;
-            shapePaths = shapeData.shape.paths.shapes;
-            var jLen = shapeData.shape.paths._length;
-            for (var j = 0; j < jLen; j += 1) {
-              localShapeCollection.addShape(this.processPath(shapePaths[j], rd));
-            }
-          }
-          shapeData.shape.paths = shapeData.localShapeCollection;
-        }
-      }
-      if (!this.dynamicProperties.length) {
-        this._mdf = false;
-      }
-    }
-  }]);
-  return RoundCornersModifier;
-}(ShapeModifier);
-
-/**
- * a
- */
-
-var RepeaterModifier = function (_ShapeModifier) {
-  inherits(RepeaterModifier, _ShapeModifier);
-
-  function RepeaterModifier() {
-    classCallCheck(this, RepeaterModifier);
-    return possibleConstructorReturn(this, (RepeaterModifier.__proto__ || Object.getPrototypeOf(RepeaterModifier)).apply(this, arguments));
-  }
-
-  createClass(RepeaterModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} data a
-     */
-    value: function initModifierProperties(elem, data) {
-      this.getValue = this.processKeys;
-      this.c = PropertyFactory.getProp(elem, data.c, 0, null, this);
-      this.o = PropertyFactory.getProp(elem, data.o, 0, null, this);
-      this.tr = TransformPropertyFactory.getTransformProperty(elem, data.tr, this);
-      this.so = PropertyFactory.getProp(elem, data.tr.so, 0, 0.01, this);
-      this.eo = PropertyFactory.getProp(elem, data.tr.eo, 0, 0.01, this);
-      this.data = data;
-      if (!this.dynamicProperties.length) {
-        this.getValue(true);
-      }
-      this._isAnimated = !!this.dynamicProperties.length;
-      this.pMatrix = new Matrix$1();
-      this.rMatrix = new Matrix$1();
-      this.sMatrix = new Matrix$1();
-      this.tMatrix = new Matrix$1();
-      this.matrix = new Matrix$1();
-    }
-
-    /**
-     * a
-     * @param {*} pMatrix a
-     * @param {*} rMatrix a
-     * @param {*} sMatrix a
-     * @param {*} transform a
-     * @param {*} perc a
-     * @param {*} inv a
-     */
-
-  }, {
-    key: 'applyTransforms',
-    value: function applyTransforms(pMatrix, rMatrix, sMatrix, transform, perc, inv) {
-      var dir = inv ? -1 : 1;
-      var scaleX = transform.s.v[0] + (1 - transform.s.v[0]) * (1 - perc);
-      var scaleY = transform.s.v[1] + (1 - transform.s.v[1]) * (1 - perc);
-      pMatrix.translate(transform.p.v[0] * dir * perc, transform.p.v[1] * dir * perc, transform.p.v[2]);
-      rMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
-      rMatrix.rotate(-transform.r.v * dir * perc);
-      rMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
-      sMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
-      sMatrix.scale(inv ? 1 / scaleX : scaleX, inv ? 1 / scaleY : scaleY);
-      sMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} arr a
-     * @param {*} pos a
-     * @param {*} elemsData a
-     */
-
-  }, {
-    key: 'init',
-    value: function init(elem, arr, pos, elemsData) {
-      this.elem = elem;
-      this.arr = arr;
-      this.pos = pos;
-      this.elemsData = elemsData;
-      this._currentCopies = 0;
-      this._elements = [];
-      this._groups = [];
-      this.frameId = -1;
-      this.initDynamicPropertyContainer(elem);
-      this.initModifierProperties(elem, arr[pos]);
-      while (pos > 0) {
-        pos -= 1;
-        // this._elements.unshift(arr.splice(pos,1)[0]);
-        this._elements.unshift(arr[pos]);
-      }
-      if (this.dynamicProperties.length) {
-        this.k = true;
-      } else {
-        this.getValue(true);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} elements a
-     */
-
-  }, {
-    key: 'resetElements',
-    value: function resetElements(elements) {
-      var len = elements.length;
-      for (var i = 0; i < len; i += 1) {
-        elements[i]._processed = false;
-        if (elements[i].ty === 'gr') {
-          this.resetElements(elements[i].it);
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} elements a
-     */
-
-  }, {
-    key: 'cloneElements',
-    value: function cloneElements(elements) {
-      var newElements = JSON.parse(JSON.stringify(elements));
-      this.resetElements(newElements);
-      return newElements;
-    }
-
-    /**
-     * a
-     * @param {*} elements a
-     * @param {*} renderFlag a
-     */
-
-  }, {
-    key: 'changeGroupRender',
-    value: function changeGroupRender(elements, renderFlag) {
-      var len = elements.length;
-      for (var i = 0; i < len; i += 1) {
-        elements[i]._render = renderFlag;
-        if (elements[i].ty === 'gr') {
-          this.changeGroupRender(elements[i].it, renderFlag);
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} _isFirstFrame a
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes(_isFirstFrame) {
-      // let items, itemsTransform, i, dir, cont;
-      if (this._mdf || _isFirstFrame) {
-        var copies = Math.ceil(this.c.v);
-        if (this._groups.length < copies) {
-          while (this._groups.length < copies) {
-            var group = {
-              it: this.cloneElements(this._elements),
-              ty: 'gr'
-            };
-            group.it.push({ 'a': { 'a': 0, 'ix': 1, 'k': [0, 0] }, 'nm': 'Transform', 'o': { 'a': 0, 'ix': 7, 'k': 100 }, 'p': { 'a': 0, 'ix': 2, 'k': [0, 0] }, 'r': { 'a': 1, 'ix': 6, 'k': [{ s: 0, e: 0, t: 0 }, { s: 0, e: 0, t: 1 }] }, 's': { 'a': 0, 'ix': 3, 'k': [100, 100] }, 'sa': { 'a': 0, 'ix': 5, 'k': 0 }, 'sk': { 'a': 0, 'ix': 4, 'k': 0 }, 'ty': 'tr' });
-
-            this.arr.splice(0, 0, group);
-            this._groups.splice(0, 0, group);
-            this._currentCopies += 1;
-          }
-          this.elem.reloadShapes();
-        }
-        var cont = 0;
-        var i = void 0;
-        var renderFlag = void 0;
-        for (i = 0; i <= this._groups.length - 1; i += 1) {
-          renderFlag = cont < copies;
-          this._groups[i]._render = renderFlag;
-          this.changeGroupRender(this._groups[i].it, renderFlag);
-          cont += 1;
-        }
-
-        this._currentCopies = copies;
-        // //
-
-        var offset = this.o.v;
-        var offsetModulo = offset % 1;
-        var roundOffset = offset > 0 ? Math.floor(offset) : Math.ceil(offset);
-        // let k;
-        // let tMat = this.tr.v.props;
-        var pProps = this.pMatrix.props;
-        var rProps = this.rMatrix.props;
-        var sProps = this.sMatrix.props;
-        this.pMatrix.reset();
-        this.rMatrix.reset();
-        this.sMatrix.reset();
-        this.tMatrix.reset();
-        this.matrix.reset();
-        var iteration = 0;
-
-        if (offset > 0) {
-          while (iteration < roundOffset) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
-            iteration += 1;
-          }
-          if (offsetModulo) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, offsetModulo, false);
-            iteration += offsetModulo;
-          }
-        } else if (offset < 0) {
-          while (iteration > roundOffset) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, true);
-            iteration -= 1;
-          }
-          if (offsetModulo) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, -offsetModulo, true);
-            iteration -= offsetModulo;
-          }
-        }
-        i = this.data.m === 1 ? 0 : this._currentCopies - 1;
-        var dir = this.data.m === 1 ? 1 : -1;
-        cont = this._currentCopies;
-        while (cont) {
-          var items = this.elemsData[i].it;
-          var itemsTransform = items[items.length - 1].transform.mProps.v.props;
-          var jLen = itemsTransform.length;
-          items[items.length - 1].transform.mProps._mdf = true;
-          items[items.length - 1].transform.op._mdf = true;
-          items[items.length - 1].transform.op.v = this.so.v + (this.eo.v - this.so.v) * (i / (this._currentCopies - 1));
-          if (iteration !== 0) {
-            if (i !== 0 && dir === 1 || i !== this._currentCopies - 1 && dir === -1) {
-              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
-            }
-            this.matrix.transform(rProps[0], rProps[1], rProps[2], rProps[3], rProps[4], rProps[5], rProps[6], rProps[7], rProps[8], rProps[9], rProps[10], rProps[11], rProps[12], rProps[13], rProps[14], rProps[15]);
-            this.matrix.transform(sProps[0], sProps[1], sProps[2], sProps[3], sProps[4], sProps[5], sProps[6], sProps[7], sProps[8], sProps[9], sProps[10], sProps[11], sProps[12], sProps[13], sProps[14], sProps[15]);
-            this.matrix.transform(pProps[0], pProps[1], pProps[2], pProps[3], pProps[4], pProps[5], pProps[6], pProps[7], pProps[8], pProps[9], pProps[10], pProps[11], pProps[12], pProps[13], pProps[14], pProps[15]);
-
-            for (var j = 0; j < jLen; j += 1) {
-              itemsTransform[j] = this.matrix.props[j];
-            }
-            this.matrix.reset();
-          } else {
-            this.matrix.reset();
-            for (var _j = 0; _j < jLen; _j += 1) {
-              itemsTransform[_j] = this.matrix.props[_j];
-            }
-          }
-          iteration += 1;
-          cont -= 1;
-          i += dir;
-        }
-      } else {
-        var _cont = this._currentCopies;
-        var _i = 0;
-        var _dir = 1;
-        while (_cont) {
-          var _items = this.elemsData[_i].it;
-          // const itemsTransform = items[items.length - 1].transform.mProps.v.props;
-          _items[_items.length - 1].transform.mProps._mdf = false;
-          _items[_items.length - 1].transform.op._mdf = false;
-          _cont -= 1;
-          _i += _dir;
-        }
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'addShape',
-    value: function addShape() {}
-  }]);
-  return RepeaterModifier;
-}(ShapeModifier);
-
-/**
- * a
- */
-
-var MouseModifier = function (_ShapeModifier) {
-  inherits(MouseModifier, _ShapeModifier);
-
-  function MouseModifier() {
-    classCallCheck(this, MouseModifier);
-    return possibleConstructorReturn(this, (MouseModifier.__proto__ || Object.getPrototypeOf(MouseModifier)).apply(this, arguments));
-  }
-
-  createClass(MouseModifier, [{
-    key: 'processKeys',
-
-    /**
-     * a
-     * @param {*} forceRender a
-     */
-    value: function processKeys(forceRender) {
-      if (this.elem.globalData.frameId === this.frameId && !forceRender) {
-        return;
-      }
-      this._mdf = true;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'addShapeToModifier',
-    value: function addShapeToModifier() {
-      this.positions.push([]);
-    }
-
-    /**
-     * a
-     * @param {*} path a
-     * @param {*} mouseCoords a
-     * @param {*} positions a
-     */
-
-  }, {
-    key: 'processPath',
-    value: function processPath(path, mouseCoords, positions) {
-      var len = path.v.length;
-      var vValues = [];
-      var oValues = [];
-      var iValues = [];
-      // let dist;
-      var theta = void 0;
-      var x = void 0;
-      var y = void 0;
-      // // OPTION A
-      for (var i = 0; i < len; i += 1) {
-        if (!positions.v[i]) {
-          positions.v[i] = [path.v[i][0], path.v[i][1]];
-          positions.o[i] = [path.o[i][0], path.o[i][1]];
-          positions.i[i] = [path.i[i][0], path.i[i][1]];
-          positions.distV[i] = 0;
-          positions.distO[i] = 0;
-          positions.distI[i] = 0;
-        }
-        theta = Math.atan2(path.v[i][1] - mouseCoords[1], path.v[i][0] - mouseCoords[0]);
-
-        x = mouseCoords[0] - positions.v[i][0];
-        y = mouseCoords[1] - positions.v[i][1];
-        var distance = Math.sqrt(x * x + y * y);
-        positions.distV[i] += (distance - positions.distV[i]) * this.data.dc;
-
-        positions.v[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][0];
-        positions.v[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][1];
-
-        theta = Math.atan2(path.o[i][1] - mouseCoords[1], path.o[i][0] - mouseCoords[0]);
-
-        x = mouseCoords[0] - positions.o[i][0];
-        y = mouseCoords[1] - positions.o[i][1];
-        distance = Math.sqrt(x * x + y * y);
-        positions.distO[i] += (distance - positions.distO[i]) * this.data.dc;
-
-        positions.o[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][0];
-        positions.o[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][1];
-
-        theta = Math.atan2(path.i[i][1] - mouseCoords[1], path.i[i][0] - mouseCoords[0]);
-
-        x = mouseCoords[0] - positions.i[i][0];
-        y = mouseCoords[1] - positions.i[i][1];
-        distance = Math.sqrt(x * x + y * y);
-        positions.distI[i] += (distance - positions.distI[i]) * this.data.dc;
-
-        positions.i[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][0];
-        positions.i[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][1];
-
-        // ///OPTION 1
-        vValues.push(positions.v[i]);
-        oValues.push(positions.o[i]);
-        iValues.push(positions.i[i]);
-
-        // ///OPTION 2
-        // vValues.push(positions.v[i]);
-        // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
-        // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
-
-
-        // ///OPTION 3
-        // vValues.push(positions.v[i]);
-        // iValues.push(path.i[i]);
-        // oValues.push(path.o[i]);
-
-
-        // ///OPTION 4
-        // vValues.push(path.v[i]);
-        // oValues.push(positions.o[i]);
-        // iValues.push(positions.i[i]);
-      }
-
-      // // OPTION B
-      /* for(i=0;i<len;i+=1){
-          if(!positions.v[i]){
-              positions.v[i] = [path.v[i][0],path.v[i][1]];
-              positions.o[i] = [path.o[i][0],path.o[i][1]];
-              positions.i[i] = [path.i[i][0],path.i[i][1]];
-              positions.distV[i] = 0;
-           }
-          theta = Math.atan2(
-              positions.v[i][1] - mouseCoords[1],
-              positions.v[i][0] - mouseCoords[0]
-          );
-          x = mouseCoords[0] - positions.v[i][0];
-          y = mouseCoords[1] - positions.v[i][1];
-          var distance = this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
-           positions.v[i][0] += Math.cos(theta) * distance + (path.v[i][0] - positions.v[i][0]) * this.data.dc;
-          positions.v[i][1] += Math.sin(theta) * distance + (path.v[i][1] - positions.v[i][1]) * this.data.dc;
-            theta = Math.atan2(
-              positions.o[i][1] - mouseCoords[1],
-              positions.o[i][0] - mouseCoords[0]
-          );
-          x = mouseCoords[0] - positions.o[i][0];
-          y = mouseCoords[1] - positions.o[i][1];
-          var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
-           positions.o[i][0] += Math.cos(theta) * distance + (path.o[i][0] - positions.o[i][0]) * this.data.dc;
-          positions.o[i][1] += Math.sin(theta) * distance + (path.o[i][1] - positions.o[i][1]) * this.data.dc;
-            theta = Math.atan2(
-              positions.i[i][1] - mouseCoords[1],
-              positions.i[i][0] - mouseCoords[0]
-          );
-          x = mouseCoords[0] - positions.i[i][0];
-          y = mouseCoords[1] - positions.i[i][1];
-          var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
-           positions.i[i][0] += Math.cos(theta) * distance + (path.i[i][0] - positions.i[i][0]) * this.data.dc;
-          positions.i[i][1] += Math.sin(theta) * distance + (path.i[i][1] - positions.i[i][1]) * this.data.dc;
-           /////OPTION 1
-          //vValues.push(positions.v[i]);
-          // oValues.push(positions.o[i]);
-          // iValues.push(positions.i[i]);
-            /////OPTION 2
-          //vValues.push(positions.v[i]);
-          // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
-          // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
-            /////OPTION 3
-          //vValues.push(positions.v[i]);
-          //iValues.push(path.i[i]);
-          //oValues.push(path.o[i]);
-            /////OPTION 4
-          //vValues.push(path.v[i]);
-          // oValues.push(positions.o[i]);
-          // iValues.push(positions.i[i]);
-      }*/
-
-      return {
-        v: vValues,
-        o: oValues,
-        i: iValues,
-        c: path.c
-      };
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes() {
-      var mouseX = this.elem.globalData.mouseX;
-      var mouseY = this.elem.globalData.mouseY;
-      var shapePaths = void 0;
-      var len = this.shapes.length;
-      // let j, jLen;
-
-      if (mouseX) {
-        var localMouseCoords = this.elem.globalToLocal([mouseX, mouseY, 0]);
-
-        var shapeData = void 0;
-        var newPaths = [];
-        for (var i = 0; i < len; i += 1) {
-          shapeData = this.shapes[i];
-          if (!shapeData.shape._mdf && !this._mdf) {
-            shapeData.shape.paths = shapeData.last;
-          } else {
-            shapeData.shape._mdf = true;
-            shapePaths = shapeData.shape.paths;
-            var jLen = shapePaths.length;
-            for (var j = 0; j < jLen; j += 1) {
-              if (!this.positions[i][j]) {
-                this.positions[i][j] = {
-                  v: [],
-                  o: [],
-                  i: [],
-                  distV: [],
-                  distO: [],
-                  distI: []
-                };
-              }
-              newPaths.push(this.processPath(shapePaths[j], localMouseCoords, this.positions[i][j]));
-            }
-            shapeData.shape.paths = newPaths;
-            shapeData.last = newPaths;
-          }
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'initModifierProperties',
-    value: function initModifierProperties(elem, data) {
-      this.getValue = this.processKeys;
-      this.data = data;
-      this.positions = [];
-    }
-  }]);
-  return MouseModifier;
-}(ShapeModifier);
-
-var modifiers = {};
-
-/**
- * a
- * @param {*} nm a
- * @param {*} factory a
- */
-function registerModifier(nm, factory) {
-  if (!modifiers[nm]) {
-    modifiers[nm] = factory;
-  }
-}
-
-/**
- * a
- * @param {*} nm a
- * @param {*} elem a
- * @param {*} data a
- * @return {*}
- */
-function getModifier(nm, elem, data) {
-  return new modifiers[nm](elem, data);
-}
-
-registerModifier('tm', TrimModifier);
-registerModifier('rd', RoundCornersModifier);
-registerModifier('rp', RepeaterModifier);
-registerModifier('ms', MouseModifier);
-
-var degToRads = Math.PI / 180;
-
-/**
- * a
- * @param {*} element a
- * @param {*} position a
- */
-function ProcessedElement(element, position) {
-  this.elem = element;
-  this.pos = position;
-}
-
-/**
- * a
- */
-
-var CVShapeElement = function () {
-  /**
-   * a
-   * @param {*} data a
-   */
-  function CVShapeElement(data) {
-    classCallCheck(this, CVShapeElement);
-
-    this.data = data;
-    this.shapes = [];
-    this.shapesData = data.shapes;
-    this.stylesList = [];
-    this.itemsData = [];
-    this.prevViewData = [];
-    this.shapeModifiers = [];
-    this.processedElements = [];
-    this.transformsManager = new ShapeTransformManager();
-    this.lcEnum = {
-      '1': 'butt',
-      '2': 'round',
-      '3': 'square'
-    };
-    this.ljEnum = {
-      '1': 'miter',
-      '2': 'round',
-      '3': 'bevel'
-    };
-
-    // set to true when inpoint is rendered
-    this._isFirstFrame = true;
-    // list of animated properties
-    this.dynamicProperties = [];
-    // If layer has been modified in current tick this will be true
-    this._mdf = false;
-
-    this.finalTransform = {
-      mProp: this.data.ks ? TransformPropertyFactory.getTransformProperty(this, this.data.ks, this) : { o: 0 },
-      _matMdf: false,
-      _opMdf: false,
-      mat: new Matrix$1()
-    };
-    if (this.data.ao) {
-      this.finalTransform.mProp.autoOriented = true;
-    }
-
-    this.transformHelper = { opacity: 1, _opMdf: false };
-    this.createContent();
-  }
-
-  /**
-   * a
-   * @param {*} elem a
-   */
-
-
-  createClass(CVShapeElement, [{
-    key: 'searchProcessedElement',
-    value: function searchProcessedElement(elem) {
-      var elements = this.processedElements;
-      var i = 0;
-      var len = elements.length;
-      while (i < len) {
-        if (elements[i].elem === elem) {
-          return elements[i].pos;
-        }
-        i += 1;
-      }
-      return 0;
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} pos a
-     */
-
-  }, {
-    key: 'addProcessedElement',
-    value: function addProcessedElement(elem, pos) {
-      var elements = this.processedElements;
-      var i = elements.length;
-      while (i) {
-        i -= 1;
-        if (elements[i].elem === elem) {
-          elements[i].pos = pos;
-          return;
-        }
-      }
-      elements.push(new ProcessedElement(elem, pos));
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'addShapeToModifiers',
-    value: function addShapeToModifiers(data) {
-      var i = void 0;
-      var len = this.shapeModifiers.length;
-      for (i = 0; i < len; i += 1) {
-        this.shapeModifiers[i].addShape(data);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} num a
-     */
-
-  }, {
-    key: 'prepareFrame',
-    value: function prepareFrame(num) {
-      this.prepareProperties(num);
-    }
-
-    /**
-     * @function
-     * Calculates all dynamic values
-     *
-     * @param {number} num current frame number in Layer's time
-     * @param {boolean} isVisible if layers is currently in range
-     *
-     */
-
-  }, {
-    key: 'prepareProperties',
-    value: function prepareProperties(num) {
-      var i = void 0;
-      var len = this.dynamicProperties.length;
-      for (i = 0; i < len; i += 1) {
-        this.dynamicProperties[i].getValue(num);
-        if (this.dynamicProperties[i]._mdf) {
-          this._mdf = true;
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} prop a
-     */
-
-  }, {
-    key: 'addDynamicProperty',
-    value: function addDynamicProperty(prop) {
-      if (this.dynamicProperties.indexOf(prop) === -1) {
-        this.dynamicProperties.push(prop);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} ctx a
-     */
-
-  }, {
-    key: 'renderFrame',
-    value: function renderFrame(ctx) {
-      if (this.data.hd) {
-        return;
-      }
-      this.renderInnerContent(ctx);
-      if (this._isFirstFrame) {
-        this._isFirstFrame = false;
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'createContent',
-    value: function createContent() {
-      this.searchShapes(this.shapesData, this.itemsData, this.prevViewData, true, []);
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     * @param {*} transforms a
-     * @return {*}
-     */
-
-  }, {
-    key: 'createStyleElement',
-    value: function createStyleElement(data, transforms) {
-      var styleElem = {
-        data: data,
-        type: data.ty,
-        preTransforms: this.transformsManager.addTransformSequence(transforms),
-        transforms: [],
-        elements: [],
-        closed: data.hd === true
-      };
-      var elementData = {};
-      if (data.ty == 'fl' || data.ty == 'st') {
-        elementData.c = PropertyFactory(this, data.c, 1, 255, this);
-        if (!elementData.c.k) {
-          styleElem.co = 'rgb(' + Math.floor(elementData.c.v[0]) + ',' + Math.floor(elementData.c.v[1]) + ',' + Math.floor(elementData.c.v[2]) + ')';
-        }
-      } else if (data.ty === 'gf' || data.ty === 'gs') {
-        elementData.s = PropertyFactory(this, data.s, 1, null, this);
-        elementData.e = PropertyFactory(this, data.e, 1, null, this);
-        elementData.h = PropertyFactory(this, data.h || { k: 0 }, 0, 0.01, this);
-        elementData.a = PropertyFactory(this, data.a || { k: 0 }, 0, degToRads, this);
-        // elementData.g = new GradientProperty(this, data.g, this);
-      }
-      elementData.o = PropertyFactory(this, data.o, 0, 0.01, this);
-      if (data.ty == 'st' || data.ty == 'gs') {
-        styleElem.lc = this.lcEnum[data.lc] || 'round';
-        styleElem.lj = this.ljEnum[data.lj] || 'round';
-        if (data.lj == 1) {
-          styleElem.ml = data.ml;
-        }
-        elementData.w = PropertyFactory(this, data.w, 0, null, this);
-        if (!elementData.w.k) {
-          styleElem.wi = elementData.w.v;
-        }
-        // if (data.d) {
-        //   const d = new DashProperty(this, data.d, 'canvas', this);
-        //   elementData.d = d;
-        //   if (!elementData.d.k) {
-        //     styleElem.da = elementData.d.dashArray;
-        //     styleElem.do = elementData.d.dashoffset[0];
-        //   }
-        // }
-      } else {
-        styleElem.r = data.r === 2 ? 'evenodd' : 'nonzero';
-      }
-      this.stylesList.push(styleElem);
-      elementData.style = styleElem;
-      return elementData;
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     * @return {*}
-     */
-
-  }, {
-    key: 'createGroupElement',
-    value: function createGroupElement() {
-      return {
-        it: [],
-        prevViewData: []
-      };
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     * @return {*}
-     */
-
-  }, {
-    key: 'createTransformElement',
-    value: function createTransformElement(data) {
-      return {
-        transform: {
-          opacity: 1,
-          _opMdf: false,
-          key: this.transformsManager.getNewKey(),
-          op: PropertyFactory(this, data.o, 0, 0.01, this),
-          mProps: TransformPropertyFactory.getTransformProperty(this, data, this)
-        }
-      };
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     * @return {*}
-     */
-
-  }, {
-    key: 'createShapeElement',
-    value: function createShapeElement(data) {
-      var elementData = new CVShapeData(this, data, this.stylesList, this.transformsManager);
-
-      this.shapes.push(elementData);
-      this.addShapeToModifiers(elementData);
-      return elementData;
-    }
-
-    /**
-     * a
-     * @param {*} transform a
-     */
-
-  }, {
-    key: 'addTransformToStyleList',
-    value: function addTransformToStyleList(transform) {
-      var len = this.stylesList.length;
-      for (var i = 0; i < len; i += 1) {
-        if (!this.stylesList[i].closed) {
-          this.stylesList[i].transforms.push(transform);
-        }
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'removeTransformFromStyleList',
-    value: function removeTransformFromStyleList() {
-      var len = this.stylesList.length;
-      for (var i = 0; i < len; i += 1) {
-        if (!this.stylesList[i].closed) {
-          this.stylesList[i].transforms.pop();
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} styles a
-     */
-
-  }, {
-    key: 'closeStyles',
-    value: function closeStyles(styles) {
-      var len = styles.length;
-      for (var i = 0; i < len; i += 1) {
-        styles[i].closed = true;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} arr a
-     * @param {*} itemsData a
-     * @param {*} prevViewData a
-     * @param {*} shouldRender a
-     * @param {*} transforms a
-     */
-
-  }, {
-    key: 'searchShapes',
-    value: function searchShapes(arr, itemsData, prevViewData, shouldRender, transforms) {
-      var len = arr.length - 1;
-      var ownStyles = [];
-      var ownModifiers = [];
-      var processedPos = void 0;
-      var modifier = void 0;
-      var ownTransforms = [].concat(transforms);
-      for (var i = len; i >= 0; i -= 1) {
-        processedPos = this.searchProcessedElement(arr[i]);
-        if (!processedPos) {
-          arr[i]._shouldRender = shouldRender;
-        } else {
-          itemsData[i] = prevViewData[processedPos - 1];
-        }
-        if (arr[i].ty == 'fl' || arr[i].ty == 'st' || arr[i].ty == 'gf' || arr[i].ty == 'gs') {
-          if (!processedPos) {
-            itemsData[i] = this.createStyleElement(arr[i], ownTransforms);
-          } else {
-            itemsData[i].style.closed = false;
-          }
-          ownStyles.push(itemsData[i].style);
-        } else if (arr[i].ty == 'gr') {
-          if (!processedPos) {
-            itemsData[i] = this.createGroupElement(arr[i]);
-          } else {
-            var jLen = itemsData[i].it.length;
-            for (var j = 0; j < jLen; j += 1) {
-              itemsData[i].prevViewData[j] = itemsData[i].it[j];
-            }
-          }
-          this.searchShapes(arr[i].it, itemsData[i].it, itemsData[i].prevViewData, shouldRender, ownTransforms);
-        } else if (arr[i].ty == 'tr') {
-          if (!processedPos) {
-            var currentTransform = this.createTransformElement(arr[i]);
-            itemsData[i] = currentTransform;
-          }
-          ownTransforms.push(itemsData[i]);
-          this.addTransformToStyleList(itemsData[i]);
-        } else if (arr[i].ty == 'sh' || arr[i].ty == 'rc' || arr[i].ty == 'el' || arr[i].ty == 'sr') {
-          if (!processedPos) {
-            itemsData[i] = this.createShapeElement(arr[i]);
-          }
-        } else if (arr[i].ty == 'tm' || arr[i].ty == 'rd') {
-          if (!processedPos) {
-            modifier = getModifier(arr[i].ty);
-            modifier.init(this, arr[i]);
-            itemsData[i] = modifier;
-            this.shapeModifiers.push(modifier);
-          } else {
-            modifier = itemsData[i];
-            modifier.closed = false;
-          }
-          ownModifiers.push(modifier);
-        } else if (arr[i].ty == 'rp') {
-          if (!processedPos) {
-            modifier = getModifier(arr[i].ty);
-            itemsData[i] = modifier;
-            modifier.init(this, arr, i, itemsData);
-            this.shapeModifiers.push(modifier);
-            shouldRender = false;
-          } else {
-            modifier = itemsData[i];
-            modifier.closed = true;
-          }
-          ownModifiers.push(modifier);
-        }
-        this.addProcessedElement(arr[i], i + 1);
-      }
-      this.removeTransformFromStyleList();
-      this.closeStyles(ownStyles);
-      var olen = ownModifiers.length;
-      for (var _i = 0; _i < olen; _i += 1) {
-        ownModifiers[_i].closed = true;
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'renderModifiers',
-    value: function renderModifiers() {
-      if (!this.shapeModifiers.length) return;
-      var len = this.shapes.length;
-      for (var _i2 = 0; _i2 < len; _i2 += 1) {
-        this.shapes[_i2].sh.reset();
-      }
-
-      var i = this.shapeModifiers.length - 1;
-      for (; i >= 0; i -= 1) {
-        this.shapeModifiers[i].processShapes(this._isFirstFrame);
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'renderInnerContent',
-    value: function renderInnerContent(ctx) {
-      this.transformHelper.opacity = 1;
-      this.transformHelper._opMdf = false;
-      this.renderModifiers();
-      this.transformsManager.processSequences(this._isFirstFrame);
-      this.renderShape(this.transformHelper, this.shapesData, this.itemsData, ctx);
-    }
-
-    /**
-     * a
-     * @param {*} parentTransform a
-     * @param {*} groupTransform a
-     */
-
-  }, {
-    key: 'renderShapeTransform',
-    value: function renderShapeTransform(parentTransform, groupTransform) {
-      if (parentTransform._opMdf || groupTransform.op._mdf || this._isFirstFrame) {
-        groupTransform.opacity = parentTransform.opacity;
-        groupTransform.opacity *= groupTransform.op.v;
-        groupTransform._opMdf = true;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} parentTransform a
-     * @param {*} items a
-     * @param {*} data a
-     * @param {*} ctx a
-     */
-
-  }, {
-    key: 'renderShape',
-    value: function renderShape(parentTransform, items, data, ctx) {
-      var len = items.length - 1;
-      var groupTransform = parentTransform;
-      for (var i = len; i >= 0; i -= 1) {
-        if (items[i].ty == 'tr') {
-          groupTransform = data[i].transform;
-          this.renderShapeTransform(parentTransform, groupTransform);
-        } else if (items[i].ty == 'sh' || items[i].ty == 'el' || items[i].ty == 'rc' || items[i].ty == 'sr') {
-          this.renderPath(items[i], data[i]);
-        } else if (items[i].ty == 'fl') {
-          this.renderFill(items[i], data[i], groupTransform);
-        } else if (items[i].ty == 'st') {
-          this.renderStroke(items[i], data[i], groupTransform);
-        } else if (items[i].ty == 'gf' || items[i].ty == 'gs') {
-          this.renderGradientFill(items[i], data[i], groupTransform);
-        } else if (items[i].ty == 'gr') {
-          this.renderShape(groupTransform, items[i].it, data[i].it);
-        }
-      }
-      if (ctx) {
-        this.drawLayer(ctx);
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'drawLayer',
-    value: function drawLayer(ctx) {
-      var len = this.stylesList.length;
-      for (var i = 0; i < len; i += 1) {
-        var currentStyle = this.stylesList[i];
-        var type = currentStyle.type;
-
-        // Skipping style when
-        // Stroke width equals 0
-        // style should not be rendered (extra unused repeaters)
-        // current opacity equals 0
-        // global opacity equals 0
-        if ((type === 'st' || type === 'gs') && currentStyle.wi === 0 || !currentStyle.data._shouldRender || currentStyle.coOp === 0) {
-          continue;
-        }
-        ctx.save();
-        var elems = currentStyle.elements;
-        if (type === 'st' || type === 'gs') {
-          ctx.strokeStyle = type === 'st' ? currentStyle.co : currentStyle.grd;
-          ctx.lineWidth = currentStyle.wi;
-          ctx.lineCap = currentStyle.lc;
-          ctx.lineJoin = currentStyle.lj;
-          ctx.miterLimit = currentStyle.ml || 0;
-        } else {
-          ctx.fillStyle = type === 'fl' ? currentStyle.co : currentStyle.grd;
-        }
-        ctx.globalAlpha = currentStyle.coOp * this.finalTransform.mProp.o.v;
-        if (type !== 'st' && type !== 'gs') {
-          ctx.beginPath();
-        }
-        var trProps = currentStyle.preTransforms.finalTransform.props;
-        ctx.transform(trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]);
-        var jLen = elems.length;
-        for (var j = 0; j < jLen; j += 1) {
-          if (type === 'st' || type === 'gs') {
-            ctx.beginPath();
-            if (currentStyle.da) {
-              ctx.setLineDash(currentStyle.da);
-              ctx.lineDashOffset = currentStyle.do;
-            }
-          }
-          var nodes = elems[j].trNodes;
-          var kLen = nodes.length;
-
-          for (var k = 0; k < kLen; k++) {
-            if (nodes[k].t == 'm') {
-              ctx.moveTo(nodes[k].p[0], nodes[k].p[1]);
-            } else if (nodes[k].t == 'c') {
-              ctx.bezierCurveTo(nodes[k].pts[0], nodes[k].pts[1], nodes[k].pts[2], nodes[k].pts[3], nodes[k].pts[4], nodes[k].pts[5]);
-            } else {
-              ctx.closePath();
-            }
-          }
-          if (type === 'st' || type === 'gs') {
-            ctx.stroke();
-            if (currentStyle.da) {
-              ctx.setLineDash(this.dashResetter);
-            }
-          }
-        }
-        if (type !== 'st' && type !== 'gs') {
-          ctx.fill(currentStyle.r);
-        }
-        ctx.restore();
-      }
-    }
-
-    /**
-     * a
-     * @param {*} pathData a
-     * @param {*} itemData a
-     */
-
-  }, {
-    key: 'renderPath',
-    value: function renderPath(pathData, itemData) {
-      if (pathData.hd !== true && pathData._shouldRender) {
-        var len = itemData.styledShapes.length;
-        for (var i = 0; i < len; i += 1) {
-          this.renderStyledShape(itemData.styledShapes[i], itemData.sh);
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} styledShape a
-     * @param {*} shape a
-     */
-
-  }, {
-    key: 'renderStyledShape',
-    value: function renderStyledShape(styledShape, shape) {
-      if (this._isFirstFrame || shape._mdf || styledShape.transforms._mdf) {
-        var shapeNodes = styledShape.trNodes;
-        var paths = shape.paths;
-        var jLen = paths._length;
-        shapeNodes.length = 0;
-        var groupTransformMat = styledShape.transforms.finalTransform;
-        for (var j = 0; j < jLen; j += 1) {
-          var pathNodes = paths.shapes[j];
-          if (pathNodes && pathNodes.v) {
-            var i = 1;
-            var len = pathNodes._length;
-            for (; i < len; i += 1) {
-              if (i === 1) {
-                shapeNodes.push({
-                  t: 'm',
-                  p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
-                });
-              }
-              shapeNodes.push({
-                t: 'c',
-                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[i], pathNodes.v[i])
-              });
-            }
-            if (len === 1) {
-              shapeNodes.push({
-                t: 'm',
-                p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
-              });
-            }
-            if (pathNodes.c && len) {
-              shapeNodes.push({
-                t: 'c',
-                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[0], pathNodes.v[0])
-              });
-              shapeNodes.push({
-                t: 'z'
-              });
-            }
-          }
-        }
-        styledShape.trNodes = shapeNodes;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} styleData a
-     * @param {*} itemData a
-     * @param {*} groupTransform a
-     */
-
-  }, {
-    key: 'renderFill',
-    value: function renderFill(styleData, itemData, groupTransform) {
-      var styleElem = itemData.style;
-
-      if (itemData.c._mdf || this._isFirstFrame) {
-        styleElem.co = 'rgb(' + Math.floor(itemData.c.v[0]) + ',' + Math.floor(itemData.c.v[1]) + ',' + Math.floor(itemData.c.v[2]) + ')';
-      }
-      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
-        styleElem.coOp = itemData.o.v * groupTransform.opacity;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} styleData a
-     * @param {*} itemData a
-     * @param {*} groupTransform a
-     */
-
-  }, {
-    key: 'renderGradientFill',
-    value: function renderGradientFill(styleData, itemData, groupTransform) {
-      var styleElem = itemData.style;
-      if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf)) {
-        var ctx = this.renderer;
-        var grd = void 0;
-        var pt1 = itemData.s.v;
-        var pt2 = itemData.e.v;
-        if (styleData.t === 1) {
-          grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
-        } else {
-          var rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
-          var ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
-
-          var percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99 : itemData.h.v;
-          var dist = rad * percent;
-          var x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
-          var y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
-          grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
-        }
-
-        var len = styleData.g.p;
-        var cValues = itemData.g.c;
-        var opacity = 1;
-
-        for (var i = 0; i < len; i += 1) {
-          if (itemData.g._hasOpacity && itemData.g._collapsable) {
-            opacity = itemData.g.o[i * 2 + 1];
-          }
-          grd.addColorStop(cValues[i * 4] / 100, 'rgba(' + cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ',' + cValues[i * 4 + 3] + ',' + opacity + ')');
-        }
-        styleElem.grd = grd;
-      }
-      styleElem.coOp = itemData.o.v * groupTransform.opacity;
-    }
-
-    /**
-     * a
-     * @param {*} styleData a
-     * @param {*} itemData a
-     * @param {*} groupTransform a
-     */
-
-  }, {
-    key: 'renderStroke',
-    value: function renderStroke(styleData, itemData, groupTransform) {
-      var styleElem = itemData.style;
-      var d = itemData.d;
-      if (d && (d._mdf || this._isFirstFrame)) {
-        styleElem.da = d.dashArray;
-        styleElem.do = d.dashoffset[0];
-      }
-      if (itemData.c._mdf || this._isFirstFrame) {
-        styleElem.co = 'rgb(' + Math.floor(itemData.c.v[0]) + ',' + Math.floor(itemData.c.v[1]) + ',' + Math.floor(itemData.c.v[2]) + ')';
-      }
-      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
-        styleElem.coOp = itemData.o.v * groupTransform.opacity;
-      }
-      if (itemData.w._mdf || this._isFirstFrame) {
-        styleElem.wi = itemData.w.v;
-      }
-    }
-  }]);
-  return CVShapeElement;
-}();
-
-/**
- * ShapeElement class
- * @class
- * @private
- */
-
-var ShapeElement = function (_Container) {
-  inherits(ShapeElement, _Container);
-
-  /**
-   * ShapeElement constructor
-   * @param {object} layer layer data information
-   * @param {object} session layer data information
-   */
-  function ShapeElement(layer) {
-    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    classCallCheck(this, ShapeElement);
-
-    var _this = possibleConstructorReturn(this, (ShapeElement.__proto__ || Object.getPrototypeOf(ShapeElement)).call(this));
-
-    var parentName = session.parentName,
-        register = session.register;
-
-
-    _this.name = parentName + '.' + layer.nm;
-    _this.bProgress = -999999;
-
-    register.setLayer(_this.name, _this);
-
-    _this.initKeyFrames(layer, session);
-
-    _this.shapes = new CVShapeElement(layer, session);
-    _this.adds(new Graphics(function (ctx) {
-      _this.shapes.prepareFrame(_this.bProgress);
-      _this.shapes.renderFrame(ctx);
-    }));
-    return _this;
-  }
-
-  /**
-   * initKeyFrames
-   * @param {object} layer layer
-   * @param {object} session session
-   */
-
-
-  createClass(ShapeElement, [{
-    key: 'initKeyFrames',
-    value: function initKeyFrames(layer, session) {
-      this.bodymovin = new Keyframes(this, layer, session);
-      this.movin = true;
-    }
-
-    /**
-     * initKeyFrames
-     * @param {number} progress progress
-     * @param {object} session session
-     */
-
-  }, {
-    key: 'updateKeyframes',
-    value: function updateKeyframes(progress, session) {
-      if (!this.movin) return;
-      this.bProgress = progress;
-      this.bodymovin.update(progress, session);
-    }
-  }]);
-  return ShapeElement;
-}(Container);
-
-/**
- * CompElement class
- * @class
- * @private
- */
-
-var CompElement = function (_Container) {
-  inherits(CompElement, _Container);
-
-  /**
-   * CompElement constructor
-   * @param {object} layer layer data information
-   * @param {object} session global session information
-   */
-  function CompElement(layer) {
-    var session = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-    classCallCheck(this, CompElement);
-
-    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this));
-
-    var assets = session.assets,
-        size = session.size,
-        prefix = session.prefix,
-        register = session.register;
-
-    var parentName = session.parentName;
-    var ist = 0;
-    var layers = [];
-
-    var mySize = {
-      w: size.w,
-      h: size.h
-    };
-    if (Utils.isArray(layer)) {
-      layers = layer;
-      _this.name = parentName;
-    } else {
-      _this.initKeyFrames(layer, session);
-      mySize.w = layer.w;
-      mySize.h = layer.h;
-      layers = getAssets(layer.refId, assets).layers;
-      ist = layer.st;
-      parentName = _this.name = parentName + '.' + layer.nm;
-    }
-
-    register.setLayer(parentName, _this);
-
-    _this.parseLayers(layers, { assets: assets, st: ist, size: mySize, prefix: prefix, register: register, parentName: parentName });
-    return _this;
-  }
-
-  /**
-   * initKeyFrames
-   * @param {object} layer layer
-   * @param {object} session session
-   */
-
-
-  createClass(CompElement, [{
-    key: 'initKeyFrames',
-    value: function initKeyFrames(layer, session) {
-      this.bodymovin = new Keyframes(this, layer, session);
-      this.movin = true;
-    }
-
-    /**
-     * initKeyFrames
-     * @param {number} progress progress
-     * @param {object} session session
-     */
-
-  }, {
-    key: 'updateKeyframes',
-    value: function updateKeyframes(progress, session) {
-      if (!this.movin) return;
-      this.bodymovin.update(progress, session);
-    }
-
-    /**
-     * parse layers
-     * @param {array} layers layers data
-     * @param {object} session assets data
-     */
-
-  }, {
-    key: 'parseLayers',
-    value: function parseLayers(layers, session) {
-      var elementsMap = this.createElements(layers, session);
-      for (var i = layers.length - 1; i >= 0; i--) {
-        var layer = layers[i];
-        var item = elementsMap[layer.ind];
-        if (!item) continue;
-        if (layer.parent) {
-          item.hierarchy = elementsMap[layer.parent];
-        }
-        this.adds(item);
-      }
-    }
-
-    /**
-     * createElements
-     * @param {arrya} layers layers
-     * @param {object} session object
-     * @return {object}
-     */
-
-  }, {
-    key: 'createElements',
-    value: function createElements(layers, session) {
-      var elementsMap = {};
-      for (var i = layers.length - 1; i >= 0; i--) {
-        var layer = layers[i];
-        var element = null;
-
-        switch (layer.ty) {
-          case 0:
-            element = new CompElement(layer, session);
-            break;
-          case 1:
-            element = new SolidElement(layer, session);
-            break;
-          case 2:
-            element = new SpriteElement(layer, session);
-            break;
-          case 3:
-            element = new NullElement(layer, session);
-            break;
-          case 4:
-            element = new ShapeElement(layer, session);
-            break;
-          default:
-            continue;
-        }
-
-        if (element) {
-          elementsMap[layer.ind] = element;
-        }
-      }
-      return elementsMap;
-    }
-  }]);
-  return CompElement;
-}(Container);
-
-/* eslint-disable */
-
-function completeLayers(layers, comps, fontManager) {
-  var layerData;
-  var i,
-      len = layers.length;
-  var j, jLen, k, kLen;
-  for (i = 0; i < len; i += 1) {
-    layerData = layers[i];
-    if (!('ks' in layerData) || layerData.completed) {
-      continue;
-    }
-    layerData.completed = true;
-    if (layerData.tt) {
-      layers[i - 1].td = layerData.tt;
-    }
-    if (layerData.hasMask) {
-      var maskProps = layerData.masksProperties;
-      jLen = maskProps.length;
-      for (j = 0; j < jLen; j += 1) {
-        if (maskProps[j].pt.k.i) {
-          convertPathsToAbsoluteValues(maskProps[j].pt.k);
-        } else {
-          kLen = maskProps[j].pt.k.length;
-          for (k = 0; k < kLen; k += 1) {
-            if (maskProps[j].pt.k[k].s) {
-              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].s[0]);
-            }
-            if (maskProps[j].pt.k[k].e) {
-              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].e[0]);
-            }
-          }
-        }
-      }
-    }
-    if (layerData.ty === 0) {
-      layerData.layers = findCompLayers(layerData.refId, comps);
-      completeLayers(layerData.layers, comps, fontManager);
-    } else if (layerData.ty === 4) {
-      completeShapes(layerData.shapes);
-    } else if (layerData.ty == 5) {
-      completeText(layerData, fontManager);
-    }
-  }
-}
-
-function findCompLayers(id, comps) {
-  var i = 0,
-      len = comps.length;
-  while (i < len) {
-    if (comps[i].id === id) {
-      if (!comps[i].layers.__used) {
-        comps[i].layers.__used = true;
-        return comps[i].layers;
-      }
-      return JSON.parse(JSON.stringify(comps[i].layers));
-    }
-    i += 1;
-  }
-}
-
-function completeShapes(arr) {
-  var i,
-      len = arr.length;
-  var j, jLen;
-  // var hasPaths = false;
-  for (i = len - 1; i >= 0; i -= 1) {
-    if (arr[i].ty == 'sh') {
-      if (arr[i].ks.k.i) {
-        convertPathsToAbsoluteValues(arr[i].ks.k);
-      } else {
-        jLen = arr[i].ks.k.length;
-        for (j = 0; j < jLen; j += 1) {
-          if (arr[i].ks.k[j].s) {
-            convertPathsToAbsoluteValues(arr[i].ks.k[j].s[0]);
-          }
-          if (arr[i].ks.k[j].e) {
-            convertPathsToAbsoluteValues(arr[i].ks.k[j].e[0]);
-          }
-        }
-      }
-      // hasPaths = true;
-    } else if (arr[i].ty == 'gr') {
-      completeShapes(arr[i].it);
-    }
-  }
-  /*if(hasPaths){
-      //mx: distance
-      //ss: sensitivity
-      //dc: decay
-      arr.splice(arr.length-1,0,{
-          "ty": "ms",
-          "mx":20,
-          "ss":10,
-            "dc":0.001,
-          "maxDist":200
-      });
-  }*/
-}
-
-function completeText(data) {
-  if (data.t.a.length === 0 && !('m' in data.t.p)) {
-    data.singleShape = true;
-  }
-}
-
-function convertPathsToAbsoluteValues(path) {
-  var i,
-      len = path.i.length;
-  for (i = 0; i < len; i += 1) {
-    path.i[i][0] += path.v[i][0];
-    path.i[i][1] += path.v[i][1];
-    path.o[i][0] += path.v[i][0];
-    path.o[i][1] += path.v[i][1];
-  }
-}
-
-function checkVersion(minimum, animVersionString) {
-  var animVersion = animVersionString ? animVersionString.split('.') : [100, 100, 100];
-  if (minimum[0] > animVersion[0]) {
-    return true;
-  } else if (animVersion[0] > minimum[0]) {
-    return false;
-  }
-  if (minimum[1] > animVersion[1]) {
-    return true;
-  } else if (animVersion[1] > minimum[1]) {
-    return false;
-  }
-  if (minimum[2] > animVersion[2]) {
-    return true;
-  } else if (animVersion[2] > minimum[2]) {
-    return false;
-  }
-}
-
-var checkText = function () {
-  var minimumVersion = [4, 4, 14];
-
-  function updateTextLayer(textLayer) {
-    var documentData = textLayer.t.d;
-    textLayer.t.d = {
-      k: [{
-        s: documentData,
-        t: 0
-      }]
-    };
-  }
-
-  function iterateLayers(layers) {
-    var i,
-        len = layers.length;
-    for (i = 0; i < len; i += 1) {
-      if (layers[i].ty === 5) {
-        updateTextLayer(layers[i]);
-      }
-    }
-  }
-
-  return function (animationData) {
-    if (checkVersion(minimumVersion, animationData.v)) {
-      iterateLayers(animationData.layers);
-      if (animationData.assets) {
-        var i,
-            len = animationData.assets.length;
-        for (i = 0; i < len; i += 1) {
-          if (animationData.assets[i].layers) {
-            iterateLayers(animationData.assets[i].layers);
-          }
-        }
-      }
-    }
-  };
-}();
-
-var checkChars = function () {
-  var minimumVersion = [4, 7, 99];
-  return function (animationData) {
-    if (animationData.chars && !checkVersion(minimumVersion, animationData.v)) {
-      var i,
-          len = animationData.chars.length,
-          j,
-          jLen;
-      var pathData, paths;
-      for (i = 0; i < len; i += 1) {
-        if (animationData.chars[i].data && animationData.chars[i].data.shapes) {
-          paths = animationData.chars[i].data.shapes[0].it;
-          jLen = paths.length;
-
-          for (j = 0; j < jLen; j += 1) {
-            pathData = paths[j].ks.k;
-            if (!pathData.__converted) {
-              convertPathsToAbsoluteValues(paths[j].ks.k);
-              pathData.__converted = true;
-            }
-          }
-        }
-      }
-    }
-  };
-}();
-
-var checkColors = function () {
-  var minimumVersion = [4, 1, 9];
-
-  function iterateShapes(shapes) {
-    var i,
-        len = shapes.length;
-    var j, jLen;
-    for (i = 0; i < len; i += 1) {
-      if (shapes[i].ty === 'gr') {
-        iterateShapes(shapes[i].it);
-      } else if (shapes[i].ty === 'fl' || shapes[i].ty === 'st') {
-        if (shapes[i].c.k && shapes[i].c.k[0].i) {
-          jLen = shapes[i].c.k.length;
-          for (j = 0; j < jLen; j += 1) {
-            if (shapes[i].c.k[j].s) {
-              shapes[i].c.k[j].s[0] /= 255;
-              shapes[i].c.k[j].s[1] /= 255;
-              shapes[i].c.k[j].s[2] /= 255;
-              shapes[i].c.k[j].s[3] /= 255;
-            }
-            if (shapes[i].c.k[j].e) {
-              shapes[i].c.k[j].e[0] /= 255;
-              shapes[i].c.k[j].e[1] /= 255;
-              shapes[i].c.k[j].e[2] /= 255;
-              shapes[i].c.k[j].e[3] /= 255;
-            }
-          }
-        } else {
-          shapes[i].c.k[0] /= 255;
-          shapes[i].c.k[1] /= 255;
-          shapes[i].c.k[2] /= 255;
-          shapes[i].c.k[3] /= 255;
-        }
-      }
-    }
-  }
-
-  function iterateLayers(layers) {
-    var i,
-        len = layers.length;
-    for (i = 0; i < len; i += 1) {
-      if (layers[i].ty === 4) {
-        iterateShapes(layers[i].shapes);
-      }
-    }
-  }
-
-  return function (animationData) {
-    if (checkVersion(minimumVersion, animationData.v)) {
-      iterateLayers(animationData.layers);
-      if (animationData.assets) {
-        var i,
-            len = animationData.assets.length;
-        for (i = 0; i < len; i += 1) {
-          if (animationData.assets[i].layers) {
-            iterateLayers(animationData.assets[i].layers);
-          }
-        }
-      }
-    }
-  };
-}();
-
-var checkShapes = function () {
-  var minimumVersion = [4, 4, 18];
-
-  function completeShapes(arr) {
-    var i,
-        len = arr.length;
-    var j, jLen;
-    // var hasPaths = false;
-    for (i = len - 1; i >= 0; i -= 1) {
-      if (arr[i].ty == 'sh') {
-        if (arr[i].ks.k.i) {
-          arr[i].ks.k.c = arr[i].closed;
-        } else {
-          jLen = arr[i].ks.k.length;
-          for (j = 0; j < jLen; j += 1) {
-            if (arr[i].ks.k[j].s) {
-              arr[i].ks.k[j].s[0].c = arr[i].closed;
-            }
-            if (arr[i].ks.k[j].e) {
-              arr[i].ks.k[j].e[0].c = arr[i].closed;
-            }
-          }
-        }
-        // hasPaths = true;
-      } else if (arr[i].ty == 'gr') {
-        completeShapes(arr[i].it);
-      }
-    }
-  }
-
-  function iterateLayers(layers) {
-    var layerData;
-    var i,
-        len = layers.length;
-    var j, jLen, k, kLen;
-    for (i = 0; i < len; i += 1) {
-      layerData = layers[i];
-      if (layerData.hasMask) {
-        var maskProps = layerData.masksProperties;
-        jLen = maskProps.length;
-        for (j = 0; j < jLen; j += 1) {
-          if (maskProps[j].pt.k.i) {
-            maskProps[j].pt.k.c = maskProps[j].cl;
-          } else {
-            kLen = maskProps[j].pt.k.length;
-            for (k = 0; k < kLen; k += 1) {
-              if (maskProps[j].pt.k[k].s) {
-                maskProps[j].pt.k[k].s[0].c = maskProps[j].cl;
-              }
-              if (maskProps[j].pt.k[k].e) {
-                maskProps[j].pt.k[k].e[0].c = maskProps[j].cl;
-              }
-            }
-          }
-        }
-      }
-      if (layerData.ty === 4) {
-        completeShapes(layerData.shapes);
-      }
-    }
-  }
-
-  return function (animationData) {
-    if (checkVersion(minimumVersion, animationData.v)) {
-      iterateLayers(animationData.layers);
-      if (animationData.assets) {
-        var i,
-            len = animationData.assets.length;
-        for (i = 0; i < len; i += 1) {
-          if (animationData.assets[i].layers) {
-            iterateLayers(animationData.assets[i].layers);
-          }
-        }
-      }
-    }
-  };
-}();
-
-function completeData(animationData, fontManager) {
-  if (animationData.__complete) {
-    return;
-  }
-  checkColors(animationData);
-  checkText(animationData);
-  checkChars(animationData);
-  checkShapes(animationData);
-  completeLayers(animationData.layers, animationData.assets, fontManager);
-  animationData.__complete = true;
-  //blitAnimation(animationData, animationData.assets, fontManager);
-}
-
-/**
- * an animation group, store and compute frame information
- * @class
- */
-
-var AnimationGroup = function () {
-  /**
-   * pass a data and extra config
-   * @param {object} options config and keyframes
-   * @param {Object} options.keyframes bodymovin data, which export from AE
-   * @param {Number} [options.repeats=0] need repeat somt times?
-   * @param {Boolean} [options.infinite=false] play this animation round and round forever
-   * @param {Boolean} [options.alternate=false] alternate direction every round
-   * @param {Number} [options.wait=0] need wait how much time to start
-   * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
-   * @param {String} [options.prefix=''] assets url prefix, like link path
-   * @param {Number} [options.timeScale=1] animation speed
-   * @param {Number} [options.autoStart=true] auto start animation after assets loaded
-   * @param {Boolean} [options.mask=false] auto start animation after assets loaded
-   * @param {Boolean} [options.crossOrigin='*'] auto start animation after assets loaded
-   */
-  function AnimationGroup(options) {
-    var _this = this;
-
-    classCallCheck(this, AnimationGroup);
-
-    this.prefix = options.prefix || options.keyframes.prefix || '';
-    completeData(options.keyframes);
-    this.keyframes = options.keyframes;
-    this.fr = this.keyframes.fr;
-    this.ip = this.keyframes.ip;
-    this.op = this.keyframes.op;
-
-    this.tpf = 1000 / this.fr;
-    this.tfs = Math.floor(this.op - this.ip);
-
-    this.living = true;
-    this.alternate = options.alternate || false;
-    this.infinite = options.infinite || false;
-    this.repeats = options.repeats || 0;
-    this.delay = options.delay || 0;
-    this.wait = options.wait || 0;
-    this.duration = this.tfs;
-    this.progress = 0;
-    this._pf = -10000;
-
-    this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
-
-    this.direction = 1;
-    this.repeatsCut = this.repeats;
-    this.delayCut = this.delay;
-    this.waitCut = this.wait;
-
-    this._paused = true;
-
-    var crossOrigin = Utils.isNumber(options.crossOrigin) ? options.crossOrigin : '*';
-    this.register = new Register(this.keyframes.assets, this.prefix, crossOrigin);
-
-    var images = this.keyframes.assets.filter(function (it) {
-      return it.u && it.p;
-    });
-    if (images.length > 0) {
-      this.register.loader.once('complete', function () {
-        _this._paused = Utils.isBoolean(options.autoStart) ? !options.autoStart : false;
-      });
-    } else {
-      this._paused = false;
-    }
-
-    var _keyframes = this.keyframes,
-        layers = _keyframes.layers,
-        w = _keyframes.w,
-        h = _keyframes.h,
-        nm = _keyframes.nm,
-        assets = _keyframes.assets;
-
-
-    this.group = new CompElement(layers, {
-      assets: assets,
-      size: { w: w, h: h },
-      prefix: this.prefix,
-      register: this.register,
-      parentName: nm
-    });
-    this.group._aniRoot = true;
-
-    /**
-     * generate a mask for animation
-     */
-    if (options.mask) {
-      var mask = {
-        render: function render(ctx) {
-          ctx.beginPath();
-          ctx.rect(0, 0, w, h);
-          ctx.clip();
-        }
-      };
-      this.group.mask = mask;
-    }
-
-    this.updateSession = { forever: this.isForever() };
-  }
-
-  /**
-   * get layer by name path
-   * @param {string} name layer name path, example: root.gift.star1
-   * @return {object}
-   */
-
-
-  createClass(AnimationGroup, [{
-    key: 'getLayerByName',
-    value: function getLayerByName(name) {
-      return this.register.getLayer(name);
-    }
-
-    /**
-     * bind other animation group to this animation group with name path
-     * @param {*} name
-     * @param {*} slot
-     */
-
-  }, {
-    key: 'bindSlot',
-    value: function bindSlot(name, slot) {
-      var slotDot = this.getLayerByName(name);
-      if (slotDot) slotDot.add(slot);
-    }
-
-    /**
-     * emit frame
-     * @private
-     * @param {*} np now frame
-     */
-
-  }, {
-    key: 'emitFrame',
-    value: function emitFrame(np) {
-      this.emit('@' + np);
-    }
-
-    /**
-     * update with time snippet
-     * @private
-     * @param {number} snippetCache snippet
-     */
-
-  }, {
-    key: 'update',
-    value: function update(snippetCache) {
-      if (!this.living) return;
-
-      var isEnd = this.updateTime(snippetCache);
-
-      this.group.updateMovin(this.progress, this.updateSession);
-
-      var np = this.progress >> 0;
-      if (this._pf !== np) {
-        this.emitFrame(this.direction > 0 ? np : this._pf);
-        this._pf = np;
-      }
-      if (isEnd === false) {
-        this.emit('update', this.progress / this.duration);
-      } else if (isEnd === true) {
-        this.emit('complete');
-      }
-    }
-
-    /**
-     * update timeline with time snippet
-     * @private
-     * @param {number} snippet snippet
-     * @return {boolean} progress status
-     */
-
-  }, {
-    key: 'updateTime',
-    value: function updateTime(snippet) {
-      var snippetCache = this.direction * this.timeScale * snippet;
-      if (this.waitCut > 0) {
-        this.waitCut -= Math.abs(snippetCache);
-        return null;
-      }
-      if (this._paused || this.delayCut > 0) {
-        if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
-        return null;
-      }
-
-      this.progress += snippetCache / this.tpf;
-      var isEnd = false;
-
-      if (!this.updateSession.forever && this.spill()) {
-        if (this.repeatsCut > 0 || this.infinite) {
-          if (this.repeatsCut > 0) --this.repeatsCut;
-          this.delayCut = this.delay;
-          if (this.alternate) {
-            this.direction *= -1;
-            this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
-          } else {
-            this.direction = 1;
-            this.progress = Utils.euclideanModulo(this.progress, this.duration);
-          }
-        } else {
-          this.progress = Utils.clamp(this.progress, 0, this.duration);
-          isEnd = true;
-          this.living = false;
-        }
-      }
-
-      return isEnd;
-    }
-
-    /**
-     * check the animation group was in forever mode
-     * @private
-     * @return {boolean}
-     */
-
-  }, {
-    key: 'isForever',
-    value: function isForever() {
-      return this.register._forever;
-    }
-
-    /**
-     * is this time progress spill the range
-     * @private
-     * @return {boolean}
-     */
-
-  }, {
-    key: 'spill',
-    value: function spill() {
-      var bottomSpill = this.progress <= 0 && this.direction === -1;
-      var topSpill = this.progress >= this.duration && this.direction === 1;
-      return bottomSpill || topSpill;
-    }
-
-    /**
-     * get time
-     * @param {number} frame frame index
-     * @return {number}
-     */
-
-  }, {
-    key: 'frameToTime',
-    value: function frameToTime(frame) {
-      return frame * this.tpf;
-    }
-
-    /**
-     * set animation speed, time scale
-     * @param {number} speed
-     */
-
-  }, {
-    key: 'setSpeed',
-    value: function setSpeed(speed) {
-      this.timeScale = speed;
-    }
-
-    /**
-     * pause this animation group
-     * @return {this}
-     */
-
-  }, {
-    key: 'pause',
-    value: function pause() {
-      this._paused = true;
-      return this;
-    }
-
-    /**
-     * resume or play this animation group
-     * @return {this}
-     */
-
-  }, {
-    key: 'resume',
-    value: function resume() {
-      this._paused = false;
-      return this;
-    }
-
-    /**
-     * play this animation group
-     * @return {this}
-     */
-
-  }, {
-    key: 'play',
-    value: function play() {
-      this._paused = false;
-      return this;
-    }
-
-    /**
-     * replay this animation group
-     * @return {this}
-     */
-
-  }, {
-    key: 'replay',
-    value: function replay() {
-      this._paused = false;
-      this.living = true;
-      this.progress = 0;
-      return this;
-    }
-
-    /**
-     * proxy this.group event-emit
-     * Emit an event to all registered event listeners.
-     *
-     * @param {String} event The name of the event.
-     */
-
-  }, {
-    key: 'emit',
-    value: function emit() {
-      var _group;
-
-      (_group = this.group).emit.apply(_group, arguments);
-    }
-
-    /**
-     * proxy this.group event-on
-     * Register a new EventListener for the given event.
-     *
-     * @param {String} event Name of the event.
-     * @param {Function} fn Callback function.
-     * @param {Mixed} [context=this] The context of the function.
-     */
-
-  }, {
-    key: 'on',
-    value: function on() {
-      var _group2;
-
-      (_group2 = this.group).on.apply(_group2, arguments);
-    }
-
-    /**
-     * proxy this.group event-once
-     * Add an EventListener that's only called once.
-     *
-     * @param {String} event Name of the event.
-     * @param {Function} fn Callback function.
-     * @param {Mixed} [context=this] The context of the function.
-     */
-
-  }, {
-    key: 'once',
-    value: function once() {
-      var _group3;
-
-      (_group3 = this.group).once.apply(_group3, arguments);
-    }
-
-    /**
-     * proxy this.group event-off
-     * @param {String} event The event we want to remove.
-     * @param {Function} fn The listener that we need to find.
-     * @param {Mixed} context Only remove listeners matching this context.
-     * @param {Boolean} once Only remove once listeners.
-     */
-
-  }, {
-    key: 'off',
-    value: function off() {
-      var _group4;
-
-      (_group4 = this.group).off.apply(_group4, arguments);
-    }
-
-    /**
-     * proxy this.group event-removeAllListeners
-     * Remove event listeners.
-     *
-     * @param {String} event The event we want to remove.
-     * @param {Function} fn The listener that we need to find.
-     * @param {Mixed} context Only remove listeners matching this context.
-     * @param {Boolean} once Only remove once listeners.
-     */
-
-  }, {
-    key: 'removeAllListeners',
-    value: function removeAllListeners() {
-      var _group5;
-
-      (_group5 = this.group).removeAllListeners.apply(_group5, arguments);
-    }
-  }]);
-  return AnimationGroup;
-}();
-
-/**
- * all animation manager, manage ticker and animation groups
- * @example
- * var manager = new PIXI.AnimationManager(app.ticker);
- * var ani = manager.parseAnimation({
- *   keyframes: data,
- *   infinite: true,
- * });
- * @class
- */
-
-var AnimationManager = function () {
-  /**
-   * animation manager, optional a ticker param
-   * @param {Ticker} _ticker
-   */
-  function AnimationManager(_ticker) {
-    var _this = this;
-
-    classCallCheck(this, AnimationManager);
-
-    /**
-     * time scale, just like speed scalar
-     *
-     * @member {Number}
-     */
-    this.timeScale = 1;
-
-    /**
-     * mark the manager was pause or not
-     *
-     * @member {Boolean}
-     */
-    this.paused = false;
-
-    /**
-     * ticker engine
-     * @private
-     */
-    this.ticker = _ticker || new Ticker();
-
-    /**
-     * all animation groups
-     * @private
-     */
-    this.groups = [];
-
-    this.ticker.on('update', function (snippet) {
-      _this.update(snippet);
-    });
-  }
-
-  /**
-   * add a animationGroup child to array
-   * @param {AnimationGroup} child AnimationGroup instance
-   * @return {AnimationGroup} child
-   */
-
-
-  createClass(AnimationManager, [{
-    key: 'add',
-    value: function add(child) {
-      var argumentsLength = arguments.length;
-
-      if (argumentsLength > 1) {
-        for (var i = 0; i < argumentsLength; i++) {
-          /* eslint prefer-rest-params: 0 */
-          this.add(arguments[i]);
-        }
-      } else {
-        this.groups.push(child);
-      }
-
-      return child;
-    }
-
-    /**
-     * parser a bodymovin data, and post some config for this animation group
-     * @param {object} options bodymovin data
-     * @param {Object} options.keyframes bodymovin data, which export from AE
-     * @param {Number} [options.repeats=0] need repeat somt times?
-     * @param {Boolean} [options.infinite=false] play this animation round and round forever
-     * @param {Boolean} [options.alternate=false] alternate direction every round
-     * @param {Number} [options.wait=0] need wait how much time to start
-     * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
-     * @param {String} [options.prefix=''] assets url prefix, like link path
-     * @param {Number} [options.timeScale=1] animation speed
-     * @param {Number} [options.autoStart=true] auto start animation after assets loaded
-     * @return {AnimationGroup}
-     * @example
-     * var manager = new PIXI.AnimationManager(app.ticker);
-     * var ani = manager.parseAnimation({
-     *   keyframes: data,
-     *   infinite: true,
-     * });
-     */
-
-  }, {
-    key: 'parseAnimation',
-    value: function parseAnimation(options) {
-      var animate = new AnimationGroup(options);
-      return this.add(animate);
-    }
-
-    /**
-     * set animation speed, time scale
-     * @param {number} speed
-     */
-
-  }, {
-    key: 'setSpeed',
-    value: function setSpeed(speed) {
-      this.timeScale = speed;
-    }
-
-    /**
-     * pause all animation groups
-     * @return {this}
-     */
-
-  }, {
-    key: 'pause',
-    value: function pause() {
-      this.paused = true;
-      return this;
-    }
-
-    /**
-     * pause all animation groups
-     * @return {this}
-     */
-
-  }, {
-    key: 'resume',
-    value: function resume() {
-      this.paused = false;
-      return this;
-    }
-
-    /**
-     * update
-     * @private
-     * @param {number} snippet
-     */
-
-  }, {
-    key: 'update',
-    value: function update(snippet) {
-      if (this.paused) return;
-      var snippetCache = this.timeScale * snippet;
-      var length = this.groups.length;
-      for (var i = 0; i < length; i++) {
-        var animationGroup = this.groups[i];
-        animationGroup.update(snippetCache);
-      }
-    }
-  }]);
-  return AnimationManager;
-}();
-
-export { Eventer, Animation, Tween, Utils, Texture, Loader, loaderUtil, Ticker, Bounds, Point, Rectangle, Polygon, Circle, Ellipse, Matrix, IDENTITY, TEMP_MATRIX, CatmullRom, BezierCurve, SvgCurve, NURBSCurve, DisplayObject, Container, Sprite, Graphics, TextFace, FilterGroup, BlurFilter, FrameBuffer, Scene, Renderer, Application, AnimationManager };
+LoaderRegister.registerLoader(LottieLoader);
+
+// import PathLottie from './core/PathLottie';
+DisplayRegister.setDisplayByType(DisplayRegister.Type.Null, CompElement$2);
+DisplayRegister.setDisplayByType(DisplayRegister.Type.Path, PathPrimitive);
+// DisplayRegister.setDisplayByType(DisplayRegister.Type.Path, PathLottie);
+DisplayRegister.setDisplayByType(DisplayRegister.Type.Shape, CompElement$2);
+DisplayRegister.setDisplayByType(DisplayRegister.Type.Solid, SolidElement$2);
+DisplayRegister.setDisplayByType(DisplayRegister.Type.Sprite, SpriteElement$2);
+DisplayRegister.setDisplayByType(DisplayRegister.Type.Container, CompElement$2);
+
+// export {AnimationManager} from './aftereffect/index';
+
+export { Eventer, Animation, Tween, Utils, Texture, Loader, loaderUtil, Ticker, Bounds, Point, Rectangle, Polygon, Circle, Ellipse, Matrix$2 as Matrix, IDENTITY, TEMP_MATRIX, CatmullRom, BezierCurve, SvgCurve, NURBSCurve, DisplayObject, Container, Sprite, Graphics, TextFace, FilterGroup, BlurFilter, FrameBuffer, Scene, Renderer, Application, AnimationGroup, AnimationManager, TransformFrames, Tools, TransformProperty, PropertyFactory, BezierEasing$1 as BezierEasing, DisplayRegister, LoaderRegister };
 //# sourceMappingURL=jcc2d.module.js.map
