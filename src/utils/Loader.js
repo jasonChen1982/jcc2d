@@ -254,4 +254,85 @@ let loaderUtil = function(srcMap, crossOrigin = '*') {
   return new Loader(crossOrigin).load(srcMap);
 };
 
-export {Texture, Loader, loaderUtil};
+
+/**
+ * prefix
+ * @method
+ * @param {object} asset asset
+ * @param {string} prefix prefix
+ * @return {string}
+ */
+function createUrl(asset, prefix) {
+  if (prefix) prefix = prefix.replace(/\/?$/, '/');
+  const up = asset.u + asset.p;
+  const url = asset.up || prefix + up;
+  return url;
+}
+
+/**
+ * an texture loader
+ * @param {array} assets assets
+ * @param {object} options options
+ * @param {string} [options.prefix] prefix
+ * @param {boolean} [options.autoLoad=true] prefix
+ */
+function LottieLoader(assets, {prefix, autoLoad = true, crossOrigin = '*'}) {
+  Eventer.call(this);
+  this.assets = assets;
+  this.prefix = prefix || '';
+  this.crossOrigin = crossOrigin;
+  this.textures = {};
+  this._total = 0;
+  this._failed = 0;
+  this._received = 0;
+  if (autoLoad) this._load();
+}
+
+LottieLoader.prototype = Object.create(Eventer.prototype);
+
+/**
+ * load assets
+ */
+LottieLoader.prototype.load = function() {
+  this._load();
+};
+
+/**
+ * a load function
+ * @private
+ */
+LottieLoader.prototype._load = function() {
+  this.assets.forEach((asset) => {
+    const id = asset.id;
+    const url = createUrl(asset, this.prefix);
+    const texture = new Texture(url, {crossOrigin: this.crossOrigin});
+    this.textures[id] = texture;
+    if (texture.loaded) {
+      this._received++;
+      this.emit('update');
+      if (this._received + this._failed >= this._total) this.emit('complete');
+    } else {
+      texture.once('load', () => {
+        this._received++;
+        this.emit('update');
+        if (this._received + this._failed >= this._total) this.emit('complete');
+      });
+      texture.once('error', () => {
+        this._failed++;
+        this.emit('update');
+        if (this._received + this._failed >= this._total) this.emit('complete');
+      });
+    }
+  });
+};
+
+/**
+ * get texture by id
+ * @param {string} id id
+ * @return {Texture} texture
+ */
+LottieLoader.prototype.getTextureById = function(id) {
+  return this.textures[id];
+};
+
+export {Texture, Loader, LottieLoader, loaderUtil};

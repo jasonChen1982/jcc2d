@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta http-equiv="Cache-Control" content="no-cache">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
-  <title>JC_demo</title>
+  <title>animations</title>
   <style type="text/css">
     * {
       padding: 0;
@@ -13,12 +13,24 @@
     }
 
     body {
-      background: #000;
-      overflow: hidden;
+      background-color: #41b882;
     }
 
-    #demo_canvas {
+    canvas {
       width: 100%;
+    }
+
+    p {
+      position: relative;
+      width: 200px;
+      line-height: 30px;
+      margin: 10px auto;
+      background: #35485d;
+      border-radius: 15px;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
     }
 
   </style>
@@ -26,7 +38,7 @@
 
 <body>
   <canvas id="demo_canvas" width="720" height="1280"></canvas>
-
+  <p>Render by jcc2d</p>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript" src="./js/data.js"></script>
@@ -36,18 +48,24 @@
       width: data.w,
       height: data.h,
     });
-    var DOC = new JC.Container();
 
-    var manager = new JC.AnimationManager(app.ticker);
-    var ani = manager.parseAnimation({
-      keyframes: data,
-      infinite: true,
-      alternate: true,
-      mask: true,
+    // PIXI.EnableAnimations(app);
+
+    const animationData = [ data.layers[5], data.layers[6], data.layers[7] ];
+    const images = animationData.map(item => {
+      const { u, p } = JC.Tools.getAssets(item.refId, data.assets);
+      const url = './' + u + p;
+      return new JC.Texture(url);
     });
-    DOC.adds(ani.group);
-    app.scene.adds(DOC);
 
+    images.forEach((texture, index) => {
+      const coin = new JC.Sprite({texture});
+      coin.bodymovin({
+        keyframes: animationData[index],
+        infinite: true,
+      });
+      app.scene.adds(coin);
+    });
 
     /**
      * 帧率监控工具

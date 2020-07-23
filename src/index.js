@@ -34,4 +34,22 @@ export {Scene} from './core/Scene';
 export {Renderer} from './core/Renderer';
 export {Application} from './core/Application';
 
-export {AnimationManager} from './aftereffect/index';
+// export {AnimationManager} from './aftereffect/index';
+
+import './lottie-displays/index';
+
+export {
+  AnimationGroup,
+  AnimationManager,
+
+  TransformFrames,
+
+  // Eventer,
+  Tools,
+  TransformProperty,
+  PropertyFactory,
+  BezierEasing,
+
+  DisplayRegister,
+  LoaderRegister,
+} from './lottie-core/index';

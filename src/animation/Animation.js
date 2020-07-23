@@ -1,7 +1,7 @@
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
 import {KeyFrames} from './KeyFrames';
-// import {AnimateRunner} from './AnimateRunner';
+import {Bodymovin} from './Bodymovin';
 import {Queues} from './Queues';
 /**
  * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
@@ -102,6 +102,18 @@ Animation.prototype.queues = function(runner, options, clear) {
 Animation.prototype.keyFrames = function(options, clear) {
   options.element = this.element;
   return this._addMove(new KeyFrames(options), clear);
+};
+
+/**
+ * 创建一个`keyFrames`动画
+ * @private
+ * @param {object} options 动画配置
+ * @param {boolean} clear 是否清除之前的动画
+ * @return {JC.Bodymovin}
+ */
+Animation.prototype.bodymovin = function(options, clear) {
+  options.element = this.element;
+  return this._addMove(new Bodymovin(options), clear);
 };
 
 /**

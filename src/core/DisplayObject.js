@@ -356,6 +356,40 @@ DisplayObject.prototype.keyFrames = function(options, clear) {
 };
 
 /**
+ * 播放一个bodymovin动画
+ *
+ * ```js
+ * import data from './animations/data.js';
+ * display.bodymovin({
+ *   keyframes: data.layers[3],
+ *   frameRate: data.fr,
+ *   ignoreProps: [ 'position', 'scaleX ],
+ * }, clear).on('complete', function() {
+ *   console.log('end queues');
+ * });
+ * ```
+ *
+ * @memberof JC.DisplayObject
+ * @param {Object} options 动画配置参数
+ * @param {Object} options.keyframes lottie 动画数据
+ * @param {Number} [options.frameRate] lottie 动画帧率，对应 json 里面的 fr
+ * @param {Array} [options.ignoreProps] 忽略 keyframes 动画数据中的哪些属性的动画描述 position|x|y|pivot|pivotX|pivotY|scale|scaleX|scaleY|rotation|alpha
+ * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+ * @param {Boolean} [options.infinite] 设置动画无限循环，优先级高于repeats
+ * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+ * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+ * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+ * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+ * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+ * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+ * @param {Boolean} clear 是否清除该对象上之前所有的动画
+ * @return {Bodymovin}
+ */
+DisplayObject.prototype.bodymovin = function(options, clear) {
+  return this.animation.bodymovin(options, clear);
+};
+
+/**
  * 不推荐使用，建议使用`queues`方法达到同样效果
  * runners动画，多个复合动画的组合形式，不支持`alternate`
  *
