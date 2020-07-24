@@ -1,2018 +1,333 @@
-
-/**
- * jcc2d.js
- * (c) 2014-2020 jason chen
- * Released under the MIT License.
- */
-
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.JC = global.JC || {})));
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+  typeof define === 'function' && define.amd ? define(['exports'], factory) :
+  (global = global || self, factory(global.JC = global.JC || {}));
 }(this, (function (exports) { 'use strict';
 
-(function () {
-  var lastTime = 0;
-  var vendors = ['ms', 'moz', 'webkit', 'o'];
-  for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-    window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-    window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
-  }
+  (function () {
+    var lastTime = 0;
+    var vendors = ['ms', 'moz', 'webkit', 'o'];
 
-  if (!window.requestAnimationFrame) {
-    window.requestAnimationFrame = function (callback) {
-      var currTime = new Date().getTime();
-      var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-      var id = window.setTimeout(function () {
-        callback(currTime + timeToCall);
-      }, timeToCall);
-      lastTime = currTime + timeToCall;
-      return id;
-    };
-  }
-
-  if (!window.cancelAnimationFrame) {
-    window.cancelAnimationFrame = function (id) {
-      clearTimeout(id);
-    };
-  }
-
-  window.RAF = window.requestAnimationFrame;
-  window.CAF = window.cancelAnimationFrame;
-})();
-
-/**
- * 返回数据类型
- * @param {*} val
- * @return {String} 数据类型
- */
-function _rt(val) {
-  return Object.prototype.toString.call(val);
-}
-
-/**
- * Utils 引擎工具箱
- *
- * @namespace JC.Utils
- */
-var Utils = {
-  /**
-   * 简单拷贝纯数据的JSON对象
-   *
-   * @static
-   * @memberof JC.Utils
-   * @param {JSON} json 待拷贝的纯数据JSON
-   * @return {JSON} 拷贝后的纯数据JSON
-   */
-  copyJSON: function copyJSON(json) {
-    return JSON.parse(JSON.stringify(json));
-  },
-
-  /**
-   * 将角度转化成弧度的乘法因子
-   *
-   * @static
-   * @memberof JC.Utils
-   * @param {number} degree 角度数
-   * @return {number} 弧度数
-   */
-  DTR: function DTR(degree) {
-    return degree * Math.PI / 180;
-  },
-
-
-  /**
-   * 将弧度转化成角度的乘法因子
-   *
-   * @static
-   * @memberof JC.Utils
-   * @param {number} radian 角度数
-   * @return {number} 弧度数
-   */
-  RTD: function RTD(radian) {
-    return radian * 180 / Math.PI;
-  },
-
-
-  /**
-   * 判断变量是否为数组类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Array} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isArray: function () {
-    var ks = _rt([]);
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为对象类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Object} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isObject: function () {
-    var ks = _rt({});
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为字符串类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {String} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isString: function () {
-    var ks = _rt('s');
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为数字类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isNumber: function () {
-    var ks = _rt(1);
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为函数类型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isFunction: function () {
-    var ks = _rt(function () {});
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为undefined
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isUndefined: function isUndefined(variable) {
-    return typeof variable === 'undefined';
-  },
-
-  /**
-   * 判断变量是否为布尔型
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isBoolean: function () {
-    var ks = _rt(true);
-    return function (variable) {
-      return _rt(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 强化的随机数，可以随机产生给定区间内的数字、随机输出数字内的项
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
-   * @param {Number} max 所给定区间较大的数字
-   * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
-   */
-  random: function random(min, max) {
-    if (this.isArray(min)) return min[~~(Math.random() * min.length)];
-    if (!this.isNumber(max)) max = min || 1, min = 0;
-    return min + Math.random() * (max - min);
-  },
-
-  /**
-   * 阿基米德求模
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} n 当前值
-   * @param {Number} m 模
-   * @return {Number} 映射到模长内的值
-   */
-  euclideanModulo: function euclideanModulo(n, m) {
-    return (n % m + m) % m;
-  },
-
-  /**
-   * 边界值域镜像
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} n 当前值
-   * @param {Number} min 值域下边界
-   * @param {Number} max 值域上边界
-   * @return {Number} 值域内反射到的值
-   */
-  codomainBounce: function codomainBounce(n, min, max) {
-    if (n < min) return 2 * min - n;
-    if (n > max) return 2 * max - n;
-    return n;
-  },
-
-  /**
-   * 数字区间闭合，避免超出区间
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 待闭合到值
-   * @param {Number} a 闭合区间左边界
-   * @param {Number} b 闭合区间右边界
-   * @return {Number} 闭合后的值
-   */
-  clamp: function clamp(x, a, b) {
-    return x < a ? a : x > b ? b : x;
-  },
-
-  /**
-   * 线性插值
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 输入的值
-   * @param {Number} min 输入值的下区间
-   * @param {Number} max 输入值的上区间
-   * @return {Number} 返回的值在区间[0,1]内
-   */
-  linear: function linear(x, min, max) {
-    if (x <= min) return 0;
-    if (x >= max) return 1;
-    x = (x - min) / (max - min);
-    return x;
-  },
-
-  /**
-   * 平滑插值
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 输入的值
-   * @param {Number} min 输入值的下区间
-   * @param {Number} max 输入值的上区间
-   * @return {Number} 返回的值在区间[0,1]内
-   */
-  smoothstep: function smoothstep(x, min, max) {
-    if (x <= min) return 0;
-    if (x >= max) return 1;
-    x = (x - min) / (max - min);
-    return x * x * (3 - 2 * x);
-  },
-
-  /**
-   * 更平滑的插值
-   *
-   * @static
-   * @method
-   * @memberof JC.Utils
-   * @param {Number} x 输入的值
-   * @param {Number} min 输入值的下区间
-   * @param {Number} max 输入值的上区间
-   * @return {Number} 返回的值在区间[0,1]内
-   */
-  smootherstep: function smootherstep(x, min, max) {
-    if (x <= min) return 0;
-    if (x >= max) return 1;
-    x = (x - min) / (max - min);
-    return x * x * x * (x * (x * 6 - 15) + 10);
-  }
-};
-
-/* eslint prefer-rest-params: 0 */
-
-/**
- * jcc2d的事件对象的类
- *
- * @class
- * @memberof JC
- */
-function Eventer() {
-  /**
-   * 事件监听列表
-   *
-   * @member {Object}
-   * @private
-   */
-  this.listeners = {};
-}
-
-/**
- * 事件对象的事件绑定函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 回调函数
- * @return {this}
- */
-Eventer.prototype.on = function (type, fn) {
-  if (!Utils.isFunction(fn)) return;
-  this.interactive = true;
-  this.listeners[type] = this.listeners[type] || [];
-  this.listeners[type].push(fn);
-  return this;
-};
-
-/**
- * 事件对象的事件解绑函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 注册时回调函数的引用
- * @return {this}
- */
-Eventer.prototype.off = function (type, fn) {
-  if (Utils.isUndefined(this.listeners[type])) return;
-  var cbs = this.listeners[type] || [];
-  var i = cbs.length;
-  if (i > 0) {
-    if (fn) {
-      while (i--) {
-        if (cbs[i] === fn) {
-          cbs.splice(i, 1);
-        }
-      }
-    } else {
-      cbs.length = 0;
+    for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+      window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+      window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
     }
-  }
-  return this;
-};
 
-/**
- * 事件对象的一次性事件绑定函数
- *
- * @param {String} type 事件类型
- * @param {Function} fn 回调函数
- * @return {this}
- */
-Eventer.prototype.once = function (type, fn) {
-  if (!Utils.isFunction(fn)) return;
-  var This = this;
-  var cb = function cb(ev) {
-    if (fn) fn(ev);
-    This.off(type, cb);
+    if (!window.requestAnimationFrame) {
+      window.requestAnimationFrame = function (callback) {
+        var currTime = new Date().getTime();
+        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+        var id = window.setTimeout(function () {
+          callback(currTime + timeToCall);
+        }, timeToCall);
+        lastTime = currTime + timeToCall;
+        return id;
+      };
+    }
+
+    if (!window.cancelAnimationFrame) {
+      window.cancelAnimationFrame = function (id) {
+        clearTimeout(id);
+      };
+    }
+
+    window.RAF = window.requestAnimationFrame;
+    window.CAF = window.cancelAnimationFrame;
+  })();
+
+  /**
+   * 返回数据类型
+   * @param {*} val
+   * @return {String} 数据类型
+   */
+  function _rt(val) {
+    return Object.prototype.toString.call(val);
+  }
+  /**
+   * Utils 引擎工具箱
+   *
+   * @namespace JC.Utils
+   */
+
+
+  var Utils = {
+    /**
+     * 简单拷贝纯数据的JSON对象
+     *
+     * @static
+     * @memberof JC.Utils
+     * @param {JSON} json 待拷贝的纯数据JSON
+     * @return {JSON} 拷贝后的纯数据JSON
+     */
+    copyJSON: function copyJSON(json) {
+      return JSON.parse(JSON.stringify(json));
+    },
+
+    /**
+     * 将角度转化成弧度的乘法因子
+     *
+     * @static
+     * @memberof JC.Utils
+     * @param {number} degree 角度数
+     * @return {number} 弧度数
+     */
+    DTR: function DTR(degree) {
+      return degree * Math.PI / 180;
+    },
+
+    /**
+     * 将弧度转化成角度的乘法因子
+     *
+     * @static
+     * @memberof JC.Utils
+     * @param {number} radian 角度数
+     * @return {number} 弧度数
+     */
+    RTD: function RTD(radian) {
+      return radian * 180 / Math.PI;
+    },
+
+    /**
+     * 判断变量是否为数组类型
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Array} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isArray: function () {
+      var ks = _rt([]);
+
+      return function (variable) {
+        return _rt(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为对象类型
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Object} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isObject: function () {
+      var ks = _rt({});
+
+      return function (variable) {
+        return _rt(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为字符串类型
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {String} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isString: function () {
+      var ks = _rt('s');
+
+      return function (variable) {
+        return _rt(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为数字类型
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isNumber: function () {
+      var ks = _rt(1);
+
+      return function (variable) {
+        return _rt(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为函数类型
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Function} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isFunction: function () {
+      var ks = _rt(function () {});
+
+      return function (variable) {
+        return _rt(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为undefined
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Function} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isUndefined: function isUndefined(variable) {
+      return typeof variable === 'undefined';
+    },
+
+    /**
+     * 判断变量是否为布尔型
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Function} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isBoolean: function () {
+      var ks = _rt(true);
+
+      return function (variable) {
+        return _rt(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 强化的随机数，可以随机产生给定区间内的数字、随机输出数字内的项
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Array | Number} min 当只传入一个变量时变量应该为数字，否则为所给定区间较小的数字
+     * @param {Number} max 所给定区间较大的数字
+     * @return {ArrayItem | Number} 返回数组中大一项或者给定区间内的数字
+     */
+    random: function random(min, max) {
+      if (this.isArray(min)) return min[~~(Math.random() * min.length)];
+      if (!this.isNumber(max)) max = min || 1, min = 0;
+      return min + Math.random() * (max - min);
+    },
+
+    /**
+     * 阿基米德求模
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} n 当前值
+     * @param {Number} m 模
+     * @return {Number} 映射到模长内的值
+     */
+    euclideanModulo: function euclideanModulo(n, m) {
+      return (n % m + m) % m;
+    },
+
+    /**
+     * 边界值域镜像
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} n 当前值
+     * @param {Number} min 值域下边界
+     * @param {Number} max 值域上边界
+     * @return {Number} 值域内反射到的值
+     */
+    codomainBounce: function codomainBounce(n, min, max) {
+      if (n < min) return 2 * min - n;
+      if (n > max) return 2 * max - n;
+      return n;
+    },
+
+    /**
+     * 数字区间闭合，避免超出区间
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} x 待闭合到值
+     * @param {Number} a 闭合区间左边界
+     * @param {Number} b 闭合区间右边界
+     * @return {Number} 闭合后的值
+     */
+    clamp: function clamp(x, a, b) {
+      return x < a ? a : x > b ? b : x;
+    },
+
+    /**
+     * 线性插值
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} x 输入的值
+     * @param {Number} min 输入值的下区间
+     * @param {Number} max 输入值的上区间
+     * @return {Number} 返回的值在区间[0,1]内
+     */
+    linear: function linear(x, min, max) {
+      if (x <= min) return 0;
+      if (x >= max) return 1;
+      x = (x - min) / (max - min);
+      return x;
+    },
+
+    /**
+     * 平滑插值
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} x 输入的值
+     * @param {Number} min 输入值的下区间
+     * @param {Number} max 输入值的上区间
+     * @return {Number} 返回的值在区间[0,1]内
+     */
+    smoothstep: function smoothstep(x, min, max) {
+      if (x <= min) return 0;
+      if (x >= max) return 1;
+      x = (x - min) / (max - min);
+      return x * x * (3 - 2 * x);
+    },
+
+    /**
+     * 更平滑的插值
+     *
+     * @static
+     * @method
+     * @memberof JC.Utils
+     * @param {Number} x 输入的值
+     * @param {Number} min 输入值的下区间
+     * @param {Number} max 输入值的上区间
+     * @return {Number} 返回的值在区间[0,1]内
+     */
+    smootherstep: function smootherstep(x, min, max) {
+      if (x <= min) return 0;
+      if (x >= max) return 1;
+      x = (x - min) / (max - min);
+      return x * x * x * (x * (x * 6 - 15) + 10);
+    }
   };
-  this.on(type, cb);
-  return this;
-};
 
-/**
- * 事件对象的触发事件函数
- *
- * @param {String} type 事件类型
- * @param {JC.InteractionData} ev 事件数据
- */
-Eventer.prototype.emit = function (type) {
-  if (Utils.isUndefined(this.listeners[type])) return;
-  var cbs = this.listeners[type] || [];
-  var cache = cbs.slice(0);
-  var reset = [];
-  for (var j = 1; j < arguments.length; j++) {
-    reset.push(arguments[j]);
-  }
-  var i = void 0;
-  for (i = 0; i < cache.length; i++) {
-    cache[i].apply(this, reset);
-  }
-};
-
-/**
- * https://github.com/gre/bezier-easing
- * BezierEasing - use bezier curve for transition easing function
- * by Gaëtan Renaudeau 2014 - 2015 – MIT License
- */
-
-var NEWTON_ITERATIONS = 4;
-var NEWTON_MIN_SLOPE = 0.001;
-var SUBDIVISION_PRECISION = 0.0000001;
-var SUBDIVISION_MAX_ITERATIONS = 10;
-
-var kSplineTableSize = 11;
-var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
-
-var float32ArraySupported = typeof Float32Array === 'function';
-
-/* eslint new-cap: 0 */
-
-/**
- * 公因式A
- *
- * @param {number} aA1 控制分量
- * @param {number} aA2 控制分量
- * @return {number} 整个公式中的A公因式的值
- */
-function A(aA1, aA2) {
-  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
-}
-
-/**
- * 公因式B
- *
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 整个公式中的B公因式的值
- */
-function B(aA1, aA2) {
-  return 3.0 * aA2 - 6.0 * aA1;
-}
-
-/**
- * 公因式C
- *
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 整个公式中的C公因式的值
- */
-function C(aA1) {
-  return 3.0 * aA1;
-}
-
-/**
- * 获取aT处的值
- *
- * @param {number} aT 三次贝塞尔曲线的t自变量
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 三次贝塞尔公式的因变量
- */
-function calcBezier(aT, aA1, aA2) {
-  return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
-}
-
-/**
- * 获取aT处的斜率
- * @param {number} aT 三次贝塞尔曲线的t自变量
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 三次贝塞尔公式的导数
- */
-function getSlope(aT, aA1, aA2) {
-  return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
-}
-
-/**
- *
- * @param {number} aX
- * @param {number} aA
- * @param {number} aB
- * @param {number} mX1
- * @param {number} mX2
- * @return {number} 二分法猜测t的值
- */
-function binarySubdivide(aX, aA, aB, mX1, mX2) {
-  var currentX = void 0;
-  var currentT = void 0;
-  var i = 0;
-  do {
-    currentT = aA + (aB - aA) / 2.0;
-    currentX = calcBezier(currentT, mX1, mX2) - aX;
-    if (currentX > 0.0) {
-      aB = currentT;
-    } else {
-      aA = currentT;
-    }
-  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
-  return currentT;
-}
-
-/**
- * 牛顿迭代算法，进一步的获取精确的T值
- * @param {number} aX
- * @param {number} aGuessT
- * @param {number} mX1
- * @param {number} mX2
- * @return {number} 获取更精确的T值
- */
-function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
-  for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
-    var currentSlope = getSlope(aGuessT, mX1, mX2);
-    if (currentSlope === 0.0) {
-      return aGuessT;
-    }
-    var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
-    aGuessT -= currentX / currentSlope;
-  }
-  return aGuessT;
-}
-
-/**
- * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
- *
- * @class
- * @memberof JC
- * @param {number} mX1 控制点1的x分量
- * @param {number} mY1 控制点1的y分量
- * @param {number} mX2 控制点2的x分量
- * @param {number} mY2 控制点2的y分量
- */
-function BezierEasing(mX1, mY1, mX2, mY2) {
-  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
-    throw new Error('bezier x values must be in [0, 1] range');
-  }
-  this.mX1 = mX1;
-  this.mY1 = mY1;
-  this.mX2 = mX2;
-  this.mY2 = mY2;
-  this.sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
-
-  this._preCompute();
-}
-
-BezierEasing.prototype._preCompute = function () {
-  // Precompute samples table
-  if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
-    for (var i = 0; i < kSplineTableSize; ++i) {
-      this.sampleValues[i] = calcBezier(i * kSampleStepSize, this.mX1, this.mX2);
-    }
-  }
-};
-
-BezierEasing.prototype._getTForX = function (aX) {
-  var intervalStart = 0.0;
-  var currentSample = 1;
-  var lastSample = kSplineTableSize - 1;
-
-  for (; currentSample !== lastSample && this.sampleValues[currentSample] <= aX; ++currentSample) {
-    intervalStart += kSampleStepSize;
-  }
-  --currentSample;
-
-  // Interpolate to provide an initial guess for t
-  var dist = (aX - this.sampleValues[currentSample]) / (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
-  var guessForT = intervalStart + dist * kSampleStepSize;
-
-  var initialSlope = getSlope(guessForT, this.mX1, this.mX2);
-  if (initialSlope >= NEWTON_MIN_SLOPE) {
-    return newtonRaphsonIterate(aX, guessForT, this.mX1, this.mX2);
-  } else if (initialSlope === 0.0) {
-    return guessForT;
-  } else {
-    return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, this.mX1, this.mX2);
-  }
-};
-
-/**
- * 通过x轴近似获取y的值
- *
- * @param {number} x x轴的偏移量
- * @return {number} y 与输入值x对应的y值
- */
-BezierEasing.prototype.get = function (x) {
-  if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
-  if (x === 0) {
-    return 0;
-  }
-  if (x === 1) {
-    return 1;
-  }
-  return calcBezier(this._getTForX(x), this.mY1, this.mY2);
-};
-
-/* eslint no-cond-assign: "off" */
-/* eslint new-cap: 0 */
-/* eslint max-len: 0 */
-
-/**
- * Tween 缓动时间运动函数集合
- *
- * ```js
- * dispay.animate({
- *   from: {x: 100},
- *   to: {x: 200},
- *   ease: JC.Tween.Ease.In, // 配置要调用的运动函数
- * })
- * ```
- * @namespace JC.Tween
- */
-
-var Tween = {
-
-  Linear: {
-
-    None: function None(k) {
-      return k;
-    }
-
-  },
-
-  Ease: {
-
-    In: function () {
-      var bezier = new BezierEasing(.42, 0, 1, 1);
-      return function (k) {
-        return bezier.get(k);
-      };
-    }(),
-
-    Out: function () {
-      var bezier = new BezierEasing(0, 0, .58, 1);
-      return function (k) {
-        return bezier.get(k);
-      };
-    }(),
-
-    InOut: function () {
-      var bezier = new BezierEasing(.42, 0, .58, 1);
-      return function (k) {
-        return bezier.get(k);
-      };
-    }(),
-
-    Bezier: function Bezier(x1, y1, x2, y2) {
-      var bezier = new BezierEasing(x1, y1, x2, y2);
-      return function (k) {
-        return bezier.get(k);
-      };
-    }
-
-  },
-
-  Elastic: {
-
-    In: function In(k) {
-      if (k === 0) {
-        return 0;
-      }
-      if (k === 1) {
-        return 1;
-      }
-      return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-    },
-
-    Out: function Out(k) {
-      if (k === 0) {
-        return 0;
-      }
-      if (k === 1) {
-        return 1;
-      }
-      return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
-    },
-
-    InOut: function InOut(k) {
-      if (k === 0) {
-        return 0;
-      }
-      if (k === 1) {
-        return 1;
-      }
-      k *= 2;
-      if (k < 1) {
-        return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
-      }
-      return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
-    }
-
-  },
-
-  Back: {
-
-    In: function In(k) {
-      var s = 1.70158;
-      return k * k * ((s + 1) * k - s);
-    },
-
-    Out: function Out(k) {
-      var s = 1.70158;
-      return --k * k * ((s + 1) * k + s) + 1;
-    },
-
-    InOut: function InOut(k) {
-      var s = 1.70158 * 1.525;
-      if ((k *= 2) < 1) {
-        return 0.5 * (k * k * ((s + 1) * k - s));
-      }
-      return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
-    }
-
-  },
-
-  Bounce: {
-
-    In: function In(k) {
-      return 1 - Tween.Bounce.Out(1 - k);
-    },
-
-    Out: function Out(k) {
-      if (k < 1 / 2.75) {
-        return 7.5625 * k * k;
-      } else if (k < 2 / 2.75) {
-        return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
-      } else if (k < 2.5 / 2.75) {
-        return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
-      } else {
-        return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
-      }
-    },
-
-    InOut: function InOut(k) {
-      if (k < 0.5) {
-        return Tween.Bounce.In(k * 2) * 0.5;
-      }
-      return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
-    }
-  }
-};
-
-/**
- * 动画对象的基本类型
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画配置信息
- */
-function Animate(options) {
-  Eventer.call(this);
-
-  this.element = options.element || {};
-  this.duration = options.duration || 300;
-  this.living = true;
-  this.resident = options.resident || false;
-
-  // this.onComplete = options.onComplete || null;
-  // this.onUpdate = options.onUpdate || null;
-
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.repeats = options.repeats || 0;
-  this.delay = options.delay || 0;
-  this.wait = options.wait || 0;
-  this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
-
-  if (options.onComplete) {
-    this.on('complete', options.onComplete.bind(this));
-  }
-  if (options.onUpdate) {
-    this.on('update', options.onUpdate.bind(this));
-  }
-
-  // this.repeatsCut = this.repeats;
-  // this.delayCut = this.delay;
-  // this.waitCut = this.wait;
-  // this.progress = 0;
-  // this.direction = 1;
-  this.init();
-
-  this.paused = false;
-}
-
-Animate.prototype = Object.create(Eventer.prototype);
-
-/**
- * 更新动画
- * @private
- * @param {number} snippet 时间片段
- * @return {object}
- */
-Animate.prototype.update = function (snippet) {
-  var snippetCache = this.direction * this.timeScale * snippet;
-  if (this.waitCut > 0) {
-    this.waitCut -= Math.abs(snippetCache);
-    return;
-  }
-  if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
-    return;
-  }
-
-  this.progress += snippetCache;
-  var isEnd = false;
-  var progressCache = this.progress;
-
-  if (this.spill()) {
-    if (this.repeatsCut > 0 || this.infinite) {
-      if (this.repeatsCut > 0) --this.repeatsCut;
-      this.delayCut = this.delay;
-      if (this.alternate) {
-        this.direction *= -1;
-        this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
-      } else {
-        this.direction = 1;
-        this.progress = Utils.euclideanModulo(this.progress, this.duration);
-      }
-    } else {
-      isEnd = true;
-    }
-  }
-
-  var pose = void 0;
-  if (!isEnd) {
-    pose = this.nextPose();
-    this.emit('update', pose, this.progress / this.duration);
-  } else {
-    if (!this.resident) this.living = false;
-    this.progress = Utils.clamp(progressCache, 0, this.duration);
-    pose = this.nextPose();
-    this.emit('complete', pose, Math.abs(progressCache - this.progress));
-  }
-  return pose;
-};
-
-/**
- * 检查动画是否到了边缘
- * @private
- * @return {boolean}
- */
-Animate.prototype.spill = function () {
-  var bottomSpill = this.progress <= 0 && this.direction === -1;
-  var topSpill = this.progress >= this.duration && this.direction === 1;
-  return bottomSpill || topSpill;
-};
-
-/**
- * 初始化动画状态
- * @private
- */
-Animate.prototype.init = function () {
-  this.direction = 1;
-  this.progress = 0;
-  this.repeatsCut = this.repeats;
-  this.delayCut = this.delay;
-  this.waitCut = this.wait;
-};
-
-/**
- * 下一帧的数据
- * @private
- */
-Animate.prototype.nextPose = function () {
-  console.warn('should be overwrite');
-};
-
-/**
- * 线性插值
- * @private
- * @param {number} p0 起始位置
- * @param {number} p1 结束位置
- * @param {number} t  进度位置
- * @return {Number}
- */
-Animate.prototype.linear = function (p0, p1, t) {
-  return (p1 - p0) * t + p0;
-};
-
-/**
- * 暂停动画
- */
-Animate.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复动画
- */
-Animate.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 停止动画，并把状态置为最后一帧，会触发事件
- */
-Animate.prototype.stop = function () {
-  this.repeats = 0;
-  this.infinite = false;
-  this.progress = this.duration;
-};
-
-/**
- * 设置动画的速率
- * @param {number} speed
- */
-Animate.prototype.setSpeed = function (speed) {
-  this.timeScale = speed;
-};
-
-/**
- * 取消动画，不会触发事件
- */
-Animate.prototype.cancle = function () {
-  this.living = false;
-};
-
-/* eslint guard-for-in: "off" */
-
-/**
- * Transition类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画所具备的特性
- */
-function Transition(options) {
-  Animate.call(this, options);
-
-  // collect from pose, when from was not complete
-  options.from = options.from || {};
-  for (var i in options.to) {
-    if (Utils.isUndefined(options.from[i])) {
-      options.from[i] = this.element[i];
-    }
-  }
-
-  this.ease = options.ease || Tween.Ease.InOut;
-  this.from = options.from;
-  this.to = options.to;
-}
-Transition.prototype = Object.create(Animate.prototype);
-
-/**
- * 计算下一帧状态
- * @private
- * @return {object}
- */
-Transition.prototype.nextPose = function () {
-  var pose = {};
-  var t = this.ease(this.progress / this.duration);
-  for (var i in this.to) {
-    pose[i] = this.linear(this.from[i], this.to[i], t);
-    if (this.element[i] !== undefined) this.element[i] = pose[i];
-  }
-  return pose;
-};
-
-// import { Point } from './Point';
-/**
- * @class
- * @memberof JC
- */
-function Curve() {}
-
-Curve.prototype = {
-
-  constructor: Curve,
-
-  getPoint: function getPoint(t) {
-    console.warn('Curve: Warning, getPoint() not implemented!', t);
-    return null;
-  },
-
-  getPointAt: function getPointAt(u) {
-    var t = this.getUtoTmapping(u);
-    return this.getPoint(t);
-  },
-
-  getPoints: function getPoints(divisions) {
-    if (isNaN(divisions)) divisions = 5;
-
-    var points = [];
-
-    for (var d = 0; d <= divisions; d++) {
-      points.push(this.getPoint(d / divisions));
-    }
-
-    return points;
-  },
-
-  getSpacedPoints: function getSpacedPoints(divisions) {
-    if (isNaN(divisions)) divisions = 5;
-
-    var points = [];
-
-    for (var d = 0; d <= divisions; d++) {
-      points.push(this.getPointAt(d / divisions));
-    }
-
-    return points;
-  },
-
-  getLength: function getLength() {
-    var lengths = this.getLengths();
-    return lengths[lengths.length - 1];
-  },
-
-  getLengths: function getLengths(divisions) {
-    if (isNaN(divisions)) {
-      divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
-    }
-
-    if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
-      return this.cacheArcLengths;
-    }
-
-    this.needsUpdate = false;
-
-    var cache = [];
-    var current = void 0;
-    var last = this.getPoint(0);
-    var p = void 0;
-    var sum = 0;
-
-    cache.push(0);
-
-    for (p = 1; p <= divisions; p++) {
-      current = this.getPoint(p / divisions);
-      sum += current.distanceTo(last);
-      cache.push(sum);
-      last = current;
-    }
-    this.cacheArcLengths = cache;
-    return cache;
-  },
-
-  updateArcLengths: function updateArcLengths() {
-    this.needsUpdate = true;
-    this.getLengths();
-  },
-
-  getUtoTmapping: function getUtoTmapping(u, distance) {
-    var arcLengths = this.getLengths();
-
-    var i = 0;
-    var il = arcLengths.length;
-    var t = void 0;
-
-    var targetArcLength = void 0;
-
-    if (distance) {
-      targetArcLength = distance;
-    } else {
-      targetArcLength = u * arcLengths[il - 1];
-    }
-
-    var low = 0;
-    var high = il - 1;
-    var comparison = void 0;
-    while (low <= high) {
-      i = Math.floor(low + (high - low) / 2);
-      comparison = arcLengths[i] - targetArcLength;
-      if (comparison < 0) {
-        low = i + 1;
-      } else if (comparison > 0) {
-        high = i - 1;
-      } else {
-        high = i;
-        break;
-      }
-    }
-
-    i = high;
-
-    if (arcLengths[i] === targetArcLength) {
-      t = i / (il - 1);
-      return t;
-    }
-
-    var lengthBefore = arcLengths[i];
-    var lengthAfter = arcLengths[i + 1];
-
-    var segmentLength = lengthAfter - lengthBefore;
-
-    var segmentFraction = (targetArcLength - lengthBefore) / segmentLength;
-
-    t = (i + segmentFraction) / (il - 1);
-
-    return t;
-  },
-
-  getTangent: function getTangent(t) {
-    var delta = 0.0001;
-    var t1 = t - delta;
-    var t2 = t + delta;
-
-    // NOTE: svg and bezier accept out of [0, 1] value
-    // if ( t1 < 0 ) t1 = 0;
-    // if ( t2 > 1 ) t2 = 1;
-
-    var pt1 = this.getPoint(t1);
-    var pt2 = this.getPoint(t2);
-
-    var vec = pt2.clone().sub(pt1);
-    return vec.normalize();
-  },
-
-  getTangentAt: function getTangentAt(u) {
-    var t = this.getUtoTmapping(u);
-    return this.getTangent(t);
-  }
-
-};
-
-/* eslint max-len: "off" */
-
-/**
- * 二维空间内坐标点类
- *
- * @class
- * @memberof JC
- * @param {number} [x=0] x轴的位置
- * @param {number} [y=0] y轴的位置
- * @param {number} [z=0] z轴的位置
- * @param {number} [w=0] w轴的位置
- */
-function Point(x, y, z, w) {
+  /* eslint prefer-rest-params: 0 */
   /**
-   * @member {number}
-   * @default 0
+   * jcc2d的事件对象的类
+   *
+   * @class
+   * @memberof JC
    */
-  this.x = x || 0;
 
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.z = z || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.w = w || 0;
-}
-
-/**
- * 克隆一这个坐标点
- *
- * @return {JC.Point} 克隆的坐标点
- */
-Point.prototype.clone = function () {
-  return new Point(this.x, this.y, this.z, this.w);
-};
-
-/**
- * 拷贝传入的坐标点来设置当前坐标点
- *
- * @param {JC.Point} p
- */
-Point.prototype.copy = function (p) {
-  this.set(p.x, p.y, p.z, p.w);
-};
-
-/**
- * 设置坐标点
- *
- * @param {number} x 轴的位置
- * @param {number} y 轴的位置
- * @param {number} z 轴的位置
- * @param {number} w 轴的位置
- * @return {Point} this
- */
-Point.prototype.set = function (x, y, z, w) {
-  this.x = x;
-  this.y = y;
-  this.z = z;
-  this.w = w;
-  return this;
-};
-
-Point.prototype.add = function (v, w) {
-  if (w !== undefined) {
-    console.warn('Use .addVectors( a, b ) instead.');
-    return this.addVectors(v, w);
-  }
-  this.x += v.x;
-  this.y += v.y;
-  this.z += v.z;
-  this.w += v.w;
-  return this;
-};
-
-Point.prototype.addVectors = function (a, b) {
-  this.x = a.x + b.x;
-  this.y = a.y + b.y;
-  this.z = a.z + b.z;
-  this.w = a.w + b.w;
-  return this;
-};
-
-Point.prototype.sub = function (v, w) {
-  if (w !== undefined) {
-    console.warn('Use .subVectors( a, b ) instead.');
-    return this.subVectors(v, w);
-  }
-  this.x -= v.x;
-  this.y -= v.y;
-  this.z -= v.z;
-  this.w -= v.w;
-  return this;
-};
-
-Point.prototype.subVectors = function (a, b) {
-  this.x = a.x - b.x;
-  this.y = a.y - b.y;
-  this.z = a.z - b.z;
-  this.w = a.w - b.w;
-  return this;
-};
-
-Point.prototype.lengthSq = function () {
-  return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
-};
-
-Point.prototype.length = function () {
-  return Math.sqrt(this.lengthSq());
-};
-
-Point.prototype.normalize = function () {
-  return this.divideScalar(this.length());
-};
-
-Point.prototype.divideScalar = function (scalar) {
-  return this.multiplyScalar(1 / scalar);
-};
-
-Point.prototype.distanceTo = function (v) {
-  return Math.sqrt(this.distanceToSquared(v));
-};
-
-Point.prototype.distanceToSquared = function (v) {
-  var dx = this.x - v.x;
-  var dy = this.y - v.y;
-  var dz = this.z - v.z;
-  return dx * dx + dy * dy + dz * dz;
-};
-
-Point.prototype.multiplyScalar = function (scalar) {
-  if (isFinite(scalar)) {
-    this.x *= scalar;
-    this.y *= scalar;
-    this.z *= scalar;
-    this.w *= scalar;
-  } else {
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
-    this.w = 0;
-  }
-  return this;
-};
-
-Point.prototype.cross = function (v, w) {
-  if (w !== undefined) {
-    console.warn('Use .crossVectors( a, b ) instead.');
-    return this.crossVectors(v, w);
-  }
-
-  var x = this.x;
-  var y = this.y;
-  var z = this.z;
-
-  this.x = y * v.z - z * v.y;
-  this.y = z * v.x - x * v.z;
-  this.z = x * v.y - y * v.x;
-
-  return this;
-};
-
-Point.prototype.crossVectors = function (a, b) {
-  var ax = a.x;
-  var ay = a.y;
-  var az = a.z;
-  var bx = b.x;
-  var by = b.y;
-  var bz = b.z;
-
-  this.x = ay * bz - az * by;
-  this.y = az * bx - ax * bz;
-  this.z = ax * by - ay * bx;
-
-  return this;
-};
-
-/**
- * PathMotion类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画所具备的特性
- */
-function PathMotion(options) {
-  Animate.call(this, options);
-  if (!options.path || !(options.path instanceof Curve)) {
-    console.warn('path is not instanceof Curve');
-  }
-
-  this.path = options.path;
-
-  this.ease = options.ease || Tween.Ease.InOut;
-
-  this.lengthMode = Utils.isBoolean(options.lengthMode) ? options.lengthMode : false;
-
-  this.attachTangent = Utils.isBoolean(options.attachTangent) ? options.attachTangent : false;
-
-  this._cacheRotate = this.element.rotation;
-  var radian = this._cacheRotate;
-  this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
-}
-
-PathMotion.prototype = Object.create(Animate.prototype);
-
-/**
- * 计算下一帧状态
- * @private
- * @return {object}
- */
-PathMotion.prototype.nextPose = function () {
-  var _rotate = 0;
-  var t = this.ease(this.progress / this.duration);
-  var pos = this.lengthMode ? this.path.getPointAt(t) : this.path.getPoint(t);
-
-  var pose = pos.clone();
-
-  if (this.attachTangent) {
-    _rotate = this.decomposeRotate(t);
-    pose.rotation = _rotate === false ? this.preDegree : _rotate;
-    pose.rotation += this._cacheRotate;
-    if (_rotate !== false) this.preDegree = _rotate;
-  }
-  this.element.setProps(pose);
-  return pose;
-};
-
-/**
- * 解算旋转角度
- * @private
- * @param {number} t 当前进度, 区间[0, 1]
- * @return {number}
- */
-PathMotion.prototype.decomposeRotate = function (t) {
-  var vector = this.lengthMode ? this.path.getTangentAt(t) : this.path.getTangent(t);
-
-  var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
-  var pi = nor > 0 ? 1 : -1;
-  var cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y) / (Math.sqrt(vector.x * vector.x + vector.y * vector.y) * Math.sqrt(this._cacheVector.x * this._cacheVector.x + this._cacheVector.y * this._cacheVector.y));
-  if (isNaN(cos)) return false;
-  return pi * Math.acos(cos) * Utils.RTD;
-};
-
-/**
- * 贝塞尔曲线类 note: 一般来说超过5阶的贝塞尔曲线并不是非常实用，你可以尝试 JC 的其他曲线类型
- * @class
- * @memberof JC
- * @param {Array}  points  array of points
- */
-function BezierCurve(points) {
-  this.points = points;
-}
-
-BezierCurve.prototype = Object.create(Curve.prototype);
-
-BezierCurve.prototype.getPoint = function (t, points) {
-  var a = points || this.points;
-  var len = a.length;
-  var rT = 1 - t;
-  var l = a.slice(0, len - 1);
-  var r = a.slice(1);
-  var oP = new Point();
-  if (len > 3) {
-    var oL = this.getPoint(t, l);
-    var oR = this.getPoint(t, r);
-    oP.x = rT * oL.x + t * oR.x;
-    oP.y = rT * oL.y + t * oR.y;
-    return oP;
-  } else {
-    oP.x = rT * rT * a[0].x + 2 * t * rT * a[1].x + t * t * a[2].x;
-    oP.y = rT * rT * a[0].y + 2 * t * rT * a[1].y + t * t * a[2].y;
-    return oP;
-  }
-};
-
-/**
- * detect number was in [min, max]
- * @method
- * @param {number} v   value
- * @param {number} min lower
- * @param {number} max upper
- * @return {boolean} in [min, max] range ?
- */
-
-
-/**
- * detect current frame index
- * @method
- * @param {array} steps frames array
- * @param {number} progress current time
- * @return {number} which frame index
- */
-
-
-/**
- * prefix
- * @method
- * @param {object} asset asset
- * @param {string} prefix prefix
- * @return {string}
- */
-
-
-/**
- * get assets from keyframes assets
- * @method
- * @param {string} id assets refid
- * @param {object} assets assets object
- * @return {object} asset object
- */
-
-var bezierPool = {};
-
-/**
- * 准备好贝塞尔曲线
- * @param {number} mX1 控制点1的x分量
- * @param {number} mY1 控制点1的y分量
- * @param {number} mX2 控制点2的x分量
- * @param {number} mY2 控制点2的y分量
- * @param {string} nm 控制点命名
- * @return {BezierEasing}
- */
-function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
-  var str = nm || [mX2, mY2, mX1, mY1].join('_').replace(/\./g, 'p');
-  if (bezierPool[str]) {
-    return bezierPool[str];
-  }
-  var bezEasing = new BezierEasing(mX1, mY1, mX2, mY2);
-  bezierPool[str] = bezEasing;
-}
-
-/**
- * 根据进度获取到普通插值
- * @param {number} s  插值起始端点
- * @param {number} e  插值结束端点
- * @param {array}  nm 贝塞尔曲线的名字
- * @param {number} p  插值进度
- * @return {array}
- */
-function getEaseing(s, e, nm, p) {
-  var value = [];
-  for (var i = 0; i < s.length; i++) {
-    var bezier = bezierPool[nm[i]] || bezierPool[nm[0]];
-    var rate = bezier.get(p);
-    var v = e[i] - s[i];
-    value[i] = s[i] + v * rate;
-  }
-  return value;
-}
-
-/**
- *
- * @param {BezierCurve} curve
- * @param {string} nm
- * @param {number} p
- * @return {Point}
- */
-function getEaseingPath(curve, nm, p) {
-  var rate = bezierPool[nm].get(p);
-  var point = curve.getPointAt(rate);
-  return [point.x, point.y, point.z];
-}
-
-/* eslint guard-for-in: "off" */
-
-var PROPS_MAP = {
-  o: {
-    props: ['alpha'],
-    scale: 0.01
-  },
-  r: {
-    props: ['rotation'],
-    scale: 1
-  },
-  p: {
-    props: ['x', 'y'],
-    scale: 1
-  },
-  a: {
-    props: ['pivotX', 'pivotY'],
-    scale: 1
-  },
-  s: {
-    props: ['scaleX', 'scaleY'],
-    scale: 0.01
-  }
-};
-
-/**
- * 判断数值是否在(min, max]区间内
- * @param {number} v   待比较的值
- * @param {number} min 最小区间
- * @param {number} max 最大区间
- * @return {boolean} 是否在(min, max]区间内
- */
-function inRange(v, min, max) {
-  return v > min && v <= max;
-}
-
-/**
- * 判断当前进度在哪一帧内
- * @param {array} steps 帧数组
- * @param {number} progress 当前进度
- * @return {number} 当前进度停留在第几帧
- */
-function findStep(steps, progress) {
-  var last = steps.length - 1;
-  for (var i = 0; i < last; i++) {
-    var step = steps[i];
-    if (inRange(progress, step.jcst, step.jcet)) {
-      return i;
-    }
-  }
-}
-
-/**
- * KeyFrames类型动画对象
- *
- * @class
- * @memberof JC
- * @param {object} [options] 动画配置信息
- */
-function KeyFrames(options) {
-  Animate.call(this, options);
-
-  this.layer = Utils.copyJSON(options.layer);
-  this.fr = options.fr || 30;
-  this.tpf = 1000 / this.fr;
-
-  this.iipt = this.layer.ip * this.tpf;
-  this.iopt = this.layer.op * this.tpf;
-
-  this.ip = options.ip === undefined ? this.layer.ip : options.ip;
-  this.op = options.op === undefined ? this.layer.op : options.op;
-
-  this.tfs = Math.floor(this.op - this.ip);
-  this.duration = this.tfs * this.tpf;
-
-  // this.keyState = {};
-  this.aks = {};
-  this.kic = {};
-
-  this.preParser();
-  this.nextPose();
-}
-KeyFrames.prototype = Object.create(Animate.prototype);
-
-/**
- * 预解析关键帧
- * @private
- */
-KeyFrames.prototype.preParser = function () {
-  var ks = this.layer.ks;
-  for (var key in ks) {
-    if (ks[key].a) {
-      this.parserDynamic(key);
-    } else {
-      this.parserStatic(key);
-    }
-  }
-};
-
-/**
- * 预解析动态属性的关键帧
- * @private
- * @param {string} key 所属的属性
- */
-KeyFrames.prototype.parserDynamic = function (key) {
-  var ksp = this.layer.ks[key];
-  var kspk = ksp.k;
-
-  ksp.jcst = kspk[0].t * this.tpf;
-  ksp.jcet = kspk[kspk.length - 1].t * this.tpf;
-
-  for (var i = 0; i < kspk.length; i++) {
-    var sbk = kspk[i];
-    var sek = kspk[i + 1];
-    if (sek) {
-      sbk.jcst = sbk.t * this.tpf;
-      sbk.jcet = sek.t * this.tpf;
-      if (Utils.isString(sbk.n) && sbk.ti && sbk.to) {
-        prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
-        var sp = new Point(sbk.s[0], sbk.s[1]);
-        var ep = new Point(sbk.e[0], sbk.e[1]);
-        var c1 = new Point(sbk.s[0] + sbk.ti[0], sbk.s[1] + sbk.ti[1]);
-        var c2 = new Point(sbk.e[0] + sbk.to[0], sbk.e[1] + sbk.to[1]);
-        sbk.curve = new BezierCurve([sp, c1, c2, ep]);
-      } else {
-        for (var _i = 0; _i < sbk.n.length; _i++) {
-          prepareEaseing(sbk.o.x[_i], sbk.o.y[_i], sbk.i.x[_i], sbk.i.y[_i]);
-        }
-      }
-    }
-  }
-
-  this.aks[key] = ksp;
-};
-
-/**
- * 预解析静态属性的关键帧
- * @private
- * @param {string} key 所属的属性
- */
-KeyFrames.prototype.parserStatic = function (key) {
-  // const prop = PM[key].label;
-  // const scale = PM[key].scale;
-  // let k = 0;
-  // if (Utils.isString(prop)) {
-  //   if (Utils.isNumber(ks[key].k)) {
-  //     k = ks[key].k;
-  //   }
-  //   if (Utils.isArray(ks[key].k)) {
-  //     k = ks[key].k[0];
-  //   }
-  //   this.element[prop] = scale * k;
-  // } else if (Utils.isArray(prop)) {
-  //   for (let i = 0; i < prop.length; i++) {
-  //     k = ks[key].k[i];
-  //     this.element[prop[i]] = scale * k;
-  //   }
-  // }
-
-  var ksp = this.layer.ks[key];
-  var kspk = ksp.k;
-  if (Utils.isNumber(kspk)) kspk = [kspk];
-
-  this.setValue(key, kspk);
-};
-
-/**
- * 计算下一帧状态
- * @private
- * @return {object}
- */
-KeyFrames.prototype.nextPose = function () {
-  var pose = {};
-  for (var key in this.aks) {
-    var ak = this.aks[key];
-    pose[key] = this.interpolation(key, ak);
-    this.setValue(key, pose[key]);
-  }
-  return pose;
-};
-
-/**
- * 计算关键帧属性值
- * @private
- * @param {string} key 关键帧配置
- * @param {object} ak 所属的属性
- * @return {array}
- */
-KeyFrames.prototype.interpolation = function (key, ak) {
-  var akk = ak.k;
-  var progress = Utils.clamp(this.progress, 0, ak.jcet);
-  var skt = ak.jcst;
-  var ekt = ak.jcet;
-  var invisible = progress < this.iipt;
-  if (invisible === this.element.visible) this.element.visible = !invisible;
-
-  if (progress <= skt) {
-    return akk[0].s;
-  } else if (progress >= ekt) {
-    var last = akk.length - 2;
-    return akk[last].e;
-  } else {
-    var kic = this.kic[key];
-    if (!Utils.isNumber(kic) || !inRange(progress, akk[kic].jcst, akk[kic].jcet)) {
-      kic = this.kic[key] = findStep(akk, progress);
-    }
-    var frame = akk[kic];
-    var rate = (progress - frame.jcst) / (frame.jcet - frame.jcst);
-    if (frame.curve) {
-      return getEaseingPath(frame.curve, frame.n, rate);
-    } else {
-      return getEaseing(frame.s, frame.e, frame.n, rate);
-    }
-  }
-};
-
-/**
- * 更新元素的属性值
- * @private
- * @param {string} key 属性
- * @param {array} value 属性值
- */
-KeyFrames.prototype.setValue = function (key, value) {
-  var props = PROPS_MAP[key].props;
-  var scale = PROPS_MAP[key].scale;
-  for (var i = 0; i < props.length; i++) {
-    var v = value[i];
-    this.element[props[i]] = scale * v;
-  }
-};
-
-/**
- * get the type by Object.prototype.toString
- * @ignore
- * @param {*} val
- * @return {String} type string value
- */
-function _rt$1(val) {
-  return Object.prototype.toString.call(val);
-}
-
-/**
- * some useful toolkit
- * @namespace
- */
-var Tools = {
-  /**
-   * simple copy a json data
-   * @method
-   * @param {JSON} json source data
-   * @return {JSON} object
-   */
-  copyJSON: function copyJSON(json) {
-    return JSON.parse(JSON.stringify(json));
-  },
-
-  /**
-   * detect the variable is array type
-   * @method
-   * @param {Array} variable input variable
-   * @return {Boolean} result
-   */
-  isArray: function () {
-    var ks = _rt$1([]);
-    return function (variable) {
-      return _rt$1(variable) === ks;
-    };
-  }(),
-
-  /**
-   * detect the variable is string type
-   * @method
-   * @param {String} variable input variable
-   * @return {Boolean} result
-   */
-  isString: function () {
-    var ks = _rt$1('s');
-    return function (variable) {
-      return _rt$1(variable) === ks;
-    };
-  }(),
-
-  /**
-   * detect the variable is number type
-   * @method
-   * @param {Number} variable input variable
-   * @return {Boolean} result
-   */
-  isNumber: function () {
-    var ks = _rt$1(1);
-    return function (variable) {
-      return _rt$1(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为函数类型
-   * @method
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isFunction: function () {
-    var ks = _rt$1(function () {});
-    return function (variable) {
-      return _rt$1(variable) === ks;
-    };
-  }(),
-
-  /**
-   * 判断变量是否为undefined
-   * @method
-   * @param {Function} variable 待判断的变量
-   * @return {Boolean} 判断的结果
-   */
-  isUndefined: function isUndefined(variable) {
-    return typeof variable === 'undefined';
-  },
-
-  /**
-   * detect the variable is boolean type
-   * @method
-   * @param {Boolean} variable input variable
-   * @return {Boolean} result
-   */
-  isBoolean: function () {
-    var ks = _rt$1(true);
-    return function (variable) {
-      return _rt$1(variable) === ks;
-    };
-  }(),
-
-  /**
-   * detect the variable is object type
-   * @method
-   * @param {Object} variable input variable
-   * @return {Boolean} result
-   */
-  isObject: function () {
-    var ks = _rt$1({});
-    return function (variable) {
-      return _rt$1(variable) === ks;
-    };
-  }(),
-
-  /**
-   * euclidean modulo
-   * @method
-   * @param {Number} n input value
-   * @param {Number} m modulo
-   * @return {Number} re-map to modulo area
-   */
-  euclideanModulo: function euclideanModulo(n, m) {
-    return (n % m + m) % m;
-  },
-
-  /**
-   * bounce value when value spill codomain
-   * @method
-   * @param {Number} n input value
-   * @param {Number} min lower boundary
-   * @param {Number} max upper boundary
-   * @return {Number} bounce back to boundary area
-   */
-  codomainBounce: function codomainBounce(n, min, max) {
-    if (n < min) return 2 * min - n;
-    if (n > max) return 2 * max - n;
-    return n;
-  },
-
-  /**
-   * clamp a value in range
-   * @method
-   * @param {Number} x input value
-   * @param {Number} a lower boundary
-   * @param {Number} b upper boundary
-   * @return {Number} clamp in range
-   */
-  clamp: function clamp(x, a, b) {
-    return x < a ? a : x > b ? b : x;
-  },
-
-  /**
-   * detect number was in [min, max]
-   * @method
-   * @param {number} v   value
-   * @param {number} min lower
-   * @param {number} max upper
-   * @return {boolean} in [min, max] range ?
-   */
-  inRange: function inRange(v, min, max) {
-    return v >= min && v <= max;
-  },
-
-
-  /**
-   * get assets from keyframes assets
-   * @method
-   * @param {string} id assets refid
-   * @param {object} assets assets object
-   * @return {object} asset object
-   */
-  getAssets: function getAssets(id, assets) {
-    for (var i = 0; i < assets.length; i++) {
-      if (id === assets[i].id) return assets[i];
-    }
-    console.error('have not assets name as', id);
-    return {};
-  },
-
-
-  /**
-   * get hex number from rgb array
-   * @param {array} rgb rgb array
-   * @return {number}
-   */
-  rgb2hex: function rgb2hex(rgb) {
-    return (rgb[0] << 16) + (rgb[1] << 8) + (rgb[2] | 0);
-  }
-};
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-};
-
-
-
-
-
-
-
-
-
-
-
-var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-};
-
-var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-
-  return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-}();
-
-
-
-
-
-
-
-
-
-var inherits = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
-  }
-
-  subClass.prototype = Object.create(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
-};
-
-
-
-
-
-
-
-
-
-
-
-var possibleConstructorReturn = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && (typeof call === "object" || typeof call === "function") ? call : self;
-};
-
-/**
- * a
- */
-
-var Eventer$1 = function () {
-  /**
-   * a
-   */
   function Eventer() {
-    classCallCheck(this, Eventer);
-
     /**
      * 事件监听列表
      *
@@ -2021,7 +336,6 @@ var Eventer$1 = function () {
      */
     this.listeners = {};
   }
-
   /**
    * 事件对象的事件绑定函数
    *
@@ -2031,7593 +345,9320 @@ var Eventer$1 = function () {
    */
 
 
-  createClass(Eventer, [{
-    key: 'on',
-    value: function on(type, fn) {
-      if (!Tools.isFunction(fn)) return this;
-      if (Tools.isUndefined(this.listeners[type])) this.listeners[type] = [];
-      this.listeners[type].push(fn);
-      return this;
+  Eventer.prototype.on = function (type, fn) {
+    if (!Utils.isFunction(fn)) return;
+    this.interactive = true;
+    this.listeners[type] = this.listeners[type] || [];
+    this.listeners[type].push(fn);
+    return this;
+  };
+  /**
+   * 事件对象的事件解绑函数
+   *
+   * @param {String} type 事件类型
+   * @param {Function} fn 注册时回调函数的引用
+   * @return {this}
+   */
+
+
+  Eventer.prototype.off = function (type, fn) {
+    if (Utils.isUndefined(this.listeners[type])) return;
+    var cbs = this.listeners[type] || [];
+    var i = cbs.length;
+
+    if (i > 0) {
+      if (fn) {
+        while (i--) {
+          if (cbs[i] === fn) {
+            cbs.splice(i, 1);
+          }
+        }
+      } else {
+        cbs.length = 0;
+      }
     }
 
-    /**
-     * 事件对象的事件解绑函数
-     *
-     * @param {String} type 事件类型
-     * @param {Function} fn 注册时回调函数的引用
-     * @return {this}
-     */
+    return this;
+  };
+  /**
+   * 事件对象的一次性事件绑定函数
+   *
+   * @param {String} type 事件类型
+   * @param {Function} fn 回调函数
+   * @return {this}
+   */
 
-  }, {
-    key: 'off',
-    value: function off(type, fn) {
-      if (Tools.isUndefined(this.listeners[type])) return this;
-      var cbs = this.listeners[type];
-      var i = cbs.length;
-      if (i > 0) {
-        if (fn) {
-          while (i--) {
-            if (cbs[i] === fn) {
-              cbs.splice(i, 1);
-            }
-          }
+
+  Eventer.prototype.once = function (type, fn) {
+    if (!Utils.isFunction(fn)) return;
+    var This = this;
+
+    var cb = function cb(ev) {
+      if (fn) fn(ev);
+      This.off(type, cb);
+    };
+
+    this.on(type, cb);
+    return this;
+  };
+  /**
+   * 事件对象的触发事件函数
+   *
+   * @param {String} type 事件类型
+   * @param {JC.InteractionData} ev 事件数据
+   */
+
+
+  Eventer.prototype.emit = function (type) {
+    if (Utils.isUndefined(this.listeners[type])) return;
+    var cbs = this.listeners[type] || [];
+    var cache = cbs.slice(0);
+    var reset = [];
+
+    for (var j = 1; j < arguments.length; j++) {
+      reset.push(arguments[j]);
+    }
+
+    var i;
+
+    for (i = 0; i < cache.length; i++) {
+      cache[i].apply(this, reset);
+    }
+  };
+
+  /**
+   * https://github.com/gre/bezier-easing
+   * BezierEasing - use bezier curve for transition easing function
+   * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+   */
+  var NEWTON_ITERATIONS = 4;
+  var NEWTON_MIN_SLOPE = 0.001;
+  var SUBDIVISION_PRECISION = 0.0000001;
+  var SUBDIVISION_MAX_ITERATIONS = 10;
+  var kSplineTableSize = 11;
+  var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+  var float32ArraySupported = typeof Float32Array === 'function';
+  /* eslint new-cap: 0 */
+
+  /**
+   * 公因式A
+   *
+   * @param {number} aA1 控制分量
+   * @param {number} aA2 控制分量
+   * @return {number} 整个公式中的A公因式的值
+   */
+
+  function A(aA1, aA2) {
+    return 1.0 - 3.0 * aA2 + 3.0 * aA1;
+  }
+  /**
+   * 公因式B
+   *
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 整个公式中的B公因式的值
+   */
+
+
+  function B(aA1, aA2) {
+    return 3.0 * aA2 - 6.0 * aA1;
+  }
+  /**
+   * 公因式C
+   *
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 整个公式中的C公因式的值
+   */
+
+
+  function C(aA1) {
+    return 3.0 * aA1;
+  }
+  /**
+   * 获取aT处的值
+   *
+   * @param {number} aT 三次贝塞尔曲线的t自变量
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 三次贝塞尔公式的因变量
+   */
+
+
+  function calcBezier(aT, aA1, aA2) {
+    return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT;
+  }
+  /**
+   * 获取aT处的斜率
+   * @param {number} aT 三次贝塞尔曲线的t自变量
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 三次贝塞尔公式的导数
+   */
+
+
+  function getSlope(aT, aA1, aA2) {
+    return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+  }
+  /**
+   *
+   * @param {number} aX
+   * @param {number} aA
+   * @param {number} aB
+   * @param {number} mX1
+   * @param {number} mX2
+   * @return {number} 二分法猜测t的值
+   */
+
+
+  function binarySubdivide(aX, aA, aB, mX1, mX2) {
+    var currentX;
+    var currentT;
+    var i = 0;
+
+    do {
+      currentT = aA + (aB - aA) / 2.0;
+      currentX = calcBezier(currentT, mX1, mX2) - aX;
+
+      if (currentX > 0.0) {
+        aB = currentT;
+      } else {
+        aA = currentT;
+      }
+    } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+
+    return currentT;
+  }
+  /**
+   * 牛顿迭代算法，进一步的获取精确的T值
+   * @param {number} aX
+   * @param {number} aGuessT
+   * @param {number} mX1
+   * @param {number} mX2
+   * @return {number} 获取更精确的T值
+   */
+
+
+  function newtonRaphsonIterate(aX, aGuessT, mX1, mX2) {
+    for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+      var currentSlope = getSlope(aGuessT, mX1, mX2);
+
+      if (currentSlope === 0.0) {
+        return aGuessT;
+      }
+
+      var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+      aGuessT -= currentX / currentSlope;
+    }
+
+    return aGuessT;
+  }
+  /**
+   * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
+   *
+   * @class
+   * @memberof JC
+   * @param {number} mX1 控制点1的x分量
+   * @param {number} mY1 控制点1的y分量
+   * @param {number} mX2 控制点2的x分量
+   * @param {number} mY2 控制点2的y分量
+   */
+
+
+  function BezierEasing(mX1, mY1, mX2, mY2) {
+    if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+      throw new Error('bezier x values must be in [0, 1] range');
+    }
+
+    this.mX1 = mX1;
+    this.mY1 = mY1;
+    this.mX2 = mX2;
+    this.mY2 = mY2;
+    this.sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+
+    this._preCompute();
+  }
+
+  BezierEasing.prototype._preCompute = function () {
+    // Precompute samples table
+    if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
+      for (var i = 0; i < kSplineTableSize; ++i) {
+        this.sampleValues[i] = calcBezier(i * kSampleStepSize, this.mX1, this.mX2);
+      }
+    }
+  };
+
+  BezierEasing.prototype._getTForX = function (aX) {
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize - 1;
+
+    for (; currentSample !== lastSample && this.sampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+
+    --currentSample; // Interpolate to provide an initial guess for t
+
+    var dist = (aX - this.sampleValues[currentSample]) / (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize;
+    var initialSlope = getSlope(guessForT, this.mX1, this.mX2);
+
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT, this.mX1, this.mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, this.mX1, this.mX2);
+    }
+  };
+  /**
+   * 通过x轴近似获取y的值
+   *
+   * @param {number} x x轴的偏移量
+   * @return {number} y 与输入值x对应的y值
+   */
+
+
+  BezierEasing.prototype.get = function (x) {
+    if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
+
+    if (x === 0) {
+      return 0;
+    }
+
+    if (x === 1) {
+      return 1;
+    }
+
+    return calcBezier(this._getTForX(x), this.mY1, this.mY2);
+  };
+
+  /* eslint no-cond-assign: "off" */
+
+  /* eslint new-cap: 0 */
+
+  /* eslint max-len: 0 */
+
+  /**
+   * Tween 缓动时间运动函数集合
+   *
+   * ```js
+   * dispay.animate({
+   *   from: {x: 100},
+   *   to: {x: 200},
+   *   ease: JC.Tween.Ease.In, // 配置要调用的运动函数
+   * })
+   * ```
+   * @namespace JC.Tween
+   */
+
+  var Tween = {
+    Linear: {
+      None: function None(k) {
+        return k;
+      }
+    },
+    Ease: {
+      In: function () {
+        var bezier = new BezierEasing(.42, 0, 1, 1);
+        return function (k) {
+          return bezier.get(k);
+        };
+      }(),
+      Out: function () {
+        var bezier = new BezierEasing(0, 0, .58, 1);
+        return function (k) {
+          return bezier.get(k);
+        };
+      }(),
+      InOut: function () {
+        var bezier = new BezierEasing(.42, 0, .58, 1);
+        return function (k) {
+          return bezier.get(k);
+        };
+      }(),
+      Bezier: function Bezier(x1, y1, x2, y2) {
+        var bezier = new BezierEasing(x1, y1, x2, y2);
+        return function (k) {
+          return bezier.get(k);
+        };
+      }
+    },
+    Elastic: {
+      In: function In(k) {
+        if (k === 0) {
+          return 0;
+        }
+
+        if (k === 1) {
+          return 1;
+        }
+
+        return -Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+      },
+      Out: function Out(k) {
+        if (k === 0) {
+          return 0;
+        }
+
+        if (k === 1) {
+          return 1;
+        }
+
+        return Math.pow(2, -10 * k) * Math.sin((k - 0.1) * 5 * Math.PI) + 1;
+      },
+      InOut: function InOut(k) {
+        if (k === 0) {
+          return 0;
+        }
+
+        if (k === 1) {
+          return 1;
+        }
+
+        k *= 2;
+
+        if (k < 1) {
+          return -0.5 * Math.pow(2, 10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI);
+        }
+
+        return 0.5 * Math.pow(2, -10 * (k - 1)) * Math.sin((k - 1.1) * 5 * Math.PI) + 1;
+      }
+    },
+    Back: {
+      In: function In(k) {
+        var s = 1.70158;
+        return k * k * ((s + 1) * k - s);
+      },
+      Out: function Out(k) {
+        var s = 1.70158;
+        return --k * k * ((s + 1) * k + s) + 1;
+      },
+      InOut: function InOut(k) {
+        var s = 1.70158 * 1.525;
+
+        if ((k *= 2) < 1) {
+          return 0.5 * (k * k * ((s + 1) * k - s));
+        }
+
+        return 0.5 * ((k -= 2) * k * ((s + 1) * k + s) + 2);
+      }
+    },
+    Bounce: {
+      In: function In(k) {
+        return 1 - Tween.Bounce.Out(1 - k);
+      },
+      Out: function Out(k) {
+        if (k < 1 / 2.75) {
+          return 7.5625 * k * k;
+        } else if (k < 2 / 2.75) {
+          return 7.5625 * (k -= 1.5 / 2.75) * k + 0.75;
+        } else if (k < 2.5 / 2.75) {
+          return 7.5625 * (k -= 2.25 / 2.75) * k + 0.9375;
         } else {
-          cbs.length = 0;
+          return 7.5625 * (k -= 2.625 / 2.75) * k + 0.984375;
+        }
+      },
+      InOut: function InOut(k) {
+        if (k < 0.5) {
+          return Tween.Bounce.In(k * 2) * 0.5;
+        }
+
+        return Tween.Bounce.Out(k * 2 - 1) * 0.5 + 0.5;
+      }
+    }
+  };
+
+  /**
+   * 动画对象的基本类型
+   *
+   * @class
+   * @memberof JC
+   * @param {object} [options] 动画配置信息
+   */
+
+  function Animate(options) {
+    Eventer.call(this);
+    this.element = options.element || {};
+    this.duration = options.duration || 300;
+    this.living = true;
+    this.resident = options.resident || false; // this.onComplete = options.onComplete || null;
+    // this.onUpdate = options.onUpdate || null;
+
+    this.infinite = options.infinite || false;
+    this.alternate = options.alternate || false;
+    this.repeats = options.repeats || 0;
+    this.delay = options.delay || 0;
+    this.wait = options.wait || 0;
+    this.timeScale = Utils.isNumber(options.timeScale) ? options.timeScale : 1;
+
+    if (options.onComplete) {
+      this.on('complete', options.onComplete.bind(this));
+    }
+
+    if (options.onUpdate) {
+      this.on('update', options.onUpdate.bind(this));
+    } // this.repeatsCut = this.repeats;
+    // this.delayCut = this.delay;
+    // this.waitCut = this.wait;
+    // this.progress = 0;
+    // this.direction = 1;
+
+
+    this.init();
+    this.paused = false;
+  }
+
+  Animate.prototype = Object.create(Eventer.prototype);
+  /**
+   * 更新动画
+   * @private
+   * @param {number} snippet 时间片段
+   * @return {object}
+   */
+
+  Animate.prototype.update = function (snippet) {
+    var snippetCache = this.direction * this.timeScale * snippet;
+
+    if (this.waitCut > 0) {
+      this.waitCut -= Math.abs(snippetCache);
+      return;
+    }
+
+    if (this.paused || !this.living || this.delayCut > 0) {
+      if (this.delayCut > 0) this.delayCut -= Math.abs(snippetCache);
+      return;
+    }
+
+    this.progress += snippetCache;
+    var isEnd = false;
+    var progressCache = this.progress;
+
+    if (this.spill()) {
+      if (this.repeatsCut > 0 || this.infinite) {
+        if (this.repeatsCut > 0) --this.repeatsCut;
+        this.delayCut = this.delay;
+
+        if (this.alternate) {
+          this.direction *= -1;
+          this.progress = Utils.codomainBounce(this.progress, 0, this.duration);
+        } else {
+          this.direction = 1;
+          this.progress = Utils.euclideanModulo(this.progress, this.duration);
+        }
+      } else {
+        isEnd = true;
+      }
+    }
+
+    var pose;
+
+    if (!isEnd) {
+      pose = this.nextPose();
+      this.emit('update', pose, this.progress / this.duration);
+    } else {
+      if (!this.resident) this.living = false;
+      this.progress = Utils.clamp(progressCache, 0, this.duration);
+      pose = this.nextPose();
+      this.emit('complete', pose, Math.abs(progressCache - this.progress));
+    }
+
+    return pose;
+  };
+  /**
+   * 检查动画是否到了边缘
+   * @private
+   * @return {boolean}
+   */
+
+
+  Animate.prototype.spill = function () {
+    var bottomSpill = this.progress <= 0 && this.direction === -1;
+    var topSpill = this.progress >= this.duration && this.direction === 1;
+    return bottomSpill || topSpill;
+  };
+  /**
+   * 初始化动画状态
+   * @private
+   */
+
+
+  Animate.prototype.init = function () {
+    this.direction = 1;
+    this.progress = 0;
+    this.repeatsCut = this.repeats;
+    this.delayCut = this.delay;
+    this.waitCut = this.wait;
+  };
+  /**
+   * 下一帧的数据
+   * @private
+   */
+
+
+  Animate.prototype.nextPose = function () {
+    console.warn('should be overwrite');
+  };
+  /**
+   * 线性插值
+   * @private
+   * @param {number} p0 起始位置
+   * @param {number} p1 结束位置
+   * @param {number} t  进度位置
+   * @return {Number}
+   */
+
+
+  Animate.prototype.linear = function (p0, p1, t) {
+    return (p1 - p0) * t + p0;
+  };
+  /**
+   * 暂停动画
+   */
+
+
+  Animate.prototype.pause = function () {
+    this.paused = true;
+  };
+  /**
+   * 恢复动画
+   */
+
+
+  Animate.prototype.restart = function () {
+    this.paused = false;
+  };
+  /**
+   * 停止动画，并把状态置为最后一帧，会触发事件
+   */
+
+
+  Animate.prototype.stop = function () {
+    this.repeats = 0;
+    this.infinite = false;
+    this.progress = this.duration;
+  };
+  /**
+   * 设置动画的速率
+   * @param {number} speed
+   */
+
+
+  Animate.prototype.setSpeed = function (speed) {
+    this.timeScale = speed;
+  };
+  /**
+   * 取消动画，不会触发事件
+   */
+
+
+  Animate.prototype.cancle = function () {
+    this.living = false;
+  };
+
+  /* eslint guard-for-in: "off" */
+
+  /**
+   * Transition类型动画对象
+   *
+   * @class
+   * @memberof JC
+   * @param {object} [options] 动画所具备的特性
+   */
+
+  function Transition(options) {
+    Animate.call(this, options); // collect from pose, when from was not complete
+
+    options.from = options.from || {};
+
+    for (var i in options.to) {
+      if (Utils.isUndefined(options.from[i])) {
+        options.from[i] = this.element[i];
+      }
+    }
+
+    this.ease = options.ease || Tween.Ease.InOut;
+    this.from = options.from;
+    this.to = options.to;
+  }
+
+  Transition.prototype = Object.create(Animate.prototype);
+  /**
+   * 计算下一帧状态
+   * @private
+   * @return {object}
+   */
+
+  Transition.prototype.nextPose = function () {
+    var pose = {};
+    var t = this.ease(this.progress / this.duration);
+
+    for (var i in this.to) {
+      pose[i] = this.linear(this.from[i], this.to[i], t);
+      if (this.element[i] !== undefined) this.element[i] = pose[i];
+    }
+
+    return pose;
+  };
+
+  // import { Point } from './Point';
+
+  /**
+   * @class
+   * @memberof JC
+   */
+  function Curve() {}
+
+  Curve.prototype = {
+    constructor: Curve,
+    getPoint: function getPoint(t) {
+      console.warn('Curve: Warning, getPoint() not implemented!', t);
+      return null;
+    },
+    getPointAt: function getPointAt(u) {
+      var t = this.getUtoTmapping(u);
+      return this.getPoint(t);
+    },
+    getPoints: function getPoints(divisions) {
+      if (isNaN(divisions)) divisions = 5;
+      var points = [];
+
+      for (var d = 0; d <= divisions; d++) {
+        points.push(this.getPoint(d / divisions));
+      }
+
+      return points;
+    },
+    getSpacedPoints: function getSpacedPoints(divisions) {
+      if (isNaN(divisions)) divisions = 5;
+      var points = [];
+
+      for (var d = 0; d <= divisions; d++) {
+        points.push(this.getPointAt(d / divisions));
+      }
+
+      return points;
+    },
+    getLength: function getLength() {
+      var lengths = this.getLengths();
+      return lengths[lengths.length - 1];
+    },
+    getLengths: function getLengths(divisions) {
+      if (isNaN(divisions)) {
+        divisions = this.__arcLengthDivisions ? this.__arcLengthDivisions : 200;
+      }
+
+      if (this.cacheArcLengths && this.cacheArcLengths.length === divisions + 1 && !this.needsUpdate) {
+        return this.cacheArcLengths;
+      }
+
+      this.needsUpdate = false;
+      var cache = [];
+      var current;
+      var last = this.getPoint(0);
+      var p;
+      var sum = 0;
+      cache.push(0);
+
+      for (p = 1; p <= divisions; p++) {
+        current = this.getPoint(p / divisions);
+        sum += current.distanceTo(last);
+        cache.push(sum);
+        last = current;
+      }
+
+      this.cacheArcLengths = cache;
+      return cache;
+    },
+    updateArcLengths: function updateArcLengths() {
+      this.needsUpdate = true;
+      this.getLengths();
+    },
+    getUtoTmapping: function getUtoTmapping(u, distance) {
+      var arcLengths = this.getLengths();
+      var i = 0;
+      var il = arcLengths.length;
+      var t;
+      var targetArcLength;
+
+      if (distance) {
+        targetArcLength = distance;
+      } else {
+        targetArcLength = u * arcLengths[il - 1];
+      }
+
+      var low = 0;
+      var high = il - 1;
+      var comparison;
+
+      while (low <= high) {
+        i = Math.floor(low + (high - low) / 2);
+        comparison = arcLengths[i] - targetArcLength;
+
+        if (comparison < 0) {
+          low = i + 1;
+        } else if (comparison > 0) {
+          high = i - 1;
+        } else {
+          high = i;
+          break;
         }
       }
-      return this;
+
+      i = high;
+
+      if (arcLengths[i] === targetArcLength) {
+        t = i / (il - 1);
+        return t;
+      }
+
+      var lengthBefore = arcLengths[i];
+      var lengthAfter = arcLengths[i + 1];
+      var segmentLength = lengthAfter - lengthBefore;
+      var segmentFraction = (targetArcLength - lengthBefore) / segmentLength;
+      t = (i + segmentFraction) / (il - 1);
+      return t;
+    },
+    getTangent: function getTangent(t) {
+      var delta = 0.0001;
+      var t1 = t - delta;
+      var t2 = t + delta; // NOTE: svg and bezier accept out of [0, 1] value
+      // if ( t1 < 0 ) t1 = 0;
+      // if ( t2 > 1 ) t2 = 1;
+
+      var pt1 = this.getPoint(t1);
+      var pt2 = this.getPoint(t2);
+      var vec = pt2.clone().sub(pt1);
+      return vec.normalize();
+    },
+    getTangentAt: function getTangentAt(u) {
+      var t = this.getUtoTmapping(u);
+      return this.getTangent(t);
+    }
+  };
+
+  /* eslint max-len: "off" */
+
+  /**
+   * 二维空间内坐标点类
+   *
+   * @class
+   * @memberof JC
+   * @param {number} [x=0] x轴的位置
+   * @param {number} [y=0] y轴的位置
+   * @param {number} [z=0] z轴的位置
+   * @param {number} [w=0] w轴的位置
+   */
+  function Point(x, y, z, w) {
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.y = y || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.z = z || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.w = w || 0;
+  }
+  /**
+   * 克隆一这个坐标点
+   *
+   * @return {JC.Point} 克隆的坐标点
+   */
+
+
+  Point.prototype.clone = function () {
+    return new Point(this.x, this.y, this.z, this.w);
+  };
+  /**
+   * 拷贝传入的坐标点来设置当前坐标点
+   *
+   * @param {JC.Point} p
+   */
+
+
+  Point.prototype.copy = function (p) {
+    this.set(p.x, p.y, p.z, p.w);
+  };
+  /**
+   * 设置坐标点
+   *
+   * @param {number} x 轴的位置
+   * @param {number} y 轴的位置
+   * @param {number} z 轴的位置
+   * @param {number} w 轴的位置
+   * @return {Point} this
+   */
+
+
+  Point.prototype.set = function (x, y, z, w) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+    return this;
+  };
+
+  Point.prototype.add = function (v, w) {
+    if (w !== undefined) {
+      console.warn('Use .addVectors( a, b ) instead.');
+      return this.addVectors(v, w);
     }
 
+    this.x += v.x;
+    this.y += v.y;
+    this.z += v.z;
+    this.w += v.w;
+    return this;
+  };
+
+  Point.prototype.addVectors = function (a, b) {
+    this.x = a.x + b.x;
+    this.y = a.y + b.y;
+    this.z = a.z + b.z;
+    this.w = a.w + b.w;
+    return this;
+  };
+
+  Point.prototype.sub = function (v, w) {
+    if (w !== undefined) {
+      console.warn('Use .subVectors( a, b ) instead.');
+      return this.subVectors(v, w);
+    }
+
+    this.x -= v.x;
+    this.y -= v.y;
+    this.z -= v.z;
+    this.w -= v.w;
+    return this;
+  };
+
+  Point.prototype.subVectors = function (a, b) {
+    this.x = a.x - b.x;
+    this.y = a.y - b.y;
+    this.z = a.z - b.z;
+    this.w = a.w - b.w;
+    return this;
+  };
+
+  Point.prototype.lengthSq = function () {
+    return this.x * this.x + this.y * this.y + this.z * this.z + this.w * this.w;
+  };
+
+  Point.prototype.length = function () {
+    return Math.sqrt(this.lengthSq());
+  };
+
+  Point.prototype.normalize = function () {
+    return this.divideScalar(this.length());
+  };
+
+  Point.prototype.divideScalar = function (scalar) {
+    return this.multiplyScalar(1 / scalar);
+  };
+
+  Point.prototype.distanceTo = function (v) {
+    return Math.sqrt(this.distanceToSquared(v));
+  };
+
+  Point.prototype.distanceToSquared = function (v) {
+    var dx = this.x - v.x;
+    var dy = this.y - v.y;
+    var dz = this.z - v.z;
+    return dx * dx + dy * dy + dz * dz;
+  };
+
+  Point.prototype.multiplyScalar = function (scalar) {
+    if (isFinite(scalar)) {
+      this.x *= scalar;
+      this.y *= scalar;
+      this.z *= scalar;
+      this.w *= scalar;
+    } else {
+      this.x = 0;
+      this.y = 0;
+      this.z = 0;
+      this.w = 0;
+    }
+
+    return this;
+  };
+
+  Point.prototype.cross = function (v, w) {
+    if (w !== undefined) {
+      console.warn('Use .crossVectors( a, b ) instead.');
+      return this.crossVectors(v, w);
+    }
+
+    var x = this.x;
+    var y = this.y;
+    var z = this.z;
+    this.x = y * v.z - z * v.y;
+    this.y = z * v.x - x * v.z;
+    this.z = x * v.y - y * v.x;
+    return this;
+  };
+
+  Point.prototype.crossVectors = function (a, b) {
+    var ax = a.x;
+    var ay = a.y;
+    var az = a.z;
+    var bx = b.x;
+    var by = b.y;
+    var bz = b.z;
+    this.x = ay * bz - az * by;
+    this.y = az * bx - ax * bz;
+    this.z = ax * by - ay * bx;
+    return this;
+  };
+
+  /**
+   * PathMotion类型动画对象
+   *
+   * @class
+   * @memberof JC
+   * @param {object} [options] 动画所具备的特性
+   */
+
+  function PathMotion(options) {
+    Animate.call(this, options);
+
+    if (!options.path || !(options.path instanceof Curve)) {
+      console.warn('path is not instanceof Curve');
+    }
+
+    this.path = options.path;
+    this.ease = options.ease || Tween.Ease.InOut;
+    this.lengthMode = Utils.isBoolean(options.lengthMode) ? options.lengthMode : false;
+    this.attachTangent = Utils.isBoolean(options.attachTangent) ? options.attachTangent : false;
+    this._cacheRotate = this.element.rotation;
+    var radian = this._cacheRotate;
+    this._cacheVector = new Point(10 * Math.cos(radian), 10 * Math.sin(radian));
+  }
+
+  PathMotion.prototype = Object.create(Animate.prototype);
+  /**
+   * 计算下一帧状态
+   * @private
+   * @return {object}
+   */
+
+  PathMotion.prototype.nextPose = function () {
+    var _rotate = 0;
+    var t = this.ease(this.progress / this.duration);
+    var pos = this.lengthMode ? this.path.getPointAt(t) : this.path.getPoint(t);
+    var pose = pos.clone();
+
+    if (this.attachTangent) {
+      _rotate = this.decomposeRotate(t);
+      pose.rotation = _rotate === false ? this.preDegree : _rotate;
+      pose.rotation += this._cacheRotate;
+      if (_rotate !== false) this.preDegree = _rotate;
+    }
+
+    this.element.setProps(pose);
+    return pose;
+  };
+  /**
+   * 解算旋转角度
+   * @private
+   * @param {number} t 当前进度, 区间[0, 1]
+   * @return {number}
+   */
+
+
+  PathMotion.prototype.decomposeRotate = function (t) {
+    var vector = this.lengthMode ? this.path.getTangentAt(t) : this.path.getTangent(t);
+    var nor = this._cacheVector.x * vector.y - vector.x * this._cacheVector.y;
+    var pi = nor > 0 ? 1 : -1;
+    var cos = (vector.x * this._cacheVector.x + vector.y * this._cacheVector.y) / (Math.sqrt(vector.x * vector.x + vector.y * vector.y) * Math.sqrt(this._cacheVector.x * this._cacheVector.x + this._cacheVector.y * this._cacheVector.y));
+    if (isNaN(cos)) return false;
+    return pi * Math.acos(cos) * Utils.RTD;
+  };
+
+  /**
+   * 贝塞尔曲线类 note: 一般来说超过5阶的贝塞尔曲线并不是非常实用，你可以尝试 JC 的其他曲线类型
+   * @class
+   * @memberof JC
+   * @param {Array}  points  array of points
+   */
+
+  function BezierCurve(points) {
+    this.points = points;
+  }
+
+  BezierCurve.prototype = Object.create(Curve.prototype);
+
+  BezierCurve.prototype.getPoint = function (t, points) {
+    var a = points || this.points;
+    var len = a.length;
+    var rT = 1 - t;
+    var l = a.slice(0, len - 1);
+    var r = a.slice(1);
+    var oP = new Point();
+
+    if (len > 3) {
+      var oL = this.getPoint(t, l);
+      var oR = this.getPoint(t, r);
+      oP.x = rT * oL.x + t * oR.x;
+      oP.y = rT * oL.y + t * oR.y;
+      return oP;
+    } else {
+      oP.x = rT * rT * a[0].x + 2 * t * rT * a[1].x + t * t * a[2].x;
+      oP.y = rT * rT * a[0].y + 2 * t * rT * a[1].y + t * t * a[2].y;
+      return oP;
+    }
+  };
+
+  var bezierPool = {};
+  /**
+   * 准备好贝塞尔曲线
+   * @param {number} mX1 控制点1的x分量
+   * @param {number} mY1 控制点1的y分量
+   * @param {number} mX2 控制点2的x分量
+   * @param {number} mY2 控制点2的y分量
+   * @param {string} nm 控制点命名
+   * @return {BezierEasing}
+   */
+
+  function prepareEaseing(mX1, mY1, mX2, mY2, nm) {
+    var str = nm || [mX2, mY2, mX1, mY1].join('_').replace(/\./g, 'p');
+
+    if (bezierPool[str]) {
+      return bezierPool[str];
+    }
+
+    var bezEasing = new BezierEasing(mX1, mY1, mX2, mY2);
+    bezierPool[str] = bezEasing;
+  }
+  /**
+   * 根据进度获取到普通插值
+   * @param {number} s  插值起始端点
+   * @param {number} e  插值结束端点
+   * @param {array}  nm 贝塞尔曲线的名字
+   * @param {number} p  插值进度
+   * @return {array}
+   */
+
+
+  function getEaseing(s, e, nm, p) {
+    var value = [];
+
+    for (var i = 0; i < s.length; i++) {
+      var bezier = bezierPool[nm[i]] || bezierPool[nm[0]];
+      var rate = bezier.get(p);
+      var v = e[i] - s[i];
+      value[i] = s[i] + v * rate;
+    }
+
+    return value;
+  }
+  /**
+   *
+   * @param {BezierCurve} curve
+   * @param {string} nm
+   * @param {number} p
+   * @return {Point}
+   */
+
+
+  function getEaseingPath(curve, nm, p) {
+    var rate = bezierPool[nm].get(p);
+    var point = curve.getPointAt(rate);
+    return [point.x, point.y, point.z];
+  }
+
+  /* eslint guard-for-in: "off" */
+  var PROPS_MAP = {
+    o: {
+      props: ['alpha'],
+      scale: 0.01
+    },
+    r: {
+      props: ['rotation'],
+      scale: 1
+    },
+    p: {
+      props: ['x', 'y'],
+      scale: 1
+    },
+    a: {
+      props: ['pivotX', 'pivotY'],
+      scale: 1
+    },
+    s: {
+      props: ['scaleX', 'scaleY'],
+      scale: 0.01
+    }
+  };
+  /**
+   * 判断数值是否在(min, max]区间内
+   * @param {number} v   待比较的值
+   * @param {number} min 最小区间
+   * @param {number} max 最大区间
+   * @return {boolean} 是否在(min, max]区间内
+   */
+
+  function inRange(v, min, max) {
+    return v > min && v <= max;
+  }
+  /**
+   * 判断当前进度在哪一帧内
+   * @param {array} steps 帧数组
+   * @param {number} progress 当前进度
+   * @return {number} 当前进度停留在第几帧
+   */
+
+
+  function findStep(steps, progress) {
+    var last = steps.length - 1;
+
+    for (var i = 0; i < last; i++) {
+      var step = steps[i];
+
+      if (inRange(progress, step.jcst, step.jcet)) {
+        return i;
+      }
+    }
+  }
+  /**
+   * KeyFrames类型动画对象
+   *
+   * @class
+   * @memberof JC
+   * @param {object} [options] 动画配置信息
+   */
+
+
+  function KeyFrames(options) {
+    Animate.call(this, options);
+    this.layer = Utils.copyJSON(options.layer);
+    this.fr = options.fr || 30;
+    this.tpf = 1000 / this.fr;
+    this.iipt = this.layer.ip * this.tpf;
+    this.iopt = this.layer.op * this.tpf;
+    this.ip = options.ip === undefined ? this.layer.ip : options.ip;
+    this.op = options.op === undefined ? this.layer.op : options.op;
+    this.tfs = Math.floor(this.op - this.ip);
+    this.duration = this.tfs * this.tpf; // this.keyState = {};
+
+    this.aks = {};
+    this.kic = {};
+    this.preParser();
+    this.nextPose();
+  }
+
+  KeyFrames.prototype = Object.create(Animate.prototype);
+  /**
+   * 预解析关键帧
+   * @private
+   */
+
+  KeyFrames.prototype.preParser = function () {
+    var ks = this.layer.ks;
+
+    for (var key in ks) {
+      if (ks[key].a) {
+        this.parserDynamic(key);
+      } else {
+        this.parserStatic(key);
+      }
+    }
+  };
+  /**
+   * 预解析动态属性的关键帧
+   * @private
+   * @param {string} key 所属的属性
+   */
+
+
+  KeyFrames.prototype.parserDynamic = function (key) {
+    var ksp = this.layer.ks[key];
+    var kspk = ksp.k;
+    ksp.jcst = kspk[0].t * this.tpf;
+    ksp.jcet = kspk[kspk.length - 1].t * this.tpf;
+
+    for (var i = 0; i < kspk.length; i++) {
+      var sbk = kspk[i];
+      var sek = kspk[i + 1];
+
+      if (sek) {
+        sbk.jcst = sbk.t * this.tpf;
+        sbk.jcet = sek.t * this.tpf;
+
+        if (Utils.isString(sbk.n) && sbk.ti && sbk.to) {
+          prepareEaseing(sbk.o.x, sbk.o.y, sbk.i.x, sbk.i.y);
+          var sp = new Point(sbk.s[0], sbk.s[1]);
+          var ep = new Point(sbk.e[0], sbk.e[1]);
+          var c1 = new Point(sbk.s[0] + sbk.ti[0], sbk.s[1] + sbk.ti[1]);
+          var c2 = new Point(sbk.e[0] + sbk.to[0], sbk.e[1] + sbk.to[1]);
+          sbk.curve = new BezierCurve([sp, c1, c2, ep]);
+        } else {
+          for (var _i = 0; _i < sbk.n.length; _i++) {
+            prepareEaseing(sbk.o.x[_i], sbk.o.y[_i], sbk.i.x[_i], sbk.i.y[_i]);
+          }
+        }
+      }
+    }
+
+    this.aks[key] = ksp;
+  };
+  /**
+   * 预解析静态属性的关键帧
+   * @private
+   * @param {string} key 所属的属性
+   */
+
+
+  KeyFrames.prototype.parserStatic = function (key) {
+    // const prop = PM[key].label;
+    // const scale = PM[key].scale;
+    // let k = 0;
+    // if (Utils.isString(prop)) {
+    //   if (Utils.isNumber(ks[key].k)) {
+    //     k = ks[key].k;
+    //   }
+    //   if (Utils.isArray(ks[key].k)) {
+    //     k = ks[key].k[0];
+    //   }
+    //   this.element[prop] = scale * k;
+    // } else if (Utils.isArray(prop)) {
+    //   for (let i = 0; i < prop.length; i++) {
+    //     k = ks[key].k[i];
+    //     this.element[prop[i]] = scale * k;
+    //   }
+    // }
+    var ksp = this.layer.ks[key];
+    var kspk = ksp.k;
+    if (Utils.isNumber(kspk)) kspk = [kspk];
+    this.setValue(key, kspk);
+  };
+  /**
+   * 计算下一帧状态
+   * @private
+   * @return {object}
+   */
+
+
+  KeyFrames.prototype.nextPose = function () {
+    var pose = {};
+
+    for (var key in this.aks) {
+      var ak = this.aks[key];
+      pose[key] = this.interpolation(key, ak);
+      this.setValue(key, pose[key]);
+    }
+
+    return pose;
+  };
+  /**
+   * 计算关键帧属性值
+   * @private
+   * @param {string} key 关键帧配置
+   * @param {object} ak 所属的属性
+   * @return {array}
+   */
+
+
+  KeyFrames.prototype.interpolation = function (key, ak) {
+    var akk = ak.k;
+    var progress = Utils.clamp(this.progress, 0, ak.jcet);
+    var skt = ak.jcst;
+    var ekt = ak.jcet;
+    var invisible = progress < this.iipt;
+    if (invisible === this.element.visible) this.element.visible = !invisible;
+
+    if (progress <= skt) {
+      return akk[0].s;
+    } else if (progress >= ekt) {
+      var last = akk.length - 2;
+      return akk[last].e;
+    } else {
+      var kic = this.kic[key];
+
+      if (!Utils.isNumber(kic) || !inRange(progress, akk[kic].jcst, akk[kic].jcet)) {
+        kic = this.kic[key] = findStep(akk, progress);
+      }
+
+      var frame = akk[kic];
+      var rate = (progress - frame.jcst) / (frame.jcet - frame.jcst);
+
+      if (frame.curve) {
+        return getEaseingPath(frame.curve, frame.n, rate);
+      } else {
+        return getEaseing(frame.s, frame.e, frame.n, rate);
+      }
+    }
+  };
+  /**
+   * 更新元素的属性值
+   * @private
+   * @param {string} key 属性
+   * @param {array} value 属性值
+   */
+
+
+  KeyFrames.prototype.setValue = function (key, value) {
+    var props = PROPS_MAP[key].props;
+    var scale = PROPS_MAP[key].scale;
+
+    for (var i = 0; i < props.length; i++) {
+      var v = value[i];
+      this.element[props[i]] = scale * v;
+    }
+  };
+
+  function _typeof(obj) {
+    "@babel/helpers - typeof";
+
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
+  function _defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  function _createClass(Constructor, protoProps, staticProps) {
+    if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) _defineProperties(Constructor, staticProps);
+    return Constructor;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function _isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
+
+    try {
+      Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (typeof call === "object" || typeof call === "function")) {
+      return call;
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _createSuper(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct();
+
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf(Derived),
+          result;
+
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf(this).constructor;
+
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+
+      return _possibleConstructorReturn(this, result);
+    };
+  }
+
+  /**
+   * get the type by Object.prototype.toString
+   * @ignore
+   * @param {*} val
+   * @return {String} type string value
+   */
+  function _rt$1(val) {
+    return Object.prototype.toString.call(val);
+  }
+  /**
+   * some useful toolkit
+   * @namespace
+   */
+
+
+  var Tools = {
     /**
-     * 事件对象的一次性事件绑定函数
+     * simple copy a json data
+     * @method
+     * @param {JSON} json source data
+     * @return {JSON} object
+     */
+    copyJSON: function copyJSON(json) {
+      return JSON.parse(JSON.stringify(json));
+    },
+
+    /**
+     * detect the variable is array type
+     * @method
+     * @param {Array} variable input variable
+     * @return {Boolean} result
+     */
+    isArray: function () {
+      var ks = _rt$1([]);
+
+      return function (variable) {
+        return _rt$1(variable) === ks;
+      };
+    }(),
+
+    /**
+     * detect the variable is string type
+     * @method
+     * @param {String} variable input variable
+     * @return {Boolean} result
+     */
+    isString: function () {
+      var ks = _rt$1('s');
+
+      return function (variable) {
+        return _rt$1(variable) === ks;
+      };
+    }(),
+
+    /**
+     * detect the variable is number type
+     * @method
+     * @param {Number} variable input variable
+     * @return {Boolean} result
+     */
+    isNumber: function () {
+      var ks = _rt$1(1);
+
+      return function (variable) {
+        return _rt$1(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为函数类型
+     * @method
+     * @param {Function} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isFunction: function () {
+      var ks = _rt$1(function () {});
+
+      return function (variable) {
+        return _rt$1(variable) === ks;
+      };
+    }(),
+
+    /**
+     * 判断变量是否为undefined
+     * @method
+     * @param {Function} variable 待判断的变量
+     * @return {Boolean} 判断的结果
+     */
+    isUndefined: function isUndefined(variable) {
+      return typeof variable === 'undefined';
+    },
+
+    /**
+     * detect the variable is boolean type
+     * @method
+     * @param {Boolean} variable input variable
+     * @return {Boolean} result
+     */
+    isBoolean: function () {
+      var ks = _rt$1(true);
+
+      return function (variable) {
+        return _rt$1(variable) === ks;
+      };
+    }(),
+
+    /**
+     * detect the variable is object type
+     * @method
+     * @param {Object} variable input variable
+     * @return {Boolean} result
+     */
+    isObject: function () {
+      var ks = _rt$1({});
+
+      return function (variable) {
+        return _rt$1(variable) === ks;
+      };
+    }(),
+
+    /**
+     * euclidean modulo
+     * @method
+     * @param {Number} n input value
+     * @param {Number} m modulo
+     * @return {Number} re-map to modulo area
+     */
+    euclideanModulo: function euclideanModulo(n, m) {
+      return (n % m + m) % m;
+    },
+
+    /**
+     * bounce value when value spill codomain
+     * @method
+     * @param {Number} n input value
+     * @param {Number} min lower boundary
+     * @param {Number} max upper boundary
+     * @return {Number} bounce back to boundary area
+     */
+    codomainBounce: function codomainBounce(n, min, max) {
+      if (n < min) return 2 * min - n;
+      if (n > max) return 2 * max - n;
+      return n;
+    },
+
+    /**
+     * clamp a value in range
+     * @method
+     * @param {Number} x input value
+     * @param {Number} a lower boundary
+     * @param {Number} b upper boundary
+     * @return {Number} clamp in range
+     */
+    clamp: function clamp(x, a, b) {
+      return x < a ? a : x > b ? b : x;
+    },
+
+    /**
+     * detect number was in [min, max]
+     * @method
+     * @param {number} v   value
+     * @param {number} min lower
+     * @param {number} max upper
+     * @return {boolean} in [min, max] range ?
+     */
+    inRange: function inRange(v, min, max) {
+      return v >= min && v <= max;
+    },
+
+    /**
+     * get assets from keyframes assets
+     * @method
+     * @param {string} id assets refid
+     * @param {object} assets assets object
+     * @return {object} asset object
+     */
+    getAssets: function getAssets(id, assets) {
+      for (var i = 0; i < assets.length; i++) {
+        if (id === assets[i].id) return assets[i];
+      }
+
+      console.error('have not assets name as', id);
+      return {};
+    },
+
+    /**
+     * get hex number from rgb array
+     * @param {array} rgb rgb array
+     * @return {number}
+     */
+    rgb2hex: function rgb2hex(rgb) {
+      return (rgb[0] << 16) + (rgb[1] << 8) + (rgb[2] | 0);
+    }
+  };
+
+  /**
+   * a
+   */
+
+  var Eventer$1 = /*#__PURE__*/function () {
+    /**
+     * a
+     */
+    function Eventer() {
+      _classCallCheck(this, Eventer);
+
+      /**
+       * 事件监听列表
+       *
+       * @member {Object}
+       * @private
+       */
+      this.listeners = {};
+    }
+    /**
+     * 事件对象的事件绑定函数
      *
      * @param {String} type 事件类型
      * @param {Function} fn 回调函数
      * @return {this}
      */
 
-  }, {
-    key: 'once',
-    value: function once(type, fn) {
-      var _this = this;
 
-      if (!Tools.isFunction(fn)) return this;
-      var cb = function cb(ev) {
-        fn(ev);
-        _this.off(type, cb);
-      };
-      this.on(type, cb);
-      return this;
-    }
-
-    /**
-     * 事件对象的触发事件函数
-     *
-     * @param {String} type 事件类型
-     * @param {Object} ev 事件数据
-     * @return {this}
-     */
-
-  }, {
-    key: 'emit',
-    value: function emit(type) {
-      if (Tools.isUndefined(this.listeners[type])) return this;
-      var cbs = this.listeners[type] || [];
-      var cache = cbs.slice(0);
-
-      for (var _len = arguments.length, reset = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        reset[_key - 1] = arguments[_key];
+    _createClass(Eventer, [{
+      key: "on",
+      value: function on(type, fn) {
+        if (!Tools.isFunction(fn)) return this;
+        if (Tools.isUndefined(this.listeners[type])) this.listeners[type] = [];
+        this.listeners[type].push(fn);
+        return this;
       }
+      /**
+       * 事件对象的事件解绑函数
+       *
+       * @param {String} type 事件类型
+       * @param {Function} fn 注册时回调函数的引用
+       * @return {this}
+       */
 
-      for (var i = 0; i < cache.length; i++) {
-        cache[i].apply(this, reset);
+    }, {
+      key: "off",
+      value: function off(type, fn) {
+        if (Tools.isUndefined(this.listeners[type])) return this;
+        var cbs = this.listeners[type];
+        var i = cbs.length;
+
+        if (i > 0) {
+          if (fn) {
+            while (i--) {
+              if (cbs[i] === fn) {
+                cbs.splice(i, 1);
+              }
+            }
+          } else {
+            cbs.length = 0;
+          }
+        }
+
+        return this;
       }
-      return this;
-    }
-  }]);
-  return Eventer;
-}();
+      /**
+       * 事件对象的一次性事件绑定函数
+       *
+       * @param {String} type 事件类型
+       * @param {Function} fn 回调函数
+       * @return {this}
+       */
 
-/**
- * register class
- * @class
- * @private
- */
-var Register = function () {
+    }, {
+      key: "once",
+      value: function once(type, fn) {
+        var _this = this;
+
+        if (!Tools.isFunction(fn)) return this;
+
+        var cb = function cb(ev) {
+          fn(ev);
+
+          _this.off(type, cb);
+        };
+
+        this.on(type, cb);
+        return this;
+      }
+      /**
+       * 事件对象的触发事件函数
+       *
+       * @param {String} type 事件类型
+       * @param {Object} ev 事件数据
+       * @return {this}
+       */
+
+    }, {
+      key: "emit",
+      value: function emit(type) {
+        if (Tools.isUndefined(this.listeners[type])) return this;
+        var cbs = this.listeners[type] || [];
+        var cache = cbs.slice(0);
+
+        for (var _len = arguments.length, reset = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          reset[_key - 1] = arguments[_key];
+        }
+
+        for (var i = 0; i < cache.length; i++) {
+          cache[i].apply(this, reset);
+        }
+
+        return this;
+      }
+    }]);
+
+    return Eventer;
+  }();
+
   /**
-   * register
-   */
-  function Register() {
-    classCallCheck(this, Register);
-
-    this.layers = {};
-    // this._forever = false;
-  }
-
-  /**
-   * registe layer
+   * register class
+   * @class
    * @private
-   * @param {string} name layer name path
-   * @param {object} layer layer object
    */
-
-
-  createClass(Register, [{
-    key: 'setLayer',
-    value: function setLayer(name, layer) {
-      if (!name) return;
-      if (this.layers[name]) console.warn('动画层命名冲突', name);
-      this.layers[name] = layer;
-    }
-
-    // /**
-    //  * registe layer
-    //  * @private
-    //  */
-    // forever() {
-    //   if (this._forever) return;
-    //   this._forever = true;
-    // }
-
+  var Register = /*#__PURE__*/function () {
     /**
-     * get layer by name path
-     * @param {string} name layer name path, example: root.gift.star1
-     * @return {object}
+     * register
+     */
+    function Register() {
+      _classCallCheck(this, Register);
+
+      this.layers = {}; // this._forever = false;
+    }
+    /**
+     * registe layer
+     * @private
+     * @param {string} name layer name path
+     * @param {object} layer layer object
      */
 
-  }, {
-    key: 'getLayer',
-    value: function getLayer(name) {
-      return this.layers[name];
-    }
-  }]);
-  return Register;
-}();
 
-var LoaderClass = null;
+    _createClass(Register, [{
+      key: "setLayer",
+      value: function setLayer(name, layer) {
+        if (!name) return;
+        if (this.layers[name]) console.warn('动画层命名冲突', name);
+        this.layers[name] = layer;
+      } // /**
+      //  * registe layer
+      //  * @private
+      //  */
+      // forever() {
+      //   if (this._forever) return;
+      //   this._forever = true;
+      // }
 
-/**
- * register an image loader
- * @param {*} _LoaderClass a
- */
-function registerLoader(_LoaderClass) {
-  LoaderClass = _LoaderClass;
-}
+      /**
+       * get layer by name path
+       * @param {string} name layer name path, example: root.gift.star1
+       * @return {object}
+       */
 
-/**
- * a
- * @return {Loader}
- */
-function getLoader() {
-  if (!LoaderClass) {
-    console.warn('must register an image loader, before you parse an animation');
-  }
-  return LoaderClass;
-}
-
-var LoaderRegister = { registerLoader: registerLoader, getLoader: getLoader };
-
-/**
- * complete layers
- * @param {*} layers
- * @param {*} comps
- * @param {*} fontManager
- */
-function completeLayers(layers, comps, fontManager) {
-  var layerData = void 0;
-  // let animArray; let lastFrame;
-  var i = void 0;var len = layers.length;
-  var j = void 0;var jLen = void 0;var k = void 0;var kLen = void 0;
-  for (i = 0; i < len; i += 1) {
-    layerData = layers[i];
-    if (!('ks' in layerData) || layerData.completed) {
-      continue;
-    }
-    layerData.completed = true;
-    if (layerData.tt) {
-      layers[i - 1].td = layerData.tt;
-    }
-    // animArray = [];
-    // lastFrame = -1;
-    if (layerData.hasMask) {
-      var maskProps = layerData.masksProperties;
-      jLen = maskProps.length;
-      for (j = 0; j < jLen; j += 1) {
-        if (maskProps[j].pt.k.i) {
-          convertPathsToAbsoluteValues(maskProps[j].pt.k);
-        } else {
-          kLen = maskProps[j].pt.k.length;
-          for (k = 0; k < kLen; k += 1) {
-            if (maskProps[j].pt.k[k].s) {
-              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].s[0]);
-            }
-            if (maskProps[j].pt.k[k].e) {
-              convertPathsToAbsoluteValues(maskProps[j].pt.k[k].e[0]);
-            }
-          }
-        }
+    }, {
+      key: "getLayer",
+      value: function getLayer(name) {
+        return this.layers[name];
       }
-    }
-    if (layerData.ty === 0) {
-      layerData.layers = findCompLayers(layerData.refId, comps);
-      completeLayers(layerData.layers, comps, fontManager);
-    } else if (layerData.ty === 4) {
-      completeShapes(layerData.shapes);
-    } else if (layerData.ty == 5) {
-      completeText(layerData, fontManager);
-    }
-  }
-}
+    }]);
 
-/**
- * findComp Layers
- * @param {*} id layer id
- * @param {*} comps comps
- * @return {Array}
- */
-function findCompLayers(id, comps) {
-  var i = 0;var len = comps.length;
-  while (i < len) {
-    if (comps[i].id === id) {
-      if (!comps[i].layers.__used) {
-        comps[i].layers.__used = true;
-        return comps[i].layers;
+    return Register;
+  }();
+
+  var LoaderClass = null;
+  /**
+   * register an image loader
+   * @param {*} _LoaderClass a
+   */
+
+  function registerLoader(_LoaderClass) {
+    LoaderClass = _LoaderClass;
+  }
+  /**
+   * a
+   * @return {Loader}
+   */
+
+
+  function getLoader() {
+    if (!LoaderClass) {
+      console.warn('must register an image loader, before you parse an animation');
+    }
+
+    return LoaderClass;
+  }
+
+  var LoaderRegister = {
+    registerLoader: registerLoader,
+    getLoader: getLoader
+  };
+
+  /**
+   * complete layers
+   * @param {*} layers
+   * @param {*} comps
+   * @param {*} fontManager
+   */
+  function completeLayers(layers, comps, fontManager) {
+    var layerData; // let animArray; let lastFrame;
+
+    var i;
+    var len = layers.length;
+    var j;
+    var jLen;
+    var k;
+    var kLen;
+
+    for (i = 0; i < len; i += 1) {
+      layerData = layers[i];
+
+      if (!('ks' in layerData) || layerData.completed) {
+        continue;
       }
-      return JSON.parse(JSON.stringify(comps[i].layers));
-    }
-    i += 1;
-  }
-}
 
-/**
- * completeShapes
- * @param {*} arr shapes
- */
-function completeShapes(arr) {
-  var i = void 0;var len = arr.length;
-  var j = void 0;var jLen = void 0;
-  // let hasPaths = false;
-  for (i = len - 1; i >= 0; i -= 1) {
-    if (arr[i].ty == 'sh') {
-      if (arr[i].ks.k.i) {
-        convertPathsToAbsoluteValues(arr[i].ks.k);
-      } else {
-        jLen = arr[i].ks.k.length;
+      layerData.completed = true;
+
+      if (layerData.tt) {
+        layers[i - 1].td = layerData.tt;
+      } // animArray = [];
+      // lastFrame = -1;
+
+
+      if (layerData.hasMask) {
+        var maskProps = layerData.masksProperties;
+        jLen = maskProps.length;
+
         for (j = 0; j < jLen; j += 1) {
-          if (arr[i].ks.k[j].s) {
-            convertPathsToAbsoluteValues(arr[i].ks.k[j].s[0]);
-          }
-          if (arr[i].ks.k[j].e) {
-            convertPathsToAbsoluteValues(arr[i].ks.k[j].e[0]);
-          }
-        }
-      }
-      // hasPaths = true;
-    } else if (arr[i].ty == 'gr') {
-      completeShapes(arr[i].it);
-    }
-  }
-  /* if(hasPaths){
-            //mx: distance
-            //ss: sensitivity
-            //dc: decay
-            arr.splice(arr.length-1,0,{
-                "ty": "ms",
-                "mx":20,
-                "ss":10,
-                 "dc":0.001,
-                "maxDist":200
-            });
-        }*/
-}
+          if (maskProps[j].pt.k.i) {
+            convertPathsToAbsoluteValues(maskProps[j].pt.k);
+          } else {
+            kLen = maskProps[j].pt.k.length;
 
-/**
- * convert relative position to absolute
- * @param {path} path path data
- */
-function convertPathsToAbsoluteValues(path) {
-  var i = void 0;var len = path.i.length;
-  for (i = 0; i < len; i += 1) {
-    path.i[i][0] += path.v[i][0];
-    path.i[i][1] += path.v[i][1];
-    path.o[i][0] += path.v[i][0];
-    path.o[i][1] += path.v[i][1];
-  }
-}
+            for (k = 0; k < kLen; k += 1) {
+              if (maskProps[j].pt.k[k].s) {
+                convertPathsToAbsoluteValues(maskProps[j].pt.k[k].s[0]);
+              }
 
-/**
- * checkVersion
- * @param {*} minimum minimum version
- * @param {*} animVersionString animate data version
- * @return {Boolean}
- */
-function checkVersion(minimum, animVersionString) {
-  var animVersion = animVersionString ? animVersionString.split('.') : [100, 100, 100];
-  if (minimum[0] > animVersion[0]) {
-    return true;
-  } else if (animVersion[0] > minimum[0]) {
-    return false;
-  }
-  if (minimum[1] > animVersion[1]) {
-    return true;
-  } else if (animVersion[1] > minimum[1]) {
-    return false;
-  }
-  if (minimum[2] > animVersion[2]) {
-    return true;
-  } else if (animVersion[2] > minimum[2]) {
-    return false;
-  }
-}
-
-var checkText = function () {
-  var minimumVersion = [4, 4, 14];
-
-  /**
-   * updateTextLayer
-   * @param {*} textLayer textLayer
-   */
-  function updateTextLayer(textLayer) {
-    var documentData = textLayer.t.d;
-    textLayer.t.d = {
-      k: [{
-        s: documentData,
-        t: 0
-      }]
-    };
-  }
-
-  /**
-   * iterateLayers
-   * @param {*} layers layers
-   */
-  function iterateLayers(layers) {
-    var i = void 0;var len = layers.length;
-    for (i = 0; i < len; i += 1) {
-      if (layers[i].ty === 5) {
-        updateTextLayer(layers[i]);
-      }
-    }
-  }
-
-  return function (animationData) {
-    if (checkVersion(minimumVersion, animationData.v)) {
-      iterateLayers(animationData.layers);
-      if (animationData.assets) {
-        var i = void 0;var len = animationData.assets.length;
-        for (i = 0; i < len; i += 1) {
-          if (animationData.assets[i].layers) {
-            iterateLayers(animationData.assets[i].layers);
-          }
-        }
-      }
-    }
-  };
-}();
-
-var checkChars = function () {
-  var minimumVersion = [4, 7, 99];
-  return function (animationData) {
-    if (animationData.chars && !checkVersion(minimumVersion, animationData.v)) {
-      var i = void 0;var len = animationData.chars.length;var j = void 0;var jLen = void 0; // let k; let kLen;
-      var pathData = void 0;var paths = void 0;
-      for (i = 0; i < len; i += 1) {
-        if (animationData.chars[i].data && animationData.chars[i].data.shapes) {
-          paths = animationData.chars[i].data.shapes[0].it;
-          jLen = paths.length;
-
-          for (j = 0; j < jLen; j += 1) {
-            pathData = paths[j].ks.k;
-            if (!pathData.__converted) {
-              convertPathsToAbsoluteValues(paths[j].ks.k);
-              pathData.__converted = true;
+              if (maskProps[j].pt.k[k].e) {
+                convertPathsToAbsoluteValues(maskProps[j].pt.k[k].e[0]);
+              }
             }
           }
         }
       }
-    }
-  };
-}();
 
-var checkColors = function () {
-  var minimumVersion = [4, 1, 9];
-
-  /**
-   * iterateShapes
-   * @param {*} shapes shapes
-   */
-  function iterateShapes(shapes) {
-    var i = void 0;var len = shapes.length;
-    var j = void 0;var jLen = void 0;
-    for (i = 0; i < len; i += 1) {
-      if (shapes[i].ty === 'gr') {
-        iterateShapes(shapes[i].it);
-      } else if (shapes[i].ty === 'fl' || shapes[i].ty === 'st') {
-        if (shapes[i].c.k && shapes[i].c.k[0].i) {
-          jLen = shapes[i].c.k.length;
-          for (j = 0; j < jLen; j += 1) {
-            if (shapes[i].c.k[j].s) {
-              shapes[i].c.k[j].s[0] /= 255;
-              shapes[i].c.k[j].s[1] /= 255;
-              shapes[i].c.k[j].s[2] /= 255;
-              shapes[i].c.k[j].s[3] /= 255;
-            }
-            if (shapes[i].c.k[j].e) {
-              shapes[i].c.k[j].e[0] /= 255;
-              shapes[i].c.k[j].e[1] /= 255;
-              shapes[i].c.k[j].e[2] /= 255;
-              shapes[i].c.k[j].e[3] /= 255;
-            }
-          }
-        } else {
-          shapes[i].c.k[0] /= 255;
-          shapes[i].c.k[1] /= 255;
-          shapes[i].c.k[2] /= 255;
-          shapes[i].c.k[3] /= 255;
-        }
+      if (layerData.ty === 0) {
+        layerData.layers = findCompLayers(layerData.refId, comps);
+        completeLayers(layerData.layers, comps);
+      } else if (layerData.ty === 4) {
+        completeShapes(layerData.shapes);
+      } else if (layerData.ty == 5) {
+        completeText(layerData);
       }
     }
   }
-
   /**
-   * iterateLayers
-   * @param {*} layers layers
+   * findComp Layers
+   * @param {*} id layer id
+   * @param {*} comps comps
+   * @return {Array}
    */
-  function iterateLayers(layers) {
-    var i = void 0;var len = layers.length;
-    for (i = 0; i < len; i += 1) {
-      if (layers[i].ty === 4) {
-        iterateShapes(layers[i].shapes);
+
+
+  function findCompLayers(id, comps) {
+    var i = 0;
+    var len = comps.length;
+
+    while (i < len) {
+      if (comps[i].id === id) {
+        if (!comps[i].layers.__used) {
+          comps[i].layers.__used = true;
+          return comps[i].layers;
+        }
+
+        return JSON.parse(JSON.stringify(comps[i].layers));
       }
+
+      i += 1;
     }
   }
-
-  return function (animationData) {
-    if (checkVersion(minimumVersion, animationData.v)) {
-      iterateLayers(animationData.layers);
-      if (animationData.assets) {
-        var i = void 0;var len = animationData.assets.length;
-        for (i = 0; i < len; i += 1) {
-          if (animationData.assets[i].layers) {
-            iterateLayers(animationData.assets[i].layers);
-          }
-        }
-      }
-    }
-  };
-}();
-
-var checkShapes = function () {
-  var minimumVersion = [4, 4, 18];
-
   /**
    * completeShapes
-   * @param {*} arr arr
+   * @param {*} arr shapes
    */
+
+
   function completeShapes(arr) {
-    var i = void 0;var len = arr.length;
-    var j = void 0;var jLen = void 0;
-    // let hasPaths = false;
+    var i;
+    var len = arr.length;
+    var j;
+    var jLen; // let hasPaths = false;
+
     for (i = len - 1; i >= 0; i -= 1) {
       if (arr[i].ty == 'sh') {
         if (arr[i].ks.k.i) {
-          arr[i].ks.k.c = arr[i].closed;
+          convertPathsToAbsoluteValues(arr[i].ks.k);
         } else {
           jLen = arr[i].ks.k.length;
+
           for (j = 0; j < jLen; j += 1) {
             if (arr[i].ks.k[j].s) {
-              arr[i].ks.k[j].s[0].c = arr[i].closed;
+              convertPathsToAbsoluteValues(arr[i].ks.k[j].s[0]);
             }
+
             if (arr[i].ks.k[j].e) {
-              arr[i].ks.k[j].e[0].c = arr[i].closed;
+              convertPathsToAbsoluteValues(arr[i].ks.k[j].e[0]);
             }
           }
-        }
-        // hasPaths = true;
+        } // hasPaths = true;
+
       } else if (arr[i].ty == 'gr') {
         completeShapes(arr[i].it);
       }
     }
+    /* if(hasPaths){
+              //mx: distance
+              //ss: sensitivity
+              //dc: decay
+              arr.splice(arr.length-1,0,{
+                  "ty": "ms",
+                  "mx":20,
+                  "ss":10,
+                   "dc":0.001,
+                  "maxDist":200
+              });
+          }*/
+
+  }
+  /**
+   * convert relative position to absolute
+   * @param {path} path path data
+   */
+
+
+  function convertPathsToAbsoluteValues(path) {
+    var i;
+    var len = path.i.length;
+
+    for (i = 0; i < len; i += 1) {
+      path.i[i][0] += path.v[i][0];
+      path.i[i][1] += path.v[i][1];
+      path.o[i][0] += path.v[i][0];
+      path.o[i][1] += path.v[i][1];
+    }
+  }
+  /**
+   * checkVersion
+   * @param {*} minimum minimum version
+   * @param {*} animVersionString animate data version
+   * @return {Boolean}
+   */
+
+
+  function checkVersion(minimum, animVersionString) {
+    var animVersion = animVersionString ? animVersionString.split('.') : [100, 100, 100];
+
+    if (minimum[0] > animVersion[0]) {
+      return true;
+    } else if (animVersion[0] > minimum[0]) {
+      return false;
+    }
+
+    if (minimum[1] > animVersion[1]) {
+      return true;
+    } else if (animVersion[1] > minimum[1]) {
+      return false;
+    }
+
+    if (minimum[2] > animVersion[2]) {
+      return true;
+    } else if (animVersion[2] > minimum[2]) {
+      return false;
+    }
   }
 
-  /**
-   * iterateLayers
-   * @param {*} layers layers
-   */
-  function iterateLayers(layers) {
-    var layerData = void 0;
-    var i = void 0;var len = layers.length;
-    var j = void 0;var jLen = void 0;var k = void 0;var kLen = void 0;
-    for (i = 0; i < len; i += 1) {
-      layerData = layers[i];
-      if (layerData.hasMask) {
-        var maskProps = layerData.masksProperties;
-        jLen = maskProps.length;
-        for (j = 0; j < jLen; j += 1) {
-          if (maskProps[j].pt.k.i) {
-            maskProps[j].pt.k.c = maskProps[j].cl;
-          } else {
-            kLen = maskProps[j].pt.k.length;
-            for (k = 0; k < kLen; k += 1) {
-              if (maskProps[j].pt.k[k].s) {
-                maskProps[j].pt.k[k].s[0].c = maskProps[j].cl;
-              }
-              if (maskProps[j].pt.k[k].e) {
-                maskProps[j].pt.k[k].e[0].c = maskProps[j].cl;
+  var checkText = function () {
+    var minimumVersion = [4, 4, 14];
+    /**
+     * updateTextLayer
+     * @param {*} textLayer textLayer
+     */
+
+    function updateTextLayer(textLayer) {
+      var documentData = textLayer.t.d;
+      textLayer.t.d = {
+        k: [{
+          s: documentData,
+          t: 0
+        }]
+      };
+    }
+    /**
+     * iterateLayers
+     * @param {*} layers layers
+     */
+
+
+    function iterateLayers(layers) {
+      var i;
+      var len = layers.length;
+
+      for (i = 0; i < len; i += 1) {
+        if (layers[i].ty === 5) {
+          updateTextLayer(layers[i]);
+        }
+      }
+    }
+
+    return function (animationData) {
+      if (checkVersion(minimumVersion, animationData.v)) {
+        iterateLayers(animationData.layers);
+
+        if (animationData.assets) {
+          var i;
+          var len = animationData.assets.length;
+
+          for (i = 0; i < len; i += 1) {
+            if (animationData.assets[i].layers) {
+              iterateLayers(animationData.assets[i].layers);
+            }
+          }
+        }
+      }
+    };
+  }();
+
+  var checkChars = function () {
+    var minimumVersion = [4, 7, 99];
+    return function (animationData) {
+      if (animationData.chars && !checkVersion(minimumVersion, animationData.v)) {
+        var i;
+        var len = animationData.chars.length;
+        var j;
+        var jLen; // let k; let kLen;
+
+        var pathData;
+        var paths;
+
+        for (i = 0; i < len; i += 1) {
+          if (animationData.chars[i].data && animationData.chars[i].data.shapes) {
+            paths = animationData.chars[i].data.shapes[0].it;
+            jLen = paths.length;
+
+            for (j = 0; j < jLen; j += 1) {
+              pathData = paths[j].ks.k;
+
+              if (!pathData.__converted) {
+                convertPathsToAbsoluteValues(paths[j].ks.k);
+                pathData.__converted = true;
               }
             }
           }
         }
       }
-      if (layerData.ty === 4) {
-        completeShapes(layerData.shapes);
-      }
-    }
-  }
+    };
+  }();
 
-  return function (animationData) {
-    if (checkVersion(minimumVersion, animationData.v)) {
-      iterateLayers(animationData.layers);
-      if (animationData.assets) {
-        var i = void 0;var len = animationData.assets.length;
-        for (i = 0; i < len; i += 1) {
-          if (animationData.assets[i].layers) {
-            iterateLayers(animationData.assets[i].layers);
+  var checkColors = function () {
+    var minimumVersion = [4, 1, 9];
+    /**
+     * iterateShapes
+     * @param {*} shapes shapes
+     */
+
+    function iterateShapes(shapes) {
+      var i;
+      var len = shapes.length;
+      var j;
+      var jLen;
+
+      for (i = 0; i < len; i += 1) {
+        if (shapes[i].ty === 'gr') {
+          iterateShapes(shapes[i].it);
+        } else if (shapes[i].ty === 'fl' || shapes[i].ty === 'st') {
+          if (shapes[i].c.k && shapes[i].c.k[0].i) {
+            jLen = shapes[i].c.k.length;
+
+            for (j = 0; j < jLen; j += 1) {
+              if (shapes[i].c.k[j].s) {
+                shapes[i].c.k[j].s[0] /= 255;
+                shapes[i].c.k[j].s[1] /= 255;
+                shapes[i].c.k[j].s[2] /= 255;
+                shapes[i].c.k[j].s[3] /= 255;
+              }
+
+              if (shapes[i].c.k[j].e) {
+                shapes[i].c.k[j].e[0] /= 255;
+                shapes[i].c.k[j].e[1] /= 255;
+                shapes[i].c.k[j].e[2] /= 255;
+                shapes[i].c.k[j].e[3] /= 255;
+              }
+            }
+          } else {
+            shapes[i].c.k[0] /= 255;
+            shapes[i].c.k[1] /= 255;
+            shapes[i].c.k[2] /= 255;
+            shapes[i].c.k[3] /= 255;
           }
         }
       }
     }
+    /**
+     * iterateLayers
+     * @param {*} layers layers
+     */
+
+
+    function iterateLayers(layers) {
+      var i;
+      var len = layers.length;
+
+      for (i = 0; i < len; i += 1) {
+        if (layers[i].ty === 4) {
+          iterateShapes(layers[i].shapes);
+        }
+      }
+    }
+
+    return function (animationData) {
+      if (checkVersion(minimumVersion, animationData.v)) {
+        iterateLayers(animationData.layers);
+
+        if (animationData.assets) {
+          var i;
+          var len = animationData.assets.length;
+
+          for (i = 0; i < len; i += 1) {
+            if (animationData.assets[i].layers) {
+              iterateLayers(animationData.assets[i].layers);
+            }
+          }
+        }
+      }
+    };
+  }();
+
+  var checkShapes = function () {
+    var minimumVersion = [4, 4, 18];
+    /**
+     * completeShapes
+     * @param {*} arr arr
+     */
+
+    function completeShapes(arr) {
+      var i;
+      var len = arr.length;
+      var j;
+      var jLen; // let hasPaths = false;
+
+      for (i = len - 1; i >= 0; i -= 1) {
+        if (arr[i].ty == 'sh') {
+          if (arr[i].ks.k.i) {
+            arr[i].ks.k.c = arr[i].closed;
+          } else {
+            jLen = arr[i].ks.k.length;
+
+            for (j = 0; j < jLen; j += 1) {
+              if (arr[i].ks.k[j].s) {
+                arr[i].ks.k[j].s[0].c = arr[i].closed;
+              }
+
+              if (arr[i].ks.k[j].e) {
+                arr[i].ks.k[j].e[0].c = arr[i].closed;
+              }
+            }
+          } // hasPaths = true;
+
+        } else if (arr[i].ty == 'gr') {
+          completeShapes(arr[i].it);
+        }
+      }
+    }
+    /**
+     * iterateLayers
+     * @param {*} layers layers
+     */
+
+
+    function iterateLayers(layers) {
+      var layerData;
+      var i;
+      var len = layers.length;
+      var j;
+      var jLen;
+      var k;
+      var kLen;
+
+      for (i = 0; i < len; i += 1) {
+        layerData = layers[i];
+
+        if (layerData.hasMask) {
+          var maskProps = layerData.masksProperties;
+          jLen = maskProps.length;
+
+          for (j = 0; j < jLen; j += 1) {
+            if (maskProps[j].pt.k.i) {
+              maskProps[j].pt.k.c = maskProps[j].cl;
+            } else {
+              kLen = maskProps[j].pt.k.length;
+
+              for (k = 0; k < kLen; k += 1) {
+                if (maskProps[j].pt.k[k].s) {
+                  maskProps[j].pt.k[k].s[0].c = maskProps[j].cl;
+                }
+
+                if (maskProps[j].pt.k[k].e) {
+                  maskProps[j].pt.k[k].e[0].c = maskProps[j].cl;
+                }
+              }
+            }
+          }
+        }
+
+        if (layerData.ty === 4) {
+          completeShapes(layerData.shapes);
+        }
+      }
+    }
+
+    return function (animationData) {
+      if (checkVersion(minimumVersion, animationData.v)) {
+        iterateLayers(animationData.layers);
+
+        if (animationData.assets) {
+          var i;
+          var len = animationData.assets.length;
+
+          for (i = 0; i < len; i += 1) {
+            if (animationData.assets[i].layers) {
+              iterateLayers(animationData.assets[i].layers);
+            }
+          }
+        }
+      }
+    };
+  }();
+  /**
+   * completeData
+   * @param {*} animationData animationData
+   * @param {*} fontManager fontManager
+   */
+
+
+  function completeData(animationData, fontManager) {
+    if (animationData.__complete) {
+      return;
+    }
+
+    checkColors(animationData);
+    checkText(animationData);
+    checkChars(animationData);
+    checkShapes(animationData);
+    completeLayers(animationData.layers, animationData.assets);
+    animationData.__complete = true; // blitAnimation(animationData, animationData.assets, fontManager);
+  }
+  /**
+   * completeText
+   * @param {*} data data
+   * @param {*} fontManager fontManager
+   */
+
+
+  function completeText(data, fontManager) {
+    if (data.t.a.length === 0 && !('m' in data.t.p)) {
+      data.singleShape = true;
+    }
+  }
+
+  var DataManager = {
+    completeData: completeData,
+    checkColors: checkColors,
+    checkChars: checkChars,
+    checkShapes: checkShapes,
+    completeLayers: completeLayers
   };
-}();
 
-/**
- * completeData
- * @param {*} animationData animationData
- * @param {*} fontManager fontManager
- */
-function completeData(animationData, fontManager) {
-  if (animationData.__complete) {
-    return;
+  /**
+   * https://github.com/gre/bezier-easing
+   * BezierEasing - use bezier curve for transition easing function
+   * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+   */
+  var NEWTON_ITERATIONS$1 = 4;
+  var NEWTON_MIN_SLOPE$1 = 0.001;
+  var SUBDIVISION_PRECISION$1 = 0.0000001;
+  var SUBDIVISION_MAX_ITERATIONS$1 = 10;
+  var kSplineTableSize$1 = 11;
+  var kSampleStepSize$1 = 1.0 / (kSplineTableSize$1 - 1.0);
+  var float32ArraySupported$1 = typeof Float32Array === 'function';
+  /* eslint new-cap: 0 */
+
+  /**
+   * 公因式A
+   *
+   * @param {number} aA1 控制分量
+   * @param {number} aA2 控制分量
+   * @return {number} 整个公式中的A公因式的值
+   */
+
+  function A$1(aA1, aA2) {
+    return 1.0 - 3.0 * aA2 + 3.0 * aA1;
   }
-  checkColors(animationData);
-  checkText(animationData);
-  checkChars(animationData);
-  checkShapes(animationData);
-  completeLayers(animationData.layers, animationData.assets, fontManager);
-  animationData.__complete = true;
-  // blitAnimation(animationData, animationData.assets, fontManager);
-}
+  /**
+   * 公因式B
+   *
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 整个公式中的B公因式的值
+   */
 
-/**
- * completeText
- * @param {*} data data
- * @param {*} fontManager fontManager
- */
-function completeText(data, fontManager) {
-  if (data.t.a.length === 0 && !('m' in data.t.p)) {
-    data.singleShape = true;
+
+  function B$1(aA1, aA2) {
+    return 3.0 * aA2 - 6.0 * aA1;
   }
-}
+  /**
+   * 公因式C
+   *
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 整个公式中的C公因式的值
+   */
 
-var DataManager = {
-  completeData: completeData,
-  checkColors: checkColors,
-  checkChars: checkChars,
-  checkShapes: checkShapes,
-  completeLayers: completeLayers
-};
 
-/**
- * https://github.com/gre/bezier-easing
- * BezierEasing - use bezier curve for transition easing function
- * by Gaëtan Renaudeau 2014 - 2015 – MIT License
- */
+  function C$1(aA1) {
+    return 3.0 * aA1;
+  }
+  /**
+   * 获取aT处的值
+   *
+   * @param {number} aT 三次贝塞尔曲线的t自变量
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 三次贝塞尔公式的因变量
+   */
 
-var NEWTON_ITERATIONS$1 = 4;
-var NEWTON_MIN_SLOPE$1 = 0.001;
-var SUBDIVISION_PRECISION$1 = 0.0000001;
-var SUBDIVISION_MAX_ITERATIONS$1 = 10;
 
-var kSplineTableSize$1 = 11;
-var kSampleStepSize$1 = 1.0 / (kSplineTableSize$1 - 1.0);
+  function calcBezier$1(aT, aA1, aA2) {
+    return ((A$1(aA1, aA2) * aT + B$1(aA1, aA2)) * aT + C$1(aA1)) * aT;
+  }
+  /**
+   * 获取aT处的斜率
+   * @param {number} aT 三次贝塞尔曲线的t自变量
+   * @param {number} aA1 控制分量1
+   * @param {number} aA2 控制分量2
+   * @return {number} 三次贝塞尔公式的导数
+   */
 
-var float32ArraySupported$1 = typeof Float32Array === 'function';
 
-/* eslint new-cap: 0 */
+  function getSlope$1(aT, aA1, aA2) {
+    return 3.0 * A$1(aA1, aA2) * aT * aT + 2.0 * B$1(aA1, aA2) * aT + C$1(aA1);
+  }
+  /**
+   *
+   * @param {number} aX
+   * @param {number} aA
+   * @param {number} aB
+   * @param {number} mX1
+   * @param {number} mX2
+   * @return {number} 二分法猜测t的值
+   */
 
-/**
- * 公因式A
- *
- * @param {number} aA1 控制分量
- * @param {number} aA2 控制分量
- * @return {number} 整个公式中的A公因式的值
- */
-function A$1(aA1, aA2) {
-  return 1.0 - 3.0 * aA2 + 3.0 * aA1;
-}
 
-/**
- * 公因式B
- *
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 整个公式中的B公因式的值
- */
-function B$1(aA1, aA2) {
-  return 3.0 * aA2 - 6.0 * aA1;
-}
+  function binarySubdivide$1(aX, aA, aB, mX1, mX2) {
+    var currentX;
+    var currentT;
+    var i = 0;
 
-/**
- * 公因式C
- *
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 整个公式中的C公因式的值
- */
-function C$1(aA1) {
-  return 3.0 * aA1;
-}
+    do {
+      currentT = aA + (aB - aA) / 2.0;
+      currentX = calcBezier$1(currentT, mX1, mX2) - aX;
 
-/**
- * 获取aT处的值
- *
- * @param {number} aT 三次贝塞尔曲线的t自变量
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 三次贝塞尔公式的因变量
- */
-function calcBezier$1(aT, aA1, aA2) {
-  return ((A$1(aA1, aA2) * aT + B$1(aA1, aA2)) * aT + C$1(aA1)) * aT;
-}
+      if (currentX > 0.0) {
+        aB = currentT;
+      } else {
+        aA = currentT;
+      }
+    } while (Math.abs(currentX) > SUBDIVISION_PRECISION$1 && ++i < SUBDIVISION_MAX_ITERATIONS$1);
 
-/**
- * 获取aT处的斜率
- * @param {number} aT 三次贝塞尔曲线的t自变量
- * @param {number} aA1 控制分量1
- * @param {number} aA2 控制分量2
- * @return {number} 三次贝塞尔公式的导数
- */
-function getSlope$1(aT, aA1, aA2) {
-  return 3.0 * A$1(aA1, aA2) * aT * aT + 2.0 * B$1(aA1, aA2) * aT + C$1(aA1);
-}
+    return currentT;
+  }
+  /**
+   * 牛顿迭代算法，进一步的获取精确的T值
+   * @param {number} aX
+   * @param {number} aGuessT
+   * @param {number} mX1
+   * @param {number} mX2
+   * @return {number} 获取更精确的T值
+   */
 
-/**
- *
- * @param {number} aX
- * @param {number} aA
- * @param {number} aB
- * @param {number} mX1
- * @param {number} mX2
- * @return {number} 二分法猜测t的值
- */
-function binarySubdivide$1(aX, aA, aB, mX1, mX2) {
-  var currentX = void 0;
-  var currentT = void 0;
-  var i = 0;
-  do {
-    currentT = aA + (aB - aA) / 2.0;
-    currentX = calcBezier$1(currentT, mX1, mX2) - aX;
-    if (currentX > 0.0) {
-      aB = currentT;
+
+  function newtonRaphsonIterate$1(aX, aGuessT, mX1, mX2) {
+    for (var i = 0; i < NEWTON_ITERATIONS$1; ++i) {
+      var currentSlope = getSlope$1(aGuessT, mX1, mX2);
+
+      if (currentSlope === 0.0) {
+        return aGuessT;
+      }
+
+      var currentX = calcBezier$1(aGuessT, mX1, mX2) - aX;
+      aGuessT -= currentX / currentSlope;
+    }
+
+    return aGuessT;
+  }
+  /**
+   * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
+   *
+   * @class
+   * @param {number} mX1 控制点1的x分量
+   * @param {number} mY1 控制点1的y分量
+   * @param {number} mX2 控制点2的x分量
+   * @param {number} mY2 控制点2的y分量
+   */
+
+
+  function BezierEasing$1(mX1, mY1, mX2, mY2) {
+    if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+      throw new Error('bezier x values must be in [0, 1] range');
+    }
+
+    this.mX1 = mX1;
+    this.mY1 = mY1;
+    this.mX2 = mX2;
+    this.mY2 = mY2;
+    this.sampleValues = float32ArraySupported$1 ? new Float32Array(kSplineTableSize$1) : new Array(kSplineTableSize$1);
+
+    this._preCompute();
+
+    this.get = this.get.bind(this);
+  }
+
+  BezierEasing$1.prototype._preCompute = function () {
+    // Precompute samples table
+    if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
+      for (var i = 0; i < kSplineTableSize$1; ++i) {
+        this.sampleValues[i] = calcBezier$1(i * kSampleStepSize$1, this.mX1, this.mX2);
+      }
+    }
+  };
+
+  BezierEasing$1.prototype._getTForX = function (aX) {
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize$1 - 1;
+
+    for (; currentSample !== lastSample && this.sampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize$1;
+    }
+
+    --currentSample; // Interpolate to provide an initial guess for t
+
+    var dist = (aX - this.sampleValues[currentSample]) / (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize$1;
+    var initialSlope = getSlope$1(guessForT, this.mX1, this.mX2);
+
+    if (initialSlope >= NEWTON_MIN_SLOPE$1) {
+      return newtonRaphsonIterate$1(aX, guessForT, this.mX1, this.mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
     } else {
-      aA = currentT;
+      return binarySubdivide$1(aX, intervalStart, intervalStart + kSampleStepSize$1, this.mX1, this.mX2);
     }
-  } while (Math.abs(currentX) > SUBDIVISION_PRECISION$1 && ++i < SUBDIVISION_MAX_ITERATIONS$1);
-  return currentT;
-}
+  };
+  /**
+   * 通过x轴近似获取y的值
+   *
+   * @param {number} x x轴的偏移量
+   * @return {number} y 与输入值x对应的y值
+   */
 
-/**
- * 牛顿迭代算法，进一步的获取精确的T值
- * @param {number} aX
- * @param {number} aGuessT
- * @param {number} mX1
- * @param {number} mX2
- * @return {number} 获取更精确的T值
- */
-function newtonRaphsonIterate$1(aX, aGuessT, mX1, mX2) {
-  for (var i = 0; i < NEWTON_ITERATIONS$1; ++i) {
-    var currentSlope = getSlope$1(aGuessT, mX1, mX2);
-    if (currentSlope === 0.0) {
-      return aGuessT;
+
+  BezierEasing$1.prototype.get = function (x) {
+    if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
+
+    if (x === 0) {
+      return 0;
     }
-    var currentX = calcBezier$1(aGuessT, mX1, mX2) - aX;
-    aGuessT -= currentX / currentSlope;
+
+    if (x === 1) {
+      return 1;
+    }
+
+    return calcBezier$1(this._getTForX(x), this.mY1, this.mY2);
+  };
+
+  var beziers = {};
+  /**
+   * get a bezierEasing from real time or cache
+   * @param {*} a in control point x component
+   * @param {*} b in control point y component
+   * @param {*} c out control point x component
+   * @param {*} d out control point y component
+   * @param {*} [nm] curver name
+   * @return {BezierEasing}
+   */
+
+  function getBezierEasing(a, b, c, d, nm) {
+    var str = nm || ('bez_' + a + '_' + b + '_' + c + '_' + d).replace(/\./g, 'p');
+
+    if (beziers[str]) {
+      return beziers[str];
+    }
+
+    var bezEasing = new BezierEasing$1(a, b, c, d);
+    beziers[str] = bezEasing;
+    return bezEasing;
   }
-  return aGuessT;
-}
 
-/**
- * cubic-bezier曲线的两个控制点，默认起始点为 0，结束点为 1
- *
- * @class
- * @param {number} mX1 控制点1的x分量
- * @param {number} mY1 控制点1的y分量
- * @param {number} mX2 控制点2的x分量
- * @param {number} mY2 控制点2的y分量
- */
-function BezierEasing$1(mX1, mY1, mX2, mY2) {
-  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
-    throw new Error('bezier x values must be in [0, 1] range');
+  var BezierFactory = {
+    getBezierEasing: getBezierEasing
+  };
+
+  /**
+   * a
+   * @param {*} type a
+   * @param {*} len a
+   * @return {*}
+   */
+  function createRegularArray(type, len) {
+    var i = 0;
+    var arr = [];
+    var value;
+
+    switch (type) {
+      case 'int16':
+      case 'uint8c':
+        value = 1;
+        break;
+
+      default:
+        value = 1.1;
+        break;
+    }
+
+    for (i = 0; i < len; i += 1) {
+      arr.push(value);
+    }
+
+    return arr;
   }
-  this.mX1 = mX1;
-  this.mY1 = mY1;
-  this.mX2 = mX2;
-  this.mY2 = mY2;
-  this.sampleValues = float32ArraySupported$1 ? new Float32Array(kSplineTableSize$1) : new Array(kSplineTableSize$1);
+  /**
+   * a
+   * @param {*} type a
+   * @param {*} len a
+   * @return {*}
+   */
 
-  this._preCompute();
 
-  this.get = this.get.bind(this);
-}
-
-BezierEasing$1.prototype._preCompute = function () {
-  // Precompute samples table
-  if (this.mX1 !== this.mY1 || this.mX2 !== this.mY2) {
-    for (var i = 0; i < kSplineTableSize$1; ++i) {
-      this.sampleValues[i] = calcBezier$1(i * kSampleStepSize$1, this.mX1, this.mX2);
+  function _createTypedArray(type, len) {
+    if (type === 'float32') {
+      return new Float32Array(len);
+    } else if (type === 'int16') {
+      return new Int16Array(len);
+    } else if (type === 'uint8c') {
+      return new Uint8ClampedArray(len);
     }
   }
-};
 
-BezierEasing$1.prototype._getTForX = function (aX) {
-  var intervalStart = 0.0;
-  var currentSample = 1;
-  var lastSample = kSplineTableSize$1 - 1;
+  var createTypedArray; //  = createTypedArray
 
-  for (; currentSample !== lastSample && this.sampleValues[currentSample] <= aX; ++currentSample) {
-    intervalStart += kSampleStepSize$1;
-  }
-  --currentSample;
-
-  // Interpolate to provide an initial guess for t
-  var dist = (aX - this.sampleValues[currentSample]) / (this.sampleValues[currentSample + 1] - this.sampleValues[currentSample]);
-  var guessForT = intervalStart + dist * kSampleStepSize$1;
-
-  var initialSlope = getSlope$1(guessForT, this.mX1, this.mX2);
-  if (initialSlope >= NEWTON_MIN_SLOPE$1) {
-    return newtonRaphsonIterate$1(aX, guessForT, this.mX1, this.mX2);
-  } else if (initialSlope === 0.0) {
-    return guessForT;
+  if (typeof Uint8ClampedArray === 'function' && typeof Float32Array === 'function') {
+    createTypedArray = _createTypedArray;
   } else {
-    return binarySubdivide$1(aX, intervalStart, intervalStart + kSampleStepSize$1, this.mX1, this.mX2);
+    createTypedArray = createRegularArray;
   }
-};
+  /**
+   * a
+   * @param {*} len a
+   * @return {*}
+   */
 
-/**
- * 通过x轴近似获取y的值
- *
- * @param {number} x x轴的偏移量
- * @return {number} y 与输入值x对应的y值
- */
-BezierEasing$1.prototype.get = function (x) {
-  if (this.mX1 === this.mY1 && this.mX2 === this.mY2) return x;
-  if (x === 0) {
-    return 0;
+
+  function createSizedArray(len) {
+    return new Array(len);
   }
-  if (x === 1) {
-    return 1;
+
+  /**
+   * a
+   * @param {*} arr a
+   * @return {*}
+   */
+
+  function _double(arr) {
+    return arr.concat(createSizedArray(arr.length));
   }
-  return calcBezier$1(this._getTForX(x), this.mY1, this.mY2);
-};
 
-var beziers = {};
+  var pooling = {
+    "double": _double
+  };
 
-/**
- * get a bezierEasing from real time or cache
- * @param {*} a in control point x component
- * @param {*} b in control point y component
- * @param {*} c out control point x component
- * @param {*} d out control point y component
- * @param {*} [nm] curver name
- * @return {BezierEasing}
- */
-function getBezierEasing(a, b, c, d, nm) {
-  var str = nm || ('bez_' + a + '_' + b + '_' + c + '_' + d).replace(/\./g, 'p');
-  if (beziers[str]) {
-    return beziers[str];
-  }
-  var bezEasing = new BezierEasing$1(a, b, c, d);
-  beziers[str] = bezEasing;
-  return bezEasing;
-}
+  var PoolFactory = function PoolFactory(initialLength, _create, _release) {
+    var _length = 0;
+    var _maxLength = initialLength;
+    var pool = createSizedArray(_maxLength);
+    var ob = {
+      newElement: newElement,
+      release: release
+    };
+    /**
+     * a
+     * @return {*}
+     */
 
-var BezierFactory = { getBezierEasing: getBezierEasing };
+    function newElement() {
+      var element;
 
-/**
- * a
- * @param {*} type a
- * @param {*} len a
- * @return {*}
- */
-function createRegularArray(type, len) {
-  var i = 0;
-  var arr = [];
-  var value = void 0;
-  switch (type) {
-    case 'int16':
-    case 'uint8c':
-      value = 1;
-      break;
-    default:
-      value = 1.1;
-      break;
-  }
-  for (i = 0; i < len; i += 1) {
-    arr.push(value);
-  }
-  return arr;
-}
+      if (_length) {
+        _length -= 1;
+        element = pool[_length];
+      } else {
+        element = _create();
+      }
 
-/**
- * a
- * @param {*} type a
- * @param {*} len a
- * @return {*}
- */
-function _createTypedArray$1(type, len) {
-  if (type === 'float32') {
-    return new Float32Array(len);
-  } else if (type === 'int16') {
-    return new Int16Array(len);
-  } else if (type === 'uint8c') {
-    return new Uint8ClampedArray(len);
-  }
-}
+      return element;
+    }
+    /**
+     * a
+     * @param {*} element a
+     */
 
-var createTypedArray = void 0;
-//  = createTypedArray
-if (typeof Uint8ClampedArray === 'function' && typeof Float32Array === 'function') {
-  createTypedArray = _createTypedArray$1;
-} else {
-  createTypedArray = createRegularArray;
-}
 
-/**
- * a
- * @param {*} len a
- * @return {*}
- */
-function createSizedArray(len) {
-  return new Array(len);
-}
+    function release(element) {
+      if (_length === _maxLength) {
+        pool = pooling["double"](pool);
+        _maxLength = _maxLength * 2;
+      }
 
-/**
- * a
- * @param {*} arr a
- * @return {*}
- */
-function double(arr) {
-  return arr.concat(createSizedArray(arr.length));
-}
+      if (_release) {
+        _release(element);
+      }
 
-var pooling = { double: double };
+      pool[_length] = element;
+      _length += 1;
+    }
+    /**
+     * @return {*}
+     */
+    // function clone() {
+    //   var clonedElement = newElement();
+    //   return _clone(clonedElement);
+    // }
 
-var PoolFactory = function PoolFactory(initialLength, _create, _release) {
-  var _length = 0;
-  var _maxLength = initialLength;
-  var pool = createSizedArray(_maxLength);
 
-  var ob = {
-    newElement: newElement,
-    release: release
+    return ob;
   };
 
   /**
    * a
    * @return {*}
    */
-  function newElement() {
-    var element = void 0;
-    if (_length) {
-      _length -= 1;
-      element = pool[_length];
-    } else {
-      element = _create();
-    }
-    return element;
+
+  function create() {
+    return createTypedArray('float32', 2);
   }
 
+  var PointPool = PoolFactory(8, create);
+
+  /**
+   * a shape path
+   */
+
+  var ShapePath = /*#__PURE__*/function () {
+    /**
+     * shape path constructor
+     */
+    function ShapePath() {
+      _classCallCheck(this, ShapePath);
+
+      this.c = false;
+      this._length = 0;
+      this._maxLength = 8;
+      this.v = createSizedArray(this._maxLength);
+      this.o = createSizedArray(this._maxLength);
+      this.i = createSizedArray(this._maxLength);
+    }
+    /**
+     * set path data
+     * @param {*} closed path is closed ?
+     * @param {*} len path vertex data length
+     */
+
+
+    _createClass(ShapePath, [{
+      key: "setPathData",
+      value: function setPathData(closed, len) {
+        this.c = closed;
+        this.setLength(len);
+        var i = 0;
+
+        while (i < len) {
+          this.v[i] = PointPool.newElement();
+          this.o[i] = PointPool.newElement();
+          this.i[i] = PointPool.newElement();
+          i += 1;
+        }
+      }
+      /**
+       * set array pool size
+       * @param {*} len array length
+       */
+
+    }, {
+      key: "setLength",
+      value: function setLength(len) {
+        while (this._maxLength < len) {
+          this.doubleArrayLength();
+        }
+
+        this._length = len;
+      }
+      /**
+       * double array pool size
+       */
+
+    }, {
+      key: "doubleArrayLength",
+      value: function doubleArrayLength() {
+        this.v = this.v.concat(createSizedArray(this._maxLength));
+        this.i = this.i.concat(createSizedArray(this._maxLength));
+        this.o = this.o.concat(createSizedArray(this._maxLength));
+        this._maxLength *= 2;
+      }
+      /**
+       * set x y to this.v | this.i | this.o
+       * @param {*} x x component
+       * @param {*} y y component
+       * @param {*} type data type v | i | o
+       * @param {*} pos data index
+       * @param {*} replace need replace a new point
+       */
+
+    }, {
+      key: "setXYAt",
+      value: function setXYAt(x, y, type, pos, replace) {
+        var arr;
+        this._length = Math.max(this._length, pos + 1);
+
+        if (this._length >= this._maxLength) {
+          this.doubleArrayLength();
+        }
+
+        switch (type) {
+          case 'v':
+            arr = this.v;
+            break;
+
+          case 'i':
+            arr = this.i;
+            break;
+
+          case 'o':
+            arr = this.o;
+            break;
+        }
+
+        if (!arr[pos] || arr[pos] && !replace) {
+          arr[pos] = PointPool.newElement();
+        }
+
+        arr[pos][0] = x;
+        arr[pos][1] = y;
+      }
+      /**
+       * setTripleAt
+       * @param {*} vX vertex x
+       * @param {*} vY vertex y
+       * @param {*} oX out control x
+       * @param {*} oY out control y
+       * @param {*} iX in control x
+       * @param {*} iY in control x
+       * @param {*} pos index of pool
+       * @param {*} replace replace point
+       */
+
+    }, {
+      key: "setTripleAt",
+      value: function setTripleAt(vX, vY, oX, oY, iX, iY, pos, replace) {
+        this.setXYAt(vX, vY, 'v', pos, replace);
+        this.setXYAt(oX, oY, 'o', pos, replace);
+        this.setXYAt(iX, iY, 'i', pos, replace);
+      }
+      /**
+       * reverse point
+       * @return {*} renturn new shape path
+       */
+
+    }, {
+      key: "reverse",
+      value: function reverse() {
+        var newPath = new ShapePath();
+        newPath.setPathData(this.c, this._length);
+        var vertices = this.v;
+        var outPoints = this.o;
+        var inPoints = this.i;
+        var init = 0;
+
+        if (this.c) {
+          newPath.setTripleAt(vertices[0][0], vertices[0][1], inPoints[0][0], inPoints[0][1], outPoints[0][0], outPoints[0][1], 0, false);
+          init = 1;
+        }
+
+        var cnt = this._length - 1;
+        var len = this._length;
+
+        for (var i = init; i < len; i += 1) {
+          newPath.setTripleAt(vertices[cnt][0], vertices[cnt][1], inPoints[cnt][0], inPoints[cnt][1], outPoints[cnt][0], outPoints[cnt][1], i, false);
+          cnt -= 1;
+        }
+
+        return newPath;
+      }
+    }]);
+
+    return ShapePath;
+  }();
+
+  /**
+   * a
+   * @return {*}
+   */
+
+  function create$1() {
+    return new ShapePath();
+  }
+  /**
+   * a
+   * FIXME: 这里可能不需要这么深度的做 release
+   * @param {*} shapePath a
+   */
+
+
+  function release(shapePath) {
+    var len = shapePath._length;
+
+    for (var i = 0; i < len; i += 1) {
+      PointPool.release(shapePath.v[i]);
+      PointPool.release(shapePath.i[i]);
+      PointPool.release(shapePath.o[i]);
+      shapePath.v[i] = null;
+      shapePath.i[i] = null;
+      shapePath.o[i] = null;
+    }
+
+    shapePath._length = 0;
+    shapePath.c = false;
+  }
+  /**
+   * a
+   * @param {*} shape a
+   * @return {*}
+   */
+
+
+  function clone(shape) {
+    var cloned = ShapePool.newElement();
+    var len = shape._length === undefined ? shape.v.length : shape._length;
+    cloned.setLength(len);
+    cloned.c = shape.c; // var pt;
+
+    for (var i = 0; i < len; i += 1) {
+      cloned.setTripleAt(shape.v[i][0], shape.v[i][1], shape.o[i][0], shape.o[i][1], shape.i[i][0], shape.i[i][1], i);
+    }
+
+    return cloned;
+  }
+
+  var ShapePool = PoolFactory(4, create$1, release);
+  ShapePool.clone = clone;
+
+  /**
+   * shape collection
+   */
+
+  var ShapeCollection = /*#__PURE__*/function () {
+    /**
+     * constructor shape collection
+     */
+    function ShapeCollection() {
+      _classCallCheck(this, ShapeCollection);
+
+      this._length = 0;
+      this._maxLength = 4;
+      this.shapes = createSizedArray(this._maxLength);
+    }
+    /**
+     * add shape to collection
+     * @param {*} shapeData shape data
+     */
+
+
+    _createClass(ShapeCollection, [{
+      key: "addShape",
+      value: function addShape(shapeData) {
+        if (this._length === this._maxLength) {
+          this.shapes = this.shapes.concat(createSizedArray(this._maxLength));
+          this._maxLength *= 2;
+        }
+
+        this.shapes[this._length] = shapeData;
+        this._length += 1;
+      }
+      /**
+       * release shapes form shape pool
+       */
+
+    }, {
+      key: "releaseShapes",
+      value: function releaseShapes() {
+        for (var i = 0; i < this._length; i += 1) {
+          ShapePool.release(this.shapes[i]);
+        }
+
+        this._length = 0;
+      }
+    }]);
+
+    return ShapeCollection;
+  }();
+
+  var _length = 0;
+  var _maxLength = 4;
+  var pool = createSizedArray(_maxLength);
+  /**
+   * a
+   * @return {*}
+   */
+
+  function newShapeCollection() {
+    var shapeCollection;
+
+    if (_length) {
+      _length -= 1;
+      shapeCollection = pool[_length];
+    } else {
+      shapeCollection = new ShapeCollection();
+    }
+
+    return shapeCollection;
+  }
+  /**
+   * a
+   * @param {*} shapeCollection a
+   */
+
+
+  function release$1(shapeCollection) {
+    var len = shapeCollection._length;
+
+    for (var i = 0; i < len; i += 1) {
+      ShapePool.release(shapeCollection.shapes[i]);
+    }
+
+    shapeCollection._length = 0;
+
+    if (_length === _maxLength) {
+      pool = pooling["double"](pool);
+      _maxLength = _maxLength * 2;
+    }
+
+    pool[_length] = shapeCollection;
+    _length += 1;
+  }
+
+  var ShapeCollectionPool = {
+    newShapeCollection: newShapeCollection,
+    release: release$1
+  };
+
+  /**
+   * a
+   */
+  var DynamicPropertyContainer = /*#__PURE__*/function () {
+    function DynamicPropertyContainer() {
+      _classCallCheck(this, DynamicPropertyContainer);
+    }
+
+    _createClass(DynamicPropertyContainer, [{
+      key: "outTypeExpressionMode",
+
+      /**
+       * a
+       */
+      value: function outTypeExpressionMode() {
+        this._hasOutTypeExpression = true;
+        if (this.container) this.container.outTypeExpressionMode();
+      }
+      /**
+       * a
+       * @param {*} prop a
+       */
+
+    }, {
+      key: "addDynamicProperty",
+      value: function addDynamicProperty(prop) {
+        if (this.dynamicProperties.indexOf(prop) === -1) {
+          this.dynamicProperties.push(prop);
+          this.container.addDynamicProperty(this);
+          this._isAnimated = true;
+          if (prop._hasOutTypeExpression) this.outTypeExpressionMode();
+        }
+      }
+      /**
+       * a
+       * @param {*} frameNum a
+       */
+
+    }, {
+      key: "iterateDynamicProperties",
+      value: function iterateDynamicProperties(frameNum) {
+        this._mdf = false;
+        var len = this.dynamicProperties.length;
+
+        for (var i = 0; i < len; i += 1) {
+          this.dynamicProperties[i].getValue(frameNum);
+
+          if (this.dynamicProperties[i]._mdf) {
+            this._mdf = true;
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} container a
+       */
+
+    }, {
+      key: "initDynamicPropertyContainer",
+      value: function initDynamicPropertyContainer(container) {
+        this.container = container;
+        this.dynamicProperties = [];
+        this._mdf = false;
+        this._isAnimated = false;
+        this._hasOutTypeExpression = false;
+      }
+    }]);
+
+    return DynamicPropertyContainer;
+  }();
+
+  var defaultCurveSegments = 200;
+  /**
+   * a
+   * @return {*}
+   */
+
+  function create$2() {
+    return {
+      addedLength: 0,
+      percents: createTypedArray('float32', defaultCurveSegments),
+      lengths: createTypedArray('float32', defaultCurveSegments)
+    };
+  }
+
+  var BezierLengthPool = PoolFactory(8, create$2);
+
+  /**
+   * @return {*}
+   */
+
+  function create$3() {
+    return {
+      lengths: [],
+      totalLength: 0
+    };
+  }
   /**
    * a
    * @param {*} element a
    */
-  function release(element) {
-    if (_length === _maxLength) {
-      pool = pooling.double(pool);
-      _maxLength = _maxLength * 2;
+
+
+  function release$2(element) {
+    var len = element.lengths.length;
+
+    for (var i = 0; i < len; i += 1) {
+      BezierLengthPool.release(element.lengths[i]);
     }
-    if (_release) {
-      _release(element);
-    }
-    pool[_length] = element;
-    _length += 1;
+
+    element.lengths.length = 0;
   }
 
+  var SegmentsLengthPool = PoolFactory(8, create$3, release$2);
+
+  // var easingFunctions = [];
+  var defaultCurveSegments$1 = 200;
   /**
+   * a
+   * @param {*} x1 a
+   * @param {*} y1 a
+   * @param {*} x2 a
+   * @param {*} y2 a
+   * @param {*} x3 a
+   * @param {*} y3 a
    * @return {*}
    */
-  // function clone() {
-  //   var clonedElement = newElement();
-  //   return _clone(clonedElement);
-  // }
 
-  return ob;
-};
-
-/**
- * a
- * @return {*}
- */
-function create$1() {
-  return createTypedArray('float32', 2);
-}
-var PointPool = PoolFactory(8, create$1);
-
-/**
- * a shape path
- */
-
-var ShapePath = function () {
-  /**
-   * shape path constructor
-   */
-  function ShapePath() {
-    classCallCheck(this, ShapePath);
-
-    this.c = false;
-    this._length = 0;
-    this._maxLength = 8;
-    this.v = createSizedArray(this._maxLength);
-    this.o = createSizedArray(this._maxLength);
-    this.i = createSizedArray(this._maxLength);
+  function pointOnLine2D(x1, y1, x2, y2, x3, y3) {
+    var det1 = x1 * y2 + y1 * x3 + x2 * y3 - x3 * y2 - y3 * x1 - x2 * y1;
+    return det1 > -0.001 && det1 < 0.001;
   }
-
   /**
-   * set path data
-   * @param {*} closed path is closed ?
-   * @param {*} len path vertex data length
+   * a
+   * @param {*} x1 a
+   * @param {*} y1 a
+   * @param {*} z1 a
+   * @param {*} x2 a
+   * @param {*} y2 a
+   * @param {*} z2 a
+   * @param {*} x3 a
+   * @param {*} y3 a
+   * @param {*} z3 a
+   * @return {*}
    */
 
 
-  createClass(ShapePath, [{
-    key: 'setPathData',
-    value: function setPathData(closed, len) {
-      this.c = closed;
-      this.setLength(len);
-      var i = 0;
-      while (i < len) {
-        this.v[i] = PointPool.newElement();
-        this.o[i] = PointPool.newElement();
-        this.i[i] = PointPool.newElement();
-        i += 1;
+  function pointOnLine3D(x1, y1, z1, x2, y2, z2, x3, y3, z3) {
+    if (z1 === 0 && z2 === 0 && z3 === 0) {
+      return pointOnLine2D(x1, y1, x2, y2, x3, y3);
+    }
+
+    var dist1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
+    var dist2 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2) + Math.pow(z3 - z1, 2));
+    var dist3 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2) + Math.pow(z3 - z2, 2));
+    var diffDist;
+
+    if (dist1 > dist2) {
+      if (dist1 > dist3) {
+        diffDist = dist1 - dist2 - dist3;
+      } else {
+        diffDist = dist3 - dist2 - dist1;
       }
-    }
-
-    /**
-     * set array pool size
-     * @param {*} len array length
-     */
-
-  }, {
-    key: 'setLength',
-    value: function setLength(len) {
-      while (this._maxLength < len) {
-        this.doubleArrayLength();
-      }
-      this._length = len;
-    }
-
-    /**
-     * double array pool size
-     */
-
-  }, {
-    key: 'doubleArrayLength',
-    value: function doubleArrayLength() {
-      this.v = this.v.concat(createSizedArray(this._maxLength));
-      this.i = this.i.concat(createSizedArray(this._maxLength));
-      this.o = this.o.concat(createSizedArray(this._maxLength));
-      this._maxLength *= 2;
-    }
-
-    /**
-     * set x y to this.v | this.i | this.o
-     * @param {*} x x component
-     * @param {*} y y component
-     * @param {*} type data type v | i | o
-     * @param {*} pos data index
-     * @param {*} replace need replace a new point
-     */
-
-  }, {
-    key: 'setXYAt',
-    value: function setXYAt(x, y, type, pos, replace) {
-      var arr = void 0;
-      this._length = Math.max(this._length, pos + 1);
-      if (this._length >= this._maxLength) {
-        this.doubleArrayLength();
-      }
-      switch (type) {
-        case 'v':
-          arr = this.v;
-          break;
-        case 'i':
-          arr = this.i;
-          break;
-        case 'o':
-          arr = this.o;
-          break;
-      }
-      if (!arr[pos] || arr[pos] && !replace) {
-        arr[pos] = PointPool.newElement();
-      }
-      arr[pos][0] = x;
-      arr[pos][1] = y;
-    }
-
-    /**
-     * setTripleAt
-     * @param {*} vX vertex x
-     * @param {*} vY vertex y
-     * @param {*} oX out control x
-     * @param {*} oY out control y
-     * @param {*} iX in control x
-     * @param {*} iY in control x
-     * @param {*} pos index of pool
-     * @param {*} replace replace point
-     */
-
-  }, {
-    key: 'setTripleAt',
-    value: function setTripleAt(vX, vY, oX, oY, iX, iY, pos, replace) {
-      this.setXYAt(vX, vY, 'v', pos, replace);
-      this.setXYAt(oX, oY, 'o', pos, replace);
-      this.setXYAt(iX, iY, 'i', pos, replace);
-    }
-
-    /**
-     * reverse point
-     * @return {*} renturn new shape path
-     */
-
-  }, {
-    key: 'reverse',
-    value: function reverse() {
-      var newPath = new ShapePath();
-      newPath.setPathData(this.c, this._length);
-      var vertices = this.v;
-      var outPoints = this.o;
-      var inPoints = this.i;
-      var init = 0;
-      if (this.c) {
-        newPath.setTripleAt(vertices[0][0], vertices[0][1], inPoints[0][0], inPoints[0][1], outPoints[0][0], outPoints[0][1], 0, false);
-        init = 1;
-      }
-      var cnt = this._length - 1;
-      var len = this._length;
-
-      for (var i = init; i < len; i += 1) {
-        newPath.setTripleAt(vertices[cnt][0], vertices[cnt][1], inPoints[cnt][0], inPoints[cnt][1], outPoints[cnt][0], outPoints[cnt][1], i, false);
-        cnt -= 1;
-      }
-      return newPath;
-    }
-  }]);
-  return ShapePath;
-}();
-
-/**
- * a
- * @return {*}
- */
-function create() {
-  return new ShapePath();
-}
-
-/**
- * a
- * FIXME: 这里可能不需要这么深度的做 release
- * @param {*} shapePath a
- */
-function release(shapePath) {
-  var len = shapePath._length;
-  for (var i = 0; i < len; i += 1) {
-    PointPool.release(shapePath.v[i]);
-    PointPool.release(shapePath.i[i]);
-    PointPool.release(shapePath.o[i]);
-    shapePath.v[i] = null;
-    shapePath.i[i] = null;
-    shapePath.o[i] = null;
-  }
-  shapePath._length = 0;
-  shapePath.c = false;
-}
-
-/**
- * a
- * @param {*} shape a
- * @return {*}
- */
-function clone(shape) {
-  var cloned = ShapePool.newElement();
-  var len = shape._length === undefined ? shape.v.length : shape._length;
-  cloned.setLength(len);
-  cloned.c = shape.c;
-  // var pt;
-
-  for (var i = 0; i < len; i += 1) {
-    cloned.setTripleAt(shape.v[i][0], shape.v[i][1], shape.o[i][0], shape.o[i][1], shape.i[i][0], shape.i[i][1], i);
-  }
-  return cloned;
-}
-
-var ShapePool = PoolFactory(4, create, release);
-ShapePool.clone = clone;
-
-/**
- * shape collection
- */
-
-var ShapeCollection = function () {
-  /**
-   * constructor shape collection
-   */
-  function ShapeCollection() {
-    classCallCheck(this, ShapeCollection);
-
-    this._length = 0;
-    this._maxLength = 4;
-    this.shapes = createSizedArray(this._maxLength);
-  }
-
-  /**
-   * add shape to collection
-   * @param {*} shapeData shape data
-   */
-
-
-  createClass(ShapeCollection, [{
-    key: 'addShape',
-    value: function addShape(shapeData) {
-      if (this._length === this._maxLength) {
-        this.shapes = this.shapes.concat(createSizedArray(this._maxLength));
-        this._maxLength *= 2;
-      }
-      this.shapes[this._length] = shapeData;
-      this._length += 1;
-    }
-
-    /**
-     * release shapes form shape pool
-     */
-
-  }, {
-    key: 'releaseShapes',
-    value: function releaseShapes() {
-      for (var i = 0; i < this._length; i += 1) {
-        ShapePool.release(this.shapes[i]);
-      }
-      this._length = 0;
-    }
-  }]);
-  return ShapeCollection;
-}();
-
-var _length = 0;
-var _maxLength = 4;
-var pool = createSizedArray(_maxLength);
-
-/**
- * a
- * @return {*}
- */
-function newShapeCollection() {
-  var shapeCollection = void 0;
-  if (_length) {
-    _length -= 1;
-    shapeCollection = pool[_length];
-  } else {
-    shapeCollection = new ShapeCollection();
-  }
-  return shapeCollection;
-}
-
-/**
- * a
- * @param {*} shapeCollection a
- */
-function release$1(shapeCollection) {
-  var len = shapeCollection._length;
-  for (var i = 0; i < len; i += 1) {
-    ShapePool.release(shapeCollection.shapes[i]);
-  }
-  shapeCollection._length = 0;
-
-  if (_length === _maxLength) {
-    pool = pooling.double(pool);
-    _maxLength = _maxLength * 2;
-  }
-  pool[_length] = shapeCollection;
-  _length += 1;
-}
-
-var ShapeCollectionPool = { newShapeCollection: newShapeCollection, release: release$1 };
-
-/**
- * a
- */
-var DynamicPropertyContainer = function () {
-  function DynamicPropertyContainer() {
-    classCallCheck(this, DynamicPropertyContainer);
-  }
-
-  createClass(DynamicPropertyContainer, [{
-    key: "outTypeExpressionMode",
-
-    /**
-     * a
-     */
-    value: function outTypeExpressionMode() {
-      this._hasOutTypeExpression = true;
-      if (this.container) this.container.outTypeExpressionMode();
-    }
-
-    /**
-     * a
-     * @param {*} prop a
-     */
-
-  }, {
-    key: "addDynamicProperty",
-    value: function addDynamicProperty(prop) {
-      if (this.dynamicProperties.indexOf(prop) === -1) {
-        this.dynamicProperties.push(prop);
-        this.container.addDynamicProperty(this);
-        this._isAnimated = true;
-        if (prop._hasOutTypeExpression) this.outTypeExpressionMode();
-      }
-    }
-
-    /**
-     * a
-     * @param {*} frameNum a
-     */
-
-  }, {
-    key: "iterateDynamicProperties",
-    value: function iterateDynamicProperties(frameNum) {
-      this._mdf = false;
-      var len = this.dynamicProperties.length;
-      for (var i = 0; i < len; i += 1) {
-        this.dynamicProperties[i].getValue(frameNum);
-        if (this.dynamicProperties[i]._mdf) {
-          this._mdf = true;
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} container a
-     */
-
-  }, {
-    key: "initDynamicPropertyContainer",
-    value: function initDynamicPropertyContainer(container) {
-      this.container = container;
-      this.dynamicProperties = [];
-      this._mdf = false;
-      this._isAnimated = false;
-      this._hasOutTypeExpression = false;
-    }
-  }]);
-  return DynamicPropertyContainer;
-}();
-
-var defaultCurveSegments$1 = 200;
-/**
- * a
- * @return {*}
- */
-function create$2() {
-  return {
-    addedLength: 0,
-    percents: createTypedArray('float32', defaultCurveSegments$1),
-    lengths: createTypedArray('float32', defaultCurveSegments$1)
-  };
-}
-var BezierLengthPool = PoolFactory(8, create$2);
-
-/**
- * @return {*}
- */
-function create$3() {
-  return {
-    lengths: [],
-    totalLength: 0
-  };
-}
-
-/**
- * a
- * @param {*} element a
- */
-function release$2(element) {
-  var len = element.lengths.length;
-  for (var i = 0; i < len; i += 1) {
-    BezierLengthPool.release(element.lengths[i]);
-  }
-  element.lengths.length = 0;
-}
-
-var SegmentsLengthPool = PoolFactory(8, create$3, release$2);
-
-// var easingFunctions = [];
-// var math = Math;
-var defaultCurveSegments = 200;
-
-/**
- * a
- * @param {*} x1 a
- * @param {*} y1 a
- * @param {*} x2 a
- * @param {*} y2 a
- * @param {*} x3 a
- * @param {*} y3 a
- * @return {*}
- */
-function pointOnLine2D(x1, y1, x2, y2, x3, y3) {
-  var det1 = x1 * y2 + y1 * x3 + x2 * y3 - x3 * y2 - y3 * x1 - x2 * y1;
-  return det1 > -0.001 && det1 < 0.001;
-}
-
-/**
- * a
- * @param {*} x1 a
- * @param {*} y1 a
- * @param {*} z1 a
- * @param {*} x2 a
- * @param {*} y2 a
- * @param {*} z2 a
- * @param {*} x3 a
- * @param {*} y3 a
- * @param {*} z3 a
- * @return {*}
- */
-function pointOnLine3D(x1, y1, z1, x2, y2, z2, x3, y3, z3) {
-  if (z1 === 0 && z2 === 0 && z3 === 0) {
-    return pointOnLine2D(x1, y1, x2, y2, x3, y3);
-  }
-  var dist1 = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2));
-  var dist2 = Math.sqrt(Math.pow(x3 - x1, 2) + Math.pow(y3 - y1, 2) + Math.pow(z3 - z1, 2));
-  var dist3 = Math.sqrt(Math.pow(x3 - x2, 2) + Math.pow(y3 - y2, 2) + Math.pow(z3 - z2, 2));
-  var diffDist = void 0;
-  if (dist1 > dist2) {
-    if (dist1 > dist3) {
-      diffDist = dist1 - dist2 - dist3;
-    } else {
+    } else if (dist3 > dist2) {
       diffDist = dist3 - dist2 - dist1;
+    } else {
+      diffDist = dist2 - dist1 - dist3;
     }
-  } else if (dist3 > dist2) {
-    diffDist = dist3 - dist2 - dist1;
-  } else {
-    diffDist = dist2 - dist1 - dist3;
+
+    return diffDist > -0.0001 && diffDist < 0.0001;
   }
-  return diffDist > -0.0001 && diffDist < 0.0001;
-}
+  /**
+   * a
+   * @param {*} pt1 a
+   * @param {*} pt2 a
+   * @param {*} pt3 a
+   * @param {*} pt4 a
+   * @return {*}
+   */
 
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @return {*}
- */
-function getBezierLength(pt1, pt2, pt3, pt4) {
-  var curveSegments = defaultCurveSegments || 200;
-  // var i, len;
-  var addedLength = 0;
-  var ptDistance = void 0;
-  var point = [];
-  var lastPoint = [];
-  var lengthData = BezierLengthPool.newElement();
-  var len = pt3.length;
-  for (var k = 0; k < curveSegments; k += 1) {
-    var perc = k / (curveSegments - 1);
-    ptDistance = 0;
-    for (var i = 0; i < len; i += 1) {
-      var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * pt3[i] + 3 * (1 - perc) * Math.pow(perc, 2) * pt4[i] + Math.pow(perc, 3) * pt2[i];
-      point[i] = ptCoord;
-      if (lastPoint[i] !== null) {
-        ptDistance += Math.pow(point[i] - lastPoint[i], 2);
-      }
-      lastPoint[i] = point[i];
-    }
-    if (ptDistance) {
-      ptDistance = Math.sqrt(ptDistance);
-      addedLength += ptDistance;
-    }
-    lengthData.percents[k] = perc;
-    lengthData.lengths[k] = addedLength;
-  }
-  lengthData.addedLength = addedLength;
-  return lengthData;
-}
 
-/**
- * a
- * @param {*} shapeData a
- * @return {*}
- */
-function getSegmentsLength(shapeData) {
-  var segmentsLength = SegmentsLengthPool.newElement();
-  var closed = shapeData.c;
-  var pathV = shapeData.v;
-  var pathO = shapeData.o;
-  var pathI = shapeData.i;
-  var len = shapeData._length;
-  var lengths = segmentsLength.lengths;
-  var totalLength = 0;
-  var i = 0;
-  for (; i < len - 1; i += 1) {
-    lengths[i] = getBezierLength(pathV[i], pathV[i + 1], pathO[i], pathI[i + 1]);
-    totalLength += lengths[i].addedLength;
-  }
-  if (closed && len) {
-    lengths[i] = getBezierLength(pathV[i], pathV[0], pathO[i], pathI[0]);
-    totalLength += lengths[i].addedLength;
-  }
-  segmentsLength.totalLength = totalLength;
-  return segmentsLength;
-}
+  function getBezierLength(pt1, pt2, pt3, pt4) {
+    var curveSegments = defaultCurveSegments$1 ; // var i, len;
 
-/**
- * a
- * @param {*} length a
- */
-function BezierData(length) {
-  this.segmentLength = 0;
-  this.points = new Array(length);
-}
-
-/**
- * a
- * @param {*} partial a
- * @param {*} point a
- */
-function PointData(partial, point) {
-  this.partialLength = partial;
-  this.point = point;
-}
-
-var storedData = {};
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @return {*}
- */
-function buildBezierData(pt1, pt2, pt3, pt4) {
-  var bezierName = (pt1[0] + '_' + pt1[1] + '_' + pt2[0] + '_' + pt2[1] + '_' + pt3[0] + '_' + pt3[1] + '_' + pt4[0] + '_' + pt4[1]).replace(/\./g, 'p');
-  if (!storedData[bezierName]) {
-    var curveSegments = defaultCurveSegments;
-    // var k, i, len;
     var addedLength = 0;
-    var ptDistance = void 0;
-    var point = void 0;
-    var lastPoint = null;
-    if (pt1.length === 2 && (pt1[0] != pt2[0] || pt1[1] != pt2[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt1[0] + pt3[0], pt1[1] + pt3[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt2[0] + pt4[0], pt2[1] + pt4[1])) {
-      curveSegments = 2;
-    }
-    var bezierData = new BezierData(curveSegments);
+    var ptDistance;
+    var point = [];
+    var lastPoint = [];
+    var lengthData = BezierLengthPool.newElement();
     var len = pt3.length;
+
     for (var k = 0; k < curveSegments; k += 1) {
-      point = createSizedArray(len);
       var perc = k / (curveSegments - 1);
       ptDistance = 0;
+
       for (var i = 0; i < len; i += 1) {
-        var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * (pt1[i] + pt3[i]) + 3 * (1 - perc) * Math.pow(perc, 2) * (pt2[i] + pt4[i]) + Math.pow(perc, 3) * pt2[i];
+        var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * pt3[i] + 3 * (1 - perc) * Math.pow(perc, 2) * pt4[i] + Math.pow(perc, 3) * pt2[i];
         point[i] = ptCoord;
-        if (lastPoint !== null) {
+
+        if (lastPoint[i] !== null) {
           ptDistance += Math.pow(point[i] - lastPoint[i], 2);
         }
-      }
-      ptDistance = Math.sqrt(ptDistance);
-      addedLength += ptDistance;
-      bezierData.points[k] = new PointData(ptDistance, point);
-      lastPoint = point;
-    }
-    bezierData.segmentLength = addedLength;
-    storedData[bezierName] = bezierData;
-  }
-  return storedData[bezierName];
-}
 
-/**
- * a
- * @param {*} perc a
- * @param {*} bezierData a
- * @return {*}
- */
-function getDistancePerc(perc, bezierData) {
-  var percents = bezierData.percents;
-  var lengths = bezierData.lengths;
-  var len = percents.length;
-  var initPos = Math.floor((len - 1) * perc);
-  var lengthPos = perc * bezierData.addedLength;
-  var lPerc = 0;
-  if (initPos === len - 1 || initPos === 0 || lengthPos === lengths[initPos]) {
-    return percents[initPos];
-  } else {
-    var dir = lengths[initPos] > lengthPos ? -1 : 1;
-    var flag = true;
-    while (flag) {
-      if (lengths[initPos] <= lengthPos && lengths[initPos + 1] > lengthPos) {
-        lPerc = (lengthPos - lengths[initPos]) / (lengths[initPos + 1] - lengths[initPos]);
-        flag = false;
-      } else {
-        initPos += dir;
+        lastPoint[i] = point[i];
       }
-      if (initPos < 0 || initPos >= len - 1) {
-        // FIX for TypedArrays that don't store floating point values with enough accuracy
-        if (initPos === len - 1) {
-          return percents[initPos];
+
+      if (ptDistance) {
+        ptDistance = Math.sqrt(ptDistance);
+        addedLength += ptDistance;
+      }
+
+      lengthData.percents[k] = perc;
+      lengthData.lengths[k] = addedLength;
+    }
+
+    lengthData.addedLength = addedLength;
+    return lengthData;
+  }
+  /**
+   * a
+   * @param {*} shapeData a
+   * @return {*}
+   */
+
+
+  function getSegmentsLength(shapeData) {
+    var segmentsLength = SegmentsLengthPool.newElement();
+    var closed = shapeData.c;
+    var pathV = shapeData.v;
+    var pathO = shapeData.o;
+    var pathI = shapeData.i;
+    var len = shapeData._length;
+    var lengths = segmentsLength.lengths;
+    var totalLength = 0;
+    var i = 0;
+
+    for (; i < len - 1; i += 1) {
+      lengths[i] = getBezierLength(pathV[i], pathV[i + 1], pathO[i], pathI[i + 1]);
+      totalLength += lengths[i].addedLength;
+    }
+
+    if (closed && len) {
+      lengths[i] = getBezierLength(pathV[i], pathV[0], pathO[i], pathI[0]);
+      totalLength += lengths[i].addedLength;
+    }
+
+    segmentsLength.totalLength = totalLength;
+    return segmentsLength;
+  }
+  /**
+   * a
+   * @param {*} length a
+   */
+
+
+  function BezierData(length) {
+    this.segmentLength = 0;
+    this.points = new Array(length);
+  }
+  /**
+   * a
+   * @param {*} partial a
+   * @param {*} point a
+   */
+
+
+  function PointData(partial, point) {
+    this.partialLength = partial;
+    this.point = point;
+  }
+
+  var storedData = {};
+  /**
+   * a
+   * @param {*} pt1 a
+   * @param {*} pt2 a
+   * @param {*} pt3 a
+   * @param {*} pt4 a
+   * @return {*}
+   */
+
+  function buildBezierData(pt1, pt2, pt3, pt4) {
+    var bezierName = (pt1[0] + '_' + pt1[1] + '_' + pt2[0] + '_' + pt2[1] + '_' + pt3[0] + '_' + pt3[1] + '_' + pt4[0] + '_' + pt4[1]).replace(/\./g, 'p');
+
+    if (!storedData[bezierName]) {
+      var curveSegments = defaultCurveSegments$1; // var k, i, len;
+
+      var addedLength = 0;
+      var ptDistance;
+      var point;
+      var lastPoint = null;
+
+      if (pt1.length === 2 && (pt1[0] != pt2[0] || pt1[1] != pt2[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt1[0] + pt3[0], pt1[1] + pt3[1]) && pointOnLine2D(pt1[0], pt1[1], pt2[0], pt2[1], pt2[0] + pt4[0], pt2[1] + pt4[1])) {
+        curveSegments = 2;
+      }
+
+      var bezierData = new BezierData(curveSegments);
+      var len = pt3.length;
+
+      for (var k = 0; k < curveSegments; k += 1) {
+        point = createSizedArray(len);
+        var perc = k / (curveSegments - 1);
+        ptDistance = 0;
+
+        for (var i = 0; i < len; i += 1) {
+          var ptCoord = Math.pow(1 - perc, 3) * pt1[i] + 3 * Math.pow(1 - perc, 2) * perc * (pt1[i] + pt3[i]) + 3 * (1 - perc) * Math.pow(perc, 2) * (pt2[i] + pt4[i]) + Math.pow(perc, 3) * pt2[i];
+          point[i] = ptCoord;
+
+          if (lastPoint !== null) {
+            ptDistance += Math.pow(point[i] - lastPoint[i], 2);
+          }
         }
-        flag = false;
+
+        ptDistance = Math.sqrt(ptDistance);
+        addedLength += ptDistance;
+        bezierData.points[k] = new PointData(ptDistance, point);
+        lastPoint = point;
       }
+
+      bezierData.segmentLength = addedLength;
+      storedData[bezierName] = bezierData;
     }
-    return percents[initPos] + (percents[initPos + 1] - percents[initPos]) * lPerc;
+
+    return storedData[bezierName];
   }
-}
-
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @param {*} percent a
- * @param {*} bezierData a
- * @return {*}
- */
-function getPointInSegment(pt1, pt2, pt3, pt4, percent, bezierData) {
-  var t1 = getDistancePerc(percent, bezierData);
-  // var u0 = 1;
-  var u1 = 1 - t1;
-  var ptX = Math.round((u1 * u1 * u1 * pt1[0] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[0] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[0] + t1 * t1 * t1 * pt2[0]) * 1000) / 1000;
-  var ptY = Math.round((u1 * u1 * u1 * pt1[1] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[1] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[1] + t1 * t1 * t1 * pt2[1]) * 1000) / 1000;
-  return [ptX, ptY];
-}
-
-// function getSegmentArray() {
-
-// }
-
-var bezierSegmentPoints = createTypedArray('float32', 8);
-
-/**
- * a
- * @param {*} pt1 a
- * @param {*} pt2 a
- * @param {*} pt3 a
- * @param {*} pt4 a
- * @param {*} startPerc a
- * @param {*} endPerc a
- * @param {*} bezierData a
- * @return {*}
- */
-function getNewSegment(pt1, pt2, pt3, pt4, startPerc, endPerc, bezierData) {
-  /* eslint camelcase: 0 */
-  startPerc = startPerc < 0 ? 0 : startPerc > 1 ? 1 : startPerc;
-  var t0 = getDistancePerc(startPerc, bezierData);
-  endPerc = endPerc > 1 ? 1 : endPerc;
-  var t1 = getDistancePerc(endPerc, bezierData);
-  var len = pt1.length;
-  var u0 = 1 - t0;
-  var u1 = 1 - t1;
-  var u0u0u0 = u0 * u0 * u0;
-  var t0u0u0_3 = t0 * u0 * u0 * 3;
-  var t0t0u0_3 = t0 * t0 * u0 * 3;
-  var t0t0t0 = t0 * t0 * t0;
-  //
-  var u0u0u1 = u0 * u0 * u1;
-  var t0u0u1_3 = t0 * u0 * u1 + u0 * t0 * u1 + u0 * u0 * t1;
-  var t0t0u1_3 = t0 * t0 * u1 + u0 * t0 * t1 + t0 * u0 * t1;
-  var t0t0t1 = t0 * t0 * t1;
-  //
-  var u0u1u1 = u0 * u1 * u1;
-  var t0u1u1_3 = t0 * u1 * u1 + u0 * t1 * u1 + u0 * u1 * t1;
-  var t0t1u1_3 = t0 * t1 * u1 + u0 * t1 * t1 + t0 * u1 * t1;
-  var t0t1t1 = t0 * t1 * t1;
-  //
-  var u1u1u1 = u1 * u1 * u1;
-  var t1u1u1_3 = t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1;
-  var t1t1u1_3 = t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1;
-  var t1t1t1 = t1 * t1 * t1;
-  for (var i = 0; i < len; i += 1) {
-    bezierSegmentPoints[i * 4] = Math.round((u0u0u0 * pt1[i] + t0u0u0_3 * pt3[i] + t0t0u0_3 * pt4[i] + t0t0t0 * pt2[i]) * 1000) / 1000;
-    bezierSegmentPoints[i * 4 + 1] = Math.round((u0u0u1 * pt1[i] + t0u0u1_3 * pt3[i] + t0t0u1_3 * pt4[i] + t0t0t1 * pt2[i]) * 1000) / 1000;
-    bezierSegmentPoints[i * 4 + 2] = Math.round((u0u1u1 * pt1[i] + t0u1u1_3 * pt3[i] + t0t1u1_3 * pt4[i] + t0t1t1 * pt2[i]) * 1000) / 1000;
-    bezierSegmentPoints[i * 4 + 3] = Math.round((u1u1u1 * pt1[i] + t1u1u1_3 * pt3[i] + t1t1u1_3 * pt4[i] + t1t1t1 * pt2[i]) * 1000) / 1000;
-  }
-
-  return bezierSegmentPoints;
-}
-
-var bez = {
-  getSegmentsLength: getSegmentsLength,
-  getNewSegment: getNewSegment,
-  getPointInSegment: getPointInSegment,
-  buildBezierData: buildBezierData,
-  pointOnLine2D: pointOnLine2D,
-  pointOnLine3D: pointOnLine3D
-};
-
-var initialDefaultFrame = -999999;
-var degToRads = Math.PI / 180;
-
-var defaultVector = [0, 0];
-
-var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
-var STR_REG = /["']\w+["']/;
-
-/**
- * Cycle
- * @class
- * @private
- */
-
-var Cycle = function () {
   /**
-   * Pingpong
-   * @param {*} type Pingpong
-   * @param {*} begin Pingpong
-   * @param {*} end Pingpong
-   */
-  function Cycle(type, begin, end) {
-    classCallCheck(this, Cycle);
-
-    this.begin = begin;
-    this.end = end;
-    this.total = this.end - this.begin;
-    this.type = type;
-  }
-
-  /**
-   * progress
-   * @param {number} progress progress
-   * @return {number} progress
+   * a
+   * @param {*} perc a
+   * @param {*} bezierData a
+   * @return {*}
    */
 
 
-  createClass(Cycle, [{
-    key: 'update',
-    value: function update(progress) {
-      if (this.type === 'in') {
-        if (progress >= this.begin) return progress;
-        return this.end - Tools.euclideanModulo(this.begin - progress, this.total);
-      } else if (this.type === 'out') {
-        if (progress <= this.end) return progress;
-        return this.begin + Tools.euclideanModulo(progress - this.end, this.total);
-      }
-    }
-  }]);
-  return Cycle;
-}();
+  function getDistancePerc(perc, bezierData) {
+    var percents = bezierData.percents;
+    var lengths = bezierData.lengths;
+    var len = percents.length;
+    var initPos = Math.floor((len - 1) * perc);
+    var lengthPos = perc * bezierData.addedLength;
+    var lPerc = 0;
 
-/**
- * Pingpong
- * @class
- * @private
- */
-
-
-var Pingpong = function () {
-  /**
-   * Pingpong
-   * @param {*} type Pingpong
-   * @param {*} begin Pingpong
-   * @param {*} end Pingpong
-   */
-  function Pingpong(type, begin, end) {
-    classCallCheck(this, Pingpong);
-
-    this.begin = begin;
-    this.end = end;
-    this.total = this.end - this.begin;
-    this.type = type;
-  }
-
-  /**
-   * progress
-   * @param {number} progress progress
-   * @return {number} progress
-   */
-
-
-  createClass(Pingpong, [{
-    key: 'update',
-    value: function update(progress) {
-      if (this.type === 'in' && progress < this.begin || this.type === 'out' && progress > this.end) {
-        var space = progress - this.end;
-        return this.pingpong(space);
-      }
-      return progress;
-    }
-
-    /**
-     * pingpong
-     * @param {number} space
-     * @return {number}
-     */
-
-  }, {
-    key: 'pingpong',
-    value: function pingpong(space) {
-      var dir = Math.floor(space / this.total) % 2;
-      if (dir) {
-        return this.begin + Tools.euclideanModulo(space, this.total);
-      } else {
-        return this.end - Tools.euclideanModulo(space, this.total);
-      }
-    }
-  }]);
-  return Pingpong;
-}();
-
-var FN_MAPS = {
-  loopIn: function loopIn(datak, mode, offset) {
-    var begin = datak[0].t;
-    var end = datak[offset].t;
-    switch (mode) {
-      case 'cycle':
-        return new Cycle('in', begin, end);
-      case 'pingpong':
-        return new Pingpong('in', begin, end);
-      default:
-        break;
-    }
-    return null;
-  },
-  loopOut: function loopOut(datak, mode, offset) {
-    var last = datak.length - 1;
-    var begin = datak[last - offset].t;
-    var end = datak[last].t;
-    switch (mode) {
-      case 'cycle':
-        return new Cycle('out', begin, end);
-      case 'pingpong':
-        return new Pingpong('out', begin, end);
-      default:
-        break;
-    }
-    return null;
-  }
-};
-
-/**
- * parseParams
- * @ignore
- * @param {string} pStr string
- * @return {array}
- */
-function parseParams(pStr) {
-  var params = pStr.split(/\s*,\s*/);
-  return params.map(function (it) {
-    if (STR_REG.test(it)) return it.replace(/"|'/g, '');
-    return parseInt(it);
-  });
-}
-
-/**
- * parseEx
- * @ignore
- * @param {string} ex string
- * @return {object}
- */
-function parseEx(ex) {
-  var rs = ex.match(EX_REG);
-  var ps = parseParams(rs[2]);
-  return {
-    name: rs[1],
-    mode: ps[0],
-    offset: ps[1]
-  };
-}
-
-/**
- * hasSupportExpression
- * @ignore
- * @param {string} ksp string
- * @return {boolean}
- */
-function hasSupportExpression(ksp) {
-  return ksp.x && EX_REG.test(ksp.x);
-}
-
-/**
- * getExpression
- * @ignore
- * @param {object} ksp ksp
- * @return {object}
- */
-function getExpression(ksp) {
-  var _parseEx = parseEx(ksp.x),
-      name = _parseEx.name,
-      mode = _parseEx.mode,
-      offset = _parseEx.offset;
-
-  var _offset = offset === 0 ? ksp.k.length - 1 : offset;
-  return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
-}
-
-var Expression = { hasSupportExpression: hasSupportExpression, getExpression: getExpression };
-
-/**
- * based on @Toji's https://github.com/toji/gl-matrix/
- * slerp with quaternion
- * @param {*} a from a
- * @param {*} b to b
- * @param {*} t progress
- * @return {Array}
- */
-function slerp(a, b, t) {
-  var out = [];
-  var ax = a[0];
-  var ay = a[1];
-  var az = a[2];
-  var aw = a[3];
-  var bx = b[0];
-  var by = b[1];
-  var bz = b[2];
-  var bw = b[3];
-
-  var omega = void 0;
-  var cosom = void 0;
-  var sinom = void 0;
-  var scale0 = void 0;
-  var scale1 = void 0;
-
-  cosom = ax * bx + ay * by + az * bz + aw * bw;
-  if (cosom < 0.0) {
-    cosom = -cosom;
-    bx = -bx;
-    by = -by;
-    bz = -bz;
-    bw = -bw;
-  }
-  if (1.0 - cosom > 0.000001) {
-    omega = Math.acos(cosom);
-    sinom = Math.sin(omega);
-    scale0 = Math.sin((1.0 - t) * omega) / sinom;
-    scale1 = Math.sin(t * omega) / sinom;
-  } else {
-    scale0 = 1.0 - t;
-    scale1 = t;
-  }
-  out[0] = scale0 * ax + scale1 * bx;
-  out[1] = scale0 * ay + scale1 * by;
-  out[2] = scale0 * az + scale1 * bz;
-  out[3] = scale0 * aw + scale1 * bw;
-
-  return out;
-}
-
-/**
- * quaternion to euler
- * @param {Array} out out euler pointer
- * @param {Array} quat origin quaternion
- */
-function quaternionToEuler(out, quat) {
-  var qx = quat[0];
-  var qy = quat[1];
-  var qz = quat[2];
-  var qw = quat[3];
-  var heading = Math.atan2(2 * qy * qw - 2 * qx * qz, 1 - 2 * qy * qy - 2 * qz * qz);
-  var attitude = Math.asin(2 * qx * qy + 2 * qz * qw);
-  var bank = Math.atan2(2 * qx * qw - 2 * qy * qz, 1 - 2 * qx * qx - 2 * qz * qz);
-  out[0] = heading / degToRads;
-  out[1] = attitude / degToRads;
-  out[2] = bank / degToRads;
-}
-
-/**
- * create a quaternion from euler
- * @param {Array} values origin euler
- * @return {Array} quaternion
- */
-function createQuaternion(values) {
-  var heading = values[0] * degToRads;
-  var attitude = values[1] * degToRads;
-  var bank = values[2] * degToRads;
-  var c1 = Math.cos(heading / 2);
-  var c2 = Math.cos(attitude / 2);
-  var c3 = Math.cos(bank / 2);
-  var s1 = Math.sin(heading / 2);
-  var s2 = Math.sin(attitude / 2);
-  var s3 = Math.sin(bank / 2);
-  var w = c1 * c2 * c3 - s1 * s2 * s3;
-  var x = s1 * s2 * c3 + c1 * c2 * s3;
-  var y = s1 * c2 * c3 + c1 * s2 * s3;
-  var z = c1 * s2 * c3 - s1 * c2 * s3;
-
-  return [x, y, z, w];
-}
-
-/**
- * basic property for animate property unit
- */
-
-var BaseProperty = function () {
-  function BaseProperty() {
-    classCallCheck(this, BaseProperty);
-  }
-
-  createClass(BaseProperty, [{
-    key: 'interpolateValue',
-
-    /**
-     * interpolate value
-     * @param {Number} frameNum now frame
-     * @param {Object} caching caching object
-     * @return {Array} newValue
-     */
-    value: function interpolateValue(frameNum, caching) {
-      // const offsetTime = this.offsetTime;
-      var newValue = void 0;
-      if (this.propType === 'multidimensional') {
-        newValue = createTypedArray('float32', this.pv.length);
-      }
-      var iterationIndex = caching.lastIndex;
-      var i = iterationIndex;
-      var len = this.keyframes.length - 1;
+    if (initPos === len - 1 || initPos === 0 || lengthPos === lengths[initPos]) {
+      return percents[initPos];
+    } else {
+      var dir = lengths[initPos] > lengthPos ? -1 : 1;
       var flag = true;
-      var keyData = void 0;var nextKeyData = void 0;
 
       while (flag) {
-        keyData = this.keyframes[i];
-        nextKeyData = this.keyframes[i + 1];
-        if (i === len - 1 && frameNum >= nextKeyData.t) {
-          if (keyData.h) {
-            keyData = nextKeyData;
-          }
-          iterationIndex = 0;
-          break;
-        }
-        if (nextKeyData.t > frameNum) {
-          iterationIndex = i;
-          break;
-        }
-        if (i < len - 1) {
-          i += 1;
+        if (lengths[initPos] <= lengthPos && lengths[initPos + 1] > lengthPos) {
+          lPerc = (lengthPos - lengths[initPos]) / (lengths[initPos + 1] - lengths[initPos]);
+          flag = false;
         } else {
-          iterationIndex = 0;
+          initPos += dir;
+        }
+
+        if (initPos < 0 || initPos >= len - 1) {
+          // FIX for TypedArrays that don't store floating point values with enough accuracy
+          if (initPos === len - 1) {
+            return percents[initPos];
+          }
+
           flag = false;
         }
       }
 
-      var k = void 0;var kLen = void 0;var perc = void 0;var jLen = void 0;var j = void 0;var fnc = void 0;
-      var nextKeyTime = nextKeyData.t;
-      var keyTime = keyData.t;
-      var endValue = void 0;
-      if (keyData.to) {
-        if (!keyData.bezierData) {
-          keyData.bezierData = bez.buildBezierData(keyData.s, nextKeyData.s || keyData.e, keyData.to, keyData.ti);
-        }
-        var bezierData = keyData.bezierData;
-        if (frameNum >= nextKeyTime || frameNum < keyTime) {
-          var ind = frameNum >= nextKeyTime ? bezierData.points.length - 1 : 0;
-          kLen = bezierData.points[ind].point.length;
-          for (k = 0; k < kLen; k += 1) {
-            newValue[k] = bezierData.points[ind].point[k];
-          }
-          // caching._lastKeyframeIndex = -1;
-        } else {
-          if (keyData.__fnct) {
-            fnc = keyData.__fnct;
-          } else {
-            fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y, keyData.n).get;
-            keyData.__fnct = fnc;
-          }
-          perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
-          var distanceInLine = bezierData.segmentLength * perc;
+      return percents[initPos] + (percents[initPos + 1] - percents[initPos]) * lPerc;
+    }
+  }
+  /**
+   * a
+   * @param {*} pt1 a
+   * @param {*} pt2 a
+   * @param {*} pt3 a
+   * @param {*} pt4 a
+   * @param {*} percent a
+   * @param {*} bezierData a
+   * @return {*}
+   */
 
-          var segmentPerc = void 0;
-          var addedLength = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastAddedLength : 0;
-          j = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastPoint : 0;
-          flag = true;
-          jLen = bezierData.points.length;
+
+  function getPointInSegment(pt1, pt2, pt3, pt4, percent, bezierData) {
+    var t1 = getDistancePerc(percent, bezierData); // var u0 = 1;
+
+    var u1 = 1 - t1;
+    var ptX = Math.round((u1 * u1 * u1 * pt1[0] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[0] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[0] + t1 * t1 * t1 * pt2[0]) * 1000) / 1000;
+    var ptY = Math.round((u1 * u1 * u1 * pt1[1] + (t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1) * pt3[1] + (t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1) * pt4[1] + t1 * t1 * t1 * pt2[1]) * 1000) / 1000;
+    return [ptX, ptY];
+  } // function getSegmentArray() {
+  // }
+
+
+  var bezierSegmentPoints = createTypedArray('float32', 8);
+  /**
+   * a
+   * @param {*} pt1 a
+   * @param {*} pt2 a
+   * @param {*} pt3 a
+   * @param {*} pt4 a
+   * @param {*} startPerc a
+   * @param {*} endPerc a
+   * @param {*} bezierData a
+   * @return {*}
+   */
+
+  function getNewSegment(pt1, pt2, pt3, pt4, startPerc, endPerc, bezierData) {
+    /* eslint camelcase: 0 */
+    startPerc = startPerc < 0 ? 0 : startPerc > 1 ? 1 : startPerc;
+    var t0 = getDistancePerc(startPerc, bezierData);
+    endPerc = endPerc > 1 ? 1 : endPerc;
+    var t1 = getDistancePerc(endPerc, bezierData);
+    var len = pt1.length;
+    var u0 = 1 - t0;
+    var u1 = 1 - t1;
+    var u0u0u0 = u0 * u0 * u0;
+    var t0u0u0_3 = t0 * u0 * u0 * 3;
+    var t0t0u0_3 = t0 * t0 * u0 * 3;
+    var t0t0t0 = t0 * t0 * t0; //
+
+    var u0u0u1 = u0 * u0 * u1;
+    var t0u0u1_3 = t0 * u0 * u1 + u0 * t0 * u1 + u0 * u0 * t1;
+    var t0t0u1_3 = t0 * t0 * u1 + u0 * t0 * t1 + t0 * u0 * t1;
+    var t0t0t1 = t0 * t0 * t1; //
+
+    var u0u1u1 = u0 * u1 * u1;
+    var t0u1u1_3 = t0 * u1 * u1 + u0 * t1 * u1 + u0 * u1 * t1;
+    var t0t1u1_3 = t0 * t1 * u1 + u0 * t1 * t1 + t0 * u1 * t1;
+    var t0t1t1 = t0 * t1 * t1; //
+
+    var u1u1u1 = u1 * u1 * u1;
+    var t1u1u1_3 = t1 * u1 * u1 + u1 * t1 * u1 + u1 * u1 * t1;
+    var t1t1u1_3 = t1 * t1 * u1 + u1 * t1 * t1 + t1 * u1 * t1;
+    var t1t1t1 = t1 * t1 * t1;
+
+    for (var i = 0; i < len; i += 1) {
+      bezierSegmentPoints[i * 4] = Math.round((u0u0u0 * pt1[i] + t0u0u0_3 * pt3[i] + t0t0u0_3 * pt4[i] + t0t0t0 * pt2[i]) * 1000) / 1000;
+      bezierSegmentPoints[i * 4 + 1] = Math.round((u0u0u1 * pt1[i] + t0u0u1_3 * pt3[i] + t0t0u1_3 * pt4[i] + t0t0t1 * pt2[i]) * 1000) / 1000;
+      bezierSegmentPoints[i * 4 + 2] = Math.round((u0u1u1 * pt1[i] + t0u1u1_3 * pt3[i] + t0t1u1_3 * pt4[i] + t0t1t1 * pt2[i]) * 1000) / 1000;
+      bezierSegmentPoints[i * 4 + 3] = Math.round((u1u1u1 * pt1[i] + t1u1u1_3 * pt3[i] + t1t1u1_3 * pt4[i] + t1t1t1 * pt2[i]) * 1000) / 1000;
+    }
+
+    return bezierSegmentPoints;
+  }
+
+  var bez = {
+    getSegmentsLength: getSegmentsLength,
+    getNewSegment: getNewSegment,
+    getPointInSegment: getPointInSegment,
+    buildBezierData: buildBezierData,
+    pointOnLine2D: pointOnLine2D,
+    pointOnLine3D: pointOnLine3D
+  };
+
+  var initialDefaultFrame = -999999;
+  var degToRads = Math.PI / 180;
+  var defaultVector = [0, 0];
+
+  var EX_REG = /(loopIn|loopOut)\(([^)]+)/;
+  var STR_REG = /["']\w+["']/;
+  /**
+   * Cycle
+   * @class
+   * @private
+   */
+
+  var Cycle = /*#__PURE__*/function () {
+    /**
+     * Pingpong
+     * @param {*} type Pingpong
+     * @param {*} begin Pingpong
+     * @param {*} end Pingpong
+     */
+    function Cycle(type, begin, end) {
+      _classCallCheck(this, Cycle);
+
+      this.begin = begin;
+      this.end = end;
+      this.total = this.end - this.begin;
+      this.type = type;
+    }
+    /**
+     * progress
+     * @param {number} progress progress
+     * @return {number} progress
+     */
+
+
+    _createClass(Cycle, [{
+      key: "update",
+      value: function update(progress) {
+        if (this.type === 'in') {
+          if (progress >= this.begin) return progress;
+          return this.end - Tools.euclideanModulo(this.begin - progress, this.total);
+        } else if (this.type === 'out') {
+          if (progress <= this.end) return progress;
+          return this.begin + Tools.euclideanModulo(progress - this.end, this.total);
+        }
+      }
+    }]);
+
+    return Cycle;
+  }();
+  /**
+   * Pingpong
+   * @class
+   * @private
+   */
+
+
+  var Pingpong = /*#__PURE__*/function () {
+    /**
+     * Pingpong
+     * @param {*} type Pingpong
+     * @param {*} begin Pingpong
+     * @param {*} end Pingpong
+     */
+    function Pingpong(type, begin, end) {
+      _classCallCheck(this, Pingpong);
+
+      this.begin = begin;
+      this.end = end;
+      this.total = this.end - this.begin;
+      this.type = type;
+    }
+    /**
+     * progress
+     * @param {number} progress progress
+     * @return {number} progress
+     */
+
+
+    _createClass(Pingpong, [{
+      key: "update",
+      value: function update(progress) {
+        if (this.type === 'in' && progress < this.begin || this.type === 'out' && progress > this.end) {
+          var space = progress - this.end;
+          return this.pingpong(space);
+        }
+
+        return progress;
+      }
+      /**
+       * pingpong
+       * @param {number} space
+       * @return {number}
+       */
+
+    }, {
+      key: "pingpong",
+      value: function pingpong(space) {
+        var dir = Math.floor(space / this.total) % 2;
+
+        if (dir) {
+          return this.begin + Tools.euclideanModulo(space, this.total);
+        } else {
+          return this.end - Tools.euclideanModulo(space, this.total);
+        }
+      }
+    }]);
+
+    return Pingpong;
+  }();
+
+  var FN_MAPS = {
+    loopIn: function loopIn(datak, mode, offset) {
+      var begin = datak[0].t;
+      var end = datak[offset].t;
+
+      switch (mode) {
+        case 'cycle':
+          return new Cycle('in', begin, end);
+
+        case 'pingpong':
+          return new Pingpong('in', begin, end);
+      }
+
+      return null;
+    },
+    loopOut: function loopOut(datak, mode, offset) {
+      var last = datak.length - 1;
+      var begin = datak[last - offset].t;
+      var end = datak[last].t;
+
+      switch (mode) {
+        case 'cycle':
+          return new Cycle('out', begin, end);
+
+        case 'pingpong':
+          return new Pingpong('out', begin, end);
+      }
+
+      return null;
+    }
+  };
+  /**
+   * parseParams
+   * @ignore
+   * @param {string} pStr string
+   * @return {array}
+   */
+
+  function parseParams(pStr) {
+    var params = pStr.split(/\s*,\s*/);
+    return params.map(function (it) {
+      if (STR_REG.test(it)) return it.replace(/"|'/g, '');
+      return parseInt(it);
+    });
+  }
+  /**
+   * parseEx
+   * @ignore
+   * @param {string} ex string
+   * @return {object}
+   */
+
+
+  function parseEx(ex) {
+    var rs = ex.match(EX_REG);
+    var ps = parseParams(rs[2]);
+    return {
+      name: rs[1],
+      mode: ps[0],
+      offset: ps[1]
+    };
+  }
+  /**
+   * hasSupportExpression
+   * @ignore
+   * @param {string} ksp string
+   * @return {boolean}
+   */
+
+
+  function hasSupportExpression(ksp) {
+    return ksp.x && EX_REG.test(ksp.x);
+  }
+  /**
+   * getExpression
+   * @ignore
+   * @param {object} ksp ksp
+   * @return {object}
+   */
+
+
+  function getExpression(ksp) {
+    var _parseEx = parseEx(ksp.x),
+        name = _parseEx.name,
+        mode = _parseEx.mode,
+        offset = _parseEx.offset;
+
+    var _offset = offset === 0 ? ksp.k.length - 1 : offset;
+
+    return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
+  }
+
+  var Expression = {
+    hasSupportExpression: hasSupportExpression,
+    getExpression: getExpression
+  };
+
+  /**
+   * based on @Toji's https://github.com/toji/gl-matrix/
+   * slerp with quaternion
+   * @param {*} a from a
+   * @param {*} b to b
+   * @param {*} t progress
+   * @return {Array}
+   */
+
+  function slerp(a, b, t) {
+    var out = [];
+    var ax = a[0];
+    var ay = a[1];
+    var az = a[2];
+    var aw = a[3];
+    var bx = b[0];
+    var by = b[1];
+    var bz = b[2];
+    var bw = b[3];
+    var omega;
+    var cosom;
+    var sinom;
+    var scale0;
+    var scale1;
+    cosom = ax * bx + ay * by + az * bz + aw * bw;
+
+    if (cosom < 0.0) {
+      cosom = -cosom;
+      bx = -bx;
+      by = -by;
+      bz = -bz;
+      bw = -bw;
+    }
+
+    if (1.0 - cosom > 0.000001) {
+      omega = Math.acos(cosom);
+      sinom = Math.sin(omega);
+      scale0 = Math.sin((1.0 - t) * omega) / sinom;
+      scale1 = Math.sin(t * omega) / sinom;
+    } else {
+      scale0 = 1.0 - t;
+      scale1 = t;
+    }
+
+    out[0] = scale0 * ax + scale1 * bx;
+    out[1] = scale0 * ay + scale1 * by;
+    out[2] = scale0 * az + scale1 * bz;
+    out[3] = scale0 * aw + scale1 * bw;
+    return out;
+  }
+  /**
+   * quaternion to euler
+   * @param {Array} out out euler pointer
+   * @param {Array} quat origin quaternion
+   */
+
+
+  function quaternionToEuler(out, quat) {
+    var qx = quat[0];
+    var qy = quat[1];
+    var qz = quat[2];
+    var qw = quat[3];
+    var heading = Math.atan2(2 * qy * qw - 2 * qx * qz, 1 - 2 * qy * qy - 2 * qz * qz);
+    var attitude = Math.asin(2 * qx * qy + 2 * qz * qw);
+    var bank = Math.atan2(2 * qx * qw - 2 * qy * qz, 1 - 2 * qx * qx - 2 * qz * qz);
+    out[0] = heading / degToRads;
+    out[1] = attitude / degToRads;
+    out[2] = bank / degToRads;
+  }
+  /**
+   * create a quaternion from euler
+   * @param {Array} values origin euler
+   * @return {Array} quaternion
+   */
+
+
+  function createQuaternion(values) {
+    var heading = values[0] * degToRads;
+    var attitude = values[1] * degToRads;
+    var bank = values[2] * degToRads;
+    var c1 = Math.cos(heading / 2);
+    var c2 = Math.cos(attitude / 2);
+    var c3 = Math.cos(bank / 2);
+    var s1 = Math.sin(heading / 2);
+    var s2 = Math.sin(attitude / 2);
+    var s3 = Math.sin(bank / 2);
+    var w = c1 * c2 * c3 - s1 * s2 * s3;
+    var x = s1 * s2 * c3 + c1 * c2 * s3;
+    var y = s1 * c2 * c3 + c1 * s2 * s3;
+    var z = c1 * s2 * c3 - s1 * c2 * s3;
+    return [x, y, z, w];
+  }
+  /**
+   * basic property for animate property unit
+   */
+
+
+  var BaseProperty = /*#__PURE__*/function () {
+    function BaseProperty() {
+      _classCallCheck(this, BaseProperty);
+    }
+
+    _createClass(BaseProperty, [{
+      key: "interpolateValue",
+
+      /**
+       * interpolate value
+       * @param {Number} frameNum now frame
+       * @param {Object} caching caching object
+       * @return {Array} newValue
+       */
+      value: function interpolateValue(frameNum, caching) {
+        // const offsetTime = this.offsetTime;
+        var newValue;
+
+        if (this.propType === 'multidimensional') {
+          newValue = createTypedArray('float32', this.pv.length);
+        }
+
+        var iterationIndex = caching.lastIndex;
+        var i = iterationIndex;
+        var len = this.keyframes.length - 1;
+        var flag = true;
+        var keyData;
+        var nextKeyData;
+
+        while (flag) {
+          keyData = this.keyframes[i];
+          nextKeyData = this.keyframes[i + 1];
+
+          if (i === len - 1 && frameNum >= nextKeyData.t) {
+            if (keyData.h) {
+              keyData = nextKeyData;
+            }
+
+            iterationIndex = 0;
+            break;
+          }
+
+          if (nextKeyData.t > frameNum) {
+            iterationIndex = i;
+            break;
+          }
+
+          if (i < len - 1) {
+            i += 1;
+          } else {
+            iterationIndex = 0;
+            flag = false;
+          }
+        }
+
+        var k;
+        var kLen;
+        var perc;
+        var jLen;
+        var j;
+        var fnc;
+        var nextKeyTime = nextKeyData.t;
+        var keyTime = keyData.t;
+        var endValue;
+
+        if (keyData.to) {
+          if (!keyData.bezierData) {
+            keyData.bezierData = bez.buildBezierData(keyData.s, nextKeyData.s || keyData.e, keyData.to, keyData.ti);
+          }
+
+          var bezierData = keyData.bezierData;
+
+          if (frameNum >= nextKeyTime || frameNum < keyTime) {
+            var ind = frameNum >= nextKeyTime ? bezierData.points.length - 1 : 0;
+            kLen = bezierData.points[ind].point.length;
+
+            for (k = 0; k < kLen; k += 1) {
+              newValue[k] = bezierData.points[ind].point[k];
+            } // caching._lastKeyframeIndex = -1;
+
+          } else {
+            if (keyData.__fnct) {
+              fnc = keyData.__fnct;
+            } else {
+              fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y, keyData.n).get;
+              keyData.__fnct = fnc;
+            }
+
+            perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+            var distanceInLine = bezierData.segmentLength * perc;
+            var segmentPerc;
+            var addedLength = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastAddedLength : 0;
+            j = caching.lastFrame < frameNum && caching._lastKeyframeIndex === i ? caching._lastPoint : 0;
+            flag = true;
+            jLen = bezierData.points.length;
+
+            while (flag) {
+              addedLength += bezierData.points[j].partialLength;
+
+              if (distanceInLine === 0 || perc === 0 || j === bezierData.points.length - 1) {
+                kLen = bezierData.points[j].point.length;
+
+                for (k = 0; k < kLen; k += 1) {
+                  newValue[k] = bezierData.points[j].point[k];
+                }
+
+                break;
+              } else if (distanceInLine >= addedLength && distanceInLine < addedLength + bezierData.points[j + 1].partialLength) {
+                segmentPerc = (distanceInLine - addedLength) / bezierData.points[j + 1].partialLength;
+                kLen = bezierData.points[j].point.length;
+
+                for (k = 0; k < kLen; k += 1) {
+                  newValue[k] = bezierData.points[j].point[k] + (bezierData.points[j + 1].point[k] - bezierData.points[j].point[k]) * segmentPerc;
+                }
+
+                break;
+              }
+
+              if (j < jLen - 1) {
+                j += 1;
+              } else {
+                flag = false;
+              }
+            }
+
+            caching._lastPoint = j;
+            caching._lastAddedLength = addedLength - bezierData.points[j].partialLength;
+            caching._lastKeyframeIndex = i;
+          }
+        } else {
+          var outX;
+          var outY;
+          var inX;
+          var inY;
+          var keyValue;
+          len = keyData.s.length;
+          endValue = nextKeyData.s || keyData.e;
+
+          if (this.sh && keyData.h !== 1) {
+            if (frameNum >= nextKeyTime) {
+              newValue[0] = endValue[0];
+              newValue[1] = endValue[1];
+              newValue[2] = endValue[2];
+            } else if (frameNum <= keyTime) {
+              newValue[0] = keyData.s[0];
+              newValue[1] = keyData.s[1];
+              newValue[2] = keyData.s[2];
+            } else {
+              var quatStart = createQuaternion(keyData.s);
+              var quatEnd = createQuaternion(endValue);
+              var time = (frameNum - keyTime) / (nextKeyTime - keyTime);
+              quaternionToEuler(newValue, slerp(quatStart, quatEnd, time));
+            }
+          } else {
+            for (i = 0; i < len; i += 1) {
+              if (keyData.h !== 1) {
+                if (frameNum >= nextKeyTime) {
+                  perc = 1;
+                } else if (frameNum < keyTime) {
+                  perc = 0;
+                } else {
+                  if (keyData.o.x.constructor === Array) {
+                    if (!keyData.__fnct) {
+                      keyData.__fnct = [];
+                    }
+
+                    if (!keyData.__fnct[i]) {
+                      outX = typeof keyData.o.x[i] === 'undefined' ? keyData.o.x[0] : keyData.o.x[i];
+                      outY = typeof keyData.o.y[i] === 'undefined' ? keyData.o.y[0] : keyData.o.y[i];
+                      inX = typeof keyData.i.x[i] === 'undefined' ? keyData.i.x[0] : keyData.i.x[i];
+                      inY = typeof keyData.i.y[i] === 'undefined' ? keyData.i.y[0] : keyData.i.y[i];
+                      fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
+                      keyData.__fnct[i] = fnc;
+                    } else {
+                      fnc = keyData.__fnct[i];
+                    }
+                  } else {
+                    if (!keyData.__fnct) {
+                      outX = keyData.o.x;
+                      outY = keyData.o.y;
+                      inX = keyData.i.x;
+                      inY = keyData.i.y;
+                      fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
+                      keyData.__fnct = fnc;
+                    } else {
+                      fnc = keyData.__fnct;
+                    }
+                  }
+
+                  perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+                }
+              }
+
+              endValue = nextKeyData.s || keyData.e;
+              keyValue = keyData.h === 1 ? keyData.s[i] : keyData.s[i] + (endValue[i] - keyData.s[i]) * perc;
+
+              if (this.propType === 'multidimensional') {
+                newValue[i] = keyValue;
+              } else {
+                newValue = keyValue;
+              }
+            }
+          }
+        }
+
+        caching.lastIndex = iterationIndex;
+        return newValue;
+      }
+      /**
+       * get value at comp frame
+       * @param {*} frameNum a
+       * @return {Array|Number}
+       */
+
+    }, {
+      key: "getValueAtCurrentTime",
+      value: function getValueAtCurrentTime(frameNum) {
+        // let frameNum = this.comp.renderedFrame;
+        var initTime = this.keyframes[0].t;
+        var endTime = this.keyframes[this.keyframes.length - 1].t;
+
+        if (!(frameNum === this._caching.lastFrame || this._caching.lastFrame !== initialDefaultFrame && (this._caching.lastFrame >= endTime && frameNum >= endTime || this._caching.lastFrame < initTime && frameNum < initTime))) {
+          if (this._caching.lastFrame >= frameNum) {
+            this._caching._lastKeyframeIndex = -1;
+            this._caching.lastIndex = 0;
+          }
+
+          var renderResult = this.interpolateValue(frameNum, this._caching);
+          this.pv = renderResult;
+        }
+
+        this._caching.lastFrame = frameNum;
+        return this.pv;
+      }
+      /**
+       * set value to this.v prop
+       * @param {Array|Number} val value
+       */
+
+    }, {
+      key: "setVValue",
+      value: function setVValue(val) {
+        var multipliedValue;
+
+        if (this.propType === 'unidimensional') {
+          multipliedValue = val * this.mult;
+
+          if (Math.abs(this.v - multipliedValue) > 0.00001) {
+            this.v = multipliedValue;
+            this._mdf = true;
+          }
+        } else {
+          var i = 0;
+          var len = this.v.length;
+
+          while (i < len) {
+            multipliedValue = val[i] * this.mult;
+
+            if (Math.abs(this.v[i] - multipliedValue) > 0.00001) {
+              this.v[i] = multipliedValue;
+              this._mdf = true;
+            }
+
+            i += 1;
+          }
+        }
+      }
+      /**
+       * process effects sequence
+       * @param {*} frameNum a
+       */
+
+    }, {
+      key: "processEffectsSequence",
+      value: function processEffectsSequence(frameNum) {
+        if (this.expression) {
+          frameNum = this.expression.update(frameNum);
+        }
+
+        if (frameNum === this.frameId || !this.effectsSequence.length) {
+          return;
+        }
+
+        if (this.lock) {
+          this.setVValue(this.pv);
+          return;
+        }
+
+        this.lock = true;
+        this._mdf = this._isFirstFrame; // let multipliedValue;
+
+        var i;
+        var len = this.effectsSequence.length;
+        var finalValue = this.kf ? this.pv : this.data.k;
+
+        for (i = 0; i < len; i += 1) {
+          finalValue = this.effectsSequence[i](frameNum);
+        }
+
+        this.setVValue(finalValue);
+        this._isFirstFrame = false;
+        this.lock = false;
+        this.frameId = frameNum;
+      }
+      /**
+       * a
+       * @param {*} effectFunction a
+       */
+
+    }, {
+      key: "addEffect",
+      value: function addEffect(effectFunction) {
+        this.effectsSequence.push(effectFunction);
+        this.container.addDynamicProperty(this);
+      }
+    }]);
+
+    return BaseProperty;
+  }();
+  /**
+   * unidimensional value property
+   */
+
+
+  var ValueProperty = /*#__PURE__*/function (_BaseProperty) {
+    _inherits(ValueProperty, _BaseProperty);
+
+    var _super = _createSuper(ValueProperty);
+
+    /**
+     * constructor unidimensional value property
+     * @param {*} elem element node
+     * @param {*} data unidimensional value property data
+     * @param {*} mult data mult scale
+     * @param {*} container value property container
+     */
+    function ValueProperty(elem, data, mult, container) {
+      var _this;
+
+      _classCallCheck(this, ValueProperty);
+
+      _this = _super.call(this);
+      _this.propType = 'unidimensional';
+      _this.mult = mult || 1;
+      _this.data = data;
+      _this.v = mult ? data.k * mult : data.k;
+      _this.pv = data.k;
+      _this._mdf = false;
+      _this.elem = elem;
+      _this.container = container;
+      _this.k = false;
+      _this.kf = false;
+      _this.vel = 0;
+      _this.effectsSequence = [];
+      _this._isFirstFrame = true;
+      _this.getValue = _this.processEffectsSequence;
+      return _this;
+    }
+
+    return ValueProperty;
+  }(BaseProperty);
+  /**
+   * multidimensional value property
+   */
+
+
+  var MultiDimensionalProperty = /*#__PURE__*/function (_BaseProperty2) {
+    _inherits(MultiDimensionalProperty, _BaseProperty2);
+
+    var _super2 = _createSuper(MultiDimensionalProperty);
+
+    /**
+     * constructor multidimensional value property
+     * @param {*} elem element node
+     * @param {*} data multidimensional value property data
+     * @param {*} mult data mult scale
+     * @param {*} container value property container
+     */
+    function MultiDimensionalProperty(elem, data, mult, container) {
+      var _this2;
+
+      _classCallCheck(this, MultiDimensionalProperty);
+
+      _this2 = _super2.call(this);
+      _this2.propType = 'multidimensional';
+      _this2.mult = mult || 1;
+      _this2.data = data;
+      _this2._mdf = false;
+      _this2.elem = elem;
+      _this2.container = container;
+      _this2.comp = elem.comp;
+      _this2.k = false;
+      _this2.kf = false;
+      _this2.frameId = -1;
+      var len = data.k.length;
+      _this2.v = createTypedArray('float32', len);
+      _this2.pv = createTypedArray('float32', len); // var arr = createTypedArray('float32', len);
+
+      _this2.vel = createTypedArray('float32', len);
+
+      for (var i = 0; i < len; i += 1) {
+        _this2.v[i] = data.k[i] * _this2.mult;
+        _this2.pv[i] = data.k[i];
+      }
+
+      _this2._isFirstFrame = true;
+      _this2.effectsSequence = [];
+      _this2.getValue = _this2.processEffectsSequence;
+      return _this2;
+    }
+
+    return MultiDimensionalProperty;
+  }(BaseProperty);
+  /**
+   * keyframed unidimensional value property
+   */
+
+
+  var KeyframedValueProperty = /*#__PURE__*/function (_BaseProperty3) {
+    _inherits(KeyframedValueProperty, _BaseProperty3);
+
+    var _super3 = _createSuper(KeyframedValueProperty);
+
+    /**
+     * constructor keyframed unidimensional value property
+     * @param {*} elem element node
+     * @param {*} data keyframed unidimensional value property data
+     * @param {*} mult data mult scale
+     * @param {*} container value property container
+     */
+    function KeyframedValueProperty(elem, data, mult, container) {
+      var _this3;
+
+      _classCallCheck(this, KeyframedValueProperty);
+
+      _this3 = _super3.call(this);
+      _this3.propType = 'unidimensional';
+      _this3.keyframes = data.k; // this.offsetTime = elem.data.st;
+
+      _this3.frameId = -1;
+      _this3._caching = {
+        lastFrame: initialDefaultFrame,
+        lastIndex: 0,
+        value: 0,
+        _lastKeyframeIndex: -1
+      };
+      _this3.k = true;
+      _this3.kf = true;
+      _this3.data = data;
+      _this3.mult = mult || 1;
+      _this3.elem = elem;
+      _this3.container = container;
+      _this3.comp = elem.comp;
+      _this3.v = initialDefaultFrame;
+      _this3.pv = initialDefaultFrame;
+      _this3._isFirstFrame = true;
+      _this3.getValue = _this3.processEffectsSequence; // this.setVValue = setVValue;
+      // this.interpolateValue = interpolateValue;
+
+      _this3.effectsSequence = [_this3.getValueAtCurrentTime.bind(_assertThisInitialized(_this3))]; // this.addEffect = addEffect;
+
+      _this3._hasOutTypeExpression = false;
+
+      if (Expression.hasSupportExpression(data)) {
+        _this3.expression = Expression.getExpression(data);
+        _this3._hasOutTypeExpression = _this3.expression.type === 'out';
+      }
+
+      return _this3;
+    }
+
+    return KeyframedValueProperty;
+  }(BaseProperty);
+  /**
+   * keyframed multidimensional value property
+   */
+
+
+  var KeyframedMultidimensionalProperty = /*#__PURE__*/function (_BaseProperty4) {
+    _inherits(KeyframedMultidimensionalProperty, _BaseProperty4);
+
+    var _super4 = _createSuper(KeyframedMultidimensionalProperty);
+
+    /**
+     * constructor keyframed multidimensional value property
+     * @param {*} elem element node
+     * @param {*} data keyframed multidimensional value property data
+     * @param {*} mult data mult scale
+     * @param {*} container value property container
+     */
+    function KeyframedMultidimensionalProperty(elem, data, mult, container) {
+      var _this4;
+
+      _classCallCheck(this, KeyframedMultidimensionalProperty);
+
+      _this4 = _super4.call(this);
+      _this4.propType = 'multidimensional';
+      var i;
+      var len = data.k.length;
+      var s;
+      var e;
+      var to;
+      var ti;
+
+      for (i = 0; i < len - 1; i += 1) {
+        if (data.k[i].to && data.k[i].s && data.k[i + 1] && data.k[i + 1].s) {
+          s = data.k[i].s;
+          e = data.k[i + 1].s;
+          to = data.k[i].to;
+          ti = data.k[i].ti;
+
+          if (s.length === 2 && !(s[0] === e[0] && s[1] === e[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], s[0] + to[0], s[1] + to[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], e[0] + ti[0], e[1] + ti[1]) || s.length === 3 && !(s[0] === e[0] && s[1] === e[1] && s[2] === e[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], s[0] + to[0], s[1] + to[1], s[2] + to[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], e[0] + ti[0], e[1] + ti[1], e[2] + ti[2])) {
+            data.k[i].to = null;
+            data.k[i].ti = null;
+          }
+
+          if (s[0] === e[0] && s[1] === e[1] && to[0] === 0 && to[1] === 0 && ti[0] === 0 && ti[1] === 0) {
+            if (s.length === 2 || s[2] === e[2] && to[2] === 0 && ti[2] === 0) {
+              data.k[i].to = null;
+              data.k[i].ti = null;
+            }
+          }
+        }
+      }
+
+      _this4.effectsSequence = [_this4.getValueAtCurrentTime.bind(_assertThisInitialized(_this4))];
+      _this4.keyframes = data.k; // this.offsetTime = elem.data.st;
+
+      _this4.k = true;
+      _this4.kf = true;
+      _this4._isFirstFrame = true;
+      _this4.mult = mult || 1;
+      _this4.elem = elem;
+      _this4.container = container;
+      _this4.comp = elem.comp;
+      _this4.getValue = _this4.processEffectsSequence; // this.setVValue = setVValue;
+      // this.interpolateValue = interpolateValue;
+
+      _this4.frameId = -1;
+      var arrLen = data.k[0].s.length;
+      _this4.v = createTypedArray('float32', arrLen);
+      _this4.pv = createTypedArray('float32', arrLen);
+
+      for (i = 0; i < arrLen; i += 1) {
+        _this4.v[i] = initialDefaultFrame;
+        _this4.pv[i] = initialDefaultFrame;
+      }
+
+      _this4._caching = {
+        lastFrame: initialDefaultFrame,
+        lastIndex: 0,
+        value: createTypedArray('float32', arrLen)
+      }; // this.addEffect = addEffect;
+
+      _this4._hasOutTypeExpression = false;
+
+      if (Expression.hasSupportExpression(data)) {
+        _this4.expression = Expression.getExpression(data);
+        _this4._hasOutTypeExpression = _this4.expression.type === 'out';
+      }
+
+      return _this4;
+    }
+
+    return KeyframedMultidimensionalProperty;
+  }(BaseProperty);
+  /**
+   * getProp by data
+   * @param {*} elem element node
+   * @param {*} data keyframed multidimensional value property data
+   * @param {*} type keyframed type or not
+   * @param {*} mult data mult scale
+   * @param {*} container value property container
+   * @return {ValueProperty|MultiDimensionalProperty|KeyframedValueProperty|KeyframedMultidimensionalProperty}
+   */
+
+
+  function getProp(elem, data, type, mult, container) {
+    var p;
+
+    if (!data.k.length) {
+      p = new ValueProperty(elem, data, mult, container);
+    } else if (typeof data.k[0] === 'number') {
+      p = new MultiDimensionalProperty(elem, data, mult, container);
+    } else {
+      switch (type) {
+        case 0:
+          p = new KeyframedValueProperty(elem, data, mult, container);
+          break;
+
+        case 1:
+          p = new KeyframedMultidimensionalProperty(elem, data, mult, container);
+          break;
+      }
+    }
+
+    if (p.effectsSequence.length) {
+      container.addDynamicProperty(p);
+    }
+
+    return p;
+  }
+
+  var PropertyFactory = {
+    getProp: getProp
+  };
+
+  // const initFrame = -999999;
+  // const degToRads = Math.PI/180;
+
+  /**
+   * basic shape property
+   */
+
+  var BaseShapeProperty = /*#__PURE__*/function () {
+    function BaseShapeProperty() {
+      _classCallCheck(this, BaseShapeProperty);
+    }
+
+    _createClass(BaseShapeProperty, [{
+      key: "interpolateShape",
+
+      /**
+       * interpolate shape
+       * @param {*} frameNum frame number
+       * @param {*} previousValue previous value
+       * @param {*} caching caching object
+       */
+      value: function interpolateShape(frameNum, previousValue, caching) {
+        var iterationIndex = caching.lastIndex;
+        var keyPropS;
+        var keyPropE;
+        var isHold;
+        var j;
+        var k;
+        var jLen;
+        var kLen;
+        var perc;
+        var vertexValue;
+        var kf = this.keyframes;
+
+        if (frameNum < kf[0].t) {
+          keyPropS = kf[0].s[0];
+          isHold = true;
+          iterationIndex = 0;
+        } else if (frameNum >= kf[kf.length - 1].t) {
+          keyPropS = kf[kf.length - 1].s ? kf[kf.length - 1].s[0] : kf[kf.length - 2].e[0];
+          /* if(kf[kf.length - 1].s){
+                    keyPropS = kf[kf.length - 1].s[0];
+                }else{
+                    keyPropS = kf[kf.length - 2].e[0];
+                }*/
+
+          isHold = true;
+        } else {
+          var i = iterationIndex;
+          var len = kf.length - 1;
+          var flag = true;
+          var keyData;
+          var nextKeyData;
+
           while (flag) {
-            addedLength += bezierData.points[j].partialLength;
-            if (distanceInLine === 0 || perc === 0 || j === bezierData.points.length - 1) {
-              kLen = bezierData.points[j].point.length;
-              for (k = 0; k < kLen; k += 1) {
-                newValue[k] = bezierData.points[j].point[k];
-              }
-              break;
-            } else if (distanceInLine >= addedLength && distanceInLine < addedLength + bezierData.points[j + 1].partialLength) {
-              segmentPerc = (distanceInLine - addedLength) / bezierData.points[j + 1].partialLength;
-              kLen = bezierData.points[j].point.length;
-              for (k = 0; k < kLen; k += 1) {
-                newValue[k] = bezierData.points[j].point[k] + (bezierData.points[j + 1].point[k] - bezierData.points[j].point[k]) * segmentPerc;
-              }
+            keyData = kf[i];
+            nextKeyData = kf[i + 1];
+
+            if (nextKeyData.t > frameNum) {
               break;
             }
-            if (j < jLen - 1) {
-              j += 1;
+
+            if (i < len - 1) {
+              i += 1;
             } else {
               flag = false;
             }
           }
-          caching._lastPoint = j;
-          caching._lastAddedLength = addedLength - bezierData.points[j].partialLength;
-          caching._lastKeyframeIndex = i;
-        }
-      } else {
-        var outX = void 0;var outY = void 0;var inX = void 0;var inY = void 0;var keyValue = void 0;
-        len = keyData.s.length;
-        endValue = nextKeyData.s || keyData.e;
-        if (this.sh && keyData.h !== 1) {
-          if (frameNum >= nextKeyTime) {
-            newValue[0] = endValue[0];
-            newValue[1] = endValue[1];
-            newValue[2] = endValue[2];
-          } else if (frameNum <= keyTime) {
-            newValue[0] = keyData.s[0];
-            newValue[1] = keyData.s[1];
-            newValue[2] = keyData.s[2];
-          } else {
-            var quatStart = createQuaternion(keyData.s);
-            var quatEnd = createQuaternion(endValue);
-            var time = (frameNum - keyTime) / (nextKeyTime - keyTime);
-            quaternionToEuler(newValue, slerp(quatStart, quatEnd, time));
-          }
-        } else {
-          for (i = 0; i < len; i += 1) {
-            if (keyData.h !== 1) {
-              if (frameNum >= nextKeyTime) {
-                perc = 1;
-              } else if (frameNum < keyTime) {
-                perc = 0;
+
+          isHold = keyData.h === 1;
+          iterationIndex = i;
+
+          if (!isHold) {
+            if (frameNum >= nextKeyData.t) {
+              perc = 1;
+            } else if (frameNum < keyData.t) {
+              perc = 0;
+            } else {
+              var fnc;
+
+              if (keyData.__fnct) {
+                fnc = keyData.__fnct;
               } else {
-                if (keyData.o.x.constructor === Array) {
-                  if (!keyData.__fnct) {
-                    keyData.__fnct = [];
-                  }
-                  if (!keyData.__fnct[i]) {
-                    outX = typeof keyData.o.x[i] === 'undefined' ? keyData.o.x[0] : keyData.o.x[i];
-                    outY = typeof keyData.o.y[i] === 'undefined' ? keyData.o.y[0] : keyData.o.y[i];
-                    inX = typeof keyData.i.x[i] === 'undefined' ? keyData.i.x[0] : keyData.i.x[i];
-                    inY = typeof keyData.i.y[i] === 'undefined' ? keyData.i.y[0] : keyData.i.y[i];
-                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
-                    keyData.__fnct[i] = fnc;
-                  } else {
-                    fnc = keyData.__fnct[i];
-                  }
-                } else {
-                  if (!keyData.__fnct) {
-                    outX = keyData.o.x;
-                    outY = keyData.o.y;
-                    inX = keyData.i.x;
-                    inY = keyData.i.y;
-                    fnc = BezierFactory.getBezierEasing(outX, outY, inX, inY).get;
-                    keyData.__fnct = fnc;
-                  } else {
-                    fnc = keyData.__fnct;
-                  }
-                }
-                perc = fnc((frameNum - keyTime) / (nextKeyTime - keyTime));
+                fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y).get;
+                keyData.__fnct = fnc;
               }
+
+              perc = fnc((frameNum - keyData.t) / (nextKeyData.t - keyData.t));
             }
 
-            endValue = nextKeyData.s || keyData.e;
-            keyValue = keyData.h === 1 ? keyData.s[i] : keyData.s[i] + (endValue[i] - keyData.s[i]) * perc;
+            keyPropE = nextKeyData.s ? nextKeyData.s[0] : keyData.e[0];
+          }
 
-            if (this.propType === 'multidimensional') {
-              newValue[i] = keyValue;
-            } else {
-              newValue = keyValue;
-            }
+          keyPropS = keyData.s[0];
+        }
+
+        jLen = previousValue._length;
+        kLen = keyPropS.i[0].length;
+        caching.lastIndex = iterationIndex;
+
+        for (j = 0; j < jLen; j += 1) {
+          for (k = 0; k < kLen; k += 1) {
+            vertexValue = isHold ? keyPropS.i[j][k] : keyPropS.i[j][k] + (keyPropE.i[j][k] - keyPropS.i[j][k]) * perc;
+            previousValue.i[j][k] = vertexValue;
+            vertexValue = isHold ? keyPropS.o[j][k] : keyPropS.o[j][k] + (keyPropE.o[j][k] - keyPropS.o[j][k]) * perc;
+            previousValue.o[j][k] = vertexValue;
+            vertexValue = isHold ? keyPropS.v[j][k] : keyPropS.v[j][k] + (keyPropE.v[j][k] - keyPropS.v[j][k]) * perc;
+            previousValue.v[j][k] = vertexValue;
           }
         }
       }
-      caching.lastIndex = iterationIndex;
-      return newValue;
-    }
+      /**
+       * interpolate shape with currentTime
+       * @param {*} frameNum frame number
+       * @return {*}
+       */
 
-    /**
-     * get value at comp frame
-     * @param {*} frameNum a
-     * @return {Array|Number}
-     */
+    }, {
+      key: "interpolateShapeCurrentTime",
+      value: function interpolateShapeCurrentTime(frameNum) {
+        var initTime = this.keyframes[0].t;
+        var endTime = this.keyframes[this.keyframes.length - 1].t;
+        var lastFrame = this._caching.lastFrame;
 
-  }, {
-    key: 'getValueAtCurrentTime',
-    value: function getValueAtCurrentTime(frameNum) {
-      // let frameNum = this.comp.renderedFrame;
-      var initTime = this.keyframes[0].t;
-      var endTime = this.keyframes[this.keyframes.length - 1].t;
-      if (!(frameNum === this._caching.lastFrame || this._caching.lastFrame !== initialDefaultFrame && (this._caching.lastFrame >= endTime && frameNum >= endTime || this._caching.lastFrame < initTime && frameNum < initTime))) {
-        if (this._caching.lastFrame >= frameNum) {
-          this._caching._lastKeyframeIndex = -1;
-          this._caching.lastIndex = 0;
+        if (!(lastFrame !== initialDefaultFrame && (lastFrame < initTime && frameNum < initTime || lastFrame > endTime && frameNum > endTime))) {
+          // //
+          this._caching.lastIndex = lastFrame < frameNum ? this._caching.lastIndex : 0;
+          this.interpolateShape(frameNum, this.pv, this._caching); // //
         }
 
-        var renderResult = this.interpolateValue(frameNum, this._caching);
-        this.pv = renderResult;
+        this._caching.lastFrame = frameNum;
+        return this.pv;
       }
-      this._caching.lastFrame = frameNum;
-      return this.pv;
-    }
+      /**
+       * reset shape
+       */
 
-    /**
-     * set value to this.v prop
-     * @param {Array|Number} val value
-     */
+    }, {
+      key: "resetShape",
+      value: function resetShape() {
+        this.paths = this.localShapeCollection;
+      }
+      /**
+       * is shapes is equal
+       * @param {*} shape1 shape1
+       * @param {*} shape2 shape2
+       * @return {*}
+       */
 
-  }, {
-    key: 'setVValue',
-    value: function setVValue(val) {
-      var multipliedValue = void 0;
-      if (this.propType === 'unidimensional') {
-        multipliedValue = val * this.mult;
-        if (Math.abs(this.v - multipliedValue) > 0.00001) {
-          this.v = multipliedValue;
+    }, {
+      key: "shapesEqual",
+      value: function shapesEqual(shape1, shape2) {
+        if (shape1._length !== shape2._length || shape1.c !== shape2.c) {
+          return false;
+        }
+
+        var i;
+        var len = shape1._length;
+
+        for (i = 0; i < len; i += 1) {
+          if (shape1.v[i][0] !== shape2.v[i][0] || shape1.v[i][1] !== shape2.v[i][1] || shape1.o[i][0] !== shape2.o[i][0] || shape1.o[i][1] !== shape2.o[i][1] || shape1.i[i][0] !== shape2.i[i][0] || shape1.i[i][1] !== shape2.i[i][1]) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+      /**
+       * set new path to this.v
+       * @param {*} newPath new path
+       */
+
+    }, {
+      key: "setVValue",
+      value: function setVValue(newPath) {
+        if (!this.shapesEqual(this.v, newPath)) {
+          this.v = ShapePool.clone(newPath);
+          this.localShapeCollection.releaseShapes();
+          this.localShapeCollection.addShape(this.v);
           this._mdf = true;
+          this.paths = this.localShapeCollection;
         }
+      }
+      /**
+       * process effects sequence
+       * @param {*} frameNum frame number
+       */
+
+    }, {
+      key: "processEffectsSequence",
+      value: function processEffectsSequence(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        } else if (!this.effectsSequence.length) {
+          this._mdf = false;
+          return;
+        }
+
+        if (this.lock) {
+          this.setVValue(this.pv);
+          return;
+        }
+
+        this.lock = true;
+        this._mdf = false;
+        var finalValue = this.kf ? this.pv : this.data.ks ? this.data.ks.k : this.data.pt.k;
+        var i;
+        var len = this.effectsSequence.length;
+
+        for (i = 0; i < len; i += 1) {
+          finalValue = this.effectsSequence[i](frameNum);
+        }
+
+        this.setVValue(finalValue);
+        this.lock = false;
+        this.frameId = frameNum;
+      }
+      /**
+       * add effect
+       * @param {*} effectFunction effect funstion
+       */
+
+    }, {
+      key: "addEffect",
+      value: function addEffect(effectFunction) {
+        console.log('addEffect', effectFunction);
+        this.effectsSequence.push(effectFunction);
+        this.container.addDynamicProperty(this);
+      }
+    }]);
+
+    return BaseShapeProperty;
+  }();
+  /**
+   * shape property
+   */
+
+
+  var ShapeProperty = /*#__PURE__*/function (_BaseShapeProperty) {
+    _inherits(ShapeProperty, _BaseShapeProperty);
+
+    var _super = _createSuper(ShapeProperty);
+
+    /**
+     * constructor shape property
+     * @param {*} elem element node
+     * @param {*} data shape value property data
+     * @param {*} type shape propType
+     */
+    function ShapeProperty(elem, data, type) {
+      var _this;
+
+      _classCallCheck(this, ShapeProperty);
+
+      _this = _super.call(this);
+      _this.propType = 'shape';
+      _this.comp = elem.comp;
+      _this.container = elem;
+      _this.elem = elem;
+      _this.data = data;
+      _this.k = false;
+      _this.kf = false;
+      _this._mdf = false;
+      var pathData = type === 3 ? data.pt.k : data.ks.k;
+      _this.v = ShapePool.clone(pathData);
+      _this.pv = ShapePool.clone(_this.v);
+      _this.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+      _this.paths = _this.localShapeCollection;
+
+      _this.paths.addShape(_this.v);
+
+      _this.reset = _this.resetShape;
+      _this.effectsSequence = [];
+      _this.getValue = _this.processEffectsSequence;
+      return _this;
+    }
+
+    return ShapeProperty;
+  }(BaseShapeProperty);
+  /**
+   * keyframed shape property
+   */
+
+
+  var KeyframedShapeProperty = /*#__PURE__*/function (_BaseShapeProperty2) {
+    _inherits(KeyframedShapeProperty, _BaseShapeProperty2);
+
+    var _super2 = _createSuper(KeyframedShapeProperty);
+
+    /**
+     * constructor keyframed shape property
+     * @param {*} elem element node
+     * @param {*} data shape value property data
+     * @param {*} type shape propType
+     */
+    function KeyframedShapeProperty(elem, data, type) {
+      var _this2;
+
+      _classCallCheck(this, KeyframedShapeProperty);
+
+      _this2 = _super2.call(this);
+      _this2.propType = 'shape';
+      _this2.comp = elem.comp;
+      _this2.elem = elem;
+      _this2.container = elem; // this.offsetTime = elem.data.st;
+
+      _this2.keyframes = type === 3 ? data.pt.k : data.ks.k;
+      _this2.k = true;
+      _this2.kf = true;
+      var len = _this2.keyframes[0].s[0].i.length; // let jLen = this.keyframes[0].s[0].i[0].length;
+
+      _this2.v = ShapePool.newElement();
+
+      _this2.v.setPathData(_this2.keyframes[0].s[0].c, len);
+
+      _this2.pv = ShapePool.clone(_this2.v);
+      _this2.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+      _this2.paths = _this2.localShapeCollection;
+
+      _this2.paths.addShape(_this2.v);
+
+      _this2.lastFrame = initialDefaultFrame;
+      _this2.reset = _this2.resetShape;
+      _this2._caching = {
+        lastFrame: initialDefaultFrame,
+        lastIndex: 0
+      };
+      _this2.effectsSequence = [_this2.interpolateShapeCurrentTime.bind(_assertThisInitialized(_this2))];
+      _this2.getValue = _this2.processEffectsSequence;
+      _this2._hasOutTypeExpression = false;
+
+      if (Expression.hasSupportExpression(data)) {
+        _this2.expression = Expression.getExpression(data);
+        _this2._hasOutTypeExpression = _this2.expression.type === 'out';
+      }
+
+      return _this2;
+    }
+
+    return KeyframedShapeProperty;
+  }(BaseShapeProperty);
+  /**
+   * ellipse shape property
+   */
+
+
+  var EllShapeProperty = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(EllShapeProperty, _DynamicPropertyConta);
+
+    var _super3 = _createSuper(EllShapeProperty);
+
+    /**
+     * constructor ellipse shape property
+     * @param {*} elem element node
+     * @param {*} data shape value property data
+     */
+    function EllShapeProperty(elem, data) {
+      var _this3;
+
+      _classCallCheck(this, EllShapeProperty);
+
+      _this3 = _super3.call(this); // this.v = {
+      //   v: createSizedArray(4),
+      //   i: createSizedArray(4),
+      //   o: createSizedArray(4),
+      //   c: true
+      // };
+
+      _this3.v = ShapePool.newElement();
+
+      _this3.v.setPathData(true, 4);
+
+      _this3.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+      _this3.paths = _this3.localShapeCollection;
+
+      _this3.localShapeCollection.addShape(_this3.v);
+
+      _this3.d = data.d;
+      _this3.elem = elem;
+      _this3.comp = elem.comp;
+      _this3.frameId = -1;
+
+      _this3.initDynamicPropertyContainer(elem);
+
+      _this3.p = PropertyFactory.getProp(elem, data.p, 1, 0, _assertThisInitialized(_this3));
+      _this3.s = PropertyFactory.getProp(elem, data.s, 1, 0, _assertThisInitialized(_this3));
+
+      if (_this3.dynamicProperties.length) {
+        _this3.k = true;
       } else {
-        var i = 0;
-        var len = this.v.length;
-        while (i < len) {
-          multipliedValue = val[i] * this.mult;
-          if (Math.abs(this.v[i] - multipliedValue) > 0.00001) {
-            this.v[i] = multipliedValue;
-            this._mdf = true;
-          }
-          i += 1;
-        }
+        _this3.k = false;
+
+        _this3.convertEllToPath();
       }
+
+      return _this3;
     }
-
-    /**
-     * process effects sequence
-     * @param {*} frameNum a
-     */
-
-  }, {
-    key: 'processEffectsSequence',
-    value: function processEffectsSequence(frameNum) {
-      if (this.expression) {
-        frameNum = this.expression.update(frameNum);
-      }
-      if (frameNum === this.frameId || !this.effectsSequence.length) {
-        return;
-      }
-      if (this.lock) {
-        this.setVValue(this.pv);
-        return;
-      }
-      this.lock = true;
-      this._mdf = this._isFirstFrame;
-      // let multipliedValue;
-      var i = void 0;var len = this.effectsSequence.length;
-      var finalValue = this.kf ? this.pv : this.data.k;
-      for (i = 0; i < len; i += 1) {
-        finalValue = this.effectsSequence[i](frameNum);
-      }
-      this.setVValue(finalValue);
-      this._isFirstFrame = false;
-      this.lock = false;
-      this.frameId = frameNum;
-    }
-
-    /**
-     * a
-     * @param {*} effectFunction a
-     */
-
-  }, {
-    key: 'addEffect',
-    value: function addEffect(effectFunction) {
-      this.effectsSequence.push(effectFunction);
-      this.container.addDynamicProperty(this);
-    }
-  }]);
-  return BaseProperty;
-}();
-
-/**
- * unidimensional value property
- */
-
-
-var ValueProperty = function (_BaseProperty) {
-  inherits(ValueProperty, _BaseProperty);
-
-  /**
-   * constructor unidimensional value property
-   * @param {*} elem element node
-   * @param {*} data unidimensional value property data
-   * @param {*} mult data mult scale
-   * @param {*} container value property container
-   */
-  function ValueProperty(elem, data, mult, container) {
-    classCallCheck(this, ValueProperty);
-
-    var _this = possibleConstructorReturn(this, (ValueProperty.__proto__ || Object.getPrototypeOf(ValueProperty)).call(this));
-
-    _this.propType = 'unidimensional';
-    _this.mult = mult || 1;
-    _this.data = data;
-    _this.v = mult ? data.k * mult : data.k;
-    _this.pv = data.k;
-    _this._mdf = false;
-    _this.elem = elem;
-    _this.container = container;
-    _this.k = false;
-    _this.kf = false;
-    _this.vel = 0;
-    _this.effectsSequence = [];
-    _this._isFirstFrame = true;
-    _this.getValue = _this.processEffectsSequence;
-    return _this;
-  }
-
-  return ValueProperty;
-}(BaseProperty);
-
-/**
- * multidimensional value property
- */
-
-
-var MultiDimensionalProperty = function (_BaseProperty2) {
-  inherits(MultiDimensionalProperty, _BaseProperty2);
-
-  /**
-   * constructor multidimensional value property
-   * @param {*} elem element node
-   * @param {*} data multidimensional value property data
-   * @param {*} mult data mult scale
-   * @param {*} container value property container
-   */
-  function MultiDimensionalProperty(elem, data, mult, container) {
-    classCallCheck(this, MultiDimensionalProperty);
-
-    var _this2 = possibleConstructorReturn(this, (MultiDimensionalProperty.__proto__ || Object.getPrototypeOf(MultiDimensionalProperty)).call(this));
-
-    _this2.propType = 'multidimensional';
-    _this2.mult = mult || 1;
-    _this2.data = data;
-    _this2._mdf = false;
-    _this2.elem = elem;
-    _this2.container = container;
-    _this2.comp = elem.comp;
-    _this2.k = false;
-    _this2.kf = false;
-    _this2.frameId = -1;
-    var len = data.k.length;
-    _this2.v = createTypedArray('float32', len);
-    _this2.pv = createTypedArray('float32', len);
-    // var arr = createTypedArray('float32', len);
-    _this2.vel = createTypedArray('float32', len);
-    for (var i = 0; i < len; i += 1) {
-      _this2.v[i] = data.k[i] * _this2.mult;
-      _this2.pv[i] = data.k[i];
-    }
-    _this2._isFirstFrame = true;
-    _this2.effectsSequence = [];
-    _this2.getValue = _this2.processEffectsSequence;
-    return _this2;
-  }
-
-  return MultiDimensionalProperty;
-}(BaseProperty);
-
-/**
- * keyframed unidimensional value property
- */
-
-
-var KeyframedValueProperty = function (_BaseProperty3) {
-  inherits(KeyframedValueProperty, _BaseProperty3);
-
-  /**
-   * constructor keyframed unidimensional value property
-   * @param {*} elem element node
-   * @param {*} data keyframed unidimensional value property data
-   * @param {*} mult data mult scale
-   * @param {*} container value property container
-   */
-  function KeyframedValueProperty(elem, data, mult, container) {
-    classCallCheck(this, KeyframedValueProperty);
-
-    var _this3 = possibleConstructorReturn(this, (KeyframedValueProperty.__proto__ || Object.getPrototypeOf(KeyframedValueProperty)).call(this));
-
-    _this3.propType = 'unidimensional';
-    _this3.keyframes = data.k;
-    // this.offsetTime = elem.data.st;
-    _this3.frameId = -1;
-    _this3._caching = { lastFrame: initialDefaultFrame, lastIndex: 0, value: 0, _lastKeyframeIndex: -1 };
-    _this3.k = true;
-    _this3.kf = true;
-    _this3.data = data;
-    _this3.mult = mult || 1;
-    _this3.elem = elem;
-    _this3.container = container;
-    _this3.comp = elem.comp;
-    _this3.v = initialDefaultFrame;
-    _this3.pv = initialDefaultFrame;
-    _this3._isFirstFrame = true;
-    _this3.getValue = _this3.processEffectsSequence;
-    // this.setVValue = setVValue;
-    // this.interpolateValue = interpolateValue;
-    _this3.effectsSequence = [_this3.getValueAtCurrentTime.bind(_this3)];
-    // this.addEffect = addEffect;
-
-    _this3._hasOutTypeExpression = false;
-    if (Expression.hasSupportExpression(data)) {
-      _this3.expression = Expression.getExpression(data);
-      _this3._hasOutTypeExpression = _this3.expression.type === 'out';
-    }
-    return _this3;
-  }
-
-  return KeyframedValueProperty;
-}(BaseProperty);
-
-/**
- * keyframed multidimensional value property
- */
-
-
-var KeyframedMultidimensionalProperty = function (_BaseProperty4) {
-  inherits(KeyframedMultidimensionalProperty, _BaseProperty4);
-
-  /**
-   * constructor keyframed multidimensional value property
-   * @param {*} elem element node
-   * @param {*} data keyframed multidimensional value property data
-   * @param {*} mult data mult scale
-   * @param {*} container value property container
-   */
-  function KeyframedMultidimensionalProperty(elem, data, mult, container) {
-    classCallCheck(this, KeyframedMultidimensionalProperty);
-
-    var _this4 = possibleConstructorReturn(this, (KeyframedMultidimensionalProperty.__proto__ || Object.getPrototypeOf(KeyframedMultidimensionalProperty)).call(this));
-
-    _this4.propType = 'multidimensional';
-    var i = void 0;var len = data.k.length;
-    var s = void 0;var e = void 0;var to = void 0;var ti = void 0;
-    for (i = 0; i < len - 1; i += 1) {
-      if (data.k[i].to && data.k[i].s && data.k[i + 1] && data.k[i + 1].s) {
-        s = data.k[i].s;
-        e = data.k[i + 1].s;
-        to = data.k[i].to;
-        ti = data.k[i].ti;
-        if (s.length === 2 && !(s[0] === e[0] && s[1] === e[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], s[0] + to[0], s[1] + to[1]) && bez.pointOnLine2D(s[0], s[1], e[0], e[1], e[0] + ti[0], e[1] + ti[1]) || s.length === 3 && !(s[0] === e[0] && s[1] === e[1] && s[2] === e[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], s[0] + to[0], s[1] + to[1], s[2] + to[2]) && bez.pointOnLine3D(s[0], s[1], s[2], e[0], e[1], e[2], e[0] + ti[0], e[1] + ti[1], e[2] + ti[2])) {
-          data.k[i].to = null;
-          data.k[i].ti = null;
-        }
-        if (s[0] === e[0] && s[1] === e[1] && to[0] === 0 && to[1] === 0 && ti[0] === 0 && ti[1] === 0) {
-          if (s.length === 2 || s[2] === e[2] && to[2] === 0 && ti[2] === 0) {
-            data.k[i].to = null;
-            data.k[i].ti = null;
-          }
-        }
-      }
-    }
-    _this4.effectsSequence = [_this4.getValueAtCurrentTime.bind(_this4)];
-    _this4.keyframes = data.k;
-    // this.offsetTime = elem.data.st;
-    _this4.k = true;
-    _this4.kf = true;
-    _this4._isFirstFrame = true;
-    _this4.mult = mult || 1;
-    _this4.elem = elem;
-    _this4.container = container;
-    _this4.comp = elem.comp;
-    _this4.getValue = _this4.processEffectsSequence;
-    // this.setVValue = setVValue;
-    // this.interpolateValue = interpolateValue;
-    _this4.frameId = -1;
-    var arrLen = data.k[0].s.length;
-    _this4.v = createTypedArray('float32', arrLen);
-    _this4.pv = createTypedArray('float32', arrLen);
-    for (i = 0; i < arrLen; i += 1) {
-      _this4.v[i] = initialDefaultFrame;
-      _this4.pv[i] = initialDefaultFrame;
-    }
-    _this4._caching = { lastFrame: initialDefaultFrame, lastIndex: 0, value: createTypedArray('float32', arrLen) };
-    // this.addEffect = addEffect;
-
-    _this4._hasOutTypeExpression = false;
-    if (Expression.hasSupportExpression(data)) {
-      _this4.expression = Expression.getExpression(data);
-      _this4._hasOutTypeExpression = _this4.expression.type === 'out';
-    }
-    return _this4;
-  }
-
-  return KeyframedMultidimensionalProperty;
-}(BaseProperty);
-
-/**
- * getProp by data
- * @param {*} elem element node
- * @param {*} data keyframed multidimensional value property data
- * @param {*} type keyframed type or not
- * @param {*} mult data mult scale
- * @param {*} container value property container
- * @return {ValueProperty|MultiDimensionalProperty|KeyframedValueProperty|KeyframedMultidimensionalProperty}
- */
-
-
-function getProp(elem, data, type, mult, container) {
-  var p = void 0;
-  if (!data.k.length) {
-    p = new ValueProperty(elem, data, mult, container);
-  } else if (typeof data.k[0] === 'number') {
-    p = new MultiDimensionalProperty(elem, data, mult, container);
-  } else {
-    switch (type) {
-      case 0:
-        p = new KeyframedValueProperty(elem, data, mult, container);
-        break;
-      case 1:
-        p = new KeyframedMultidimensionalProperty(elem, data, mult, container);
-        break;
-    }
-  }
-  if (p.effectsSequence.length) {
-    container.addDynamicProperty(p);
-  }
-  return p;
-}
-
-var PropertyFactory = { getProp: getProp };
-
-// import { hasExpression, getExpression } from '../../utils/Expression';
-// const initFrame = -999999;
-// const degToRads = Math.PI/180;
-
-/**
- * basic shape property
- */
-
-var BaseShapeProperty = function () {
-  function BaseShapeProperty() {
-    classCallCheck(this, BaseShapeProperty);
-  }
-
-  createClass(BaseShapeProperty, [{
-    key: 'interpolateShape',
-
-    /**
-     * interpolate shape
-     * @param {*} frameNum frame number
-     * @param {*} previousValue previous value
-     * @param {*} caching caching object
-     */
-    value: function interpolateShape(frameNum, previousValue, caching) {
-      var iterationIndex = caching.lastIndex;
-      var keyPropS = void 0;var keyPropE = void 0;var isHold = void 0;var j = void 0;var k = void 0;var jLen = void 0;var kLen = void 0;var perc = void 0;var vertexValue = void 0;
-      var kf = this.keyframes;
-      if (frameNum < kf[0].t) {
-        keyPropS = kf[0].s[0];
-        isHold = true;
-        iterationIndex = 0;
-      } else if (frameNum >= kf[kf.length - 1].t) {
-        keyPropS = kf[kf.length - 1].s ? kf[kf.length - 1].s[0] : kf[kf.length - 2].e[0];
-        /* if(kf[kf.length - 1].s){
-                  keyPropS = kf[kf.length - 1].s[0];
-              }else{
-                  keyPropS = kf[kf.length - 2].e[0];
-              }*/
-        isHold = true;
-      } else {
-        var i = iterationIndex;
-        var len = kf.length - 1;var flag = true;var keyData = void 0;var nextKeyData = void 0;
-        while (flag) {
-          keyData = kf[i];
-          nextKeyData = kf[i + 1];
-          if (nextKeyData.t > frameNum) {
-            break;
-          }
-          if (i < len - 1) {
-            i += 1;
-          } else {
-            flag = false;
-          }
-        }
-        isHold = keyData.h === 1;
-        iterationIndex = i;
-        if (!isHold) {
-          if (frameNum >= nextKeyData.t) {
-            perc = 1;
-          } else if (frameNum < keyData.t) {
-            perc = 0;
-          } else {
-            var fnc = void 0;
-            if (keyData.__fnct) {
-              fnc = keyData.__fnct;
-            } else {
-              fnc = BezierFactory.getBezierEasing(keyData.o.x, keyData.o.y, keyData.i.x, keyData.i.y).get;
-              keyData.__fnct = fnc;
-            }
-            perc = fnc((frameNum - keyData.t) / (nextKeyData.t - keyData.t));
-          }
-          keyPropE = nextKeyData.s ? nextKeyData.s[0] : keyData.e[0];
-        }
-        keyPropS = keyData.s[0];
-      }
-      jLen = previousValue._length;
-      kLen = keyPropS.i[0].length;
-      caching.lastIndex = iterationIndex;
-
-      for (j = 0; j < jLen; j += 1) {
-        for (k = 0; k < kLen; k += 1) {
-          vertexValue = isHold ? keyPropS.i[j][k] : keyPropS.i[j][k] + (keyPropE.i[j][k] - keyPropS.i[j][k]) * perc;
-          previousValue.i[j][k] = vertexValue;
-          vertexValue = isHold ? keyPropS.o[j][k] : keyPropS.o[j][k] + (keyPropE.o[j][k] - keyPropS.o[j][k]) * perc;
-          previousValue.o[j][k] = vertexValue;
-          vertexValue = isHold ? keyPropS.v[j][k] : keyPropS.v[j][k] + (keyPropE.v[j][k] - keyPropS.v[j][k]) * perc;
-          previousValue.v[j][k] = vertexValue;
-        }
-      }
-    }
-
-    /**
-     * interpolate shape with currentTime
-     * @param {*} frameNum frame number
-     * @return {*}
-     */
-
-  }, {
-    key: 'interpolateShapeCurrentTime',
-    value: function interpolateShapeCurrentTime(frameNum) {
-      var initTime = this.keyframes[0].t;
-      var endTime = this.keyframes[this.keyframes.length - 1].t;
-      var lastFrame = this._caching.lastFrame;
-      if (!(lastFrame !== initialDefaultFrame && (lastFrame < initTime && frameNum < initTime || lastFrame > endTime && frameNum > endTime))) {
-        // //
-        this._caching.lastIndex = lastFrame < frameNum ? this._caching.lastIndex : 0;
-        this.interpolateShape(frameNum, this.pv, this._caching);
-        // //
-      }
-      this._caching.lastFrame = frameNum;
-      return this.pv;
-    }
-
     /**
      * reset shape
      */
 
-  }, {
-    key: 'resetShape',
-    value: function resetShape() {
-      this.paths = this.localShapeCollection;
-    }
 
-    /**
-     * is shapes is equal
-     * @param {*} shape1 shape1
-     * @param {*} shape2 shape2
-     * @return {*}
-     */
-
-  }, {
-    key: 'shapesEqual',
-    value: function shapesEqual(shape1, shape2) {
-      if (shape1._length !== shape2._length || shape1.c !== shape2.c) {
-        return false;
-      }
-      var i = void 0;var len = shape1._length;
-      for (i = 0; i < len; i += 1) {
-        if (shape1.v[i][0] !== shape2.v[i][0] || shape1.v[i][1] !== shape2.v[i][1] || shape1.o[i][0] !== shape2.o[i][0] || shape1.o[i][1] !== shape2.o[i][1] || shape1.i[i][0] !== shape2.i[i][0] || shape1.i[i][1] !== shape2.i[i][1]) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    /**
-     * set new path to this.v
-     * @param {*} newPath new path
-     */
-
-  }, {
-    key: 'setVValue',
-    value: function setVValue(newPath) {
-      if (!this.shapesEqual(this.v, newPath)) {
-        this.v = ShapePool.clone(newPath);
-        this.localShapeCollection.releaseShapes();
-        this.localShapeCollection.addShape(this.v);
-        this._mdf = true;
+    _createClass(EllShapeProperty, [{
+      key: "reset",
+      value: function reset() {
         this.paths = this.localShapeCollection;
       }
-    }
-
-    /**
-     * process effects sequence
-     * @param {*} frameNum frame number
-     */
-
-  }, {
-    key: 'processEffectsSequence',
-    value: function processEffectsSequence(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      } else if (!this.effectsSequence.length) {
-        this._mdf = false;
-        return;
-      }
-      if (this.lock) {
-        this.setVValue(this.pv);
-        return;
-      }
-      this.lock = true;
-      this._mdf = false;
-      var finalValue = this.kf ? this.pv : this.data.ks ? this.data.ks.k : this.data.pt.k;
-      var i = void 0;var len = this.effectsSequence.length;
-      for (i = 0; i < len; i += 1) {
-        finalValue = this.effectsSequence[i](frameNum);
-      }
-      this.setVValue(finalValue);
-      this.lock = false;
-      this.frameId = frameNum;
-    }
-
-    /**
-     * add effect
-     * @param {*} effectFunction effect funstion
-     */
-
-  }, {
-    key: 'addEffect',
-    value: function addEffect(effectFunction) {
-      console.log('addEffect', effectFunction);
-      this.effectsSequence.push(effectFunction);
-      this.container.addDynamicProperty(this);
-    }
-  }]);
-  return BaseShapeProperty;
-}();
-
-/**
- * shape property
- */
-
-
-var ShapeProperty = function (_BaseShapeProperty) {
-  inherits(ShapeProperty, _BaseShapeProperty);
-
-  /**
-   * constructor shape property
-   * @param {*} elem element node
-   * @param {*} data shape value property data
-   * @param {*} type shape propType
-   */
-  function ShapeProperty(elem, data, type) {
-    classCallCheck(this, ShapeProperty);
-
-    var _this = possibleConstructorReturn(this, (ShapeProperty.__proto__ || Object.getPrototypeOf(ShapeProperty)).call(this));
-
-    _this.propType = 'shape';
-    _this.comp = elem.comp;
-    _this.container = elem;
-    _this.elem = elem;
-    _this.data = data;
-    _this.k = false;
-    _this.kf = false;
-    _this._mdf = false;
-    var pathData = type === 3 ? data.pt.k : data.ks.k;
-    _this.v = ShapePool.clone(pathData);
-    _this.pv = ShapePool.clone(_this.v);
-    _this.localShapeCollection = ShapeCollectionPool.newShapeCollection();
-    _this.paths = _this.localShapeCollection;
-    _this.paths.addShape(_this.v);
-    _this.reset = _this.resetShape;
-    _this.effectsSequence = [];
-    _this.getValue = _this.processEffectsSequence;
-    return _this;
-  }
-
-  return ShapeProperty;
-}(BaseShapeProperty);
-
-/**
- * keyframed shape property
- */
-
-
-var KeyframedShapeProperty = function (_BaseShapeProperty2) {
-  inherits(KeyframedShapeProperty, _BaseShapeProperty2);
-
-  /**
-   * constructor keyframed shape property
-   * @param {*} elem element node
-   * @param {*} data shape value property data
-   * @param {*} type shape propType
-   */
-  function KeyframedShapeProperty(elem, data, type) {
-    classCallCheck(this, KeyframedShapeProperty);
-
-    var _this2 = possibleConstructorReturn(this, (KeyframedShapeProperty.__proto__ || Object.getPrototypeOf(KeyframedShapeProperty)).call(this));
-
-    _this2.propType = 'shape';
-    _this2.comp = elem.comp;
-    _this2.elem = elem;
-    _this2.container = elem;
-    // this.offsetTime = elem.data.st;
-    _this2.keyframes = type === 3 ? data.pt.k : data.ks.k;
-    _this2.k = true;
-    _this2.kf = true;
-    var len = _this2.keyframes[0].s[0].i.length;
-    // let jLen = this.keyframes[0].s[0].i[0].length;
-    _this2.v = ShapePool.newElement();
-    _this2.v.setPathData(_this2.keyframes[0].s[0].c, len);
-    _this2.pv = ShapePool.clone(_this2.v);
-    _this2.localShapeCollection = ShapeCollectionPool.newShapeCollection();
-    _this2.paths = _this2.localShapeCollection;
-    _this2.paths.addShape(_this2.v);
-    _this2.lastFrame = initialDefaultFrame;
-    _this2.reset = _this2.resetShape;
-    _this2._caching = { lastFrame: initialDefaultFrame, lastIndex: 0 };
-    _this2.effectsSequence = [_this2.interpolateShapeCurrentTime.bind(_this2)];
-    _this2.getValue = _this2.processEffectsSequence;
-
-    _this2._hasOutTypeExpression = false;
-    if (Expression.hasSupportExpression(data)) {
-      _this2.expression = Expression.getExpression(data);
-      _this2._hasOutTypeExpression = _this2.expression.type === 'out';
-    }
-    return _this2;
-  }
-
-  return KeyframedShapeProperty;
-}(BaseShapeProperty);
-
-/**
- * ellipse shape property
- */
-
-
-var EllShapeProperty = function (_DynamicPropertyConta) {
-  inherits(EllShapeProperty, _DynamicPropertyConta);
-
-  /**
-   * constructor ellipse shape property
-   * @param {*} elem element node
-   * @param {*} data shape value property data
-   */
-  function EllShapeProperty(elem, data) {
-    classCallCheck(this, EllShapeProperty);
-
-    // this.v = {
-    //   v: createSizedArray(4),
-    //   i: createSizedArray(4),
-    //   o: createSizedArray(4),
-    //   c: true
-    // };
-    var _this3 = possibleConstructorReturn(this, (EllShapeProperty.__proto__ || Object.getPrototypeOf(EllShapeProperty)).call(this));
-
-    _this3.v = ShapePool.newElement();
-    _this3.v.setPathData(true, 4);
-    _this3.localShapeCollection = ShapeCollectionPool.newShapeCollection();
-    _this3.paths = _this3.localShapeCollection;
-    _this3.localShapeCollection.addShape(_this3.v);
-    _this3.d = data.d;
-    _this3.elem = elem;
-    _this3.comp = elem.comp;
-    _this3.frameId = -1;
-    _this3.initDynamicPropertyContainer(elem);
-    _this3.p = PropertyFactory.getProp(elem, data.p, 1, 0, _this3);
-    _this3.s = PropertyFactory.getProp(elem, data.s, 1, 0, _this3);
-    if (_this3.dynamicProperties.length) {
-      _this3.k = true;
-    } else {
-      _this3.k = false;
-      _this3.convertEllToPath();
-    }
-    return _this3;
-  }
-
-  /**
-   * reset shape
-   */
-
-
-  createClass(EllShapeProperty, [{
-    key: 'reset',
-    value: function reset() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * get point with frameId
-     * @param {*} frameNum frame number
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-      this.iterateDynamicProperties(frameNum);
-      this.frameId = frameNum;
-
-      if (this._mdf) {
-        this.convertEllToPath();
-      }
-    }
-
-    /**
-     * convert ellipse to path
-     */
-
-  }, {
-    key: 'convertEllToPath',
-    value: function convertEllToPath() {
-      var p0 = this.p.v[0];
-      var p1 = this.p.v[1];
-      var s0 = this.s.v[0] / 2;
-      var s1 = this.s.v[1] / 2;
-      var _cw = this.d !== 3;
-      var _v = this.v;
-      _v.v[0][0] = p0;
-      _v.v[0][1] = p1 - s1;
-      _v.v[1][0] = _cw ? p0 + s0 : p0 - s0;
-      _v.v[1][1] = p1;
-      _v.v[2][0] = p0;
-      _v.v[2][1] = p1 + s1;
-      _v.v[3][0] = _cw ? p0 - s0 : p0 + s0;
-      _v.v[3][1] = p1;
-      _v.i[0][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
-      _v.i[0][1] = p1 - s1;
-      _v.i[1][0] = _cw ? p0 + s0 : p0 - s0;
-      _v.i[1][1] = p1 - s1 * cPoint;
-      _v.i[2][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
-      _v.i[2][1] = p1 + s1;
-      _v.i[3][0] = _cw ? p0 - s0 : p0 + s0;
-      _v.i[3][1] = p1 + s1 * cPoint;
-      _v.o[0][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
-      _v.o[0][1] = p1 - s1;
-      _v.o[1][0] = _cw ? p0 + s0 : p0 - s0;
-      _v.o[1][1] = p1 + s1 * cPoint;
-      _v.o[2][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
-      _v.o[2][1] = p1 + s1;
-      _v.o[3][0] = _cw ? p0 - s0 : p0 + s0;
-      _v.o[3][1] = p1 - s1 * cPoint;
-    }
-  }]);
-  return EllShapeProperty;
-}(DynamicPropertyContainer);
-
-/**
- * star shape property
- */
-
-
-var StarShapeProperty = function (_DynamicPropertyConta2) {
-  inherits(StarShapeProperty, _DynamicPropertyConta2);
-
-  /**
-   * constructor star shape property
-   * @param {*} elem element node
-   * @param {*} data shape value property data
-   */
-  function StarShapeProperty(elem, data) {
-    classCallCheck(this, StarShapeProperty);
-
-    var _this4 = possibleConstructorReturn(this, (StarShapeProperty.__proto__ || Object.getPrototypeOf(StarShapeProperty)).call(this));
-
-    _this4.v = ShapePool.newElement();
-    _this4.v.setPathData(true, 0);
-    _this4.elem = elem;
-    _this4.comp = elem.comp;
-    _this4.data = data;
-    _this4.frameId = -1;
-    _this4.d = data.d;
-    _this4.initDynamicPropertyContainer(elem);
-    if (data.sy === 1) {
-      _this4.ir = PropertyFactory.getProp(elem, data.ir, 0, 0, _this4);
-      _this4.is = PropertyFactory.getProp(elem, data.is, 0, 0.01, _this4);
-      _this4.convertToPath = _this4.convertStarToPath;
-    } else {
-      _this4.convertToPath = _this4.convertPolygonToPath;
-    }
-    _this4.pt = PropertyFactory.getProp(elem, data.pt, 0, 0, _this4);
-    _this4.p = PropertyFactory.getProp(elem, data.p, 1, 0, _this4);
-    _this4.r = PropertyFactory.getProp(elem, data.r, 0, degToRads, _this4);
-    _this4.or = PropertyFactory.getProp(elem, data.or, 0, 0, _this4);
-    _this4.os = PropertyFactory.getProp(elem, data.os, 0, 0.01, _this4);
-    _this4.localShapeCollection = ShapeCollectionPool.newShapeCollection();
-    _this4.localShapeCollection.addShape(_this4.v);
-    _this4.paths = _this4.localShapeCollection;
-    if (_this4.dynamicProperties.length) {
-      _this4.k = true;
-    } else {
-      _this4.k = false;
-      _this4.convertToPath();
-    }
-    return _this4;
-  }
-
-  /**
-   * reset shape
-   */
-
-
-  createClass(StarShapeProperty, [{
-    key: 'reset',
-    value: function reset() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * get point with frameId
-     * @param {*} frameNum frame number
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-      this.frameId = frameNum;
-      this.iterateDynamicProperties(frameNum);
-
-      if (this._mdf) {
-        this.convertToPath();
-      }
-    }
-
-    /**
-     * convert star to path
-     */
-
-  }, {
-    key: 'convertStarToPath',
-    value: function convertStarToPath() {
-      var numPts = Math.floor(this.pt.v) * 2;
-      var angle = Math.PI * 2 / numPts;
-      /* this.v.v.length = numPts;
-              this.v.i.length = numPts;
-              this.v.o.length = numPts;*/
-      var longFlag = true;
-      var longRad = this.or.v;
-      var shortRad = this.ir.v;
-      var longRound = this.os.v;
-      var shortRound = this.is.v;
-      var longPerimSegment = 2 * Math.PI * longRad / (numPts * 2);
-      var shortPerimSegment = 2 * Math.PI * shortRad / (numPts * 2);
-      var i = void 0;var rad = void 0;var roundness = void 0;var perimSegment = void 0;var currentAng = -Math.PI / 2;
-      currentAng += this.r.v;
-      var dir = this.data.d === 3 ? -1 : 1;
-      this.v._length = 0;
-      for (i = 0; i < numPts; i += 1) {
-        rad = longFlag ? longRad : shortRad;
-        roundness = longFlag ? longRound : shortRound;
-        perimSegment = longFlag ? longPerimSegment : shortPerimSegment;
-        var x = rad * Math.cos(currentAng);
-        var y = rad * Math.sin(currentAng);
-        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
-        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
-        x += +this.p.v[0];
-        y += +this.p.v[1];
-        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
-
-        /* this.v.v[i] = [x,y];
-                  this.v.i[i] = [x+ox*perimSegment*roundness*dir,y+oy*perimSegment*roundness*dir];
-                  this.v.o[i] = [x-ox*perimSegment*roundness*dir,y-oy*perimSegment*roundness*dir];
-                  this.v._length = numPts;*/
-        longFlag = !longFlag;
-        currentAng += angle * dir;
-      }
-    }
-
-    /**
-     * convert polygon to path
-     */
-
-  }, {
-    key: 'convertPolygonToPath',
-    value: function convertPolygonToPath() {
-      var numPts = Math.floor(this.pt.v);
-      var angle = Math.PI * 2 / numPts;
-      var rad = this.or.v;
-      var roundness = this.os.v;
-      var perimSegment = 2 * Math.PI * rad / (numPts * 4);
-      var i = void 0;var currentAng = -Math.PI / 2;
-      var dir = this.data.d === 3 ? -1 : 1;
-      currentAng += this.r.v;
-      this.v._length = 0;
-      for (i = 0; i < numPts; i += 1) {
-        var x = rad * Math.cos(currentAng);
-        var y = rad * Math.sin(currentAng);
-        var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
-        var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
-        x += +this.p.v[0];
-        y += +this.p.v[1];
-        this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
-        currentAng += angle * dir;
-      }
-      this.paths.length = 0;
-      this.paths[0] = this.v;
-    }
-  }]);
-  return StarShapeProperty;
-}(DynamicPropertyContainer);
-
-var roundCorner = 0.5519;
-var cPoint = roundCorner;
-
-/**
- * rect shape property
- */
-
-var RectShapeProperty = function (_DynamicPropertyConta3) {
-  inherits(RectShapeProperty, _DynamicPropertyConta3);
-
-  /**
-   * constructor rect shape property
-   * @param {*} elem element node
-   * @param {*} data shape value property data
-   */
-  function RectShapeProperty(elem, data) {
-    classCallCheck(this, RectShapeProperty);
-
-    var _this5 = possibleConstructorReturn(this, (RectShapeProperty.__proto__ || Object.getPrototypeOf(RectShapeProperty)).call(this));
-
-    _this5.v = ShapePool.newElement();
-    _this5.v.c = true;
-    _this5.localShapeCollection = ShapeCollectionPool.newShapeCollection();
-    _this5.localShapeCollection.addShape(_this5.v);
-    _this5.paths = _this5.localShapeCollection;
-    _this5.elem = elem;
-    _this5.comp = elem.comp;
-    _this5.frameId = -1;
-    _this5.d = data.d;
-    _this5.initDynamicPropertyContainer(elem);
-    _this5.p = PropertyFactory.getProp(elem, data.p, 1, 0, _this5);
-    _this5.s = PropertyFactory.getProp(elem, data.s, 1, 0, _this5);
-    _this5.r = PropertyFactory.getProp(elem, data.r, 0, 0, _this5);
-    if (_this5.dynamicProperties.length) {
-      _this5.k = true;
-    } else {
-      _this5.k = false;
-      _this5.convertRectToPath();
-    }
-    return _this5;
-  }
-
-  /**
-   * reset shape
-   */
-
-
-  createClass(RectShapeProperty, [{
-    key: 'reset',
-    value: function reset() {
-      this.paths = this.localShapeCollection;
-    }
-
-    /**
-     * get point with frameId
-     * @param {*} frameNum frame number
-     */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-      this.frameId = frameNum;
-      this.iterateDynamicProperties(frameNum);
-
-      if (this._mdf) {
-        this.convertRectToPath();
-      }
-    }
-
-    /**
-     * convert rect to path
-     */
-
-  }, {
-    key: 'convertRectToPath',
-    value: function convertRectToPath() {
-      var p0 = this.p.v[0];var p1 = this.p.v[1];var v0 = this.s.v[0] / 2;var v1 = this.s.v[1] / 2;
-      var round = Math.min(v0, v1, this.r.v);
-      var cPoint = round * (1 - roundCorner);
-      this.v._length = 0;
-
-      if (this.d === 2 || this.d === 1) {
-        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, 0, true);
-        this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, p0 + v0, p1 + v1 - round, 1, true);
-        if (round !== 0) {
-          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, 2, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0 + round, p1 + v1, 3, true);
-          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, 4, true);
-          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1 + round, 5, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, 6, true);
-          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, p0 + v0 - round, p1 - v1, 7, true);
-        } else {
-          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0, p1 + v1, 2);
-          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1, 3);
+      /**
+       * get point with frameId
+       * @param {*} frameNum frame number
+       */
+
+    }, {
+      key: "getValue",
+      value: function getValue(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
         }
+
+        this.iterateDynamicProperties(frameNum);
+        this.frameId = frameNum;
+
+        if (this._mdf) {
+          this.convertEllToPath();
+        }
+      }
+      /**
+       * convert ellipse to path
+       */
+
+    }, {
+      key: "convertEllToPath",
+      value: function convertEllToPath() {
+        var p0 = this.p.v[0];
+        var p1 = this.p.v[1];
+        var s0 = this.s.v[0] / 2;
+        var s1 = this.s.v[1] / 2;
+
+        var _cw = this.d !== 3;
+
+        var _v = this.v;
+        _v.v[0][0] = p0;
+        _v.v[0][1] = p1 - s1;
+        _v.v[1][0] = _cw ? p0 + s0 : p0 - s0;
+        _v.v[1][1] = p1;
+        _v.v[2][0] = p0;
+        _v.v[2][1] = p1 + s1;
+        _v.v[3][0] = _cw ? p0 - s0 : p0 + s0;
+        _v.v[3][1] = p1;
+        _v.i[0][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
+        _v.i[0][1] = p1 - s1;
+        _v.i[1][0] = _cw ? p0 + s0 : p0 - s0;
+        _v.i[1][1] = p1 - s1 * cPoint;
+        _v.i[2][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
+        _v.i[2][1] = p1 + s1;
+        _v.i[3][0] = _cw ? p0 - s0 : p0 + s0;
+        _v.i[3][1] = p1 + s1 * cPoint;
+        _v.o[0][0] = _cw ? p0 + s0 * cPoint : p0 - s0 * cPoint;
+        _v.o[0][1] = p1 - s1;
+        _v.o[1][0] = _cw ? p0 + s0 : p0 - s0;
+        _v.o[1][1] = p1 + s1 * cPoint;
+        _v.o[2][0] = _cw ? p0 - s0 * cPoint : p0 + s0 * cPoint;
+        _v.o[2][1] = p1 + s1;
+        _v.o[3][0] = _cw ? p0 - s0 : p0 + s0;
+        _v.o[3][1] = p1 - s1 * cPoint;
+      }
+    }]);
+
+    return EllShapeProperty;
+  }(DynamicPropertyContainer);
+  /**
+   * star shape property
+   */
+
+
+  var StarShapeProperty = /*#__PURE__*/function (_DynamicPropertyConta2) {
+    _inherits(StarShapeProperty, _DynamicPropertyConta2);
+
+    var _super4 = _createSuper(StarShapeProperty);
+
+    /**
+     * constructor star shape property
+     * @param {*} elem element node
+     * @param {*} data shape value property data
+     */
+    function StarShapeProperty(elem, data) {
+      var _this4;
+
+      _classCallCheck(this, StarShapeProperty);
+
+      _this4 = _super4.call(this);
+      _this4.v = ShapePool.newElement();
+
+      _this4.v.setPathData(true, 0);
+
+      _this4.elem = elem;
+      _this4.comp = elem.comp;
+      _this4.data = data;
+      _this4.frameId = -1;
+      _this4.d = data.d;
+
+      _this4.initDynamicPropertyContainer(elem);
+
+      if (data.sy === 1) {
+        _this4.ir = PropertyFactory.getProp(elem, data.ir, 0, 0, _assertThisInitialized(_this4));
+        _this4.is = PropertyFactory.getProp(elem, data.is, 0, 0.01, _assertThisInitialized(_this4));
+        _this4.convertToPath = _this4.convertStarToPath;
       } else {
-        this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, p0 + v0, p1 - v1 + round, 0, true);
-        if (round !== 0) {
-          this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, 1, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0 + round, p1 - v1, 2, true);
-          this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, 3, true);
-          this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1 - round, 4, true);
-          this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, 5, true);
-          this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0 - round, p1 + v1, 6, true);
-          this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, 7, true);
-        } else {
-          this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0, p1 - v1, 1, true);
-          this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1, 2, true);
-          this.v.setTripleAt(p0 + v0, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0, p1 + v1, 3, true);
+        _this4.convertToPath = _this4.convertPolygonToPath;
+      }
+
+      _this4.pt = PropertyFactory.getProp(elem, data.pt, 0, 0, _assertThisInitialized(_this4));
+      _this4.p = PropertyFactory.getProp(elem, data.p, 1, 0, _assertThisInitialized(_this4));
+      _this4.r = PropertyFactory.getProp(elem, data.r, 0, degToRads, _assertThisInitialized(_this4));
+      _this4.or = PropertyFactory.getProp(elem, data.or, 0, 0, _assertThisInitialized(_this4));
+      _this4.os = PropertyFactory.getProp(elem, data.os, 0, 0.01, _assertThisInitialized(_this4));
+      _this4.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+
+      _this4.localShapeCollection.addShape(_this4.v);
+
+      _this4.paths = _this4.localShapeCollection;
+
+      if (_this4.dynamicProperties.length) {
+        _this4.k = true;
+      } else {
+        _this4.k = false;
+
+        _this4.convertToPath();
+      }
+
+      return _this4;
+    }
+    /**
+     * reset shape
+     */
+
+
+    _createClass(StarShapeProperty, [{
+      key: "reset",
+      value: function reset() {
+        this.paths = this.localShapeCollection;
+      }
+      /**
+       * get point with frameId
+       * @param {*} frameNum frame number
+       */
+
+    }, {
+      key: "getValue",
+      value: function getValue(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        this.frameId = frameNum;
+        this.iterateDynamicProperties(frameNum);
+
+        if (this._mdf) {
+          this.convertToPath();
         }
       }
+      /**
+       * convert star to path
+       */
+
+    }, {
+      key: "convertStarToPath",
+      value: function convertStarToPath() {
+        var numPts = Math.floor(this.pt.v) * 2;
+        var angle = Math.PI * 2 / numPts;
+        /* this.v.v.length = numPts;
+                this.v.i.length = numPts;
+                this.v.o.length = numPts;*/
+
+        var longFlag = true;
+        var longRad = this.or.v;
+        var shortRad = this.ir.v;
+        var longRound = this.os.v;
+        var shortRound = this.is.v;
+        var longPerimSegment = 2 * Math.PI * longRad / (numPts * 2);
+        var shortPerimSegment = 2 * Math.PI * shortRad / (numPts * 2);
+        var i;
+        var rad;
+        var roundness;
+        var perimSegment;
+        var currentAng = -Math.PI / 2;
+        currentAng += this.r.v;
+        var dir = this.data.d === 3 ? -1 : 1;
+        this.v._length = 0;
+
+        for (i = 0; i < numPts; i += 1) {
+          rad = longFlag ? longRad : shortRad;
+          roundness = longFlag ? longRound : shortRound;
+          perimSegment = longFlag ? longPerimSegment : shortPerimSegment;
+          var x = rad * Math.cos(currentAng);
+          var y = rad * Math.sin(currentAng);
+          var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
+          var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
+          x += +this.p.v[0];
+          y += +this.p.v[1];
+          this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
+          /* this.v.v[i] = [x,y];
+                    this.v.i[i] = [x+ox*perimSegment*roundness*dir,y+oy*perimSegment*roundness*dir];
+                    this.v.o[i] = [x-ox*perimSegment*roundness*dir,y-oy*perimSegment*roundness*dir];
+                    this.v._length = numPts;*/
+
+          longFlag = !longFlag;
+          currentAng += angle * dir;
+        }
+      }
+      /**
+       * convert polygon to path
+       */
+
+    }, {
+      key: "convertPolygonToPath",
+      value: function convertPolygonToPath() {
+        var numPts = Math.floor(this.pt.v);
+        var angle = Math.PI * 2 / numPts;
+        var rad = this.or.v;
+        var roundness = this.os.v;
+        var perimSegment = 2 * Math.PI * rad / (numPts * 4);
+        var i;
+        var currentAng = -Math.PI / 2;
+        var dir = this.data.d === 3 ? -1 : 1;
+        currentAng += this.r.v;
+        this.v._length = 0;
+
+        for (i = 0; i < numPts; i += 1) {
+          var x = rad * Math.cos(currentAng);
+          var y = rad * Math.sin(currentAng);
+          var ox = x === 0 && y === 0 ? 0 : y / Math.sqrt(x * x + y * y);
+          var oy = x === 0 && y === 0 ? 0 : -x / Math.sqrt(x * x + y * y);
+          x += +this.p.v[0];
+          y += +this.p.v[1];
+          this.v.setTripleAt(x, y, x - ox * perimSegment * roundness * dir, y - oy * perimSegment * roundness * dir, x + ox * perimSegment * roundness * dir, y + oy * perimSegment * roundness * dir, i, true);
+          currentAng += angle * dir;
+        }
+
+        this.paths.length = 0;
+        this.paths[0] = this.v;
+      }
+    }]);
+
+    return StarShapeProperty;
+  }(DynamicPropertyContainer);
+
+  var roundCorner = 0.5519;
+  var cPoint = roundCorner;
+  /**
+   * rect shape property
+   */
+
+  var RectShapeProperty = /*#__PURE__*/function (_DynamicPropertyConta3) {
+    _inherits(RectShapeProperty, _DynamicPropertyConta3);
+
+    var _super5 = _createSuper(RectShapeProperty);
+
+    /**
+     * constructor rect shape property
+     * @param {*} elem element node
+     * @param {*} data shape value property data
+     */
+    function RectShapeProperty(elem, data) {
+      var _this5;
+
+      _classCallCheck(this, RectShapeProperty);
+
+      _this5 = _super5.call(this);
+      _this5.v = ShapePool.newElement();
+      _this5.v.c = true;
+      _this5.localShapeCollection = ShapeCollectionPool.newShapeCollection();
+
+      _this5.localShapeCollection.addShape(_this5.v);
+
+      _this5.paths = _this5.localShapeCollection;
+      _this5.elem = elem;
+      _this5.comp = elem.comp;
+      _this5.frameId = -1;
+      _this5.d = data.d;
+
+      _this5.initDynamicPropertyContainer(elem);
+
+      _this5.p = PropertyFactory.getProp(elem, data.p, 1, 0, _assertThisInitialized(_this5));
+      _this5.s = PropertyFactory.getProp(elem, data.s, 1, 0, _assertThisInitialized(_this5));
+      _this5.r = PropertyFactory.getProp(elem, data.r, 0, 0, _assertThisInitialized(_this5));
+
+      if (_this5.dynamicProperties.length) {
+        _this5.k = true;
+      } else {
+        _this5.k = false;
+
+        _this5.convertRectToPath();
+      }
+
+      return _this5;
     }
-  }]);
-  return RectShapeProperty;
-}(DynamicPropertyContainer);
-
-/**
- * get shape prop with data
- * @param {*} elem element node
- * @param {*} data shape value property data
- * @param {*} type lottie shape type
- * @return {*}
- */
+    /**
+     * reset shape
+     */
 
 
-function getShapeProp(elem, data, type) {
-  var prop = void 0;
-  if (type === 3 || type === 4) {
-    var dataProp = type === 3 ? data.pt : data.ks;
-    var keys = dataProp.k;
-    if (keys.length) {
-      prop = new KeyframedShapeProperty(elem, data, type);
-    } else {
-      prop = new ShapeProperty(elem, data, type);
+    _createClass(RectShapeProperty, [{
+      key: "reset",
+      value: function reset() {
+        this.paths = this.localShapeCollection;
+      }
+      /**
+       * get point with frameId
+       * @param {*} frameNum frame number
+       */
+
+    }, {
+      key: "getValue",
+      value: function getValue(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        this.frameId = frameNum;
+        this.iterateDynamicProperties(frameNum);
+
+        if (this._mdf) {
+          this.convertRectToPath();
+        }
+      }
+      /**
+       * convert rect to path
+       */
+
+    }, {
+      key: "convertRectToPath",
+      value: function convertRectToPath() {
+        var p0 = this.p.v[0];
+        var p1 = this.p.v[1];
+        var v0 = this.s.v[0] / 2;
+        var v1 = this.s.v[1] / 2;
+        var round = Math.min(v0, v1, this.r.v);
+        var cPoint = round * (1 - roundCorner);
+        this.v._length = 0;
+
+        if (this.d === 2 || this.d === 1) {
+          this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, 0, true);
+          this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, p0 + v0, p1 + v1 - round, 1, true);
+
+          if (round !== 0) {
+            this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, 2, true);
+            this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0 + round, p1 + v1, 3, true);
+            this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, 4, true);
+            this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1 + round, 5, true);
+            this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, 6, true);
+            this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, p0 + v0 - round, p1 - v1, 7, true);
+          } else {
+            this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0 + cPoint, p1 + v1, p0 - v0, p1 + v1, 2);
+            this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0, p1 - v1 + cPoint, p0 - v0, p1 - v1, 3);
+          }
+        } else {
+          this.v.setTripleAt(p0 + v0, p1 - v1 + round, p0 + v0, p1 - v1 + cPoint, p0 + v0, p1 - v1 + round, 0, true);
+
+          if (round !== 0) {
+            this.v.setTripleAt(p0 + v0 - round, p1 - v1, p0 + v0 - round, p1 - v1, p0 + v0 - cPoint, p1 - v1, 1, true);
+            this.v.setTripleAt(p0 - v0 + round, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0 + round, p1 - v1, 2, true);
+            this.v.setTripleAt(p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + round, p0 - v0, p1 - v1 + cPoint, 3, true);
+            this.v.setTripleAt(p0 - v0, p1 + v1 - round, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1 - round, 4, true);
+            this.v.setTripleAt(p0 - v0 + round, p1 + v1, p0 - v0 + round, p1 + v1, p0 - v0 + cPoint, p1 + v1, 5, true);
+            this.v.setTripleAt(p0 + v0 - round, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0 - round, p1 + v1, 6, true);
+            this.v.setTripleAt(p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - round, p0 + v0, p1 + v1 - cPoint, 7, true);
+          } else {
+            this.v.setTripleAt(p0 - v0, p1 - v1, p0 - v0 + cPoint, p1 - v1, p0 - v0, p1 - v1, 1, true);
+            this.v.setTripleAt(p0 - v0, p1 + v1, p0 - v0, p1 + v1 - cPoint, p0 - v0, p1 + v1, 2, true);
+            this.v.setTripleAt(p0 + v0, p1 + v1, p0 + v0 - cPoint, p1 + v1, p0 + v0, p1 + v1, 3, true);
+          }
+        }
+      }
+    }]);
+
+    return RectShapeProperty;
+  }(DynamicPropertyContainer);
+  /**
+   * get shape prop with data
+   * @param {*} elem element node
+   * @param {*} data shape value property data
+   * @param {*} type lottie shape type
+   * @return {*}
+   */
+
+
+  function getShapeProp(elem, data, type) {
+    var prop;
+
+    if (type === 3 || type === 4) {
+      var dataProp = type === 3 ? data.pt : data.ks;
+      var keys = dataProp.k;
+
+      if (keys.length) {
+        prop = new KeyframedShapeProperty(elem, data, type);
+      } else {
+        prop = new ShapeProperty(elem, data, type);
+      }
+    } else if (type === 5) {
+      prop = new RectShapeProperty(elem, data);
+    } else if (type === 6) {
+      prop = new EllShapeProperty(elem, data);
+    } else if (type === 7) {
+      prop = new StarShapeProperty(elem, data);
     }
-  } else if (type === 5) {
-    prop = new RectShapeProperty(elem, data);
-  } else if (type === 6) {
-    prop = new EllShapeProperty(elem, data);
-  } else if (type === 7) {
-    prop = new StarShapeProperty(elem, data);
+
+    if (prop.k) {
+      // FIXME: maybe not needed
+      elem.addDynamicProperty(prop);
+    }
+
+    return prop;
   }
-  if (prop.k) {
-    // FIXME: maybe not needed
-    elem.addDynamicProperty(prop);
+  /**
+   * get ShapeProperty class
+   * @return {ShapeProperty}
+   */
+
+
+  function getConstructorFunction() {
+    return ShapeProperty;
   }
-  return prop;
-}
+  /**
+   * get KeyframedShapeProperty class
+   * @return {KeyframedShapeProperty}
+   */
 
-/**
- * get ShapeProperty class
- * @return {ShapeProperty}
- */
-function getConstructorFunction() {
-  return ShapeProperty;
-}
 
-/**
- * get KeyframedShapeProperty class
- * @return {KeyframedShapeProperty}
- */
-function getKeyframedConstructorFunction() {
-  return KeyframedShapeProperty;
-}
+  function getKeyframedConstructorFunction() {
+    return KeyframedShapeProperty;
+  }
 
-var ShapePropertyFactory = { getShapeProp: getShapeProp, getConstructorFunction: getConstructorFunction, getKeyframedConstructorFunction: getKeyframedConstructorFunction };
-
-// import {
-//   Graphics,
-// } from 'pixi.js';
-/**
- * a
- */
-
-var MaskFrames = function (_DynamicPropertyConta) {
-  inherits(MaskFrames, _DynamicPropertyConta);
+  var ShapePropertyFactory = {
+    getShapeProp: getShapeProp,
+    getConstructorFunction: getConstructorFunction,
+    getKeyframedConstructorFunction: getKeyframedConstructorFunction
+  };
 
   /**
    * a
-   * @param {*} elem a
-   * @param {*} masksProperties a
-   * @param {*} session a
    */
-  function MaskFrames(elem, masksProperties, session) {
-    classCallCheck(this, MaskFrames);
 
-    var _this = possibleConstructorReturn(this, (MaskFrames.__proto__ || Object.getPrototypeOf(MaskFrames)).call(this));
+  var MaskFrames = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(MaskFrames, _DynamicPropertyConta);
 
-    _this.frameId = -1;
-    _this.elem = elem;
-    _this.session = session;
-    _this.masksProperties = masksProperties || [];
-    _this.initDynamicPropertyContainer(elem);
-    _this.viewData = createSizedArray(_this.masksProperties.length);
-    var len = _this.masksProperties.length;
-    var hasMasks = false;
-    for (var i = 0; i < len; i++) {
-      if (_this.masksProperties[i].mode !== 'n') {
-        hasMasks = true;
+    var _super = _createSuper(MaskFrames);
+
+    /**
+     * a
+     * @param {*} elem a
+     * @param {*} masksProperties a
+     * @param {*} session a
+     */
+    function MaskFrames(elem, masksProperties, session) {
+      var _this;
+
+      _classCallCheck(this, MaskFrames);
+
+      _this = _super.call(this);
+      _this.frameId = -1;
+      _this.elem = elem;
+      _this.session = session;
+      _this.masksProperties = masksProperties || [];
+
+      _this.initDynamicPropertyContainer(elem);
+
+      _this.viewData = createSizedArray(_this.masksProperties.length);
+      var len = _this.masksProperties.length;
+      var hasMasks = false;
+
+      for (var i = 0; i < len; i++) {
+        if (_this.masksProperties[i].mode !== 'n') {
+          hasMasks = true;
+        }
+
+        _this.viewData[i] = ShapePropertyFactory.getShapeProp(_assertThisInitialized(_this), _this.masksProperties[i], 3);
+        _this.viewData[i].inv = _this.masksProperties[i].inv;
       }
-      _this.viewData[i] = ShapePropertyFactory.getShapeProp(_this, _this.masksProperties[i], 3);
-      _this.viewData[i].inv = _this.masksProperties[i].inv;
+
+      _this.hasMasks = hasMasks;
+      return _this;
     }
-    _this.hasMasks = hasMasks;
-    return _this;
-  }
+    /**
+     * a
+     * @param {number} frameNum frameNum
+     */
+
+
+    _createClass(MaskFrames, [{
+      key: "getValue",
+      value: function getValue(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        this.iterateDynamicProperties(frameNum);
+        this.frameId = frameNum;
+      }
+    }]);
+
+    return MaskFrames;
+  }(DynamicPropertyContainer);
+
+  /* eslint-disable */
+  /*!
+   Transformation Matrix v2.0
+   (c) Epistemex 2014-2015
+   www.epistemex.com
+   By Ken Fyrstenberg
+   Contributions by leeoniya.
+   License: MIT, header required.
+   */
 
   /**
-   * a
-   * @param {number} frameNum frameNum
+   * 2D transformation matrix object initialized with identity matrix.
+   *
+   * The matrix can synchronize a canvas context by supplying the context
+   * as an argument, or later apply current absolute transform to an
+   * existing context.
+   *
+   * All values are handled as floating point values.
+   *
+   * @param {CanvasRenderingContext2D} [context] - Optional context to sync with Matrix
+   * @prop {number} a - scale x
+   * @prop {number} b - shear y
+   * @prop {number} c - shear x
+   * @prop {number} d - scale y
+   * @prop {number} e - translate x
+   * @prop {number} f - translate y
+   * @prop {CanvasRenderingContext2D|null} [context=null] - set or get current canvas context
+   * @constructor
    */
 
-
-  createClass(MaskFrames, [{
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-
-      this.iterateDynamicProperties(frameNum);
-
-      this.frameId = frameNum;
-    }
-  }]);
-  return MaskFrames;
-}(DynamicPropertyContainer);
-
-/* eslint-disable */
-/*!
- Transformation Matrix v2.0
- (c) Epistemex 2014-2015
- www.epistemex.com
- By Ken Fyrstenberg
- Contributions by leeoniya.
- License: MIT, header required.
- */
-
-/**
- * 2D transformation matrix object initialized with identity matrix.
- *
- * The matrix can synchronize a canvas context by supplying the context
- * as an argument, or later apply current absolute transform to an
- * existing context.
- *
- * All values are handled as floating point values.
- *
- * @param {CanvasRenderingContext2D} [context] - Optional context to sync with Matrix
- * @prop {number} a - scale x
- * @prop {number} b - shear y
- * @prop {number} c - shear x
- * @prop {number} d - scale y
- * @prop {number} e - translate x
- * @prop {number} f - translate y
- * @prop {CanvasRenderingContext2D|null} [context=null] - set or get current canvas context
- * @constructor
- */
-
-var Matrix = function () {
-
+  var Matrix = function () {
     var _cos = Math.cos;
     var _sin = Math.sin;
     var _tan = Math.tan;
     var _rnd = Math.round;
 
     function reset() {
-        this.props[0] = 1;
-        this.props[1] = 0;
-        this.props[2] = 0;
-        this.props[3] = 0;
-        this.props[4] = 0;
-        this.props[5] = 1;
-        this.props[6] = 0;
-        this.props[7] = 0;
-        this.props[8] = 0;
-        this.props[9] = 0;
-        this.props[10] = 1;
-        this.props[11] = 0;
-        this.props[12] = 0;
-        this.props[13] = 0;
-        this.props[14] = 0;
-        this.props[15] = 1;
-        return this;
+      this.props[0] = 1;
+      this.props[1] = 0;
+      this.props[2] = 0;
+      this.props[3] = 0;
+      this.props[4] = 0;
+      this.props[5] = 1;
+      this.props[6] = 0;
+      this.props[7] = 0;
+      this.props[8] = 0;
+      this.props[9] = 0;
+      this.props[10] = 1;
+      this.props[11] = 0;
+      this.props[12] = 0;
+      this.props[13] = 0;
+      this.props[14] = 0;
+      this.props[15] = 1;
+      return this;
     }
 
     function rotate(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+      if (angle === 0) {
+        return this;
+      }
+
+      var mCos = _cos(angle);
+
+      var mSin = _sin(angle);
+
+      return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     }
 
     function rotateX(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(1, 0, 0, 0, 0, mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1);
+      if (angle === 0) {
+        return this;
+      }
+
+      var mCos = _cos(angle);
+
+      var mSin = _sin(angle);
+
+      return this._t(1, 0, 0, 0, 0, mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1);
     }
 
     function rotateY(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, 0, mSin, 0, 0, 1, 0, 0, -mSin, 0, mCos, 0, 0, 0, 0, 1);
+      if (angle === 0) {
+        return this;
+      }
+
+      var mCos = _cos(angle);
+
+      var mSin = _sin(angle);
+
+      return this._t(mCos, 0, mSin, 0, 0, 1, 0, 0, -mSin, 0, mCos, 0, 0, 0, 0, 1);
     }
 
     function rotateZ(angle) {
-        if (angle === 0) {
-            return this;
-        }
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+      if (angle === 0) {
+        return this;
+      }
+
+      var mCos = _cos(angle);
+
+      var mSin = _sin(angle);
+
+      return this._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     }
 
     function shear(sx, sy) {
-        return this._t(1, sy, sx, 1, 0, 0);
+      return this._t(1, sy, sx, 1, 0, 0);
     }
 
     function skew(ax, ay) {
-        return this.shear(_tan(ax), _tan(ay));
+      return this.shear(_tan(ax), _tan(ay));
     }
 
     function skewFromAxis(ax, angle) {
-        var mCos = _cos(angle);
-        var mSin = _sin(angle);
-        return this._t(mCos, mSin, 0, 0, -mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(1, 0, 0, 0, _tan(ax), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        //return this._t(mCos, mSin, -mSin, mCos, 0, 0)._t(1, 0, _tan(ax), 1, 0, 0)._t(mCos, -mSin, mSin, mCos, 0, 0);
+      var mCos = _cos(angle);
+
+      var mSin = _sin(angle);
+
+      return this._t(mCos, mSin, 0, 0, -mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(1, 0, 0, 0, _tan(ax), 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)._t(mCos, -mSin, 0, 0, mSin, mCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); //return this._t(mCos, mSin, -mSin, mCos, 0, 0)._t(1, 0, _tan(ax), 1, 0, 0)._t(mCos, -mSin, mSin, mCos, 0, 0);
     }
 
     function scale(sx, sy, sz) {
-        if (!sz && sz !== 0) {
-            sz = 1;
-        }
-        if (sx === 1 && sy === 1 && sz === 1) {
-            return this;
-        }
-        return this._t(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1);
+      if (!sz && sz !== 0) {
+        sz = 1;
+      }
+
+      if (sx === 1 && sy === 1 && sz === 1) {
+        return this;
+      }
+
+      return this._t(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1);
     }
 
     function setTransform(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) {
-        this.props[0] = a;
-        this.props[1] = b;
-        this.props[2] = c;
-        this.props[3] = d;
-        this.props[4] = e;
-        this.props[5] = f;
-        this.props[6] = g;
-        this.props[7] = h;
-        this.props[8] = i;
-        this.props[9] = j;
-        this.props[10] = k;
-        this.props[11] = l;
-        this.props[12] = m;
-        this.props[13] = n;
-        this.props[14] = o;
-        this.props[15] = p;
-        return this;
+      this.props[0] = a;
+      this.props[1] = b;
+      this.props[2] = c;
+      this.props[3] = d;
+      this.props[4] = e;
+      this.props[5] = f;
+      this.props[6] = g;
+      this.props[7] = h;
+      this.props[8] = i;
+      this.props[9] = j;
+      this.props[10] = k;
+      this.props[11] = l;
+      this.props[12] = m;
+      this.props[13] = n;
+      this.props[14] = o;
+      this.props[15] = p;
+      return this;
     }
 
     function translate(tx, ty, tz) {
-        tz = tz || 0;
-        if (tx !== 0 || ty !== 0 || tz !== 0) {
-            return this._t(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1);
-        }
-        return this;
+      tz = tz || 0;
+
+      if (tx !== 0 || ty !== 0 || tz !== 0) {
+        return this._t(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, tx, ty, tz, 1);
+      }
+
+      return this;
     }
 
     function transform(a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, k2, l2, m2, n2, o2, p2) {
+      var _p = this.props;
 
-        var _p = this.props;
-
-        if (a2 === 1 && b2 === 0 && c2 === 0 && d2 === 0 && e2 === 0 && f2 === 1 && g2 === 0 && h2 === 0 && i2 === 0 && j2 === 0 && k2 === 1 && l2 === 0) {
-            //NOTE: commenting this condition because TurboFan deoptimizes code when present
-            //if(m2 !== 0 || n2 !== 0 || o2 !== 0){
-            _p[12] = _p[12] * a2 + _p[15] * m2;
-            _p[13] = _p[13] * f2 + _p[15] * n2;
-            _p[14] = _p[14] * k2 + _p[15] * o2;
-            _p[15] = _p[15] * p2;
-            //}
-            this._identityCalculated = false;
-            return this;
-        }
-
-        var a1 = _p[0];
-        var b1 = _p[1];
-        var c1 = _p[2];
-        var d1 = _p[3];
-        var e1 = _p[4];
-        var f1 = _p[5];
-        var g1 = _p[6];
-        var h1 = _p[7];
-        var i1 = _p[8];
-        var j1 = _p[9];
-        var k1 = _p[10];
-        var l1 = _p[11];
-        var m1 = _p[12];
-        var n1 = _p[13];
-        var o1 = _p[14];
-        var p1 = _p[15];
-
-        /* matrix order (canvas compatible):
-         * ace
-         * bdf
-         * 001
-         */
-        _p[0] = a1 * a2 + b1 * e2 + c1 * i2 + d1 * m2;
-        _p[1] = a1 * b2 + b1 * f2 + c1 * j2 + d1 * n2;
-        _p[2] = a1 * c2 + b1 * g2 + c1 * k2 + d1 * o2;
-        _p[3] = a1 * d2 + b1 * h2 + c1 * l2 + d1 * p2;
-
-        _p[4] = e1 * a2 + f1 * e2 + g1 * i2 + h1 * m2;
-        _p[5] = e1 * b2 + f1 * f2 + g1 * j2 + h1 * n2;
-        _p[6] = e1 * c2 + f1 * g2 + g1 * k2 + h1 * o2;
-        _p[7] = e1 * d2 + f1 * h2 + g1 * l2 + h1 * p2;
-
-        _p[8] = i1 * a2 + j1 * e2 + k1 * i2 + l1 * m2;
-        _p[9] = i1 * b2 + j1 * f2 + k1 * j2 + l1 * n2;
-        _p[10] = i1 * c2 + j1 * g2 + k1 * k2 + l1 * o2;
-        _p[11] = i1 * d2 + j1 * h2 + k1 * l2 + l1 * p2;
-
-        _p[12] = m1 * a2 + n1 * e2 + o1 * i2 + p1 * m2;
-        _p[13] = m1 * b2 + n1 * f2 + o1 * j2 + p1 * n2;
-        _p[14] = m1 * c2 + n1 * g2 + o1 * k2 + p1 * o2;
-        _p[15] = m1 * d2 + n1 * h2 + o1 * l2 + p1 * p2;
+      if (a2 === 1 && b2 === 0 && c2 === 0 && d2 === 0 && e2 === 0 && f2 === 1 && g2 === 0 && h2 === 0 && i2 === 0 && j2 === 0 && k2 === 1 && l2 === 0) {
+        //NOTE: commenting this condition because TurboFan deoptimizes code when present
+        //if(m2 !== 0 || n2 !== 0 || o2 !== 0){
+        _p[12] = _p[12] * a2 + _p[15] * m2;
+        _p[13] = _p[13] * f2 + _p[15] * n2;
+        _p[14] = _p[14] * k2 + _p[15] * o2;
+        _p[15] = _p[15] * p2; //}
 
         this._identityCalculated = false;
         return this;
+      }
+
+      var a1 = _p[0];
+      var b1 = _p[1];
+      var c1 = _p[2];
+      var d1 = _p[3];
+      var e1 = _p[4];
+      var f1 = _p[5];
+      var g1 = _p[6];
+      var h1 = _p[7];
+      var i1 = _p[8];
+      var j1 = _p[9];
+      var k1 = _p[10];
+      var l1 = _p[11];
+      var m1 = _p[12];
+      var n1 = _p[13];
+      var o1 = _p[14];
+      var p1 = _p[15];
+      /* matrix order (canvas compatible):
+       * ace
+       * bdf
+       * 001
+       */
+
+      _p[0] = a1 * a2 + b1 * e2 + c1 * i2 + d1 * m2;
+      _p[1] = a1 * b2 + b1 * f2 + c1 * j2 + d1 * n2;
+      _p[2] = a1 * c2 + b1 * g2 + c1 * k2 + d1 * o2;
+      _p[3] = a1 * d2 + b1 * h2 + c1 * l2 + d1 * p2;
+      _p[4] = e1 * a2 + f1 * e2 + g1 * i2 + h1 * m2;
+      _p[5] = e1 * b2 + f1 * f2 + g1 * j2 + h1 * n2;
+      _p[6] = e1 * c2 + f1 * g2 + g1 * k2 + h1 * o2;
+      _p[7] = e1 * d2 + f1 * h2 + g1 * l2 + h1 * p2;
+      _p[8] = i1 * a2 + j1 * e2 + k1 * i2 + l1 * m2;
+      _p[9] = i1 * b2 + j1 * f2 + k1 * j2 + l1 * n2;
+      _p[10] = i1 * c2 + j1 * g2 + k1 * k2 + l1 * o2;
+      _p[11] = i1 * d2 + j1 * h2 + k1 * l2 + l1 * p2;
+      _p[12] = m1 * a2 + n1 * e2 + o1 * i2 + p1 * m2;
+      _p[13] = m1 * b2 + n1 * f2 + o1 * j2 + p1 * n2;
+      _p[14] = m1 * c2 + n1 * g2 + o1 * k2 + p1 * o2;
+      _p[15] = m1 * d2 + n1 * h2 + o1 * l2 + p1 * p2;
+      this._identityCalculated = false;
+      return this;
     }
 
     function isIdentity() {
-        if (!this._identityCalculated) {
-            this._identity = !(this.props[0] !== 1 || this.props[1] !== 0 || this.props[2] !== 0 || this.props[3] !== 0 || this.props[4] !== 0 || this.props[5] !== 1 || this.props[6] !== 0 || this.props[7] !== 0 || this.props[8] !== 0 || this.props[9] !== 0 || this.props[10] !== 1 || this.props[11] !== 0 || this.props[12] !== 0 || this.props[13] !== 0 || this.props[14] !== 0 || this.props[15] !== 1);
-            this._identityCalculated = true;
-        }
-        return this._identity;
+      if (!this._identityCalculated) {
+        this._identity = !(this.props[0] !== 1 || this.props[1] !== 0 || this.props[2] !== 0 || this.props[3] !== 0 || this.props[4] !== 0 || this.props[5] !== 1 || this.props[6] !== 0 || this.props[7] !== 0 || this.props[8] !== 0 || this.props[9] !== 0 || this.props[10] !== 1 || this.props[11] !== 0 || this.props[12] !== 0 || this.props[13] !== 0 || this.props[14] !== 0 || this.props[15] !== 1);
+        this._identityCalculated = true;
+      }
+
+      return this._identity;
     }
 
     function equals(matr) {
-        var i = 0;
-        while (i < 16) {
-            if (matr.props[i] !== this.props[i]) {
-                return false;
-            }
-            i += 1;
+      var i = 0;
+
+      while (i < 16) {
+        if (matr.props[i] !== this.props[i]) {
+          return false;
         }
-        return true;
+
+        i += 1;
+      }
+
+      return true;
     }
 
     function clone(matr) {
-        var i;
-        for (i = 0; i < 16; i += 1) {
-            matr.props[i] = this.props[i];
-        }
+      var i;
+
+      for (i = 0; i < 16; i += 1) {
+        matr.props[i] = this.props[i];
+      }
     }
 
     function cloneFromProps(props) {
-        var i;
-        for (i = 0; i < 16; i += 1) {
-            this.props[i] = props[i];
-        }
+      var i;
+
+      for (i = 0; i < 16; i += 1) {
+        this.props[i] = props[i];
+      }
     }
 
     function applyToPoint(x, y, z) {
+      return {
+        x: x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12],
+        y: x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13],
+        z: x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]
+      };
+      /*return {
+       x: x * me.a + y * me.c + me.e,
+       y: x * me.b + y * me.d + me.f
+       };*/
+    }
 
-        return {
-            x: x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12],
-            y: x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13],
-            z: x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]
-        };
-        /*return {
-         x: x * me.a + y * me.c + me.e,
-         y: x * me.b + y * me.d + me.f
-         };*/
-    }
     function applyToX(x, y, z) {
-        return x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12];
+      return x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12];
     }
+
     function applyToY(x, y, z) {
-        return x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13];
+      return x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13];
     }
+
     function applyToZ(x, y, z) {
-        return x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14];
+      return x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14];
     }
 
     function inversePoint(pt) {
-        var determinant = this.props[0] * this.props[5] - this.props[1] * this.props[4];
-        var a = this.props[5] / determinant;
-        var b = -this.props[1] / determinant;
-        var c = -this.props[4] / determinant;
-        var d = this.props[0] / determinant;
-        var e = (this.props[4] * this.props[13] - this.props[5] * this.props[12]) / determinant;
-        var f = -(this.props[0] * this.props[13] - this.props[1] * this.props[12]) / determinant;
-        return [pt[0] * a + pt[1] * c + e, pt[0] * b + pt[1] * d + f, 0];
+      var determinant = this.props[0] * this.props[5] - this.props[1] * this.props[4];
+      var a = this.props[5] / determinant;
+      var b = -this.props[1] / determinant;
+      var c = -this.props[4] / determinant;
+      var d = this.props[0] / determinant;
+      var e = (this.props[4] * this.props[13] - this.props[5] * this.props[12]) / determinant;
+      var f = -(this.props[0] * this.props[13] - this.props[1] * this.props[12]) / determinant;
+      return [pt[0] * a + pt[1] * c + e, pt[0] * b + pt[1] * d + f, 0];
     }
 
     function inversePoints(pts) {
-        var i,
-            len = pts.length,
-            retPts = [];
-        for (i = 0; i < len; i += 1) {
-            retPts[i] = inversePoint(pts[i]);
-        }
-        return retPts;
+      var i,
+          len = pts.length,
+          retPts = [];
+
+      for (i = 0; i < len; i += 1) {
+        retPts[i] = inversePoint(pts[i]);
+      }
+
+      return retPts;
     }
 
     function applyToTriplePoints(pt1, pt2, pt3) {
-        var arr = createTypedArray('float32', 6);
-        if (this.isIdentity()) {
-            arr[0] = pt1[0];
-            arr[1] = pt1[1];
-            arr[2] = pt2[0];
-            arr[3] = pt2[1];
-            arr[4] = pt3[0];
-            arr[5] = pt3[1];
-        } else {
-            var p0 = this.props[0],
-                p1 = this.props[1],
-                p4 = this.props[4],
-                p5 = this.props[5],
-                p12 = this.props[12],
-                p13 = this.props[13];
-            arr[0] = pt1[0] * p0 + pt1[1] * p4 + p12;
-            arr[1] = pt1[0] * p1 + pt1[1] * p5 + p13;
-            arr[2] = pt2[0] * p0 + pt2[1] * p4 + p12;
-            arr[3] = pt2[0] * p1 + pt2[1] * p5 + p13;
-            arr[4] = pt3[0] * p0 + pt3[1] * p4 + p12;
-            arr[5] = pt3[0] * p1 + pt3[1] * p5 + p13;
-        }
-        return arr;
+      var arr = createTypedArray('float32', 6);
+
+      if (this.isIdentity()) {
+        arr[0] = pt1[0];
+        arr[1] = pt1[1];
+        arr[2] = pt2[0];
+        arr[3] = pt2[1];
+        arr[4] = pt3[0];
+        arr[5] = pt3[1];
+      } else {
+        var p0 = this.props[0],
+            p1 = this.props[1],
+            p4 = this.props[4],
+            p5 = this.props[5],
+            p12 = this.props[12],
+            p13 = this.props[13];
+        arr[0] = pt1[0] * p0 + pt1[1] * p4 + p12;
+        arr[1] = pt1[0] * p1 + pt1[1] * p5 + p13;
+        arr[2] = pt2[0] * p0 + pt2[1] * p4 + p12;
+        arr[3] = pt2[0] * p1 + pt2[1] * p5 + p13;
+        arr[4] = pt3[0] * p0 + pt3[1] * p4 + p12;
+        arr[5] = pt3[0] * p1 + pt3[1] * p5 + p13;
+      }
+
+      return arr;
     }
 
     function applyToPointArray(x, y, z) {
-        var arr;
-        if (this.isIdentity()) {
-            arr = [x, y, z];
-        } else {
-            arr = [x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12], x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13], x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]];
-        }
-        return arr;
+      var arr;
+
+      if (this.isIdentity()) {
+        arr = [x, y, z];
+      } else {
+        arr = [x * this.props[0] + y * this.props[4] + z * this.props[8] + this.props[12], x * this.props[1] + y * this.props[5] + z * this.props[9] + this.props[13], x * this.props[2] + y * this.props[6] + z * this.props[10] + this.props[14]];
+      }
+
+      return arr;
     }
 
     function applyToPointStringified(x, y) {
-        if (this.isIdentity()) {
-            return x + ',' + y;
-        }
-        var _p = this.props;
-        return Math.round((x * _p[0] + y * _p[4] + _p[12]) * 100) / 100 + ',' + Math.round((x * _p[1] + y * _p[5] + _p[13]) * 100) / 100;
+      if (this.isIdentity()) {
+        return x + ',' + y;
+      }
+
+      var _p = this.props;
+      return Math.round((x * _p[0] + y * _p[4] + _p[12]) * 100) / 100 + ',' + Math.round((x * _p[1] + y * _p[5] + _p[13]) * 100) / 100;
     }
 
     function toCSS() {
-        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
-        /*if(this.isIdentity()) {
-            return '';
-        }*/
-        var i = 0;
-        var props = this.props;
-        var cssValue = 'matrix3d(';
-        var v = 10000;
-        while (i < 16) {
-            cssValue += _rnd(props[i] * v) / v;
-            cssValue += i === 15 ? ')' : ',';
-            i += 1;
-        }
-        return cssValue;
+      //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
+
+      /*if(this.isIdentity()) {
+          return '';
+      }*/
+      var i = 0;
+      var props = this.props;
+      var cssValue = 'matrix3d(';
+      var v = 10000;
+
+      while (i < 16) {
+        cssValue += _rnd(props[i] * v) / v;
+        cssValue += i === 15 ? ')' : ',';
+        i += 1;
+      }
+
+      return cssValue;
     }
 
     function roundMatrixProperty(val) {
-        var v = 10000;
-        if (val < 0.000001 && val > 0 || val > -0.000001 && val < 0) {
-            return _rnd(val * v) / v;
-        }
-        return val;
+      var v = 10000;
+
+      if (val < 0.000001 && val > 0 || val > -0.000001 && val < 0) {
+        return _rnd(val * v) / v;
+      }
+
+      return val;
     }
 
     function to2dCSS() {
-        //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
-        /*if(this.isIdentity()) {
-            return '';
-        }*/
-        var props = this.props;
-        var _a = roundMatrixProperty(props[0]);
-        var _b = roundMatrixProperty(props[1]);
-        var _c = roundMatrixProperty(props[4]);
-        var _d = roundMatrixProperty(props[5]);
-        var _e = roundMatrixProperty(props[12]);
-        var _f = roundMatrixProperty(props[13]);
-        return "matrix(" + _a + ',' + _b + ',' + _c + ',' + _d + ',' + _e + ',' + _f + ")";
+      //Doesn't make much sense to add this optimization. If it is an identity matrix, it's very likely this will get called only once since it won't be keyframed.
+
+      /*if(this.isIdentity()) {
+          return '';
+      }*/
+      var props = this.props;
+
+      var _a = roundMatrixProperty(props[0]);
+
+      var _b = roundMatrixProperty(props[1]);
+
+      var _c = roundMatrixProperty(props[4]);
+
+      var _d = roundMatrixProperty(props[5]);
+
+      var _e = roundMatrixProperty(props[12]);
+
+      var _f = roundMatrixProperty(props[13]);
+
+      return "matrix(" + _a + ',' + _b + ',' + _c + ',' + _d + ',' + _e + ',' + _f + ")";
     }
 
     return function () {
-        this.reset = reset;
-        this.rotate = rotate;
-        this.rotateX = rotateX;
-        this.rotateY = rotateY;
-        this.rotateZ = rotateZ;
-        this.skew = skew;
-        this.skewFromAxis = skewFromAxis;
-        this.shear = shear;
-        this.scale = scale;
-        this.setTransform = setTransform;
-        this.translate = translate;
-        this.transform = transform;
-        this.applyToPoint = applyToPoint;
-        this.applyToX = applyToX;
-        this.applyToY = applyToY;
-        this.applyToZ = applyToZ;
-        this.applyToPointArray = applyToPointArray;
-        this.applyToTriplePoints = applyToTriplePoints;
-        this.applyToPointStringified = applyToPointStringified;
-        this.toCSS = toCSS;
-        this.to2dCSS = to2dCSS;
-        this.clone = clone;
-        this.cloneFromProps = cloneFromProps;
-        this.equals = equals;
-        this.inversePoints = inversePoints;
-        this.inversePoint = inversePoint;
-        this._t = this.transform;
-        this.isIdentity = isIdentity;
-        this._identity = true;
-        this._identityCalculated = false;
-
-        this.props = createTypedArray('float32', 16);
-        this.reset();
+      this.reset = reset;
+      this.rotate = rotate;
+      this.rotateX = rotateX;
+      this.rotateY = rotateY;
+      this.rotateZ = rotateZ;
+      this.skew = skew;
+      this.skewFromAxis = skewFromAxis;
+      this.shear = shear;
+      this.scale = scale;
+      this.setTransform = setTransform;
+      this.translate = translate;
+      this.transform = transform;
+      this.applyToPoint = applyToPoint;
+      this.applyToX = applyToX;
+      this.applyToY = applyToY;
+      this.applyToZ = applyToZ;
+      this.applyToPointArray = applyToPointArray;
+      this.applyToTriplePoints = applyToTriplePoints;
+      this.applyToPointStringified = applyToPointStringified;
+      this.toCSS = toCSS;
+      this.to2dCSS = to2dCSS;
+      this.clone = clone;
+      this.cloneFromProps = cloneFromProps;
+      this.equals = equals;
+      this.inversePoints = inversePoints;
+      this.inversePoint = inversePoint;
+      this._t = this.transform;
+      this.isIdentity = isIdentity;
+      this._identity = true;
+      this._identityCalculated = false;
+      this.props = createTypedArray('float32', 16);
+      this.reset();
     };
-}();
-
-/**
- * a
- */
-
-var ShapeTransformManager = function () {
-  /**
-   * a
-   */
-  function ShapeTransformManager() {
-    classCallCheck(this, ShapeTransformManager);
-
-    this.sequences = {};
-    this.sequenceList = [];
-    this.transform_key_count = 0;
-  }
+  }();
 
   /**
    * a
-   * @param {*} transforms a
-   * @return {*}
    */
 
-
-  createClass(ShapeTransformManager, [{
-    key: 'addTransformSequence',
-    value: function addTransformSequence(transforms) {
-      var len = transforms.length;
-      var key = '_';
-      for (var i = 0; i < len; i += 1) {
-        key += transforms[i].transform.key + '_';
-      }
-      var sequence = this.sequences[key];
-      if (!sequence) {
-        sequence = {
-          transforms: [].concat(transforms),
-          finalTransform: new Matrix(),
-          _mdf: false
-        };
-        this.sequences[key] = sequence;
-        this.sequenceList.push(sequence);
-      }
-      return sequence;
-    }
-
+  var ShapeTransformManager = /*#__PURE__*/function () {
     /**
      * a
-     * @param {*} sequence a
-     * @param {*} isFirstFrame a
      */
+    function ShapeTransformManager() {
+      _classCallCheck(this, ShapeTransformManager);
 
-  }, {
-    key: 'processSequence',
-    value: function processSequence(sequence, isFirstFrame) {
-      var i = 0;
-      var _mdf = isFirstFrame;
-      var len = sequence.transforms.length;
-      while (i < len && !isFirstFrame) {
-        if (sequence.transforms[i].transform.mProps._mdf) {
-          _mdf = true;
-          break;
-        }
-        i += 1;
-      }
-      if (_mdf) {
-        var props = void 0;
-        sequence.finalTransform.reset();
-        for (i = len - 1; i >= 0; i -= 1) {
-          props = sequence.transforms[i].transform.mProps.v.props;
-          sequence.finalTransform.transform(props[0], props[1], props[2], props[3], props[4], props[5], props[6], props[7], props[8], props[9], props[10], props[11], props[12], props[13], props[14], props[15]);
-        }
-      }
-      sequence._mdf = _mdf;
+      this.sequences = {};
+      this.sequenceList = [];
+      this.transform_key_count = 0;
     }
-
     /**
      * a
-     * @param {*} isFirstFrame a
-     */
-
-  }, {
-    key: 'processSequences',
-    value: function processSequences(isFirstFrame) {
-      var len = this.sequenceList.length;
-      for (var i = 0; i < len; i += 1) {
-        this.processSequence(this.sequenceList[i], isFirstFrame);
-      }
-    }
-
-    /**
-     * a
+     * @param {*} transforms a
      * @return {*}
      */
 
-  }, {
-    key: 'getNewKey',
-    value: function getNewKey() {
-      return '_' + this.transform_key_count++;
-    }
-  }]);
-  return ShapeTransformManager;
-}();
 
-/**
- * ProcessedElement class
- */
-var ProcessedElement =
-/**
- * constructor processed elem
- * @param {*} elem
- * @param {*} position
- */
-function ProcessedElement(elem, position) {
-  classCallCheck(this, ProcessedElement);
+    _createClass(ShapeTransformManager, [{
+      key: "addTransformSequence",
+      value: function addTransformSequence(transforms) {
+        var len = transforms.length;
+        var key = '_';
 
-  this.elem = elem;
-  this.pos = position;
-};
+        for (var i = 0; i < len; i += 1) {
+          key += transforms[i].transform.key + '_';
+        }
 
-/**
- * ShapeData class
- */
+        var sequence = this.sequences[key];
 
-var ShapeData = function () {
-  /**
-   * constructor ShapeData
-   * @param {*} element a
-   * @param {*} data a
-   * @param {*} styles a
-   * @param {*} transformsManager a
-   */
-  function ShapeData(element, data, styles, transformsManager) {
-    classCallCheck(this, ShapeData);
+        if (!sequence) {
+          sequence = {
+            transforms: [].concat(transforms),
+            finalTransform: new Matrix(),
+            _mdf: false
+          };
+          this.sequences[key] = sequence;
+          this.sequenceList.push(sequence);
+        }
 
-    this.styledShapes = [];
-    this.tr = [0, 0, 0, 0, 0, 0];
-    var ty = 4;
-    if (data.ty == 'rc') {
-      ty = 5;
-    } else if (data.ty == 'el') {
-      ty = 6;
-    } else if (data.ty == 'sr') {
-      ty = 7;
-    }
-    this.sh = ShapePropertyFactory.getShapeProp(element, data, ty);
-    var len = styles.length;
-    for (var i = 0; i < len; i += 1) {
-      if (!styles[i].closed) {
-        var styledShape = {
-          transforms: transformsManager.addTransformSequence(styles[i].transforms),
-          trNodes: []
-        };
-        this.styledShapes.push(styledShape);
-        styles[i].elements.push(styledShape);
+        return sequence;
       }
-    }
-  }
+      /**
+       * a
+       * @param {*} sequence a
+       * @param {*} isFirstFrame a
+       */
+
+    }, {
+      key: "processSequence",
+      value: function processSequence(sequence, isFirstFrame) {
+        var i = 0;
+        var _mdf = isFirstFrame;
+        var len = sequence.transforms.length;
+
+        while (i < len && !isFirstFrame) {
+          if (sequence.transforms[i].transform.mProps._mdf) {
+            _mdf = true;
+            break;
+          }
+
+          i += 1;
+        }
+
+        if (_mdf) {
+          var props;
+          sequence.finalTransform.reset();
+
+          for (i = len - 1; i >= 0; i -= 1) {
+            props = sequence.transforms[i].transform.mProps.v.props;
+            sequence.finalTransform.transform(props[0], props[1], props[2], props[3], props[4], props[5], props[6], props[7], props[8], props[9], props[10], props[11], props[12], props[13], props[14], props[15]);
+          }
+        }
+
+        sequence._mdf = _mdf;
+      }
+      /**
+       * a
+       * @param {*} isFirstFrame a
+       */
+
+    }, {
+      key: "processSequences",
+      value: function processSequences(isFirstFrame) {
+        var len = this.sequenceList.length;
+
+        for (var i = 0; i < len; i += 1) {
+          this.processSequence(this.sequenceList[i], isFirstFrame);
+        }
+      }
+      /**
+       * a
+       * @return {*}
+       */
+
+    }, {
+      key: "getNewKey",
+      value: function getNewKey() {
+        return '_' + this.transform_key_count++;
+      }
+    }]);
+
+    return ShapeTransformManager;
+  }();
 
   /**
-   * set as animated
+   * ProcessedElement class
    */
-
-
-  createClass(ShapeData, [{
-    key: 'setAsAnimated',
-    value: function setAsAnimated() {
-      this._isAnimated = true;
-    }
-  }]);
-  return ShapeData;
-}();
-
-var display = {};
-var Type = {
-  Null: 'Null',
-  Path: 'Path',
-  Shape: 'Shape',
-  Solid: 'Solid',
-  Sprite: 'Sprite',
-  Container: 'Container'
-};
-
-/**
- * setDisplayByType
- * @param {*} type a
- * @param {*} classFn a
- */
-function setDisplayByType(type, classFn) {
-  display[type] = classFn;
-}
-
-/**
- * a
- * @param {*} type a
- * @return {display}
- */
-function getDisplayByType(type) {
-  return display[type];
-}
-
-var DisplayRegister = { Type: Type, setDisplayByType: setDisplayByType, getDisplayByType: getDisplayByType };
-
-/**
- * a
- */
-
-var PathPaint = function () {
+  var ProcessedElement =
   /**
-   * constructor style element
-   * @param {*} elem item data
-   * @param {*} data item data
-   * @param {*} transforms transforms array
+   * constructor processed elem
+   * @param {*} elem
+   * @param {*} position
    */
-  function PathPaint(elem, data, transforms) {
-    classCallCheck(this, PathPaint);
+  function ProcessedElement(elem, position) {
+    _classCallCheck(this, ProcessedElement);
 
     this.elem = elem;
-    this.data = data;
-    this.type = data.ty;
-    this.preTransforms = transforms;
-    this.transforms = [];
-    this.elements = [];
-    this.closed = data.hd === true;
+    this.pos = position;
+  };
 
-    this.displayType = DisplayRegister.Type.Path;
-    var classFn = DisplayRegister.getDisplayByType(this.displayType);
-    this.display = new classFn(this, data);
-    this.elem.display.addChild(this.display);
+  /**
+   * ShapeData class
+   */
+
+  var ShapeData = /*#__PURE__*/function () {
+    /**
+     * constructor ShapeData
+     * @param {*} element a
+     * @param {*} data a
+     * @param {*} styles a
+     * @param {*} transformsManager a
+     */
+    function ShapeData(element, data, styles, transformsManager) {
+      _classCallCheck(this, ShapeData);
+
+      this.styledShapes = [];
+      this.tr = [0, 0, 0, 0, 0, 0];
+      var ty = 4;
+
+      if (data.ty == 'rc') {
+        ty = 5;
+      } else if (data.ty == 'el') {
+        ty = 6;
+      } else if (data.ty == 'sr') {
+        ty = 7;
+      }
+
+      this.sh = ShapePropertyFactory.getShapeProp(element, data, ty);
+      var len = styles.length;
+
+      for (var i = 0; i < len; i += 1) {
+        if (!styles[i].closed) {
+          var styledShape = {
+            transforms: transformsManager.addTransformSequence(styles[i].transforms),
+            trNodes: []
+          };
+          this.styledShapes.push(styledShape);
+          styles[i].elements.push(styledShape);
+        }
+      }
+    }
+    /**
+     * set as animated
+     */
+
+
+    _createClass(ShapeData, [{
+      key: "setAsAnimated",
+      value: function setAsAnimated() {
+        this._isAnimated = true;
+      }
+    }]);
+
+    return ShapeData;
+  }();
+
+  var display = {};
+  var Type = {
+    Null: 'Null',
+    Path: 'Path',
+    Shape: 'Shape',
+    Solid: 'Solid',
+    Sprite: 'Sprite',
+    Container: 'Container'
+  };
+  /**
+   * setDisplayByType
+   * @param {*} type a
+   * @param {*} classFn a
+   */
+
+  function setDisplayByType(type, classFn) {
+    display[type] = classFn;
   }
+  /**
+   * a
+   * @param {*} type a
+   * @return {display}
+   */
+
+
+  function getDisplayByType(type) {
+    return display[type];
+  }
+
+  var DisplayRegister = {
+    Type: Type,
+    setDisplayByType: setDisplayByType,
+    getDisplayByType: getDisplayByType
+  };
 
   /**
    * a
    */
 
+  var PathPaint = /*#__PURE__*/function () {
+    /**
+     * constructor style element
+     * @param {*} elem item data
+     * @param {*} data item data
+     * @param {*} transforms transforms array
+     */
+    function PathPaint(elem, data, transforms) {
+      _classCallCheck(this, PathPaint);
 
-  createClass(PathPaint, [{
-    key: 'updateGrahpics',
-    value: function updateGrahpics() {
-      this.display.updateLottieGrahpics(this);
+      this.elem = elem;
+      this.data = data;
+      this.type = data.ty;
+      this.preTransforms = transforms;
+      this.transforms = [];
+      this.elements = [];
+      this.closed = data.hd === true;
+      this.displayType = DisplayRegister.Type.Path;
+      var classFn = DisplayRegister.getDisplayByType(this.displayType);
+      this.display = new classFn(this, data);
+      this.elem.display.addChild(this.display);
     }
-  }]);
-  return PathPaint;
-}();
+    /**
+     * a
+     */
 
-/**
- * transform property origin from tr
- */
-var TransformProperty = function (_DynamicPropertyConta) {
-  inherits(TransformProperty, _DynamicPropertyConta);
+
+    _createClass(PathPaint, [{
+      key: "updateGrahpics",
+      value: function updateGrahpics() {
+        this.display.updateLottieGrahpics(this);
+      }
+    }]);
+
+    return PathPaint;
+  }();
 
   /**
-   * constructor about transform property
+   * transform property origin from tr
+   */
+
+  var TransformProperty = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(TransformProperty, _DynamicPropertyConta);
+
+    var _super = _createSuper(TransformProperty);
+
+    /**
+     * constructor about transform property
+     * @param {*} elem element node
+     * @param {*} data multidimensional value property data
+     * @param {*} container value property container
+     */
+    function TransformProperty(elem, data, container) {
+      var _this;
+
+      _classCallCheck(this, TransformProperty);
+
+      _this = _super.call(this);
+      _this.elem = elem;
+      _this.frameId = -1;
+      _this.propType = 'transform';
+      _this.data = data;
+      _this.v = new Matrix(); // Precalculated matrix with non animated properties
+
+      _this.pre = new Matrix();
+      _this.appliedTransformations = 0;
+
+      _this.initDynamicPropertyContainer(container || elem);
+
+      if (data.p && data.p.s) {
+        _this.px = PropertyFactory.getProp(elem, data.p.x, 0, 0, _assertThisInitialized(_this));
+        _this.py = PropertyFactory.getProp(elem, data.p.y, 0, 0, _assertThisInitialized(_this));
+
+        if (data.p.z) {
+          _this.pz = PropertyFactory.getProp(elem, data.p.z, 0, 0, _assertThisInitialized(_this));
+        }
+      } else {
+        _this.p = PropertyFactory.getProp(elem, data.p || {
+          k: [0, 0, 0]
+        }, 1, 0, _assertThisInitialized(_this));
+      }
+
+      if (data.rx) {
+        _this.rx = PropertyFactory.getProp(elem, data.rx, 0, degToRads, _assertThisInitialized(_this));
+        _this.ry = PropertyFactory.getProp(elem, data.ry, 0, degToRads, _assertThisInitialized(_this));
+        _this.rz = PropertyFactory.getProp(elem, data.rz, 0, degToRads, _assertThisInitialized(_this));
+
+        if (data.or.k[0].ti) {
+          var i;
+          var len = data.or.k.length;
+
+          for (i = 0; i < len; i += 1) {
+            data.or.k[i].to = data.or.k[i].ti = null;
+          }
+        }
+
+        _this.or = PropertyFactory.getProp(elem, data.or, 1, degToRads, _assertThisInitialized(_this)); // sh Indicates it needs to be capped between -180 and 180
+
+        _this.or.sh = true;
+      } else {
+        _this.r = PropertyFactory.getProp(elem, data.r || {
+          k: 0
+        }, 0, degToRads, _assertThisInitialized(_this));
+      }
+
+      if (data.sk) {
+        _this.sk = PropertyFactory.getProp(elem, data.sk, 0, degToRads, _assertThisInitialized(_this));
+        _this.sa = PropertyFactory.getProp(elem, data.sa, 0, degToRads, _assertThisInitialized(_this));
+      }
+
+      _this.a = PropertyFactory.getProp(elem, data.a || {
+        k: [0, 0, 0]
+      }, 1, 0, _assertThisInitialized(_this));
+      _this.s = PropertyFactory.getProp(elem, data.s || {
+        k: [100, 100, 100]
+      }, 1, 0.01, _assertThisInitialized(_this)); // Opacity is not part of the transform properties, that's why it won't use this.dynamicProperties. That way transforms won't get updated if opacity changes.
+
+      if (data.o) {
+        _this.o = PropertyFactory.getProp(elem, data.o, 0, 0.01, elem);
+      } else {
+        _this.o = {
+          _mdf: false,
+          v: 1
+        };
+      }
+
+      _this._isDirty = true;
+
+      if (!_this.dynamicProperties.length) {
+        _this.getValue(initialDefaultFrame, true);
+      }
+
+      return _this;
+    }
+    /**
+     * add Dynamic Property
+     * @param {*} prop Dynamic Property
+     */
+    // addDynamicProperty(prop) {
+    //   super.addDynamicProperty(prop);
+    //   this.elem.addDynamicProperty(prop);
+    //   this._isDirty = true;
+    // }
+
+    /**
+     * get transform
+     * @param {*} frameNum a
+     * @param {Boolean} forceRender force render
+     */
+
+
+    _createClass(TransformProperty, [{
+      key: "getValue",
+      value: function getValue(frameNum, forceRender) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        if (this._isDirty) {
+          this.precalculateMatrix();
+          this._isDirty = false;
+        }
+
+        this.iterateDynamicProperties();
+
+        if (this._mdf || forceRender) {
+          this.v.cloneFromProps(this.pre.props);
+
+          if (this.appliedTransformations < 1) {
+            this.v.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+          }
+
+          if (this.appliedTransformations < 2) {
+            this.v.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+          }
+
+          if (this.sk && this.appliedTransformations < 3) {
+            this.v.skewFromAxis(-this.sk.v, this.sa.v);
+          }
+
+          if (this.r && this.appliedTransformations < 4) {
+            this.v.rotate(-this.r.v);
+          } else if (!this.r && this.appliedTransformations < 4) {
+            this.v.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+          }
+
+          if (this.autoOriented) {
+            var v1;
+            var v2; // FIXME: should use frame interval
+
+            var frameRate = this.elem.globalData.frameRate;
+
+            if (this.p && this.p.keyframes && this.p.getValueAtTime) {
+              if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
+                v1 = this.p.getValueAtTime((this.p.keyframes[0].t + 0.01) / frameRate, 0);
+                v2 = this.p.getValueAtTime(this.p.keyframes[0].t / frameRate, 0);
+              } else if (this.p._caching.lastFrame + this.p.offsetTime >= this.p.keyframes[this.p.keyframes.length - 1].t) {
+                v1 = this.p.getValueAtTime(this.p.keyframes[this.p.keyframes.length - 1].t / frameRate, 0);
+                v2 = this.p.getValueAtTime((this.p.keyframes[this.p.keyframes.length - 1].t - 0.05) / frameRate, 0);
+              } else {
+                v1 = this.p.pv;
+                v2 = this.p.getValueAtTime((this.p._caching.lastFrame + this.p.offsetTime - 0.01) / frameRate, this.p.offsetTime);
+              }
+            } else if (this.px && this.px.keyframes && this.py.keyframes && this.px.getValueAtTime && this.py.getValueAtTime) {
+              v1 = [];
+              v2 = [];
+              var px = this.px;
+              var py = this.py;
+
+              if (px._caching.lastFrame + px.offsetTime <= px.keyframes[0].t) {
+                v1[0] = px.getValueAtTime((px.keyframes[0].t + 0.01) / frameRate, 0);
+                v1[1] = py.getValueAtTime((py.keyframes[0].t + 0.01) / frameRate, 0);
+                v2[0] = px.getValueAtTime(px.keyframes[0].t / frameRate, 0);
+                v2[1] = py.getValueAtTime(py.keyframes[0].t / frameRate, 0);
+              } else if (px._caching.lastFrame + px.offsetTime >= px.keyframes[px.keyframes.length - 1].t) {
+                v1[0] = px.getValueAtTime(px.keyframes[px.keyframes.length - 1].t / frameRate, 0);
+                v1[1] = py.getValueAtTime(py.keyframes[py.keyframes.length - 1].t / frameRate, 0);
+                v2[0] = px.getValueAtTime((px.keyframes[px.keyframes.length - 1].t - 0.01) / frameRate, 0);
+                v2[1] = py.getValueAtTime((py.keyframes[py.keyframes.length - 1].t - 0.01) / frameRate, 0);
+              } else {
+                v1 = [px.pv, py.pv];
+                v2[0] = px.getValueAtTime((px._caching.lastFrame + px.offsetTime - 0.01) / frameRate, px.offsetTime);
+                v2[1] = py.getValueAtTime((py._caching.lastFrame + py.offsetTime - 0.01) / frameRate, py.offsetTime);
+              }
+            } else {
+              v1 = v2 = defaultVector;
+            }
+
+            this.v.rotate(-Math.atan2(v1[1] - v2[1], v1[0] - v2[0]));
+          }
+
+          if (this.data.p && this.data.p.s) {
+            if (this.data.p.z) {
+              this.v.translate(this.px.v, this.py.v, -this.pz.v);
+            } else {
+              this.v.translate(this.px.v, this.py.v, 0);
+            }
+          } else {
+            this.v.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
+          }
+        }
+
+        this.frameId = frameNum;
+      }
+      /**
+       * pre calculate matrix for performance
+       */
+
+    }, {
+      key: "precalculateMatrix",
+      value: function precalculateMatrix() {
+        if (!this.a.k) {
+          this.pre.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+          this.appliedTransformations = 1;
+        } else {
+          return;
+        }
+
+        if (!this.s.effectsSequence.length) {
+          this.pre.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+          this.appliedTransformations = 2;
+        } else {
+          return;
+        }
+
+        if (this.sk) {
+          if (!this.sk.effectsSequence.length && !this.sa.effectsSequence.length) {
+            this.pre.skewFromAxis(-this.sk.v, this.sa.v);
+            this.appliedTransformations = 3;
+          } else {
+            return;
+          }
+        }
+
+        if (this.r) {
+          if (!this.r.effectsSequence.length) {
+            this.pre.rotate(-this.r.v);
+            this.appliedTransformations = 4;
+          } else {
+            return;
+          }
+        } else if (!this.rz.effectsSequence.length && !this.ry.effectsSequence.length && !this.rx.effectsSequence.length && !this.or.effectsSequence.length) {
+          this.pre.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+          this.appliedTransformations = 4;
+        }
+      }
+      /**
+       * apply a matrix
+       * @param {*} mat matrix
+       */
+
+    }, {
+      key: "applyToMatrix",
+      value: function applyToMatrix(mat) {
+        var _mdf = this._mdf;
+        this.iterateDynamicProperties();
+        this._mdf = this._mdf || _mdf;
+
+        if (this.a) {
+          mat.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
+        }
+
+        if (this.s) {
+          mat.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
+        }
+
+        if (this.sk) {
+          mat.skewFromAxis(-this.sk.v, this.sa.v);
+        }
+
+        if (this.r) {
+          mat.rotate(-this.r.v);
+        } else {
+          mat.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
+        }
+
+        if (this.data.p.s) {
+          if (this.data.p.z) {
+            mat.translate(this.px.v, this.py.v, -this.pz.v);
+          } else {
+            mat.translate(this.px.v, this.py.v, 0);
+          }
+        } else {
+          mat.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
+        }
+      }
+    }]);
+
+    return TransformProperty;
+  }(DynamicPropertyContainer);
+  /**
+   * get a transform property
    * @param {*} elem element node
    * @param {*} data multidimensional value property data
    * @param {*} container value property container
+   * @return {TransformProperty}
    */
-  function TransformProperty(elem, data, container) {
-    classCallCheck(this, TransformProperty);
 
-    var _this = possibleConstructorReturn(this, (TransformProperty.__proto__ || Object.getPrototypeOf(TransformProperty)).call(this));
-
-    _this.elem = elem;
-    _this.frameId = -1;
-    _this.propType = 'transform';
-    _this.data = data;
-    _this.v = new Matrix();
-    // Precalculated matrix with non animated properties
-    _this.pre = new Matrix();
-    _this.appliedTransformations = 0;
-    _this.initDynamicPropertyContainer(container || elem);
-    if (data.p && data.p.s) {
-      _this.px = PropertyFactory.getProp(elem, data.p.x, 0, 0, _this);
-      _this.py = PropertyFactory.getProp(elem, data.p.y, 0, 0, _this);
-      if (data.p.z) {
-        _this.pz = PropertyFactory.getProp(elem, data.p.z, 0, 0, _this);
-      }
-    } else {
-      _this.p = PropertyFactory.getProp(elem, data.p || { k: [0, 0, 0] }, 1, 0, _this);
-    }
-    if (data.rx) {
-      _this.rx = PropertyFactory.getProp(elem, data.rx, 0, degToRads, _this);
-      _this.ry = PropertyFactory.getProp(elem, data.ry, 0, degToRads, _this);
-      _this.rz = PropertyFactory.getProp(elem, data.rz, 0, degToRads, _this);
-      if (data.or.k[0].ti) {
-        var i = void 0;var len = data.or.k.length;
-        for (i = 0; i < len; i += 1) {
-          data.or.k[i].to = data.or.k[i].ti = null;
-        }
-      }
-      _this.or = PropertyFactory.getProp(elem, data.or, 1, degToRads, _this);
-      // sh Indicates it needs to be capped between -180 and 180
-      _this.or.sh = true;
-    } else {
-      _this.r = PropertyFactory.getProp(elem, data.r || { k: 0 }, 0, degToRads, _this);
-    }
-    if (data.sk) {
-      _this.sk = PropertyFactory.getProp(elem, data.sk, 0, degToRads, _this);
-      _this.sa = PropertyFactory.getProp(elem, data.sa, 0, degToRads, _this);
-    }
-    _this.a = PropertyFactory.getProp(elem, data.a || { k: [0, 0, 0] }, 1, 0, _this);
-    _this.s = PropertyFactory.getProp(elem, data.s || { k: [100, 100, 100] }, 1, 0.01, _this);
-    // Opacity is not part of the transform properties, that's why it won't use this.dynamicProperties. That way transforms won't get updated if opacity changes.
-    if (data.o) {
-      _this.o = PropertyFactory.getProp(elem, data.o, 0, 0.01, elem);
-    } else {
-      _this.o = { _mdf: false, v: 1 };
-    }
-    _this._isDirty = true;
-    if (!_this.dynamicProperties.length) {
-      _this.getValue(initialDefaultFrame, true);
-    }
-    return _this;
-  }
+  function getTransformProperty(elem, data, container) {
+    return new TransformProperty(elem, data, container);
+  } // export default { getTransformProperty };
 
   /**
-   * add Dynamic Property
-   * @param {*} prop Dynamic Property
+   * a
    */
-  // addDynamicProperty(prop) {
-  //   super.addDynamicProperty(prop);
-  //   this.elem.addDynamicProperty(prop);
-  //   this._isDirty = true;
-  // }
+
+  var ShapeModifier = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(ShapeModifier, _DynamicPropertyConta);
+
+    var _super = _createSuper(ShapeModifier);
+
+    function ShapeModifier() {
+      _classCallCheck(this, ShapeModifier);
+
+      return _super.apply(this, arguments);
+    }
+
+    _createClass(ShapeModifier, [{
+      key: "initModifierProperties",
+
+      /**
+       * a
+       */
+      value: function initModifierProperties() {}
+      /**
+       * a
+       */
+
+    }, {
+      key: "addShapeToModifier",
+      value: function addShapeToModifier() {}
+      /**
+       * a
+       * @param {*} data a
+       */
+
+    }, {
+      key: "addShape",
+      value: function addShape(data) {
+        if (!this.closed) {
+          // Adding shape to dynamic properties. It covers the case where a shape has no effects applied, to reset it's _mdf state on every tick.
+          data.sh.container.addDynamicProperty(data.sh);
+          var shapeData = {
+            shape: data.sh,
+            data: data,
+            localShapeCollection: ShapeCollectionPool.newShapeCollection()
+          };
+          this.shapes.push(shapeData);
+          this.addShapeToModifier(shapeData);
+
+          if (this._isAnimated) {
+            data.setAsAnimated();
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} elem a
+       * @param {*} data a
+       */
+
+    }, {
+      key: "init",
+      value: function init(elem, data) {
+        this.shapes = [];
+        this.elem = elem;
+        this.initDynamicPropertyContainer(elem);
+        this.initModifierProperties(elem, data);
+        this.frameId = initialDefaultFrame;
+        this.closed = false;
+        this.k = false;
+
+        if (this.dynamicProperties.length) {
+          this.k = true;
+        } else {
+          this.getValue(true);
+        }
+      }
+      /**
+       * process keys
+       * @param {number} frameNum frameNum
+       */
+
+    }, {
+      key: "processKeys",
+      value: function processKeys(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        this.frameId = frameNum;
+        this.iterateDynamicProperties(frameNum);
+      }
+    }]);
+
+    return ShapeModifier;
+  }(DynamicPropertyContainer);
 
   /**
-   * get transform
-   * @param {*} frameNum a
-   * @param {Boolean} forceRender force render
+   * TrimModifier class
    */
 
+  var TrimModifier = /*#__PURE__*/function (_ShapeModifier) {
+    _inherits(TrimModifier, _ShapeModifier);
 
-  createClass(TransformProperty, [{
-    key: 'getValue',
-    value: function getValue(frameNum, forceRender) {
-      if (frameNum === this.frameId) {
-        return;
+    var _super = _createSuper(TrimModifier);
+
+    function TrimModifier() {
+      _classCallCheck(this, TrimModifier);
+
+      return _super.apply(this, arguments);
+    }
+
+    _createClass(TrimModifier, [{
+      key: "initModifierProperties",
+
+      /**
+       * init modifier properties
+       * @param {*} elem element node
+       * @param {*} data trim value property data
+       */
+      value: function initModifierProperties(elem, data) {
+        this.s = PropertyFactory.getProp(elem, data.s, 0, 0.01, this);
+        this.e = PropertyFactory.getProp(elem, data.e, 0, 0.01, this);
+        this.o = PropertyFactory.getProp(elem, data.o, 0, 0, this);
+        this.sValue = 0;
+        this.eValue = 0;
+        this.getValue = this.processKeys;
+        this.m = data.m;
+        this._isAnimated = !!this.s.effectsSequence.length || !!this.e.effectsSequence.length || !!this.o.effectsSequence.length;
       }
-      if (this._isDirty) {
-        this.precalculateMatrix();
-        this._isDirty = false;
+      /**
+       * add shape to modifier
+       * @param {*} shapeData shape data
+       */
+
+    }, {
+      key: "addShapeToModifier",
+      value: function addShapeToModifier(shapeData) {
+        shapeData.pathsData = [];
       }
+      /**
+       * calculate shape edges
+       * @param {*} s trim start
+       * @param {*} e trim end
+       * @param {*} shapeLength shape length
+       * @param {*} addedLength added length
+       * @param {*} totalModifierLength total modifier length
+       * @return {*}
+       */
 
-      this.iterateDynamicProperties();
+    }, {
+      key: "calculateShapeEdges",
+      value: function calculateShapeEdges(s, e, shapeLength, addedLength, totalModifierLength) {
+        var segments = [];
 
-      if (this._mdf || forceRender) {
-        this.v.cloneFromProps(this.pre.props);
-        if (this.appliedTransformations < 1) {
-          this.v.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
-        }
-        if (this.appliedTransformations < 2) {
-          this.v.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
-        }
-        if (this.sk && this.appliedTransformations < 3) {
-          this.v.skewFromAxis(-this.sk.v, this.sa.v);
-        }
-        if (this.r && this.appliedTransformations < 4) {
-          this.v.rotate(-this.r.v);
-        } else if (!this.r && this.appliedTransformations < 4) {
-          this.v.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
-        }
-        if (this.autoOriented) {
-          var v1 = void 0;var v2 = void 0;
-          // FIXME: should use frame interval
-          var frameRate = this.elem.globalData.frameRate;
-          if (this.p && this.p.keyframes && this.p.getValueAtTime) {
-            if (this.p._caching.lastFrame + this.p.offsetTime <= this.p.keyframes[0].t) {
-              v1 = this.p.getValueAtTime((this.p.keyframes[0].t + 0.01) / frameRate, 0);
-              v2 = this.p.getValueAtTime(this.p.keyframes[0].t / frameRate, 0);
-            } else if (this.p._caching.lastFrame + this.p.offsetTime >= this.p.keyframes[this.p.keyframes.length - 1].t) {
-              v1 = this.p.getValueAtTime(this.p.keyframes[this.p.keyframes.length - 1].t / frameRate, 0);
-              v2 = this.p.getValueAtTime((this.p.keyframes[this.p.keyframes.length - 1].t - 0.05) / frameRate, 0);
-            } else {
-              v1 = this.p.pv;
-              v2 = this.p.getValueAtTime((this.p._caching.lastFrame + this.p.offsetTime - 0.01) / frameRate, this.p.offsetTime);
-            }
-          } else if (this.px && this.px.keyframes && this.py.keyframes && this.px.getValueAtTime && this.py.getValueAtTime) {
-            v1 = [];
-            v2 = [];
-            var px = this.px;var py = this.py;
-            if (px._caching.lastFrame + px.offsetTime <= px.keyframes[0].t) {
-              v1[0] = px.getValueAtTime((px.keyframes[0].t + 0.01) / frameRate, 0);
-              v1[1] = py.getValueAtTime((py.keyframes[0].t + 0.01) / frameRate, 0);
-              v2[0] = px.getValueAtTime(px.keyframes[0].t / frameRate, 0);
-              v2[1] = py.getValueAtTime(py.keyframes[0].t / frameRate, 0);
-            } else if (px._caching.lastFrame + px.offsetTime >= px.keyframes[px.keyframes.length - 1].t) {
-              v1[0] = px.getValueAtTime(px.keyframes[px.keyframes.length - 1].t / frameRate, 0);
-              v1[1] = py.getValueAtTime(py.keyframes[py.keyframes.length - 1].t / frameRate, 0);
-              v2[0] = px.getValueAtTime((px.keyframes[px.keyframes.length - 1].t - 0.01) / frameRate, 0);
-              v2[1] = py.getValueAtTime((py.keyframes[py.keyframes.length - 1].t - 0.01) / frameRate, 0);
-            } else {
-              v1 = [px.pv, py.pv];
-              v2[0] = px.getValueAtTime((px._caching.lastFrame + px.offsetTime - 0.01) / frameRate, px.offsetTime);
-              v2[1] = py.getValueAtTime((py._caching.lastFrame + py.offsetTime - 0.01) / frameRate, py.offsetTime);
-            }
-          } else {
-            v1 = v2 = defaultVector;
-          }
-          this.v.rotate(-Math.atan2(v1[1] - v2[1], v1[0] - v2[0]));
-        }
-        if (this.data.p && this.data.p.s) {
-          if (this.data.p.z) {
-            this.v.translate(this.px.v, this.py.v, -this.pz.v);
-          } else {
-            this.v.translate(this.px.v, this.py.v, 0);
-          }
+        if (e <= 1) {
+          segments.push({
+            s: s,
+            e: e
+          });
+        } else if (s >= 1) {
+          segments.push({
+            s: s - 1,
+            e: e - 1
+          });
         } else {
-          this.v.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
+          segments.push({
+            s: s,
+            e: 1
+          });
+          segments.push({
+            s: 0,
+            e: e - 1
+          });
         }
-      }
-      this.frameId = frameNum;
-    }
 
-    /**
-     * pre calculate matrix for performance
-     */
+        var shapeSegments = [];
+        var i;
+        var len = segments.length;
+        var segmentOb;
 
-  }, {
-    key: 'precalculateMatrix',
-    value: function precalculateMatrix() {
-      if (!this.a.k) {
-        this.pre.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
-        this.appliedTransformations = 1;
-      } else {
-        return;
-      }
-      if (!this.s.effectsSequence.length) {
-        this.pre.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
-        this.appliedTransformations = 2;
-      } else {
-        return;
-      }
-      if (this.sk) {
-        if (!this.sk.effectsSequence.length && !this.sa.effectsSequence.length) {
-          this.pre.skewFromAxis(-this.sk.v, this.sa.v);
-          this.appliedTransformations = 3;
-        } else {
-          return;
-        }
-      }
-      if (this.r) {
-        if (!this.r.effectsSequence.length) {
-          this.pre.rotate(-this.r.v);
-          this.appliedTransformations = 4;
-        } else {
-          return;
-        }
-      } else if (!this.rz.effectsSequence.length && !this.ry.effectsSequence.length && !this.rx.effectsSequence.length && !this.or.effectsSequence.length) {
-        this.pre.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
-        this.appliedTransformations = 4;
-      }
-    }
-
-    /**
-     * apply a matrix
-     * @param {*} mat matrix
-     */
-
-  }, {
-    key: 'applyToMatrix',
-    value: function applyToMatrix(mat) {
-      var _mdf = this._mdf;
-      this.iterateDynamicProperties();
-      this._mdf = this._mdf || _mdf;
-      if (this.a) {
-        mat.translate(-this.a.v[0], -this.a.v[1], this.a.v[2]);
-      }
-      if (this.s) {
-        mat.scale(this.s.v[0], this.s.v[1], this.s.v[2]);
-      }
-      if (this.sk) {
-        mat.skewFromAxis(-this.sk.v, this.sa.v);
-      }
-      if (this.r) {
-        mat.rotate(-this.r.v);
-      } else {
-        mat.rotateZ(-this.rz.v).rotateY(this.ry.v).rotateX(this.rx.v).rotateZ(-this.or.v[2]).rotateY(this.or.v[1]).rotateX(this.or.v[0]);
-      }
-      if (this.data.p.s) {
-        if (this.data.p.z) {
-          mat.translate(this.px.v, this.py.v, -this.pz.v);
-        } else {
-          mat.translate(this.px.v, this.py.v, 0);
-        }
-      } else {
-        mat.translate(this.p.v[0], this.p.v[1], -this.p.v[2]);
-      }
-    }
-  }]);
-  return TransformProperty;
-}(DynamicPropertyContainer);
-
-/**
- * get a transform property
- * @param {*} elem element node
- * @param {*} data multidimensional value property data
- * @param {*} container value property container
- * @return {TransformProperty}
- */
-function getTransformProperty(elem, data, container) {
-  return new TransformProperty(elem, data, container);
-}
-
-// export default { getTransformProperty };
-
-/**
- * a
- */
-
-var ShapeModifier = function (_DynamicPropertyConta) {
-  inherits(ShapeModifier, _DynamicPropertyConta);
-
-  function ShapeModifier() {
-    classCallCheck(this, ShapeModifier);
-    return possibleConstructorReturn(this, (ShapeModifier.__proto__ || Object.getPrototypeOf(ShapeModifier)).apply(this, arguments));
-  }
-
-  createClass(ShapeModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * a
-     */
-    value: function initModifierProperties() {}
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'addShapeToModifier',
-    value: function addShapeToModifier() {}
-
-    /**
-     * a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'addShape',
-    value: function addShape(data) {
-      if (!this.closed) {
-        // Adding shape to dynamic properties. It covers the case where a shape has no effects applied, to reset it's _mdf state on every tick.
-        data.sh.container.addDynamicProperty(data.sh);
-
-        var shapeData = { shape: data.sh, data: data, localShapeCollection: ShapeCollectionPool.newShapeCollection() };
-        this.shapes.push(shapeData);
-        this.addShapeToModifier(shapeData);
-        if (this._isAnimated) {
-          data.setAsAnimated();
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'init',
-    value: function init(elem, data) {
-      this.shapes = [];
-      this.elem = elem;
-      this.initDynamicPropertyContainer(elem);
-      this.initModifierProperties(elem, data);
-      this.frameId = initialDefaultFrame;
-      this.closed = false;
-      this.k = false;
-      if (this.dynamicProperties.length) {
-        this.k = true;
-      } else {
-        this.getValue(true);
-      }
-    }
-
-    /**
-     * process keys
-     * @param {number} frameNum frameNum
-     */
-
-  }, {
-    key: 'processKeys',
-    value: function processKeys(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-      this.frameId = frameNum;
-      this.iterateDynamicProperties(frameNum);
-    }
-  }]);
-  return ShapeModifier;
-}(DynamicPropertyContainer);
-
-// import { registerModifier } from './ShapeModifiers';
-/**
- * TrimModifier class
- */
-
-var TrimModifier = function (_ShapeModifier) {
-  inherits(TrimModifier, _ShapeModifier);
-
-  function TrimModifier() {
-    classCallCheck(this, TrimModifier);
-    return possibleConstructorReturn(this, (TrimModifier.__proto__ || Object.getPrototypeOf(TrimModifier)).apply(this, arguments));
-  }
-
-  createClass(TrimModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * init modifier properties
-     * @param {*} elem element node
-     * @param {*} data trim value property data
-     */
-    value: function initModifierProperties(elem, data) {
-      this.s = PropertyFactory.getProp(elem, data.s, 0, 0.01, this);
-      this.e = PropertyFactory.getProp(elem, data.e, 0, 0.01, this);
-      this.o = PropertyFactory.getProp(elem, data.o, 0, 0, this);
-      this.sValue = 0;
-      this.eValue = 0;
-      this.getValue = this.processKeys;
-      this.m = data.m;
-      this._isAnimated = !!this.s.effectsSequence.length || !!this.e.effectsSequence.length || !!this.o.effectsSequence.length;
-    }
-
-    /**
-     * add shape to modifier
-     * @param {*} shapeData shape data
-     */
-
-  }, {
-    key: 'addShapeToModifier',
-    value: function addShapeToModifier(shapeData) {
-      shapeData.pathsData = [];
-    }
-
-    /**
-     * calculate shape edges
-     * @param {*} s trim start
-     * @param {*} e trim end
-     * @param {*} shapeLength shape length
-     * @param {*} addedLength added length
-     * @param {*} totalModifierLength total modifier length
-     * @return {*}
-     */
-
-  }, {
-    key: 'calculateShapeEdges',
-    value: function calculateShapeEdges(s, e, shapeLength, addedLength, totalModifierLength) {
-      var segments = [];
-      if (e <= 1) {
-        segments.push({
-          s: s,
-          e: e
-        });
-      } else if (s >= 1) {
-        segments.push({
-          s: s - 1,
-          e: e - 1
-        });
-      } else {
-        segments.push({
-          s: s,
-          e: 1
-        });
-        segments.push({
-          s: 0,
-          e: e - 1
-        });
-      }
-      var shapeSegments = [];
-      var i = void 0;var len = segments.length;var segmentOb = void 0;
-      for (i = 0; i < len; i += 1) {
-        segmentOb = segments[i];
-        if (segmentOb.e * totalModifierLength < addedLength || segmentOb.s * totalModifierLength > addedLength + shapeLength) {
-          // do nothing
-        } else {
-          var shapeS = void 0;var shapeE = void 0;
-          if (segmentOb.s * totalModifierLength <= addedLength) {
-            shapeS = 0;
-          } else {
-            shapeS = (segmentOb.s * totalModifierLength - addedLength) / shapeLength;
-          }
-          if (segmentOb.e * totalModifierLength >= addedLength + shapeLength) {
-            shapeE = 1;
-          } else {
-            shapeE = (segmentOb.e * totalModifierLength - addedLength) / shapeLength;
-          }
-          shapeSegments.push([shapeS, shapeE]);
-        }
-      }
-      if (!shapeSegments.length) {
-        shapeSegments.push([0, 0]);
-      }
-      return shapeSegments;
-    }
-
-    /**
-     * release paths data
-     * @param {*} pathsData paths data
-     * @return {*}
-     */
-
-  }, {
-    key: 'releasePathsData',
-    value: function releasePathsData(pathsData) {
-      var len = pathsData.length;
-      for (var i = 0; i < len; i += 1) {
-        SegmentsLengthPool.release(pathsData[i]);
-      }
-      pathsData.length = 0;
-      return pathsData;
-    }
-
-    /**
-     * a
-     * @param {*} _isFirstFrame a
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes(_isFirstFrame) {
-      var s = void 0;var e = void 0;
-      if (this._mdf || _isFirstFrame) {
-        var o = this.o.v % 360 / 360;
-        if (o < 0) {
-          o += 1;
-        }
-        s = (this.s.v > 1 ? 1 : this.s.v < 0 ? 0 : this.s.v) + o;
-        e = (this.e.v > 1 ? 1 : this.e.v < 0 ? 0 : this.e.v) + o;
-        if (s === e) {
-          // do nothing
-        }
-        if (s > e) {
-          var _s = s;
-          s = e;
-          e = _s;
-        }
-        s = Math.round(s * 10000) * 0.0001;
-        e = Math.round(e * 10000) * 0.0001;
-        this.sValue = s;
-        this.eValue = e;
-      } else {
-        s = this.sValue;
-        e = this.eValue;
-      }
-      var shapePaths = void 0;
-      var i = void 0;var len = this.shapes.length;var j = void 0;var jLen = void 0;
-      var pathsData = void 0;var pathData = void 0;var totalShapeLength = void 0;var totalModifierLength = 0;
-
-      if (e === s) {
         for (i = 0; i < len; i += 1) {
-          this.shapes[i].localShapeCollection.releaseShapes();
-          this.shapes[i].shape._mdf = true;
-          this.shapes[i].shape.paths = this.shapes[i].localShapeCollection;
-          if (this._mdf) {
-            this.shapes[i].pathsData.length = 0;
-          }
-        }
-      } else if (!(e === 1 && s === 0 || e === 0 && s === 1)) {
-        var segments = [];var shapeData = void 0;var localShapeCollection = void 0;
-        for (i = 0; i < len; i += 1) {
-          shapeData = this.shapes[i];
-          // if shape hasn't changed and trim properties haven't changed, cached previous path can be used
-          if (!shapeData.shape._mdf && !this._mdf && !_isFirstFrame && this.m !== 2) {
-            shapeData.shape.paths = shapeData.localShapeCollection;
-          } else {
-            shapePaths = shapeData.shape.paths;
-            jLen = shapePaths._length;
-            totalShapeLength = 0;
-            if (!shapeData.shape._mdf && shapeData.pathsData.length) {
-              totalShapeLength = shapeData.totalShapeLength;
+          segmentOb = segments[i];
+
+          if (segmentOb.e * totalModifierLength < addedLength || segmentOb.s * totalModifierLength > addedLength + shapeLength) ; else {
+            var shapeS = void 0;
+            var shapeE = void 0;
+
+            if (segmentOb.s * totalModifierLength <= addedLength) {
+              shapeS = 0;
             } else {
-              pathsData = this.releasePathsData(shapeData.pathsData);
-              for (j = 0; j < jLen; j += 1) {
-                pathData = bez.getSegmentsLength(shapePaths.shapes[j]);
-                pathsData.push(pathData);
-                totalShapeLength += pathData.totalLength;
-              }
-              shapeData.totalShapeLength = totalShapeLength;
-              shapeData.pathsData = pathsData;
+              shapeS = (segmentOb.s * totalModifierLength - addedLength) / shapeLength;
             }
 
-            totalModifierLength += totalShapeLength;
-            shapeData.shape._mdf = true;
+            if (segmentOb.e * totalModifierLength >= addedLength + shapeLength) {
+              shapeE = 1;
+            } else {
+              shapeE = (segmentOb.e * totalModifierLength - addedLength) / shapeLength;
+            }
+
+            shapeSegments.push([shapeS, shapeE]);
           }
         }
-        var shapeS = s;var shapeE = e;var addedLength = 0;var edges = void 0;
-        for (i = len - 1; i >= 0; i -= 1) {
-          shapeData = this.shapes[i];
-          if (shapeData.shape._mdf) {
-            localShapeCollection = shapeData.localShapeCollection;
-            localShapeCollection.releaseShapes();
-            // if m === 2 means paths are trimmed individually so edges need to be found for this specific shape relative to whoel group
-            if (this.m === 2 && len > 1) {
-              edges = this.calculateShapeEdges(s, e, shapeData.totalShapeLength, addedLength, totalModifierLength);
-              addedLength += shapeData.totalShapeLength;
-            } else {
-              edges = [[shapeS, shapeE]];
+
+        if (!shapeSegments.length) {
+          shapeSegments.push([0, 0]);
+        }
+
+        return shapeSegments;
+      }
+      /**
+       * release paths data
+       * @param {*} pathsData paths data
+       * @return {*}
+       */
+
+    }, {
+      key: "releasePathsData",
+      value: function releasePathsData(pathsData) {
+        var len = pathsData.length;
+
+        for (var i = 0; i < len; i += 1) {
+          SegmentsLengthPool.release(pathsData[i]);
+        }
+
+        pathsData.length = 0;
+        return pathsData;
+      }
+      /**
+       * a
+       * @param {*} _isFirstFrame a
+       */
+
+    }, {
+      key: "processShapes",
+      value: function processShapes(_isFirstFrame) {
+        var s;
+        var e;
+
+        if (this._mdf || _isFirstFrame) {
+          var o = this.o.v % 360 / 360;
+
+          if (o < 0) {
+            o += 1;
+          }
+
+          s = (this.s.v > 1 ? 1 : this.s.v < 0 ? 0 : this.s.v) + o;
+          e = (this.e.v > 1 ? 1 : this.e.v < 0 ? 0 : this.e.v) + o;
+
+          if (s > e) {
+            var _s = s;
+            s = e;
+            e = _s;
+          }
+
+          s = Math.round(s * 10000) * 0.0001;
+          e = Math.round(e * 10000) * 0.0001;
+          this.sValue = s;
+          this.eValue = e;
+        } else {
+          s = this.sValue;
+          e = this.eValue;
+        }
+
+        var shapePaths;
+        var i;
+        var len = this.shapes.length;
+        var j;
+        var jLen;
+        var pathsData;
+        var pathData;
+        var totalShapeLength;
+        var totalModifierLength = 0;
+
+        if (e === s) {
+          for (i = 0; i < len; i += 1) {
+            this.shapes[i].localShapeCollection.releaseShapes();
+            this.shapes[i].shape._mdf = true;
+            this.shapes[i].shape.paths = this.shapes[i].localShapeCollection;
+
+            if (this._mdf) {
+              this.shapes[i].pathsData.length = 0;
             }
-            jLen = edges.length;
-            for (j = 0; j < jLen; j += 1) {
-              shapeS = edges[j][0];
-              shapeE = edges[j][1];
-              segments.length = 0;
-              if (shapeE <= 1) {
-                segments.push({
-                  s: shapeData.totalShapeLength * shapeS,
-                  e: shapeData.totalShapeLength * shapeE
-                });
-              } else if (shapeS >= 1) {
-                segments.push({
-                  s: shapeData.totalShapeLength * (shapeS - 1),
-                  e: shapeData.totalShapeLength * (shapeE - 1)
-                });
+          }
+        } else if (!(e === 1 && s === 0 || e === 0 && s === 1)) {
+          var segments = [];
+          var shapeData;
+          var localShapeCollection;
+
+          for (i = 0; i < len; i += 1) {
+            shapeData = this.shapes[i]; // if shape hasn't changed and trim properties haven't changed, cached previous path can be used
+
+            if (!shapeData.shape._mdf && !this._mdf && !_isFirstFrame && this.m !== 2) {
+              shapeData.shape.paths = shapeData.localShapeCollection;
+            } else {
+              shapePaths = shapeData.shape.paths;
+              jLen = shapePaths._length;
+              totalShapeLength = 0;
+
+              if (!shapeData.shape._mdf && shapeData.pathsData.length) {
+                totalShapeLength = shapeData.totalShapeLength;
               } else {
-                segments.push({
-                  s: shapeData.totalShapeLength * shapeS,
-                  e: shapeData.totalShapeLength
-                });
-                segments.push({
-                  s: 0,
-                  e: shapeData.totalShapeLength * (shapeE - 1)
-                });
-              }
-              var newShapesData = this.addShapes(shapeData, segments[0]);
-              if (segments[0].s !== segments[0].e) {
-                if (segments.length > 1) {
-                  var lastShapeInCollection = shapeData.shape.paths.shapes[shapeData.shape.paths._length - 1];
-                  if (lastShapeInCollection.c) {
-                    var lastShape = newShapesData.pop();
-                    this.addPaths(newShapesData, localShapeCollection);
-                    newShapesData = this.addShapes(shapeData, segments[1], lastShape);
-                  } else {
-                    this.addPaths(newShapesData, localShapeCollection);
-                    newShapesData = this.addShapes(shapeData, segments[1]);
-                  }
+                pathsData = this.releasePathsData(shapeData.pathsData);
+
+                for (j = 0; j < jLen; j += 1) {
+                  pathData = bez.getSegmentsLength(shapePaths.shapes[j]);
+                  pathsData.push(pathData);
+                  totalShapeLength += pathData.totalLength;
                 }
-                this.addPaths(newShapesData, localShapeCollection);
+
+                shapeData.totalShapeLength = totalShapeLength;
+                shapeData.pathsData = pathsData;
               }
+
+              totalModifierLength += totalShapeLength;
+              shapeData.shape._mdf = true;
             }
-            shapeData.shape.paths = localShapeCollection;
+          }
+
+          var shapeS = s;
+          var shapeE = e;
+          var addedLength = 0;
+          var edges;
+
+          for (i = len - 1; i >= 0; i -= 1) {
+            shapeData = this.shapes[i];
+
+            if (shapeData.shape._mdf) {
+              localShapeCollection = shapeData.localShapeCollection;
+              localShapeCollection.releaseShapes(); // if m === 2 means paths are trimmed individually so edges need to be found for this specific shape relative to whoel group
+
+              if (this.m === 2 && len > 1) {
+                edges = this.calculateShapeEdges(s, e, shapeData.totalShapeLength, addedLength, totalModifierLength);
+                addedLength += shapeData.totalShapeLength;
+              } else {
+                edges = [[shapeS, shapeE]];
+              }
+
+              jLen = edges.length;
+
+              for (j = 0; j < jLen; j += 1) {
+                shapeS = edges[j][0];
+                shapeE = edges[j][1];
+                segments.length = 0;
+
+                if (shapeE <= 1) {
+                  segments.push({
+                    s: shapeData.totalShapeLength * shapeS,
+                    e: shapeData.totalShapeLength * shapeE
+                  });
+                } else if (shapeS >= 1) {
+                  segments.push({
+                    s: shapeData.totalShapeLength * (shapeS - 1),
+                    e: shapeData.totalShapeLength * (shapeE - 1)
+                  });
+                } else {
+                  segments.push({
+                    s: shapeData.totalShapeLength * shapeS,
+                    e: shapeData.totalShapeLength
+                  });
+                  segments.push({
+                    s: 0,
+                    e: shapeData.totalShapeLength * (shapeE - 1)
+                  });
+                }
+
+                var newShapesData = this.addShapes(shapeData, segments[0]);
+
+                if (segments[0].s !== segments[0].e) {
+                  if (segments.length > 1) {
+                    var lastShapeInCollection = shapeData.shape.paths.shapes[shapeData.shape.paths._length - 1];
+
+                    if (lastShapeInCollection.c) {
+                      var lastShape = newShapesData.pop();
+                      this.addPaths(newShapesData, localShapeCollection);
+                      newShapesData = this.addShapes(shapeData, segments[1], lastShape);
+                    } else {
+                      this.addPaths(newShapesData, localShapeCollection);
+                      newShapesData = this.addShapes(shapeData, segments[1]);
+                    }
+                  }
+
+                  this.addPaths(newShapesData, localShapeCollection);
+                }
+              }
+
+              shapeData.shape.paths = localShapeCollection;
+            }
+          }
+        } else if (this._mdf) {
+          for (i = 0; i < len; i += 1) {
+            // Releasign Trim Cached paths data when no trim applied in case shapes are modified inbetween.
+            // Don't remove this even if it's losing cached info.
+            this.shapes[i].pathsData.length = 0;
+            this.shapes[i].shape._mdf = true;
           }
         }
-      } else if (this._mdf) {
-        for (i = 0; i < len; i += 1) {
-          // Releasign Trim Cached paths data when no trim applied in case shapes are modified inbetween.
-          // Don't remove this even if it's losing cached info.
-          this.shapes[i].pathsData.length = 0;
-          this.shapes[i].shape._mdf = true;
+      }
+      /**
+       * add paths
+       * @param {*} newPaths new paths
+       * @param {*} localShapeCollection local shape collection
+       */
+
+    }, {
+      key: "addPaths",
+      value: function addPaths(newPaths, localShapeCollection) {
+        var len = newPaths.length;
+
+        for (var i = 0; i < len; i += 1) {
+          localShapeCollection.addShape(newPaths[i]);
         }
       }
-    }
+      /**
+       * add segment
+       * @param {*} pt1 point1
+       * @param {*} pt2 point2
+       * @param {*} pt3 point3
+       * @param {*} pt4 point4
+       * @param {*} shapePath target shape path
+       * @param {*} pos data index
+       * @param {*} newShape is new shape ?
+       */
 
-    /**
-     * add paths
-     * @param {*} newPaths new paths
-     * @param {*} localShapeCollection local shape collection
-     */
+    }, {
+      key: "addSegment",
+      value: function addSegment(pt1, pt2, pt3, pt4, shapePath, pos, newShape) {
+        shapePath.setXYAt(pt2[0], pt2[1], 'o', pos);
+        shapePath.setXYAt(pt3[0], pt3[1], 'i', pos + 1);
 
-  }, {
-    key: 'addPaths',
-    value: function addPaths(newPaths, localShapeCollection) {
-      var len = newPaths.length;
-      for (var i = 0; i < len; i += 1) {
-        localShapeCollection.addShape(newPaths[i]);
+        if (newShape) {
+          shapePath.setXYAt(pt1[0], pt1[1], 'v', pos);
+        }
+
+        shapePath.setXYAt(pt4[0], pt4[1], 'v', pos + 1);
       }
-    }
+      /**
+       * add segment from points array
+       * @param {*} points points
+       * @param {*} shapePath target shape path
+       * @param {*} pos data index
+       * @param {*} newShape is new shape ?
+       */
 
-    /**
-     * add segment
-     * @param {*} pt1 point1
-     * @param {*} pt2 point2
-     * @param {*} pt3 point3
-     * @param {*} pt4 point4
-     * @param {*} shapePath target shape path
-     * @param {*} pos data index
-     * @param {*} newShape is new shape ?
-     */
+    }, {
+      key: "addSegmentFromArray",
+      value: function addSegmentFromArray(points, shapePath, pos, newShape) {
+        shapePath.setXYAt(points[1], points[5], 'o', pos);
+        shapePath.setXYAt(points[2], points[6], 'i', pos + 1);
 
-  }, {
-    key: 'addSegment',
-    value: function addSegment(pt1, pt2, pt3, pt4, shapePath, pos, newShape) {
-      shapePath.setXYAt(pt2[0], pt2[1], 'o', pos);
-      shapePath.setXYAt(pt3[0], pt3[1], 'i', pos + 1);
-      if (newShape) {
-        shapePath.setXYAt(pt1[0], pt1[1], 'v', pos);
+        if (newShape) {
+          shapePath.setXYAt(points[0], points[4], 'v', pos);
+        }
+
+        shapePath.setXYAt(points[3], points[7], 'v', pos + 1);
       }
-      shapePath.setXYAt(pt4[0], pt4[1], 'v', pos + 1);
-    }
+      /**
+       * add shapes to this modifier
+       * @param {*} shapeData shape data
+       * @param {*} shapeSegment shape segment
+       * @param {*} shapePath shape path
+       * @return {*}
+       */
 
-    /**
-     * add segment from points array
-     * @param {*} points points
-     * @param {*} shapePath target shape path
-     * @param {*} pos data index
-     * @param {*} newShape is new shape ?
-     */
+    }, {
+      key: "addShapes",
+      value: function addShapes(shapeData, shapeSegment, shapePath) {
+        var pathsData = shapeData.pathsData;
+        var shapePaths = shapeData.shape.paths.shapes;
+        var i;
+        var len = shapeData.shape.paths._length;
+        var j;
+        var jLen;
+        var addedLength = 0;
+        var currentLengthData;
+        var segmentCount;
+        var lengths;
+        var segment;
+        var shapes = [];
+        var initPos;
+        var newShape = true;
 
-  }, {
-    key: 'addSegmentFromArray',
-    value: function addSegmentFromArray(points, shapePath, pos, newShape) {
-      shapePath.setXYAt(points[1], points[5], 'o', pos);
-      shapePath.setXYAt(points[2], points[6], 'i', pos + 1);
-      if (newShape) {
-        shapePath.setXYAt(points[0], points[4], 'v', pos);
-      }
-      shapePath.setXYAt(points[3], points[7], 'v', pos + 1);
-    }
+        if (!shapePath) {
+          shapePath = ShapePool.newElement();
+          segmentCount = 0;
+          initPos = 0;
+        } else {
+          segmentCount = shapePath._length;
+          initPos = shapePath._length;
+        }
 
-    /**
-     * add shapes to this modifier
-     * @param {*} shapeData shape data
-     * @param {*} shapeSegment shape segment
-     * @param {*} shapePath shape path
-     * @return {*}
-     */
+        shapes.push(shapePath);
 
-  }, {
-    key: 'addShapes',
-    value: function addShapes(shapeData, shapeSegment, shapePath) {
-      var pathsData = shapeData.pathsData;
-      var shapePaths = shapeData.shape.paths.shapes;
-      var i = void 0;var len = shapeData.shape.paths._length;var j = void 0;var jLen = void 0;
-      var addedLength = 0;
-      var currentLengthData = void 0;var segmentCount = void 0;
-      var lengths = void 0;
-      var segment = void 0;
-      var shapes = [];
-      var initPos = void 0;
-      var newShape = true;
-      if (!shapePath) {
-        shapePath = ShapePool.newElement();
-        segmentCount = 0;
-        initPos = 0;
-      } else {
-        segmentCount = shapePath._length;
-        initPos = shapePath._length;
-      }
-      shapes.push(shapePath);
-      for (i = 0; i < len; i += 1) {
-        lengths = pathsData[i].lengths;
-        shapePath.c = shapePaths[i].c;
-        jLen = shapePaths[i].c ? lengths.length : lengths.length + 1;
-        for (j = 1; j < jLen; j += 1) {
-          currentLengthData = lengths[j - 1];
-          if (addedLength + currentLengthData.addedLength < shapeSegment.s) {
-            addedLength += currentLengthData.addedLength;
-            shapePath.c = false;
-          } else if (addedLength > shapeSegment.e) {
-            shapePath.c = false;
-            break;
-          } else {
-            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + currentLengthData.addedLength) {
-              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[j], shapePaths[i].v[j], shapePath, segmentCount, newShape);
-              newShape = false;
+        for (i = 0; i < len; i += 1) {
+          lengths = pathsData[i].lengths;
+          shapePath.c = shapePaths[i].c;
+          jLen = shapePaths[i].c ? lengths.length : lengths.length + 1;
+
+          for (j = 1; j < jLen; j += 1) {
+            currentLengthData = lengths[j - 1];
+
+            if (addedLength + currentLengthData.addedLength < shapeSegment.s) {
+              addedLength += currentLengthData.addedLength;
+              shapePath.c = false;
+            } else if (addedLength > shapeSegment.e) {
+              shapePath.c = false;
+              break;
             } else {
-              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[j], shapePaths[i].o[j - 1], shapePaths[i].i[j], (shapeSegment.s - addedLength) / currentLengthData.addedLength, (shapeSegment.e - addedLength) / currentLengthData.addedLength, lengths[j - 1]);
-              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
-              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
-              newShape = false;
+              if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + currentLengthData.addedLength) {
+                this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[j], shapePaths[i].v[j], shapePath, segmentCount, newShape);
+                newShape = false;
+              } else {
+                segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[j], shapePaths[i].o[j - 1], shapePaths[i].i[j], (shapeSegment.s - addedLength) / currentLengthData.addedLength, (shapeSegment.e - addedLength) / currentLengthData.addedLength, lengths[j - 1]);
+                this.addSegmentFromArray(segment, shapePath, segmentCount, newShape); // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
+
+                newShape = false;
+                shapePath.c = false;
+              }
+
+              addedLength += currentLengthData.addedLength;
+              segmentCount += 1;
+            }
+          }
+
+          if (shapePaths[i].c && lengths.length) {
+            currentLengthData = lengths[j - 1];
+
+            if (addedLength <= shapeSegment.e) {
+              var segmentLength = lengths[j - 1].addedLength;
+
+              if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + segmentLength) {
+                this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[0], shapePaths[i].v[0], shapePath, segmentCount, newShape);
+                newShape = false;
+              } else {
+                segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[0], shapePaths[i].o[j - 1], shapePaths[i].i[0], (shapeSegment.s - addedLength) / segmentLength, (shapeSegment.e - addedLength) / segmentLength, lengths[j - 1]);
+                this.addSegmentFromArray(segment, shapePath, segmentCount, newShape); // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
+
+                newShape = false;
+                shapePath.c = false;
+              }
+            } else {
               shapePath.c = false;
             }
+
             addedLength += currentLengthData.addedLength;
             segmentCount += 1;
           }
+
+          if (shapePath._length) {
+            shapePath.setXYAt(shapePath.v[initPos][0], shapePath.v[initPos][1], 'i', initPos);
+            shapePath.setXYAt(shapePath.v[shapePath._length - 1][0], shapePath.v[shapePath._length - 1][1], 'o', shapePath._length - 1);
+          }
+
+          if (addedLength > shapeSegment.e) {
+            break;
+          }
+
+          if (i < len - 1) {
+            shapePath = ShapePool.newElement();
+            newShape = true;
+            shapes.push(shapePath);
+            segmentCount = 0;
+          }
         }
-        if (shapePaths[i].c && lengths.length) {
-          currentLengthData = lengths[j - 1];
-          if (addedLength <= shapeSegment.e) {
-            var segmentLength = lengths[j - 1].addedLength;
-            if (shapeSegment.s <= addedLength && shapeSegment.e >= addedLength + segmentLength) {
-              this.addSegment(shapePaths[i].v[j - 1], shapePaths[i].o[j - 1], shapePaths[i].i[0], shapePaths[i].v[0], shapePath, segmentCount, newShape);
-              newShape = false;
+
+        return shapes;
+      }
+    }]);
+
+    return TrimModifier;
+  }(ShapeModifier);
+
+  var roundCorner$1 = 0.5519;
+  /**
+   * a
+   */
+
+  var RoundCornersModifier = /*#__PURE__*/function (_ShapeModifier) {
+    _inherits(RoundCornersModifier, _ShapeModifier);
+
+    var _super = _createSuper(RoundCornersModifier);
+
+    function RoundCornersModifier() {
+      _classCallCheck(this, RoundCornersModifier);
+
+      return _super.apply(this, arguments);
+    }
+
+    _createClass(RoundCornersModifier, [{
+      key: "initModifierProperties",
+
+      /**
+       * init modifier properties
+       * @param {*} elem element node
+       * @param {*} data round corners value property data
+       */
+      value: function initModifierProperties(elem, data) {
+        this.getValue = this.processKeys;
+        this.rd = PropertyFactory.getProp(elem, data.r, 0, null, this);
+        this._isAnimated = !!this.rd.effectsSequence.length;
+      }
+      /**
+       * process path
+       * @param {*} path path
+       * @param {*} round round
+       * @return {*}
+       */
+
+    }, {
+      key: "processPath",
+      value: function processPath(path, round) {
+        var clonedPath = ShapePool.newElement();
+        clonedPath.c = path.c;
+        var i;
+        var len = path._length;
+        var currentV;
+        var currentI;
+        var currentO;
+        var closerV; // let newV;
+        // let newO;
+        // let newI;
+
+        var distance;
+        var newPosPerc;
+        var index = 0;
+        var vX;
+        var vY;
+        var oX;
+        var oY;
+        var iX;
+        var iY;
+
+        for (i = 0; i < len; i += 1) {
+          currentV = path.v[i];
+          currentO = path.o[i];
+          currentI = path.i[i];
+
+          if (currentV[0] === currentO[0] && currentV[1] === currentO[1] && currentV[0] === currentI[0] && currentV[1] === currentI[1]) {
+            if ((i === 0 || i === len - 1) && !path.c) {
+              clonedPath.setTripleAt(currentV[0], currentV[1], currentO[0], currentO[1], currentI[0], currentI[1], index);
+              /* clonedPath.v[index] = currentV;
+                    clonedPath.o[index] = currentO;
+                    clonedPath.i[index] = currentI;*/
+
+              index += 1;
             } else {
-              segment = bez.getNewSegment(shapePaths[i].v[j - 1], shapePaths[i].v[0], shapePaths[i].o[j - 1], shapePaths[i].i[0], (shapeSegment.s - addedLength) / segmentLength, (shapeSegment.e - addedLength) / segmentLength, lengths[j - 1]);
-              this.addSegmentFromArray(segment, shapePath, segmentCount, newShape);
-              // this.addSegment(segment.pt1, segment.pt3, segment.pt4, segment.pt2, shapePath, segmentCount, newShape);
-              newShape = false;
-              shapePath.c = false;
+              if (i === 0) {
+                closerV = path.v[len - 1];
+              } else {
+                closerV = path.v[i - 1];
+              }
+
+              distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
+              newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
+              vX = iX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
+              vY = iY = currentV[1] - (currentV[1] - closerV[1]) * newPosPerc;
+              oX = vX - (vX - currentV[0]) * roundCorner$1;
+              oY = vY - (vY - currentV[1]) * roundCorner$1;
+              clonedPath.setTripleAt(vX, vY, oX, oY, iX, iY, index);
+              index += 1;
+
+              if (i === len - 1) {
+                closerV = path.v[0];
+              } else {
+                closerV = path.v[i + 1];
+              }
+
+              distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
+              newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
+              vX = oX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
+              vY = oY = currentV[1] + (closerV[1] - currentV[1]) * newPosPerc;
+              iX = vX - (vX - currentV[0]) * roundCorner$1;
+              iY = vY - (vY - currentV[1]) * roundCorner$1;
+              clonedPath.setTripleAt(vX, vY, oX, oY, iX, iY, index);
+              index += 1;
             }
           } else {
-            shapePath.c = false;
+            clonedPath.setTripleAt(path.v[i][0], path.v[i][1], path.o[i][0], path.o[i][1], path.i[i][0], path.i[i][1], index);
+            index += 1;
           }
-          addedLength += currentLengthData.addedLength;
-          segmentCount += 1;
         }
-        if (shapePath._length) {
-          shapePath.setXYAt(shapePath.v[initPos][0], shapePath.v[initPos][1], 'i', initPos);
-          shapePath.setXYAt(shapePath.v[shapePath._length - 1][0], shapePath.v[shapePath._length - 1][1], 'o', shapePath._length - 1);
+
+        return clonedPath;
+      }
+      /**
+       * process shapes
+       * @param {*} _isFirstFrame is first frame
+       */
+
+    }, {
+      key: "processShapes",
+      value: function processShapes(_isFirstFrame) {
+        var shapePaths;
+        var i;
+        var len = this.shapes.length;
+        var j;
+        var jLen;
+        var rd = this.rd.v;
+
+        if (rd !== 0) {
+          var shapeData; // let newPaths;
+
+          var localShapeCollection;
+
+          for (i = 0; i < len; i += 1) {
+            shapeData = this.shapes[i]; // newPaths = shapeData.shape.paths;
+
+            localShapeCollection = shapeData.localShapeCollection;
+
+            if (!(!shapeData.shape._mdf && !this._mdf && !_isFirstFrame)) {
+              localShapeCollection.releaseShapes();
+              shapeData.shape._mdf = true;
+              shapePaths = shapeData.shape.paths.shapes;
+              jLen = shapeData.shape.paths._length;
+
+              for (j = 0; j < jLen; j += 1) {
+                localShapeCollection.addShape(this.processPath(shapePaths[j], rd));
+              }
+            }
+
+            shapeData.shape.paths = shapeData.localShapeCollection;
+          }
         }
-        if (addedLength > shapeSegment.e) {
-          break;
-        }
-        if (i < len - 1) {
-          shapePath = ShapePool.newElement();
-          newShape = true;
-          shapes.push(shapePath);
-          segmentCount = 0;
+
+        if (!this.dynamicProperties.length) {
+          this._mdf = false;
         }
       }
-      return shapes;
-    }
-  }]);
-  return TrimModifier;
-}(ShapeModifier);
+    }]);
 
-var roundCorner$1 = 0.5519;
+    return RoundCornersModifier;
+  }(ShapeModifier);
 
-/**
- * a
- */
+  /**
+   * a
+   */
 
-var RoundCornersModifier = function (_ShapeModifier) {
-  inherits(RoundCornersModifier, _ShapeModifier);
+  var RepeaterModifier = /*#__PURE__*/function (_ShapeModifier) {
+    _inherits(RepeaterModifier, _ShapeModifier);
 
-  function RoundCornersModifier() {
-    classCallCheck(this, RoundCornersModifier);
-    return possibleConstructorReturn(this, (RoundCornersModifier.__proto__ || Object.getPrototypeOf(RoundCornersModifier)).apply(this, arguments));
-  }
+    var _super = _createSuper(RepeaterModifier);
 
-  createClass(RoundCornersModifier, [{
-    key: 'initModifierProperties',
+    function RepeaterModifier() {
+      _classCallCheck(this, RepeaterModifier);
 
-    /**
-     * init modifier properties
-     * @param {*} elem element node
-     * @param {*} data round corners value property data
-     */
-    value: function initModifierProperties(elem, data) {
-      this.getValue = this.processKeys;
-      this.rd = PropertyFactory.getProp(elem, data.r, 0, null, this);
-      this._isAnimated = !!this.rd.effectsSequence.length;
+      return _super.apply(this, arguments);
     }
 
-    /**
-     * process path
-     * @param {*} path path
-     * @param {*} round round
-     * @return {*}
-     */
+    _createClass(RepeaterModifier, [{
+      key: "initModifierProperties",
 
-  }, {
-    key: 'processPath',
-    value: function processPath(path, round) {
-      var clonedPath = ShapePool.newElement();
-      clonedPath.c = path.c;
-      var i = void 0;var len = path._length;
-      var currentV = void 0;
-      var currentI = void 0;
-      var currentO = void 0;
-      var closerV = void 0;
-      // let newV;
-      // let newO;
-      // let newI;
-      var distance = void 0;
-      var newPosPerc = void 0;
-      var index = 0;
-      var vX = void 0;var vY = void 0;var oX = void 0;var oY = void 0;var iX = void 0;var iY = void 0;
-      for (i = 0; i < len; i += 1) {
-        currentV = path.v[i];
-        currentO = path.o[i];
-        currentI = path.i[i];
-        if (currentV[0] === currentO[0] && currentV[1] === currentO[1] && currentV[0] === currentI[0] && currentV[1] === currentI[1]) {
-          if ((i === 0 || i === len - 1) && !path.c) {
-            clonedPath.setTripleAt(currentV[0], currentV[1], currentO[0], currentO[1], currentI[0], currentI[1], index);
-            /* clonedPath.v[index] = currentV;
-                  clonedPath.o[index] = currentO;
-                  clonedPath.i[index] = currentI;*/
-            index += 1;
-          } else {
-            if (i === 0) {
-              closerV = path.v[len - 1];
-            } else {
-              closerV = path.v[i - 1];
-            }
-            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
-            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
-            vX = iX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
-            vY = iY = currentV[1] - (currentV[1] - closerV[1]) * newPosPerc;
-            oX = vX - (vX - currentV[0]) * roundCorner$1;
-            oY = vY - (vY - currentV[1]) * roundCorner$1;
-            clonedPath.setTripleAt(vX, vY, oX, oY, iX, iY, index);
-            index += 1;
+      /**
+       * a
+       * @param {*} elem a
+       * @param {*} data a
+       */
+      value: function initModifierProperties(elem, data) {
+        this.getValue = this.processKeys;
+        this.c = PropertyFactory.getProp(elem, data.c, 0, null, this);
+        this.o = PropertyFactory.getProp(elem, data.o, 0, null, this);
+        this.tr = getTransformProperty(elem, data.tr, this);
+        this.so = PropertyFactory.getProp(elem, data.tr.so, 0, 0.01, this);
+        this.eo = PropertyFactory.getProp(elem, data.tr.eo, 0, 0.01, this);
+        this.data = data;
 
-            if (i === len - 1) {
-              closerV = path.v[0];
-            } else {
-              closerV = path.v[i + 1];
+        if (!this.dynamicProperties.length) {
+          this.getValue(true);
+        }
+
+        this._isAnimated = !!this.dynamicProperties.length;
+        this.pMatrix = new Matrix();
+        this.rMatrix = new Matrix();
+        this.sMatrix = new Matrix();
+        this.tMatrix = new Matrix();
+        this.matrix = new Matrix();
+      }
+      /**
+       * a
+       * @param {*} pMatrix a
+       * @param {*} rMatrix a
+       * @param {*} sMatrix a
+       * @param {*} transform a
+       * @param {*} perc a
+       * @param {*} inv a
+       */
+
+    }, {
+      key: "applyTransforms",
+      value: function applyTransforms(pMatrix, rMatrix, sMatrix, transform, perc, inv) {
+        var dir = inv ? -1 : 1;
+        var scaleX = transform.s.v[0] + (1 - transform.s.v[0]) * (1 - perc);
+        var scaleY = transform.s.v[1] + (1 - transform.s.v[1]) * (1 - perc);
+        pMatrix.translate(transform.p.v[0] * dir * perc, transform.p.v[1] * dir * perc, transform.p.v[2]);
+        rMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
+        rMatrix.rotate(-transform.r.v * dir * perc);
+        rMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
+        sMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
+        sMatrix.scale(inv ? 1 / scaleX : scaleX, inv ? 1 / scaleY : scaleY);
+        sMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
+      }
+      /**
+       * a
+       * @param {*} elem a
+       * @param {*} arr a
+       * @param {*} pos a
+       * @param {*} elemsData a
+       */
+
+    }, {
+      key: "init",
+      value: function init(elem, arr, pos, elemsData) {
+        this.elem = elem;
+        this.arr = arr;
+        this.pos = pos;
+        this.elemsData = elemsData;
+        this._currentCopies = 0;
+        this._elements = [];
+        this._groups = [];
+        this.frameId = -1;
+        this.initDynamicPropertyContainer(elem);
+        this.initModifierProperties(elem, arr[pos]);
+
+        while (pos > 0) {
+          pos -= 1; // this._elements.unshift(arr.splice(pos,1)[0]);
+
+          this._elements.unshift(arr[pos]);
+        }
+
+        if (this.dynamicProperties.length) {
+          this.k = true;
+        } else {
+          this.getValue(true);
+        }
+      }
+      /**
+       * a
+       * @param {*} elements a
+       */
+
+    }, {
+      key: "resetElements",
+      value: function resetElements(elements) {
+        var len = elements.length;
+
+        for (var i = 0; i < len; i += 1) {
+          elements[i]._processed = false;
+
+          if (elements[i].ty === 'gr') {
+            this.resetElements(elements[i].it);
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} elements a
+       * @return {*}
+       */
+
+    }, {
+      key: "cloneElements",
+      value: function cloneElements(elements) {
+        var newElements = JSON.parse(JSON.stringify(elements));
+        this.resetElements(newElements);
+        return newElements;
+      }
+      /**
+       * a
+       * @param {*} elements a
+       * @param {*} renderFlag a
+       */
+
+    }, {
+      key: "changeGroupRender",
+      value: function changeGroupRender(elements, renderFlag) {
+        var len = elements.length;
+
+        for (var i = 0; i < len; i += 1) {
+          elements[i]._render = renderFlag;
+
+          if (elements[i].ty === 'gr') {
+            this.changeGroupRender(elements[i].it, renderFlag);
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} _isFirstFrame a
+       */
+
+    }, {
+      key: "processShapes",
+      value: function processShapes(_isFirstFrame) {
+        // let items, itemsTransform, i, dir, cont;
+        if (this._mdf || _isFirstFrame) {
+          var copies = Math.ceil(this.c.v);
+
+          if (this._groups.length < copies) {
+            while (this._groups.length < copies) {
+              var group = {
+                it: this.cloneElements(this._elements),
+                ty: 'gr'
+              };
+              group.it.push({
+                'a': {
+                  'a': 0,
+                  'ix': 1,
+                  'k': [0, 0]
+                },
+                'nm': 'Transform',
+                'o': {
+                  'a': 0,
+                  'ix': 7,
+                  'k': 100
+                },
+                'p': {
+                  'a': 0,
+                  'ix': 2,
+                  'k': [0, 0]
+                },
+                'r': {
+                  'a': 1,
+                  'ix': 6,
+                  'k': [{
+                    s: 0,
+                    e: 0,
+                    t: 0
+                  }, {
+                    s: 0,
+                    e: 0,
+                    t: 1
+                  }]
+                },
+                's': {
+                  'a': 0,
+                  'ix': 3,
+                  'k': [100, 100]
+                },
+                'sa': {
+                  'a': 0,
+                  'ix': 5,
+                  'k': 0
+                },
+                'sk': {
+                  'a': 0,
+                  'ix': 4,
+                  'k': 0
+                },
+                'ty': 'tr'
+              });
+              this.arr.splice(0, 0, group);
+
+              this._groups.splice(0, 0, group);
+
+              this._currentCopies += 1;
             }
-            distance = Math.sqrt(Math.pow(currentV[0] - closerV[0], 2) + Math.pow(currentV[1] - closerV[1], 2));
-            newPosPerc = distance ? Math.min(distance / 2, round) / distance : 0;
-            vX = oX = currentV[0] + (closerV[0] - currentV[0]) * newPosPerc;
-            vY = oY = currentV[1] + (closerV[1] - currentV[1]) * newPosPerc;
-            iX = vX - (vX - currentV[0]) * roundCorner$1;
-            iY = vY - (vY - currentV[1]) * roundCorner$1;
-            clonedPath.setTripleAt(vX, vY, oX, oY, iX, iY, index);
-            index += 1;
+
+            this.elem.reloadShapes();
+          }
+
+          var cont = 0;
+          var i;
+          var renderFlag;
+
+          for (i = 0; i <= this._groups.length - 1; i += 1) {
+            renderFlag = cont < copies;
+            this._groups[i]._render = renderFlag;
+            this.changeGroupRender(this._groups[i].it, renderFlag);
+            cont += 1;
+          }
+
+          this._currentCopies = copies; // //
+
+          var offset = this.o.v;
+          var offsetModulo = offset % 1;
+          var roundOffset = offset > 0 ? Math.floor(offset) : Math.ceil(offset); // let k;
+          // let tMat = this.tr.v.props;
+
+          var pProps = this.pMatrix.props;
+          var rProps = this.rMatrix.props;
+          var sProps = this.sMatrix.props;
+          this.pMatrix.reset();
+          this.rMatrix.reset();
+          this.sMatrix.reset();
+          this.tMatrix.reset();
+          this.matrix.reset();
+          var iteration = 0;
+
+          if (offset > 0) {
+            while (iteration < roundOffset) {
+              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
+              iteration += 1;
+            }
+
+            if (offsetModulo) {
+              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, offsetModulo, false);
+              iteration += offsetModulo;
+            }
+          } else if (offset < 0) {
+            while (iteration > roundOffset) {
+              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, true);
+              iteration -= 1;
+            }
+
+            if (offsetModulo) {
+              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, -offsetModulo, true);
+              iteration -= offsetModulo;
+            }
+          }
+
+          i = this.data.m === 1 ? 0 : this._currentCopies - 1;
+          var dir = this.data.m === 1 ? 1 : -1;
+          cont = this._currentCopies;
+
+          while (cont) {
+            var items = this.elemsData[i].it;
+            var itemsTransform = items[items.length - 1].transform.mProps.v.props;
+            var jLen = itemsTransform.length;
+            items[items.length - 1].transform.mProps._mdf = true;
+            items[items.length - 1].transform.op._mdf = true;
+            items[items.length - 1].transform.op.v = this.so.v + (this.eo.v - this.so.v) * (i / (this._currentCopies - 1));
+
+            if (iteration !== 0) {
+              if (i !== 0 && dir === 1 || i !== this._currentCopies - 1 && dir === -1) {
+                this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
+              }
+
+              this.matrix.transform(rProps[0], rProps[1], rProps[2], rProps[3], rProps[4], rProps[5], rProps[6], rProps[7], rProps[8], rProps[9], rProps[10], rProps[11], rProps[12], rProps[13], rProps[14], rProps[15]);
+              this.matrix.transform(sProps[0], sProps[1], sProps[2], sProps[3], sProps[4], sProps[5], sProps[6], sProps[7], sProps[8], sProps[9], sProps[10], sProps[11], sProps[12], sProps[13], sProps[14], sProps[15]);
+              this.matrix.transform(pProps[0], pProps[1], pProps[2], pProps[3], pProps[4], pProps[5], pProps[6], pProps[7], pProps[8], pProps[9], pProps[10], pProps[11], pProps[12], pProps[13], pProps[14], pProps[15]);
+
+              for (var j = 0; j < jLen; j += 1) {
+                itemsTransform[j] = this.matrix.props[j];
+              }
+
+              this.matrix.reset();
+            } else {
+              this.matrix.reset();
+
+              for (var _j = 0; _j < jLen; _j += 1) {
+                itemsTransform[_j] = this.matrix.props[_j];
+              }
+            }
+
+            iteration += 1;
+            cont -= 1;
+            i += dir;
           }
         } else {
-          clonedPath.setTripleAt(path.v[i][0], path.v[i][1], path.o[i][0], path.o[i][1], path.i[i][0], path.i[i][1], index);
-          index += 1;
+          var _cont = this._currentCopies;
+          var _i = 0;
+          var _dir = 1;
+
+          while (_cont) {
+            var _items = this.elemsData[_i].it; // const itemsTransform = items[items.length - 1].transform.mProps.v.props;
+
+            _items[_items.length - 1].transform.mProps._mdf = false;
+            _items[_items.length - 1].transform.op._mdf = false;
+            _cont -= 1;
+            _i += _dir;
+          }
         }
       }
-      return clonedPath;
+      /**
+       * a
+       */
+
+    }, {
+      key: "addShape",
+      value: function addShape() {}
+    }]);
+
+    return RepeaterModifier;
+  }(ShapeModifier);
+
+  /**
+   * MouseModifier class
+   */
+
+  var MouseModifier = /*#__PURE__*/function (_ShapeModifier) {
+    _inherits(MouseModifier, _ShapeModifier);
+
+    var _super = _createSuper(MouseModifier);
+
+    function MouseModifier() {
+      _classCallCheck(this, MouseModifier);
+
+      return _super.apply(this, arguments);
     }
 
-    /**
-     * process shapes
-     * @param {*} _isFirstFrame is first frame
-     */
+    _createClass(MouseModifier, [{
+      key: "initModifierProperties",
 
-  }, {
-    key: 'processShapes',
-    value: function processShapes(_isFirstFrame) {
-      var shapePaths = void 0;
-      var i = void 0;var len = this.shapes.length;
-      var j = void 0;var jLen = void 0;
-      var rd = this.rd.v;
+      /**
+       * init modifier properties
+       * @param {*} elem element node
+       * @param {*} data mouse value property data
+       */
+      value: function initModifierProperties(elem, data) {
+        this.getValue = this.processKeys;
+        this.data = data;
+        this.positions = [];
+      }
+      /**
+       * process keys
+       * @param {number} frameNum frameNum
+       * @param {*} forceRender force render
+       */
 
-      if (rd !== 0) {
-        var shapeData = void 0;
-        // let newPaths;
-        var localShapeCollection = void 0;
+    }, {
+      key: "processKeys",
+      value: function processKeys(frameNum, forceRender) {
+        if (frameNum === this.frameId && !forceRender) {
+          return;
+        }
+
+        this._mdf = true;
+      }
+      /**
+       * add shape to modifier
+       */
+
+    }, {
+      key: "addShapeToModifier",
+      value: function addShapeToModifier() {
+        this.positions.push([]);
+      }
+      /**
+       * a
+       * @param {*} path a
+       * @param {*} mouseCoords a
+       * @param {*} positions a
+       * @return {*}
+       */
+
+    }, {
+      key: "processPath",
+      value: function processPath(path, mouseCoords, positions) {
+        var i;
+        var len = path.v.length;
+        var vValues = [];
+        var oValues = [];
+        var iValues = []; // let dist;
+
+        var theta;
+        var x;
+        var y; // // OPTION A
+
         for (i = 0; i < len; i += 1) {
-          shapeData = this.shapes[i];
-          // newPaths = shapeData.shape.paths;
-          localShapeCollection = shapeData.localShapeCollection;
-          if (!(!shapeData.shape._mdf && !this._mdf && !_isFirstFrame)) {
-            localShapeCollection.releaseShapes();
-            shapeData.shape._mdf = true;
-            shapePaths = shapeData.shape.paths.shapes;
-            jLen = shapeData.shape.paths._length;
-            for (j = 0; j < jLen; j += 1) {
-              localShapeCollection.addShape(this.processPath(shapePaths[j], rd));
+          if (!positions.v[i]) {
+            positions.v[i] = [path.v[i][0], path.v[i][1]];
+            positions.o[i] = [path.o[i][0], path.o[i][1]];
+            positions.i[i] = [path.i[i][0], path.i[i][1]];
+            positions.distV[i] = 0;
+            positions.distO[i] = 0;
+            positions.distI[i] = 0;
+          }
+
+          theta = Math.atan2(path.v[i][1] - mouseCoords[1], path.v[i][0] - mouseCoords[0]);
+          x = mouseCoords[0] - positions.v[i][0];
+          y = mouseCoords[1] - positions.v[i][1];
+          var distance = Math.sqrt(x * x + y * y);
+          positions.distV[i] += (distance - positions.distV[i]) * this.data.dc;
+          positions.v[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][0];
+          positions.v[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][1];
+          theta = Math.atan2(path.o[i][1] - mouseCoords[1], path.o[i][0] - mouseCoords[0]);
+          x = mouseCoords[0] - positions.o[i][0];
+          y = mouseCoords[1] - positions.o[i][1];
+          distance = Math.sqrt(x * x + y * y);
+          positions.distO[i] += (distance - positions.distO[i]) * this.data.dc;
+          positions.o[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][0];
+          positions.o[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][1];
+          theta = Math.atan2(path.i[i][1] - mouseCoords[1], path.i[i][0] - mouseCoords[0]);
+          x = mouseCoords[0] - positions.i[i][0];
+          y = mouseCoords[1] - positions.i[i][1];
+          distance = Math.sqrt(x * x + y * y);
+          positions.distI[i] += (distance - positions.distI[i]) * this.data.dc;
+          positions.i[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][0];
+          positions.i[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][1]; // ///OPTION 1
+
+          vValues.push(positions.v[i]);
+          oValues.push(positions.o[i]);
+          iValues.push(positions.i[i]); // ///OPTION 2
+          // vValues.push(positions.v[i]);
+          // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
+          // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
+          // ///OPTION 3
+          // vValues.push(positions.v[i]);
+          // iValues.push(path.i[i]);
+          // oValues.push(path.o[i]);
+          // ///OPTION 4
+          // vValues.push(path.v[i]);
+          // oValues.push(positions.o[i]);
+          // iValues.push(positions.i[i]);
+        } // // OPTION B
+
+        /* for(i=0;i<len;i+=1){
+              if(!positions.v[i]){
+                  positions.v[i] = [path.v[i][0],path.v[i][1]];
+                  positions.o[i] = [path.o[i][0],path.o[i][1]];
+                  positions.i[i] = [path.i[i][0],path.i[i][1]];
+                  positions.distV[i] = 0;
+               }
+              theta = Math.atan2(
+                  positions.v[i][1] - mouseCoords[1],
+                  positions.v[i][0] - mouseCoords[0]
+              );
+              x = mouseCoords[0] - positions.v[i][0];
+              y = mouseCoords[1] - positions.v[i][1];
+              var distance = this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+               positions.v[i][0] += Math.cos(theta) * distance + (path.v[i][0] - positions.v[i][0]) * this.data.dc;
+              positions.v[i][1] += Math.sin(theta) * distance + (path.v[i][1] - positions.v[i][1]) * this.data.dc;
+                theta = Math.atan2(
+                  positions.o[i][1] - mouseCoords[1],
+                  positions.o[i][0] - mouseCoords[0]
+              );
+              x = mouseCoords[0] - positions.o[i][0];
+              y = mouseCoords[1] - positions.o[i][1];
+              var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+               positions.o[i][0] += Math.cos(theta) * distance + (path.o[i][0] - positions.o[i][0]) * this.data.dc;
+              positions.o[i][1] += Math.sin(theta) * distance + (path.o[i][1] - positions.o[i][1]) * this.data.dc;
+                theta = Math.atan2(
+                  positions.i[i][1] - mouseCoords[1],
+                  positions.i[i][0] - mouseCoords[0]
+              );
+              x = mouseCoords[0] - positions.i[i][0];
+              y = mouseCoords[1] - positions.i[i][1];
+              var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
+               positions.i[i][0] += Math.cos(theta) * distance + (path.i[i][0] - positions.i[i][0]) * this.data.dc;
+              positions.i[i][1] += Math.sin(theta) * distance + (path.i[i][1] - positions.i[i][1]) * this.data.dc;
+               /////OPTION 1
+              //vValues.push(positions.v[i]);
+              // oValues.push(positions.o[i]);
+              // iValues.push(positions.i[i]);
+                /////OPTION 2
+              //vValues.push(positions.v[i]);
+              // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
+              // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
+                /////OPTION 3
+              //vValues.push(positions.v[i]);
+              //iValues.push(path.i[i]);
+              //oValues.push(path.o[i]);
+                /////OPTION 4
+              //vValues.push(path.v[i]);
+              // oValues.push(positions.o[i]);
+              // iValues.push(positions.i[i]);
+          }*/
+
+
+        return {
+          v: vValues,
+          o: oValues,
+          i: iValues,
+          c: path.c
+        };
+      }
+      /**
+       * process shapes
+       */
+
+    }, {
+      key: "processShapes",
+      value: function processShapes() {
+        // FIXME: mouse modifier data
+        var mouseX = this.elem.globalData.mouseX;
+        var mouseY = this.elem.globalData.mouseY;
+        var shapePaths;
+        var i;
+        var len = this.shapes.length;
+        var j;
+        var jLen;
+
+        if (mouseX) {
+          var localMouseCoords = this.elem.globalToLocal([mouseX, mouseY, 0]);
+          var shapeData;
+          var newPaths = [];
+
+          for (i = 0; i < len; i += 1) {
+            shapeData = this.shapes[i];
+
+            if (!shapeData.shape._mdf && !this._mdf) {
+              shapeData.shape.paths = shapeData.last;
+            } else {
+              shapeData.shape._mdf = true;
+              shapePaths = shapeData.shape.paths;
+              jLen = shapePaths.length;
+
+              for (j = 0; j < jLen; j += 1) {
+                if (!this.positions[i][j]) {
+                  this.positions[i][j] = {
+                    v: [],
+                    o: [],
+                    i: [],
+                    distV: [],
+                    distO: [],
+                    distI: []
+                  };
+                }
+
+                newPaths.push(this.processPath(shapePaths[j], localMouseCoords, this.positions[i][j]));
+              }
+
+              shapeData.shape.paths = newPaths;
+              shapeData.last = newPaths;
             }
           }
-          shapeData.shape.paths = shapeData.localShapeCollection;
         }
       }
-      if (!this.dynamicProperties.length) {
-        this._mdf = false;
-      }
+    }]);
+
+    return MouseModifier;
+  }(ShapeModifier);
+
+  var modifiers = {};
+  /**
+   * a
+   * @param {*} nm a
+   * @param {*} factory a
+   */
+
+  function registerModifier(nm, factory) {
+    if (!modifiers[nm]) {
+      modifiers[nm] = factory;
     }
-  }]);
-  return RoundCornersModifier;
-}(ShapeModifier);
+  }
+  /**
+   * a
+   * @param {*} nm a
+   * @param {*} elem a
+   * @param {*} data a
+   * @return {*}
+   */
 
-/**
- * a
- */
 
-var RepeaterModifier = function (_ShapeModifier) {
-  inherits(RepeaterModifier, _ShapeModifier);
-
-  function RepeaterModifier() {
-    classCallCheck(this, RepeaterModifier);
-    return possibleConstructorReturn(this, (RepeaterModifier.__proto__ || Object.getPrototypeOf(RepeaterModifier)).apply(this, arguments));
+  function getModifier(nm, elem, data) {
+    return new modifiers[nm](elem, data);
   }
 
-  createClass(RepeaterModifier, [{
-    key: 'initModifierProperties',
+  registerModifier('tm', TrimModifier);
+  registerModifier('rd', RoundCornersModifier);
+  registerModifier('rp', RepeaterModifier);
+  registerModifier('ms', MouseModifier);
+  var ShapeModifiers = {
+    getModifier: getModifier
+  };
+
+  /**
+   * a
+   */
+
+  var DashProperty = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(DashProperty, _DynamicPropertyConta);
+
+    var _super = _createSuper(DashProperty);
 
     /**
      * a
      * @param {*} elem a
      * @param {*} data a
+     * @param {*} container a
      */
-    value: function initModifierProperties(elem, data) {
-      this.getValue = this.processKeys;
-      this.c = PropertyFactory.getProp(elem, data.c, 0, null, this);
-      this.o = PropertyFactory.getProp(elem, data.o, 0, null, this);
-      this.tr = getTransformProperty(elem, data.tr, this);
-      this.so = PropertyFactory.getProp(elem, data.tr.so, 0, 0.01, this);
-      this.eo = PropertyFactory.getProp(elem, data.tr.eo, 0, 0.01, this);
-      this.data = data;
-      if (!this.dynamicProperties.length) {
-        this.getValue(true);
-      }
-      this._isAnimated = !!this.dynamicProperties.length;
-      this.pMatrix = new Matrix();
-      this.rMatrix = new Matrix();
-      this.sMatrix = new Matrix();
-      this.tMatrix = new Matrix();
-      this.matrix = new Matrix();
-    }
+    function DashProperty(elem, data, container) {
+      var _this;
 
-    /**
-     * a
-     * @param {*} pMatrix a
-     * @param {*} rMatrix a
-     * @param {*} sMatrix a
-     * @param {*} transform a
-     * @param {*} perc a
-     * @param {*} inv a
-     */
+      _classCallCheck(this, DashProperty);
 
-  }, {
-    key: 'applyTransforms',
-    value: function applyTransforms(pMatrix, rMatrix, sMatrix, transform, perc, inv) {
-      var dir = inv ? -1 : 1;
-      var scaleX = transform.s.v[0] + (1 - transform.s.v[0]) * (1 - perc);
-      var scaleY = transform.s.v[1] + (1 - transform.s.v[1]) * (1 - perc);
-      pMatrix.translate(transform.p.v[0] * dir * perc, transform.p.v[1] * dir * perc, transform.p.v[2]);
-      rMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
-      rMatrix.rotate(-transform.r.v * dir * perc);
-      rMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
-      sMatrix.translate(-transform.a.v[0], -transform.a.v[1], transform.a.v[2]);
-      sMatrix.scale(inv ? 1 / scaleX : scaleX, inv ? 1 / scaleY : scaleY);
-      sMatrix.translate(transform.a.v[0], transform.a.v[1], transform.a.v[2]);
-    }
+      _this = _super.call(this);
+      _this.elem = elem;
+      _this.frameId = -1;
+      _this.dataProps = createSizedArray(data.length); // this.renderer = renderer;
 
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} arr a
-     * @param {*} pos a
-     * @param {*} elemsData a
-     */
+      _this.k = false; // this.dashStr = '';
 
-  }, {
-    key: 'init',
-    value: function init(elem, arr, pos, elemsData) {
-      this.elem = elem;
-      this.arr = arr;
-      this.pos = pos;
-      this.elemsData = elemsData;
-      this._currentCopies = 0;
-      this._elements = [];
-      this._groups = [];
-      this.frameId = -1;
-      this.initDynamicPropertyContainer(elem);
-      this.initModifierProperties(elem, arr[pos]);
-      while (pos > 0) {
-        pos -= 1;
-        // this._elements.unshift(arr.splice(pos,1)[0]);
-        this._elements.unshift(arr[pos]);
-      }
-      if (this.dynamicProperties.length) {
-        this.k = true;
-      } else {
-        this.getValue(true);
-      }
-    }
+      _this.dashArray = createTypedArray('float32', data.length ? data.length - 1 : 0);
+      _this.dashoffset = createTypedArray('float32', 1);
 
-    /**
-     * a
-     * @param {*} elements a
-     */
+      _this.initDynamicPropertyContainer(container);
 
-  }, {
-    key: 'resetElements',
-    value: function resetElements(elements) {
-      var len = elements.length;
-      for (var i = 0; i < len; i += 1) {
-        elements[i]._processed = false;
-        if (elements[i].ty === 'gr') {
-          this.resetElements(elements[i].it);
-        }
-      }
-    }
+      var i;
+      var len = data.length || 0;
+      var prop;
 
-    /**
-     * a
-     * @param {*} elements a
-     * @return {*}
-     */
-
-  }, {
-    key: 'cloneElements',
-    value: function cloneElements(elements) {
-      var newElements = JSON.parse(JSON.stringify(elements));
-      this.resetElements(newElements);
-      return newElements;
-    }
-
-    /**
-     * a
-     * @param {*} elements a
-     * @param {*} renderFlag a
-     */
-
-  }, {
-    key: 'changeGroupRender',
-    value: function changeGroupRender(elements, renderFlag) {
-      var len = elements.length;
-      for (var i = 0; i < len; i += 1) {
-        elements[i]._render = renderFlag;
-        if (elements[i].ty === 'gr') {
-          this.changeGroupRender(elements[i].it, renderFlag);
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} _isFirstFrame a
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes(_isFirstFrame) {
-      // let items, itemsTransform, i, dir, cont;
-      if (this._mdf || _isFirstFrame) {
-        var copies = Math.ceil(this.c.v);
-        if (this._groups.length < copies) {
-          while (this._groups.length < copies) {
-            var group = {
-              it: this.cloneElements(this._elements),
-              ty: 'gr'
-            };
-            group.it.push({ 'a': { 'a': 0, 'ix': 1, 'k': [0, 0] }, 'nm': 'Transform', 'o': { 'a': 0, 'ix': 7, 'k': 100 }, 'p': { 'a': 0, 'ix': 2, 'k': [0, 0] }, 'r': { 'a': 1, 'ix': 6, 'k': [{ s: 0, e: 0, t: 0 }, { s: 0, e: 0, t: 1 }] }, 's': { 'a': 0, 'ix': 3, 'k': [100, 100] }, 'sa': { 'a': 0, 'ix': 5, 'k': 0 }, 'sk': { 'a': 0, 'ix': 4, 'k': 0 }, 'ty': 'tr' });
-
-            this.arr.splice(0, 0, group);
-            this._groups.splice(0, 0, group);
-            this._currentCopies += 1;
-          }
-          this.elem.reloadShapes();
-        }
-        var cont = 0;
-        var i = void 0;
-        var renderFlag = void 0;
-        for (i = 0; i <= this._groups.length - 1; i += 1) {
-          renderFlag = cont < copies;
-          this._groups[i]._render = renderFlag;
-          this.changeGroupRender(this._groups[i].it, renderFlag);
-          cont += 1;
-        }
-
-        this._currentCopies = copies;
-        // //
-
-        var offset = this.o.v;
-        var offsetModulo = offset % 1;
-        var roundOffset = offset > 0 ? Math.floor(offset) : Math.ceil(offset);
-        // let k;
-        // let tMat = this.tr.v.props;
-        var pProps = this.pMatrix.props;
-        var rProps = this.rMatrix.props;
-        var sProps = this.sMatrix.props;
-        this.pMatrix.reset();
-        this.rMatrix.reset();
-        this.sMatrix.reset();
-        this.tMatrix.reset();
-        this.matrix.reset();
-        var iteration = 0;
-
-        if (offset > 0) {
-          while (iteration < roundOffset) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
-            iteration += 1;
-          }
-          if (offsetModulo) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, offsetModulo, false);
-            iteration += offsetModulo;
-          }
-        } else if (offset < 0) {
-          while (iteration > roundOffset) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, true);
-            iteration -= 1;
-          }
-          if (offsetModulo) {
-            this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, -offsetModulo, true);
-            iteration -= offsetModulo;
-          }
-        }
-        i = this.data.m === 1 ? 0 : this._currentCopies - 1;
-        var dir = this.data.m === 1 ? 1 : -1;
-        cont = this._currentCopies;
-        while (cont) {
-          var items = this.elemsData[i].it;
-          var itemsTransform = items[items.length - 1].transform.mProps.v.props;
-          var jLen = itemsTransform.length;
-          items[items.length - 1].transform.mProps._mdf = true;
-          items[items.length - 1].transform.op._mdf = true;
-          items[items.length - 1].transform.op.v = this.so.v + (this.eo.v - this.so.v) * (i / (this._currentCopies - 1));
-          if (iteration !== 0) {
-            if (i !== 0 && dir === 1 || i !== this._currentCopies - 1 && dir === -1) {
-              this.applyTransforms(this.pMatrix, this.rMatrix, this.sMatrix, this.tr, 1, false);
-            }
-            this.matrix.transform(rProps[0], rProps[1], rProps[2], rProps[3], rProps[4], rProps[5], rProps[6], rProps[7], rProps[8], rProps[9], rProps[10], rProps[11], rProps[12], rProps[13], rProps[14], rProps[15]);
-            this.matrix.transform(sProps[0], sProps[1], sProps[2], sProps[3], sProps[4], sProps[5], sProps[6], sProps[7], sProps[8], sProps[9], sProps[10], sProps[11], sProps[12], sProps[13], sProps[14], sProps[15]);
-            this.matrix.transform(pProps[0], pProps[1], pProps[2], pProps[3], pProps[4], pProps[5], pProps[6], pProps[7], pProps[8], pProps[9], pProps[10], pProps[11], pProps[12], pProps[13], pProps[14], pProps[15]);
-
-            for (var j = 0; j < jLen; j += 1) {
-              itemsTransform[j] = this.matrix.props[j];
-            }
-            this.matrix.reset();
-          } else {
-            this.matrix.reset();
-            for (var _j = 0; _j < jLen; _j += 1) {
-              itemsTransform[_j] = this.matrix.props[_j];
-            }
-          }
-          iteration += 1;
-          cont -= 1;
-          i += dir;
-        }
-      } else {
-        var _cont = this._currentCopies;
-        var _i = 0;
-        var _dir = 1;
-        while (_cont) {
-          var _items = this.elemsData[_i].it;
-          // const itemsTransform = items[items.length - 1].transform.mProps.v.props;
-          _items[_items.length - 1].transform.mProps._mdf = false;
-          _items[_items.length - 1].transform.op._mdf = false;
-          _cont -= 1;
-          _i += _dir;
-        }
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'addShape',
-    value: function addShape() {}
-  }]);
-  return RepeaterModifier;
-}(ShapeModifier);
-
-/**
- * MouseModifier class
- */
-
-var MouseModifier = function (_ShapeModifier) {
-  inherits(MouseModifier, _ShapeModifier);
-
-  function MouseModifier() {
-    classCallCheck(this, MouseModifier);
-    return possibleConstructorReturn(this, (MouseModifier.__proto__ || Object.getPrototypeOf(MouseModifier)).apply(this, arguments));
-  }
-
-  createClass(MouseModifier, [{
-    key: 'initModifierProperties',
-
-    /**
-     * init modifier properties
-     * @param {*} elem element node
-     * @param {*} data mouse value property data
-     */
-    value: function initModifierProperties(elem, data) {
-      this.getValue = this.processKeys;
-      this.data = data;
-      this.positions = [];
-    }
-
-    /**
-     * process keys
-     * @param {number} frameNum frameNum
-     * @param {*} forceRender force render
-     */
-
-  }, {
-    key: 'processKeys',
-    value: function processKeys(frameNum, forceRender) {
-      if (frameNum === this.frameId && !forceRender) {
-        return;
-      }
-      this._mdf = true;
-    }
-
-    /**
-     * add shape to modifier
-     */
-
-  }, {
-    key: 'addShapeToModifier',
-    value: function addShapeToModifier() {
-      this.positions.push([]);
-    }
-
-    /**
-     * a
-     * @param {*} path a
-     * @param {*} mouseCoords a
-     * @param {*} positions a
-     * @return {*}
-     */
-
-  }, {
-    key: 'processPath',
-    value: function processPath(path, mouseCoords, positions) {
-      var i = void 0;var len = path.v.length;
-      var vValues = [];var oValues = [];var iValues = [];
-      // let dist;
-      var theta = void 0;var x = void 0;var y = void 0;
-      // // OPTION A
       for (i = 0; i < len; i += 1) {
-        if (!positions.v[i]) {
-          positions.v[i] = [path.v[i][0], path.v[i][1]];
-          positions.o[i] = [path.o[i][0], path.o[i][1]];
-          positions.i[i] = [path.i[i][0], path.i[i][1]];
-          positions.distV[i] = 0;
-          positions.distO[i] = 0;
-          positions.distI[i] = 0;
-        }
-        theta = Math.atan2(path.v[i][1] - mouseCoords[1], path.v[i][0] - mouseCoords[0]);
-
-        x = mouseCoords[0] - positions.v[i][0];
-        y = mouseCoords[1] - positions.v[i][1];
-        var distance = Math.sqrt(x * x + y * y);
-        positions.distV[i] += (distance - positions.distV[i]) * this.data.dc;
-
-        positions.v[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][0];
-        positions.v[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distV[i]) / 2 + path.v[i][1];
-
-        theta = Math.atan2(path.o[i][1] - mouseCoords[1], path.o[i][0] - mouseCoords[0]);
-
-        x = mouseCoords[0] - positions.o[i][0];
-        y = mouseCoords[1] - positions.o[i][1];
-        distance = Math.sqrt(x * x + y * y);
-        positions.distO[i] += (distance - positions.distO[i]) * this.data.dc;
-
-        positions.o[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][0];
-        positions.o[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distO[i]) / 2 + path.o[i][1];
-
-        theta = Math.atan2(path.i[i][1] - mouseCoords[1], path.i[i][0] - mouseCoords[0]);
-
-        x = mouseCoords[0] - positions.i[i][0];
-        y = mouseCoords[1] - positions.i[i][1];
-        distance = Math.sqrt(x * x + y * y);
-        positions.distI[i] += (distance - positions.distI[i]) * this.data.dc;
-
-        positions.i[i][0] = Math.cos(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][0];
-        positions.i[i][1] = Math.sin(theta) * Math.max(0, this.data.maxDist - positions.distI[i]) / 2 + path.i[i][1];
-
-        // ///OPTION 1
-        vValues.push(positions.v[i]);
-        oValues.push(positions.o[i]);
-        iValues.push(positions.i[i]);
-
-        // ///OPTION 2
-        // vValues.push(positions.v[i]);
-        // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
-        // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
-
-
-        // ///OPTION 3
-        // vValues.push(positions.v[i]);
-        // iValues.push(path.i[i]);
-        // oValues.push(path.o[i]);
-
-
-        // ///OPTION 4
-        // vValues.push(path.v[i]);
-        // oValues.push(positions.o[i]);
-        // iValues.push(positions.i[i]);
+        prop = PropertyFactory.getProp(elem, data[i].v, 0, 0, _assertThisInitialized(_this));
+        _this.k = prop.k || _this.k;
+        _this.dataProps[i] = {
+          n: data[i].n,
+          p: prop
+        };
       }
 
-      // // OPTION B
-      /* for(i=0;i<len;i+=1){
-            if(!positions.v[i]){
-                positions.v[i] = [path.v[i][0],path.v[i][1]];
-                positions.o[i] = [path.o[i][0],path.o[i][1]];
-                positions.i[i] = [path.i[i][0],path.i[i][1]];
-                positions.distV[i] = 0;
-             }
-            theta = Math.atan2(
-                positions.v[i][1] - mouseCoords[1],
-                positions.v[i][0] - mouseCoords[0]
-            );
-            x = mouseCoords[0] - positions.v[i][0];
-            y = mouseCoords[1] - positions.v[i][1];
-            var distance = this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
-             positions.v[i][0] += Math.cos(theta) * distance + (path.v[i][0] - positions.v[i][0]) * this.data.dc;
-            positions.v[i][1] += Math.sin(theta) * distance + (path.v[i][1] - positions.v[i][1]) * this.data.dc;
-              theta = Math.atan2(
-                positions.o[i][1] - mouseCoords[1],
-                positions.o[i][0] - mouseCoords[0]
-            );
-            x = mouseCoords[0] - positions.o[i][0];
-            y = mouseCoords[1] - positions.o[i][1];
-            var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
-             positions.o[i][0] += Math.cos(theta) * distance + (path.o[i][0] - positions.o[i][0]) * this.data.dc;
-            positions.o[i][1] += Math.sin(theta) * distance + (path.o[i][1] - positions.o[i][1]) * this.data.dc;
-              theta = Math.atan2(
-                positions.i[i][1] - mouseCoords[1],
-                positions.i[i][0] - mouseCoords[0]
-            );
-            x = mouseCoords[0] - positions.i[i][0];
-            y = mouseCoords[1] - positions.i[i][1];
-            var distance =  this.data.ss * this.data.mx / Math.sqrt( (x * x) + (y * y) );
-             positions.i[i][0] += Math.cos(theta) * distance + (path.i[i][0] - positions.i[i][0]) * this.data.dc;
-            positions.i[i][1] += Math.sin(theta) * distance + (path.i[i][1] - positions.i[i][1]) * this.data.dc;
-             /////OPTION 1
-            //vValues.push(positions.v[i]);
-            // oValues.push(positions.o[i]);
-            // iValues.push(positions.i[i]);
-              /////OPTION 2
-            //vValues.push(positions.v[i]);
-            // iValues.push([path.i[i][0]+(positions.v[i][0]-path.v[i][0]),path.i[i][1]+(positions.v[i][1]-path.v[i][1])]);
-            // oValues.push([path.o[i][0]+(positions.v[i][0]-path.v[i][0]),path.o[i][1]+(positions.v[i][1]-path.v[i][1])]);
-              /////OPTION 3
-            //vValues.push(positions.v[i]);
-            //iValues.push(path.i[i]);
-            //oValues.push(path.o[i]);
-              /////OPTION 4
-            //vValues.push(path.v[i]);
-            // oValues.push(positions.o[i]);
-            // iValues.push(positions.i[i]);
-        }*/
+      if (!_this.k) {
+        _this.getValue(true);
+      }
 
-      return {
-        v: vValues,
-        o: oValues,
-        i: iValues,
-        c: path.c
-      };
+      _this._isAnimated = _this.k;
+      return _this;
     }
-
     /**
-     * process shapes
-     */
-
-  }, {
-    key: 'processShapes',
-    value: function processShapes() {
-      // FIXME: mouse modifier data
-      var mouseX = this.elem.globalData.mouseX;
-      var mouseY = this.elem.globalData.mouseY;
-      var shapePaths = void 0;
-      var i = void 0;var len = this.shapes.length;
-      var j = void 0;var jLen = void 0;
-
-      if (mouseX) {
-        var localMouseCoords = this.elem.globalToLocal([mouseX, mouseY, 0]);
-
-        var shapeData = void 0;var newPaths = [];
-        for (i = 0; i < len; i += 1) {
-          shapeData = this.shapes[i];
-          if (!shapeData.shape._mdf && !this._mdf) {
-            shapeData.shape.paths = shapeData.last;
-          } else {
-            shapeData.shape._mdf = true;
-            shapePaths = shapeData.shape.paths;
-            jLen = shapePaths.length;
-            for (j = 0; j < jLen; j += 1) {
-              if (!this.positions[i][j]) {
-                this.positions[i][j] = {
-                  v: [],
-                  o: [],
-                  i: [],
-                  distV: [],
-                  distO: [],
-                  distI: []
-                };
-              }
-              newPaths.push(this.processPath(shapePaths[j], localMouseCoords, this.positions[i][j]));
-            }
-            shapeData.shape.paths = newPaths;
-            shapeData.last = newPaths;
-          }
-        }
-      }
-    }
-  }]);
-  return MouseModifier;
-}(ShapeModifier);
-
-var modifiers = {};
-
-/**
- * a
- * @param {*} nm a
- * @param {*} factory a
- */
-function registerModifier(nm, factory) {
-  if (!modifiers[nm]) {
-    modifiers[nm] = factory;
-  }
-}
-
-/**
- * a
- * @param {*} nm a
- * @param {*} elem a
- * @param {*} data a
- * @return {*}
- */
-function getModifier(nm, elem, data) {
-  return new modifiers[nm](elem, data);
-}
-
-registerModifier('tm', TrimModifier);
-registerModifier('rd', RoundCornersModifier);
-registerModifier('rp', RepeaterModifier);
-registerModifier('ms', MouseModifier);
-
-var ShapeModifiers = { getModifier: getModifier };
-
-/**
- * a
- */
-
-var DashProperty = function (_DynamicPropertyConta) {
-  inherits(DashProperty, _DynamicPropertyConta);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} data a
-   * @param {*} container a
-   */
-  function DashProperty(elem, data, container) {
-    classCallCheck(this, DashProperty);
-
-    var _this = possibleConstructorReturn(this, (DashProperty.__proto__ || Object.getPrototypeOf(DashProperty)).call(this));
-
-    _this.elem = elem;
-    _this.frameId = -1;
-    _this.dataProps = createSizedArray(data.length);
-    // this.renderer = renderer;
-    _this.k = false;
-    // this.dashStr = '';
-    _this.dashArray = createTypedArray('float32', data.length ? data.length - 1 : 0);
-    _this.dashoffset = createTypedArray('float32', 1);
-    _this.initDynamicPropertyContainer(container);
-    var i = void 0;var len = data.length || 0;var prop = void 0;
-    for (i = 0; i < len; i += 1) {
-      prop = PropertyFactory.getProp(elem, data[i].v, 0, 0, _this);
-      _this.k = prop.k || _this.k;
-      _this.dataProps[i] = { n: data[i].n, p: prop };
-    }
-    if (!_this.k) {
-      _this.getValue(true);
-    }
-    _this._isAnimated = _this.k;
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {number} frameNum frameNum
-   * @param {*} forceRender a
-   */
-
-
-  createClass(DashProperty, [{
-    key: 'getValue',
-    value: function getValue(frameNum, forceRender) {
-      if (frameNum === this.frameId && !forceRender) {
-        return;
-      }
-      this.frameId = frameNum;
-      this.iterateDynamicProperties();
-      this._mdf = this._mdf || forceRender;
-      if (this._mdf) {
-        var _i = 0;var _len = this.dataProps.length;
-        // if (this.renderer === 'svg') {
-        //   this.dashStr = '';
-        // }
-        for (_i = 0; _i < _len; _i += 1) {
-          if (this.dataProps[_i].n != 'o') {
-            // if (this.renderer === 'svg') {
-            //   this.dashStr += ' ' + this.dataProps[i].p.v;
-            // } else {
-            //   this.dashArray[i] = this.dataProps[i].p.v;
-            // }
-            this.dashArray[_i] = this.dataProps[_i].p.v;
-          } else {
-            this.dashoffset[0] = this.dataProps[_i].p.v;
-          }
-        }
-      }
-    }
-  }]);
-  return DashProperty;
-}(DynamicPropertyContainer);
-
-/**
- * GradientProperty class
- */
-
-var GradientProperty = function (_DynamicPropertyConta) {
-  inherits(GradientProperty, _DynamicPropertyConta);
-
-  /**
-   * constructor GradientProperty
-   * @param {*} elem element node
-   * @param {*} data gradient property data
-   * @param {*} container container
-   */
-  function GradientProperty(elem, data, container) {
-    classCallCheck(this, GradientProperty);
-
-    var _this = possibleConstructorReturn(this, (GradientProperty.__proto__ || Object.getPrototypeOf(GradientProperty)).call(this));
-
-    _this.data = data;
-    _this.c = createTypedArray('uint8c', data.p * 4);
-    var cLength = data.k.k[0].s ? data.k.k[0].s.length - data.p * 4 : data.k.k.length - data.p * 4;
-    _this.o = createTypedArray('float32', cLength);
-    _this._cmdf = false;
-    _this._omdf = false;
-    _this._collapsable = _this.checkCollapsable();
-    _this._hasOpacity = cLength;
-    _this.initDynamicPropertyContainer(container);
-    _this.prop = PropertyFactory.getProp(elem, data.k, 1, null, _this);
-    _this.k = _this.prop.k;
-    _this.getValue(true);
-    return _this;
-  }
-
-  /**
-   * compare points
-   * @param {*} values values
-   * @param {*} points points
-   * @return {*}
-   */
-
-
-  createClass(GradientProperty, [{
-    key: 'comparePoints',
-    value: function comparePoints(values, points) {
-      var i = 0;var len = this.o.length / 2;var diff = void 0;
-      while (i < len) {
-        diff = Math.abs(values[i * 4] - values[points * 4 + i * 2]);
-        if (diff > 0.01) {
-          return false;
-        }
-        i += 1;
-      }
-      return true;
-    }
-
-    /**
-     * check collapsable
-     * @return {*}
-     */
-
-  }, {
-    key: 'checkCollapsable',
-    value: function checkCollapsable() {
-      if (this.o.length / 2 !== this.c.length / 4) {
-        return false;
-      }
-      if (this.data.k.k[0].s) {
-        var i = 0;var len = this.data.k.k.length;
-        while (i < len) {
-          if (!this.comparePoints(this.data.k.k[i].s, this.data.p)) {
-            return false;
-          }
-          i += 1;
-        }
-      } else if (!this.comparePoints(this.data.k.k, this.data.p)) {
-        return false;
-      }
-      return true;
-    }
-
-    /**
-     * get value
+     * a
+     * @param {number} frameNum frameNum
      * @param {*} forceRender a
      */
 
-  }, {
-    key: 'getValue',
-    value: function getValue(forceRender) {
-      this.prop.getValue();
-      this._mdf = false;
-      this._cmdf = false;
-      this._omdf = false;
-      if (this.prop._mdf || forceRender) {
-        var i = void 0;var len = this.data.p * 4;
-        var mult = void 0;var val = void 0;
-        for (i = 0; i < len; i += 1) {
-          mult = i % 4 === 0 ? 100 : 255;
-          val = Math.round(this.prop.v[i] * mult);
-          if (this.c[i] !== val) {
-            this.c[i] = val;
-            this._cmdf = !forceRender;
-          }
-        }
-        if (this.o.length) {
-          len = this.prop.v.length;
-          for (i = this.data.p * 4; i < len; i += 1) {
-            mult = i % 2 === 0 ? 100 : 1;
-            val = i % 2 === 0 ? Math.round(this.prop.v[i] * 100) : this.prop.v[i];
-            if (this.o[i - this.data.p * 4] !== val) {
-              this.o[i - this.data.p * 4] = val;
-              this._omdf = !forceRender;
-            }
-          }
-        }
-        this._mdf = !forceRender;
-      }
-    }
-  }]);
-  return GradientProperty;
-}(DynamicPropertyContainer);
 
-// import StyleElement from '../shapes/StyleElement';
-// import Matrix from '../utils/lib/transformation-matrix';
-// import displayManager from '../displayManager';
-
-/**
- * ShapesFrames class
- */
-
-var ShapesFrames = function (_DynamicPropertyConta) {
-  inherits(ShapesFrames, _DynamicPropertyConta);
-
-  /**
-   * a
-   * @param {*} keyframesManager a
-   * @param {*} shapes a
-   * @param {*} session a
-   */
-  function ShapesFrames(keyframesManager, shapes, session) {
-    classCallCheck(this, ShapesFrames);
-
-    var _this = possibleConstructorReturn(this, (ShapesFrames.__proto__ || Object.getPrototypeOf(ShapesFrames)).call(this));
-
-    _this.frameId = -1;
-    _this.keyframesManager = keyframesManager;
-    _this.elem = keyframesManager.elem;
-    _this.session = session;
-    _this.shapes = [];
-    _this.shapesData = shapes;
-    _this.stylesList = [];
-    _this.itemsData = [];
-    _this.prevViewData = [];
-    _this.shapeModifiers = [];
-    _this.processedElements = [];
-    _this.transformsManager = new ShapeTransformManager();
-    _this.initDynamicPropertyContainer(keyframesManager);
-
-    _this.lcEnum = {
-      '1': 'butt',
-      '2': 'round',
-      '3': 'square'
-    };
-    _this.ljEnum = {
-      '1': 'miter',
-      '2': 'round',
-      '3': 'bevel'
-    };
-
-    // set to true when inpoint is rendered
-    _this._isFirstFrame = true;
-
-    _this.transformHelper = { opacity: 1, _opMdf: false };
-    _this.searchShapes(_this.shapesData, _this.itemsData, _this.prevViewData, true, []);
-    if (!_this._isAnimated) {
-      _this.transformHelper.opacity = 1;
-      _this.transformHelper._opMdf = false;
-      _this.updateModifiers(_this.frameId);
-      _this.transformsManager.processSequences(_this._isFirstFrame);
-      _this.updateShape(_this.transformHelper, _this.shapesData, _this.itemsData);
-
-      _this.updateGrahpics();
-    }
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {number} frameNum frameNum
-   */
-  // prepareProperties(frameNum) {
-  //   let i;
-  //   const len = this.dynamicProperties.length;
-  //   for (i = 0; i < len; i += 1) {
-  //     this.dynamicProperties[i].getValue(frameNum);
-  //     if (this.dynamicProperties[i]._mdf) {
-  //       this._mdf = true;
-  //     }
-  //   }
-  // }
-
-  /**
-   * a
-   * @param {*} prop a
-   */
-  // addDynamicProperty(prop) {
-  //   if (this.dynamicProperties.indexOf(prop) === -1) {
-  //     this.dynamicProperties.push(prop);
-  //   }
-  // }
-
-  /**
-   * create style element
-   * @param {*} data style item data
-   * @param {*} transforms transforms array
-   * @return {*}
-   */
-
-
-  createClass(ShapesFrames, [{
-    key: 'createStyleElement',
-    value: function createStyleElement(data, transforms) {
-      // let styleElem = {
-      //   data: data,
-      //   type: data.ty,
-      //   preTransforms: this.transformsManager.addTransformSequence(transforms),
-      //   transforms: [],
-      //   elements: [],
-      //   closed: data.hd === true,
-      // };
-      var styleElem = new PathPaint(this.elem, data, this.transformsManager.addTransformSequence(transforms));
-      var elementData = {};
-      if (data.ty == 'fl' || data.ty == 'st') {
-        elementData.c = PropertyFactory.getProp(this, data.c, 1, 255, this);
-        if (!elementData.c.k) {
-          styleElem.co = elementData.c.v; // 'rgb('+bm_floor(elementData.c.v[0])+','+bm_floor(elementData.c.v[1])+','+bm_floor(elementData.c.v[2])+')';
-        }
-      } else if (data.ty === 'gf' || data.ty === 'gs') {
-        elementData.s = PropertyFactory.getProp(this, data.s, 1, null, this);
-        elementData.e = PropertyFactory.getProp(this, data.e, 1, null, this);
-        elementData.h = PropertyFactory.getProp(this, data.h || { k: 0 }, 0, 0.01, this);
-        elementData.a = PropertyFactory.getProp(this, data.a || { k: 0 }, 0, degToRads, this);
-        elementData.g = new GradientProperty(this, data.g, this);
-      }
-      elementData.o = PropertyFactory.getProp(this, data.o, 0, 0.01, this);
-      if (data.ty == 'st' || data.ty == 'gs') {
-        styleElem.lc = this.lcEnum[data.lc] || 'round';
-        styleElem.lj = this.ljEnum[data.lj] || 'round';
-        if (data.lj == 1) {
-          styleElem.ml = data.ml;
-        }
-        elementData.w = PropertyFactory.getProp(this, data.w, 0, null, this);
-        if (!elementData.w.k) {
-          styleElem.wi = elementData.w.v;
-        }
-        if (data.d) {
-          var d = new DashProperty(this, data.d, 'canvas', this);
-          elementData.d = d;
-          if (!elementData.d.k) {
-            styleElem.da = elementData.d.dashArray;
-            styleElem.do = elementData.d.dashoffset[0];
-          }
-        }
-      } else {
-        styleElem.r = data.r === 2 ? 'evenodd' : 'nonzero';
-      }
-      this.stylesList.push(styleElem);
-      elementData.style = styleElem;
-      return elementData;
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'addShapeToModifiers',
-    value: function addShapeToModifiers(data) {
-      var i = void 0;var len = this.shapeModifiers.length;
-      for (i = 0; i < len; i += 1) {
-        this.shapeModifiers[i].addShape(data);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     * @return {Boolean}
-     */
-
-  }, {
-    key: 'isShapeInAnimatedModifiers',
-    value: function isShapeInAnimatedModifiers(data) {
-      var i = 0;var len = this.shapeModifiers.length;
-      while (i < len) {
-        if (this.shapeModifiers[i].isAnimatedWithShape(data)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    /**
-     * a
-     * @param {number} frameNum frameNum
-     */
-
-  }, {
-    key: 'updateModifiers',
-    value: function updateModifiers(frameNum) {
-      if (!this.shapeModifiers.length) {
-        return;
-      }
-      var i = void 0;var len = this.shapes.length;
-      for (i = 0; i < len; i += 1) {
-        this.shapes[i].sh.reset();
-      }
-
-      len = this.shapeModifiers.length;
-      for (i = len - 1; i >= 0; i -= 1) {
-        this.shapeModifiers[i].processShapes(frameNum, this._isFirstFrame);
-      }
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @return {number}
-     */
-
-  }, {
-    key: 'searchProcessedElement',
-    value: function searchProcessedElement(elem) {
-      var elements = this.processedElements;
-      var i = 0;var len = elements.length;
-      while (i < len) {
-        if (elements[i].elem === elem) {
-          return elements[i].pos;
-        }
-        i += 1;
-      }
-      return 0;
-    }
-
-    /**
-     * a
-     * @param {*} elem a
-     * @param {*} pos a
-     */
-
-  }, {
-    key: 'addProcessedElement',
-    value: function addProcessedElement(elem, pos) {
-      var elements = this.processedElements;
-      var i = elements.length;
-      while (i) {
-        i -= 1;
-        if (elements[i].elem === elem) {
-          elements[i].pos = pos;
+    _createClass(DashProperty, [{
+      key: "getValue",
+      value: function getValue(frameNum, forceRender) {
+        if (frameNum === this.frameId && !forceRender) {
           return;
         }
-      }
-      elements.push(new ProcessedElement(elem, pos));
-    }
 
-    /**
-     * create group element
-     * @return {*}
-     */
+        this.frameId = frameNum;
+        this.iterateDynamicProperties();
+        this._mdf = this._mdf || forceRender;
 
-  }, {
-    key: 'createGroupElement',
-    value: function createGroupElement() {
-      return {
-        it: [],
-        prevViewData: []
-      };
-    }
+        if (this._mdf) {
+          var _i = 0;
+          var _len = this.dataProps.length; // if (this.renderer === 'svg') {
+          //   this.dashStr = '';
+          // }
 
-    /**
-     * create transform element
-     * @param {*} data a
-     * @return {*}
-     */
-
-  }, {
-    key: 'createTransformElement',
-    value: function createTransformElement(data) {
-      return {
-        transform: {
-          opacity: 1,
-          _opMdf: false,
-          key: this.transformsManager.getNewKey(),
-          op: PropertyFactory.getProp(this, data.o, 0, 0.01, this),
-          mProps: getTransformProperty(this, data, this)
-        }
-      };
-    }
-
-    /**
-     * a
-     * @param {*} data a
-     * @return {*}
-     */
-
-  }, {
-    key: 'createShapeElement',
-    value: function createShapeElement(data) {
-      var elementData = new ShapeData(this, data, this.stylesList, this.transformsManager);
-
-      this.shapes.push(elementData);
-      this.addShapeToModifiers(elementData);
-      return elementData;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'reloadShapes',
-    value: function reloadShapes() {
-      this._isFirstFrame = true;
-      var i = void 0;var len = this.itemsData.length;
-      for (i = 0; i < len; i += 1) {
-        this.prevViewData[i] = this.itemsData[i];
-      }
-      this.searchShapes(this.shapesData, this.itemsData, this.prevViewData, true, []);
-      len = this.dynamicProperties.length;
-      for (i = 0; i < len; i += 1) {
-        this.dynamicProperties[i].getValue();
-      }
-      this.updateModifiers();
-      this.transformsManager.processSequences(this._isFirstFrame);
-    }
-
-    /**
-     * a
-     * @param {*} transform a
-     */
-
-  }, {
-    key: 'addTransformToStyleList',
-    value: function addTransformToStyleList(transform) {
-      var len = this.stylesList.length;
-      for (var i = 0; i < len; i += 1) {
-        if (!this.stylesList[i].closed) {
-          this.stylesList[i].transforms.push(transform);
-        }
-      }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'removeTransformFromStyleList',
-    value: function removeTransformFromStyleList() {
-      var len = this.stylesList.length;
-      for (var i = 0; i < len; i += 1) {
-        if (!this.stylesList[i].closed) {
-          this.stylesList[i].transforms.pop();
-        }
-      }
-    }
-
-    /**
-     * a
-     * @param {*} styles a
-     */
-
-  }, {
-    key: 'closeStyles',
-    value: function closeStyles(styles) {
-      var len = styles.length;
-      for (var i = 0; i < len; i += 1) {
-        styles[i].closed = true;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} arr a
-     * @param {*} itemsData a
-     * @param {*} prevViewData a
-     * @param {*} shouldRender a
-     * @param {*} transforms a
-     */
-
-  }, {
-    key: 'searchShapes',
-    value: function searchShapes(arr, itemsData, prevViewData, shouldRender, transforms) {
-      var i = void 0;var len = arr.length - 1;
-      var j = void 0;var jLen = void 0;
-      var ownStyles = [];var ownModifiers = [];var processedPos = void 0;var modifier = void 0;var currentTransform = void 0;
-      var ownTransforms = [].concat(transforms);
-      for (i = len; i >= 0; i -= 1) {
-        processedPos = this.searchProcessedElement(arr[i]);
-        if (!processedPos) {
-          arr[i]._shouldRender = shouldRender;
-        } else {
-          itemsData[i] = prevViewData[processedPos - 1];
-        }
-        if (arr[i].ty == 'fl' || arr[i].ty == 'st' || arr[i].ty == 'gf' || arr[i].ty == 'gs') {
-          if (!processedPos) {
-            itemsData[i] = this.createStyleElement(arr[i], ownTransforms);
-          } else {
-            itemsData[i].style.closed = false;
-          }
-
-          ownStyles.push(itemsData[i].style);
-        } else if (arr[i].ty == 'gr') {
-          if (!processedPos) {
-            itemsData[i] = this.createGroupElement(arr[i]);
-          } else {
-            jLen = itemsData[i].it.length;
-            for (j = 0; j < jLen; j += 1) {
-              itemsData[i].prevViewData[j] = itemsData[i].it[j];
+          for (_i = 0; _i < _len; _i += 1) {
+            if (this.dataProps[_i].n != 'o') {
+              // if (this.renderer === 'svg') {
+              //   this.dashStr += ' ' + this.dataProps[i].p.v;
+              // } else {
+              //   this.dashArray[i] = this.dataProps[i].p.v;
+              // }
+              this.dashArray[_i] = this.dataProps[_i].p.v;
+            } else {
+              this.dashoffset[0] = this.dataProps[_i].p.v;
             }
           }
-          this.searchShapes(arr[i].it, itemsData[i].it, itemsData[i].prevViewData, shouldRender, ownTransforms);
-        } else if (arr[i].ty == 'tr') {
-          if (!processedPos) {
-            currentTransform = this.createTransformElement(arr[i]);
-            itemsData[i] = currentTransform;
-          }
-          ownTransforms.push(itemsData[i]);
-          this.addTransformToStyleList(itemsData[i]);
-        } else if (arr[i].ty == 'sh' || arr[i].ty == 'rc' || arr[i].ty == 'el' || arr[i].ty == 'sr') {
-          if (!processedPos) {
-            itemsData[i] = this.createShapeElement(arr[i]);
-          }
-        } else if (arr[i].ty == 'tm' || arr[i].ty == 'rd') {
-          if (!processedPos) {
-            modifier = ShapeModifiers.getModifier(arr[i].ty);
-            modifier.init(this, arr[i]);
-            itemsData[i] = modifier;
-            this.shapeModifiers.push(modifier);
-          } else {
-            modifier = itemsData[i];
-            modifier.closed = false;
-          }
-          ownModifiers.push(modifier);
-        } else if (arr[i].ty == 'rp') {
-          if (!processedPos) {
-            modifier = ShapeModifiers.getModifier(arr[i].ty);
-            itemsData[i] = modifier;
-            modifier.init(this, arr, i, itemsData);
-            this.shapeModifiers.push(modifier);
-            shouldRender = false;
-          } else {
-            modifier = itemsData[i];
-            modifier.closed = true;
-          }
-          ownModifiers.push(modifier);
         }
-        this.addProcessedElement(arr[i], i + 1);
       }
-      this.removeTransformFromStyleList();
-      this.closeStyles(ownStyles);
-      len = ownModifiers.length;
-      for (i = 0; i < len; i += 1) {
-        ownModifiers[i].closed = true;
-      }
-    }
+    }]);
+
+    return DashProperty;
+  }(DynamicPropertyContainer);
+
+  /**
+   * GradientProperty class
+   */
+
+  var GradientProperty = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(GradientProperty, _DynamicPropertyConta);
+
+    var _super = _createSuper(GradientProperty);
 
     /**
-     * a
-     * @param {*} parentTransform a
-     * @param {*} groupTransform a
+     * constructor GradientProperty
+     * @param {*} elem element node
+     * @param {*} data gradient property data
+     * @param {*} container container
      */
+    function GradientProperty(elem, data, container) {
+      var _this;
 
-  }, {
-    key: 'updateShapeTransform',
-    value: function updateShapeTransform(parentTransform, groupTransform) {
-      if (parentTransform._opMdf || groupTransform.op._mdf || this._isFirstFrame) {
-        groupTransform.opacity = parentTransform.opacity;
-        groupTransform.opacity *= groupTransform.op.v;
-        groupTransform._opMdf = true;
-      }
+      _classCallCheck(this, GradientProperty);
+
+      _this = _super.call(this);
+      _this.data = data;
+      _this.c = createTypedArray('uint8c', data.p * 4);
+      var cLength = data.k.k[0].s ? data.k.k[0].s.length - data.p * 4 : data.k.k.length - data.p * 4;
+      _this.o = createTypedArray('float32', cLength);
+      _this._cmdf = false;
+      _this._omdf = false;
+      _this._collapsable = _this.checkCollapsable();
+      _this._hasOpacity = cLength;
+
+      _this.initDynamicPropertyContainer(container);
+
+      _this.prop = PropertyFactory.getProp(elem, data.k, 1, null, _assertThisInitialized(_this));
+      _this.k = _this.prop.k;
+
+      _this.getValue(true);
+
+      return _this;
     }
-
     /**
-     * a
-     * @param {*} styledShape a
-     * @param {*} shape a
+     * compare points
+     * @param {*} values values
+     * @param {*} points points
+     * @return {*}
      */
 
-  }, {
-    key: 'updateStyledShape',
-    value: function updateStyledShape(styledShape, shape) {
-      if (this._isFirstFrame || shape._mdf || styledShape.transforms._mdf) {
-        var shapeNodes = styledShape.trNodes;
-        var paths = shape.paths;
-        var i = void 0;var len = void 0;var j = void 0;var jLen = paths._length;
-        shapeNodes.length = 0;
-        var groupTransformMat = styledShape.transforms.finalTransform;
-        for (j = 0; j < jLen; j += 1) {
-          var pathNodes = paths.shapes[j];
-          if (pathNodes && pathNodes.v) {
-            len = pathNodes._length;
-            for (i = 1; i < len; i += 1) {
-              if (i === 1) {
-                shapeNodes.push({
-                  t: 'm',
-                  p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
-                });
+
+    _createClass(GradientProperty, [{
+      key: "comparePoints",
+      value: function comparePoints(values, points) {
+        var i = 0;
+        var len = this.o.length / 2;
+        var diff;
+
+        while (i < len) {
+          diff = Math.abs(values[i * 4] - values[points * 4 + i * 2]);
+
+          if (diff > 0.01) {
+            return false;
+          }
+
+          i += 1;
+        }
+
+        return true;
+      }
+      /**
+       * check collapsable
+       * @return {*}
+       */
+
+    }, {
+      key: "checkCollapsable",
+      value: function checkCollapsable() {
+        if (this.o.length / 2 !== this.c.length / 4) {
+          return false;
+        }
+
+        if (this.data.k.k[0].s) {
+          var i = 0;
+          var len = this.data.k.k.length;
+
+          while (i < len) {
+            if (!this.comparePoints(this.data.k.k[i].s, this.data.p)) {
+              return false;
+            }
+
+            i += 1;
+          }
+        } else if (!this.comparePoints(this.data.k.k, this.data.p)) {
+          return false;
+        }
+
+        return true;
+      }
+      /**
+       * get value
+       * @param {*} forceRender a
+       */
+
+    }, {
+      key: "getValue",
+      value: function getValue(forceRender) {
+        this.prop.getValue();
+        this._mdf = false;
+        this._cmdf = false;
+        this._omdf = false;
+
+        if (this.prop._mdf || forceRender) {
+          var i;
+          var len = this.data.p * 4;
+          var mult;
+          var val;
+
+          for (i = 0; i < len; i += 1) {
+            mult = i % 4 === 0 ? 100 : 255;
+            val = Math.round(this.prop.v[i] * mult);
+
+            if (this.c[i] !== val) {
+              this.c[i] = val;
+              this._cmdf = !forceRender;
+            }
+          }
+
+          if (this.o.length) {
+            len = this.prop.v.length;
+
+            for (i = this.data.p * 4; i < len; i += 1) {
+              mult = i % 2 === 0 ? 100 : 1;
+              val = i % 2 === 0 ? Math.round(this.prop.v[i] * 100) : this.prop.v[i];
+
+              if (this.o[i - this.data.p * 4] !== val) {
+                this.o[i - this.data.p * 4] = val;
+                this._omdf = !forceRender;
               }
-              shapeNodes.push({
-                t: 'c',
-                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[i], pathNodes.v[i])
-              });
-            }
-            if (len === 1) {
-              shapeNodes.push({
-                t: 'm',
-                p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
-              });
-            }
-            if (pathNodes.c && len) {
-              shapeNodes.push({
-                t: 'c',
-                pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[0], pathNodes.v[0])
-              });
-              shapeNodes.push({
-                t: 'z'
-              });
             }
           }
-        }
-        styledShape.trNodes = shapeNodes;
-      }
-    }
 
-    /**
-     * a
-     * @param {*} pathData a
-     * @param {*} itemData a
-     */
-
-  }, {
-    key: 'updatePath',
-    value: function updatePath(pathData, itemData) {
-      if (pathData.hd !== true && pathData._shouldRender) {
-        var i = void 0;var len = itemData.styledShapes.length;
-        for (i = 0; i < len; i += 1) {
-          this.updateStyledShape(itemData.styledShapes[i], itemData.sh);
+          this._mdf = !forceRender;
         }
       }
-    }
+    }]);
+
+    return GradientProperty;
+  }(DynamicPropertyContainer);
+
+  /**
+   * ShapesFrames class
+   */
+
+  var ShapesFrames = /*#__PURE__*/function (_DynamicPropertyConta) {
+    _inherits(ShapesFrames, _DynamicPropertyConta);
+
+    var _super = _createSuper(ShapesFrames);
 
     /**
      * a
-     * @param {*} styleData a
-     * @param {*} itemData a
-     * @param {*} groupTransform a
+     * @param {*} keyframesManager a
+     * @param {*} shapes a
+     * @param {*} session a
      */
+    function ShapesFrames(keyframesManager, shapes, session) {
+      var _this;
 
-  }, {
-    key: 'updateFill',
-    value: function updateFill(styleData, itemData, groupTransform) {
-      var styleElem = itemData.style;
+      _classCallCheck(this, ShapesFrames);
 
-      if (itemData.c._mdf || this._isFirstFrame) {
-        // styleElem.co = 'rgb('
-        // + Math.floor(itemData.c.v[0]) + ','
-        // + Math.floor(itemData.c.v[1]) + ','
-        // + Math.floor(itemData.c.v[2]) + ')';
-        styleElem.co = itemData.c.v; // rgb2hex(itemData.c.v);
+      _this = _super.call(this);
+      _this.frameId = -1;
+      _this.keyframesManager = keyframesManager;
+      _this.elem = keyframesManager.elem;
+      _this.session = session;
+      _this.shapes = [];
+      _this.shapesData = shapes;
+      _this.stylesList = [];
+      _this.itemsData = [];
+      _this.prevViewData = [];
+      _this.shapeModifiers = [];
+      _this.processedElements = [];
+      _this.transformsManager = new ShapeTransformManager();
+
+      _this.initDynamicPropertyContainer(keyframesManager);
+
+      _this.lcEnum = {
+        '1': 'butt',
+        '2': 'round',
+        '3': 'square'
+      };
+      _this.ljEnum = {
+        '1': 'miter',
+        '2': 'round',
+        '3': 'bevel'
+      }; // set to true when inpoint is rendered
+
+      _this._isFirstFrame = true;
+      _this.transformHelper = {
+        opacity: 1,
+        _opMdf: false
+      };
+
+      _this.searchShapes(_this.shapesData, _this.itemsData, _this.prevViewData, true, []);
+
+      if (!_this._isAnimated) {
+        _this.transformHelper.opacity = 1;
+        _this.transformHelper._opMdf = false;
+
+        _this.updateModifiers(_this.frameId);
+
+        _this.transformsManager.processSequences(_this._isFirstFrame);
+
+        _this.updateShape(_this.transformHelper, _this.shapesData, _this.itemsData);
+
+        _this.updateGrahpics();
       }
-      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
-        styleElem.coOp = itemData.o.v * groupTransform.opacity;
-      }
+
+      return _this;
     }
-
-    /**
-     * a
-     * @param {*} styleData a
-     * @param {*} itemData aa
-     * @param {*} groupTransform a
-     */
-
-  }, {
-    key: 'updateStroke',
-    value: function updateStroke(styleData, itemData, groupTransform) {
-      var styleElem = itemData.style;
-      var d = itemData.d;
-      if (d && (d._mdf || this._isFirstFrame)) {
-        styleElem.da = d.dashArray;
-        styleElem.do = d.dashoffset[0];
-      }
-      if (itemData.c._mdf || this._isFirstFrame) {
-        styleElem.co = itemData.c.v; // 'rgb('+bm_floor(itemData.c.v[0])+','+bm_floor(itemData.c.v[1])+','+bm_floor(itemData.c.v[2])+')';
-      }
-      if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
-        styleElem.coOp = itemData.o.v * groupTransform.opacity;
-      }
-      if (itemData.w._mdf || this._isFirstFrame) {
-        styleElem.wi = itemData.w.v;
-      }
-    }
-
-    /**
-     * a
-     * @param {*} styleData a
-     * @param {*} itemData a
-     * @param {*} groupTransform a
-     */
-
-  }, {
-    key: 'updateGradientFill',
-    value: function updateGradientFill(styleData, itemData, groupTransform) {
-      var styleElem = itemData.style;
-      if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf)) {
-        var ctx = this.globalData.canvasContext;
-        var grd = void 0;
-        var pt1 = itemData.s.v;var pt2 = itemData.e.v;
-        if (styleData.t === 1) {
-          grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
-        } else {
-          var rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
-          var ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
-
-          var percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99 : itemData.h.v;
-          var dist = rad * percent;
-          var x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
-          var y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
-          grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
-        }
-
-        var i = void 0;var len = styleData.g.p;
-        var cValues = itemData.g.c;
-        var opacity = 1;
-
-        for (i = 0; i < len; i += 1) {
-          if (itemData.g._hasOpacity && itemData.g._collapsable) {
-            opacity = itemData.g.o[i * 2 + 1];
-          }
-          grd.addColorStop(cValues[i * 4] / 100, 'rgba(' + cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ',' + cValues[i * 4 + 3] + ',' + opacity + ')');
-        }
-        styleElem.grd = grd;
-      }
-      styleElem.coOp = itemData.o.v * groupTransform.opacity;
-    }
-
-    /**
-     * a
-     * @param {*} parentTransform a
-     * @param {*} items a
-     * @param {*} data a
-     */
-
-  }, {
-    key: 'updateShape',
-    value: function updateShape(parentTransform, items, data) {
-      var len = items.length - 1;
-      var groupTransform = parentTransform;
-      for (var i = len; i >= 0; i -= 1) {
-        if (items[i].ty == 'tr') {
-          groupTransform = data[i].transform;
-          this.updateShapeTransform(parentTransform, groupTransform);
-        } else if (items[i].ty == 'sh' || items[i].ty == 'el' || items[i].ty == 'rc' || items[i].ty == 'sr') {
-          this.updatePath(items[i], data[i]);
-        } else if (items[i].ty == 'fl') {
-          this.updateFill(items[i], data[i], groupTransform);
-        } else if (items[i].ty == 'st') {
-          this.updateStroke(items[i], data[i], groupTransform);
-        } else if (items[i].ty == 'gf' || items[i].ty == 'gs') {
-          this.updateGradientFill(items[i], data[i], groupTransform);
-        } else if (items[i].ty == 'gr') {
-          this.updateShape(groupTransform, items[i].it, data[i].it);
-        }
-      }
-      // if (isMain) {
-      //   this.drawLayer();
-      // }
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'updateGrahpics',
-    value: function updateGrahpics() {
-      var len = this.stylesList.length;
-      for (var i = 0; i < len; i += 1) {
-        var currentStyle = this.stylesList[i];
-        currentStyle.updateGrahpics();
-      }
-    }
-
     /**
      * a
      * @param {number} frameNum frameNum
      */
-
-  }, {
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-      this.iterateDynamicProperties(frameNum);
-      this.transformHelper.opacity = 1;
-      this.transformHelper._opMdf = false;
-      this.updateModifiers(frameNum);
-      this.transformsManager.processSequences(this._isFirstFrame);
-      this.updateShape(this.transformHelper, this.shapesData, this.itemsData);
-
-      this.updateGrahpics();
-
-      this.frameId = frameNum;
-    }
-  }]);
-  return ShapesFrames;
-}(DynamicPropertyContainer);
-
-/**
- * a
- */
-
-var TransformFrames = function (_TransformProperty) {
-  inherits(TransformFrames, _TransformProperty);
-
-  /**
-   * a
-   * @param {*} elem a
-   * @param {*} hs a
-   * @param {*} session a
-   */
-  function TransformFrames(elem, hs, session) {
-    classCallCheck(this, TransformFrames);
-
-    var _this = possibleConstructorReturn(this, (TransformFrames.__proto__ || Object.getPrototypeOf(TransformFrames)).call(this, elem, hs));
-
-    _this.frameId = -1;
-    _this.hs = hs;
-    _this.session = session;
-    return _this;
-  }
-
-  /**
-   * get transform
-   * @param {number} frameNum frameNum
-   */
-
-
-  createClass(TransformFrames, [{
-    key: 'getValue',
-    value: function getValue(frameNum) {
-      if (frameNum === this.frameId) {
-        return;
-      }
-
-      this.iterateDynamicProperties(frameNum);
-
-      this.frameId = frameNum;
-    }
-
-    /**
-     * get position x
-     */
-
-  }, {
-    key: 'x',
-    get: function get$$1() {
-      return this.p ? this.p.v[0] : this.px.v;
-    }
-
-    /**
-     * get position x
-     */
-
-  }, {
-    key: 'y',
-    get: function get$$1() {
-      return this.p ? this.p.v[1] : this.py.v;
-    }
-
-    /**
-     * get anchor x
-     */
-
-  }, {
-    key: 'anchorX',
-    get: function get$$1() {
-      return this.a.v[0];
-    }
-
-    /**
-     * get anchor x
-     */
-
-  }, {
-    key: 'anchorY',
-    get: function get$$1() {
-      return this.a.v[1];
-    }
-
-    /**
-     * get scale x
-     */
-
-  }, {
-    key: 'scaleX',
-    get: function get$$1() {
-      return this.s.v[0];
-    }
-
-    /**
-     * get scale x
-     */
-
-  }, {
-    key: 'scaleY',
-    get: function get$$1() {
-      return this.s.v[1];
-    }
-
-    /**
-     * get rotation
-     */
-
-  }, {
-    key: 'rotation',
-    get: function get$$1() {
-      return this.r.v;
-    }
-
-    /**
-     * get alpha
-     */
-
-  }, {
-    key: 'alpha',
-    get: function get$$1() {
-      return this.o.v;
-    }
-  }]);
-  return TransformFrames;
-}(TransformProperty);
-
-/**
- * KeyframesManager
- * @class
- * @private
- */
-
-var KeyframesManager = function () {
-  /**
-   * manager
-   * @param {object} elem elem
-   */
-  function KeyframesManager(elem) {
-    classCallCheck(this, KeyframesManager);
-
-    // const { st, config } = session;
-
-    this.elem = elem;
-    // this.layer = layer;
-
-    // const opst = this.layer.op + st;
-
-    // this.isOverSide = opst >= config.op;
-
-    // this.keyframes = [];
-
-    // set to true when inpoint is rendered
-    this._isFirstFrame = false;
-
-    // list of animated properties
-    this.dynamicProperties = [];
-
-    // If layer has been modified in current tick this will be true
-    this._mdf = false;
-
-    this.transform = null;
-
-    this.masks = null;
-
-    this.shapes = null;
-
-    this._hasOutTypeExpression = false;
-
-    this.needUpdateOverlap = false;
-
-    this.isOverlapMode = false;
-
-    this.visible = true;
-  }
-
-  /**
-   * manager
-   * @param {object} layer elem
-   * @param {object} session elem
-   */
-
-
-  createClass(KeyframesManager, [{
-    key: 'initFrame',
-    value: function initFrame(layer, session) {
-      // this.elem = elem;
-      this.layer = layer;
-
-      var local = session.local,
-          global = session.global;
-
-      this.session = session;
-
-      // const opst = this.layer.op + st;
-
-      // ip, op, st session
-      this.isOverlapLayer = this.layer.op >= local.op - local.st;
-
-      this.isOverlapMode = global.overlapMode;
-
-      this.parseLayer(layer, session);
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'outTypeExpressionMode',
-    value: function outTypeExpressionMode() {
-      this._hasOutTypeExpression = true;
-      if (this.isOverlapLayer) {
-        this.needUpdateOverlap = true;
-      }
-    }
-
-    /**
-     * Calculates all dynamic values
-     * @param {number} frameNum current frame number in Layer's time
-     * @param {boolean} isVisible if layers is currently in range
-     */
-
-  }, {
-    key: 'prepareProperties',
-    value: function prepareProperties(frameNum, isVisible) {
-      var i = void 0;var len = this.dynamicProperties.length;
-      for (i = 0; i < len; i += 1) {
-        if (isVisible || this.needUpdateOverlap || this.elem._isParent && this.dynamicProperties[i].propType === 'transform') {
-          this.dynamicProperties[i].getValue(frameNum);
-          if (this.dynamicProperties[i]._mdf) {
-            // this.globalData._mdf = true;
-            this._mdf = true;
-          }
-        }
-      }
-    }
+    // prepareProperties(frameNum) {
+    //   let i;
+    //   const len = this.dynamicProperties.length;
+    //   for (i = 0; i < len; i += 1) {
+    //     this.dynamicProperties[i].getValue(frameNum);
+    //     if (this.dynamicProperties[i]._mdf) {
+    //       this._mdf = true;
+    //     }
+    //   }
+    // }
 
     /**
      * a
      * @param {*} prop a
      */
-
-  }, {
-    key: 'addDynamicProperty',
-    value: function addDynamicProperty(prop) {
-      if (this.dynamicProperties.indexOf(prop) === -1) {
-        this.dynamicProperties.push(prop);
-      }
-    }
+    // addDynamicProperty(prop) {
+    //   if (this.dynamicProperties.indexOf(prop) === -1) {
+    //     this.dynamicProperties.push(prop);
+    //   }
+    // }
 
     /**
-     * parse
-     * @param {object} layer
-     * @param {object} session
+     * create style element
+     * @param {*} data style item data
+     * @param {*} transforms transforms array
+     * @return {*}
      */
 
-  }, {
-    key: 'parseLayer',
-    value: function parseLayer(_ref, session) {
-      var ks = _ref.ks,
-          hasMask = _ref.hasMask,
-          masksProperties = _ref.masksProperties,
-          shapes = _ref.shapes,
-          tm = _ref.tm;
 
-      if (ks) {
-        this.transform = new TransformFrames(this, ks, session);
-        // ao logic
-      }
+    _createClass(ShapesFrames, [{
+      key: "createStyleElement",
+      value: function createStyleElement(data, transforms) {
+        // let styleElem = {
+        //   data: data,
+        //   type: data.ty,
+        //   preTransforms: this.transformsManager.addTransformSequence(transforms),
+        //   transforms: [],
+        //   elements: [],
+        //   closed: data.hd === true,
+        // };
+        var styleElem = new PathPaint(this.elem, data, this.transformsManager.addTransformSequence(transforms));
+        var elementData = {};
 
-      if (hasMask) {
-        this.masks = new MaskFrames(this, masksProperties, session);
-      }
-      if (shapes) {
-        this.shapes = new ShapesFrames(this, shapes, session);
-      }
+        if (data.ty == 'fl' || data.ty == 'st') {
+          elementData.c = PropertyFactory.getProp(this, data.c, 1, 255, this);
 
-      if (tm) {
-        var frameRate = session.global.frameRate;
+          if (!elementData.c.k) {
+            styleElem.co = elementData.c.v; // 'rgb('+bm_floor(elementData.c.v[0])+','+bm_floor(elementData.c.v[1])+','+bm_floor(elementData.c.v[2])+')';
+          }
+        } else if (data.ty === 'gf' || data.ty === 'gs') {
+          elementData.s = PropertyFactory.getProp(this, data.s, 1, null, this);
+          elementData.e = PropertyFactory.getProp(this, data.e, 1, null, this);
+          elementData.h = PropertyFactory.getProp(this, data.h || {
+            k: 0
+          }, 0, 0.01, this);
+          elementData.a = PropertyFactory.getProp(this, data.a || {
+            k: 0
+          }, 0, degToRads, this);
+          elementData.g = new GradientProperty(this, data.g, this);
+        }
 
-        this.tm = PropertyFactory.getProp(this, tm, 0, frameRate, this);
-      }
-    }
+        elementData.o = PropertyFactory.getProp(this, data.o, 0, 0.01, this);
 
-    /**
-     * update
-     * @param {number} frameNum frameNum
-     * @param {object} session update session
-     */
+        if (data.ty == 'st' || data.ty == 'gs') {
+          styleElem.lc = this.lcEnum[data.lc] || 'round';
+          styleElem.lj = this.ljEnum[data.lj] || 'round';
 
-  }, {
-    key: 'updateFrame',
-    value: function updateFrame(frameNum, session) {
-      this._mdf = false;
-      var inIpOpRange = Tools.inRange(frameNum, this.layer.ip, this.layer.op);
-      if (this.isOverlapMode && this.isOverlapLayer) {
-        this.visible = frameNum >= this.layer.ip;
-      } else {
-        this.visible = inIpOpRange;
-      }
+          if (data.lj == 1) {
+            styleElem.ml = data.ml;
+          }
 
-      this.prepareProperties(frameNum, inIpOpRange);
-    }
+          elementData.w = PropertyFactory.getProp(this, data.w, 0, null, this);
 
-    /**
-     * a
-     */
+          if (!elementData.w.k) {
+            styleElem.wi = elementData.w.v;
+          }
 
-  }, {
-    key: 'updateDisplay',
-    value: function updateDisplay() {
-      var display = this.elem.display;
-      if (!this.elem._isRoot) {
-        if (this.visible) {
-          display.show();
+          if (data.d) {
+            var d = new DashProperty(this, data.d, 'canvas', this);
+            elementData.d = d;
+
+            if (!elementData.d.k) {
+              styleElem.da = elementData.d.dashArray;
+              styleElem["do"] = elementData.d.dashoffset[0];
+            }
+          }
         } else {
-          display.hide();
+          styleElem.r = data.r === 2 ? 'evenodd' : 'nonzero';
+        }
+
+        this.stylesList.push(styleElem);
+        elementData.style = styleElem;
+        return elementData;
+      }
+      /**
+       * a
+       * @param {*} data a
+       */
+
+    }, {
+      key: "addShapeToModifiers",
+      value: function addShapeToModifiers(data) {
+        var i;
+        var len = this.shapeModifiers.length;
+
+        for (i = 0; i < len; i += 1) {
+          this.shapeModifiers[i].addShape(data);
         }
       }
-      if (this.transform) display.updateLottieTransform(this.transform);
-      if (this.masks) display.updateLottieMasks(this.masks);
-    }
-  }]);
-  return KeyframesManager;
-}();
+      /**
+       * a
+       * @param {*} data a
+       * @return {Boolean}
+       */
 
-/**
- * a
- */
+    }, {
+      key: "isShapeInAnimatedModifiers",
+      value: function isShapeInAnimatedModifiers(data) {
+        var i = 0;
+        var len = this.shapeModifiers.length;
 
-var BaseElement = function () {
+        while (i < len) {
+          if (this.shapeModifiers[i].isAnimatedWithShape(data)) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+      /**
+       * a
+       * @param {number} frameNum frameNum
+       */
+
+    }, {
+      key: "updateModifiers",
+      value: function updateModifiers(frameNum) {
+        if (!this.shapeModifiers.length) {
+          return;
+        }
+
+        var i;
+        var len = this.shapes.length;
+
+        for (i = 0; i < len; i += 1) {
+          this.shapes[i].sh.reset();
+        }
+
+        len = this.shapeModifiers.length;
+
+        for (i = len - 1; i >= 0; i -= 1) {
+          this.shapeModifiers[i].processShapes(frameNum, this._isFirstFrame);
+        }
+      }
+      /**
+       * a
+       * @param {*} elem a
+       * @return {number}
+       */
+
+    }, {
+      key: "searchProcessedElement",
+      value: function searchProcessedElement(elem) {
+        var elements = this.processedElements;
+        var i = 0;
+        var len = elements.length;
+
+        while (i < len) {
+          if (elements[i].elem === elem) {
+            return elements[i].pos;
+          }
+
+          i += 1;
+        }
+
+        return 0;
+      }
+      /**
+       * a
+       * @param {*} elem a
+       * @param {*} pos a
+       */
+
+    }, {
+      key: "addProcessedElement",
+      value: function addProcessedElement(elem, pos) {
+        var elements = this.processedElements;
+        var i = elements.length;
+
+        while (i) {
+          i -= 1;
+
+          if (elements[i].elem === elem) {
+            elements[i].pos = pos;
+            return;
+          }
+        }
+
+        elements.push(new ProcessedElement(elem, pos));
+      }
+      /**
+       * create group element
+       * @return {*}
+       */
+
+    }, {
+      key: "createGroupElement",
+      value: function createGroupElement() {
+        return {
+          it: [],
+          prevViewData: []
+        };
+      }
+      /**
+       * create transform element
+       * @param {*} data a
+       * @return {*}
+       */
+
+    }, {
+      key: "createTransformElement",
+      value: function createTransformElement(data) {
+        return {
+          transform: {
+            opacity: 1,
+            _opMdf: false,
+            key: this.transformsManager.getNewKey(),
+            op: PropertyFactory.getProp(this, data.o, 0, 0.01, this),
+            mProps: getTransformProperty(this, data, this)
+          }
+        };
+      }
+      /**
+       * a
+       * @param {*} data a
+       * @return {*}
+       */
+
+    }, {
+      key: "createShapeElement",
+      value: function createShapeElement(data) {
+        var elementData = new ShapeData(this, data, this.stylesList, this.transformsManager);
+        this.shapes.push(elementData);
+        this.addShapeToModifiers(elementData);
+        return elementData;
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "reloadShapes",
+      value: function reloadShapes() {
+        this._isFirstFrame = true;
+        var i;
+        var len = this.itemsData.length;
+
+        for (i = 0; i < len; i += 1) {
+          this.prevViewData[i] = this.itemsData[i];
+        }
+
+        this.searchShapes(this.shapesData, this.itemsData, this.prevViewData, true, []);
+        len = this.dynamicProperties.length;
+
+        for (i = 0; i < len; i += 1) {
+          this.dynamicProperties[i].getValue();
+        }
+
+        this.updateModifiers();
+        this.transformsManager.processSequences(this._isFirstFrame);
+      }
+      /**
+       * a
+       * @param {*} transform a
+       */
+
+    }, {
+      key: "addTransformToStyleList",
+      value: function addTransformToStyleList(transform) {
+        var len = this.stylesList.length;
+
+        for (var i = 0; i < len; i += 1) {
+          if (!this.stylesList[i].closed) {
+            this.stylesList[i].transforms.push(transform);
+          }
+        }
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "removeTransformFromStyleList",
+      value: function removeTransformFromStyleList() {
+        var len = this.stylesList.length;
+
+        for (var i = 0; i < len; i += 1) {
+          if (!this.stylesList[i].closed) {
+            this.stylesList[i].transforms.pop();
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} styles a
+       */
+
+    }, {
+      key: "closeStyles",
+      value: function closeStyles(styles) {
+        var len = styles.length;
+
+        for (var i = 0; i < len; i += 1) {
+          styles[i].closed = true;
+        }
+      }
+      /**
+       * a
+       * @param {*} arr a
+       * @param {*} itemsData a
+       * @param {*} prevViewData a
+       * @param {*} shouldRender a
+       * @param {*} transforms a
+       */
+
+    }, {
+      key: "searchShapes",
+      value: function searchShapes(arr, itemsData, prevViewData, shouldRender, transforms) {
+        var i;
+        var len = arr.length - 1;
+        var j;
+        var jLen;
+        var ownStyles = [];
+        var ownModifiers = [];
+        var processedPos;
+        var modifier;
+        var currentTransform;
+        var ownTransforms = [].concat(transforms);
+
+        for (i = len; i >= 0; i -= 1) {
+          processedPos = this.searchProcessedElement(arr[i]);
+
+          if (!processedPos) {
+            arr[i]._shouldRender = shouldRender;
+          } else {
+            itemsData[i] = prevViewData[processedPos - 1];
+          }
+
+          if (arr[i].ty == 'fl' || arr[i].ty == 'st' || arr[i].ty == 'gf' || arr[i].ty == 'gs') {
+            if (!processedPos) {
+              itemsData[i] = this.createStyleElement(arr[i], ownTransforms);
+            } else {
+              itemsData[i].style.closed = false;
+            }
+
+            ownStyles.push(itemsData[i].style);
+          } else if (arr[i].ty == 'gr') {
+            if (!processedPos) {
+              itemsData[i] = this.createGroupElement(arr[i]);
+            } else {
+              jLen = itemsData[i].it.length;
+
+              for (j = 0; j < jLen; j += 1) {
+                itemsData[i].prevViewData[j] = itemsData[i].it[j];
+              }
+            }
+
+            this.searchShapes(arr[i].it, itemsData[i].it, itemsData[i].prevViewData, shouldRender, ownTransforms);
+          } else if (arr[i].ty == 'tr') {
+            if (!processedPos) {
+              currentTransform = this.createTransformElement(arr[i]);
+              itemsData[i] = currentTransform;
+            }
+
+            ownTransforms.push(itemsData[i]);
+            this.addTransformToStyleList(itemsData[i]);
+          } else if (arr[i].ty == 'sh' || arr[i].ty == 'rc' || arr[i].ty == 'el' || arr[i].ty == 'sr') {
+            if (!processedPos) {
+              itemsData[i] = this.createShapeElement(arr[i]);
+            }
+          } else if (arr[i].ty == 'tm' || arr[i].ty == 'rd') {
+            if (!processedPos) {
+              modifier = ShapeModifiers.getModifier(arr[i].ty);
+              modifier.init(this, arr[i]);
+              itemsData[i] = modifier;
+              this.shapeModifiers.push(modifier);
+            } else {
+              modifier = itemsData[i];
+              modifier.closed = false;
+            }
+
+            ownModifiers.push(modifier);
+          } else if (arr[i].ty == 'rp') {
+            if (!processedPos) {
+              modifier = ShapeModifiers.getModifier(arr[i].ty);
+              itemsData[i] = modifier;
+              modifier.init(this, arr, i, itemsData);
+              this.shapeModifiers.push(modifier);
+              shouldRender = false;
+            } else {
+              modifier = itemsData[i];
+              modifier.closed = true;
+            }
+
+            ownModifiers.push(modifier);
+          }
+
+          this.addProcessedElement(arr[i], i + 1);
+        }
+
+        this.removeTransformFromStyleList();
+        this.closeStyles(ownStyles);
+        len = ownModifiers.length;
+
+        for (i = 0; i < len; i += 1) {
+          ownModifiers[i].closed = true;
+        }
+      }
+      /**
+       * a
+       * @param {*} parentTransform a
+       * @param {*} groupTransform a
+       */
+
+    }, {
+      key: "updateShapeTransform",
+      value: function updateShapeTransform(parentTransform, groupTransform) {
+        if (parentTransform._opMdf || groupTransform.op._mdf || this._isFirstFrame) {
+          groupTransform.opacity = parentTransform.opacity;
+          groupTransform.opacity *= groupTransform.op.v;
+          groupTransform._opMdf = true;
+        }
+      }
+      /**
+       * a
+       * @param {*} styledShape a
+       * @param {*} shape a
+       */
+
+    }, {
+      key: "updateStyledShape",
+      value: function updateStyledShape(styledShape, shape) {
+        if (this._isFirstFrame || shape._mdf || styledShape.transforms._mdf) {
+          var shapeNodes = styledShape.trNodes;
+          var paths = shape.paths;
+          var i;
+          var len;
+          var j;
+          var jLen = paths._length;
+          shapeNodes.length = 0;
+          var groupTransformMat = styledShape.transforms.finalTransform;
+
+          for (j = 0; j < jLen; j += 1) {
+            var pathNodes = paths.shapes[j];
+
+            if (pathNodes && pathNodes.v) {
+              len = pathNodes._length;
+
+              for (i = 1; i < len; i += 1) {
+                if (i === 1) {
+                  shapeNodes.push({
+                    t: 'm',
+                    p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
+                  });
+                }
+
+                shapeNodes.push({
+                  t: 'c',
+                  pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[i], pathNodes.v[i])
+                });
+              }
+
+              if (len === 1) {
+                shapeNodes.push({
+                  t: 'm',
+                  p: groupTransformMat.applyToPointArray(pathNodes.v[0][0], pathNodes.v[0][1], 0)
+                });
+              }
+
+              if (pathNodes.c && len) {
+                shapeNodes.push({
+                  t: 'c',
+                  pts: groupTransformMat.applyToTriplePoints(pathNodes.o[i - 1], pathNodes.i[0], pathNodes.v[0])
+                });
+                shapeNodes.push({
+                  t: 'z'
+                });
+              }
+            }
+          }
+
+          styledShape.trNodes = shapeNodes;
+        }
+      }
+      /**
+       * a
+       * @param {*} pathData a
+       * @param {*} itemData a
+       */
+
+    }, {
+      key: "updatePath",
+      value: function updatePath(pathData, itemData) {
+        if (pathData.hd !== true && pathData._shouldRender) {
+          var i;
+          var len = itemData.styledShapes.length;
+
+          for (i = 0; i < len; i += 1) {
+            this.updateStyledShape(itemData.styledShapes[i], itemData.sh);
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} styleData a
+       * @param {*} itemData a
+       * @param {*} groupTransform a
+       */
+
+    }, {
+      key: "updateFill",
+      value: function updateFill(styleData, itemData, groupTransform) {
+        var styleElem = itemData.style;
+
+        if (itemData.c._mdf || this._isFirstFrame) {
+          // styleElem.co = 'rgb('
+          // + Math.floor(itemData.c.v[0]) + ','
+          // + Math.floor(itemData.c.v[1]) + ','
+          // + Math.floor(itemData.c.v[2]) + ')';
+          styleElem.co = itemData.c.v; // rgb2hex(itemData.c.v);
+        }
+
+        if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
+          styleElem.coOp = itemData.o.v * groupTransform.opacity;
+        }
+      }
+      /**
+       * a
+       * @param {*} styleData a
+       * @param {*} itemData aa
+       * @param {*} groupTransform a
+       */
+
+    }, {
+      key: "updateStroke",
+      value: function updateStroke(styleData, itemData, groupTransform) {
+        var styleElem = itemData.style;
+        var d = itemData.d;
+
+        if (d && (d._mdf || this._isFirstFrame)) {
+          styleElem.da = d.dashArray;
+          styleElem["do"] = d.dashoffset[0];
+        }
+
+        if (itemData.c._mdf || this._isFirstFrame) {
+          styleElem.co = itemData.c.v; // 'rgb('+bm_floor(itemData.c.v[0])+','+bm_floor(itemData.c.v[1])+','+bm_floor(itemData.c.v[2])+')';
+        }
+
+        if (itemData.o._mdf || groupTransform._opMdf || this._isFirstFrame) {
+          styleElem.coOp = itemData.o.v * groupTransform.opacity;
+        }
+
+        if (itemData.w._mdf || this._isFirstFrame) {
+          styleElem.wi = itemData.w.v;
+        }
+      }
+      /**
+       * a
+       * @param {*} styleData a
+       * @param {*} itemData a
+       * @param {*} groupTransform a
+       */
+
+    }, {
+      key: "updateGradientFill",
+      value: function updateGradientFill(styleData, itemData, groupTransform) {
+        var styleElem = itemData.style;
+
+        if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf)) {
+          var ctx = this.globalData.canvasContext;
+          var grd;
+          var pt1 = itemData.s.v;
+          var pt2 = itemData.e.v;
+
+          if (styleData.t === 1) {
+            grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
+          } else {
+            var rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
+            var ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
+            var percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99 : itemData.h.v;
+            var dist = rad * percent;
+            var x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
+            var y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
+            grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
+          }
+
+          var i;
+          var len = styleData.g.p;
+          var cValues = itemData.g.c;
+          var opacity = 1;
+
+          for (i = 0; i < len; i += 1) {
+            if (itemData.g._hasOpacity && itemData.g._collapsable) {
+              opacity = itemData.g.o[i * 2 + 1];
+            }
+
+            grd.addColorStop(cValues[i * 4] / 100, 'rgba(' + cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ',' + cValues[i * 4 + 3] + ',' + opacity + ')');
+          }
+
+          styleElem.grd = grd;
+        }
+
+        styleElem.coOp = itemData.o.v * groupTransform.opacity;
+      }
+      /**
+       * a
+       * @param {*} parentTransform a
+       * @param {*} items a
+       * @param {*} data a
+       */
+
+    }, {
+      key: "updateShape",
+      value: function updateShape(parentTransform, items, data) {
+        var len = items.length - 1;
+        var groupTransform = parentTransform;
+
+        for (var i = len; i >= 0; i -= 1) {
+          if (items[i].ty == 'tr') {
+            groupTransform = data[i].transform;
+            this.updateShapeTransform(parentTransform, groupTransform);
+          } else if (items[i].ty == 'sh' || items[i].ty == 'el' || items[i].ty == 'rc' || items[i].ty == 'sr') {
+            this.updatePath(items[i], data[i]);
+          } else if (items[i].ty == 'fl') {
+            this.updateFill(items[i], data[i], groupTransform);
+          } else if (items[i].ty == 'st') {
+            this.updateStroke(items[i], data[i], groupTransform);
+          } else if (items[i].ty == 'gf' || items[i].ty == 'gs') {
+            this.updateGradientFill(items[i], data[i], groupTransform);
+          } else if (items[i].ty == 'gr') {
+            this.updateShape(groupTransform, items[i].it, data[i].it);
+          }
+        } // if (isMain) {
+        //   this.drawLayer();
+        // }
+
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "updateGrahpics",
+      value: function updateGrahpics() {
+        var len = this.stylesList.length;
+
+        for (var i = 0; i < len; i += 1) {
+          var currentStyle = this.stylesList[i];
+          currentStyle.updateGrahpics();
+        }
+      }
+      /**
+       * a
+       * @param {number} frameNum frameNum
+       */
+
+    }, {
+      key: "getValue",
+      value: function getValue(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        this.iterateDynamicProperties(frameNum);
+        this.transformHelper.opacity = 1;
+        this.transformHelper._opMdf = false;
+        this.updateModifiers(frameNum);
+        this.transformsManager.processSequences(this._isFirstFrame);
+        this.updateShape(this.transformHelper, this.shapesData, this.itemsData);
+        this.updateGrahpics();
+        this.frameId = frameNum;
+      }
+    }]);
+
+    return ShapesFrames;
+  }(DynamicPropertyContainer);
+
   /**
    * a
-   * @param {*} layer layer
-   */
-  function BaseElement(layer) {
-    classCallCheck(this, BaseElement);
-
-    this.data = layer;
-    if (this.data.sr === undefined) {
-      this.data.sr = 1;
-    }
-    this.offsetTime = layer.st || 0;
-    this.bodymovin = new KeyframesManager(this);
-    this.displayType = '';
-    this.display = null;
-    this.hierarchy = null;
-
-    this.lottieTreeParent = null;
-  }
-
-  /**
-   * set hierarchy
-   * @param {*} elem elem
    */
 
+  var TransformFrames = /*#__PURE__*/function (_TransformProperty) {
+    _inherits(TransformFrames, _TransformProperty);
 
-  createClass(BaseElement, [{
-    key: 'setHierarchy',
-    value: function setHierarchy(elem) {
-      this.hierarchy = elem;
-      this.display.setHierarchy(elem.display);
-    }
+    var _super = _createSuper(TransformFrames);
 
     /**
      * a
-     * @param {*} type a
-     * @param {*} data a
-     * @return {DisplayInstance}
+     * @param {*} elem a
+     * @param {*} hs a
+     * @param {*} session a
+     */
+    function TransformFrames(elem, hs, session) {
+      var _this;
+
+      _classCallCheck(this, TransformFrames);
+
+      _this = _super.call(this, elem, hs);
+      _this.frameId = -1;
+      _this.hs = hs;
+      _this.session = session;
+      return _this;
+    }
+    /**
+     * get transform
+     * @param {number} frameNum frameNum
      */
 
-  }, {
-    key: 'initDisplayInstance',
-    value: function initDisplayInstance(type, data) {
-      var classFn = DisplayRegister.getDisplayByType(type);
-      var instance = new classFn(this, data);
-      return instance;
-    }
 
+    _createClass(TransformFrames, [{
+      key: "getValue",
+      value: function getValue(frameNum) {
+        if (frameNum === this.frameId) {
+          return;
+        }
+
+        this.iterateDynamicProperties(frameNum);
+        this.frameId = frameNum;
+      }
+      /**
+       * get position x
+       */
+
+    }, {
+      key: "x",
+      get: function get() {
+        return this.p ? this.p.v[0] : this.px.v;
+      }
+      /**
+       * get position x
+       */
+
+    }, {
+      key: "y",
+      get: function get() {
+        return this.p ? this.p.v[1] : this.py.v;
+      }
+      /**
+       * get anchor x
+       */
+
+    }, {
+      key: "anchorX",
+      get: function get() {
+        return this.a.v[0];
+      }
+      /**
+       * get anchor x
+       */
+
+    }, {
+      key: "anchorY",
+      get: function get() {
+        return this.a.v[1];
+      }
+      /**
+       * get scale x
+       */
+
+    }, {
+      key: "scaleX",
+      get: function get() {
+        return this.s.v[0];
+      }
+      /**
+       * get scale x
+       */
+
+    }, {
+      key: "scaleY",
+      get: function get() {
+        return this.s.v[1];
+      }
+      /**
+       * get rotation
+       */
+
+    }, {
+      key: "rotation",
+      get: function get() {
+        return this.r.v;
+      }
+      /**
+       * get alpha
+       */
+
+    }, {
+      key: "alpha",
+      get: function get() {
+        return this.o.v;
+      }
+    }]);
+
+    return TransformFrames;
+  }(TransformProperty);
+
+  /**
+   * KeyframesManager
+   * @class
+   * @private
+   */
+
+  var KeyframesManager = /*#__PURE__*/function () {
+    /**
+     * manager
+     * @param {object} elem elem
+     */
+    function KeyframesManager(elem) {
+      _classCallCheck(this, KeyframesManager);
+
+      // const { st, config } = session;
+      this.elem = elem; // this.layer = layer;
+      // const opst = this.layer.op + st;
+      // this.isOverSide = opst >= config.op;
+      // this.keyframes = [];
+      // set to true when inpoint is rendered
+
+      this._isFirstFrame = false; // list of animated properties
+
+      this.dynamicProperties = []; // If layer has been modified in current tick this will be true
+
+      this._mdf = false;
+      this.transform = null;
+      this.masks = null;
+      this.shapes = null;
+      this._hasOutTypeExpression = false;
+      this.needUpdateOverlap = false;
+      this.isOverlapMode = false;
+      this.visible = true;
+    }
+    /**
+     * manager
+     * @param {object} layer elem
+     * @param {object} session elem
+     */
+
+
+    _createClass(KeyframesManager, [{
+      key: "initFrame",
+      value: function initFrame(layer, session) {
+        // this.elem = elem;
+        this.layer = layer;
+        var local = session.local,
+            global = session.global;
+        this.session = session; // const opst = this.layer.op + st;
+        // ip, op, st session
+
+        this.isOverlapLayer = this.layer.op >= local.op - local.st;
+        this.isOverlapMode = global.overlapMode;
+        this.parseLayer(layer, session);
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "outTypeExpressionMode",
+      value: function outTypeExpressionMode() {
+        this._hasOutTypeExpression = true;
+
+        if (this.isOverlapLayer) {
+          this.needUpdateOverlap = true;
+        }
+      }
+      /**
+       * Calculates all dynamic values
+       * @param {number} frameNum current frame number in Layer's time
+       * @param {boolean} isVisible if layers is currently in range
+       */
+
+    }, {
+      key: "prepareProperties",
+      value: function prepareProperties(frameNum, isVisible) {
+        var i;
+        var len = this.dynamicProperties.length;
+
+        for (i = 0; i < len; i += 1) {
+          if (isVisible || this.needUpdateOverlap || this.elem._isParent && this.dynamicProperties[i].propType === 'transform') {
+            this.dynamicProperties[i].getValue(frameNum);
+
+            if (this.dynamicProperties[i]._mdf) {
+              // this.globalData._mdf = true;
+              this._mdf = true;
+            }
+          }
+        }
+      }
+      /**
+       * a
+       * @param {*} prop a
+       */
+
+    }, {
+      key: "addDynamicProperty",
+      value: function addDynamicProperty(prop) {
+        if (this.dynamicProperties.indexOf(prop) === -1) {
+          this.dynamicProperties.push(prop);
+        }
+      }
+      /**
+       * parse
+       * @param {object} layer
+       * @param {object} session
+       */
+
+    }, {
+      key: "parseLayer",
+      value: function parseLayer(_ref, session) {
+        var ks = _ref.ks,
+            hasMask = _ref.hasMask,
+            masksProperties = _ref.masksProperties,
+            shapes = _ref.shapes,
+            tm = _ref.tm;
+
+        if (ks) {
+          this.transform = new TransformFrames(this, ks, session); // ao logic
+        }
+
+        if (hasMask) {
+          this.masks = new MaskFrames(this, masksProperties, session);
+        }
+
+        if (shapes) {
+          this.shapes = new ShapesFrames(this, shapes, session);
+        }
+
+        if (tm) {
+          var frameRate = session.global.frameRate;
+          this.tm = PropertyFactory.getProp(this, tm, 0, frameRate, this);
+        }
+      }
+      /**
+       * update
+       * @param {number} frameNum frameNum
+       * @param {object} session update session
+       */
+
+    }, {
+      key: "updateFrame",
+      value: function updateFrame(frameNum, session) {
+        this._mdf = false;
+        var inIpOpRange = Tools.inRange(frameNum, this.layer.ip, this.layer.op);
+
+        if (this.isOverlapMode && this.isOverlapLayer) {
+          this.visible = frameNum >= this.layer.ip;
+        } else {
+          this.visible = inIpOpRange;
+        }
+
+        this.prepareProperties(frameNum, inIpOpRange);
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "updateDisplay",
+      value: function updateDisplay() {
+        var display = this.elem.display;
+
+        if (!this.elem._isRoot) {
+          if (this.visible) {
+            display.show();
+          } else {
+            display.hide();
+          }
+        }
+
+        if (this.transform) display.updateLottieTransform(this.transform);
+        if (this.masks) display.updateLottieMasks(this.masks);
+      }
+    }]);
+
+    return KeyframesManager;
+  }();
+
+  /**
+   * a
+   */
+
+  var BaseElement = /*#__PURE__*/function () {
+    /**
+     * a
+     * @param {*} layer layer
+     */
+    function BaseElement(layer) {
+      _classCallCheck(this, BaseElement);
+
+      this.data = layer;
+
+      if (this.data.sr === undefined) {
+        this.data.sr = 1;
+      }
+
+      this.offsetTime = layer.st || 0;
+      this.bodymovin = new KeyframesManager(this);
+      this.displayType = '';
+      this.display = null;
+      this.hierarchy = null;
+      this.lottieTreeParent = null;
+    }
+    /**
+     * set hierarchy
+     * @param {*} elem elem
+     */
+
+
+    _createClass(BaseElement, [{
+      key: "setHierarchy",
+      value: function setHierarchy(elem) {
+        this.hierarchy = elem;
+        this.display.setHierarchy(elem.display);
+      }
+      /**
+       * a
+       * @param {*} type a
+       * @param {*} data a
+       * @return {DisplayInstance}
+       */
+
+    }, {
+      key: "initDisplayInstance",
+      value: function initDisplayInstance(type, data) {
+        var classFn = DisplayRegister.getDisplayByType(type);
+        var instance = new classFn(this, data);
+        return instance;
+      }
+      /**
+       * a
+       * @param {*} frameNum a
+       */
+
+    }, {
+      key: "updateFrame",
+      value: function updateFrame(frameNum) {
+        this.bodymovin.updateFrame(frameNum);
+        this.bodymovin.updateDisplay();
+      }
+    }]);
+
+    return BaseElement;
+  }();
+
+  /**
+   * a
+   */
+
+  var CompElement = /*#__PURE__*/function (_BaseElement) {
+    _inherits(CompElement, _BaseElement);
+
+    var _super = _createSuper(CompElement);
+
+    /**
+     * a
+     * @param {*} layer a
+     * @param {*} session a
+     */
+    function CompElement(layer, session) {
+      var _this;
+
+      _classCallCheck(this, CompElement);
+
+      _this = _super.call(this, layer);
+      var maskComp = session.global.maskComp,
+          _session$local = session.local,
+          w = _session$local.w,
+          h = _session$local.h;
+      _this.session = session;
+      var config = {
+        layer: layer,
+        session: session
+      };
+
+      if (maskComp) {
+        config.maskComp = maskComp;
+        config.viewport = {
+          x: 0,
+          y: 0,
+          width: w,
+          height: h
+        };
+      }
+
+      _this.config = config;
+      _this.childNodes = [];
+      _this.displayType = DisplayRegister.Type.Container;
+      _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+      _this.bodymovin.initFrame(layer, session);
+
+      return _this;
+    }
     /**
      * a
      * @param {*} frameNum a
      */
 
-  }, {
-    key: 'updateFrame',
-    value: function updateFrame(frameNum) {
-      this.bodymovin.updateFrame(frameNum);
-      this.bodymovin.updateDisplay();
-    }
-  }]);
-  return BaseElement;
-}();
 
-/**
- * a
- */
+    _createClass(CompElement, [{
+      key: "updateFrame",
+      value: function updateFrame(frameNum) {
+        this.bodymovin.updateFrame(frameNum);
+        this.bodymovin.updateDisplay();
+        frameNum -= this.offsetTime;
 
-var CompElement = function (_BaseElement) {
-  inherits(CompElement, _BaseElement);
+        if (this.bodymovin.tm) {
+          var timeRemapped = this.bodymovin.tm.v;
 
-  /**
-   * a
-   * @param {*} layer a
-   * @param {*} session a
-   */
-  function CompElement(layer, session) {
-    classCallCheck(this, CompElement);
+          if (timeRemapped === this.data.op) {
+            timeRemapped = this.data.op - 1;
+          }
 
-    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this, layer));
-
-    var maskComp = session.global.maskComp,
-        _session$local = session.local,
-        w = _session$local.w,
-        h = _session$local.h;
-
-    _this.session = session;
-
-    var config = {
-      layer: layer,
-      session: session
-    };
-
-    if (maskComp) {
-      config.maskComp = maskComp;
-      config.viewport = { x: 0, y: 0, width: w, height: h };
-    }
-    _this.config = config;
-
-    _this.childNodes = [];
-
-    _this.displayType = DisplayRegister.Type.Container;
-
-    _this.display = _this.initDisplayInstance(_this.displayType, config);
-
-    _this.bodymovin.initFrame(layer, session);
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {*} frameNum a
-   */
-
-
-  createClass(CompElement, [{
-    key: 'updateFrame',
-    value: function updateFrame(frameNum) {
-      this.bodymovin.updateFrame(frameNum);
-      this.bodymovin.updateDisplay();
-
-      frameNum -= this.offsetTime;
-
-      if (this.bodymovin.tm) {
-        var timeRemapped = this.bodymovin.tm.v;
-        if (timeRemapped === this.data.op) {
-          timeRemapped = this.data.op - 1;
+          frameNum = timeRemapped;
+        } else {
+          frameNum = frameNum / this.data.sr;
         }
-        frameNum = timeRemapped;
-      } else {
-        frameNum = frameNum / this.data.sr;
+
+        for (var i = 0; i < this.childNodes.length; i++) {
+          this.childNodes[i].updateFrame(frameNum);
+        }
       }
-      for (var i = 0; i < this.childNodes.length; i++) {
-        this.childNodes[i].updateFrame(frameNum);
+      /**
+       * a
+       * @param {*} node a
+       */
+
+    }, {
+      key: "addChild",
+      value: function addChild(node) {
+        node.lottieTreeParent = this;
+        this.childNodes.push(node);
+        this.display.addChild(node.display);
       }
-    }
+    }]);
+
+    return CompElement;
+  }(BaseElement);
+
+  /**
+   * a
+   */
+
+  var SolidElement = /*#__PURE__*/function (_BaseElement) {
+    _inherits(SolidElement, _BaseElement);
+
+    var _super = _createSuper(SolidElement);
 
     /**
      * a
-     * @param {*} node a
+     * @param {*} layer a
+     * @param {*} session a
      */
-
-  }, {
-    key: 'addChild',
-    value: function addChild(node) {
-      node.lottieTreeParent = this;
-      this.childNodes.push(node);
-      this.display.addChild(node.display);
-    }
-  }]);
-  return CompElement;
-}(BaseElement);
-
-/**
- * a
- */
-
-var SolidElement = function (_BaseElement) {
-  inherits(SolidElement, _BaseElement);
-
-  /**
-   * a
-   * @param {*} layer a
-   * @param {*} session a
-   */
-  function SolidElement(layer, session) {
-    classCallCheck(this, SolidElement);
-
-    var _this = possibleConstructorReturn(this, (SolidElement.__proto__ || Object.getPrototypeOf(SolidElement)).call(this, layer));
-
-    var config = {
-      layer: layer,
-      session: session,
-      rect: { x: 0, y: 0, width: layer.sw, height: layer.sh },
-      color: layer.sc
-    };
-    _this.config = config;
-    _this.session = session;
-
-    _this.displayType = DisplayRegister.Type.Solid;
-
-    _this.display = _this.initDisplayInstance(_this.displayType, config);
-
-    _this.bodymovin.initFrame(layer, session);
-    return _this;
-  }
-
-  return SolidElement;
-}(BaseElement);
-
-/**
- * a
- */
-
-var SpriteElement = function (_BaseElement) {
-  inherits(SpriteElement, _BaseElement);
-
-  /**
-   * a
-   * @param {*} layer a
-   * @param {*} session a
-   */
-  function SpriteElement(layer, session) {
-    classCallCheck(this, SpriteElement);
-
-    var _this = possibleConstructorReturn(this, (SpriteElement.__proto__ || Object.getPrototypeOf(SpriteElement)).call(this, layer));
-
-    var _session$global = session.global,
-        loader = _session$global.loader,
-        assets = _session$global.assets;
-
-    var asset = Tools.getAssets(layer.refId, assets);
-
-    var config = {
-      layer: layer,
-      session: session,
-      texture: loader.getTextureById(asset.id),
-      asset: asset
-    };
-    _this.config = config;
-    _this.session = session;
-
-    _this.displayType = DisplayRegister.Type.Sprite;
-
-    _this.display = _this.initDisplayInstance(_this.displayType, config);
-
-    _this.bodymovin.initFrame(layer, session);
-    return _this;
-  }
-
-  return SpriteElement;
-}(BaseElement);
-
-/**
- * a
- */
-
-var ShapeElement = function (_BaseElement) {
-  inherits(ShapeElement, _BaseElement);
-
-  /**
-   * a
-   * @param {*} layer a
-   * @param {*} session a
-   */
-  function ShapeElement(layer, session) {
-    classCallCheck(this, ShapeElement);
-
-    var _this = possibleConstructorReturn(this, (ShapeElement.__proto__ || Object.getPrototypeOf(ShapeElement)).call(this, layer));
-
-    var config = {
-      layer: layer,
-      session: session
-    };
-    _this.config = config;
-    _this.session = session;
-
-    _this.displayType = DisplayRegister.Type.Container;
-
-    _this.display = _this.initDisplayInstance(_this.displayType, config);
-
-    _this.bodymovin.initFrame(layer, session);
-    return _this;
-  }
-
-  return ShapeElement;
-}(BaseElement);
-
-/**
- * a
- */
-
-var NullElement = function (_BaseElement) {
-  inherits(NullElement, _BaseElement);
-
-  /**
-   * a
-   * @param {*} layer a
-   * @param {*} session a
-   */
-  function NullElement(layer, session) {
-    classCallCheck(this, NullElement);
-
-    var _this = possibleConstructorReturn(this, (NullElement.__proto__ || Object.getPrototypeOf(NullElement)).call(this, layer));
-
-    var config = {
-      layer: layer,
-      session: session
-    };
-    _this.config = config;
-    _this.session = session;
-
-    _this.displayType = DisplayRegister.Type.Container;
-
-    _this.display = _this.initDisplayInstance(_this.displayType, config);
-
-    _this.bodymovin.initFrame(layer, session);
-    return _this;
-  }
-
-  return NullElement;
-}(BaseElement);
-
-// import Loader from '../utils/Loader';
-/**
- * an animation group, store and compute frame information
- * @class
- */
-
-var AnimationGroup = function (_Eventer) {
-  inherits(AnimationGroup, _Eventer);
-
-  /**
-   * parser a bodymovin data, and post some config for this animation group
-   * @param {object} options animation config
-   * @param {Object} options.keyframes bodymovin data, which export from AE by bodymovin
-   * @param {Number} [options.repeats=0] need repeat some times?
-   * @param {Boolean} [options.infinite=false] play this animation round and round forever
-   * @param {Boolean} [options.alternate=false] alternate play direction every round
-   * @param {Number} [options.wait=0] need wait how much millisecond to start
-   * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
-   * @param {Number} [options.timeScale=1] animation speed, time scale factor
-   * @param {Boolean} [options.autoLoad=true] auto load assets, if this animation have
-   * @param {Boolean} [options.autoStart=true] auto start animation after assets loaded
-   * @param {Boolean} [options.overlapMode=false] enable overlap mode, it is useful when you have a overlap expression
-   * @param {Object} [options.segments={}] animation segments, splite by start and end keyframe number
-   * @param {Boolean} [options.initSegment=''] animation segments, init finite state machine
-   * @param {Boolean} [options.maskComp=false] auto start animation after assets loaded
-   * @param {String} [options.prefix=''] assets url prefix, look like link path
-   * @param {class} LoaderClass loader class
-   */
-  function AnimationGroup(options, LoaderClass) {
-    classCallCheck(this, AnimationGroup);
-
-    /**
-     * 动画是否是激活状态
-     * @member {boolean}
-     */
-    var _this = possibleConstructorReturn(this, (AnimationGroup.__proto__ || Object.getPrototypeOf(AnimationGroup)).call(this));
-
-    _this.living = true;
-
-    /**
-     * 动画无限循环播放
-     * @member {boolean}
-     */
-    _this.infinite = options.infinite || false;
-
-    /**
-     * 动画循环多少次
-     * @member {number}
-     */
-    _this.repeats = options.repeats || 0;
-
-    /**
-     * 动画交替播放
-     * @member {boolean}
-     */
-    _this.alternate = options.alternate || false;
-
-    /**
-     * 动画延迟多长时间启动
-     * @member {number}
-     */
-    _this.wait = options.wait || 0;
-
-    /**
-     * 动画延迟多长时间开始
-     * @member {number}
-     */
-    _this.delay = options.delay || 0;
-
-    /**
-     * 动画是否启动 overlap 模式
-     * @member {number}
-     */
-    _this.overlapMode = options.overlapMode || false;
-
-    /**
-     * 动画速度
-     * @member {number}
-     */
-    _this.timeScale = Tools.isNumber(options.timeScale) ? options.timeScale : 1;
-
-    /**
-     * 总帧数
-     * @member {number}
-     */
-    _this.frameNum = 0;
-
-    /**
-     * 记录帧位，初始值随意设置为负无穷大
-     * @member {number}
-     * @private
-     */
-    _this._pf = -Infinity;
-
-    /**
-     * 动画方向，1 or -1
-     * @member {number}
-     * @private
-     */
-    _this.direction = 1;
-
-    /**
-     * 缓存重复多少次
-     * @member {number}
-     * @private
-     */
-    _this._repeatsCut = _this.repeats;
-
-    /**
-     * 缓存延迟多少时间
-     * @member {number}
-     * @private
-     */
-    _this._delayCut = _this.delay;
-
-    /**
-     * 缓存等待多少时间
-     * @member {number}
-     * @private
-     */
-    _this._waitCut = _this.wait;
-
-    /**
-     * 是否暂停状态，可以使用
-     * @member {number}
-     * @private
-     */
-    _this._paused = true;
-
-    var keyframes = Tools.copyJSON(options.keyframes);
-    DataManager.completeData(keyframes);
-
-    /**
-     * 提取全局信息
-     */
-    var fr = keyframes.fr,
-        ip = keyframes.ip,
-        op = keyframes.op,
-        assets = keyframes.assets,
-        prefix = keyframes.prefix;
-
-    /**
-     * 帧率
-     * @member {number}
-     * @private
-     */
-
-    _this.frameRate = fr;
-
-    /**
-     * 帧素
-     * @member {number}
-     * @private
-     */
-    _this.frameMult = fr / 1000;
-
-    /**
-     * 动画数据
-     * @private
-     */
-    _this.keyframes = keyframes;
-
-    /**
-     * 默认动画配置
-     * @private
-     */
-    _this.defaultSegment = [ip, op];
-
-    /**
-     * 分段动画配置，和 segmentName 参数配合使用
-     * @private
-     */
-    _this.segments = options.segments || {};
-
-    /**
-     * 有限状态机，当前状态机，和 segments 参数配合使用
-     * @private
-     */
-    var segmentName = options.initSegment || '';
-
-    // 获取初始化分段
-    var segment = segmentName && _this.segments[segmentName] || _this.defaultSegment;
-
-    /**
-     * 当前segment播放的开始帧
-     * @private
-     */
-    _this.beginFrame = segment[0];
-
-    /**
-     * 当前segment播放的结束帧
-     * @private
-     */
-    _this.endFrame = segment[1];
-
-    /**
-     * 资源相对地址前缀
-     * @private
-     */
-    _this.prefix = options.prefix || prefix || '';
-
-    /**
-     * 每帧时间
-     * @member {number}
-     * @private
-     */
-    _this._tpf = 1000 / fr;
-
-    /**
-     * 总帧数
-     * @member {number}
-     */
-    _this.duration = Math.floor(_this.endFrame - _this.beginFrame);
-
-    var autoLoad = Tools.isBoolean(options.autoLoad) ? options.autoLoad : true;
-    var autoStart = Tools.isBoolean(options.autoStart) ? options.autoStart : true;
-
-    var loader = null;
-    var images = assets.filter(function (it) {
-      return it.u && it.p;
-    });
-    if (images.length > 0) {
-      var _LoaderClass = LoaderRegister.getLoader();
-      _this.loader = loader = new _LoaderClass(images, { prefix: _this.prefix, autoLoad: autoLoad });
-      _this._imageLoadHandle = function () {
-        _this._paused = !autoStart;
+    function SolidElement(layer, session) {
+      var _this;
+
+      _classCallCheck(this, SolidElement);
+
+      _this = _super.call(this, layer);
+      var config = {
+        layer: layer,
+        session: session,
+        rect: {
+          x: 0,
+          y: 0,
+          width: layer.sw,
+          height: layer.sh
+        },
+        color: layer.sc
       };
-      _this._cancelImageLoadHandle = function () {
-        loader.off('complete', _this._imageLoadHandle);
-      };
-      loader.once('complete', _this._imageLoadHandle);
-    } else {
-      _this._cancelImageLoadHandle = null;
-      _this._paused = !autoStart;
+      _this.config = config;
+      _this.session = session;
+      _this.displayType = DisplayRegister.Type.Solid;
+      _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+      _this.bodymovin.initFrame(layer, session);
+
+      return _this;
     }
 
-    // 注册图层
-    var register = new Register();
-
-    /**
-     * 该动画组注册的信息
-     * @member {LayerRegister}
-     * @private
-     */
-    _this.register = register;
-
-    var maskComp = Tools.isBoolean(options.maskComp) ? options.maskComp : true;
-    var session = {
-      global: {
-        assets: assets,
-        loader: loader,
-        register: register,
-        maskComp: maskComp,
-        frameRate: fr,
-        overlapMode: _this.overlapMode
-      },
-      local: {
-        parentName: ''
-      }
-    };
-
-    /**
-     * 该动画组的根对象
-     * @member {CompElement}
-     */
-    _this.root = _this.extraCompositions(_this.keyframes, session);
-    _this.root._isRoot = true;
-    _this.group = _this.rootDisplay = _this.root.display;
-    return _this;
-  }
+    return SolidElement;
+  }(BaseElement);
 
   /**
    * a
-   * @param {object} data layers
-   * @param {object} assets object
-   * @return {container}
    */
 
+  var SpriteElement = /*#__PURE__*/function (_BaseElement) {
+    _inherits(SpriteElement, _BaseElement);
 
-  createClass(AnimationGroup, [{
-    key: 'extraCompositions',
-    value: function extraCompositions(data, _ref) {
-      var global = _ref.global,
-          local = _ref.local;
-      var w = data.w,
-          h = data.h,
-          ip = data.ip,
-          op = data.op,
-          _data$st = data.st,
-          st = _data$st === undefined ? 0 : _data$st,
-          _data$nm = data.nm,
-          nm = _data$nm === undefined ? 'null' : _data$nm;
+    var _super = _createSuper(SpriteElement);
 
-      var parentName = local.parentName ? local.parentName + '.' + nm : nm;
-      var container = new CompElement(data, { global: global, local: local });
-      var layers = data.layers || Tools.getAssets(data.refId, global.assets).layers;
+    /**
+     * a
+     * @param {*} layer a
+     * @param {*} session a
+     */
+    function SpriteElement(layer, session) {
+      var _this;
 
-      var session = {
-        global: global,
-        local: {
-          w: w, h: h, ip: ip, op: op, st: st,
-          parentName: parentName
-        }
+      _classCallCheck(this, SpriteElement);
+
+      _this = _super.call(this, layer);
+      var _session$global = session.global,
+          loader = _session$global.loader,
+          assets = _session$global.assets;
+      var asset = Tools.getAssets(layer.refId, assets);
+      var config = {
+        layer: layer,
+        session: session,
+        texture: loader.getTextureById(asset.id),
+        asset: asset
       };
+      _this.config = config;
+      _this.session = session;
+      _this.displayType = DisplayRegister.Type.Sprite;
+      _this.display = _this.initDisplayInstance(_this.displayType, config);
 
-      var elementsMap = this.createElements(layers, session);
-      for (var i = layers.length - 1; i >= 0; i--) {
-        var layer = layers[i];
-        var item = elementsMap[layer.ind];
-        if (!item) continue;
-        if (layer.parent) {
-          var parent = elementsMap[layer.parent];
-          parent._isParent = true;
-          item.setHierarchy(parent);
-        }
-        var nameHierarchy = parentName + '.' + item.name;
-        global.register.setLayer(nameHierarchy, item);
-        container.addChild(item);
-      }
-      return container;
+      _this.bodymovin.initFrame(layer, session);
+
+      return _this;
     }
 
-    /**
-     * createElements
-     * @param {arrya} layers layers
-     * @param {object} session object
-     * @return {object}
-     */
-
-  }, {
-    key: 'createElements',
-    value: function createElements(layers, session) {
-      var elementsMap = {};
-      for (var i = layers.length - 1; i >= 0; i--) {
-        var layer = layers[i];
-        var element = null;
-
-        if (layer.td !== undefined) continue;
-
-        switch (layer.ty) {
-          case 0:
-            element = this.extraCompositions(layer, session);
-            break;
-          case 1:
-            element = new SolidElement(layer, session);
-            break;
-          case 2:
-            element = new SpriteElement(layer, session);
-            break;
-          case 3:
-            element = new NullElement(layer, session);
-            break;
-          case 4:
-            element = new ShapeElement(layer, session);
-            break;
-          default:
-            continue;
-        }
-
-        if (element) {
-          if (layer.ind === undefined) layer.ind = i;
-          elementsMap[layer.ind] = element;
-          element.name = layer.nm || 'null';
-        }
-      }
-      return elementsMap;
-    }
-
-    /**
-     * get layer by name path
-     * @param {string} name layer name path, example: root.gift.star1
-     * @return {object}
-     */
-
-  }, {
-    key: 'getDisplayByName',
-    value: function getDisplayByName(name) {
-      var layer = this.register.getLayer(name);
-      if (layer.display) return layer.display;
-      console.warn('can not find display name as ', name);
-      return null;
-    }
-
-    /**
-     * bind other animation-group or display-object to this animation-group with name path
-     * @param {*} name
-     * @param {*} slot
-     */
-
-  }, {
-    key: 'bindSlot',
-    value: function bindSlot(name, slot) {
-      var slotDisplay = this.getDisplayByName(name);
-      slotDisplay.addChild(slot);
-    }
-
-    /**
-     * emit frame
-     * @private
-     * @param {*} np now frame
-     */
-
-  }, {
-    key: 'emitFrame',
-    value: function emitFrame(np) {
-      this.emit('@' + np);
-    }
-
-    /**
-     * update with time snippet
-     * @private
-     * @param {number} snippetCache snippet
-     */
-
-  }, {
-    key: 'update',
-    value: function update(snippetCache) {
-      if (!this.living) return;
-
-      var isEnd = this.updateTime(snippetCache);
-
-      var correctedFrameNum = this.beginFrame + this.frameNum;
-      this.root.updateFrame(correctedFrameNum);
-
-      var np = correctedFrameNum >> 0;
-      if (this._pf !== np) {
-        this.emitFrame(this.direction > 0 ? np : this._pf);
-        this._pf = np;
-      }
-      if (isEnd === false) {
-        this.emit('update', this.frameNum / this.duration);
-      } else if (this.hadEnded !== isEnd && isEnd === true) {
-        this.emit('complete');
-      }
-      this.hadEnded = isEnd;
-    }
-
-    /**
-     * update timeline with time snippet
-     * @private
-     * @param {number} snippet snippet
-     * @return {boolean} frameNum status
-     */
-
-  }, {
-    key: 'updateTime',
-    value: function updateTime(snippet) {
-      var snippetCache = this.direction * this.timeScale * snippet;
-      if (this._waitCut > 0) {
-        this._waitCut -= Math.abs(snippetCache);
-        return null;
-      }
-      if (this._paused || this._delayCut > 0) {
-        if (this._delayCut > 0) this._delayCut -= Math.abs(snippetCache);
-        return null;
-      }
-
-      this.frameNum += snippetCache / this._tpf;
-      var isEnd = false;
-
-      if (this.spill()) {
-        if (this._repeatsCut > 0 || this.infinite) {
-          if (this._repeatsCut > 0) --this._repeatsCut;
-          this._delayCut = this.delay;
-          if (this.alternate) {
-            this.direction *= -1;
-            this.frameNum = Tools.codomainBounce(this.frameNum, 0, this.duration);
-          } else {
-            this.direction = 1;
-            this.frameNum = Tools.euclideanModulo(this.frameNum, this.duration);
-          }
-        } else {
-          if (!this.overlapMode) {
-            this.frameNum = Tools.clamp(this.frameNum, 0, this.duration);
-            this.living = false;
-          }
-          isEnd = true;
-        }
-      }
-
-      return isEnd;
-    }
-
-    /**
-     * is this time frameNum spill the range
-     * @private
-     * @return {boolean}
-     */
-
-  }, {
-    key: 'spill',
-    value: function spill() {
-      var bottomSpill = this.frameNum <= 0 && this.direction === -1;
-      var topSpill = this.frameNum >= this.duration && this.direction === 1;
-      return bottomSpill || topSpill;
-    }
-
-    /**
-     * get time
-     * @param {number} frame frame index
-     * @return {number}
-     */
-
-  }, {
-    key: 'frameToTime',
-    value: function frameToTime(frame) {
-      return frame * this._tpf;
-    }
-
-    /**
-     * set animation speed, time scale
-     * @param {number} speed
-     */
-
-  }, {
-    key: 'setSpeed',
-    value: function setSpeed(speed) {
-      this.timeScale = speed;
-    }
-
-    /**
-     * set finite state machine
-     * @param {String|Array} name segment name which define in segments props, you can also pass an array like [10, 30]
-     * @param {Object} options animation config
-     * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
-     * @param {Number} [options.repeats=0] need repeat somt times?
-     * @param {Boolean} [options.infinite=false] play this animation round and round forever
-     * @param {Boolean} [options.alternate=false] alternate direction every round
-     * @param {Number} [options.wait=0] need wait how much millisecond to start
-     * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
-     */
-
-  }, {
-    key: 'playSegment',
-    value: function playSegment(name) {
-      var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-      if (!name) return;
-
-      var segment = null;
-      if (Tools.isArray(name)) {
-        segment = name;
-      } else if (Tools.isString(name)) {
-        segment = this.segments[name];
-      }
-
-      if (!segment) return;
-
-      this.beginFrame = segment[0];
-      this.endFrame = segment[1];
-
-      if (Tools.isNumber(options.delay)) this.delay = options.delay;
-      if (Tools.isNumber(options.repeats)) this.repeats = options.repeats;
-      if (Tools.isBoolean(options.infinite)) this.infinite = options.infinite;
-      if (Tools.isBoolean(options.alternate)) this.alternate = options.alternate;
-      if (Tools.isNumber(options.wait)) this.wait = options.wait;
-      if (Tools.isNumber(options.delay)) this.delay = options.delay;
-
-      this.replay();
-    }
-
-    /**
-     * pause this animation group
-     * @return {this}
-     */
-
-  }, {
-    key: 'pause',
-    value: function pause() {
-      if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
-      this._paused = true;
-      return this;
-    }
-
-    /**
-     * resume or play this animation group
-     * @return {this}
-     */
-
-  }, {
-    key: 'resume',
-    value: function resume() {
-      if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
-      this._paused = false;
-      return this;
-    }
-
-    /**
-     * replay this animation group from begin frame
-     * @return {this}
-     */
-
-  }, {
-    key: 'replay',
-    value: function replay() {
-      if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
-      this._paused = false;
-      this._repeatsCut = this.repeats;
-      this._delayCut = this.delay;
-      this.living = true;
-      this.frameNum = 0;
-      this.duration = Math.floor(this.endFrame - this.beginFrame);
-      this.direction = 1;
-      return this;
-    }
-  }]);
-  return AnimationGroup;
-}(Eventer$1);
-
-/**
- * all lottie animation manager, manage update loop and animation groups
- * @example
- * const manager = new PIXI.AnimationManager(app);
- * const ani = manager.parseAnimation({
- *   keyframes: data,
- *   infinite: true,
- * });
- * @class
- */
-
-var AnimationManager = function (_Eventer) {
-  inherits(AnimationManager, _Eventer);
+    return SpriteElement;
+  }(BaseElement);
 
   /**
-   * animation manager, a ticker instance
-   * @param {Application} app app object
+   * a
    */
-  function AnimationManager(app) {
-    classCallCheck(this, AnimationManager);
+
+  var ShapeElement = /*#__PURE__*/function (_BaseElement) {
+    _inherits(ShapeElement, _BaseElement);
+
+    var _super = _createSuper(ShapeElement);
 
     /**
-     * pre-time cache
-     *
-     * @member {Number}
-     * @private
+     * a
+     * @param {*} layer a
+     * @param {*} session a
      */
-    var _this = possibleConstructorReturn(this, (AnimationManager.__proto__ || Object.getPrototypeOf(AnimationManager)).call(this));
+    function ShapeElement(layer, session) {
+      var _this;
 
-    _this.pt = 0;
+      _classCallCheck(this, ShapeElement);
 
-    /**
-     * how long the time through, at this tick
-     *
-     * @member {Number}
-     * @private
-     */
-    _this.snippet = 0;
+      _this = _super.call(this, layer);
+      var config = {
+        layer: layer,
+        session: session
+      };
+      _this.config = config;
+      _this.session = session;
+      _this.displayType = DisplayRegister.Type.Container;
+      _this.display = _this.initDisplayInstance(_this.displayType, config);
 
-    /**
-     * time scale, just like speed scalar
-     *
-     * @member {Number}
-     */
-    _this.timeScale = 1;
+      _this.bodymovin.initFrame(layer, session);
 
-    /**
-     * mark the manager was pause or not
-     *
-     * @member {Boolean}
-     */
-    _this.paused = false;
+      return _this;
+    }
 
-    /**
-     * get shared ticker from app object
-     * @private
-     */
-    _this.ticker = app.ticker ? app.ticker : app;
-
-    /**
-     * all animation groups
-     * @private
-     */
-    _this.groups = [];
-
-    _this.update = _this.update.bind(_this);
-
-    if (_this.ticker) _this.start();
-    return _this;
-  }
+    return ShapeElement;
+  }(BaseElement);
 
   /**
-   * add a animationGroup child to array
-   * @param {AnimationGroup} child AnimationGroup instance
-   * @return {AnimationGroup} child
+   * a
    */
 
+  var NullElement = /*#__PURE__*/function (_BaseElement) {
+    _inherits(NullElement, _BaseElement);
 
-  createClass(AnimationManager, [{
-    key: 'add',
-    value: function add(child) {
-      var argumentsLength = arguments.length;
+    var _super = _createSuper(NullElement);
 
-      if (argumentsLength > 1) {
-        for (var i = 0; i < argumentsLength; i++) {
-          /* eslint prefer-rest-params: 0 */
-          this.add(arguments[i]);
-        }
-      } else {
-        this.groups.push(child);
-      }
+    /**
+     * a
+     * @param {*} layer a
+     * @param {*} session a
+     */
+    function NullElement(layer, session) {
+      var _this;
 
-      return child;
+      _classCallCheck(this, NullElement);
+
+      _this = _super.call(this, layer);
+      var config = {
+        layer: layer,
+        session: session
+      };
+      _this.config = config;
+      _this.session = session;
+      _this.displayType = DisplayRegister.Type.Container;
+      _this.display = _this.initDisplayInstance(_this.displayType, config);
+
+      _this.bodymovin.initFrame(layer, session);
+
+      return _this;
     }
+
+    return NullElement;
+  }(BaseElement);
+
+  /**
+   * an animation group, store and compute frame information
+   * @class
+   */
+
+  var AnimationGroup = /*#__PURE__*/function (_Eventer) {
+    _inherits(AnimationGroup, _Eventer);
+
+    var _super = _createSuper(AnimationGroup);
 
     /**
      * parser a bodymovin data, and post some config for this animation group
@@ -9636,3986 +9677,4819 @@ var AnimationManager = function (_Eventer) {
      * @param {Boolean} [options.initSegment=''] animation segments, init finite state machine
      * @param {Boolean} [options.maskComp=false] auto start animation after assets loaded
      * @param {String} [options.prefix=''] assets url prefix, look like link path
-     * @return {AnimationGroup}
-     * @example
-     * const manager = new PIXI.AnimationManager(app);
-     * const ani = manager.parseAnimation({
-     *   keyframes: data,
-     *   infinite: true,
-     * });
+     * @param {class} LoaderClass loader class
      */
-
-  }, {
-    key: 'parseAnimation',
-    value: function parseAnimation(options) {
-      var animate = new AnimationGroup(options);
-      return this.add(animate);
-    }
-
-    /**
-     * set animation speed, time scale
-     * @param {number} speed
-     */
-
-  }, {
-    key: 'setSpeed',
-    value: function setSpeed(speed) {
-      this.timeScale = speed;
-    }
-
-    /**
-     * start update loop
-     * @return {this}
-     */
-
-  }, {
-    key: 'start',
-    value: function start() {
-      this.pt = Date.now();
-      this.ticker.on('update', this.update);
-      return this;
-    }
-
-    /**
-     * stop update loop
-     * @return {this}
-     */
-
-  }, {
-    key: 'stop',
-    value: function stop() {
-      this.ticker.off('update', this.update);
-      return this;
-    }
-
-    /**
-     * pause all animation groups
-     * @return {this}
-     */
-
-  }, {
-    key: 'pause',
-    value: function pause() {
-      this.paused = true;
-      return this;
-    }
-
-    /**
-     * pause all animation groups
-     * @return {this}
-     */
-
-  }, {
-    key: 'resume',
-    value: function resume() {
-      this.paused = false;
-      return this;
-    }
-
-    /**
-     * update all active animation
-     * @private
-     */
-
-  }, {
-    key: 'update',
-    value: function update() {
-      this.timeline();
-      if (this.paused) return;
-      var snippetCache = this.timeScale * this.snippet;
-      var length = this.groups.length;
-      for (var i = 0; i < length; i++) {
-        var animationGroup = this.groups[i];
-        animationGroup.update(snippetCache);
-      }
-      this.emit('update', this.snippet);
-    }
-
-    /**
-     * get timeline snippet
-     * @private
-     */
-
-  }, {
-    key: 'timeline',
-    value: function timeline() {
-      var snippet = Date.now() - this.pt;
-      if (!this.pt || snippet > 200) {
-        this.pt = Date.now();
-        snippet = Date.now() - this.pt;
-      }
-      this.pt += snippet;
-      this.snippet = snippet;
-    }
-  }]);
-  return AnimationManager;
-}(Eventer$1);
-
-/* eslint guard-for-in: "off" */
-
-/**
- * Bodymovin 类型动画对象
- *
- * @class
- * @private
- * @param {object} options 动画所具备的特性
- */
-function Bodymovin(options) {
-  Animate.call(this, options);
-
-  // list of animated properties
-  this.dynamicProperties = [];
-
-  // If layer has been modified in current tick this will be true
-  this._mdf = false;
-
-  this.keyframes = Tools.copyJSON(options.keyframes);
-  this.frameRate = options.frameRate || 30;
-  this.tpf = 1000 / this.frameRate;
-  // this.frameNum = -1;
-
-  this.ip = Tools.isUndefined(options.ip) ? this.keyframes.ip : options.ip;
-  this.op = Tools.isUndefined(options.ip) ? this.keyframes.op : options.op;
-
-  this.tfs = this.op - this.ip;
-  this.duration = this.tfs * this.tpf;
-
-  this.ignoreProps = Tools.isArray(options.ignoreProps) ? options.ignoreProps : [];
-
-  this.transform = new TransformFrames(this, this.keyframes.ks);
-}
-Bodymovin.prototype = Object.create(Animate.prototype);
-
-/**
- * Calculates all dynamic values
- * @param {number} frameNum current frame number in Layer's time
- */
-Bodymovin.prototype.prepareProperties = function (frameNum) {
-  var i = void 0;var len = this.dynamicProperties.length;
-  for (i = 0; i < len; i += 1) {
-    this.dynamicProperties[i].getValue(frameNum);
-    if (this.dynamicProperties[i]._mdf) {
-      this._mdf = true;
-    }
-  }
-};
-
-/**
- * add dynamic property
- * @param {*} prop dynamic property
- */
-Bodymovin.prototype.addDynamicProperty = function (prop) {
-  if (this.dynamicProperties.indexOf(prop) === -1) {
-    this.dynamicProperties.push(prop);
-  }
-};
-
-/**
- * 计算下一帧状态
- * @private
- * @return {object}
- */
-Bodymovin.prototype.nextPose = function () {
-  var pose = {};
-  var frameNum = this.ip + this.progress / this.tpf;
-  this.prepareProperties(frameNum);
-
-  if (this.ignoreProps.indexOf('position') === -1) {
-    if (this.ignoreProps.indexOf('x') === -1) {
-      pose.x = this.element.x = this.transform.x;
-    }
-    if (this.ignoreProps.indexOf('y') === -1) {
-      pose.y = this.element.y = this.transform.y;
-    }
-  }
-
-  if (this.ignoreProps.indexOf('pivot') === -1) {
-    if (this.ignoreProps.indexOf('pivotX') === -1) {
-      pose.pivotX = this.element.pivotX = this.transform.anchorX;
-    }
-    if (this.ignoreProps.indexOf('pivotY') === -1) {
-      pose.pivotY = this.element.pivotY = this.transform.anchorY;
-    }
-  }
-
-  if (this.ignoreProps.indexOf('scale') === -1) {
-    if (this.ignoreProps.indexOf('scaleX') === -1) {
-      pose.scaleX = this.element.scaleX = this.transform.scaleX;
-    }
-    if (this.ignoreProps.indexOf('scaleY') === -1) {
-      pose.scaleY = this.element.scaleY = this.transform.scaleY;
-    }
-  }
-
-  if (this.ignoreProps.indexOf('rotation') === -1) {
-    pose.rotation = this.element.rotation = this.transform.rotation;
-  }
-
-  if (this.ignoreProps.indexOf('alpha') === -1) {
-    pose.alpha = this.element.alpha = this.transform.alpha;
-  }
-
-  return pose;
-};
-
-// import {Utils} from '../utils/Utils';
-
-/**
- * AnimateRunner类型动画类
- *
- * @class
- * @memberof JC
- * @param {object} runner 动画属性参数
- * @param {object} [options] queue动画配置
- */
-function Queues(runner, options) {
-  Animate.call(this, options);
-
-  this.runners = [];
-  this.queues = [];
-  this.cursor = 0;
-  this.total = 0;
-  this.alternate = false;
-
-  if (runner) this.then(runner);
-}
-Queues.prototype = Object.create(Animate.prototype);
-
-/**
- * 更新下一个`runner`
- * @param {Object} runner
- * @return {this}
- * @private
- */
-Queues.prototype.then = function (runner) {
-  this.queues.push(runner);
-
-  this.total = this.queues.length;
-  return this;
-};
-
-/**
- * 更新下一个`runner`
- * @param {Object} _
- * @param {Number} time
- * @private
- */
-Queues.prototype.nextOne = function (_, time) {
-  this.runners[this.cursor].init();
-  this.cursor++;
-  this.timeSnippet = time;
-};
-
-/**
- * 初始化当前`runner`
- * @private
- */
-Queues.prototype.initOne = function () {
-  var runner = this.queues[this.cursor];
-  runner.infinite = false;
-  runner.resident = true;
-  runner.element = this.element;
-
-  var animate = null;
-  if (runner.path) {
-    animate = new PathMotion(runner);
-  } else if (runner.to) {
-    animate = new Transition(runner);
-  }
-  if (animate !== null) {
-    animate.on('complete', this.nextOne.bind(this));
-    this.runners.push(animate);
-  }
-};
-
-/**
- * 下一帧的状态
- * @private
- * @param {number} snippetCache 时间片段
- * @return {object}
- */
-Queues.prototype.nextPose = function (snippetCache) {
-  if (!this.runners[this.cursor] && this.queues[this.cursor]) {
-    this.initOne();
-  }
-  if (this.timeSnippet > 0) {
-    snippetCache += this.timeSnippet;
-    this.timeSnippet = 0;
-  }
-  return this.runners[this.cursor].update(snippetCache);
-};
-
-/**
- * 更新动画数据
- * @private
- * @param {number} snippet 时间片段
- * @return {object}
- */
-Queues.prototype.update = function (snippet) {
-  if (this.wait > 0) {
-    this.wait -= Math.abs(snippet);
-    return;
-  }
-  if (this.paused || !this.living || this.delayCut > 0) {
-    if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
-    return;
-  }
-
-  var cc = this.cursor;
-
-  var pose = this.nextPose(this.timeScale * snippet);
-
-  this.emit('update', {
-    index: cc, pose: pose
-  }, this.progress / this.duration);
-
-  if (this.spill()) {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
-      this.delayCut = this.delay;
-      this.cursor = 0;
-    } else {
-      if (!this.resident) this.living = false;
-      this.emit('complete', pose);
-    }
-  }
-  return pose;
-};
-
-/**
- * 检查动画是否到了边缘
- * @private
- * @return {boolean}
- */
-Queues.prototype.spill = function () {
-  // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
-  var topSpill = this.cursor >= this.total;
-  return topSpill;
-};
-
-/**
- * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
- *
- * @class
- * @memberof JC
- * @param {JC.DisplayObject} element
- */
-function Animation(element) {
-  this.element = element;
-
-  /**
-   * 自身当前动画队列
-   *
-   * @member {array}
-   */
-  this.animates = [];
-
-  /**
-   * 自身及后代动画的缩放比例
-   *
-   * @member {number}
-   */
-  this.timeScale = 1;
-
-  /**
-   * 是否暂停自身的动画
-   *
-   * @member {Boolean}
-   */
-  this.paused = false;
-}
-
-/**
- * 更新动画数据
- * @private
- * @param {number} snippet 时间片段
- */
-Animation.prototype.update = function (snippet) {
-  if (this.paused) return;
-  snippet = this.timeScale * snippet;
-  var cache = this.animates.slice(0);
-  for (var i = 0; i < cache.length; i++) {
-    if (!cache[i].living && !cache[i].resident) {
-      this.animates.splice(i, 1);
-    }
-    cache[i].update(snippet);
-  }
-};
-
-/**
- * 创建一个`animate`动画
- * @private
- * @param {object} options 动画配置
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.Transition}
- */
-Animation.prototype.animate = function (options, clear) {
-  options.element = this.element;
-  return this._addMove(new Transition(options), clear);
-};
-
-/**
- * 创建一个`motion`动画
- * @private
- * @param {object} options 动画配置
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.PathMotion}
- */
-Animation.prototype.motion = function (options, clear) {
-  options.element = this.element;
-  return this._addMove(new PathMotion(options), clear);
-};
-
-/**
- * 创建一个`runners`动画
- * @private
- * @param {object} options 动画配置
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.AnimateRunner}
- */
-// Animation.prototype.runners = function(options, clear) {
-//   options.element = this.element;
-//   return this._addMove(new AnimateRunner(options), clear);
-// };
-Animation.prototype.queues = function (runner, options, clear) {
-  options.element = this.element;
-  return this._addMove(new Queues(runner, options), clear);
-};
-
-/**
- * 创建一个`keyFrames`动画
- * @private
- * @param {object} options 动画配置
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.KeyFrames}
- */
-Animation.prototype.keyFrames = function (options, clear) {
-  options.element = this.element;
-  return this._addMove(new KeyFrames(options), clear);
-};
-
-/**
- * 创建一个`keyFrames`动画
- * @private
- * @param {object} options 动画配置
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.Bodymovin}
- */
-Animation.prototype.bodymovin = function (options, clear) {
-  options.element = this.element;
-  return this._addMove(new Bodymovin(options), clear);
-};
-
-/**
- * 添加到动画队列
- * @private
- * @param {object} animate 创建出来的动画对象
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.KeyFrames|JC.AnimateRunner|JC.PathMotion|JC.Transition}
- */
-Animation.prototype._addMove = function (animate, clear) {
-  if (clear) this.clear();
-  this.animates.push(animate);
-  return animate;
-};
-
-/**
- * 暂停动画组
- */
-Animation.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复动画组
- */
-Animation.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 设置动画组的播放速率
- * @param {number} speed
- */
-Animation.prototype.setSpeed = function (speed) {
-  this.timeScale = speed;
-};
-
-/**
- * 清除动画队列
- * @private
- */
-Animation.prototype.clear = function () {
-  this.animates.length = 0;
-};
-
-/* eslint guard-for-in: "off" */
-
-// const TextureCache = {};
-
-var URL = 'url';
-var IMG = 'img';
-
-/**
- *
- * @param {Object} frame object
- * @return {Boolean}
- */
-function isFrame(frame) {
-  return frame.tagName === 'VIDEO' || frame.tagName === 'CANVAS' || frame.tagName === 'IMG';
-}
-
-/**
- * 图片纹理类
- *
- * @class
- * @memberof JC
- * @param {string | Image} texture 图片url或者图片对象.
- * @param {object} options 图片配置
- * @param {boolean} [options.lazy=false] 图片是否需要懒加载
- * @param {string} [options.crossOrigin] 图片是否配置跨域
- * @extends JC.Eventer
- */
-function Texture(texture, options) {
-  Eventer.call(this);
-  options = options || {};
-
-  this.type = '';
-  this.url = '';
-  this.texture = null;
-  this.crossOrigin = options.crossOrigin;
-  this.loaded = false;
-  this.hadload = false;
-  this.lazy = options.lazy || false;
-
-  if (Utils.isString(texture)) {
-    this.type = URL;
-    this.url = texture;
-    this.texture = this.resole();
-    this.texture.crossOrigin = this.crossOrigin;
-    if (!this.lazy) this.load();
-  } else if (isFrame(texture)) {
-    this.type = IMG;
-    this.loaded = true;
-    this.hadload = true;
-    this.texture = texture;
-  } else {
-    console.warn('texture not support this texture');
-    return;
-  }
-
-  this.listen();
-}
-Texture.prototype = Object.create(Eventer.prototype);
-
-/**
- * 创建一个图片
- *
- * @private
- * @return {Image}
- */
-Texture.prototype.resole = function () {
-  return new Image();
-};
-
-/**
- * 尝试加载图片
- *
- * @param {String} url 图片url或者图片对象.
- */
-Texture.prototype.load = function (url) {
-  if (this.hadload || this.type !== URL) return;
-  url = url || this.url;
-  this.hadload = true;
-  this.texture.src = url;
-};
-
-/**
- * 监听加载事件
- */
-Texture.prototype.listen = function () {
-  var _this = this;
-
-  this.texture.addEventListener('load', function () {
-    _this.loaded = true;
-    _this.emit('load');
-  });
-  this.texture.addEventListener('error', function () {
-    _this.emit('error');
-  });
-};
-
-/**
- * 获取纹理的宽
- *
- * @member width
- * @property {Number} width 纹理的宽
- * @memberof JC.Texture
- */
-Object.defineProperty(Texture.prototype, 'width', {
-  get: function get() {
-    return this.texture ? this.texture.width : 0;
-  }
-});
-
-/**
- * 获取纹理的高
- *
- * @member height
- * @property {Number} height 纹理的高
- * @memberof JC.Texture
- */
-Object.defineProperty(Texture.prototype, 'height', {
-  get: function get() {
-    return this.texture ? this.texture.height : 0;
-  }
-});
-
-/**
- * 获取纹理的原始宽
- *
- * @member naturalWidth
- * @property {Number} naturalWidth 纹理的原始宽
- * @memberof JC.Texture
- */
-Object.defineProperty(Texture.prototype, 'naturalWidth', {
-  get: function get() {
-    return this.texture ? this.texture.naturalWidth || this.texture.width : 0;
-  }
-});
-
-/**
- * 获取纹理的原始高
- *
- * @member naturalHeight
- * @property {Number} naturalHeight 纹理的原始高
- * @memberof JC.Texture
- */
-Object.defineProperty(Texture.prototype, 'naturalHeight', {
-  get: function get() {
-    return this.texture ? this.texture.naturalHeight || this.texture.height : 0;
-  }
-});
-
-/**
- * 图片资源加载器
- *
- * @class
- * @param {String} crossOrigin cross-origin config
- * @namespace JC.Loader
- * @extends JC.Eventer
- */
-function Loader(crossOrigin) {
-  Eventer.call(this);
-  this.crossOrigin = crossOrigin;
-  this.textures = {};
-  this._total = 0;
-  this._failed = 0;
-  this._received = 0;
-}
-Loader.prototype = Object.create(Eventer.prototype);
-
-/**
- * 开始加载资源
- *
- * ```js
- * var loadBox = new JC.Loader();
- * loadBox.load({
- *     aaa: 'img/xxx.png',
- *     bbb: 'img/yyy.png',
- *     ccc: 'img/zzz.png'
- * });
- * ```
- *
- * @param {object} srcMap 配置了key－value的json格式数据
- * @return {JC.Loader} 返回本实例对象
- */
-Loader.prototype.load = function (srcMap) {
-  var This = this;
-  this._total = 0;
-  this._failed = 0;
-  this._received = 0;
-
-  for (var src in srcMap) {
-    this._total++;
-    this.textures[src] = new Texture(srcMap[src], { crossOrigin: this.crossOrigin });
-    bind(this.textures[src]);
-  }
-
-  /**
-   * @param {Texture} texture
-   */
-  function bind(texture) {
-    texture.on('load', function () {
-      This._received++;
-      This.emit('update');
-      if (This._received + This._failed >= This._total) This.emit('complete');
-    });
-    texture.on('error', function () {
-      This._failed++;
-      This.emit('update');
-      if (This._received + This._failed >= This._total) This.emit('complete');
-    });
-  }
-  return this;
-};
-
-/**
- * 从纹理图片盒子里面通过id获取纹理图片
- *
- * ```js
- * var texture = loadBox.getById('id');
- * ```
- *
- * @param {string} id 之前加载时配置的key值
- * @return {JC.Texture} 包装出来的JC.Texture对象
- */
-Loader.prototype.getById = function (id) {
-  return this.textures[id];
-};
-
-/**
- * 获取资源加载的进度
- *
- * @member progress
- * @property progress {number} 0至1之间的值
- * @memberof JC.Loader
- */
-Object.defineProperty(Loader.prototype, 'progress', {
-  get: function get() {
-    return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
-  }
-});
-
-/**
- * 资源加载工具
- *
- * @function
- * @memberof JC
- * @param {object} srcMap key-src map
- * @param {String} crossOrigin cross-origin config
- * @return {JC.Loader}
- */
-var loaderUtil = function loaderUtil(srcMap) {
-  var crossOrigin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '*';
-
-  return new Loader(crossOrigin).load(srcMap);
-};
-
-/**
- * prefix
- * @method
- * @param {object} asset asset
- * @param {string} prefix prefix
- * @return {string}
- */
-function createUrl$1(asset, prefix) {
-  if (prefix) prefix = prefix.replace(/\/?$/, '/');
-  var up = asset.u + asset.p;
-  var url = asset.up || prefix + up;
-  return url;
-}
-
-/**
- * an texture loader
- * @param {array} assets assets
- * @param {object} options options
- * @param {string} [options.prefix] prefix
- * @param {boolean} [options.autoLoad=true] prefix
- */
-function LottieLoader(assets, _ref) {
-  var prefix = _ref.prefix,
-      _ref$autoLoad = _ref.autoLoad,
-      autoLoad = _ref$autoLoad === undefined ? true : _ref$autoLoad,
-      _ref$crossOrigin = _ref.crossOrigin,
-      crossOrigin = _ref$crossOrigin === undefined ? '*' : _ref$crossOrigin;
-
-  Eventer.call(this);
-  this.assets = assets;
-  this.prefix = prefix || '';
-  this.crossOrigin = crossOrigin;
-  this.textures = {};
-  this._total = 0;
-  this._failed = 0;
-  this._received = 0;
-  if (autoLoad) this._load();
-}
-
-LottieLoader.prototype = Object.create(Eventer.prototype);
-
-/**
- * load assets
- */
-LottieLoader.prototype.load = function () {
-  this._load();
-};
-
-/**
- * a load function
- * @private
- */
-LottieLoader.prototype._load = function () {
-  var _this2 = this;
-
-  this.assets.forEach(function (asset) {
-    var id = asset.id;
-    var url = createUrl$1(asset, _this2.prefix);
-    var texture = new Texture(url, { crossOrigin: _this2.crossOrigin });
-    _this2.textures[id] = texture;
-    if (texture.loaded) {
-      _this2._received++;
-      _this2.emit('update');
-      if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
-    } else {
-      texture.once('load', function () {
-        _this2._received++;
-        _this2.emit('update');
-        if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+    function AnimationGroup(options, LoaderClass) {
+      var _this;
+
+      _classCallCheck(this, AnimationGroup);
+
+      _this = _super.call(this);
+      /**
+       * 动画是否是激活状态
+       * @member {boolean}
+       */
+
+      _this.living = true;
+      /**
+       * 动画无限循环播放
+       * @member {boolean}
+       */
+
+      _this.infinite = options.infinite || false;
+      /**
+       * 动画循环多少次
+       * @member {number}
+       */
+
+      _this.repeats = options.repeats || 0;
+      /**
+       * 动画交替播放
+       * @member {boolean}
+       */
+
+      _this.alternate = options.alternate || false;
+      /**
+       * 动画延迟多长时间启动
+       * @member {number}
+       */
+
+      _this.wait = options.wait || 0;
+      /**
+       * 动画延迟多长时间开始
+       * @member {number}
+       */
+
+      _this.delay = options.delay || 0;
+      /**
+       * 动画是否启动 overlap 模式
+       * @member {number}
+       */
+
+      _this.overlapMode = options.overlapMode || false;
+      /**
+       * 动画速度
+       * @member {number}
+       */
+
+      _this.timeScale = Tools.isNumber(options.timeScale) ? options.timeScale : 1;
+      /**
+       * 总帧数
+       * @member {number}
+       */
+
+      _this.frameNum = 0;
+      /**
+       * 记录帧位，初始值随意设置为负无穷大
+       * @member {number}
+       * @private
+       */
+
+      _this._pf = -Infinity;
+      /**
+       * 动画方向，1 or -1
+       * @member {number}
+       * @private
+       */
+
+      _this.direction = 1;
+      /**
+       * 缓存重复多少次
+       * @member {number}
+       * @private
+       */
+
+      _this._repeatsCut = _this.repeats;
+      /**
+       * 缓存延迟多少时间
+       * @member {number}
+       * @private
+       */
+
+      _this._delayCut = _this.delay;
+      /**
+       * 缓存等待多少时间
+       * @member {number}
+       * @private
+       */
+
+      _this._waitCut = _this.wait;
+      /**
+       * 是否暂停状态，可以使用
+       * @member {number}
+       * @private
+       */
+
+      _this._paused = true;
+      var keyframes = Tools.copyJSON(options.keyframes);
+      DataManager.completeData(keyframes);
+      /**
+       * 提取全局信息
+       */
+
+      var fr = keyframes.fr,
+          ip = keyframes.ip,
+          op = keyframes.op,
+          assets = keyframes.assets,
+          prefix = keyframes.prefix;
+      /**
+       * 帧率
+       * @member {number}
+       * @private
+       */
+
+      _this.frameRate = fr;
+      /**
+       * 帧素
+       * @member {number}
+       * @private
+       */
+
+      _this.frameMult = fr / 1000;
+      /**
+       * 动画数据
+       * @private
+       */
+
+      _this.keyframes = keyframes;
+      /**
+       * 默认动画配置
+       * @private
+       */
+
+      _this.defaultSegment = [ip, op];
+      /**
+       * 分段动画配置，和 segmentName 参数配合使用
+       * @private
+       */
+
+      _this.segments = options.segments || {};
+      /**
+       * 有限状态机，当前状态机，和 segments 参数配合使用
+       * @private
+       */
+
+      var segmentName = options.initSegment || ''; // 获取初始化分段
+
+      var segment = segmentName && _this.segments[segmentName] || _this.defaultSegment;
+      /**
+       * 当前segment播放的开始帧
+       * @private
+       */
+
+      _this.beginFrame = segment[0];
+      /**
+       * 当前segment播放的结束帧
+       * @private
+       */
+
+      _this.endFrame = segment[1];
+      /**
+       * 资源相对地址前缀
+       * @private
+       */
+
+      _this.prefix = options.prefix || prefix || '';
+      /**
+       * 每帧时间
+       * @member {number}
+       * @private
+       */
+
+      _this._tpf = 1000 / fr;
+      /**
+       * 总帧数
+       * @member {number}
+       */
+
+      _this.duration = Math.floor(_this.endFrame - _this.beginFrame);
+      var autoLoad = Tools.isBoolean(options.autoLoad) ? options.autoLoad : true;
+      var autoStart = Tools.isBoolean(options.autoStart) ? options.autoStart : true;
+      var loader = null;
+      var images = assets.filter(function (it) {
+        return it.u && it.p;
       });
-      texture.once('error', function () {
-        _this2._failed++;
-        _this2.emit('update');
-        if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
-      });
-    }
-  });
-};
 
-/**
- * get texture by id
- * @param {string} id id
- * @return {Texture} texture
- */
-LottieLoader.prototype.getTextureById = function (id) {
-  return this.textures[id];
-};
+      if (images.length > 0) {
+        var _LoaderClass = LoaderRegister.getLoader();
 
-/**
- * ticker class
- * @param {boolean} enableFPS
- */
-function Ticker(enableFPS) {
-  Eventer.call(this);
+        _this.loader = loader = new _LoaderClass(images, {
+          prefix: _this.prefix,
+          autoLoad: autoLoad
+        });
 
-  /**
-   * 是否记录渲染性能
-   *
-   * @member {Boolean}
-   */
-  this.enableFPS = Utils.isBoolean(enableFPS) ? enableFPS : true;
+        _this._imageLoadHandle = function () {
+          _this._paused = !autoStart;
+        };
 
-  /**
-   * 上一次绘制的时间点
-   *
-   * @member {Number}
-   * @private
-   */
-  this.pt = 0;
+        _this._cancelImageLoadHandle = function () {
+          loader.off('complete', _this._imageLoadHandle);
+        };
 
-  /**
-   * 本次渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.snippet = 0;
-
-  /**
-   * 平均渲染经历的时间片段长度
-   *
-   * @member {Number}
-   * @private
-   */
-  this.averageSnippet = 0;
-
-  /**
-   * 渲染的瞬时帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.fps = 0;
-
-  /**
-   * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
-   *
-   * @member {Number}
-   */
-  this.averageFps = 0;
-
-  /**
-   * 渲染总花费时间，除去被中断、被暂停等时间
-   *
-   * @member {Number}
-   * @private
-   */
-  this._takeTime = 0;
-
-  /**
-   * 渲染总次数
-   *
-   * @member {Number}
-   * @private
-   */
-  this._renderTimes = 0;
-
-  /**
-   * 是否开启 ticker
-   *
-   * @member {Boolean}
-   */
-  this.started = false;
-
-  /**
-   * 是否暂停 ticker
-   *
-   * @member {Boolean}
-   */
-  this.paused = false;
-}
-
-Ticker.prototype = Object.create(Eventer.prototype);
-
-Ticker.prototype.timeline = function () {
-  this.snippet = Date.now() - this.pt;
-  if (this.pt === 0 || this.snippet > 200) {
-    this.pt = Date.now();
-    this.snippet = Date.now() - this.pt;
-  }
-
-  if (this.enableFPS) {
-    this._renderTimes++;
-    this._takeTime += Math.max(15, this.snippet);
-    this.fps = 1000 / Math.max(15, this.snippet) >> 0;
-    this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
-  }
-
-  this.pt += this.snippet;
-};
-
-Ticker.prototype.tick = function () {
-  if (this.paused) return;
-  this.emit('pretimeline');
-  this.timeline();
-  this.emit('posttimeline', this.snippet);
-  this.emit('update', this.snippet);
-  this.emit('tick', this.snippet);
-};
-
-/**
- * 渲染循环
- *
- * @method start
- */
-Ticker.prototype.start = function () {
-  var _this = this;
-
-  if (this.started) return;
-  this.started = true;
-  var loop = function loop() {
-    _this.tick();
-    _this.loop = RAF(loop);
-  };
-  loop();
-};
-
-/**
- * 渲染循环
- *
- * @method stop
- */
-Ticker.prototype.stop = function () {
-  CAF(this.loop);
-  this.started = false;
-};
-
-/**
- * 暂停触发 tick
- *
- * @method pause
- */
-Ticker.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复触发 tick
- *
- * @method resume
- */
-Ticker.prototype.resume = function () {
-  this.paused = false;
-};
-
-/**
- * 矩形类
- *
- * @class
- * @memberof JC
- * @param {number} x 左上角的x坐标
- * @param {number} y 左上角的y坐标
- * @param {number} width 矩形的宽度
- * @param {number} height 矩形的高度
- */
-function Rectangle(x, y, width, height) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.width = width || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.height = height || 0;
-}
-
-/**
- * 空矩形对象
- *
- * @static
- * @constant
- */
-Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
-
-/**
- * 克隆一个与该举行对象同样属性的矩形
- *
- * @return {PIXI.Rectangle} 克隆出的矩形
- */
-Rectangle.prototype.clone = function () {
-  return new Rectangle(this.x, this.y, this.width, this.height);
-};
-
-/**
- * 检查坐标点是否在矩形区域内
- *
- * @param {number} x 坐标点的x轴位置
- * @param {number} y 坐标点的y轴位置
- * @return {boolean} 坐标点是否在矩形区域内
- */
-Rectangle.prototype.contains = function (x, y) {
-  if (this.width <= 0 || this.height <= 0) {
-    return false;
-  }
-
-  if (x >= this.x && x < this.x + this.width) {
-    if (y >= this.y && y < this.y + this.height) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
-/**
- * 显示对象的包围盒子
- *
- * @class
- * @memberof JC
- * @param {Number} minX
- * @param {Number} minY
- * @param {Number} maxX
- * @param {Number} maxY
- */
-function Bounds(minX, minY, maxX, maxY) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minX = Utils.isNumber(minX) ? minX : Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.minY = Utils.isNumber(minY) ? minY : Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxX = Utils.isNumber(maxX) ? maxX : -Infinity;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.maxY = Utils.isNumber(maxY) ? maxY : -Infinity;
-
-  // this.rect = null;
-}
-
-Bounds.prototype.isEmpty = function () {
-  return this.minX > this.maxX || this.minY > this.maxY;
-};
-
-Bounds.prototype.clear = function () {
-  this.minX = Infinity;
-  this.minY = Infinity;
-  this.maxX = -Infinity;
-  this.maxY = -Infinity;
-  return this;
-};
-
-/**
- * 将包围盒子转换成矩形描述
- *
- * @param {JC.Rectangle} rect 待转换的矩形
- * @return {JC.Rectangle}
- */
-Bounds.prototype.getRectangle = function (rect) {
-  if (this.isEmpty()) {
-    return Rectangle.EMPTY;
-  }
-
-  rect = rect || new Rectangle(0, 0, 1, 1);
-
-  rect.x = this.minX;
-  rect.y = this.minY;
-  rect.width = this.maxX - this.minX;
-  rect.height = this.maxY - this.minY;
-
-  return rect;
-};
-
-/**
- * 往包围盒增加外部顶点，更新包围盒区域
- *
- * @param {JC.Point} point
- */
-Bounds.prototype.addPoint = function (point) {
-  this.minX = Math.min(this.minX, point.x);
-  this.maxX = Math.max(this.maxX, point.x);
-  this.minY = Math.min(this.minY, point.y);
-  this.maxY = Math.max(this.maxY, point.y);
-};
-
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param {JC.Rectangle} rect
- */
-Bounds.prototype.addRect = function (rect) {
-  this.minX = Math.min(this.minX, rect.x);
-  this.maxX = Math.max(this.maxX, rect.width + rect.x);
-  this.minY = Math.min(this.minY, rect.y);
-  this.maxY = Math.max(this.maxY, rect.height + rect.y);
-};
-
-/**
- * 往包围盒增加矩形区域，更新包围盒区域
- *
- * @param {JC.Circle} circle
- */
-Bounds.prototype.addCircle = function (circle) {
-  this.minX = Math.min(this.minX, circle.x - circle.radius);
-  this.maxX = Math.max(this.maxX, circle.x + circle.radius);
-  this.minY = Math.min(this.minY, circle.y - circle.radius);
-  this.maxY = Math.max(this.maxY, circle.y + circle.radius);
-};
-
-/**
- * 往包围盒增加顶点数组，更新包围盒区域
- *
- * @param {Array} vertices
- */
-Bounds.prototype.addVert = function (vertices) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  for (var i = 0; i < vertices.length; i += 2) {
-    var x = vertices[i];
-    var y = vertices[i + 1];
-    minX = x < minX ? x : minX;
-    minY = y < minY ? y : minY;
-    maxX = x > maxX ? x : maxX;
-    maxY = y > maxY ? y : maxY;
-  }
-
-  this.minX = minX;
-  this.minY = minY;
-  this.maxX = maxX;
-  this.maxY = maxY;
-};
-
-/**
- * 往包围盒增加包围盒，更新包围盒区域
- *
- * @param {JC.Bounds} bounds
- */
-Bounds.prototype.addBounds = function (bounds) {
-  var minX = this.minX;
-  var minY = this.minY;
-  var maxX = this.maxX;
-  var maxY = this.maxY;
-
-  this.minX = bounds.minX < minX ? bounds.minX : minX;
-  this.minY = bounds.minY < minY ? bounds.minY : minY;
-  this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
-  this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
-};
-
-/**
- * @class
- * @memberof JC
- * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
- */
-function Polygon(points) {
-  if (!Utils.isArray(points)) {
-    points = new Array(arguments.length);
-    /* eslint-disable */
-    for (var a = 0; a < points.length; ++a) {
-      points[a] = arguments[a];
-    }
-  }
-
-  if (points[0] instanceof Point) {
-    var p = [];
-    for (var i = 0, il = points.length; i < il; i++) {
-      p.push(points[i].x, points[i].y);
-    }
-
-    points = p;
-  }
-
-  this.closed = true;
-
-  this.points = points;
-}
-
-/**
- * 克隆一个属性相同的多边型对象
- *
- * @return {PIXI.Polygon} 克隆的对象
- */
-Polygon.prototype.clone = function () {
-  return new Polygon(this.points.slice());
-};
-
-/**
- * 检查坐标点是否在多边形内部
- *
- * @param {number} x 坐标点的x轴坐标
- * @param {number} y 坐标点的y轴坐标
- * @return {boolean} 是否在多边形内部
- */
-Polygon.prototype.contains = function (x, y) {
-  var inside = false;
-
-  var length = this.points.length / 2;
-
-  for (var i = 0, j = length - 1; i < length; j = i++) {
-    var xi = this.points[i * 2];
-    var yi = this.points[i * 2 + 1];
-    var xj = this.points[j * 2];
-    var yj = this.points[j * 2 + 1];
-    var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
-
-    if (intersect) {
-      inside = !inside;
-    }
-  }
-
-  return inside;
-};
-
-/**
- * 圆形对象
- *
- * @class
- * @memberof JC
- * @param {number} x x轴的坐标
- * @param {number} y y轴的坐标
- * @param {number} radius 圆的半径
- */
-function Circle(x, y, radius) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.radius = radius || 0;
-}
-
-/**
- * 克隆一个该圆对象
- *
- * @return {PIXI.Circle} 克隆出来的圆对象
- */
-Circle.prototype.clone = function () {
-  return new Circle(this.x, this.y, this.radius);
-};
-
-/**
- * 检测坐标点是否在园内
- *
- * @param {number} x 坐标点的x轴坐标
- * @param {number} y 坐标点的y轴坐标
- * @return {boolean} 坐标点是否在园内
- */
-Circle.prototype.contains = function (x, y) {
-  if (this.radius <= 0) {
-    return false;
-  }
-
-  var dx = this.x - x;
-  var dy = this.y - y;
-  var r2 = this.radius * this.radius;
-
-  dx *= dx;
-  dy *= dy;
-
-  return dx + dy <= r2;
-};
-
-/**
-* 返回对象所占的矩形区域
-*
-* @return {PIXI.Rectangle} 矩形对象
-*/
-Circle.prototype.getBounds = function () {
-  return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
-};
-
-/**
- * 椭圆对象
- *
- * @class
- * @memberof JC
- * @param {number} x x轴的坐标
- * @param {number} y y轴的坐标
- * @param {number} width 椭圆的宽度
- * @param {number} height 椭圆的高度
- */
-function Ellipse(x, y, width, height) {
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.x = x || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.y = y || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.width = width || 0;
-
-  /**
-   * @member {number}
-   * @default 0
-   */
-  this.height = height || 0;
-}
-
-/**
- * 克隆一个该椭圆对象
- *
- * @return {PIXI.Ellipse} 克隆出来的椭圆对象
- */
-Ellipse.prototype.clone = function () {
-  return new Ellipse(this.x, this.y, this.width, this.height);
-};
-
-/**
- * 检测坐标点是否在椭园内
- *
- * @param {number} x 坐标点的x轴坐标
- * @param {number} y 坐标点的y轴坐标
- * @return {boolean} 坐标点是否在椭园内
- */
-Ellipse.prototype.contains = function (x, y) {
-  if (this.width <= 0 || this.height <= 0) {
-    return false;
-  }
-
-  // normalize the coords to an ellipse with center 0,0
-  var normx = (x - this.x) / this.width;
-  var normy = (y - this.y) / this.height;
-
-  normx *= normx;
-  normy *= normy;
-
-  return normx + normy <= 1;
-};
-
-/**
- * 返回对象所占的矩形区域
- *
- * @return {PIXI.Rectangle} 矩形对象
- */
-Ellipse.prototype.getBounds = function () {
-  return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
-};
-
-/**
- * 矩阵对象，用来描述和记录对象的tansform 状态信息
- *
- * @class
- * @memberof JC
- */
-function Matrix$2() {
-  this.a = 1;
-  this.b = 0;
-  this.c = 0;
-  this.d = 1;
-  this.tx = 0;
-  this.ty = 0;
-}
-
-/**
- * 从数组设置一个矩阵
- *
- * @param {array} array
- */
-Matrix$2.prototype.fromArray = function (array) {
-  this.a = array[0];
-  this.b = array[1];
-  this.c = array[2];
-  this.d = array[3];
-  this.tx = array[4];
-  this.ty = array[5];
-};
-
-/**
- * 将对象的数据以数组的形式导出
- *
- * @param {boolean} transpose 是否对矩阵进行转置
- * @return {number[]} 返回数组
- */
-Matrix$2.prototype.toArray = function (transpose) {
-  if (!this.array) this.array = new Float32Array(9);
-  var array = this.array;
-
-  if (transpose) {
-    array[0] = this.a;
-    array[1] = this.b;
-    array[2] = 0;
-    array[3] = this.c;
-    array[4] = this.d;
-    array[5] = 0;
-    array[6] = this.tx;
-    array[7] = this.ty;
-    array[8] = 1;
-  } else {
-    array[0] = this.a;
-    array[1] = this.c;
-    array[2] = this.tx;
-    array[3] = this.b;
-    array[4] = this.d;
-    array[5] = this.ty;
-    array[6] = 0;
-    array[7] = 0;
-    array[8] = 1;
-  }
-  return array;
-};
-
-/**
- * 将坐标点与矩阵左乘
- *
- * @param {object} pos 原始点
- * @param {object} newPos 变换之后的点
- * @return {object} 返回数组
- */
-Matrix$2.prototype.apply = function (pos, newPos) {
-  newPos = newPos || {};
-  newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
-  newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
-  return newPos;
-};
-/**
- * 将坐标点与转置矩阵左乘
- *
- * @param {object} pos 原始点
- * @param {object} newPos 变换之后的点
- * @return {object} 变换之后的点
- */
-Matrix$2.prototype.applyInverse = function (pos, newPos) {
-  newPos = newPos || {};
-  var id = 1 / (this.a * this.d + this.c * -this.b);
-  newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
-  newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
-  return newPos;
-};
-/**
- * 位移操作
- * @param {number} x
- * @param {number} y
- * @return {this}
- */
-Matrix$2.prototype.translate = function (x, y) {
-  this.tx += x;
-  this.ty += y;
-  return this;
-};
-/**
- * 缩放操作
- * @param {number} x
- * @param {number} y
- * @return {this}
- */
-Matrix$2.prototype.scale = function (x, y) {
-  this.a *= x;
-  this.d *= y;
-  this.c *= x;
-  this.b *= y;
-  this.tx *= x;
-  this.ty *= y;
-  return this;
-};
-/**
- * 旋转操作
- * @param {number} angle
- * @return {this}
- */
-Matrix$2.prototype.rotate = function (angle) {
-  var cos = Math.cos(angle);
-  var sin = Math.sin(angle);
-  var a1 = this.a;
-  var c1 = this.c;
-  var tx1 = this.tx;
-  this.a = a1 * cos - this.b * sin;
-  this.b = a1 * sin + this.b * cos;
-  this.c = c1 * cos - this.d * sin;
-  this.d = c1 * sin + this.d * cos;
-  this.tx = tx1 * cos - this.ty * sin;
-  this.ty = tx1 * sin + this.ty * cos;
-  return this;
-};
-/**
- * 矩阵相乘
- * @param {matrix} matrix
- * @return {this}
- */
-Matrix$2.prototype.append = function (matrix) {
-  var a1 = this.a;
-  var b1 = this.b;
-  var c1 = this.c;
-  var d1 = this.d;
-  this.a = matrix.a * a1 + matrix.b * c1;
-  this.b = matrix.a * b1 + matrix.b * d1;
-  this.c = matrix.c * a1 + matrix.d * c1;
-  this.d = matrix.c * b1 + matrix.d * d1;
-  this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
-  this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
-  return this;
-};
-/**
- * 单位矩阵
- *
- * @return {this}
- */
-Matrix$2.prototype.identity = function () {
-  this.a = 1;
-  this.b = 0;
-  this.c = 0;
-  this.d = 1;
-  this.tx = 0;
-  this.ty = 0;
-  return this;
-};
-/**
- * 快速设置矩阵各个分量
- * @param {number} x
- * @param {number} y
- * @param {number} pivotX
- * @param {number} pivotY
- * @param {number} scaleX
- * @param {number} scaleY
- * @param {number} rotation
- * @param {number} skewX
- * @param {number} skewY
- * @param {number} originX
- * @param {number} originY
- * @return {this}
- */
-Matrix$2.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
-  var sr = Math.sin(rotation);
-  var cr = Math.cos(rotation);
-  var sy = Math.tan(skewY);
-  var nsx = Math.tan(skewX);
-
-  var a = cr * scaleX;
-  var b = sr * scaleX;
-  var c = -sr * scaleY;
-  var d = cr * scaleY;
-
-  var pox = pivotX + originX;
-  var poy = pivotY + originY;
-
-  this.a = a + sy * c;
-  this.b = b + sy * d;
-  this.c = nsx * a + c;
-  this.d = nsx * b + d;
-
-  this.tx = x - pox * this.a - poy * this.c + originX;
-  this.ty = y - pox * this.b - poy * this.d + originY;
-
-  return this;
-};
-var IDENTITY = new Matrix$2();
-var TEMP_MATRIX = new Matrix$2();
-
-/**
- *
- * @class
- * @memberof JC
- * @param {Array}  points  array of points
- */
-function CatmullRom(points) {
-  this.points = points;
-
-  this.passCmp = {
-    x: true,
-    y: true,
-    z: false
-  };
-
-  this.ccmp = {};
-
-  this.updateCcmp();
-}
-
-CatmullRom.prototype = Object.create(Curve.prototype);
-
-CatmullRom.prototype.updateCcmp = function () {
-  for (var i = 0; i < this.points.length; i++) {
-    var point = this.points[i];
-    for (var cmp in this.passCmp) {
-      if (this.passCmp[cmp] && !Utils.isUndefined(point[cmp])) {
-        this.ccmp[cmp] = this.ccmp[cmp] || [];
-        this.ccmp[cmp][i] = point[cmp];
-      }
-    }
-  }
-};
-
-CatmullRom.prototype.getPoint = function (k) {
-  var point = new Point();
-  for (var cmp in this.passCmp) {
-    if (this.passCmp[cmp]) {
-      point[cmp] = this.solveEachCmp(this.ccmp[cmp], k);
-    }
-  }
-  return point;
-};
-
-CatmullRom.prototype.solveEachCmp = function (v, k) {
-  var m = v.length - 1;
-  var f = m * k;
-  var i = Math.floor(f);
-  var fn = this.solve;
-
-  if (v[0] === v[m]) {
-    if (k < 0) {
-      i = Math.floor(f = m * (1 + k));
-    }
-
-    return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-  } else {
-    if (k < 0) {
-      return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-    }
-
-    if (k > 1) {
-      return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-    }
-
-    return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-  }
-};
-
-CatmullRom.prototype.solve = function (p0, p1, p2, p3, t) {
-  var v0 = (p2 - p0) * 0.5;
-  var v1 = (p3 - p1) * 0.5;
-  var t2 = t * t;
-  var t3 = t * t2;
-
-  /* eslint max-len: 0 */
-  return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-};
-
-// SvgCurve.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); // NOTE: some like don`t need svg tag to wrap
-
-/**
- *
- * @class
- * @memberof JC
- * @param {String}  path  array of points
- */
-function SvgCurve(path) {
-  if (Utils.isString(path)) {
-    this.path = this.createPath(path);
-  } else if (path.nodeName === 'path' && path.getAttribute('d')) {
-    this.path = path;
-  } else {
-    /* eslint max-len: "off" */
-    console.warn('path just accept <path d="M10 10"> element or "M10 10" string but found ' + path);
-  }
-  this.totalLength = this.path.getTotalLength();
-}
-
-SvgCurve.prototype = Object.create(Curve.prototype);
-
-SvgCurve.prototype.createPath = function (d) {
-  var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  return p.setAttribute(d);
-};
-
-SvgCurve.prototype.getPoint = function (t) {
-  var point = this.path.getPointAtLength(t * this.totalLength);
-  return new Point(point.x, point.y);
-};
-
-var NURBSUtils = {
-
-  /**
-   * Finds knot vector span.
-   * @param {number} p degree
-   * @param {number} u parametric value
-   * @param {number} U knot vector
-   * @return {number} span
-   */
-  findSpan: function findSpan(p, u, U) {
-    var n = U.length - p - 1;
-
-    if (u >= U[n]) {
-      return n - 1;
-    }
-
-    if (u <= U[p]) {
-      return p;
-    }
-
-    var low = p;
-    var high = n;
-    var mid = Math.floor((low + high) / 2);
-
-    while (u < U[mid] || u >= U[mid + 1]) {
-      if (u < U[mid]) {
-        high = mid;
+        loader.once('complete', _this._imageLoadHandle);
       } else {
-        low = mid;
-      }
+        _this._cancelImageLoadHandle = null;
+        _this._paused = !autoStart;
+      } // 注册图层
 
-      mid = Math.floor((low + high) / 2);
+
+      var register = new Register();
+      /**
+       * 该动画组注册的信息
+       * @member {LayerRegister}
+       * @private
+       */
+
+      _this.register = register;
+      var maskComp = Tools.isBoolean(options.maskComp) ? options.maskComp : true;
+      var session = {
+        global: {
+          assets: assets,
+          loader: loader,
+          register: register,
+          maskComp: maskComp,
+          frameRate: fr,
+          overlapMode: _this.overlapMode
+        },
+        local: {
+          parentName: ''
+        }
+      };
+      /**
+       * 该动画组的根对象
+       * @member {CompElement}
+       */
+
+      _this.root = _this.extraCompositions(_this.keyframes, session);
+      _this.root._isRoot = true;
+      _this.group = _this.rootDisplay = _this.root.display;
+      return _this;
     }
+    /**
+     * a
+     * @param {object} data layers
+     * @param {object} assets object
+     * @return {container}
+     */
 
-    return mid;
-  },
+
+    _createClass(AnimationGroup, [{
+      key: "extraCompositions",
+      value: function extraCompositions(data, _ref) {
+        var global = _ref.global,
+            local = _ref.local;
+        var w = data.w,
+            h = data.h,
+            ip = data.ip,
+            op = data.op,
+            _data$st = data.st,
+            st = _data$st === void 0 ? 0 : _data$st,
+            _data$nm = data.nm,
+            nm = _data$nm === void 0 ? 'null' : _data$nm;
+        var parentName = local.parentName ? local.parentName + '.' + nm : nm;
+        var container = new CompElement(data, {
+          global: global,
+          local: local
+        });
+        var layers = data.layers || Tools.getAssets(data.refId, global.assets).layers;
+        var session = {
+          global: global,
+          local: {
+            w: w,
+            h: h,
+            ip: ip,
+            op: op,
+            st: st,
+            parentName: parentName
+          }
+        };
+        var elementsMap = this.createElements(layers, session);
+
+        for (var i = layers.length - 1; i >= 0; i--) {
+          var layer = layers[i];
+          var item = elementsMap[layer.ind];
+          if (!item) continue;
+
+          if (layer.parent) {
+            var parent = elementsMap[layer.parent];
+            parent._isParent = true;
+            item.setHierarchy(parent);
+          }
+
+          var nameHierarchy = parentName + '.' + item.name;
+          global.register.setLayer(nameHierarchy, item);
+          container.addChild(item);
+        }
+
+        return container;
+      }
+      /**
+       * createElements
+       * @param {arrya} layers layers
+       * @param {object} session object
+       * @return {object}
+       */
+
+    }, {
+      key: "createElements",
+      value: function createElements(layers, session) {
+        var elementsMap = {};
+
+        for (var i = layers.length - 1; i >= 0; i--) {
+          var layer = layers[i];
+          var element = null;
+          if (layer.td !== undefined) continue;
+
+          switch (layer.ty) {
+            case 0:
+              element = this.extraCompositions(layer, session);
+              break;
+
+            case 1:
+              element = new SolidElement(layer, session);
+              break;
+
+            case 2:
+              element = new SpriteElement(layer, session);
+              break;
+
+            case 3:
+              element = new NullElement(layer, session);
+              break;
+
+            case 4:
+              element = new ShapeElement(layer, session);
+              break;
+
+            default:
+              continue;
+          }
+
+          if (element) {
+            if (layer.ind === undefined) layer.ind = i;
+            elementsMap[layer.ind] = element;
+            element.name = layer.nm || 'null';
+          }
+        }
+
+        return elementsMap;
+      }
+      /**
+       * get layer by name path
+       * @param {string} name layer name path, example: root.gift.star1
+       * @return {object}
+       */
+
+    }, {
+      key: "getDisplayByName",
+      value: function getDisplayByName(name) {
+        var layer = this.register.getLayer(name);
+        if (layer.display) return layer.display;
+        console.warn('can not find display name as ', name);
+        return null;
+      }
+      /**
+       * bind other animation-group or display-object to this animation-group with name path
+       * @param {*} name
+       * @param {*} slot
+       */
+
+    }, {
+      key: "bindSlot",
+      value: function bindSlot(name, slot) {
+        var slotDisplay = this.getDisplayByName(name);
+        slotDisplay.addChild(slot);
+      }
+      /**
+       * emit frame
+       * @private
+       * @param {*} np now frame
+       */
+
+    }, {
+      key: "emitFrame",
+      value: function emitFrame(np) {
+        this.emit("@".concat(np));
+      }
+      /**
+       * update with time snippet
+       * @private
+       * @param {number} snippetCache snippet
+       */
+
+    }, {
+      key: "update",
+      value: function update(snippetCache) {
+        if (!this.living) return;
+        var isEnd = this.updateTime(snippetCache);
+        var correctedFrameNum = this.beginFrame + this.frameNum;
+        this.root.updateFrame(correctedFrameNum);
+        var np = correctedFrameNum >> 0;
+
+        if (this._pf !== np) {
+          this.emitFrame(this.direction > 0 ? np : this._pf);
+          this._pf = np;
+        }
+
+        if (isEnd === false) {
+          this.emit('update', this.frameNum / this.duration);
+        } else if (this.hadEnded !== isEnd && isEnd === true) {
+          this.emit('complete');
+        }
+
+        this.hadEnded = isEnd;
+      }
+      /**
+       * update timeline with time snippet
+       * @private
+       * @param {number} snippet snippet
+       * @return {boolean} frameNum status
+       */
+
+    }, {
+      key: "updateTime",
+      value: function updateTime(snippet) {
+        var snippetCache = this.direction * this.timeScale * snippet;
+
+        if (this._waitCut > 0) {
+          this._waitCut -= Math.abs(snippetCache);
+          return null;
+        }
+
+        if (this._paused || this._delayCut > 0) {
+          if (this._delayCut > 0) this._delayCut -= Math.abs(snippetCache);
+          return null;
+        }
+
+        this.frameNum += snippetCache / this._tpf;
+        var isEnd = false;
+
+        if (this.spill()) {
+          if (this._repeatsCut > 0 || this.infinite) {
+            if (this._repeatsCut > 0) --this._repeatsCut;
+            this._delayCut = this.delay;
+
+            if (this.alternate) {
+              this.direction *= -1;
+              this.frameNum = Tools.codomainBounce(this.frameNum, 0, this.duration);
+            } else {
+              this.direction = 1;
+              this.frameNum = Tools.euclideanModulo(this.frameNum, this.duration);
+            }
+          } else {
+            if (!this.overlapMode) {
+              this.frameNum = Tools.clamp(this.frameNum, 0, this.duration);
+              this.living = false;
+            }
+
+            isEnd = true;
+          }
+        }
+
+        return isEnd;
+      }
+      /**
+       * is this time frameNum spill the range
+       * @private
+       * @return {boolean}
+       */
+
+    }, {
+      key: "spill",
+      value: function spill() {
+        var bottomSpill = this.frameNum <= 0 && this.direction === -1;
+        var topSpill = this.frameNum >= this.duration && this.direction === 1;
+        return bottomSpill || topSpill;
+      }
+      /**
+       * get time
+       * @param {number} frame frame index
+       * @return {number}
+       */
+
+    }, {
+      key: "frameToTime",
+      value: function frameToTime(frame) {
+        return frame * this._tpf;
+      }
+      /**
+       * set animation speed, time scale
+       * @param {number} speed
+       */
+
+    }, {
+      key: "setSpeed",
+      value: function setSpeed(speed) {
+        this.timeScale = speed;
+      }
+      /**
+       * set finite state machine
+       * @param {String|Array} name segment name which define in segments props, you can also pass an array like [10, 30]
+       * @param {Object} options animation config
+       * @param {Number} [options.delay=0] need delay how much time to begin, effect every round
+       * @param {Number} [options.repeats=0] need repeat somt times?
+       * @param {Boolean} [options.infinite=false] play this animation round and round forever
+       * @param {Boolean} [options.alternate=false] alternate direction every round
+       * @param {Number} [options.wait=0] need wait how much millisecond to start
+       * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
+       */
+
+    }, {
+      key: "playSegment",
+      value: function playSegment(name) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        if (!name) return;
+        var segment = null;
+
+        if (Tools.isArray(name)) {
+          segment = name;
+        } else if (Tools.isString(name)) {
+          segment = this.segments[name];
+        }
+
+        if (!segment) return;
+        this.beginFrame = segment[0];
+        this.endFrame = segment[1];
+        if (Tools.isNumber(options.delay)) this.delay = options.delay;
+        if (Tools.isNumber(options.repeats)) this.repeats = options.repeats;
+        if (Tools.isBoolean(options.infinite)) this.infinite = options.infinite;
+        if (Tools.isBoolean(options.alternate)) this.alternate = options.alternate;
+        if (Tools.isNumber(options.wait)) this.wait = options.wait;
+        if (Tools.isNumber(options.delay)) this.delay = options.delay;
+        this.replay();
+      }
+      /**
+       * pause this animation group
+       * @return {this}
+       */
+
+    }, {
+      key: "pause",
+      value: function pause() {
+        if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
+        this._paused = true;
+        return this;
+      }
+      /**
+       * resume or play this animation group
+       * @return {this}
+       */
+
+    }, {
+      key: "resume",
+      value: function resume() {
+        if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
+        this._paused = false;
+        return this;
+      }
+      /**
+       * replay this animation group from begin frame
+       * @return {this}
+       */
+
+    }, {
+      key: "replay",
+      value: function replay() {
+        if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
+        this._paused = false;
+        this._repeatsCut = this.repeats;
+        this._delayCut = this.delay;
+        this.living = true;
+        this.frameNum = 0;
+        this.duration = Math.floor(this.endFrame - this.beginFrame);
+        this.direction = 1;
+        return this;
+      }
+    }]);
+
+    return AnimationGroup;
+  }(Eventer$1);
 
   /**
-   * Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
-   * @param {number} span span in which u lies
-   * @param {number} u parametric point
-   * @param {number} p degree
-   * @param {number} U knot vector
-   * @return {array} array[p+1] with basis functions values.
+   * all lottie animation manager, manage update loop and animation groups
+   * @example
+   * const manager = new PIXI.AnimationManager(app);
+   * const ani = manager.parseAnimation({
+   *   keyframes: data,
+   *   infinite: true,
+   * });
+   * @class
    */
-  calcBasisFunctions: function calcBasisFunctions(span, u, p, U) {
-    var N = [];
-    var left = [];
-    var right = [];
-    N[0] = 1.0;
 
-    for (var j = 1; j <= p; ++j) {
-      left[j] = u - U[span + 1 - j];
-      right[j] = U[span + j] - u;
+  var AnimationManager = /*#__PURE__*/function (_Eventer) {
+    _inherits(AnimationManager, _Eventer);
 
-      var saved = 0.0;
+    var _super = _createSuper(AnimationManager);
 
-      for (var r = 0; r < j; ++r) {
-        var rv = right[r + 1];
-        var lv = left[j - r];
-        var temp = N[r] / (rv + lv);
-        N[r] = saved + rv * temp;
-        saved = lv * temp;
-      }
+    /**
+     * animation manager, a ticker instance
+     * @param {Application} app app object
+     */
+    function AnimationManager(app) {
+      var _this;
 
-      N[j] = saved;
+      _classCallCheck(this, AnimationManager);
+
+      _this = _super.call(this);
+      /**
+       * pre-time cache
+       *
+       * @member {Number}
+       * @private
+       */
+
+      _this.pt = 0;
+      /**
+       * how long the time through, at this tick
+       *
+       * @member {Number}
+       * @private
+       */
+
+      _this.snippet = 0;
+      /**
+       * time scale, just like speed scalar
+       *
+       * @member {Number}
+       */
+
+      _this.timeScale = 1;
+      /**
+       * mark the manager was pause or not
+       *
+       * @member {Boolean}
+       */
+
+      _this.paused = false;
+      /**
+       * get shared ticker from app object
+       * @private
+       */
+
+      _this.ticker = app.ticker ? app.ticker : app;
+      /**
+       * all animation groups
+       * @private
+       */
+
+      _this.groups = [];
+      _this.update = _this.update.bind(_assertThisInitialized(_this));
+      if (_this.ticker) _this.start();
+      return _this;
     }
+    /**
+     * add a animationGroup child to array
+     * @param {AnimationGroup} child AnimationGroup instance
+     * @return {AnimationGroup} child
+     */
 
-    return N;
-  },
+
+    _createClass(AnimationManager, [{
+      key: "add",
+      value: function add(child) {
+        var argumentsLength = arguments.length;
+
+        if (argumentsLength > 1) {
+          for (var i = 0; i < argumentsLength; i++) {
+            /* eslint prefer-rest-params: 0 */
+            this.add(arguments[i]);
+          }
+        } else {
+          this.groups.push(child);
+        }
+
+        return child;
+      }
+      /**
+       * parser a bodymovin data, and post some config for this animation group
+       * @param {object} options animation config
+       * @param {Object} options.keyframes bodymovin data, which export from AE by bodymovin
+       * @param {Number} [options.repeats=0] need repeat some times?
+       * @param {Boolean} [options.infinite=false] play this animation round and round forever
+       * @param {Boolean} [options.alternate=false] alternate play direction every round
+       * @param {Number} [options.wait=0] need wait how much millisecond to start
+       * @param {Number} [options.delay=0] need delay how much millisecond to begin, effect every loop round
+       * @param {Number} [options.timeScale=1] animation speed, time scale factor
+       * @param {Boolean} [options.autoLoad=true] auto load assets, if this animation have
+       * @param {Boolean} [options.autoStart=true] auto start animation after assets loaded
+       * @param {Boolean} [options.overlapMode=false] enable overlap mode, it is useful when you have a overlap expression
+       * @param {Object} [options.segments={}] animation segments, splite by start and end keyframe number
+       * @param {Boolean} [options.initSegment=''] animation segments, init finite state machine
+       * @param {Boolean} [options.maskComp=false] auto start animation after assets loaded
+       * @param {String} [options.prefix=''] assets url prefix, look like link path
+       * @return {AnimationGroup}
+       * @example
+       * const manager = new PIXI.AnimationManager(app);
+       * const ani = manager.parseAnimation({
+       *   keyframes: data,
+       *   infinite: true,
+       * });
+       */
+
+    }, {
+      key: "parseAnimation",
+      value: function parseAnimation(options) {
+        var animate = new AnimationGroup(options);
+        return this.add(animate);
+      }
+      /**
+       * set animation speed, time scale
+       * @param {number} speed
+       */
+
+    }, {
+      key: "setSpeed",
+      value: function setSpeed(speed) {
+        this.timeScale = speed;
+      }
+      /**
+       * start update loop
+       * @return {this}
+       */
+
+    }, {
+      key: "start",
+      value: function start() {
+        this.pt = Date.now();
+        this.ticker.on('update', this.update);
+        return this;
+      }
+      /**
+       * stop update loop
+       * @return {this}
+       */
+
+    }, {
+      key: "stop",
+      value: function stop() {
+        this.ticker.off('update', this.update);
+        return this;
+      }
+      /**
+       * pause all animation groups
+       * @return {this}
+       */
+
+    }, {
+      key: "pause",
+      value: function pause() {
+        this.paused = true;
+        return this;
+      }
+      /**
+       * pause all animation groups
+       * @return {this}
+       */
+
+    }, {
+      key: "resume",
+      value: function resume() {
+        this.paused = false;
+        return this;
+      }
+      /**
+       * update all active animation
+       * @private
+       */
+
+    }, {
+      key: "update",
+      value: function update() {
+        this.timeline();
+        if (this.paused) return;
+        var snippetCache = this.timeScale * this.snippet;
+        var length = this.groups.length;
+
+        for (var i = 0; i < length; i++) {
+          var animationGroup = this.groups[i];
+          animationGroup.update(snippetCache);
+        }
+
+        this.emit('update', this.snippet);
+      }
+      /**
+       * get timeline snippet
+       * @private
+       */
+
+    }, {
+      key: "timeline",
+      value: function timeline() {
+        var snippet = Date.now() - this.pt;
+
+        if (!this.pt || snippet > 200) {
+          this.pt = Date.now();
+          snippet = Date.now() - this.pt;
+        }
+
+        this.pt += snippet;
+        this.snippet = snippet;
+      }
+    }]);
+
+    return AnimationManager;
+  }(Eventer$1);
+
+  /* eslint guard-for-in: "off" */
 
   /**
-   * Calculate B-Spline curve points. See The NURBS Book, page 82
-   * @param {number} p degree of B-Spline
-   * @param {vector} U knot vector
-   * @param {vector} P control points (x, y, z, w)
-   * @param {vector} u parametric point
-   * @return {point} point for given u
+   * Bodymovin 类型动画对象
+   *
+   * @class
+   * @private
+   * @param {object} options 动画所具备的特性
+   */
+
+  function Bodymovin(options) {
+    Animate.call(this, options); // list of animated properties
+
+    this.dynamicProperties = []; // If layer has been modified in current tick this will be true
+
+    this._mdf = false;
+    this.keyframes = Tools.copyJSON(options.keyframes);
+    this.frameRate = options.frameRate || 30;
+    this.tpf = 1000 / this.frameRate; // this.frameNum = -1;
+
+    this.ip = Tools.isUndefined(options.ip) ? this.keyframes.ip : options.ip;
+    this.op = Tools.isUndefined(options.ip) ? this.keyframes.op : options.op;
+    this.tfs = this.op - this.ip;
+    this.duration = this.tfs * this.tpf;
+    this.ignoreProps = Tools.isArray(options.ignoreProps) ? options.ignoreProps : [];
+    this.transform = new TransformFrames(this, this.keyframes.ks);
+  }
+
+  Bodymovin.prototype = Object.create(Animate.prototype);
+  /**
+   * Calculates all dynamic values
+   * @param {number} frameNum current frame number in Layer's time
+   */
+
+  Bodymovin.prototype.prepareProperties = function (frameNum) {
+    var i;
+    var len = this.dynamicProperties.length;
+
+    for (i = 0; i < len; i += 1) {
+      this.dynamicProperties[i].getValue(frameNum);
+
+      if (this.dynamicProperties[i]._mdf) {
+        this._mdf = true;
+      }
+    }
+  };
+  /**
+   * add dynamic property
+   * @param {*} prop dynamic property
+   */
+
+
+  Bodymovin.prototype.addDynamicProperty = function (prop) {
+    if (this.dynamicProperties.indexOf(prop) === -1) {
+      this.dynamicProperties.push(prop);
+    }
+  };
+  /**
+   * 计算下一帧状态
+   * @private
+   * @return {object}
+   */
+
+
+  Bodymovin.prototype.nextPose = function () {
+    var pose = {};
+    var frameNum = this.ip + this.progress / this.tpf;
+    this.prepareProperties(frameNum);
+
+    if (this.ignoreProps.indexOf('position') === -1) {
+      if (this.ignoreProps.indexOf('x') === -1) {
+        pose.x = this.element.x = this.transform.x;
+      }
+
+      if (this.ignoreProps.indexOf('y') === -1) {
+        pose.y = this.element.y = this.transform.y;
+      }
+    }
+
+    if (this.ignoreProps.indexOf('pivot') === -1) {
+      if (this.ignoreProps.indexOf('pivotX') === -1) {
+        pose.pivotX = this.element.pivotX = this.transform.anchorX;
+      }
+
+      if (this.ignoreProps.indexOf('pivotY') === -1) {
+        pose.pivotY = this.element.pivotY = this.transform.anchorY;
+      }
+    }
+
+    if (this.ignoreProps.indexOf('scale') === -1) {
+      if (this.ignoreProps.indexOf('scaleX') === -1) {
+        pose.scaleX = this.element.scaleX = this.transform.scaleX;
+      }
+
+      if (this.ignoreProps.indexOf('scaleY') === -1) {
+        pose.scaleY = this.element.scaleY = this.transform.scaleY;
+      }
+    }
+
+    if (this.ignoreProps.indexOf('rotation') === -1) {
+      pose.rotation = this.element.rotation = this.transform.rotation;
+    }
+
+    if (this.ignoreProps.indexOf('alpha') === -1) {
+      pose.alpha = this.element.alpha = this.transform.alpha;
+    }
+
+    return pose;
+  };
+
+  /**
+   * AnimateRunner类型动画类
+   *
+   * @class
+   * @memberof JC
+   * @param {object} runner 动画属性参数
+   * @param {object} [options] queue动画配置
+   */
+
+  function Queues(runner, options) {
+    Animate.call(this, options);
+    this.runners = [];
+    this.queues = [];
+    this.cursor = 0;
+    this.total = 0;
+    this.alternate = false;
+    if (runner) this.then(runner);
+  }
+
+  Queues.prototype = Object.create(Animate.prototype);
+  /**
+   * 更新下一个`runner`
+   * @param {Object} runner
+   * @return {this}
+   * @private
+   */
+
+  Queues.prototype.then = function (runner) {
+    this.queues.push(runner);
+    this.total = this.queues.length;
+    return this;
+  };
+  /**
+   * 更新下一个`runner`
+   * @param {Object} _
+   * @param {Number} time
+   * @private
+   */
+
+
+  Queues.prototype.nextOne = function (_, time) {
+    this.runners[this.cursor].init();
+    this.cursor++;
+    this.timeSnippet = time;
+  };
+  /**
+   * 初始化当前`runner`
+   * @private
+   */
+
+
+  Queues.prototype.initOne = function () {
+    var runner = this.queues[this.cursor];
+    runner.infinite = false;
+    runner.resident = true;
+    runner.element = this.element;
+    var animate = null;
+
+    if (runner.path) {
+      animate = new PathMotion(runner);
+    } else if (runner.to) {
+      animate = new Transition(runner);
+    }
+
+    if (animate !== null) {
+      animate.on('complete', this.nextOne.bind(this));
+      this.runners.push(animate);
+    }
+  };
+  /**
+   * 下一帧的状态
+   * @private
+   * @param {number} snippetCache 时间片段
+   * @return {object}
+   */
+
+
+  Queues.prototype.nextPose = function (snippetCache) {
+    if (!this.runners[this.cursor] && this.queues[this.cursor]) {
+      this.initOne();
+    }
+
+    if (this.timeSnippet > 0) {
+      snippetCache += this.timeSnippet;
+      this.timeSnippet = 0;
+    }
+
+    return this.runners[this.cursor].update(snippetCache);
+  };
+  /**
+   * 更新动画数据
+   * @private
+   * @param {number} snippet 时间片段
+   * @return {object}
+   */
+
+
+  Queues.prototype.update = function (snippet) {
+    if (this.wait > 0) {
+      this.wait -= Math.abs(snippet);
+      return;
+    }
+
+    if (this.paused || !this.living || this.delayCut > 0) {
+      if (this.delayCut > 0) this.delayCut -= Math.abs(snippet);
+      return;
+    }
+
+    var cc = this.cursor;
+    var pose = this.nextPose(this.timeScale * snippet);
+    this.emit('update', {
+      index: cc,
+      pose: pose
+    }, this.progress / this.duration);
+
+    if (this.spill()) {
+      if (this.repeats > 0 || this.infinite) {
+        if (this.repeats > 0) --this.repeats;
+        this.delayCut = this.delay;
+        this.cursor = 0;
+      } else {
+        if (!this.resident) this.living = false;
+        this.emit('complete', pose);
+      }
+    }
+
+    return pose;
+  };
+  /**
+   * 检查动画是否到了边缘
+   * @private
+   * @return {boolean}
+   */
+
+
+  Queues.prototype.spill = function () {
+    // TODO: 这里应该保留溢出，不然会导致时间轴上的误差
+    var topSpill = this.cursor >= this.total;
+    return topSpill;
+  };
+
+  /**
+   * Animation类型动画类，该类上的功能将以`add-on`的形势增加到`DisplayObject`上
+   *
+   * @class
+   * @memberof JC
+   * @param {JC.DisplayObject} element
+   */
+
+  function Animation(element) {
+    this.element = element;
+    /**
+     * 自身当前动画队列
+     *
+     * @member {array}
+     */
+
+    this.animates = [];
+    /**
+     * 自身及后代动画的缩放比例
+     *
+     * @member {number}
+     */
+
+    this.timeScale = 1;
+    /**
+     * 是否暂停自身的动画
+     *
+     * @member {Boolean}
+     */
+
+    this.paused = false;
+  }
+  /**
+   * 更新动画数据
+   * @private
+   * @param {number} snippet 时间片段
+   */
+
+
+  Animation.prototype.update = function (snippet) {
+    if (this.paused) return;
+    snippet = this.timeScale * snippet;
+    var cache = this.animates.slice(0);
+
+    for (var i = 0; i < cache.length; i++) {
+      if (!cache[i].living && !cache[i].resident) {
+        this.animates.splice(i, 1);
+      }
+
+      cache[i].update(snippet);
+    }
+  };
+  /**
+   * 创建一个`animate`动画
+   * @private
+   * @param {object} options 动画配置
+   * @param {boolean} clear 是否清除之前的动画
+   * @return {JC.Transition}
+   */
+
+
+  Animation.prototype.animate = function (options, clear) {
+    options.element = this.element;
+    return this._addMove(new Transition(options), clear);
+  };
+  /**
+   * 创建一个`motion`动画
+   * @private
+   * @param {object} options 动画配置
+   * @param {boolean} clear 是否清除之前的动画
+   * @return {JC.PathMotion}
+   */
+
+
+  Animation.prototype.motion = function (options, clear) {
+    options.element = this.element;
+    return this._addMove(new PathMotion(options), clear);
+  };
+  /**
+   * 创建一个`runners`动画
+   * @private
+   * @param {object} options 动画配置
+   * @param {boolean} clear 是否清除之前的动画
+   * @return {JC.AnimateRunner}
+   */
+  // Animation.prototype.runners = function(options, clear) {
+  //   options.element = this.element;
+  //   return this._addMove(new AnimateRunner(options), clear);
+  // };
+
+
+  Animation.prototype.queues = function (runner, options, clear) {
+    options.element = this.element;
+    return this._addMove(new Queues(runner, options), clear);
+  };
+  /**
+   * 创建一个`keyFrames`动画
+   * @private
+   * @param {object} options 动画配置
+   * @param {boolean} clear 是否清除之前的动画
+   * @return {JC.KeyFrames}
+   */
+
+
+  Animation.prototype.keyFrames = function (options, clear) {
+    options.element = this.element;
+    return this._addMove(new KeyFrames(options), clear);
+  };
+  /**
+   * 创建一个`keyFrames`动画
+   * @private
+   * @param {object} options 动画配置
+   * @param {boolean} clear 是否清除之前的动画
+   * @return {JC.Bodymovin}
+   */
+
+
+  Animation.prototype.bodymovin = function (options, clear) {
+    options.element = this.element;
+    return this._addMove(new Bodymovin(options), clear);
+  };
+  /**
+   * 添加到动画队列
+   * @private
+   * @param {object} animate 创建出来的动画对象
+   * @param {boolean} clear 是否清除之前的动画
+   * @return {JC.KeyFrames|JC.AnimateRunner|JC.PathMotion|JC.Transition}
+   */
+
+
+  Animation.prototype._addMove = function (animate, clear) {
+    if (clear) this.clear();
+    this.animates.push(animate);
+    return animate;
+  };
+  /**
+   * 暂停动画组
+   */
+
+
+  Animation.prototype.pause = function () {
+    this.paused = true;
+  };
+  /**
+   * 恢复动画组
+   */
+
+
+  Animation.prototype.restart = function () {
+    this.paused = false;
+  };
+  /**
+   * 设置动画组的播放速率
+   * @param {number} speed
+   */
+
+
+  Animation.prototype.setSpeed = function (speed) {
+    this.timeScale = speed;
+  };
+  /**
+   * 清除动画队列
+   * @private
+   */
+
+
+  Animation.prototype.clear = function () {
+    this.animates.length = 0;
+  };
+
+  /* eslint guard-for-in: "off" */
+
+  var URL = 'url';
+  var IMG = 'img';
+  /**
+   *
+   * @param {Object} frame object
+   * @return {Boolean}
+   */
+
+  function isFrame(frame) {
+    return frame.tagName === 'VIDEO' || frame.tagName === 'CANVAS' || frame.tagName === 'IMG';
+  }
+  /**
+   * 图片纹理类
+   *
+   * @class
+   * @memberof JC
+   * @param {string | Image} texture 图片url或者图片对象.
+   * @param {object} options 图片配置
+   * @param {boolean} [options.lazy=false] 图片是否需要懒加载
+   * @param {string} [options.crossOrigin] 图片是否配置跨域
+   * @extends JC.Eventer
+   */
+
+
+  function Texture(texture, options) {
+    Eventer.call(this);
+    options = options || {};
+    this.type = '';
+    this.url = '';
+    this.texture = null;
+    this.crossOrigin = options.crossOrigin;
+    this.loaded = false;
+    this.hadload = false;
+    this.lazy = options.lazy || false;
+
+    if (Utils.isString(texture)) {
+      this.type = URL;
+      this.url = texture;
+      this.texture = this.resole();
+      this.texture.crossOrigin = this.crossOrigin;
+      if (!this.lazy) this.load();
+    } else if (isFrame(texture)) {
+      this.type = IMG;
+      this.loaded = true;
+      this.hadload = true;
+      this.texture = texture;
+    } else {
+      console.warn('texture not support this texture');
+      return;
+    }
+
+    this.listen();
+  }
+
+  Texture.prototype = Object.create(Eventer.prototype);
+  /**
+   * 创建一个图片
+   *
+   * @private
+   * @return {Image}
+   */
+
+  Texture.prototype.resole = function () {
+    return new Image();
+  };
+  /**
+   * 尝试加载图片
+   *
+   * @param {String} url 图片url或者图片对象.
+   */
+
+
+  Texture.prototype.load = function (url) {
+    if (this.hadload || this.type !== URL) return;
+    url = url || this.url;
+    this.hadload = true;
+    this.texture.src = url;
+  };
+  /**
+   * 监听加载事件
+   */
+
+
+  Texture.prototype.listen = function () {
+    var _this = this;
+
+    this.texture.addEventListener('load', function () {
+      _this.loaded = true;
+
+      _this.emit('load');
+    });
+    this.texture.addEventListener('error', function () {
+      _this.emit('error');
+    });
+  };
+  /**
+   * 获取纹理的宽
+   *
+   * @member width
+   * @property {Number} width 纹理的宽
+   * @memberof JC.Texture
+   */
+
+
+  Object.defineProperty(Texture.prototype, 'width', {
+    get: function get() {
+      return this.texture ? this.texture.width : 0;
+    }
+  });
+  /**
+   * 获取纹理的高
+   *
+   * @member height
+   * @property {Number} height 纹理的高
+   * @memberof JC.Texture
+   */
+
+  Object.defineProperty(Texture.prototype, 'height', {
+    get: function get() {
+      return this.texture ? this.texture.height : 0;
+    }
+  });
+  /**
+   * 获取纹理的原始宽
+   *
+   * @member naturalWidth
+   * @property {Number} naturalWidth 纹理的原始宽
+   * @memberof JC.Texture
+   */
+
+  Object.defineProperty(Texture.prototype, 'naturalWidth', {
+    get: function get() {
+      return this.texture ? this.texture.naturalWidth || this.texture.width : 0;
+    }
+  });
+  /**
+   * 获取纹理的原始高
+   *
+   * @member naturalHeight
+   * @property {Number} naturalHeight 纹理的原始高
+   * @memberof JC.Texture
+   */
+
+  Object.defineProperty(Texture.prototype, 'naturalHeight', {
+    get: function get() {
+      return this.texture ? this.texture.naturalHeight || this.texture.height : 0;
+    }
+  });
+  /**
+   * 图片资源加载器
+   *
+   * @class
+   * @param {String} crossOrigin cross-origin config
+   * @namespace JC.Loader
+   * @extends JC.Eventer
+   */
+
+  function Loader(crossOrigin) {
+    Eventer.call(this);
+    this.crossOrigin = crossOrigin;
+    this.textures = {};
+    this._total = 0;
+    this._failed = 0;
+    this._received = 0;
+  }
+
+  Loader.prototype = Object.create(Eventer.prototype);
+  /**
+   * 开始加载资源
+   *
+   * ```js
+   * var loadBox = new JC.Loader();
+   * loadBox.load({
+   *     aaa: 'img/xxx.png',
+   *     bbb: 'img/yyy.png',
+   *     ccc: 'img/zzz.png'
+   * });
+   * ```
+   *
+   * @param {object} srcMap 配置了key－value的json格式数据
+   * @return {JC.Loader} 返回本实例对象
+   */
+
+  Loader.prototype.load = function (srcMap) {
+    var This = this;
+    this._total = 0;
+    this._failed = 0;
+    this._received = 0;
+
+    for (var src in srcMap) {
+      this._total++;
+      this.textures[src] = new Texture(srcMap[src], {
+        crossOrigin: this.crossOrigin
+      });
+      bind(this.textures[src]);
+    }
+    /**
+     * @param {Texture} texture
+     */
+
+
+    function bind(texture) {
+      texture.on('load', function () {
+        This._received++;
+        This.emit('update');
+        if (This._received + This._failed >= This._total) This.emit('complete');
+      });
+      texture.on('error', function () {
+        This._failed++;
+        This.emit('update');
+        if (This._received + This._failed >= This._total) This.emit('complete');
+      });
+    }
+
+    return this;
+  };
+  /**
+   * 从纹理图片盒子里面通过id获取纹理图片
+   *
+   * ```js
+   * var texture = loadBox.getById('id');
+   * ```
+   *
+   * @param {string} id 之前加载时配置的key值
+   * @return {JC.Texture} 包装出来的JC.Texture对象
+   */
+
+
+  Loader.prototype.getById = function (id) {
+    return this.textures[id];
+  };
+  /**
+   * 获取资源加载的进度
+   *
+   * @member progress
+   * @property progress {number} 0至1之间的值
+   * @memberof JC.Loader
+   */
+
+
+  Object.defineProperty(Loader.prototype, 'progress', {
+    get: function get() {
+      return this._total === 0 ? 1 : (this._received + this._failed) / this._total;
+    }
+  });
+  /**
+   * 资源加载工具
+   *
+   * @function
+   * @memberof JC
+   * @param {object} srcMap key-src map
+   * @param {String} crossOrigin cross-origin config
+   * @return {JC.Loader}
+   */
+
+  var loaderUtil = function loaderUtil(srcMap) {
+    var crossOrigin = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '*';
+    return new Loader(crossOrigin).load(srcMap);
+  };
+  /**
+   * prefix
+   * @method
+   * @param {object} asset asset
+   * @param {string} prefix prefix
+   * @return {string}
+   */
+
+
+  function createUrl(asset, prefix) {
+    if (prefix) prefix = prefix.replace(/\/?$/, '/');
+    var up = asset.u + asset.p;
+    var url = asset.up || prefix + up;
+    return url;
+  }
+  /**
+   * an texture loader
+   * @param {array} assets assets
+   * @param {object} options options
+   * @param {string} [options.prefix] prefix
+   * @param {boolean} [options.autoLoad=true] prefix
+   */
+
+
+  function LottieLoader(assets, _ref) {
+    var prefix = _ref.prefix,
+        _ref$autoLoad = _ref.autoLoad,
+        autoLoad = _ref$autoLoad === void 0 ? true : _ref$autoLoad,
+        _ref$crossOrigin = _ref.crossOrigin,
+        crossOrigin = _ref$crossOrigin === void 0 ? '*' : _ref$crossOrigin;
+    Eventer.call(this);
+    this.assets = assets;
+    this.prefix = prefix || '';
+    this.crossOrigin = crossOrigin;
+    this.textures = {};
+    this._total = 0;
+    this._failed = 0;
+    this._received = 0;
+    if (autoLoad) this._load();
+  }
+
+  LottieLoader.prototype = Object.create(Eventer.prototype);
+  /**
+   * load assets
+   */
+
+  LottieLoader.prototype.load = function () {
+    this._load();
+  };
+  /**
+   * a load function
+   * @private
+   */
+
+
+  LottieLoader.prototype._load = function () {
+    var _this2 = this;
+
+    this.assets.forEach(function (asset) {
+      var id = asset.id;
+      var url = createUrl(asset, _this2.prefix);
+      var texture = new Texture(url, {
+        crossOrigin: _this2.crossOrigin
+      });
+      _this2.textures[id] = texture;
+
+      if (texture.loaded) {
+        _this2._received++;
+
+        _this2.emit('update');
+
+        if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+      } else {
+        texture.once('load', function () {
+          _this2._received++;
+
+          _this2.emit('update');
+
+          if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+        });
+        texture.once('error', function () {
+          _this2._failed++;
+
+          _this2.emit('update');
+
+          if (_this2._received + _this2._failed >= _this2._total) _this2.emit('complete');
+        });
+      }
+    });
+  };
+  /**
+   * get texture by id
+   * @param {string} id id
+   * @return {Texture} texture
+   */
+
+
+  LottieLoader.prototype.getTextureById = function (id) {
+    return this.textures[id];
+  };
+
+  /**
+   * ticker class
+   * @param {boolean} enableFPS
+   */
+
+  function Ticker(enableFPS) {
+    Eventer.call(this);
+    /**
+     * 是否记录渲染性能
+     *
+     * @member {Boolean}
+     */
+
+    this.enableFPS = Utils.isBoolean(enableFPS) ? enableFPS : true;
+    /**
+     * 上一次绘制的时间点
+     *
+     * @member {Number}
+     * @private
+     */
+
+    this.pt = 0;
+    /**
+     * 本次渲染经历的时间片段长度
+     *
+     * @member {Number}
+     * @private
+     */
+
+    this.snippet = 0;
+    /**
+     * 平均渲染经历的时间片段长度
+     *
+     * @member {Number}
+     * @private
+     */
+
+    this.averageSnippet = 0;
+    /**
+     * 渲染的瞬时帧率，仅在enableFPS为true时才可用
+     *
+     * @member {Number}
+     */
+
+    this.fps = 0;
+    /**
+     * 渲染到目前为止的平均帧率，仅在enableFPS为true时才可用
+     *
+     * @member {Number}
+     */
+
+    this.averageFps = 0;
+    /**
+     * 渲染总花费时间，除去被中断、被暂停等时间
+     *
+     * @member {Number}
+     * @private
+     */
+
+    this._takeTime = 0;
+    /**
+     * 渲染总次数
+     *
+     * @member {Number}
+     * @private
+     */
+
+    this._renderTimes = 0;
+    /**
+     * 是否开启 ticker
+     *
+     * @member {Boolean}
+     */
+
+    this.started = false;
+    /**
+     * 是否暂停 ticker
+     *
+     * @member {Boolean}
+     */
+
+    this.paused = false;
+  }
+
+  Ticker.prototype = Object.create(Eventer.prototype);
+
+  Ticker.prototype.timeline = function () {
+    this.snippet = Date.now() - this.pt;
+
+    if (this.pt === 0 || this.snippet > 200) {
+      this.pt = Date.now();
+      this.snippet = Date.now() - this.pt;
+    }
+
+    if (this.enableFPS) {
+      this._renderTimes++;
+      this._takeTime += Math.max(15, this.snippet);
+      this.fps = 1000 / Math.max(15, this.snippet) >> 0;
+      this.averageFps = 1000 / (this._takeTime / this._renderTimes) >> 0;
+    }
+
+    this.pt += this.snippet;
+  };
+
+  Ticker.prototype.tick = function () {
+    if (this.paused) return;
+    this.emit('pretimeline');
+    this.timeline();
+    this.emit('posttimeline', this.snippet);
+    this.emit('update', this.snippet);
+    this.emit('tick', this.snippet);
+  };
+  /**
+   * 渲染循环
+   *
+   * @method start
+   */
+
+
+  Ticker.prototype.start = function () {
+    var _this = this;
+
+    if (this.started) return;
+    this.started = true;
+
+    var loop = function loop() {
+      _this.tick();
+
+      _this.loop = RAF(loop);
+    };
+
+    loop();
+  };
+  /**
+   * 渲染循环
+   *
+   * @method stop
+   */
+
+
+  Ticker.prototype.stop = function () {
+    CAF(this.loop);
+    this.started = false;
+  };
+  /**
+   * 暂停触发 tick
+   *
+   * @method pause
+   */
+
+
+  Ticker.prototype.pause = function () {
+    this.paused = true;
+  };
+  /**
+   * 恢复触发 tick
+   *
+   * @method resume
+   */
+
+
+  Ticker.prototype.resume = function () {
+    this.paused = false;
+  };
+
+  /**
+   * 矩形类
+   *
+   * @class
+   * @memberof JC
+   * @param {number} x 左上角的x坐标
+   * @param {number} y 左上角的y坐标
+   * @param {number} width 矩形的宽度
+   * @param {number} height 矩形的高度
+   */
+  function Rectangle(x, y, width, height) {
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.y = y || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.width = width || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.height = height || 0;
+  }
+  /**
+   * 空矩形对象
+   *
+   * @static
+   * @constant
+   */
+
+
+  Rectangle.EMPTY = new Rectangle(0, 0, 0, 0);
+  /**
+   * 克隆一个与该举行对象同样属性的矩形
+   *
+   * @return {PIXI.Rectangle} 克隆出的矩形
+   */
+
+  Rectangle.prototype.clone = function () {
+    return new Rectangle(this.x, this.y, this.width, this.height);
+  };
+  /**
+   * 检查坐标点是否在矩形区域内
+   *
+   * @param {number} x 坐标点的x轴位置
+   * @param {number} y 坐标点的y轴位置
+   * @return {boolean} 坐标点是否在矩形区域内
+   */
+
+
+  Rectangle.prototype.contains = function (x, y) {
+    if (this.width <= 0 || this.height <= 0) {
+      return false;
+    }
+
+    if (x >= this.x && x < this.x + this.width) {
+      if (y >= this.y && y < this.y + this.height) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  /**
+   * 显示对象的包围盒子
+   *
+   * @class
+   * @memberof JC
+   * @param {Number} minX
+   * @param {Number} minY
+   * @param {Number} maxX
+   * @param {Number} maxY
+   */
+
+  function Bounds(minX, minY, maxX, maxY) {
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.minX = Utils.isNumber(minX) ? minX : Infinity;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.minY = Utils.isNumber(minY) ? minY : Infinity;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.maxX = Utils.isNumber(maxX) ? maxX : -Infinity;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.maxY = Utils.isNumber(maxY) ? maxY : -Infinity; // this.rect = null;
+  }
+
+  Bounds.prototype.isEmpty = function () {
+    return this.minX > this.maxX || this.minY > this.maxY;
+  };
+
+  Bounds.prototype.clear = function () {
+    this.minX = Infinity;
+    this.minY = Infinity;
+    this.maxX = -Infinity;
+    this.maxY = -Infinity;
+    return this;
+  };
+  /**
+   * 将包围盒子转换成矩形描述
+   *
+   * @param {JC.Rectangle} rect 待转换的矩形
+   * @return {JC.Rectangle}
+   */
+
+
+  Bounds.prototype.getRectangle = function (rect) {
+    if (this.isEmpty()) {
+      return Rectangle.EMPTY;
+    }
+
+    rect = rect || new Rectangle(0, 0, 1, 1);
+    rect.x = this.minX;
+    rect.y = this.minY;
+    rect.width = this.maxX - this.minX;
+    rect.height = this.maxY - this.minY;
+    return rect;
+  };
+  /**
+   * 往包围盒增加外部顶点，更新包围盒区域
+   *
+   * @param {JC.Point} point
+   */
+
+
+  Bounds.prototype.addPoint = function (point) {
+    this.minX = Math.min(this.minX, point.x);
+    this.maxX = Math.max(this.maxX, point.x);
+    this.minY = Math.min(this.minY, point.y);
+    this.maxY = Math.max(this.maxY, point.y);
+  };
+  /**
+   * 往包围盒增加矩形区域，更新包围盒区域
+   *
+   * @param {JC.Rectangle} rect
+   */
+
+
+  Bounds.prototype.addRect = function (rect) {
+    this.minX = Math.min(this.minX, rect.x);
+    this.maxX = Math.max(this.maxX, rect.width + rect.x);
+    this.minY = Math.min(this.minY, rect.y);
+    this.maxY = Math.max(this.maxY, rect.height + rect.y);
+  };
+  /**
+   * 往包围盒增加矩形区域，更新包围盒区域
+   *
+   * @param {JC.Circle} circle
+   */
+
+
+  Bounds.prototype.addCircle = function (circle) {
+    this.minX = Math.min(this.minX, circle.x - circle.radius);
+    this.maxX = Math.max(this.maxX, circle.x + circle.radius);
+    this.minY = Math.min(this.minY, circle.y - circle.radius);
+    this.maxY = Math.max(this.maxY, circle.y + circle.radius);
+  };
+  /**
+   * 往包围盒增加顶点数组，更新包围盒区域
+   *
+   * @param {Array} vertices
+   */
+
+
+  Bounds.prototype.addVert = function (vertices) {
+    var minX = this.minX;
+    var minY = this.minY;
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+
+    for (var i = 0; i < vertices.length; i += 2) {
+      var x = vertices[i];
+      var y = vertices[i + 1];
+      minX = x < minX ? x : minX;
+      minY = y < minY ? y : minY;
+      maxX = x > maxX ? x : maxX;
+      maxY = y > maxY ? y : maxY;
+    }
+
+    this.minX = minX;
+    this.minY = minY;
+    this.maxX = maxX;
+    this.maxY = maxY;
+  };
+  /**
+   * 往包围盒增加包围盒，更新包围盒区域
+   *
+   * @param {JC.Bounds} bounds
+   */
+
+
+  Bounds.prototype.addBounds = function (bounds) {
+    var minX = this.minX;
+    var minY = this.minY;
+    var maxX = this.maxX;
+    var maxY = this.maxY;
+    this.minX = bounds.minX < minX ? bounds.minX : minX;
+    this.minY = bounds.minY < minY ? bounds.minY : minY;
+    this.maxX = bounds.maxX > maxX ? bounds.maxX : maxX;
+    this.maxY = bounds.maxY > maxY ? bounds.maxY : maxY;
+  };
+
+  /**
+   * @class
+   * @memberof JC
+   * @param {JC.Point} points 坐标点数组，可以是JC.Point类型的数组项数组，也可以是连续两个数分别代表x、y坐标的数组。
+   */
+
+  function Polygon(points) {
+    if (!Utils.isArray(points)) {
+      points = new Array(arguments.length);
+      /* eslint-disable */
+
+      for (var a = 0; a < points.length; ++a) {
+        points[a] = arguments[a];
+      }
+    }
+
+    if (points[0] instanceof Point) {
+      var p = [];
+
+      for (var i = 0, il = points.length; i < il; i++) {
+        p.push(points[i].x, points[i].y);
+      }
+
+      points = p;
+    }
+
+    this.closed = true;
+    this.points = points;
+  }
+  /**
+   * 克隆一个属性相同的多边型对象
+   *
+   * @return {PIXI.Polygon} 克隆的对象
+   */
+
+
+  Polygon.prototype.clone = function () {
+    return new Polygon(this.points.slice());
+  };
+  /**
+   * 检查坐标点是否在多边形内部
+   *
+   * @param {number} x 坐标点的x轴坐标
+   * @param {number} y 坐标点的y轴坐标
+   * @return {boolean} 是否在多边形内部
+   */
+
+
+  Polygon.prototype.contains = function (x, y) {
+    var inside = false;
+    var length = this.points.length / 2;
+
+    for (var i = 0, j = length - 1; i < length; j = i++) {
+      var xi = this.points[i * 2];
+      var yi = this.points[i * 2 + 1];
+      var xj = this.points[j * 2];
+      var yj = this.points[j * 2 + 1];
+      var intersect = yi > y !== yj > y && x < (xj - xi) * (y - yi) / (yj - yi) + xi;
+
+      if (intersect) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  };
+
+  /**
+   * 圆形对象
+   *
+   * @class
+   * @memberof JC
+   * @param {number} x x轴的坐标
+   * @param {number} y y轴的坐标
+   * @param {number} radius 圆的半径
+   */
+
+  function Circle(x, y, radius) {
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.y = y || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
+
+    this.radius = radius || 0;
+  }
+  /**
+   * 克隆一个该圆对象
+   *
+   * @return {PIXI.Circle} 克隆出来的圆对象
+   */
+
+
+  Circle.prototype.clone = function () {
+    return new Circle(this.x, this.y, this.radius);
+  };
+  /**
+   * 检测坐标点是否在园内
+   *
+   * @param {number} x 坐标点的x轴坐标
+   * @param {number} y 坐标点的y轴坐标
+   * @return {boolean} 坐标点是否在园内
+   */
+
+
+  Circle.prototype.contains = function (x, y) {
+    if (this.radius <= 0) {
+      return false;
+    }
+
+    var dx = this.x - x;
+    var dy = this.y - y;
+    var r2 = this.radius * this.radius;
+    dx *= dx;
+    dy *= dy;
+    return dx + dy <= r2;
+  };
+  /**
+  * 返回对象所占的矩形区域
+  *
+  * @return {PIXI.Rectangle} 矩形对象
   */
-  calcBSplinePoint: function calcBSplinePoint(p, U, P, u) {
-    var span = this.findSpan(p, u, U);
-    var N = this.calcBasisFunctions(span, u, p, U);
-    var C = new Point(0, 0, 0, 0);
 
-    for (var j = 0; j <= p; ++j) {
-      var point = P[span - p + j];
-      var Nj = N[j];
-      var wNj = point.w * Nj;
-      C.x += point.x * wNj;
-      C.y += point.y * wNj;
-      C.z += point.z * wNj;
-      C.w += point.w * Nj;
-    }
 
-    return C;
-  },
+  Circle.prototype.getBounds = function () {
+    return new Rectangle(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+  };
 
   /**
-   * Calculate basis functions derivatives.
-   * See The NURBS Book, page 72, algorithm A2.3.
-   * @param {number} span span in which u lies
-   * @param {number} u    parametric point
-   * @param {number} p    degree
-   * @param {number} n    number of derivatives to calculate
-   * @param {number} U    knot vector
-   * @return {array} ders
+   * 椭圆对象
+   *
+   * @class
+   * @memberof JC
+   * @param {number} x x轴的坐标
+   * @param {number} y y轴的坐标
+   * @param {number} width 椭圆的宽度
+   * @param {number} height 椭圆的高度
    */
-  calcBasisFunctionDerivatives: function calcBasisFunctionDerivatives(span, u, p, n, U) {
-    var zeroArr = [];
-    var i = 0;
-    for (i = 0; i <= p; ++i) {
-      zeroArr[i] = 0.0;
-    }
 
-    var ders = [];
-    for (i = 0; i <= n; ++i) {
-      ders[i] = zeroArr.slice(0);
-    }
+  function Ellipse(x, y, width, height) {
+    /**
+     * @member {number}
+     * @default 0
+     */
+    this.x = x || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
 
-    var ndu = [];
-    for (i = 0; i <= p; ++i) {
-      ndu[i] = zeroArr.slice(0);
-    }
+    this.y = y || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
 
-    ndu[0][0] = 1.0;
+    this.width = width || 0;
+    /**
+     * @member {number}
+     * @default 0
+     */
 
-    var left = zeroArr.slice(0);
-    var right = zeroArr.slice(0);
-    var j = 1;
-    var r = 0;
-    var k = 1;
+    this.height = height || 0;
+  }
+  /**
+   * 克隆一个该椭圆对象
+   *
+   * @return {PIXI.Ellipse} 克隆出来的椭圆对象
+   */
 
-    for (j = 1; j <= p; ++j) {
-      left[j] = u - U[span + 1 - j];
-      right[j] = U[span + j] - u;
 
-      var saved = 0.0;
-      for (r = 0; r < j; ++r) {
-        var rv = right[r + 1];
-        var lv = left[j - r];
-        ndu[j][r] = rv + lv;
+  Ellipse.prototype.clone = function () {
+    return new Ellipse(this.x, this.y, this.width, this.height);
+  };
+  /**
+   * 检测坐标点是否在椭园内
+   *
+   * @param {number} x 坐标点的x轴坐标
+   * @param {number} y 坐标点的y轴坐标
+   * @return {boolean} 坐标点是否在椭园内
+   */
 
-        var temp = ndu[r][j - 1] / ndu[j][r];
-        ndu[r][j] = saved + rv * temp;
-        saved = lv * temp;
-      }
 
-      ndu[j][j] = saved;
-    }
+  Ellipse.prototype.contains = function (x, y) {
+    if (this.width <= 0 || this.height <= 0) {
+      return false;
+    } // normalize the coords to an ellipse with center 0,0
 
-    for (j = 0; j <= p; ++j) {
-      ders[0][j] = ndu[j][p];
-    }
 
-    for (r = 0; r <= p; ++r) {
-      var s1 = 0;
-      var s2 = 1;
+    var normx = (x - this.x) / this.width;
+    var normy = (y - this.y) / this.height;
+    normx *= normx;
+    normy *= normy;
+    return normx + normy <= 1;
+  };
+  /**
+   * 返回对象所占的矩形区域
+   *
+   * @return {PIXI.Rectangle} 矩形对象
+   */
 
-      var a = [];
-      for (i = 0; i <= p; ++i) {
-        a[i] = zeroArr.slice(0);
-      }
-      a[0][0] = 1.0;
 
-      for (k = 1; k <= n; ++k) {
-        var d = 0.0;
-        var rk = r - k;
-        var pk = p - k;
-
-        if (r >= k) {
-          a[s2][0] = a[s1][0] / ndu[pk + 1][rk];
-          d = a[s2][0] * ndu[rk][pk];
-        }
-
-        var j1 = rk >= -1 ? 1 : -rk;
-        var j2 = r - 1 <= pk ? k - 1 : p - r;
-
-        for (j = j1; j <= j2; ++j) {
-          a[s2][j] = (a[s1][j] - a[s1][j - 1]) / ndu[pk + 1][rk + j];
-          d += a[s2][j] * ndu[rk + j][pk];
-        }
-
-        if (r <= pk) {
-          a[s2][k] = -a[s1][k - 1] / ndu[pk + 1][r];
-          d += a[s2][k] * ndu[r][pk];
-        }
-
-        ders[k][r] = d;
-
-        j = s1;
-        s1 = s2;
-        s2 = j;
-      }
-    }
-
-    r = p;
-
-    for (k = 1; k <= n; ++k) {
-      for (j = 0; j <= p; ++j) {
-        ders[k][j] *= r;
-      }
-      r *= p - k;
-    }
-
-    return ders;
-  },
+  Ellipse.prototype.getBounds = function () {
+    return new Rectangle(this.x - this.width, this.y - this.height, this.width, this.height);
+  };
 
   /**
-   * Calculate derivatives of a B-Spline.
-   * See The NURBS Book, page 93, algorithm A3.2.
-   * @param {number} p   degree
-   * @param {number} U   knot vector
-   * @param {number} P   control points
-   * @param {number} u   Parametric points
-   * @param {number} nd  number of derivatives
-   * @return {array} array[d+1] with derivatives
+   * 矩阵对象，用来描述和记录对象的tansform 状态信息
+   *
+   * @class
+   * @memberof JC
    */
-  calcBSplineDerivatives: function calcBSplineDerivatives(p, U, P, u, nd) {
-    var du = nd < p ? nd : p;
-    var CK = [];
-    var span = this.findSpan(p, u, U);
-    var nders = this.calcBasisFunctionDerivatives(span, u, p, du, U);
-    var Pw = [];
-    var point = void 0;
-    var i = 0;
-    var k = 0;
+  function Matrix$1() {
+    this.a = 1;
+    this.b = 0;
+    this.c = 0;
+    this.d = 1;
+    this.tx = 0;
+    this.ty = 0;
+  }
+  /**
+   * 从数组设置一个矩阵
+   *
+   * @param {array} array
+   */
 
-    for (; i < P.length; ++i) {
-      point = P[i].clone();
-      var w = point.w;
 
-      point.x *= w;
-      point.y *= w;
-      point.z *= w;
+  Matrix$1.prototype.fromArray = function (array) {
+    this.a = array[0];
+    this.b = array[1];
+    this.c = array[2];
+    this.d = array[3];
+    this.tx = array[4];
+    this.ty = array[5];
+  };
+  /**
+   * 将对象的数据以数组的形式导出
+   *
+   * @param {boolean} transpose 是否对矩阵进行转置
+   * @return {number[]} 返回数组
+   */
 
-      Pw[i] = point;
+
+  Matrix$1.prototype.toArray = function (transpose) {
+    if (!this.array) this.array = new Float32Array(9);
+    var array = this.array;
+
+    if (transpose) {
+      array[0] = this.a;
+      array[1] = this.b;
+      array[2] = 0;
+      array[3] = this.c;
+      array[4] = this.d;
+      array[5] = 0;
+      array[6] = this.tx;
+      array[7] = this.ty;
+      array[8] = 1;
+    } else {
+      array[0] = this.a;
+      array[1] = this.c;
+      array[2] = this.tx;
+      array[3] = this.b;
+      array[4] = this.d;
+      array[5] = this.ty;
+      array[6] = 0;
+      array[7] = 0;
+      array[8] = 1;
     }
-    for (; k <= du; ++k) {
-      point = Pw[span - p].clone().multiplyScalar(nders[k][0]);
+
+    return array;
+  };
+  /**
+   * 将坐标点与矩阵左乘
+   *
+   * @param {object} pos 原始点
+   * @param {object} newPos 变换之后的点
+   * @return {object} 返回数组
+   */
+
+
+  Matrix$1.prototype.apply = function (pos, newPos) {
+    newPos = newPos || {};
+    newPos.x = this.a * pos.x + this.c * pos.y + this.tx;
+    newPos.y = this.b * pos.x + this.d * pos.y + this.ty;
+    return newPos;
+  };
+  /**
+   * 将坐标点与转置矩阵左乘
+   *
+   * @param {object} pos 原始点
+   * @param {object} newPos 变换之后的点
+   * @return {object} 变换之后的点
+   */
+
+
+  Matrix$1.prototype.applyInverse = function (pos, newPos) {
+    newPos = newPos || {};
+    var id = 1 / (this.a * this.d + this.c * -this.b);
+    newPos.x = this.d * id * pos.x + -this.c * id * pos.y + (this.ty * this.c - this.tx * this.d) * id;
+    newPos.y = this.a * id * pos.y + -this.b * id * pos.x + (-this.ty * this.a + this.tx * this.b) * id;
+    return newPos;
+  };
+  /**
+   * 位移操作
+   * @param {number} x
+   * @param {number} y
+   * @return {this}
+   */
+
+
+  Matrix$1.prototype.translate = function (x, y) {
+    this.tx += x;
+    this.ty += y;
+    return this;
+  };
+  /**
+   * 缩放操作
+   * @param {number} x
+   * @param {number} y
+   * @return {this}
+   */
+
+
+  Matrix$1.prototype.scale = function (x, y) {
+    this.a *= x;
+    this.d *= y;
+    this.c *= x;
+    this.b *= y;
+    this.tx *= x;
+    this.ty *= y;
+    return this;
+  };
+  /**
+   * 旋转操作
+   * @param {number} angle
+   * @return {this}
+   */
+
+
+  Matrix$1.prototype.rotate = function (angle) {
+    var cos = Math.cos(angle);
+    var sin = Math.sin(angle);
+    var a1 = this.a;
+    var c1 = this.c;
+    var tx1 = this.tx;
+    this.a = a1 * cos - this.b * sin;
+    this.b = a1 * sin + this.b * cos;
+    this.c = c1 * cos - this.d * sin;
+    this.d = c1 * sin + this.d * cos;
+    this.tx = tx1 * cos - this.ty * sin;
+    this.ty = tx1 * sin + this.ty * cos;
+    return this;
+  };
+  /**
+   * 矩阵相乘
+   * @param {matrix} matrix
+   * @return {this}
+   */
+
+
+  Matrix$1.prototype.append = function (matrix) {
+    var a1 = this.a;
+    var b1 = this.b;
+    var c1 = this.c;
+    var d1 = this.d;
+    this.a = matrix.a * a1 + matrix.b * c1;
+    this.b = matrix.a * b1 + matrix.b * d1;
+    this.c = matrix.c * a1 + matrix.d * c1;
+    this.d = matrix.c * b1 + matrix.d * d1;
+    this.tx = matrix.tx * a1 + matrix.ty * c1 + this.tx;
+    this.ty = matrix.tx * b1 + matrix.ty * d1 + this.ty;
+    return this;
+  };
+  /**
+   * 单位矩阵
+   *
+   * @return {this}
+   */
+
+
+  Matrix$1.prototype.identity = function () {
+    this.a = 1;
+    this.b = 0;
+    this.c = 0;
+    this.d = 1;
+    this.tx = 0;
+    this.ty = 0;
+    return this;
+  };
+  /**
+   * 快速设置矩阵各个分量
+   * @param {number} x
+   * @param {number} y
+   * @param {number} pivotX
+   * @param {number} pivotY
+   * @param {number} scaleX
+   * @param {number} scaleY
+   * @param {number} rotation
+   * @param {number} skewX
+   * @param {number} skewY
+   * @param {number} originX
+   * @param {number} originY
+   * @return {this}
+   */
+
+
+  Matrix$1.prototype.setTransform = function (x, y, pivotX, pivotY, scaleX, scaleY, rotation, skewX, skewY, originX, originY) {
+    var sr = Math.sin(rotation);
+    var cr = Math.cos(rotation);
+    var sy = Math.tan(skewY);
+    var nsx = Math.tan(skewX);
+    var a = cr * scaleX;
+    var b = sr * scaleX;
+    var c = -sr * scaleY;
+    var d = cr * scaleY;
+    var pox = pivotX + originX;
+    var poy = pivotY + originY;
+    this.a = a + sy * c;
+    this.b = b + sy * d;
+    this.c = nsx * a + c;
+    this.d = nsx * b + d;
+    this.tx = x - pox * this.a - poy * this.c + originX;
+    this.ty = y - pox * this.b - poy * this.d + originY;
+    return this;
+  };
+
+  var IDENTITY = new Matrix$1();
+  var TEMP_MATRIX = new Matrix$1();
+
+  /**
+   *
+   * @class
+   * @memberof JC
+   * @param {Array}  points  array of points
+   */
+
+  function CatmullRom(points) {
+    this.points = points;
+    this.passCmp = {
+      x: true,
+      y: true,
+      z: false
+    };
+    this.ccmp = {};
+    this.updateCcmp();
+  }
+
+  CatmullRom.prototype = Object.create(Curve.prototype);
+
+  CatmullRom.prototype.updateCcmp = function () {
+    for (var i = 0; i < this.points.length; i++) {
+      var point = this.points[i];
+
+      for (var cmp in this.passCmp) {
+        if (this.passCmp[cmp] && !Utils.isUndefined(point[cmp])) {
+          this.ccmp[cmp] = this.ccmp[cmp] || [];
+          this.ccmp[cmp][i] = point[cmp];
+        }
+      }
+    }
+  };
+
+  CatmullRom.prototype.getPoint = function (k) {
+    var point = new Point();
+
+    for (var cmp in this.passCmp) {
+      if (this.passCmp[cmp]) {
+        point[cmp] = this.solveEachCmp(this.ccmp[cmp], k);
+      }
+    }
+
+    return point;
+  };
+
+  CatmullRom.prototype.solveEachCmp = function (v, k) {
+    var m = v.length - 1;
+    var f = m * k;
+    var i = Math.floor(f);
+    var fn = this.solve;
+
+    if (v[0] === v[m]) {
+      if (k < 0) {
+        i = Math.floor(f = m * (1 + k));
+      }
+
+      return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+    } else {
+      if (k < 0) {
+        return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+      }
+
+      if (k > 1) {
+        return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+      }
+
+      return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+    }
+  };
+
+  CatmullRom.prototype.solve = function (p0, p1, p2, p3, t) {
+    var v0 = (p2 - p0) * 0.5;
+    var v1 = (p3 - p1) * 0.5;
+    var t2 = t * t;
+    var t3 = t * t2;
+    /* eslint max-len: 0 */
+
+    return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+  };
+
+  /**
+   *
+   * @class
+   * @memberof JC
+   * @param {String}  path  array of points
+   */
+
+  function SvgCurve(path) {
+    if (Utils.isString(path)) {
+      this.path = this.createPath(path);
+    } else if (path.nodeName === 'path' && path.getAttribute('d')) {
+      this.path = path;
+    } else {
+      /* eslint max-len: "off" */
+      console.warn('path just accept <path d="M10 10"> element or "M10 10" string but found ' + path);
+    }
+
+    this.totalLength = this.path.getTotalLength();
+  }
+
+  SvgCurve.prototype = Object.create(Curve.prototype);
+
+  SvgCurve.prototype.createPath = function (d) {
+    var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    return p.setAttribute(d);
+  };
+
+  SvgCurve.prototype.getPoint = function (t) {
+    var point = this.path.getPointAtLength(t * this.totalLength);
+    return new Point(point.x, point.y);
+  };
+
+  var NURBSUtils = {
+    /**
+     * Finds knot vector span.
+     * @param {number} p degree
+     * @param {number} u parametric value
+     * @param {number} U knot vector
+     * @return {number} span
+     */
+    findSpan: function findSpan(p, u, U) {
+      var n = U.length - p - 1;
+
+      if (u >= U[n]) {
+        return n - 1;
+      }
+
+      if (u <= U[p]) {
+        return p;
+      }
+
+      var low = p;
+      var high = n;
+      var mid = Math.floor((low + high) / 2);
+
+      while (u < U[mid] || u >= U[mid + 1]) {
+        if (u < U[mid]) {
+          high = mid;
+        } else {
+          low = mid;
+        }
+
+        mid = Math.floor((low + high) / 2);
+      }
+
+      return mid;
+    },
+
+    /**
+     * Calculate basis functions. See The NURBS Book, page 70, algorithm A2.2
+     * @param {number} span span in which u lies
+     * @param {number} u parametric point
+     * @param {number} p degree
+     * @param {number} U knot vector
+     * @return {array} array[p+1] with basis functions values.
+     */
+    calcBasisFunctions: function calcBasisFunctions(span, u, p, U) {
+      var N = [];
+      var left = [];
+      var right = [];
+      N[0] = 1.0;
 
       for (var j = 1; j <= p; ++j) {
-        point.add(Pw[span - p + j].clone().multiplyScalar(nders[k][j]));
+        left[j] = u - U[span + 1 - j];
+        right[j] = U[span + j] - u;
+        var saved = 0.0;
+
+        for (var r = 0; r < j; ++r) {
+          var rv = right[r + 1];
+          var lv = left[j - r];
+          var temp = N[r] / (rv + lv);
+          N[r] = saved + rv * temp;
+          saved = lv * temp;
+        }
+
+        N[j] = saved;
       }
 
-      CK[k] = point;
-    }
+      return N;
+    },
 
-    for (k = du + 1; k <= nd + 1; ++k) {
-      CK[k] = new Point(0, 0, 0);
-    }
+    /**
+     * Calculate B-Spline curve points. See The NURBS Book, page 82
+     * @param {number} p degree of B-Spline
+     * @param {vector} U knot vector
+     * @param {vector} P control points (x, y, z, w)
+     * @param {vector} u parametric point
+     * @return {point} point for given u
+    */
+    calcBSplinePoint: function calcBSplinePoint(p, U, P, u) {
+      var span = this.findSpan(p, u, U);
+      var N = this.calcBasisFunctions(span, u, p, U);
+      var C = new Point(0, 0, 0, 0);
 
-    return CK;
-  },
-
-  /*
-  Calculate "K over I"
-   returns k!/(i!(k-i)!)
-  */
-  calcKoverI: function calcKoverI(k, i) {
-    var nom = 1;
-    var j = 2;
-
-    for (j = 2; j <= k; ++j) {
-      nom *= j;
-    }
-
-    var denom = 1;
-
-    for (j = 2; j <= i; ++j) {
-      denom *= j;
-    }
-
-    for (j = 2; j <= k - i; ++j) {
-      denom *= j;
-    }
-
-    return nom / denom;
-  },
-
-  /**
-   * Calculate derivatives (0-nd) of rational curve.
-   * See The NURBS Book, page 127, algorithm A4.2.
-   * @param {array} Pders result of function calcBSplineDerivatives
-   * @return {array} with derivatives for rational curve.
-   */
-  calcRationalCurveDerivatives: function calcRationalCurveDerivatives(Pders) {
-    var nd = Pders.length;
-    var Aders = [];
-    var wders = [];
-    var i = 0;
-
-    for (i = 0; i < nd; ++i) {
-      var point = Pders[i];
-      Aders[i] = new Point(point.x, point.y, point.z);
-      wders[i] = point.w;
-    }
-
-    var CK = [];
-
-    for (var k = 0; k < nd; ++k) {
-      var v = Aders[k].clone();
-
-      for (i = 1; i <= k; ++i) {
-        v.sub(CK[k - i].clone().multiplyScalar(this.calcKoverI(k, i) * wders[i]));
+      for (var j = 0; j <= p; ++j) {
+        var point = P[span - p + j];
+        var Nj = N[j];
+        var wNj = point.w * Nj;
+        C.x += point.x * wNj;
+        C.y += point.y * wNj;
+        C.z += point.z * wNj;
+        C.w += point.w * Nj;
       }
 
-      CK[k] = v.divideScalar(wders[0]);
-    }
+      return C;
+    },
 
-    return CK;
-  },
+    /**
+     * Calculate basis functions derivatives.
+     * See The NURBS Book, page 72, algorithm A2.3.
+     * @param {number} span span in which u lies
+     * @param {number} u    parametric point
+     * @param {number} p    degree
+     * @param {number} n    number of derivatives to calculate
+     * @param {number} U    knot vector
+     * @return {array} ders
+     */
+    calcBasisFunctionDerivatives: function calcBasisFunctionDerivatives(span, u, p, n, U) {
+      var zeroArr = [];
+      var i = 0;
 
-  /**
-   * Calculate NURBS curve derivatives.
-   * See The NURBS Book, page 127, algorithm A4.2.
-   * @param {number} p  degree
-   * @param {number} U  knot vector
-   * @param {number} P  control points in homogeneous space
-   * @param {number} u  parametric points
-   * @param {number} nd number of derivatives
-   * @return {array} returns array with derivatives.
-   */
-  calcNURBSDerivatives: function calcNURBSDerivatives(p, U, P, u, nd) {
-    var Pders = this.calcBSplineDerivatives(p, U, P, u, nd);
-    return this.calcRationalCurveDerivatives(Pders);
-  },
+      for (i = 0; i <= p; ++i) {
+        zeroArr[i] = 0.0;
+      }
 
-  /**
-   * Calculate rational B-Spline surface point.
-   * See The NURBS Book, page 134, algorithm A4.3.
-   * @param {number} p degrees of B-Spline surface
-   * @param {number} q degrees of B-Spline surface
-   *
-   * @param {number} U knot vectors
-   * @param {number} V knot vectors
-   *
-   * @param {number} P control points (x, y, z, w)
-   *
-   * @param {number} u parametric values
-   * @param {number} v parametric values
-   * @return {JC.Point} point for given (u, v)
-   */
-  calcSurfacePoint: function calcSurfacePoint(p, q, U, V, P, u, v) {
-    var uspan = this.findSpan(p, u, U);
-    var vspan = this.findSpan(q, v, V);
-    var Nu = this.calcBasisFunctions(uspan, u, p, U);
-    var Nv = this.calcBasisFunctions(vspan, v, q, V);
-    var temp = [];
-    var l = 0;
+      var ders = [];
 
-    for (; l <= q; ++l) {
-      temp[l] = new Point(0, 0, 0, 0);
-      for (var k = 0; k <= p; ++k) {
-        var point = P[uspan - p + k][vspan - q + l].clone();
+      for (i = 0; i <= n; ++i) {
+        ders[i] = zeroArr.slice(0);
+      }
+
+      var ndu = [];
+
+      for (i = 0; i <= p; ++i) {
+        ndu[i] = zeroArr.slice(0);
+      }
+
+      ndu[0][0] = 1.0;
+      var left = zeroArr.slice(0);
+      var right = zeroArr.slice(0);
+      var j = 1;
+      var r = 0;
+      var k = 1;
+
+      for (j = 1; j <= p; ++j) {
+        left[j] = u - U[span + 1 - j];
+        right[j] = U[span + j] - u;
+        var saved = 0.0;
+
+        for (r = 0; r < j; ++r) {
+          var rv = right[r + 1];
+          var lv = left[j - r];
+          ndu[j][r] = rv + lv;
+          var temp = ndu[r][j - 1] / ndu[j][r];
+          ndu[r][j] = saved + rv * temp;
+          saved = lv * temp;
+        }
+
+        ndu[j][j] = saved;
+      }
+
+      for (j = 0; j <= p; ++j) {
+        ders[0][j] = ndu[j][p];
+      }
+
+      for (r = 0; r <= p; ++r) {
+        var s1 = 0;
+        var s2 = 1;
+        var a = [];
+
+        for (i = 0; i <= p; ++i) {
+          a[i] = zeroArr.slice(0);
+        }
+
+        a[0][0] = 1.0;
+
+        for (k = 1; k <= n; ++k) {
+          var d = 0.0;
+          var rk = r - k;
+          var pk = p - k;
+
+          if (r >= k) {
+            a[s2][0] = a[s1][0] / ndu[pk + 1][rk];
+            d = a[s2][0] * ndu[rk][pk];
+          }
+
+          var j1 = rk >= -1 ? 1 : -rk;
+          var j2 = r - 1 <= pk ? k - 1 : p - r;
+
+          for (j = j1; j <= j2; ++j) {
+            a[s2][j] = (a[s1][j] - a[s1][j - 1]) / ndu[pk + 1][rk + j];
+            d += a[s2][j] * ndu[rk + j][pk];
+          }
+
+          if (r <= pk) {
+            a[s2][k] = -a[s1][k - 1] / ndu[pk + 1][r];
+            d += a[s2][k] * ndu[r][pk];
+          }
+
+          ders[k][r] = d;
+          j = s1;
+          s1 = s2;
+          s2 = j;
+        }
+      }
+
+      r = p;
+
+      for (k = 1; k <= n; ++k) {
+        for (j = 0; j <= p; ++j) {
+          ders[k][j] *= r;
+        }
+
+        r *= p - k;
+      }
+
+      return ders;
+    },
+
+    /**
+     * Calculate derivatives of a B-Spline.
+     * See The NURBS Book, page 93, algorithm A3.2.
+     * @param {number} p   degree
+     * @param {number} U   knot vector
+     * @param {number} P   control points
+     * @param {number} u   Parametric points
+     * @param {number} nd  number of derivatives
+     * @return {array} array[d+1] with derivatives
+     */
+    calcBSplineDerivatives: function calcBSplineDerivatives(p, U, P, u, nd) {
+      var du = nd < p ? nd : p;
+      var CK = [];
+      var span = this.findSpan(p, u, U);
+      var nders = this.calcBasisFunctionDerivatives(span, u, p, du, U);
+      var Pw = [];
+      var point;
+      var i = 0;
+      var k = 0;
+
+      for (; i < P.length; ++i) {
+        point = P[i].clone();
         var w = point.w;
         point.x *= w;
         point.y *= w;
         point.z *= w;
-        temp[l].add(point.multiplyScalar(Nu[k]));
+        Pw[i] = point;
+      }
+
+      for (; k <= du; ++k) {
+        point = Pw[span - p].clone().multiplyScalar(nders[k][0]);
+
+        for (var j = 1; j <= p; ++j) {
+          point.add(Pw[span - p + j].clone().multiplyScalar(nders[k][j]));
+        }
+
+        CK[k] = point;
+      }
+
+      for (k = du + 1; k <= nd + 1; ++k) {
+        CK[k] = new Point(0, 0, 0);
+      }
+
+      return CK;
+    },
+
+    /*
+    Calculate "K over I"
+     returns k!/(i!(k-i)!)
+    */
+    calcKoverI: function calcKoverI(k, i) {
+      var nom = 1;
+      var j = 2;
+
+      for (j = 2; j <= k; ++j) {
+        nom *= j;
+      }
+
+      var denom = 1;
+
+      for (j = 2; j <= i; ++j) {
+        denom *= j;
+      }
+
+      for (j = 2; j <= k - i; ++j) {
+        denom *= j;
+      }
+
+      return nom / denom;
+    },
+
+    /**
+     * Calculate derivatives (0-nd) of rational curve.
+     * See The NURBS Book, page 127, algorithm A4.2.
+     * @param {array} Pders result of function calcBSplineDerivatives
+     * @return {array} with derivatives for rational curve.
+     */
+    calcRationalCurveDerivatives: function calcRationalCurveDerivatives(Pders) {
+      var nd = Pders.length;
+      var Aders = [];
+      var wders = [];
+      var i = 0;
+
+      for (i = 0; i < nd; ++i) {
+        var point = Pders[i];
+        Aders[i] = new Point(point.x, point.y, point.z);
+        wders[i] = point.w;
+      }
+
+      var CK = [];
+
+      for (var k = 0; k < nd; ++k) {
+        var v = Aders[k].clone();
+
+        for (i = 1; i <= k; ++i) {
+          v.sub(CK[k - i].clone().multiplyScalar(this.calcKoverI(k, i) * wders[i]));
+        }
+
+        CK[k] = v.divideScalar(wders[0]);
+      }
+
+      return CK;
+    },
+
+    /**
+     * Calculate NURBS curve derivatives.
+     * See The NURBS Book, page 127, algorithm A4.2.
+     * @param {number} p  degree
+     * @param {number} U  knot vector
+     * @param {number} P  control points in homogeneous space
+     * @param {number} u  parametric points
+     * @param {number} nd number of derivatives
+     * @return {array} returns array with derivatives.
+     */
+    calcNURBSDerivatives: function calcNURBSDerivatives(p, U, P, u, nd) {
+      var Pders = this.calcBSplineDerivatives(p, U, P, u, nd);
+      return this.calcRationalCurveDerivatives(Pders);
+    },
+
+    /**
+     * Calculate rational B-Spline surface point.
+     * See The NURBS Book, page 134, algorithm A4.3.
+     * @param {number} p degrees of B-Spline surface
+     * @param {number} q degrees of B-Spline surface
+     *
+     * @param {number} U knot vectors
+     * @param {number} V knot vectors
+     *
+     * @param {number} P control points (x, y, z, w)
+     *
+     * @param {number} u parametric values
+     * @param {number} v parametric values
+     * @return {JC.Point} point for given (u, v)
+     */
+    calcSurfacePoint: function calcSurfacePoint(p, q, U, V, P, u, v) {
+      var uspan = this.findSpan(p, u, U);
+      var vspan = this.findSpan(q, v, V);
+      var Nu = this.calcBasisFunctions(uspan, u, p, U);
+      var Nv = this.calcBasisFunctions(vspan, v, q, V);
+      var temp = [];
+      var l = 0;
+
+      for (; l <= q; ++l) {
+        temp[l] = new Point(0, 0, 0, 0);
+
+        for (var k = 0; k <= p; ++k) {
+          var point = P[uspan - p + k][vspan - q + l].clone();
+          var w = point.w;
+          point.x *= w;
+          point.y *= w;
+          point.z *= w;
+          temp[l].add(point.multiplyScalar(Nu[k]));
+        }
+      }
+
+      var Sw = new Point(0, 0, 0, 0);
+
+      for (l = 0; l <= q; ++l) {
+        Sw.add(temp[l].multiplyScalar(Nv[l]));
+      }
+
+      Sw.divideScalar(Sw.w);
+      return new Point(Sw.x, Sw.y, Sw.z);
+    }
+  };
+
+  /**
+   *
+   * @class
+   * @memberof JC
+   * @param {Number} degree
+   * @param {Array}  knots           array of reals
+   * @param {Array}  controlPoints   array of Point
+   */
+
+  function NURBSCurve(degree, knots, controlPoints) {
+    this.degree = degree;
+    this.knots = knots;
+    this.controlPoints = controlPoints; // [];
+  }
+
+  NURBSCurve.prototype = Object.create(Curve.prototype);
+  NURBSCurve.prototype.constructor = NURBSCurve;
+
+  NURBSCurve.prototype.getPoint = function (t) {
+    var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]); // linear mapping t->u
+    // following results in (wx, wy, wz, w) homogeneous point
+
+    var hpoint = NURBSUtils.calcBSplinePoint(this.degree, this.knots, this.controlPoints, u);
+
+    if (hpoint.w !== 1.0) {
+      // project to 3D space: (wx, wy, wz, w) -> (x, y, z, 1)
+      hpoint.divideScalar(hpoint.w);
+    }
+
+    return new Point(hpoint.x, hpoint.y, hpoint.z);
+  };
+
+  NURBSCurve.prototype.getTangent = function (t) {
+    var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]);
+    var ders = NURBSUtils.calcNURBSDerivatives(this.degree, this.knots, this.controlPoints, u, 1);
+    var tangent = ders[1].clone();
+    tangent.normalize();
+    return tangent;
+  };
+
+  /* eslint max-len: "off" */
+  /**
+   * 显示对象的基类，继承至Eventer
+   *
+   * @class
+   * @memberof JC
+   * @extends JC.Eventer
+   */
+
+  function DisplayObject() {
+    Eventer.call(this);
+    /**
+     * 控制渲染对象是否显示
+     *
+     * @member {Boolean}
+     */
+
+    this.visible = true;
+    /**
+     * 世界透明度
+     *
+     * @private
+     * @member {Number}
+     */
+
+    this.worldAlpha = 1;
+    /**
+     * 控制渲染对象的透明度
+     *
+     * @member {Number}
+     */
+
+    this.alpha = 1;
+    /**
+     * 控制渲染对象的x轴的缩放
+     *
+     * @member {Number}
+     */
+
+    this.scaleX = 1;
+    /**
+     * 控制渲染对象的y轴的缩放
+     *
+     * @member {Number}
+     */
+
+    this.scaleY = 1;
+    /**
+     * 控制渲染对象的x轴的斜切
+     *
+     * @member {Number}
+     */
+
+    this.skewX = 0;
+    /**
+     * 控制渲染对象的y轴的斜切
+     *
+     * @member {Number}
+     */
+
+    this.skewY = 0;
+    /**
+     * 控制渲染对象的旋转角度
+     *
+     * @member {Number}
+     */
+
+    this.rotation = 0;
+    this.rotationCache = 0;
+    this._sr = 0;
+    this._cr = 1;
+    /**
+     * 控制渲染对象的x位置
+     *
+     * @member {Number}
+     */
+
+    this.x = 0;
+    /**
+     * 控制渲染对象的y位置
+     *
+     * @member {Number}
+     */
+
+    this.y = 0;
+    /**
+     * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
+     *
+     * @member {Number}
+     */
+
+    this.pivotX = 0;
+    /**
+     * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
+     *
+     * @member {Number}
+     */
+
+    this.pivotY = 0;
+    /**
+     * 控制渲染对象的x变换中心
+     *
+     * @member {Number}
+     */
+
+    this.originX = 0;
+    /**
+     * 控制渲染对象的y变换中心
+     *
+     * @member {Number}
+     */
+
+    this.originY = 0;
+    /**
+     * 对象的遮罩层
+     *
+     * @member {JC.Graphics}
+     */
+
+    this.mask = null;
+    /**
+     * 当前对象的直接父级
+     *
+     * @private
+     * @member {JC.Container}
+     */
+
+    this.parent = null;
+    /**
+     * 当前对象所应用的矩阵状态
+     *
+     * @private
+     * @member {JC.Matrix}
+     */
+
+    this.worldTransform = new Matrix$1();
+    /**
+     * 当前对象的事件管家
+     *
+     * @private
+     * @member {JC.Eventer}
+     */
+    // this.event = new Eventer();
+
+    /**
+     * 当前对象是否穿透自身的事件检测
+     *
+     * @member {Boolean}
+     */
+
+    this.passEvent = false;
+    /**
+     * 当前对象的事件检测边界
+     *
+     * @private
+     * @member {JC.Shape}
+     */
+
+    this.eventArea = null;
+    /**
+     * 当前对象的动画管家
+     *
+     * @private
+     * @member {Array}
+     */
+
+    this.animation = new Animation(this);
+    /**
+     * 标记当前对象是否为touchstart触发状态
+     *
+     * @private
+     * @member {Boolean}
+     */
+    // this._touchstarted = false;
+
+    /**
+     * 标记当前对象是否为mousedown触发状态
+     *
+     * @private
+     * @member {Boolean}
+     */
+    // this._mousedowned = false;
+
+    /**
+     * 渲染对象是否具备光标样式，例如 cursor
+     *
+     * @member {Boolean}
+     */
+    // this.buttonMode = false;
+
+    /**
+     * 当渲染对象是按钮时所具备的光标样式
+     *
+     * @member {Boolean}
+     */
+
+    this.cursor = '';
+    /**
+     * Enable interaction events for the DisplayObject. Touch, pointer and mouse
+     * events will not be emitted unless `interactive` is set to `true`.
+     *
+     * @member {boolean}
+     */
+
+    this.interactive = false;
+    /**
+     * Determines if the children to the displayObject can be clicked/touched
+     * Setting this to false allows PixiJS to bypass a recursive `hitTest` function
+     *
+     * @member {boolean}
+     * @memberof PIXI.Container#
+     */
+
+    this.interactiveChildren = true;
+  }
+
+  DisplayObject.prototype = Object.create(Eventer.prototype);
+  /**
+   * 对渲染对象进行x、y轴同时缩放
+   *
+   * @name scale
+   * @member {Number}
+   * @memberof JC.DisplayObject#
+   */
+
+  Object.defineProperty(DisplayObject.prototype, 'scale', {
+    get: function get() {
+      return this.scaleX;
+    },
+    set: function set(scale) {
+      this.scaleX = this.scaleY = scale;
+    }
+  });
+  /**
+   * 对渲染对象进行x、y轴同时缩放
+   *
+   * @name scale
+   * @member {Number}
+   * @memberof JC.DisplayObject#
+   */
+
+  Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
+    get: function get() {
+      if (this._trackedPointers === undefined) this._trackedPointers = {};
+      return this._trackedPointers;
+    }
+  });
+  /**
+   * animate动画，指定动画的启始位置和结束位置
+   *
+   * ```js
+   * display.animate({
+   *   from: {x: 100},
+   *   to: {x: 200},
+   *   ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+   *   repeats: 10, // 动画运动完后再重复10次
+   *   infinite: true, // 无限循环动画
+   *   alternate: true, // 偶数次的时候动画回放
+   *   duration: 1000, // 动画时长 ms单位 默认 300ms
+   *   onUpdate: function(state,rate){},
+   *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+   * });
+   * ```
+   *
+   * @param {Object} options 动画配置参数
+   * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
+   * @param {Object} options.to 设置对象的结束位置和结束姿态等
+   * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+   * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+   * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+   * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+   * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+   * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+   * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+   * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+   * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+   * @param {Boolean} clear 是否去掉之前的动画
+   * @return {JC.Animate}
+   */
+
+  DisplayObject.prototype.animate = function (options, clear) {
+    return this.animation.animate(options, clear);
+  };
+  /**
+   * motion动画，让物体按照设定好的曲线运动
+   *
+   * ```js
+   * display.motion({
+   *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
+   *   attachTangent: true, // 物体是否捕获切线方向
+   *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+   *   repeats: 10, // 动画运动完后再重复10次
+   *   infinite: true, // 无限循环动画
+   *   alternate: true, // 偶数次的时候动画回放
+   *   duration: 1000, // 动画时长 ms单位 默认 300ms
+   *   onUpdate: function(state,rate){}, // 动画更新回调
+   *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+   * });
+   * ```
+   * @param {Object} options 动画配置参数
+   * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
+   * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
+   * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
+   * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+   * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+   * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+   * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+   * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+   * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+   * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+   * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+   * @param {Boolean} clear 是否去掉之前的动画
+   * @return {JC.Animate}
+   */
+
+
+  DisplayObject.prototype.motion = function (options, clear) {
+    return this.animation.motion(options, clear);
+  };
+  /**
+   * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
+   *
+   * ```js
+   * display.keyFrames({
+   *   ks: data.layers[0], // ae导出的动画数据
+   *   fr: 30, // 动画的帧率，默认：30fps
+   *   repeats: 10, // 动画运动完后再重复10次
+   *   infinite: true, // 无限循环动画
+   *   alternate: true, // 偶数次的时候动画回放
+   *   onUpdate: function(state,rate){},
+   *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+   * });
+   * ```
+   *
+   * @param {Object} options 动画配置参数
+   * @param {Object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
+   * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
+   * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+   * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
+   * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+   * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+   * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+   * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+   * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+   * @param {Boolean} clear 是否去掉之前的动画
+   * @return {JC.Animate}
+   */
+
+
+  DisplayObject.prototype.keyFrames = function (options, clear) {
+    return this.animation.keyFrames(options, clear);
+  };
+  /**
+   * 播放一个bodymovin动画
+   *
+   * ```js
+   * import data from './animations/data.js';
+   * display.bodymovin({
+   *   keyframes: data.layers[3],
+   *   frameRate: data.fr,
+   *   ignoreProps: [ 'position', 'scaleX ],
+   * }, clear).on('complete', function() {
+   *   console.log('end queues');
+   * });
+   * ```
+   *
+   * @memberof JC.DisplayObject
+   * @param {Object} options 动画配置参数
+   * @param {Object} options.keyframes lottie 动画数据
+   * @param {Number} [options.frameRate] lottie 动画帧率，对应 json 里面的 fr
+   * @param {Array} [options.ignoreProps] 忽略 keyframes 动画数据中的哪些属性的动画描述 position|x|y|pivot|pivotX|pivotY|scale|scaleX|scaleY|rotation|alpha
+   * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
+   * @param {Boolean} [options.infinite] 设置动画无限循环，优先级高于repeats
+   * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
+   * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
+   * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+   * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+   * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+   * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+   * @param {Boolean} clear 是否清除该对象上之前所有的动画
+   * @return {Bodymovin}
+   */
+
+
+  DisplayObject.prototype.bodymovin = function (options, clear) {
+    return this.animation.bodymovin(options, clear);
+  };
+  /**
+   * 不推荐使用，建议使用`queues`方法达到同样效果
+   * runners动画，多个复合动画的组合形式，不支持`alternate`
+   *
+   * ```js
+   * display.runners({
+   *   runners: [
+   *     { from: {}, to: {} },
+   *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
+   *   ], // 组合动画，支持组合 animate、motion
+   *   delay: 1000, // ae导出的动画数据
+   *   wait: 100, // ae导出的动画数据
+   *   repeats: 10, // 动画运动完后再重复10次
+   *   infinite: true, // 无限循环动画
+   *   onUpdate: function(state,rate){},
+   *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
+   * });
+   * ```
+   *
+   * @param {Object} options 动画配置参数
+   * @param {Object} options.runners 组合动画，支持 animate、motion 这些的自定义组合
+   * @param {Number} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
+   * @param {Boolean} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
+   * @param {Number} [options.wait=0] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+   * @param {Number} [options.delay=0] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+   * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
+   * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
+   * @param {Boolean} clear 是否去掉之前的动画
+   * @return {JC.Animate}
+   */
+
+
+  DisplayObject.prototype.runners = function (options, clear) {
+    return this.animation.runners(options, clear);
+  };
+  /**
+   * 以链式调用的方式触发一串动画 （不支持`alternate`）
+   *
+   * ```js
+   * display.queues({ from: { x: 1 }, to: { x: 2 } })
+   *   .then({ path: JC.BezierCurve([ point1, point2, point3, point4 ]) })
+   *   .then({ from: { x: 2 }, to: { x: 1 } })
+   *   .then({ from: { scale: 1 }, to: { scale: 0 } })
+   *   .on('complete', function() {
+   *     console.log('end queues');
+   *   });
+   * ```
+   *
+   * @param {Object} [runner] 添加动画，可以是 animate 或者 motion 动画配置
+   * @param {Object} [options={}] 整个动画的循环等配置
+   * @param {Object} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
+   * @param {Object} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
+   * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
+   * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
+   * @param {Boolean} [clear=false] 是否去掉之前的动画
+   * @return {JC.Queues}
+   */
+
+
+  DisplayObject.prototype.queues = function (runner) {
+    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var clear = arguments.length > 2 ? arguments[2] : undefined;
+    return this.animation.queues(runner, options, clear);
+  };
+  /**
+   * 检查对象是否可见
+   *
+   * @return {Boolean} 对象是否可见
+   */
+
+
+  DisplayObject.prototype.isVisible = function () {
+    return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
+  };
+  /**
+   * 移除对象上的遮罩
+   */
+
+
+  DisplayObject.prototype.removeMask = function () {
+    this.mask = null;
+  };
+  /**
+   * 设置对象上的属性值
+   *
+   * @private
+   * @param {Object} props
+   */
+
+
+  DisplayObject.prototype.setProps = function (props) {
+    if (props === undefined) return;
+
+    for (var key in props) {
+      if (this[key] === undefined) {
+        continue;
+      } else {
+        this[key] = props[key];
       }
     }
-
-    var Sw = new Point(0, 0, 0, 0);
-    for (l = 0; l <= q; ++l) {
-      Sw.add(temp[l].multiplyScalar(Nv[l]));
-    }
-
-    Sw.divideScalar(Sw.w);
-    return new Point(Sw.x, Sw.y, Sw.z);
-  }
-
-};
-
-/**
- *
- * @class
- * @memberof JC
- * @param {Number} degree
- * @param {Array}  knots           array of reals
- * @param {Array}  controlPoints   array of Point
- */
-function NURBSCurve(degree, knots, controlPoints) {
-  this.degree = degree;
-  this.knots = knots;
-  this.controlPoints = controlPoints; // [];
-}
-
-NURBSCurve.prototype = Object.create(Curve.prototype);
-NURBSCurve.prototype.constructor = NURBSCurve;
-
-NURBSCurve.prototype.getPoint = function (t) {
-  var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]); // linear mapping t->u
-
-  // following results in (wx, wy, wz, w) homogeneous point
-  var hpoint = NURBSUtils.calcBSplinePoint(this.degree, this.knots, this.controlPoints, u);
-
-  if (hpoint.w !== 1.0) {
-    // project to 3D space: (wx, wy, wz, w) -> (x, y, z, 1)
-    hpoint.divideScalar(hpoint.w);
-  }
-
-  return new Point(hpoint.x, hpoint.y, hpoint.z);
-};
-
-NURBSCurve.prototype.getTangent = function (t) {
-  var u = this.knots[0] + t * (this.knots[this.knots.length - 1] - this.knots[0]);
-  var ders = NURBSUtils.calcNURBSDerivatives(this.degree, this.knots, this.controlPoints, u, 1);
-  var tangent = ders[1].clone();
-  tangent.normalize();
-
-  return tangent;
-};
-
-/* eslint max-len: "off" */
-
-/**
- * 显示对象的基类，继承至Eventer
- *
- * @class
- * @memberof JC
- * @extends JC.Eventer
- */
-function DisplayObject() {
-  Eventer.call(this);
-
+  };
   /**
-   * 控制渲染对象是否显示
-   *
-   * @member {Boolean}
-   */
-  this.visible = true;
-
-  /**
-   * 世界透明度
+   * 更新对象本身的矩阵姿态以及透明度
    *
    * @private
-   * @member {Number}
+   * @param {Matrix} rootMatrix
+   * @method updateTransform
    */
-  this.worldAlpha = 1;
 
-  /**
-   * 控制渲染对象的透明度
-   *
-   * @member {Number}
-   */
-  this.alpha = 1;
 
-  /**
-   * 控制渲染对象的x轴的缩放
-   *
-   * @member {Number}
-   */
-  this.scaleX = 1;
+  DisplayObject.prototype.updateTransform = function (rootMatrix) {
+    var pt = rootMatrix || this.hierarchy && this.hierarchy.worldTransform || this.parent && this.parent.worldTransform || IDENTITY;
+    var wt = this.worldTransform;
+    var worldAlpha = this.parent && this.parent.worldAlpha || 1;
+    var a;
+    var b;
+    var c;
+    var d;
+    var tx;
+    var ty;
+    var pox = this.pivotX + this.originX;
+    var poy = this.pivotY + this.originY;
 
-  /**
-   * 控制渲染对象的y轴的缩放
-   *
-   * @member {Number}
-   */
-  this.scaleY = 1;
-
-  /**
-   * 控制渲染对象的x轴的斜切
-   *
-   * @member {Number}
-   */
-  this.skewX = 0;
-
-  /**
-   * 控制渲染对象的y轴的斜切
-   *
-   * @member {Number}
-   */
-  this.skewY = 0;
-
-  /**
-   * 控制渲染对象的旋转角度
-   *
-   * @member {Number}
-   */
-  this.rotation = 0;
-  this.rotationCache = 0;
-  this._sr = 0;
-  this._cr = 1;
-
-  /**
-   * 控制渲染对象的x位置
-   *
-   * @member {Number}
-   */
-  this.x = 0;
-
-  /**
-   * 控制渲染对象的y位置
-   *
-   * @member {Number}
-   */
-  this.y = 0;
-
-  /**
-   * 控制渲染对象的相对本身x轴位置的进一步偏移，将会影响旋转中心点
-   *
-   * @member {Number}
-   */
-  this.pivotX = 0;
-
-  /**
-   * 控制渲染对象的相对本身y轴位置的进一步偏移，将会影响旋转中心点
-   *
-   * @member {Number}
-   */
-  this.pivotY = 0;
-
-  /**
-   * 控制渲染对象的x变换中心
-   *
-   * @member {Number}
-   */
-  this.originX = 0;
-
-  /**
-   * 控制渲染对象的y变换中心
-   *
-   * @member {Number}
-   */
-  this.originY = 0;
-
-  /**
-   * 对象的遮罩层
-   *
-   * @member {JC.Graphics}
-   */
-  this.mask = null;
-
-  /**
-   * 当前对象的直接父级
-   *
-   * @private
-   * @member {JC.Container}
-   */
-  this.parent = null;
-
-  /**
-   * 当前对象所应用的矩阵状态
-   *
-   * @private
-   * @member {JC.Matrix}
-   */
-  this.worldTransform = new Matrix$2();
-
-  /**
-   * 当前对象的事件管家
-   *
-   * @private
-   * @member {JC.Eventer}
-   */
-  // this.event = new Eventer();
-
-  /**
-   * 当前对象是否穿透自身的事件检测
-   *
-   * @member {Boolean}
-   */
-  this.passEvent = false;
-
-  /**
-   * 当前对象的事件检测边界
-   *
-   * @private
-   * @member {JC.Shape}
-   */
-  this.eventArea = null;
-
-  /**
-   * 当前对象的动画管家
-   *
-   * @private
-   * @member {Array}
-   */
-  this.animation = new Animation(this);
-
-  /**
-   * 标记当前对象是否为touchstart触发状态
-   *
-   * @private
-   * @member {Boolean}
-   */
-  // this._touchstarted = false;
-
-  /**
-   * 标记当前对象是否为mousedown触发状态
-   *
-   * @private
-   * @member {Boolean}
-   */
-  // this._mousedowned = false;
-
-  /**
-   * 渲染对象是否具备光标样式，例如 cursor
-   *
-   * @member {Boolean}
-   */
-  // this.buttonMode = false;
-
-  /**
-   * 当渲染对象是按钮时所具备的光标样式
-   *
-   * @member {Boolean}
-   */
-  this.cursor = '';
-
-  /**
-   * Enable interaction events for the DisplayObject. Touch, pointer and mouse
-   * events will not be emitted unless `interactive` is set to `true`.
-   *
-   * @member {boolean}
-   */
-  this.interactive = false;
-
-  /**
-   * Determines if the children to the displayObject can be clicked/touched
-   * Setting this to false allows PixiJS to bypass a recursive `hitTest` function
-   *
-   * @member {boolean}
-   * @memberof PIXI.Container#
-   */
-  this.interactiveChildren = true;
-}
-DisplayObject.prototype = Object.create(Eventer.prototype);
-
-/**
- * 对渲染对象进行x、y轴同时缩放
- *
- * @name scale
- * @member {Number}
- * @memberof JC.DisplayObject#
- */
-Object.defineProperty(DisplayObject.prototype, 'scale', {
-  get: function get() {
-    return this.scaleX;
-  },
-  set: function set(scale) {
-    this.scaleX = this.scaleY = scale;
-  }
-});
-
-/**
- * 对渲染对象进行x、y轴同时缩放
- *
- * @name scale
- * @member {Number}
- * @memberof JC.DisplayObject#
- */
-Object.defineProperty(DisplayObject.prototype, 'trackedPointers', {
-  get: function get() {
-    if (this._trackedPointers === undefined) this._trackedPointers = {};
-    return this._trackedPointers;
-  }
-});
-
-/**
- * animate动画，指定动画的启始位置和结束位置
- *
- * ```js
- * display.animate({
- *   from: {x: 100},
- *   to: {x: 200},
- *   ease: JC.Tween.Bounce.Out, // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
- *   onUpdate: function(state,rate){},
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {Object} options 动画配置参数
- * @param {Object} [options.from] 设置对象的起始位置和起始姿态等，该项配置可选
- * @param {Object} options.to 设置对象的结束位置和结束姿态等
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
- */
-DisplayObject.prototype.animate = function (options, clear) {
-  return this.animation.animate(options, clear);
-};
-
-/**
- * motion动画，让物体按照设定好的曲线运动
- *
- * ```js
- * display.motion({
- *   path: new JC.SvgCurve('M10 10 H 90 V 90 H 10 L 10 10), // path路径，需要继承自Curve
- *   attachTangent: true, // 物体是否捕获切线方向
- *   ease: JC.Tween.Ease.bezier(0.25,0.1,0.25,1), // 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   duration: 1000, // 动画时长 ms单位 默认 300ms
- *   onUpdate: function(state,rate){}, // 动画更新回调
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- * @param {Object} options 动画配置参数
- * @param {Curve} options.path path路径，需要继承自Curve，可以传入BezierCurve实例、NURBSCurve实例、SvgCurve实例
- * @param {Boolean} [options.attachTangent] 物体是否捕获切线方向
- * @param {String} [options.ease] 执行动画使用的缓动函数 默认值为 JC.Tween.Ease.InOut
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
- */
-DisplayObject.prototype.motion = function (options, clear) {
-  return this.animation.motion(options, clear);
-};
-
-/**
- * keyFrames动画，设置物体动画的keyframe，可以为相邻的两个keyFrames之前配置差值时间及时间函数
- *
- * ```js
- * display.keyFrames({
- *   ks: data.layers[0], // ae导出的动画数据
- *   fr: 30, // 动画的帧率，默认：30fps
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   alternate: true, // 偶数次的时候动画回放
- *   onUpdate: function(state,rate){},
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {Object} options 动画配置参数
- * @param {Object} options.ks 配置关键帧的位置、姿态，ae导出的动画数据
- * @param {Number} [options.fr] 配置关键帧的位置、姿态，ae导出的动画数据
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限次执行，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
- */
-DisplayObject.prototype.keyFrames = function (options, clear) {
-  return this.animation.keyFrames(options, clear);
-};
-
-/**
- * 播放一个bodymovin动画
- *
- * ```js
- * import data from './animations/data.js';
- * display.bodymovin({
- *   keyframes: data.layers[3],
- *   frameRate: data.fr,
- *   ignoreProps: [ 'position', 'scaleX ],
- * }, clear).on('complete', function() {
- *   console.log('end queues');
- * });
- * ```
- *
- * @memberof JC.DisplayObject
- * @param {Object} options 动画配置参数
- * @param {Object} options.keyframes lottie 动画数据
- * @param {Number} [options.frameRate] lottie 动画帧率，对应 json 里面的 fr
- * @param {Array} [options.ignoreProps] 忽略 keyframes 动画数据中的哪些属性的动画描述 position|x|y|pivot|pivotX|pivotY|scale|scaleX|scaleY|rotation|alpha
- * @param {Number} [options.repeats] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite] 设置动画无限循环，优先级高于repeats
- * @param {Boolean} [options.alternate] 设置动画是否偶数次回返
- * @param {Number} [options.duration] 设置动画执行时间 默认 300ms
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否清除该对象上之前所有的动画
- * @return {Bodymovin}
- */
-DisplayObject.prototype.bodymovin = function (options, clear) {
-  return this.animation.bodymovin(options, clear);
-};
-
-/**
- * 不推荐使用，建议使用`queues`方法达到同样效果
- * runners动画，多个复合动画的组合形式，不支持`alternate`
- *
- * ```js
- * display.runners({
- *   runners: [
- *     { from: {}, to: {} },
- *     { path: JC.BezierCurve([ point1, point2, point3, point4 ]) },
- *   ], // 组合动画，支持组合 animate、motion
- *   delay: 1000, // ae导出的动画数据
- *   wait: 100, // ae导出的动画数据
- *   repeats: 10, // 动画运动完后再重复10次
- *   infinite: true, // 无限循环动画
- *   onUpdate: function(state,rate){},
- *   onComplete: function(){ console.log('end'); } // 动画执行结束回调
- * });
- * ```
- *
- * @param {Object} options 动画配置参数
- * @param {Object} options.runners 组合动画，支持 animate、motion 这些的自定义组合
- * @param {Number} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Boolean} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
- * @param {Number} [options.wait=0] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay=0] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Function} [options.onUpdate] 设置动画更新时的回调函数
- * @param {Function} [options.onComplete] 设置动画结束时的回调函数，如果infinite为true该事件将不会触发
- * @param {Boolean} clear 是否去掉之前的动画
- * @return {JC.Animate}
- */
-DisplayObject.prototype.runners = function (options, clear) {
-  return this.animation.runners(options, clear);
-};
-
-/**
- * 以链式调用的方式触发一串动画 （不支持`alternate`）
- *
- * ```js
- * display.queues({ from: { x: 1 }, to: { x: 2 } })
- *   .then({ path: JC.BezierCurve([ point1, point2, point3, point4 ]) })
- *   .then({ from: { x: 2 }, to: { x: 1 } })
- *   .then({ from: { scale: 1 }, to: { scale: 0 } })
- *   .on('complete', function() {
- *     console.log('end queues');
- *   });
- * ```
- *
- * @param {Object} [runner] 添加动画，可以是 animate 或者 motion 动画配置
- * @param {Object} [options={}] 整个动画的循环等配置
- * @param {Object} [options.repeats=0] 设置动画执行完成后再重复多少次，优先级没有infinite高
- * @param {Object} [options.infinite=false] 设置动画无限次执行，优先级高于repeats
- * @param {Number} [options.wait] 设置动画延迟时间，在重复动画不会生效 默认 0ms
- * @param {Number} [options.delay] 设置动画延迟时间，在重复动画也会生效 默认 0ms
- * @param {Boolean} [clear=false] 是否去掉之前的动画
- * @return {JC.Queues}
- */
-DisplayObject.prototype.queues = function (runner) {
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var clear = arguments[2];
-
-  return this.animation.queues(runner, options, clear);
-};
-
-/**
- * 检查对象是否可见
- *
- * @return {Boolean} 对象是否可见
- */
-DisplayObject.prototype.isVisible = function () {
-  return !!(this.visible && this.alpha > 0 && this.scaleX * this.scaleY !== 0);
-};
-
-/**
- * 移除对象上的遮罩
- */
-DisplayObject.prototype.removeMask = function () {
-  this.mask = null;
-};
-
-/**
- * 设置对象上的属性值
- *
- * @private
- * @param {Object} props
- */
-DisplayObject.prototype.setProps = function (props) {
-  if (props === undefined) return;
-  for (var key in props) {
-    if (this[key] === undefined) {
-      continue;
+    if (this.skewX || this.skewY) {
+      TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation, this.skewX, this.skewY, this.originX, this.originY);
+      wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
+      wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
+      wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
+      wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
+      wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
+      wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
     } else {
-      this[key] = props[key];
-    }
-  }
-};
+      if (this.rotation % 360) {
+        if (this.rotation !== this.rotationCache) {
+          this.rotationCache = this.rotation;
+          this._sr = Math.sin(this.rotation);
+          this._cr = Math.cos(this.rotation);
+        }
 
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @private
- * @param {Matrix} rootMatrix
- * @method updateTransform
- */
-DisplayObject.prototype.updateTransform = function (rootMatrix) {
-  var pt = rootMatrix || this.hierarchy && this.hierarchy.worldTransform || this.parent && this.parent.worldTransform || IDENTITY;
-  var wt = this.worldTransform;
-  var worldAlpha = this.parent && this.parent.worldAlpha || 1;
+        a = this._cr * this.scaleX;
+        b = this._sr * this.scaleX;
+        c = -this._sr * this.scaleY;
+        d = this._cr * this.scaleY;
+        tx = this.x;
+        ty = this.y;
 
-  var a = void 0;
-  var b = void 0;
-  var c = void 0;
-  var d = void 0;
-  var tx = void 0;
-  var ty = void 0;
+        if (this.pivotX || this.pivotY || this.originX || this.originY) {
+          tx -= pox * a + poy * c - this.originX;
+          ty -= pox * b + poy * d - this.originY;
+        }
 
-  var pox = this.pivotX + this.originX;
-  var poy = this.pivotY + this.originY;
-
-  if (this.skewX || this.skewY) {
-    TEMP_MATRIX.setTransform(this.x, this.y, this.pivotX, this.pivotY, this.scaleX, this.scaleY, this.rotation, this.skewX, this.skewY, this.originX, this.originY);
-
-    wt.a = TEMP_MATRIX.a * pt.a + TEMP_MATRIX.b * pt.c;
-    wt.b = TEMP_MATRIX.a * pt.b + TEMP_MATRIX.b * pt.d;
-    wt.c = TEMP_MATRIX.c * pt.a + TEMP_MATRIX.d * pt.c;
-    wt.d = TEMP_MATRIX.c * pt.b + TEMP_MATRIX.d * pt.d;
-    wt.tx = TEMP_MATRIX.tx * pt.a + TEMP_MATRIX.ty * pt.c + pt.tx;
-    wt.ty = TEMP_MATRIX.tx * pt.b + TEMP_MATRIX.ty * pt.d + pt.ty;
-  } else {
-    if (this.rotation % 360) {
-      if (this.rotation !== this.rotationCache) {
-        this.rotationCache = this.rotation;
-        this._sr = Math.sin(this.rotation);
-        this._cr = Math.cos(this.rotation);
+        wt.a = a * pt.a + b * pt.c;
+        wt.b = a * pt.b + b * pt.d;
+        wt.c = c * pt.a + d * pt.c;
+        wt.d = c * pt.b + d * pt.d;
+        wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+        wt.ty = tx * pt.b + ty * pt.d + pt.ty;
+      } else {
+        a = this.scaleX;
+        d = this.scaleY;
+        tx = this.x - pox * a + this.originX;
+        ty = this.y - poy * d + this.originY;
+        wt.a = a * pt.a;
+        wt.b = a * pt.b;
+        wt.c = d * pt.c;
+        wt.d = d * pt.d;
+        wt.tx = tx * pt.a + ty * pt.c + pt.tx;
+        wt.ty = tx * pt.b + ty * pt.d + pt.ty;
       }
-
-      a = this._cr * this.scaleX;
-      b = this._sr * this.scaleX;
-      c = -this._sr * this.scaleY;
-      d = this._cr * this.scaleY;
-      tx = this.x;
-      ty = this.y;
-
-      if (this.pivotX || this.pivotY || this.originX || this.originY) {
-        tx -= pox * a + poy * c - this.originX;
-        ty -= pox * b + poy * d - this.originY;
-      }
-      wt.a = a * pt.a + b * pt.c;
-      wt.b = a * pt.b + b * pt.d;
-      wt.c = c * pt.a + d * pt.c;
-      wt.d = c * pt.b + d * pt.d;
-      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
-      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
-    } else {
-      a = this.scaleX;
-      d = this.scaleY;
-
-      tx = this.x - pox * a + this.originX;
-      ty = this.y - poy * d + this.originY;
-
-      wt.a = a * pt.a;
-      wt.b = a * pt.b;
-      wt.c = d * pt.c;
-      wt.d = d * pt.d;
-      wt.tx = tx * pt.a + ty * pt.c + pt.tx;
-      wt.ty = tx * pt.b + ty * pt.d + pt.ty;
     }
+
+    this.worldAlpha = this.alpha * worldAlpha;
+  };
+  /**
+   * 更新对象本身的动画
+   *
+   * @private
+   * @param {Number} snippet
+   */
+
+
+  DisplayObject.prototype.updateAnimation = function (snippet) {
+    this.animation.update(snippet);
+  };
+  /**
+   * 设置矩阵和透明度到当前绘图上下文
+   *
+   * @private
+   * @param {context} ctx
+   */
+
+
+  DisplayObject.prototype.setTransform = function (ctx) {
+    var matrix = this.worldTransform;
+    ctx.globalAlpha = this.worldAlpha;
+    ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
+  };
+  /**
+   * 获取物体相对于canvas世界坐标系的坐标位置
+   *
+   * @return {Object}
+   */
+
+
+  DisplayObject.prototype.getGlobalPos = function () {
+    return {
+      x: this.worldTransform.tx,
+      y: this.worldTransform.ty
+    };
+  };
+  /**
+   * 设置显示对象的事件检测区域
+   *
+   * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
+   * @param {Boolean} clock 是否锁住当前设置的监测区域不会被内部更新修改。
+   */
+
+
+  DisplayObject.prototype.setArea = function (shape, clock) {
+    if (this.eventArea !== null && this.eventArea.clocked && !clock) return;
+    this.eventArea = shape;
+    if (clock) this.eventArea.clocked = true;
+  };
+  /**
+   * 检测坐标点是否在多变性内
+   *
+   * @param {JC.Point} global
+   * @return {Boolean} 是否包含该点
+   */
+
+
+  DisplayObject.prototype.contains = function (global) {
+    if (this.eventArea === null) return false;
+    var point = new Point();
+    this.worldTransform.applyInverse(global, point);
+    return this.eventArea && this.eventArea.contains(point.x, point.y);
+  };
+
+  /* eslint prefer-rest-params: 0 */
+  /**
+   * 显示对象容器，继承至DisplayObject
+   *
+   * ```js
+   * var container = new JC.Container();
+   * container.adds(sprite);
+   * ```
+   *
+   * @class
+   * @memberof JC
+   * @extends JC.DisplayObject
+   */
+
+  function Container() {
+    DisplayObject.call(this);
+    /**
+     * 渲染对象的列表
+     *
+     * @member {Array}
+     */
+
+    this.childs = [];
+    /**
+     * 自身及后代动画的缩放比例
+     *
+     * @member {Number}
+     */
+
+    this.timeScale = 1;
+    /**
+     * 是否暂停自身的动画
+     *
+     * @member {Boolean}
+     */
+
+    this.paused = false;
+    /**
+     * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
+     *
+     * @private
+     * @member {Number}
+     */
+
+    this._zIndex = 0;
+    /**
+     * 强制该对象在渲染子集之前为他们排序
+     *
+     * @member {Boolean}
+     */
+
+    this.souldSort = false;
+    /**
+     * 显示对象的包围盒
+     *
+     * @member {JC.Bounds}
+     */
+
+    this.bounds = new Bounds();
+    /**
+     * 显示对象内部表示的边界
+     *
+     * @private
+     * @member {JC.Bounds}
+     */
+
+    this._bounds = new Bounds();
+    this.vertexData = new Float32Array(8);
   }
-  this.worldAlpha = this.alpha * worldAlpha;
-};
 
-/**
- * 更新对象本身的动画
- *
- * @private
- * @param {Number} snippet
- */
-DisplayObject.prototype.updateAnimation = function (snippet) {
-  this.animation.update(snippet);
-};
-
-/**
- * 设置矩阵和透明度到当前绘图上下文
- *
- * @private
- * @param {context} ctx
- */
-DisplayObject.prototype.setTransform = function (ctx) {
-  var matrix = this.worldTransform;
-  ctx.globalAlpha = this.worldAlpha;
-  ctx.setTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.tx, matrix.ty);
-};
-
-/**
- * 获取物体相对于canvas世界坐标系的坐标位置
- *
- * @return {Object}
- */
-DisplayObject.prototype.getGlobalPos = function () {
-  return { x: this.worldTransform.tx, y: this.worldTransform.ty };
-};
-
-/**
- * 设置显示对象的事件检测区域
- *
- * @param {JC.Polygon|JC.Rectangle} shape JC内置形状类型的实例
- * @param {Boolean} clock 是否锁住当前设置的监测区域不会被内部更新修改。
- */
-DisplayObject.prototype.setArea = function (shape, clock) {
-  if (this.eventArea !== null && this.eventArea.clocked && !clock) return;
-  this.eventArea = shape;
-  if (clock) this.eventArea.clocked = true;
-};
-
-/**
- * 检测坐标点是否在多变性内
- *
- * @param {JC.Point} global
- * @return {Boolean} 是否包含该点
- */
-DisplayObject.prototype.contains = function (global) {
-  if (this.eventArea === null) return false;
-  var point = new Point();
-  this.worldTransform.applyInverse(global, point);
-  return this.eventArea && this.eventArea.contains(point.x, point.y);
-};
-
-/* eslint prefer-rest-params: 0 */
-
-/**
- * 显示对象容器，继承至DisplayObject
- *
- * ```js
- * var container = new JC.Container();
- * container.adds(sprite);
- * ```
- *
- * @class
- * @memberof JC
- * @extends JC.DisplayObject
- */
-function Container() {
-  DisplayObject.call(this);
-
-  /**
-   * 渲染对象的列表
-   *
-   * @member {Array}
-   */
-  this.childs = [];
-
-  /**
-   * 自身及后代动画的缩放比例
-   *
-   * @member {Number}
-   */
-  this.timeScale = 1;
-
-  /**
-   * 是否暂停自身的动画
-   *
-   * @member {Boolean}
-   */
-  this.paused = false;
-
+  Container.prototype = Object.create(DisplayObject.prototype);
   /**
    * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
    *
-   * @private
+   * @name zIndex
    * @member {Number}
+   * @memberof JC.Container#
    */
-  this._zIndex = 0;
 
-  /**
-   * 强制该对象在渲染子集之前为他们排序
-   *
-   * @member {Boolean}
-   */
-  this.souldSort = false;
+  Object.defineProperty(Container.prototype, 'zIndex', {
+    get: function get() {
+      return this._zIndex;
+    },
+    set: function set(zIndex) {
+      if (this._zIndex !== zIndex) {
+        this._zIndex = zIndex;
 
+        if (this.parent) {
+          this.parent.souldSort = true;
+        }
+      }
+    }
+  });
   /**
-   * 显示对象的包围盒
-   *
-   * @member {JC.Bounds}
-   */
-  this.bounds = new Bounds();
-
-  /**
-   * 显示对象内部表示的边界
+   * 对自身子集进行zIndex排序
    *
    * @private
-   * @member {JC.Bounds}
+   * @method _sortList
    */
-  this._bounds = new Bounds();
 
-  this.vertexData = new Float32Array(8);
-}
-Container.prototype = Object.create(DisplayObject.prototype);
+  Container.prototype._sortList = function () {
+    /**
+     * 因为数组sort排序的不稳定性，顾采用冒泡排序方式
+     */
+    var childs = this.childs;
+    var length = childs.length;
+    var i;
+    var j;
+    var temp;
 
-/**
- * 当前对象的z-index层级，z-index的值只会影响该对象在其所在的渲染列表内产生影响
- *
- * @name zIndex
- * @member {Number}
- * @memberof JC.Container#
- */
-Object.defineProperty(Container.prototype, 'zIndex', {
-  get: function get() {
-    return this._zIndex;
-  },
-  set: function set(zIndex) {
-    if (this._zIndex !== zIndex) {
-      this._zIndex = zIndex;
-      if (this.parent) {
-        this.parent.souldSort = true;
+    for (i = 0; i < length - 1; i++) {
+      for (j = 0; j < length - 1 - i; j++) {
+        if (childs[j].zIndex > childs[j + 1].zIndex) {
+          temp = childs[j];
+          childs[j] = childs[j + 1];
+          childs[j + 1] = temp;
+        }
       }
     }
-  }
-});
 
-/**
- * 对自身子集进行zIndex排序
- *
- * @private
- * @method _sortList
- */
-Container.prototype._sortList = function () {
-  /**
-   * 因为数组sort排序的不稳定性，顾采用冒泡排序方式
-   */
-  var childs = this.childs;
-  var length = childs.length;
-  var i = void 0;
-  var j = void 0;
-  var temp = void 0;
-  for (i = 0; i < length - 1; i++) {
-    for (j = 0; j < length - 1 - i; j++) {
-      if (childs[j].zIndex > childs[j + 1].zIndex) {
-        temp = childs[j];
-        childs[j] = childs[j + 1];
-        childs[j + 1] = temp;
-      }
-    }
-  }
-  this.souldSort = false;
-};
-
-/**
- * 更新bodymovin动画
- * @param {number} progress progress
- * @param {object} session
- */
-Container.prototype.updateMovin = function (progress, session) {
-  var length = this.childs.length;
-  for (var i = 0; i < length; i++) {
-    var doc = this.childs[i];
-    if (doc && !doc._aniRoot && doc.updateMovin) {
-      doc.updateMovin(progress, session);
-    }
-  }
-  this.updateKeyframes && this.updateKeyframes(progress, session);
-};
-
-/**
- * 向容器添加一个物体
- *
- * ```js
- * container.adds(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param {JC.Container} object
- * @return {JC.Container}
- */
-Container.prototype.adds = function (object) {
-  if (arguments.length > 1) {
-    for (var i = 0; i < arguments.length; i++) {
-      this.adds(arguments[i]);
-    }
-    return this;
-  }
-  if (object === this) {
-    console.error('adds: object can\'t be added as a child of itself.', object);
-  }
-  if (object && object instanceof Container) {
-    if (object.parent !== null) {
-      object.parent.remove(object);
-    }
-    object.parent = this;
-    this.childs.push(object);
-    this.souldSort = true;
-  } else {
-    console.error('adds: object not an instance of Container', object);
-  }
-  return this;
-};
-
-/**
- * 从容器移除一个物体
- *
- * ```js
- * container.remove(sprite,sprite2,text3,graphice);
- * ```
- *
- * @param {JC.Container} object
- */
-Container.prototype.remove = function (object) {
-  if (arguments.length > 1) {
-    for (var i = 0; i < arguments.length; i++) {
-      this.remove(arguments[i]);
-    }
-  }
-  var index = this.childs.indexOf(object);
-  if (index !== -1) {
-    object.parent = null;
-    this.childs.splice(index, 1);
-  }
-};
-
-/**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
- *
- * @private
- * @param {Number} snippet
- */
-Container.prototype.updateTimeline = function (snippet) {
-  this.emit('pretimeline', snippet);
-  if (this.paused) return;
-  snippet = this.timeScale * snippet;
-  this.updateAnimation(snippet);
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    child.updateTimeline(snippet);
-    i++;
-  }
-  this.emit('posttimeline', snippet);
-};
-
-/**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
- *
- * @private
- */
-Container.prototype.updatePosture = function () {
-  this.emit('preposture');
-  if (this.souldSort) this._sortList();
-  this.updateTransform();
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    child.updatePosture();
-    i++;
-  }
-  this.emit('postposture');
-};
-
-/**
- * 渲染自己并触发后代渲染
- * @param {context} ctx
- * @private
- */
-Container.prototype.render = function (ctx) {
-  this.emit('prerender');
-  ctx.save();
-  this.setTransform(ctx);
-  if (this.mask) this.mask.render(ctx);
-  this.renderMe(ctx);
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    i++;
-    if (!child.isVisible()) continue;
-    child.render(ctx);
-  }
-  ctx.restore();
-  this.emit('postrender');
-};
-
-/**
- * 渲染自己
- * @private
- * @return {Boolean} 是否渲染
- */
-Container.prototype.renderMe = function () {
-  return true;
-};
-
-/**
- * 计算自己的包围盒
- * @private
- */
-Container.prototype.calculateVertices = function () {
-  var wt = this.worldTransform;
-  var a = wt.a;
-  var b = wt.b;
-  var c = wt.c;
-  var d = wt.d;
-  var tx = wt.tx;
-  var ty = wt.ty;
-  var vertexData = this.vertexData;
-  var w0 = void 0;
-  var w1 = void 0;
-  var h0 = void 0;
-  var h1 = void 0;
-
-  w0 = this._bounds.minX;
-  w1 = this._bounds.maxX;
-
-  h0 = this._bounds.minY;
-  h1 = this._bounds.maxY;
-
-  // xy
-  vertexData[0] = a * w1 + c * h1 + tx;
-  vertexData[1] = d * h1 + b * w1 + ty;
-
-  // xy
-  vertexData[2] = a * w0 + c * h1 + tx;
-  vertexData[3] = d * h1 + b * w0 + ty;
-
-  // xy
-  vertexData[4] = a * w0 + c * h0 + tx;
-  vertexData[5] = d * h0 + b * w0 + ty;
-
-  // xy
-  vertexData[6] = a * w1 + c * h0 + tx;
-  vertexData[7] = d * h0 + b * w1 + ty;
-};
-
-/**
- * 计算包围盒子
- *
- * @method calculateBounds
- */
-Container.prototype.calculateBounds = function () {
-  this.bounds.clear();
-  if (!this.visible) {
-    return;
-  }
-  this._calculateBounds();
-
-  for (var i = 0; i < this.childs.length; i++) {
-    var child = this.childs[i];
-
-    child.calculateBounds();
-
-    this.bounds.addBounds(child.bounds);
-  }
-};
-
-Container.prototype._calculateBounds = function () {
-  this.calculateVertices();
-  this.bounds.addVert(this.vertexData);
-};
-
-/**
- * 设置渲染物体的包围盒
- * @param {JC.Bounds} bounds
- */
-Container.prototype.setBounds = function (bounds) {
-  if (bounds instanceof Bounds) {
-    this._bounds = bounds;
-  }
-};
-
-/**
- * 暂停自身和子级的所有动画进度
- */
-Container.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复自身和子级的所有动画进度
- */
-Container.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 设置自身及子级的动画速度
- * @param {Number} speed 设置的速率值
- */
-Container.prototype.setSpeed = function (speed) {
-  this.timeScale = speed;
-};
-
-/* eslint max-len: "off" */
-
-/**
- * MovieClip类型动画对象
- *
- * @class
- * @memberof JC
- * @extends JC.Eventer
- * @param {object} [element] 动画对象 内部传入
- * @param {object} [options] 动画配置信息 内部传入
- */
-function MovieClip(element, options) {
-  Eventer.call(this);
-
-  this.element = element;
-  this.living = false;
-
-  // this.onComplete = null;
-  // this.onUpdate = null;
-
-  this.infinite = false;
-  this.alternate = false;
-  this.repeats = 0;
-
-  this.animations = options.animations || {};
-
-  this.index = 0;
-  this.preIndex = -1;
-  this.direction = 1;
-  this.frames = [];
-  this.preFrame = null;
-
-  this.fillMode = 0;
-  this.fps = 16;
-
-  this.paused = false;
-
-  this.pt = 0;
-  this.nt = 0;
-}
-
-MovieClip.prototype = Object.create(Eventer.prototype);
-
-/**
- * 更新动画
- * @private
- * @param {number} snippet 时间片段
- */
-MovieClip.prototype.update = function (snippet) {
-  if (this.paused || !this.living) return;
-  this.nt += snippet;
-  if (this.nt - this.pt < this.interval) return;
-  this.pt = this.nt;
-  var i = this.index + this.direction;
-  if (i < this.frames.length && i >= 0) {
-    this.index = i;
-    // Do you need this handler???
-    // this.onUpdate&&this.onUpdate(this.index);
-  } else {
-    if (this.repeats > 0 || this.infinite) {
-      if (this.repeats > 0) --this.repeats;
-      if (this.alternate) {
-        this.direction *= -1;
-        this.index += this.direction;
-      } else {
-        this.direction = 1;
-        this.index = 0;
-      }
-      // Do you need this handler???
-      // this.onUpdate && this.onUpdate(this.index);
-    } else {
-      this.living = false;
-      this.index = this.fillMode;
-      this.emit('complete');
-    }
-  }
-};
-
-/**
- * 获取帧位置
- * @private
- * @return {JC.Rectangle}
- */
-MovieClip.prototype.getFrame = function () {
-  if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
-  var frame = this.element.frame.clone();
-  var cf = this.frames[this.index];
-  if (cf > 0) {
-    var row = this.element.naturalWidth / this.element.frame.width >> 0;
-    var lintRow = this.element.frame.x / this.element.frame.width >> 0;
-
-    var mCol = (lintRow + cf) / row >> 0;
-    var mRow = (lintRow + cf) % row;
-    frame.x = mRow * this.element.frame.width;
-    frame.y += mCol * this.element.frame.height;
-  }
-  this.preIndex = this.index;
-  this.preFrame = frame;
-  return frame;
-};
-
-/**
- * 播放逐帧
- * @param {object} options 播放配置
- * @return {this}
- */
-MovieClip.prototype.playMovie = function (options) {
-  // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
-  this.off('complete');
-  var movie = this.format(options.movie);
-  if (!Utils.isArray(movie)) return;
-  this.frames = movie;
-  this.index = 0;
-  this.direction = 1;
-  this.fillMode = options.fillMode || 0;
-  this.fps = options.fps || this.fps;
-  this.infinite = options.infinite || false;
-  this.alternate = options.alternate || false;
-  this.repeats = options.repeats || 0;
-  this.living = true;
-  if (options.onComplete) {
-    var This = this;
-    this.once('complete', function () {
-      options.onComplete.call(This);
-    });
-  }
-  return this;
-};
-
-/**
- * 格式化逐帧信息
- * @private
- * @param {string|array|object} movie 逐帧信息
- * @return {array}
- */
-MovieClip.prototype.format = function (movie) {
-  if (Utils.isString(movie)) {
-    var config = this.animations[movie];
-    if (config) {
-      return this.format(config);
-    } else {
-      console.warn('you havn\'t config ' + movie + ' in animations ');
-      return false;
-    }
-  } else if (Utils.isArray(movie)) {
-    return movie;
-  } else if (Utils.isObject(movie)) {
-    var arr = [];
-    for (var i = movie.start; i <= movie.end; i++) {
-      arr.push(i);
-    }
-    if (movie.next && this.animations[movie.next]) {
-      var This = this;
-      var conf = {};
-      if (Utils.isString(movie.next) && this.animations[movie.next]) {
-        conf.movie = movie.next;
-        conf.infinite = true;
-      } else if (Utils.isObject(movie.next)) {
-        conf = movie.next;
-      }
-      if (Utils.isString(conf.movie)) {
-        this.once('complete', function () {
-          This.playMovie(conf);
-        });
-      }
-    }
-    return arr;
-  }
-};
-
-/**
- * 暂停逐帧
- */
-MovieClip.prototype.pause = function () {
-  this.paused = true;
-};
-
-/**
- * 恢复播放逐帧
- */
-MovieClip.prototype.restart = function () {
-  this.paused = false;
-};
-
-/**
- * 取消逐帧
- */
-MovieClip.prototype.cancle = function () {
-  this.living = false;
-};
-
-/**
- * 帧间隔
- * @private
- */
-Object.defineProperty(MovieClip.prototype, 'interval', {
-  get: function get() {
-    return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
-  }
-});
-
-/**
- * 位图精灵图，继承至Container
- *
- * ```js
- * var loadBox = JC.loaderUtil({
- *    frames: './images/frames.png'
- * });
- * var sprite = new JC.Sprite({
- *      texture: loadBox.getById('frames'),
- *      frame: new JC.Rectangle(0, 0, w, h),
- *      width: 100,
- *      height: 100,
- *      animations: {
- *          fall: {start: 0,end: 4,next: 'stand'},
- *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
- *          stand: {start: 10,end: 39},
- *          walk: {start: 40,end: 59,next: 'stand'},
- *          other: [ 0, 1, 2, 1, 3, 4 ], // 同样接受数组形势
- *      }
- * });
- * ```
- *
- * @class
- * @memberof JC
- * @extends JC.Container
- * @param {Object} options
- * @param {JC.Texture} options.texture 图片纹理
- * @param {JC.Rectangle} [options.frame] 当是逐帧或者是裁切显示时需要配置，显示的矩形区域
- * @param {Number} [options.width] 实际显示的宽，可能会缩放图像
- * @param {Number} [options.height] 实际显示的高，可能会缩放图像
- * @param {Object} [options.animations] 逐帧的预置帧动画配置
- */
-function Sprite() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-  Container.call(this);
-
-  this._width = 0;
-
-  this._height = 0;
-
-  this.ready = false;
-
-  this.upTexture(options);
-
-  this.movieClip = new MovieClip(this, options);
-}
-Sprite.prototype = Object.create(Container.prototype);
-
-/**
- * 更新纹理对象
- *
- * @private
- * @param {json} options
- */
-Sprite.prototype.upTexture = function (options) {
-  var _this = this;
-
-  if (!options.texture) return;
-  if (!options.texture.loaded) {
-    this.ready = false;
-    options.texture.on('load', function () {
-      _this.upTexture(options);
-      _this.ready = true;
-    });
-    return;
-  }
-
-  this.ready = true;
-  this.texture = options.texture;
-  this.naturalWidth = options.texture.naturalWidth;
-  this.naturalHeight = options.texture.naturalHeight;
-  this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
-
-  this.width = options.width || this.frame.width;
-  this.height = options.height || this.frame.height;
-  if (this.movieClip) {
-    this.movieClip.preFrame = null;
-  }
-};
-
-/**
- * 当前图片对象的width
- *
- * @name width
- * @member {Number}
- * @memberof JC.Sprite#
- */
-Object.defineProperty(Sprite.prototype, 'width', {
-  get: function get() {
-    return this._width;
-  },
-  set: function set(width) {
-    if (this._width !== width) {
-      this._width = width;
-      this.updateGeometry();
-    }
-  }
-});
-
-/**
- * 当前图片对象的height
- *
- * @name height
- * @member {Number}
- * @memberof JC.Sprite#
- */
-Object.defineProperty(Sprite.prototype, 'height', {
-  get: function get() {
-    return this._height;
-  },
-  set: function set(height) {
-    if (this._height !== height) {
-      this._height = height;
-      this.updateGeometry();
-    }
-  }
-});
-
-/**
- * 更新对象的事件几何形态
- * note: 此处的setArea是懒更新，如果需要
- *
- * @private
- */
-Sprite.prototype.updateGeometry = function () {
-  var rect = new Rectangle(0, 0, this.width, this.height);
-  this._bounds.clear().addRect(rect);
-  this.setArea(rect);
-};
-
-/**
- * 更新对象的动画姿态
- *
- * @private
- * @param {number} snippet
- */
-Sprite.prototype.updateAnimation = function (snippet) {
-  this.animation.update(snippet);
-  this.movieClip.update(snippet);
-};
-
-/**
- * 播放逐帧动画
- * @param {Object} options 可以是播放配置对象
- * @param {String|Array} options.movie 预置的动画名，或者是帧索引数组
- * @param {Number} [options.fillMode] 结束时停留在哪一帧
- * @param {Boolean} [options.repeats] 重复播放次数
- * @param {Boolean} [options.infinite] 无限循环，优先级比 repeats 高
- * @param {Boolean} [options.alternate] 循环时交替播放
- * @param {Number} [options.fps] 当前动画将使用的帧率
- * @return {MovieClip}
- */
-Sprite.prototype.playMovie = function (options) {
-  return this.movieClip.playMovie(options);
-};
-
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @private
- * @param {context} ctx
- */
-Sprite.prototype.renderMe = function (ctx) {
-  if (!this.ready) return;
-  var frame = this.movieClip.getFrame();
-  ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
-};
-
-/**
- * 帧缓冲区
- * @class
- * @memberof JC
- */
-function FrameBuffer() {
-  this.canvas = document.createElement('canvas');
-  this.ctx = this.canvas.getContext('2d');
-}
-
-/**
- * 设置缓冲区大小
- * @param {JC.Rectangle} rect 获取到的尺寸
- */
-FrameBuffer.prototype.setSize = function (rect) {
-  this.width = this.canvas.width = rect.width + rect.px * 2;
-  this.height = this.canvas.height = rect.height + rect.py * 2;
-};
-
-/**
- * 清除缓冲区
- */
-FrameBuffer.prototype.clear = function () {
-  this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-  this.ctx.clearRect(0, 0, this.width, this.height);
-};
-
-/**
- * 设置绘图上下文的变换矩阵
- * @param {number} a
- * @param {number} b
- * @param {number} c
- * @param {number} d
- * @param {number} e
- * @param {number} f
- */
-FrameBuffer.prototype.setTransform = function (a, b, c, d, e, f) {
-  this.ctx.setTransform(a, b, c, d, e, f);
-};
-
-/**
- * 获取缓冲区的像素
- * @return {ImageData}
- */
-FrameBuffer.prototype.getBuffer = function () {
-  this.buffer = this.ctx.getImageData(0, 0, this.width, this.height);
-  return this.buffer;
-};
-
-/**
- * 放置像素到缓冲区
- * @return {canvas}
- */
-FrameBuffer.prototype.putBuffer = function () {
-  this.ctx.putImageData(this.buffer, 0, 0);
-  return this.canvas;
-};
-
-var FUNCTION = 'fn';
-var INSTANCE = 'in';
-
-/* eslint max-len: 0 */
-
-/**
- * 形状对象，继承至Container
- *
- *
- * ```js
- * const options = {
- *   cache: true,
- *   bounds: new JC.Bounds(-50, -50, 50, 50)
- * };
- * function drawRect(ctx) {
- *  ctx.fillStyle = 'red';
- *  ctx.fillRect(-10, -10, 10, 10);
- * }
- *
- * function Cricle(options) {
- *   this.radius = options.radius || 0;
- *   this.color = options.color || '#3a3cfd';
- * }
- * Cricle.prototype.render = function(ctx) {
- *   ctx.beginPath();
- *   ctx.fillStyle = this.color;
- *   ctx.arc(0, 0, this.radius, 0, Math.PI * 2, true);
- *   ctx.closePath();
- *   ctx.fill();
- * }
- *
- * const rect = new JC.Graphics(drawRect);
- * const cricle = new JC.Graphics(new Cricle());
- *
- * ```
- *
- * @class
- * @memberof JC
- * @extends JC.Container
- * @param {function|object} mesh 绘制对象，可以是函数，也可以是带有render方法的对象，绘制时会将当前绘图环境传递给它
- * @param {object} options 绘制对象
- * @param {boolean} [options.cache] 是否缓存改绘制对象，加入绘制对象非常复杂并后续无需更新时设置为 true 可以优化性能
- * @param {JC.Bounds} [options.bounds] 绘制对象的包围盒，在需要缓存时需要手动设置
- */
-function Graphics(mesh, options) {
-  Container.call(this);
-  options = options || {};
-  this.mesh = mesh;
-  this.meshType = Utils.isFunction(mesh) ? FUNCTION : Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
-  if (this.meshType === '') console.error('不支持的绘制对象');
-
-  this.cache = options.cache || false;
-  this.cached = false;
-  this.setBounds(options.bounds);
-
-  this.frameBuffer = null;
-}
-Graphics.prototype = Object.create(Container.prototype);
-
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @private
- * @param {context} ctx
- */
-Graphics.prototype.renderMe = function (ctx) {
-  if (!this.meshType) return;
-  if (this.cached || this.cache) {
-    if (this.cache) {
-      if (this.frameBuffer === null) this.frameBuffer = new FrameBuffer();
-
-      this.frameBuffer.clear();
-      this.__co = this._bounds.getRectangle();
-      this.__co.px = this.__co.py = 0;
-      this.frameBuffer.setSize(this.__co);
-      this.frameBuffer.setTransform(1, 0, 0, 1, -this.__co.x, -this.__co.y);
-
-      this._drawBack(this.frameBuffer.ctx);
-
-      this.cached = true;
-      this.cache = false;
-    }
-    this.frameBuffer && ctx.drawImage(this.frameBuffer.canvas, this.__co.x - this.__co.px, this.__co.y - this.__co.py, this.frameBuffer.width, this.frameBuffer.height);
-  } else {
-    this._drawBack(ctx);
-  }
-};
-
-/**
- * 调用绘制函数
- *
- * @private
- * @param {context} ctx
- */
-Graphics.prototype._drawBack = function (ctx) {
-  if (this.meshType === FUNCTION) {
-    this.mesh(ctx);
-  } else if (this.meshType === INSTANCE) {
-    this.mesh.render(ctx);
-  }
-};
-
-/* eslint max-len: 0 */
-
-/**
- * 文本，继承至Container
- *
- *
- * ```js
- * var text = new JC.TextFace(
- *   'JC jcc2d canvas renderer',
- *   {
- *     fontSize: '16px',
- *     ...
- *   }
- * );
- * ```
- *
- * @class
- * @extends JC.Container
- * @memberof JC
- * @param {string} text
- * @param {object} style
- * @param {string} [style.fontSize] 文字的字号
- * @param {string} [style.fontFamily] 文字的字体
- * @param {string} [style.fontStyle] 文字的 style ('normal', 'italic' or 'oblique')
- * @param {string} [style.fontWeight] 文字的 weight ('normal', 'bold', 'bolder', 'lighter' and '100', '200', '300', '400', '500', '600', '700', 800' or '900')
- * @param {boolean} [style.fill] 文字填充模式 默认为: ture
- * @param {string} [style.fillColor] 文字填充的颜色
- * @param {boolean} [style.stroke] 文字描边模式 默认为: false
- * @param {string} [style.strokeColor] 文字描边的颜色
- * @param {number} [style.lineWidth] 文字描边的宽度
- * @param {string} [style.textAlign] 文字的水平对齐方式 默认值: 'center' (top|bottom|middle|alphabetic|hanging)
- * @param {string} [style.textBaseline] 文字的垂直对齐方式 默认值: 'middle' (top|bottom|middle|alphabetic|hanging)
- */
-function TextFace(text, style) {
-  Container.call(this);
-  this.text = text.toString();
-
-  // ctx.font 缩写的顺序 fontStyle + fontVariant + fontWeight + fontSizeString + fontFamily
-  this.fontStyle = style.fontStyle || 'normal';
-  this.fontWeight = style.fontWeight || 'normal';
-  this.fontSize = style.fontSize || '12px';
-  this.fontFamily = style.fontFamily || 'Arial';
-
-  this.fillColor = style.fillColor || 'black';
-  this.strokeColor = style.strokeColor || 'red';
-
-  // 对齐方式
-  this.textAlign = style.textAlign || 'center';
-  this.textBaseline = style.textBaseline || 'middle';
-
-  this.lineWidth = Utils.isNumber(style.lineWidth) ? style.lineWidth : 1;
-
-  this.stroke = Utils.isBoolean(style.stroke) ? style.stroke : false;
-
-  this.fill = Utils.isBoolean(style.fill) ? style.fill : true;
-
-  // ctx.measureText(str); // 返回指定文本的宽度
-}
-TextFace.prototype = Object.create(Container.prototype);
-
-/**
- * 更新对象本身的矩阵姿态以及透明度
- *
- * @method updateMe
- * @private
- * @param {context} ctx
- */
-TextFace.prototype.renderMe = function (ctx) {
-  ctx.font = this.fontStyle + ' ' + this.fontWeight + ' ' + this.fontSize + ' ' + this.fontFamily;
-  ctx.textAlign = this.textAlign;
-  ctx.textBaseline = this.textBaseline;
-  if (this.fill) {
-    ctx.fillStyle = this.fillColor;
-    ctx.fillText(this.text, 0, 0);
-  }
-  if (this.stroke) {
-    ctx.lineWidth = this.lineWidth;
-    ctx.strokeStyle = this.strokeColor;
-    ctx.strokeText(this.text, 0, 0);
-  }
-};
-
-/**
- *
- * @class
- * @memberof JC
- * @param {number} blurX x轴的模糊值
- * @param {number} blurY y轴的模糊值
- * @param {number} quality 模糊的质量，模糊计算会被递归多少次
- */
-function FilterGroup() {
-  Container.call(this);
-
-  /**
-   * 帧缓冲区
-   * @property frameBuffer
-   * @default FrameBuffer
-   * @type FrameBuffer
-   **/
-  this.frameBuffer = new FrameBuffer();
-
-  /**
-   * 帧缓冲区
-   * @property frameBuffer
-   * @default []
-   * @type {FrameBuffer}
-   **/
-  this.filters = [];
-
-  /**
-   * 下一帧的图像需要更新
-   * @property needUpdateBuffer
-   * @default false
-   * @type Boolean
-   **/
-  this.needUpdateBuffer = true;
-
-  /**
-   * 每一帧渲染都重新绘制
-   * @property autoUpdateBuffer
-   * @default false
-   * @type Boolean
-   **/
-  this.autoUpdateBuffer = false;
-
-  /**
-   * 时候给帧缓冲区加padding
-   * @property padding
-   * @default {x:0,y:0}
-   * @type Object
-   **/
-  this.padding = {
-    x: 0,
-    y: 0
+    this.souldSort = false;
   };
-}
+  /**
+   * 更新bodymovin动画
+   * @param {number} progress progress
+   * @param {object} session
+   */
 
-FilterGroup.prototype = Object.create(Container.prototype);
 
-FilterGroup.prototype.updatePosture = function () {
-  if (this.souldSort) this._sortList();
-  this.updateTransform();
+  Container.prototype.updateMovin = function (progress, session) {
+    var length = this.childs.length;
 
-  if (this.needUpdateBuffer || this.autoUpdateBuffer) {
-    this.cacheMatrix = this.worldTransform;
-    this.worldTransform = __tmpMatrix.identity();
-    this._upc();
+    for (var i = 0; i < length; i++) {
+      var doc = this.childs[i];
 
-    this.calculateBounds();
-    this.__o = this.bounds.getRectangle();
+      if (doc && !doc._aniRoot && doc.updateMovin) {
+        doc.updateMovin(progress, session);
+      }
+    }
 
-    this.__o.px = this.padding.x;
-    this.__o.py = this.padding.y;
+    this.updateKeyframes && this.updateKeyframes(progress, session);
+  };
+  /**
+   * 向容器添加一个物体
+   *
+   * ```js
+   * container.adds(sprite,sprite2,text3,graphice);
+   * ```
+   *
+   * @param {JC.Container} object
+   * @return {JC.Container}
+   */
 
-    // 保证子级是以(0, 0)点写入帧缓冲区
-    this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
-    this._upc();
 
-    this.worldTransform = this.cacheMatrix;
-  } else {
-    this._upc();
-  }
-};
+  Container.prototype.adds = function (object) {
+    if (arguments.length > 1) {
+      for (var i = 0; i < arguments.length; i++) {
+        this.adds(arguments[i]);
+      }
 
-FilterGroup.prototype._upc = function () {
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    var child = this.childs[i];
-    child.updatePosture();
-    i++;
-  }
-};
+      return this;
+    }
 
-FilterGroup.prototype.addFilter = function (filter, idx) {
-  if (idx >= 0) {
-    this.filters.splice(idx, 0, filter);
-  } else if (Utils.isUndefined(idx)) {
-    this.filters.push(filter);
-  } else {
-    console.warn('add filter error');
-  }
-};
+    if (object === this) {
+      console.error('adds: object can\'t be added as a child of itself.', object);
+    }
 
-FilterGroup.prototype.render = function (ctx) {
-  ctx.save();
-  if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+    if (object && object instanceof Container) {
+      if (object.parent !== null) {
+        object.parent.remove(object);
+      }
+
+      object.parent = this;
+      this.childs.push(object);
+      this.souldSort = true;
+    } else {
+      console.error('adds: object not an instance of Container', object);
+    }
+
+    return this;
+  };
+  /**
+   * 从容器移除一个物体
+   *
+   * ```js
+   * container.remove(sprite,sprite2,text3,graphice);
+   * ```
+   *
+   * @param {JC.Container} object
+   */
+
+
+  Container.prototype.remove = function (object) {
+    if (arguments.length > 1) {
+      for (var i = 0; i < arguments.length; i++) {
+        this.remove(arguments[i]);
+      }
+    }
+
+    var index = this.childs.indexOf(object);
+
+    if (index !== -1) {
+      object.parent = null;
+      this.childs.splice(index, 1);
+    }
+  };
+  /**
+   * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+   *
+   * @private
+   * @param {Number} snippet
+   */
+
+
+  Container.prototype.updateTimeline = function (snippet) {
+    this.emit('pretimeline', snippet);
+    if (this.paused) return;
+    snippet = this.timeScale * snippet;
+    this.updateAnimation(snippet);
     var i = 0;
     var l = this.childs.length;
-    var child = null;
 
-    this.frameBuffer.clear();
-    this.frameBuffer.setSize(this.__o);
-    for (i = 0; i < l; i++) {
-      child = this.childs[i];
-      if (!child.isVisible()) continue;
-      child.render(this.frameBuffer.ctx);
+    while (i < l) {
+      var child = this.childs[i];
+      child.updateTimeline(snippet);
+      i++;
     }
-    this.filtersRunner(this.frameBuffer.getBuffer());
 
-    this.needUpdateBuffer = false;
+    this.emit('posttimeline', snippet);
+  };
+  /**
+   * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新
+   *
+   * @private
+   */
+
+
+  Container.prototype.updatePosture = function () {
+    this.emit('preposture');
+    if (this.souldSort) this._sortList();
+    this.updateTransform();
+    var i = 0;
+    var l = this.childs.length;
+
+    while (i < l) {
+      var child = this.childs[i];
+      child.updatePosture();
+      i++;
+    }
+
+    this.emit('postposture');
+  };
+  /**
+   * 渲染自己并触发后代渲染
+   * @param {context} ctx
+   * @private
+   */
+
+
+  Container.prototype.render = function (ctx) {
+    this.emit('prerender');
+    ctx.save();
+    this.setTransform(ctx);
+    if (this.mask) this.mask.render(ctx);
+    this.renderMe(ctx);
+    var i = 0;
+    var l = this.childs.length;
+
+    while (i < l) {
+      var child = this.childs[i];
+      i++;
+      if (!child.isVisible()) continue;
+      child.render(ctx);
+    }
+
+    ctx.restore();
+    this.emit('postrender');
+  };
+  /**
+   * 渲染自己
+   * @private
+   * @return {Boolean} 是否渲染
+   */
+
+
+  Container.prototype.renderMe = function () {
+    return true;
+  };
+  /**
+   * 计算自己的包围盒
+   * @private
+   */
+
+
+  Container.prototype.calculateVertices = function () {
+    var wt = this.worldTransform;
+    var a = wt.a;
+    var b = wt.b;
+    var c = wt.c;
+    var d = wt.d;
+    var tx = wt.tx;
+    var ty = wt.ty;
+    var vertexData = this.vertexData;
+    var w0;
+    var w1;
+    var h0;
+    var h1;
+    w0 = this._bounds.minX;
+    w1 = this._bounds.maxX;
+    h0 = this._bounds.minY;
+    h1 = this._bounds.maxY; // xy
+
+    vertexData[0] = a * w1 + c * h1 + tx;
+    vertexData[1] = d * h1 + b * w1 + ty; // xy
+
+    vertexData[2] = a * w0 + c * h1 + tx;
+    vertexData[3] = d * h1 + b * w0 + ty; // xy
+
+    vertexData[4] = a * w0 + c * h0 + tx;
+    vertexData[5] = d * h0 + b * w0 + ty; // xy
+
+    vertexData[6] = a * w1 + c * h0 + tx;
+    vertexData[7] = d * h0 + b * w1 + ty;
+  };
+  /**
+   * 计算包围盒子
+   *
+   * @method calculateBounds
+   */
+
+
+  Container.prototype.calculateBounds = function () {
+    this.bounds.clear();
+
+    if (!this.visible) {
+      return;
+    }
+
+    this._calculateBounds();
+
+    for (var i = 0; i < this.childs.length; i++) {
+      var child = this.childs[i];
+      child.calculateBounds();
+      this.bounds.addBounds(child.bounds);
+    }
+  };
+
+  Container.prototype._calculateBounds = function () {
+    this.calculateVertices();
+    this.bounds.addVert(this.vertexData);
+  };
+  /**
+   * 设置渲染物体的包围盒
+   * @param {JC.Bounds} bounds
+   */
+
+
+  Container.prototype.setBounds = function (bounds) {
+    if (bounds instanceof Bounds) {
+      this._bounds = bounds;
+    }
+  };
+  /**
+   * 暂停自身和子级的所有动画进度
+   */
+
+
+  Container.prototype.pause = function () {
+    this.paused = true;
+  };
+  /**
+   * 恢复自身和子级的所有动画进度
+   */
+
+
+  Container.prototype.restart = function () {
+    this.paused = false;
+  };
+  /**
+   * 设置自身及子级的动画速度
+   * @param {Number} speed 设置的速率值
+   */
+
+
+  Container.prototype.setSpeed = function (speed) {
+    this.timeScale = speed;
+  };
+
+  /* eslint max-len: "off" */
+
+  /**
+   * MovieClip类型动画对象
+   *
+   * @class
+   * @memberof JC
+   * @extends JC.Eventer
+   * @param {object} [element] 动画对象 内部传入
+   * @param {object} [options] 动画配置信息 内部传入
+   */
+
+  function MovieClip(element, options) {
+    Eventer.call(this);
+    this.element = element;
+    this.living = false; // this.onComplete = null;
+    // this.onUpdate = null;
+
+    this.infinite = false;
+    this.alternate = false;
+    this.repeats = 0;
+    this.animations = options.animations || {};
+    this.index = 0;
+    this.preIndex = -1;
+    this.direction = 1;
+    this.frames = [];
+    this.preFrame = null;
+    this.fillMode = 0;
+    this.fps = 16;
+    this.paused = false;
+    this.pt = 0;
+    this.nt = 0;
   }
-  this.renderMe(ctx);
-  ctx.restore();
-};
 
-FilterGroup.prototype.renderMe = function (ctx) {
-  var x = this.__o.x - this.__o.px;
-  var y = this.__o.y - this.__o.py;
-  var w = this.frameBuffer.width;
-  var h = this.frameBuffer.height;
-  this.setTransform(ctx);
-  if (this.mask) this.mask.render(ctx);
-  ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
-};
+  MovieClip.prototype = Object.create(Eventer.prototype);
+  /**
+   * 更新动画
+   * @private
+   * @param {number} snippet 时间片段
+   */
 
-FilterGroup.prototype.filtersRunner = function (buffer) {
-  if (this.filters.length === 0) return;
-  this.filters.forEach(function (filter) {
-    filter.applyFilter(buffer);
+  MovieClip.prototype.update = function (snippet) {
+    if (this.paused || !this.living) return;
+    this.nt += snippet;
+    if (this.nt - this.pt < this.interval) return;
+    this.pt = this.nt;
+    var i = this.index + this.direction;
+
+    if (i < this.frames.length && i >= 0) {
+      this.index = i; // Do you need this handler???
+      // this.onUpdate&&this.onUpdate(this.index);
+    } else {
+      if (this.repeats > 0 || this.infinite) {
+        if (this.repeats > 0) --this.repeats;
+
+        if (this.alternate) {
+          this.direction *= -1;
+          this.index += this.direction;
+        } else {
+          this.direction = 1;
+          this.index = 0;
+        } // Do you need this handler???
+        // this.onUpdate && this.onUpdate(this.index);
+
+      } else {
+        this.living = false;
+        this.index = this.fillMode;
+        this.emit('complete');
+      }
+    }
+  };
+  /**
+   * 获取帧位置
+   * @private
+   * @return {JC.Rectangle}
+   */
+
+
+  MovieClip.prototype.getFrame = function () {
+    if (this.index === this.preIndex && this.preFrame !== null) return this.preFrame;
+    var frame = this.element.frame.clone();
+    var cf = this.frames[this.index];
+
+    if (cf > 0) {
+      var row = this.element.naturalWidth / this.element.frame.width >> 0;
+      var lintRow = this.element.frame.x / this.element.frame.width >> 0;
+      var mCol = (lintRow + cf) / row >> 0;
+      var mRow = (lintRow + cf) % row;
+      frame.x = mRow * this.element.frame.width;
+      frame.y += mCol * this.element.frame.height;
+    }
+
+    this.preIndex = this.index;
+    this.preFrame = frame;
+    return frame;
+  };
+  /**
+   * 播放逐帧
+   * @param {object} options 播放配置
+   * @return {this}
+   */
+
+
+  MovieClip.prototype.playMovie = function (options) {
+    // 避免多次调用时前面调用所绑定的监听事件还在监听列表里
+    this.off('complete');
+    var movie = this.format(options.movie);
+    if (!Utils.isArray(movie)) return;
+    this.frames = movie;
+    this.index = 0;
+    this.direction = 1;
+    this.fillMode = options.fillMode || 0;
+    this.fps = options.fps || this.fps;
+    this.infinite = options.infinite || false;
+    this.alternate = options.alternate || false;
+    this.repeats = options.repeats || 0;
+    this.living = true;
+
+    if (options.onComplete) {
+      var This = this;
+      this.once('complete', function () {
+        options.onComplete.call(This);
+      });
+    }
+
+    return this;
+  };
+  /**
+   * 格式化逐帧信息
+   * @private
+   * @param {string|array|object} movie 逐帧信息
+   * @return {array}
+   */
+
+
+  MovieClip.prototype.format = function (movie) {
+    if (Utils.isString(movie)) {
+      var config = this.animations[movie];
+
+      if (config) {
+        return this.format(config);
+      } else {
+        console.warn('you havn\'t config ' + movie + ' in animations ');
+        return false;
+      }
+    } else if (Utils.isArray(movie)) {
+      return movie;
+    } else if (Utils.isObject(movie)) {
+      var arr = [];
+
+      for (var i = movie.start; i <= movie.end; i++) {
+        arr.push(i);
+      }
+
+      if (movie.next && this.animations[movie.next]) {
+        var This = this;
+        var conf = {};
+
+        if (Utils.isString(movie.next) && this.animations[movie.next]) {
+          conf.movie = movie.next;
+          conf.infinite = true;
+        } else if (Utils.isObject(movie.next)) {
+          conf = movie.next;
+        }
+
+        if (Utils.isString(conf.movie)) {
+          this.once('complete', function () {
+            This.playMovie(conf);
+          });
+        }
+      }
+
+      return arr;
+    }
+  };
+  /**
+   * 暂停逐帧
+   */
+
+
+  MovieClip.prototype.pause = function () {
+    this.paused = true;
+  };
+  /**
+   * 恢复播放逐帧
+   */
+
+
+  MovieClip.prototype.restart = function () {
+    this.paused = false;
+  };
+  /**
+   * 取消逐帧
+   */
+
+
+  MovieClip.prototype.cancle = function () {
+    this.living = false;
+  };
+  /**
+   * 帧间隔
+   * @private
+   */
+
+
+  Object.defineProperty(MovieClip.prototype, 'interval', {
+    get: function get() {
+      return this.fps > 0 ? 1000 / this.fps >> 0 : 16;
+    }
   });
-};
 
-var __tmpMatrix = new Matrix$2();
+  /**
+   * 位图精灵图，继承至Container
+   *
+   * ```js
+   * var loadBox = JC.loaderUtil({
+   *    frames: './images/frames.png'
+   * });
+   * var sprite = new JC.Sprite({
+   *      texture: loadBox.getById('frames'),
+   *      frame: new JC.Rectangle(0, 0, w, h),
+   *      width: 100,
+   *      height: 100,
+   *      animations: {
+   *          fall: {start: 0,end: 4,next: 'stand'},
+   *          fly: {start: 5,end: 9,next: {movie: 'stand', repeats: 2}},
+   *          stand: {start: 10,end: 39},
+   *          walk: {start: 40,end: 59,next: 'stand'},
+   *          other: [ 0, 1, 2, 1, 3, 4 ], // 同样接受数组形势
+   *      }
+   * });
+   * ```
+   *
+   * @class
+   * @memberof JC
+   * @extends JC.Container
+   * @param {Object} options
+   * @param {JC.Texture} options.texture 图片纹理
+   * @param {JC.Rectangle} [options.frame] 当是逐帧或者是裁切显示时需要配置，显示的矩形区域
+   * @param {Number} [options.width] 实际显示的宽，可能会缩放图像
+   * @param {Number} [options.height] 实际显示的高，可能会缩放图像
+   * @param {Object} [options.animations] 逐帧的预置帧动画配置
+   */
 
-/**
- *
- * @class
- * @memberof JC
- * @param {number} blurX x轴的模糊值
- * @param {number} blurY y轴的模糊值
- * @param {number} quality 模糊的质量，模糊计算会被递归多少次
- */
-function BlurFilter(blurX, blurY, quality) {
+  function Sprite() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    Container.call(this);
+    this._width = 0;
+    this._height = 0;
+    this.ready = false;
+    this.upTexture(options);
+    this.movieClip = new MovieClip(this, options);
+  }
+
+  Sprite.prototype = Object.create(Container.prototype);
+  /**
+   * 更新纹理对象
+   *
+   * @private
+   * @param {json} options
+   */
+
+  Sprite.prototype.upTexture = function (options) {
+    var _this = this;
+
+    if (!options.texture) return;
+
+    if (!options.texture.loaded) {
+      this.ready = false;
+      options.texture.on('load', function () {
+        _this.upTexture(options);
+
+        _this.ready = true;
+      });
+      return;
+    }
+
+    this.ready = true;
+    this.texture = options.texture;
+    this.naturalWidth = options.texture.naturalWidth;
+    this.naturalHeight = options.texture.naturalHeight;
+    this.frame = options.frame || new Rectangle(0, 0, this.naturalWidth, this.naturalHeight);
+    this.width = options.width || this.frame.width;
+    this.height = options.height || this.frame.height;
+
+    if (this.movieClip) {
+      this.movieClip.preFrame = null;
+    }
+  };
+  /**
+   * 当前图片对象的width
+   *
+   * @name width
+   * @member {Number}
+   * @memberof JC.Sprite#
+   */
+
+
+  Object.defineProperty(Sprite.prototype, 'width', {
+    get: function get() {
+      return this._width;
+    },
+    set: function set(width) {
+      if (this._width !== width) {
+        this._width = width;
+        this.updateGeometry();
+      }
+    }
+  });
+  /**
+   * 当前图片对象的height
+   *
+   * @name height
+   * @member {Number}
+   * @memberof JC.Sprite#
+   */
+
+  Object.defineProperty(Sprite.prototype, 'height', {
+    get: function get() {
+      return this._height;
+    },
+    set: function set(height) {
+      if (this._height !== height) {
+        this._height = height;
+        this.updateGeometry();
+      }
+    }
+  });
+  /**
+   * 更新对象的事件几何形态
+   * note: 此处的setArea是懒更新，如果需要
+   *
+   * @private
+   */
+
+  Sprite.prototype.updateGeometry = function () {
+    var rect = new Rectangle(0, 0, this.width, this.height);
+
+    this._bounds.clear().addRect(rect);
+
+    this.setArea(rect);
+  };
+  /**
+   * 更新对象的动画姿态
+   *
+   * @private
+   * @param {number} snippet
+   */
+
+
+  Sprite.prototype.updateAnimation = function (snippet) {
+    this.animation.update(snippet);
+    this.movieClip.update(snippet);
+  };
+  /**
+   * 播放逐帧动画
+   * @param {Object} options 可以是播放配置对象
+   * @param {String|Array} options.movie 预置的动画名，或者是帧索引数组
+   * @param {Number} [options.fillMode] 结束时停留在哪一帧
+   * @param {Boolean} [options.repeats] 重复播放次数
+   * @param {Boolean} [options.infinite] 无限循环，优先级比 repeats 高
+   * @param {Boolean} [options.alternate] 循环时交替播放
+   * @param {Number} [options.fps] 当前动画将使用的帧率
+   * @return {MovieClip}
+   */
+
+
+  Sprite.prototype.playMovie = function (options) {
+    return this.movieClip.playMovie(options);
+  };
+  /**
+   * 更新对象本身的矩阵姿态以及透明度
+   *
+   * @private
+   * @param {context} ctx
+   */
+
+
+  Sprite.prototype.renderMe = function (ctx) {
+    if (!this.ready) return;
+    var frame = this.movieClip.getFrame();
+    ctx.drawImage(this.texture.texture, frame.x, frame.y, frame.width, frame.height, 0, 0, this.width, this.height);
+  };
+
+  /**
+   * 帧缓冲区
+   * @class
+   * @memberof JC
+   */
+  function FrameBuffer() {
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+  }
+  /**
+   * 设置缓冲区大小
+   * @param {JC.Rectangle} rect 获取到的尺寸
+   */
+
+
+  FrameBuffer.prototype.setSize = function (rect) {
+    this.width = this.canvas.width = rect.width + rect.px * 2;
+    this.height = this.canvas.height = rect.height + rect.py * 2;
+  };
+  /**
+   * 清除缓冲区
+   */
+
+
+  FrameBuffer.prototype.clear = function () {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  };
+  /**
+   * 设置绘图上下文的变换矩阵
+   * @param {number} a
+   * @param {number} b
+   * @param {number} c
+   * @param {number} d
+   * @param {number} e
+   * @param {number} f
+   */
+
+
+  FrameBuffer.prototype.setTransform = function (a, b, c, d, e, f) {
+    this.ctx.setTransform(a, b, c, d, e, f);
+  };
+  /**
+   * 获取缓冲区的像素
+   * @return {ImageData}
+   */
+
+
+  FrameBuffer.prototype.getBuffer = function () {
+    this.buffer = this.ctx.getImageData(0, 0, this.width, this.height);
+    return this.buffer;
+  };
+  /**
+   * 放置像素到缓冲区
+   * @return {canvas}
+   */
+
+
+  FrameBuffer.prototype.putBuffer = function () {
+    this.ctx.putImageData(this.buffer, 0, 0);
+    return this.canvas;
+  };
+
+  var FUNCTION = 'fn';
+  var INSTANCE = 'in';
+  /* eslint max-len: 0 */
+
+  /**
+   * 形状对象，继承至Container
+   *
+   *
+   * ```js
+   * const options = {
+   *   cache: true,
+   *   bounds: new JC.Bounds(-50, -50, 50, 50)
+   * };
+   * function drawRect(ctx) {
+   *  ctx.fillStyle = 'red';
+   *  ctx.fillRect(-10, -10, 10, 10);
+   * }
+   *
+   * function Cricle(options) {
+   *   this.radius = options.radius || 0;
+   *   this.color = options.color || '#3a3cfd';
+   * }
+   * Cricle.prototype.render = function(ctx) {
+   *   ctx.beginPath();
+   *   ctx.fillStyle = this.color;
+   *   ctx.arc(0, 0, this.radius, 0, Math.PI * 2, true);
+   *   ctx.closePath();
+   *   ctx.fill();
+   * }
+   *
+   * const rect = new JC.Graphics(drawRect);
+   * const cricle = new JC.Graphics(new Cricle());
+   *
+   * ```
+   *
+   * @class
+   * @memberof JC
+   * @extends JC.Container
+   * @param {function|object} mesh 绘制对象，可以是函数，也可以是带有render方法的对象，绘制时会将当前绘图环境传递给它
+   * @param {object} options 绘制对象
+   * @param {boolean} [options.cache] 是否缓存改绘制对象，加入绘制对象非常复杂并后续无需更新时设置为 true 可以优化性能
+   * @param {JC.Bounds} [options.bounds] 绘制对象的包围盒，在需要缓存时需要手动设置
+   */
+
+  function Graphics(mesh, options) {
+    Container.call(this);
+    options = options || {};
+    this.mesh = mesh;
+    this.meshType = Utils.isFunction(mesh) ? FUNCTION : Utils.isObject(mesh) && Utils.isFunction(mesh.render) ? INSTANCE : '';
+    if (this.meshType === '') console.error('不支持的绘制对象');
+    this.cache = options.cache || false;
+    this.cached = false;
+    this.setBounds(options.bounds);
+    this.frameBuffer = null;
+  }
+
+  Graphics.prototype = Object.create(Container.prototype);
+  /**
+   * 更新对象本身的矩阵姿态以及透明度
+   *
+   * @private
+   * @param {context} ctx
+   */
+
+  Graphics.prototype.renderMe = function (ctx) {
+    if (!this.meshType) return;
+
+    if (this.cached || this.cache) {
+      if (this.cache) {
+        if (this.frameBuffer === null) this.frameBuffer = new FrameBuffer();
+        this.frameBuffer.clear();
+        this.__co = this._bounds.getRectangle();
+        this.__co.px = this.__co.py = 0;
+        this.frameBuffer.setSize(this.__co);
+        this.frameBuffer.setTransform(1, 0, 0, 1, -this.__co.x, -this.__co.y);
+
+        this._drawBack(this.frameBuffer.ctx);
+
+        this.cached = true;
+        this.cache = false;
+      }
+
+      this.frameBuffer && ctx.drawImage(this.frameBuffer.canvas, this.__co.x - this.__co.px, this.__co.y - this.__co.py, this.frameBuffer.width, this.frameBuffer.height);
+    } else {
+      this._drawBack(ctx);
+    }
+  };
+  /**
+   * 调用绘制函数
+   *
+   * @private
+   * @param {context} ctx
+   */
+
+
+  Graphics.prototype._drawBack = function (ctx) {
+    if (this.meshType === FUNCTION) {
+      this.mesh(ctx);
+    } else if (this.meshType === INSTANCE) {
+      this.mesh.render(ctx);
+    }
+  };
+
+  /* eslint max-len: 0 */
+
+  /**
+   * 文本，继承至Container
+   *
+   *
+   * ```js
+   * var text = new JC.TextFace(
+   *   'JC jcc2d canvas renderer',
+   *   {
+   *     fontSize: '16px',
+   *     ...
+   *   }
+   * );
+   * ```
+   *
+   * @class
+   * @extends JC.Container
+   * @memberof JC
+   * @param {string} text
+   * @param {object} style
+   * @param {string} [style.fontSize] 文字的字号
+   * @param {string} [style.fontFamily] 文字的字体
+   * @param {string} [style.fontStyle] 文字的 style ('normal', 'italic' or 'oblique')
+   * @param {string} [style.fontWeight] 文字的 weight ('normal', 'bold', 'bolder', 'lighter' and '100', '200', '300', '400', '500', '600', '700', 800' or '900')
+   * @param {boolean} [style.fill] 文字填充模式 默认为: ture
+   * @param {string} [style.fillColor] 文字填充的颜色
+   * @param {boolean} [style.stroke] 文字描边模式 默认为: false
+   * @param {string} [style.strokeColor] 文字描边的颜色
+   * @param {number} [style.lineWidth] 文字描边的宽度
+   * @param {string} [style.textAlign] 文字的水平对齐方式 默认值: 'center' (top|bottom|middle|alphabetic|hanging)
+   * @param {string} [style.textBaseline] 文字的垂直对齐方式 默认值: 'middle' (top|bottom|middle|alphabetic|hanging)
+   */
+
+  function TextFace(text, style) {
+    Container.call(this);
+    this.text = text.toString(); // ctx.font 缩写的顺序 fontStyle + fontVariant + fontWeight + fontSizeString + fontFamily
+
+    this.fontStyle = style.fontStyle || 'normal';
+    this.fontWeight = style.fontWeight || 'normal';
+    this.fontSize = style.fontSize || '12px';
+    this.fontFamily = style.fontFamily || 'Arial';
+    this.fillColor = style.fillColor || 'black';
+    this.strokeColor = style.strokeColor || 'red'; // 对齐方式
+
+    this.textAlign = style.textAlign || 'center';
+    this.textBaseline = style.textBaseline || 'middle';
+    this.lineWidth = Utils.isNumber(style.lineWidth) ? style.lineWidth : 1;
+    this.stroke = Utils.isBoolean(style.stroke) ? style.stroke : false;
+    this.fill = Utils.isBoolean(style.fill) ? style.fill : true; // ctx.measureText(str); // 返回指定文本的宽度
+  }
+
+  TextFace.prototype = Object.create(Container.prototype);
+  /**
+   * 更新对象本身的矩阵姿态以及透明度
+   *
+   * @method updateMe
+   * @private
+   * @param {context} ctx
+   */
+
+  TextFace.prototype.renderMe = function (ctx) {
+    ctx.font = this.fontStyle + ' ' + this.fontWeight + ' ' + this.fontSize + ' ' + this.fontFamily;
+    ctx.textAlign = this.textAlign;
+    ctx.textBaseline = this.textBaseline;
+
+    if (this.fill) {
+      ctx.fillStyle = this.fillColor;
+      ctx.fillText(this.text, 0, 0);
+    }
+
+    if (this.stroke) {
+      ctx.lineWidth = this.lineWidth;
+      ctx.strokeStyle = this.strokeColor;
+      ctx.strokeText(this.text, 0, 0);
+    }
+  };
+
+  /**
+   *
+   * @class
+   * @memberof JC
+   * @param {number} blurX x轴的模糊值
+   * @param {number} blurY y轴的模糊值
+   * @param {number} quality 模糊的质量，模糊计算会被递归多少次
+   */
+
+  function FilterGroup() {
+    Container.call(this);
+    /**
+     * 帧缓冲区
+     * @property frameBuffer
+     * @default FrameBuffer
+     * @type FrameBuffer
+     **/
+
+    this.frameBuffer = new FrameBuffer();
+    /**
+     * 帧缓冲区
+     * @property frameBuffer
+     * @default []
+     * @type {FrameBuffer}
+     **/
+
+    this.filters = [];
+    /**
+     * 下一帧的图像需要更新
+     * @property needUpdateBuffer
+     * @default false
+     * @type Boolean
+     **/
+
+    this.needUpdateBuffer = true;
+    /**
+     * 每一帧渲染都重新绘制
+     * @property autoUpdateBuffer
+     * @default false
+     * @type Boolean
+     **/
+
+    this.autoUpdateBuffer = false;
+    /**
+     * 时候给帧缓冲区加padding
+     * @property padding
+     * @default {x:0,y:0}
+     * @type Object
+     **/
+
+    this.padding = {
+      x: 0,
+      y: 0
+    };
+  }
+
+  FilterGroup.prototype = Object.create(Container.prototype);
+
+  FilterGroup.prototype.updatePosture = function () {
+    if (this.souldSort) this._sortList();
+    this.updateTransform();
+
+    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+      this.cacheMatrix = this.worldTransform;
+      this.worldTransform = __tmpMatrix.identity();
+
+      this._upc();
+
+      this.calculateBounds();
+      this.__o = this.bounds.getRectangle();
+      this.__o.px = this.padding.x;
+      this.__o.py = this.padding.y; // 保证子级是以(0, 0)点写入帧缓冲区
+
+      this.worldTransform.translate(-this.__o.x + this.__o.px, -this.__o.y + this.__o.py);
+
+      this._upc();
+
+      this.worldTransform = this.cacheMatrix;
+    } else {
+      this._upc();
+    }
+  };
+
+  FilterGroup.prototype._upc = function () {
+    var i = 0;
+    var l = this.childs.length;
+
+    while (i < l) {
+      var child = this.childs[i];
+      child.updatePosture();
+      i++;
+    }
+  };
+
+  FilterGroup.prototype.addFilter = function (filter, idx) {
+    if (idx >= 0) {
+      this.filters.splice(idx, 0, filter);
+    } else if (Utils.isUndefined(idx)) {
+      this.filters.push(filter);
+    } else {
+      console.warn('add filter error');
+    }
+  };
+
+  FilterGroup.prototype.render = function (ctx) {
+    ctx.save();
+
+    if (this.needUpdateBuffer || this.autoUpdateBuffer) {
+      var i = 0;
+      var l = this.childs.length;
+      var child = null;
+      this.frameBuffer.clear();
+      this.frameBuffer.setSize(this.__o);
+
+      for (i = 0; i < l; i++) {
+        child = this.childs[i];
+        if (!child.isVisible()) continue;
+        child.render(this.frameBuffer.ctx);
+      }
+
+      this.filtersRunner(this.frameBuffer.getBuffer());
+      this.needUpdateBuffer = false;
+    }
+
+    this.renderMe(ctx);
+    ctx.restore();
+  };
+
+  FilterGroup.prototype.renderMe = function (ctx) {
+    var x = this.__o.x - this.__o.px;
+    var y = this.__o.y - this.__o.py;
+    var w = this.frameBuffer.width;
+    var h = this.frameBuffer.height;
+    this.setTransform(ctx);
+    if (this.mask) this.mask.render(ctx);
+    ctx.drawImage(this.frameBuffer.putBuffer(), 0, 0, w, h, x, y, w, h);
+  };
+
+  FilterGroup.prototype.filtersRunner = function (buffer) {
+    if (this.filters.length === 0) return;
+    this.filters.forEach(function (filter) {
+      filter.applyFilter(buffer);
+    });
+  };
+
+  var __tmpMatrix = new Matrix$1();
+
+  /**
+   *
+   * @class
+   * @memberof JC
+   * @param {number} blurX x轴的模糊值
+   * @param {number} blurY y轴的模糊值
+   * @param {number} quality 模糊的质量，模糊计算会被递归多少次
+   */
+
+  function BlurFilter(blurX, blurY, quality) {
     if (Utils.isNumber(blurX) || blurX < 0) blurX = 0;
     if (Utils.isNumber(blurY) || blurY < 0) blurY = 0;
     if (Utils.isNumber(quality) || quality < 1) quality = 1;
-
     /**
      * x轴的模糊值
      * @property blurX
      * @default 0
      * @type Number
      **/
-    this.blurX = blurX | 0;
 
+    this.blurX = blurX | 0;
     /**
      * y轴的模糊值
      * @property blurY
      * @default 0
      * @type Number
      **/
-    this.blurY = blurY | 0;
 
+    this.blurY = blurY | 0;
     /**
      * 模糊的质量，模糊计算会被递归多少次
      * @property quality
      * @default 1
      * @type Number
      **/
-    this.quality = quality | 0;
-}
 
-/**
- * 对渲染对象进行x、y轴同时设置模糊半径
- *
- * @member {number}
- * @name blur
- * @memberof JC.BlurFilter#
- */
-Object.defineProperty(BlurFilter.prototype, 'blur', {
+    this.quality = quality | 0;
+  }
+  /**
+   * 对渲染对象进行x、y轴同时设置模糊半径
+   *
+   * @member {number}
+   * @name blur
+   * @memberof JC.BlurFilter#
+   */
+
+
+  Object.defineProperty(BlurFilter.prototype, 'blur', {
     get: function get() {
-        return this.blurX;
+      return this.blurX;
     },
     set: function set(blur) {
-        this.blurX = this.blurY = blur;
+      this.blurX = this.blurY = blur;
     }
-});
+  });
+  /* eslint max-len: "off" */
 
-/* eslint max-len: "off" */
-var MUL_TABLE = [1, 171, 205, 293, 57, 373, 79, 137, 241, 27, 391, 357, 41, 19, 283, 265, 497, 469, 443, 421, 25, 191, 365, 349, 335, 161, 155, 149, 9, 278, 269, 261, 505, 245, 475, 231, 449, 437, 213, 415, 405, 395, 193, 377, 369, 361, 353, 345, 169, 331, 325, 319, 313, 307, 301, 37, 145, 285, 281, 69, 271, 267, 263, 259, 509, 501, 493, 243, 479, 118, 465, 459, 113, 446, 55, 435, 429, 423, 209, 413, 51, 403, 199, 393, 97, 3, 379, 375, 371, 367, 363, 359, 355, 351, 347, 43, 85, 337, 333, 165, 327, 323, 5, 317, 157, 311, 77, 305, 303, 75, 297, 294, 73, 289, 287, 71, 141, 279, 277, 275, 68, 135, 67, 133, 33, 262, 260, 129, 511, 507, 503, 499, 495, 491, 61, 121, 481, 477, 237, 235, 467, 232, 115, 457, 227, 451, 7, 445, 221, 439, 218, 433, 215, 427, 425, 211, 419, 417, 207, 411, 409, 203, 202, 401, 399, 396, 197, 49, 389, 387, 385, 383, 95, 189, 47, 187, 93, 185, 23, 183, 91, 181, 45, 179, 89, 177, 11, 175, 87, 173, 345, 343, 341, 339, 337, 21, 167, 83, 331, 329, 327, 163, 81, 323, 321, 319, 159, 79, 315, 313, 39, 155, 309, 307, 153, 305, 303, 151, 75, 299, 149, 37, 295, 147, 73, 291, 145, 289, 287, 143, 285, 71, 141, 281, 35, 279, 139, 69, 275, 137, 273, 17, 271, 135, 269, 267, 133, 265, 33, 263, 131, 261, 130, 259, 129, 257, 1];
+  var MUL_TABLE = [1, 171, 205, 293, 57, 373, 79, 137, 241, 27, 391, 357, 41, 19, 283, 265, 497, 469, 443, 421, 25, 191, 365, 349, 335, 161, 155, 149, 9, 278, 269, 261, 505, 245, 475, 231, 449, 437, 213, 415, 405, 395, 193, 377, 369, 361, 353, 345, 169, 331, 325, 319, 313, 307, 301, 37, 145, 285, 281, 69, 271, 267, 263, 259, 509, 501, 493, 243, 479, 118, 465, 459, 113, 446, 55, 435, 429, 423, 209, 413, 51, 403, 199, 393, 97, 3, 379, 375, 371, 367, 363, 359, 355, 351, 347, 43, 85, 337, 333, 165, 327, 323, 5, 317, 157, 311, 77, 305, 303, 75, 297, 294, 73, 289, 287, 71, 141, 279, 277, 275, 68, 135, 67, 133, 33, 262, 260, 129, 511, 507, 503, 499, 495, 491, 61, 121, 481, 477, 237, 235, 467, 232, 115, 457, 227, 451, 7, 445, 221, 439, 218, 433, 215, 427, 425, 211, 419, 417, 207, 411, 409, 203, 202, 401, 399, 396, 197, 49, 389, 387, 385, 383, 95, 189, 47, 187, 93, 185, 23, 183, 91, 181, 45, 179, 89, 177, 11, 175, 87, 173, 345, 343, 341, 339, 337, 21, 167, 83, 331, 329, 327, 163, 81, 323, 321, 319, 159, 79, 315, 313, 39, 155, 309, 307, 153, 305, 303, 151, 75, 299, 149, 37, 295, 147, 73, 291, 145, 289, 287, 143, 285, 71, 141, 281, 35, 279, 139, 69, 275, 137, 273, 17, 271, 135, 269, 267, 133, 265, 33, 263, 131, 261, 130, 259, 129, 257, 1];
+  var SHG_TABLE = [0, 9, 10, 11, 9, 12, 10, 11, 12, 9, 13, 13, 10, 9, 13, 13, 14, 14, 14, 14, 10, 13, 14, 14, 14, 13, 13, 13, 9, 14, 14, 14, 15, 14, 15, 14, 15, 15, 14, 15, 15, 15, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15, 15, 15, 12, 14, 15, 15, 13, 15, 15, 15, 15, 16, 16, 16, 15, 16, 14, 16, 16, 14, 16, 13, 16, 16, 16, 15, 16, 13, 16, 15, 16, 14, 9, 16, 16, 16, 16, 16, 16, 16, 16, 16, 13, 14, 16, 16, 15, 16, 16, 10, 16, 15, 16, 14, 16, 16, 14, 16, 16, 14, 16, 16, 14, 15, 16, 16, 16, 14, 15, 14, 15, 13, 16, 16, 15, 17, 17, 17, 17, 17, 17, 14, 15, 17, 17, 16, 16, 17, 16, 15, 17, 16, 17, 11, 17, 16, 17, 16, 17, 16, 17, 17, 16, 17, 17, 16, 17, 17, 16, 16, 17, 17, 17, 16, 14, 17, 17, 17, 17, 15, 16, 14, 16, 15, 16, 13, 16, 15, 16, 14, 16, 15, 16, 12, 16, 15, 16, 17, 17, 17, 17, 17, 13, 16, 15, 17, 17, 17, 16, 15, 17, 17, 17, 16, 15, 17, 17, 14, 16, 17, 17, 16, 17, 17, 16, 15, 17, 16, 14, 17, 16, 15, 17, 16, 17, 17, 16, 17, 15, 16, 17, 14, 17, 16, 15, 17, 16, 17, 13, 17, 16, 17, 17, 16, 17, 14, 17, 16, 17, 16, 17, 16, 17, 9];
+  /* eslint-disable */
 
-var SHG_TABLE = [0, 9, 10, 11, 9, 12, 10, 11, 12, 9, 13, 13, 10, 9, 13, 13, 14, 14, 14, 14, 10, 13, 14, 14, 14, 13, 13, 13, 9, 14, 14, 14, 15, 14, 15, 14, 15, 15, 14, 15, 15, 15, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, 15, 15, 15, 12, 14, 15, 15, 13, 15, 15, 15, 15, 16, 16, 16, 15, 16, 14, 16, 16, 14, 16, 13, 16, 16, 16, 15, 16, 13, 16, 15, 16, 14, 9, 16, 16, 16, 16, 16, 16, 16, 16, 16, 13, 14, 16, 16, 15, 16, 16, 10, 16, 15, 16, 14, 16, 16, 14, 16, 16, 14, 16, 16, 14, 15, 16, 16, 16, 14, 15, 14, 15, 13, 16, 16, 15, 17, 17, 17, 17, 17, 17, 14, 15, 17, 17, 16, 16, 17, 16, 15, 17, 16, 17, 11, 17, 16, 17, 16, 17, 16, 17, 17, 16, 17, 17, 16, 17, 17, 16, 16, 17, 17, 17, 16, 14, 17, 17, 17, 17, 15, 16, 14, 16, 15, 16, 13, 16, 15, 16, 14, 16, 15, 16, 12, 16, 15, 16, 17, 17, 17, 17, 17, 13, 16, 15, 17, 17, 17, 16, 15, 17, 17, 17, 16, 15, 17, 17, 14, 16, 17, 17, 16, 17, 17, 16, 15, 17, 16, 14, 17, 16, 15, 17, 16, 17, 17, 16, 17, 15, 16, 17, 14, 17, 16, 15, 17, 16, 17, 13, 17, 16, 17, 17, 16, 17, 14, 17, 16, 17, 16, 17, 16, 17, 9];
-
-/* eslint-disable */
-BlurFilter.prototype.applyFilter = function (imageData) {
-
+  BlurFilter.prototype.applyFilter = function (imageData) {
     var radiusX = this.blurX >> 1;
     if (isNaN(radiusX) || radiusX < 0) return false;
     var radiusY = this.blurY >> 1;
     if (isNaN(radiusY) || radiusY < 0) return false;
     if (radiusX == 0 && radiusY == 0) return false;
-
     var iterations = this.quality;
     if (isNaN(iterations) || iterations < 1) iterations = 1;
     iterations |= 0;
     if (iterations > 3) iterations = 3;
     if (iterations < 1) iterations = 1;
-
     var px = imageData.data;
     var x = 0,
         y = 0,
@@ -13632,3357 +14506,3233 @@ BlurFilter.prototype.applyFilter = function (imageData) {
         pg = 0,
         pb = 0,
         pa = 0;
-
     var divx = radiusX + radiusX + 1 | 0;
     var divy = radiusY + radiusY + 1 | 0;
     var w = imageData.width | 0;
     var h = imageData.height | 0;
-
     var w1 = w - 1 | 0;
     var h1 = h - 1 | 0;
     var rxp1 = radiusX + 1 | 0;
     var ryp1 = radiusY + 1 | 0;
-
-    var ssx = { r: 0, b: 0, g: 0, a: 0 };
+    var ssx = {
+      r: 0,
+      b: 0,
+      g: 0,
+      a: 0
+    };
     var sx = ssx;
+
     for (i = 1; i < divx; i++) {
-        sx = sx.n = { r: 0, b: 0, g: 0, a: 0 };
+      sx = sx.n = {
+        r: 0,
+        b: 0,
+        g: 0,
+        a: 0
+      };
     }
+
     sx.n = ssx;
-
-    var ssy = { r: 0, b: 0, g: 0, a: 0 };
+    var ssy = {
+      r: 0,
+      b: 0,
+      g: 0,
+      a: 0
+    };
     var sy = ssy;
+
     for (i = 1; i < divy; i++) {
-        sy = sy.n = { r: 0, b: 0, g: 0, a: 0 };
+      sy = sy.n = {
+        r: 0,
+        b: 0,
+        g: 0,
+        a: 0
+      };
     }
+
     sy.n = ssy;
-
     var si = null;
-
     var mtx = MUL_TABLE[radiusX] | 0;
     var stx = SHG_TABLE[radiusX] | 0;
     var mty = MUL_TABLE[radiusY] | 0;
     var sty = SHG_TABLE[radiusY] | 0;
 
     while (iterations-- > 0) {
+      yw = yi = 0;
+      var ms = mtx;
+      var ss = stx;
 
-        yw = yi = 0;
-        var ms = mtx;
-        var ss = stx;
-        for (y = h; --y > -1;) {
-            r = rxp1 * (pr = px[yi | 0]);
-            g = rxp1 * (pg = px[yi + 1 | 0]);
-            b = rxp1 * (pb = px[yi + 2 | 0]);
-            a = rxp1 * (pa = px[yi + 3 | 0]);
+      for (y = h; --y > -1;) {
+        r = rxp1 * (pr = px[yi | 0]);
+        g = rxp1 * (pg = px[yi + 1 | 0]);
+        b = rxp1 * (pb = px[yi + 2 | 0]);
+        a = rxp1 * (pa = px[yi + 3 | 0]);
+        sx = ssx;
 
-            sx = ssx;
-
-            for (i = rxp1; --i > -1;) {
-                sx.r = pr;
-                sx.g = pg;
-                sx.b = pb;
-                sx.a = pa;
-                sx = sx.n;
-            }
-
-            for (i = 1; i < rxp1; i++) {
-                p = yi + ((w1 < i ? w1 : i) << 2) | 0;
-                r += sx.r = px[p];
-                g += sx.g = px[p + 1];
-                b += sx.b = px[p + 2];
-                a += sx.a = px[p + 3];
-
-                sx = sx.n;
-            }
-
-            si = ssx;
-            for (x = 0; x < w; x++) {
-                px[yi++] = r * ms >>> ss;
-                px[yi++] = g * ms >>> ss;
-                px[yi++] = b * ms >>> ss;
-                px[yi++] = a * ms >>> ss;
-
-                p = yw + ((p = x + radiusX + 1) < w1 ? p : w1) << 2;
-
-                r -= si.r - (si.r = px[p]);
-                g -= si.g - (si.g = px[p + 1]);
-                b -= si.b - (si.b = px[p + 2]);
-                a -= si.a - (si.a = px[p + 3]);
-
-                si = si.n;
-            }
-            yw += w;
+        for (i = rxp1; --i > -1;) {
+          sx.r = pr;
+          sx.g = pg;
+          sx.b = pb;
+          sx.a = pa;
+          sx = sx.n;
         }
 
-        ms = mty;
-        ss = sty;
+        for (i = 1; i < rxp1; i++) {
+          p = yi + ((w1 < i ? w1 : i) << 2) | 0;
+          r += sx.r = px[p];
+          g += sx.g = px[p + 1];
+          b += sx.b = px[p + 2];
+          a += sx.a = px[p + 3];
+          sx = sx.n;
+        }
+
+        si = ssx;
+
         for (x = 0; x < w; x++) {
-            yi = x << 2 | 0;
-
-            r = ryp1 * (pr = px[yi]) | 0;
-            g = ryp1 * (pg = px[yi + 1 | 0]) | 0;
-            b = ryp1 * (pb = px[yi + 2 | 0]) | 0;
-            a = ryp1 * (pa = px[yi + 3 | 0]) | 0;
-
-            sy = ssy;
-            for (i = 0; i < ryp1; i++) {
-                sy.r = pr;
-                sy.g = pg;
-                sy.b = pb;
-                sy.a = pa;
-                sy = sy.n;
-            }
-
-            yp = w;
-
-            for (i = 1; i <= radiusY; i++) {
-                yi = yp + x << 2;
-
-                r += sy.r = px[yi];
-                g += sy.g = px[yi + 1];
-                b += sy.b = px[yi + 2];
-                a += sy.a = px[yi + 3];
-
-                sy = sy.n;
-
-                if (i < h1) {
-                    yp += w;
-                }
-            }
-
-            yi = x;
-            si = ssy;
-            if (iterations > 0) {
-                for (y = 0; y < h; y++) {
-                    p = yi << 2;
-                    px[p + 3] = pa = a * ms >>> ss;
-                    if (pa > 0) {
-                        px[p] = r * ms >>> ss;
-                        px[p + 1] = g * ms >>> ss;
-                        px[p + 2] = b * ms >>> ss;
-                    } else {
-                        px[p] = px[p + 1] = px[p + 2] = 0;
-                    }
-
-                    p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
-
-                    r -= si.r - (si.r = px[p]);
-                    g -= si.g - (si.g = px[p + 1]);
-                    b -= si.b - (si.b = px[p + 2]);
-                    a -= si.a - (si.a = px[p + 3]);
-
-                    si = si.n;
-
-                    yi += w;
-                }
-            } else {
-                for (y = 0; y < h; y++) {
-                    p = yi << 2;
-                    px[p + 3] = pa = a * ms >>> ss;
-                    if (pa > 0) {
-                        pa = 255 / pa;
-                        px[p] = (r * ms >>> ss) * pa;
-                        px[p + 1] = (g * ms >>> ss) * pa;
-                        px[p + 2] = (b * ms >>> ss) * pa;
-                    } else {
-                        px[p] = px[p + 1] = px[p + 2] = 0;
-                    }
-
-                    p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
-
-                    r -= si.r - (si.r = px[p]);
-                    g -= si.g - (si.g = px[p + 1]);
-                    b -= si.b - (si.b = px[p + 2]);
-                    a -= si.a - (si.a = px[p + 3]);
-
-                    si = si.n;
-
-                    yi += w;
-                }
-            }
+          px[yi++] = r * ms >>> ss;
+          px[yi++] = g * ms >>> ss;
+          px[yi++] = b * ms >>> ss;
+          px[yi++] = a * ms >>> ss;
+          p = yw + ((p = x + radiusX + 1) < w1 ? p : w1) << 2;
+          r -= si.r - (si.r = px[p]);
+          g -= si.g - (si.g = px[p + 1]);
+          b -= si.b - (si.b = px[p + 2]);
+          a -= si.a - (si.a = px[p + 3]);
+          si = si.n;
         }
-    }
-    return true;
-};
 
-// import {Utils} from '../utils/Utils';
-
-/**
- * 舞台对象，继承至 Container
- * @class
- * @extends JC.Container
- * @memberof JC
- */
-function Scene() {
-  Container.call(this);
-}
-
-Scene.prototype = Object.create(Container.prototype);
-
-/**
- * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新。
- * Scene 的 updatePosture 会接收一个来自 Renderer 的 rootMatrix。
- *
- * @private
- * @param {Matrix} [rootMatrix] 初始矩阵，由 Renderer 直接传入。
- */
-Scene.prototype.updatePosture = function (rootMatrix) {
-  this.emit('preposture');
-  if (this.souldSort) this._sortList();
-  this.updateTransform(rootMatrix);
-
-  var i = 0;
-  var l = this.childs.length;
-  while (i < l) {
-    this.childs[i].updatePosture();
-    i++;
-  }
-  this.emit('postposture');
-};
-
-// import {Vector2} from 'three';
-/**
- * Holds all information related to an Interaction event
- *
- * @class
- */
-
-var InteractionData = function () {
-  /**
-   * InteractionData constructor
-   */
-  function InteractionData() {
-    classCallCheck(this, InteractionData);
-
-    /**
-     * This point stores the global coords of where the touch/mouse event happened
-     *
-     * @member {Point}
-     */
-    this.global = new Point(-100000, -100000);
-
-    /**
-     * This resolution
-     *
-     * @member {Point}
-     */
-    this.resolution = new Point(1, 1);
-
-    /**
-     * The target DisplayObject that was interacted with
-     *
-     * @member {Object3D}
-     */
-    this.target = null;
-
-    /**
-     * When passed to an event handler, this will be the original DOM Event that was captured
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
-     * @member {MouseEvent|TouchEvent|PointerEvent}
-     */
-    this.originalEvent = null;
-
-    /**
-     * Unique identifier for this interaction
-     *
-     * @member {number}
-     */
-    this.identifier = null;
-
-    /**
-     * Indicates whether or not the pointer device that created the event is the primary pointer.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/isPrimary
-     * @type {Boolean}
-     */
-    this.isPrimary = false;
-
-    /**
-     * Indicates which button was pressed on the mouse or pointer device to trigger the event.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
-     * @type {number}
-     */
-    this.button = 0;
-
-    /**
-     * Indicates which buttons are pressed on the mouse or pointer device when the event is triggered.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
-     * @type {number}
-     */
-    this.buttons = 0;
-
-    /**
-     * The width of the pointer's contact along the x-axis, measured in CSS pixels.
-     * radiusX of TouchEvents will be represented by this value.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/width
-     * @type {number}
-     */
-    this.width = 0;
-
-    /**
-     * The height of the pointer's contact along the y-axis, measured in CSS pixels.
-     * radiusY of TouchEvents will be represented by this value.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/height
-     * @type {number}
-     */
-    this.height = 0;
-
-    /**
-     * The angle, in degrees, between the pointer device and the screen.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/tiltX
-     * @type {number}
-     */
-    this.tiltX = 0;
-
-    /**
-     * The angle, in degrees, between the pointer device and the screen.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/tiltY
-     * @type {number}
-     */
-    this.tiltY = 0;
-
-    /**
-     * The type of pointer that triggered the event.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
-     * @type {string}
-     */
-    this.pointerType = null;
-
-    /**
-     * Pressure applied by the pointing device during the event. A Touch's force property
-     * will be represented by this value.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pressure
-     * @type {number}
-     */
-    this.pressure = 0;
-
-    /**
-     * From TouchEvents (not PointerEvents triggered by touches), the rotationAngle of the Touch.
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Touch/rotationAngle
-     * @type {number}
-     */
-    this.rotationAngle = 0;
-
-    /**
-     * Twist of a stylus pointer.
-     * @see https://w3c.github.io/pointerevents/#pointerevent-interface
-     * @type {number}
-     */
-    this.twist = 0;
-
-    /**
-     * Barrel pressure on a stylus pointer.
-     * @see https://w3c.github.io/pointerevents/#pointerevent-interface
-     * @type {number}
-     */
-    this.tangentialPressure = 0;
-  }
-
-  /**
-   * The unique identifier of the pointer. It will be the same as `identifier`.
-   * @readonly
-   * @member {number}
-   * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerId
-   */
-
-
-  createClass(InteractionData, [{
-    key: '_copyEvent',
-
-
-    /**
-     * Copies properties from normalized event data.
-     *
-     * @param {Touch|MouseEvent|PointerEvent} event The normalized event data
-     * @private
-     */
-    value: function _copyEvent(event) {
-      // isPrimary should only change on touchstart/pointerdown, so we don't want to overwrite
-      // it with "false" on later events when our shim for it on touch events might not be
-      // accurate
-      if (event.isPrimary) {
-        this.isPrimary = true;
-      }
-      this.button = event.button;
-      this.buttons = event.buttons;
-      this.width = event.width;
-      this.height = event.height;
-      this.tiltX = event.tiltX;
-      this.tiltY = event.tiltY;
-      this.pointerType = event.pointerType;
-      this.pressure = event.pressure;
-      this.rotationAngle = event.rotationAngle;
-      this.twist = event.twist || 0;
-      this.tangentialPressure = event.tangentialPressure || 0;
-    }
-
-    /**
-     * Resets the data for pooling.
-     *
-     * @private
-     */
-
-  }, {
-    key: '_reset',
-    value: function _reset() {
-      // isPrimary is the only property that we really need to reset - everything else is
-      // guaranteed to be overwritten
-      this.isPrimary = false;
-    }
-  }, {
-    key: 'pointerId',
-    get: function get$$1() {
-      return this.identifier;
-    }
-  }]);
-  return InteractionData;
-}();
-
-/**
- * Event class that mimics native DOM events.
- *
- * @class
- */
-var InteractionEvent = function () {
-  /**
-   * InteractionEvent constructor
-   */
-  function InteractionEvent() {
-    classCallCheck(this, InteractionEvent);
-
-    /**
-     * Whether this event will continue propagating in the tree
-     *
-     * @member {boolean}
-     */
-    this.stopped = false;
-
-    /**
-     * The object which caused this event to be dispatched.
-     *
-     * @member {Object3D}
-     */
-    this.target = null;
-
-    /**
-     * The object whose event listener’s callback is currently being invoked.
-     *
-     * @member {Object3D}
-     */
-    this.currentTarget = null;
-
-    /**
-     * Type of the event
-     *
-     * @member {string}
-     */
-    this.type = null;
-
-    /**
-     * InteractionData related to this event
-     *
-     * @member {InteractionData}
-     */
-    this.data = null;
-  }
-
-  /**
-   * Prevents event from reaching any objects other than the current object.
-   *
-   */
-
-
-  createClass(InteractionEvent, [{
-    key: "stopPropagation",
-    value: function stopPropagation() {
-      this.stopped = true;
-    }
-
-    /**
-     * Resets the event.
-     *
-     * @private
-     */
-
-  }, {
-    key: "_reset",
-    value: function _reset() {
-      this.stopped = false;
-      this.currentTarget = null;
-      this.target = null;
-    }
-  }]);
-  return InteractionEvent;
-}();
-
-/**
- * DisplayObjects with the `trackedPointers` property use this class to track interactions
- *
- * @class
- * @private
- */
-var InteractionTrackingData = function () {
-  /**
-   * @param {number} pointerId - Unique pointer id of the event
-   */
-  function InteractionTrackingData(pointerId) {
-    classCallCheck(this, InteractionTrackingData);
-
-    this._pointerId = pointerId;
-    this._flags = InteractionTrackingData.FLAGS.NONE;
-  }
-
-  /**
-   *
-   * @private
-   * @param {number} flag - The interaction flag to set
-   * @param {boolean} yn - Should the flag be set or unset
-   */
-
-
-  createClass(InteractionTrackingData, [{
-    key: "_doSet",
-    value: function _doSet(flag, yn) {
-      if (yn) {
-        this._flags = this._flags | flag;
-      } else {
-        this._flags = this._flags & ~flag;
-      }
-    }
-
-    /**
-     * Unique pointer id of the event
-     *
-     * @readonly
-     * @member {number}
-     */
-
-  }, {
-    key: "pointerId",
-    get: function get$$1() {
-      return this._pointerId;
-    }
-
-    /**
-     * State of the tracking data, expressed as bit flags
-     *
-     * @member {number}
-     */
-
-  }, {
-    key: "flags",
-    get: function get$$1() {
-      return this._flags;
-    }
-
-    /**
-     * Set the flags for the tracking data
-     *
-     * @param {number} flags - Flags to set
-     */
-    ,
-    set: function set$$1(flags) {
-      this._flags = flags;
-    }
-
-    /**
-     * Is the tracked event inactive (not over or down)?
-     *
-     * @member {number}
-     */
-
-  }, {
-    key: "none",
-    get: function get$$1() {
-      return this._flags === this.constructor.FLAGS.NONE;
-    }
-
-    /**
-     * Is the tracked event over the DisplayObject?
-     *
-     * @member {boolean}
-     */
-
-  }, {
-    key: "over",
-    get: function get$$1() {
-      return (this._flags & this.constructor.FLAGS.OVER) !== 0;
-    }
-
-    /**
-     * Set the over flag
-     *
-     * @param {boolean} yn - Is the event over?
-     */
-    ,
-    set: function set$$1(yn) {
-      this._doSet(this.constructor.FLAGS.OVER, yn);
-    }
-
-    /**
-     * Did the right mouse button come down in the DisplayObject?
-     *
-     * @member {boolean}
-     */
-
-  }, {
-    key: "rightDown",
-    get: function get$$1() {
-      return (this._flags & this.constructor.FLAGS.RIGHT_DOWN) !== 0;
-    }
-
-    /**
-     * Set the right down flag
-     *
-     * @param {boolean} yn - Is the right mouse button down?
-     */
-    ,
-    set: function set$$1(yn) {
-      this._doSet(this.constructor.FLAGS.RIGHT_DOWN, yn);
-    }
-
-    /**
-     * Did the left mouse button come down in the DisplayObject?
-     *
-     * @member {boolean}
-     */
-
-  }, {
-    key: "leftDown",
-    get: function get$$1() {
-      return (this._flags & this.constructor.FLAGS.LEFT_DOWN) !== 0;
-    }
-
-    /**
-     * Set the left down flag
-     *
-     * @param {boolean} yn - Is the left mouse button down?
-     */
-    ,
-    set: function set$$1(yn) {
-      this._doSet(this.constructor.FLAGS.LEFT_DOWN, yn);
-    }
-  }]);
-  return InteractionTrackingData;
-}();
-
-InteractionTrackingData.FLAGS = Object.freeze({
-  NONE: 0,
-  OVER: 1 << 0,
-  LEFT_DOWN: 1 << 1,
-  RIGHT_DOWN: 1 << 2
-});
-
-var MOUSE_POINTER_ID = 'MOUSE';
-
-/* eslint max-len: 0 */
-
-// helpers for hitTest() - only used inside hitTest()
-var hitTestEvent = {
-  target: null,
-  data: {
-    global: null
-  }
-};
-
-/**
- * The interaction manager deals with mouse, touch and pointer events. Any DisplayObject can be interactive
- * if its interactive parameter is set to true
- * This manager also supports multitouch.
- *
- * reference to [pixi.js](http://www.pixijs.com/) impl
- *
- * @private
- * @class
- * @extends Eventer
- */
-
-var InteractionManager = function (_Eventer) {
-  inherits(InteractionManager, _Eventer);
-
-  /**
-   * @param {Renderer} renderer - A reference to the current renderer
-   * @param {Object} [options] - The options for the manager.
-   * @param {Boolean} [options.autoPreventDefault=false] - Should the manager automatically prevent default browser actions.
-   * @param {Boolean} [options.autoAttach=true] - Should the manager automatically attach target element.
-   * @param {Number} [options.interactionFrequency=10] - Frequency increases the interaction events will be checked.
-   */
-  function InteractionManager(renderer, options) {
-    classCallCheck(this, InteractionManager);
-
-    var _this = possibleConstructorReturn(this, (InteractionManager.__proto__ || Object.getPrototypeOf(InteractionManager)).call(this));
-
-    options = options || {};
-
-    /**
-     * The renderer this interaction manager works for.
-     *
-     * @member {Renderer}
-     */
-    _this.renderer = renderer;
-
-    /**
-     * Should default browser actions automatically be prevented.
-     * Does not apply to pointer events for backwards compatibility
-     * preventDefault on pointer events stops mouse events from firing
-     * Thus, for every pointer event, there will always be either a mouse of touch event alongside it.
-     *
-     * @member {boolean}
-     * @default false
-     */
-    _this.autoPreventDefault = options.autoPreventDefault || false;
-
-    /**
-     * Frequency in milliseconds that the mousemove, moveover & mouseout interaction events will be checked.
-     *
-     * @member {number}
-     * @default 10
-     */
-    _this.interactionFrequency = options.interactionFrequency || 10;
-
-    /**
-     * The mouse data
-     *
-     * @member {InteractionData}
-     */
-    _this.mouse = new InteractionData();
-    _this.mouse.identifier = MOUSE_POINTER_ID;
-
-    // setting the mouse to start off far off screen will mean that mouse over does
-    //  not get called before we even move the mouse.
-    _this.mouse.global.set(-999999);
-
-    /**
-     * Actively tracked InteractionData
-     *
-     * @private
-     * @member {Object.<number,InteractionData>}
-     */
-    _this.activeInteractionData = {};
-    _this.activeInteractionData[MOUSE_POINTER_ID] = _this.mouse;
-
-    /**
-     * Pool of unused InteractionData
-     *
-     * @private
-     * @member {InteractionData[]}
-     */
-    _this.interactionDataPool = [];
-
-    /**
-     * An event data object to handle all the event tracking/dispatching
-     *
-     * @member {object}
-     */
-    _this.eventData = new InteractionEvent();
-
-    /**
-     * The DOM element to bind to.
-     *
-     * @private
-     * @member {HTMLElement}
-     */
-    _this.interactionDOMElement = null;
-
-    /**
-     * This property determines if mousemove and touchmove events are fired only when the cursor
-     * is over the object.
-     * Setting to true will make things work more in line with how the DOM verison works.
-     * Setting to false can make things easier for things like dragging
-     * It is currently set to false as this is how three.js used to work.
-     *
-     * @member {boolean}
-     * @default true
-     */
-    _this.moveWhenInside = true;
-
-    /**
-     * Have events been attached to the dom element?
-     *
-     * @private
-     * @member {boolean}
-     */
-    _this.eventsAdded = false;
-
-    /**
-     * Is the mouse hovering over the renderer?
-     *
-     * @private
-     * @member {boolean}
-     */
-    _this.mouseOverRenderer = false;
-
-    /**
-     * Does the device support touch events
-     * https://www.w3.org/TR/touch-events/
-     *
-     * @readonly
-     * @member {boolean}
-     */
-    _this.supportsTouchEvents = 'ontouchstart' in window;
-
-    /**
-     * Does the device support pointer events
-     * https://www.w3.org/Submission/pointer-events/
-     *
-     * @readonly
-     * @member {boolean}
-     */
-    _this.supportsPointerEvents = !!window.PointerEvent;
-
-    // this will make it so that you don't have to call bind all the time
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onClick = _this.onClick.bind(_this);
-    _this.processClick = _this.processClick.bind(_this);
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onPointerUp = _this.onPointerUp.bind(_this);
-    _this.processPointerUp = _this.processPointerUp.bind(_this);
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onPointerCancel = _this.onPointerCancel.bind(_this);
-    _this.processPointerCancel = _this.processPointerCancel.bind(_this);
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onPointerDown = _this.onPointerDown.bind(_this);
-    _this.processPointerDown = _this.processPointerDown.bind(_this);
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onPointerMove = _this.onPointerMove.bind(_this);
-    _this.processPointerMove = _this.processPointerMove.bind(_this);
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onPointerOut = _this.onPointerOut.bind(_this);
-    _this.processPointerOverOut = _this.processPointerOverOut.bind(_this);
-
-    /**
-     * @private
-     * @member {Function}
-     */
-    _this.onPointerOver = _this.onPointerOver.bind(_this);
-
-    /**
-     * Dictionary of how different cursor modes are handled. Strings are handled as CSS cursor
-     * values, objects are handled as dictionaries of CSS values for interactionDOMElement,
-     * and functions are called instead of changing the CSS.
-     * Default CSS cursor values are provided for 'default' and 'pointer' modes.
-     * @member {Object.<string, (string|Function|Object.<string, string>)>}
-     */
-    _this.cursorStyles = {
-      default: 'inherit',
-      pointer: 'pointer'
-    };
-
-    /**
-     * The mode of the cursor that is being used.
-     * The value of this is a key from the cursorStyles dictionary.
-     *
-     * @member {string}
-     */
-    _this.currentCursorMode = null;
-
-    /**
-     * Internal cached let.
-     *
-     * @private
-     * @member {string}
-     */
-    _this.cursor = null;
-
-    /**
-     * ray caster, for survey intersects from 3d-scene
-     *
-     * @private
-     * @member {Raycaster}
-     */
-    // this.raycaster = new Raycaster();
-
-    /**
-     * snippet time
-     *
-     * @private
-     * @member {Number}
-     */
-    _this._deltaTime = 0;
-
-    _this.setTargetElement(_this.renderer.canvas);
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
-     * object.
-     *
-     * @event InteractionManager#mousedown
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
-     * on the display object.
-     *
-     * @event InteractionManager#rightdown
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is released over the display
-     * object.
-     *
-     * @event InteractionManager#mouseup
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is released
-     * over the display object.
-     *
-     * @event InteractionManager#rightup
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
-     * the display object.
-     *
-     * @event InteractionManager#click
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
-     * and released on the display object.
-     *
-     * @event InteractionManager#rightclick
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is released outside the
-     * display object that initially registered a
-     * [mousedown]{@link InteractionManager#event:mousedown}.
-     *
-     * @event InteractionManager#mouseupoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is released
-     * outside the display object that initially registered a
-     * [rightdown]{@link InteractionManager#event:rightdown}.
-     *
-     * @event InteractionManager#rightupoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device (usually a mouse) is moved while over the display object
-     *
-     * @event InteractionManager#mousemove
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device (usually a mouse) is moved onto the display object
-     *
-     * @event InteractionManager#mouseover
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device (usually a mouse) is moved off the display object
-     *
-     * @event InteractionManager#mouseout
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is pressed on the display object.
-     *
-     * @event InteractionManager#pointerdown
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is released over the display object.
-     *
-     * @event InteractionManager#pointerup
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when the operating system cancels a pointer event
-     *
-     * @event InteractionManager#pointercancel
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is pressed and released on the display object.
-     *
-     * @event InteractionManager#pointertap
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is released outside the display object that initially
-     * registered a [pointerdown]{@link InteractionManager#event:pointerdown}.
-     *
-     * @event InteractionManager#pointerupoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device is moved while over the display object
-     *
-     * @event InteractionManager#pointermove
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device is moved onto the display object
-     *
-     * @event InteractionManager#pointerover
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device is moved off the display object
-     *
-     * @event InteractionManager#pointerout
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is placed on the display object.
-     *
-     * @event InteractionManager#touchstart
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is removed from the display object.
-     *
-     * @event InteractionManager#touchend
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when the operating system cancels a touch
-     *
-     * @event InteractionManager#touchcancel
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is placed and removed from the display object.
-     *
-     * @event InteractionManager#tap
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is removed outside of the display object that initially
-     * registered a [touchstart]{@link InteractionManager#event:touchstart}.
-     *
-     * @event InteractionManager#touchendoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is moved along the display object.
-     *
-     * @event InteractionManager#touchmove
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is pressed on the display.
-     * object. DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#mousedown
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
-     * on the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#rightdown
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is released over the display
-     * object. DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#mouseup
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is released
-     * over the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#rightup
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
-     * the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#click
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
-     * and released on the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#rightclick
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button (usually a mouse left-button) is released outside the
-     * display object that initially registered a
-     * [mousedown]{@link Object3D#event:mousedown}.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#mouseupoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device secondary button (usually a mouse right-button) is released
-     * outside the display object that initially registered a
-     * [rightdown]{@link Object3D#event:rightdown}.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#rightupoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device (usually a mouse) is moved while over the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#mousemove
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device (usually a mouse) is moved onto the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#mouseover
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device (usually a mouse) is moved off the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#mouseout
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is pressed on the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointerdown
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is released over the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointerup
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when the operating system cancels a pointer event.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointercancel
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is pressed and released on the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointertap
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device button is released outside the display object that initially
-     * registered a [pointerdown]{@link Object3D#event:pointerdown}.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointerupoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device is moved while over the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointermove
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device is moved onto the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointerover
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a pointer device is moved off the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#pointerout
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is placed on the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#touchstart
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is removed from the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#touchend
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when the operating system cancels a touch.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#touchcancel
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is placed and removed from the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#tap
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is removed outside of the display object that initially
-     * registered a [touchstart]{@link Object3D#event:touchstart}.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#touchendoutside
-     * @param {InteractionEvent} event - Interaction event
-     */
-
-    /**
-     * Fired when a touch point is moved along the display object.
-     * DisplayObject's `interactive` property must be set to `true` to fire event.
-     *
-     * @event Object3D#touchmove
-     * @param {InteractionEvent} event - Interaction event
-     */
-    return _this;
-  }
-
-  /**
-   * Hit tests a point against the display tree, returning the first interactive object that is hit.
-   *
-   * @param {Point} globalPoint - A point to hit test with, in global space.
-   * @param {Object3D} [root] - The root display object to start from. If omitted, defaults
-   * to the last rendered root of the associated renderer.
-   * @return {Object3D} The hit display object, if any.
-   */
-
-
-  createClass(InteractionManager, [{
-    key: 'hitTest',
-    value: function hitTest(globalPoint, root) {
-      // clear the target for our hit test
-      hitTestEvent.target = null;
-      // assign the global point
-      hitTestEvent.data.global = globalPoint;
-      // ensure safety of the root
-      if (!root) {
-        root = this.renderer;
-      }
-      // run the hit test
-      this.processInteractive(hitTestEvent, root, null, true);
-      // return our found object - it'll be null if we didn't hit anything
-
-      return hitTestEvent.target;
-    }
-
-    /**
-     * Sets the DOM element which will receive mouse/touch events. This is useful for when you have
-     * other DOM elements on top of the renderers Canvas element. With this you'll be bale to deletegate
-     * another DOM element to receive those events.
-     *
-     * @param {HTMLCanvasElement} element - the DOM element which will receive mouse and touch events.
-     */
-
-  }, {
-    key: 'setTargetElement',
-    value: function setTargetElement(element) {
-      this.removeEvents();
-
-      this.interactionDOMElement = element;
-
-      this.addEvents();
-    }
-
-    /**
-     * Registers all the DOM events
-     *
-     * @private
-     */
-
-  }, {
-    key: 'addEvents',
-    value: function addEvents() {
-      if (!this.interactionDOMElement || this.eventsAdded) {
-        return;
+        yw += w;
       }
 
-      this.emit('addevents');
+      ms = mty;
+      ss = sty;
 
-      this.interactionDOMElement.addEventListener('click', this.onClick, true);
+      for (x = 0; x < w; x++) {
+        yi = x << 2 | 0;
+        r = ryp1 * (pr = px[yi]) | 0;
+        g = ryp1 * (pg = px[yi + 1 | 0]) | 0;
+        b = ryp1 * (pb = px[yi + 2 | 0]) | 0;
+        a = ryp1 * (pa = px[yi + 3 | 0]) | 0;
+        sy = ssy;
 
-      if (window.navigator.msPointerEnabled) {
-        this.interactionDOMElement.style['-ms-content-zooming'] = 'none';
-        this.interactionDOMElement.style['-ms-touch-action'] = 'none';
-      } else if (this.supportsPointerEvents) {
-        this.interactionDOMElement.style['touch-action'] = 'none';
-      }
+        for (i = 0; i < ryp1; i++) {
+          sy.r = pr;
+          sy.g = pg;
+          sy.b = pb;
+          sy.a = pa;
+          sy = sy.n;
+        }
 
-      /**
-       * These events are added first, so that if pointer events are normalised, they are fired
-       * in the same order as non-normalised events. ie. pointer event 1st, mouse / touch 2nd
-       */
-      if (this.supportsPointerEvents) {
-        window.document.addEventListener('pointermove', this.onPointerMove, true);
-        this.interactionDOMElement.addEventListener('pointerdown', this.onPointerDown, true);
-        // pointerout is fired in addition to pointerup (for touch events) and pointercancel
-        // we already handle those, so for the purposes of what we do in onPointerOut, we only
-        // care about the pointerleave event
-        this.interactionDOMElement.addEventListener('pointerleave', this.onPointerOut, true);
-        this.interactionDOMElement.addEventListener('pointerover', this.onPointerOver, true);
-        window.addEventListener('pointercancel', this.onPointerCancel, true);
-        window.addEventListener('pointerup', this.onPointerUp, true);
-      } else {
-        window.document.addEventListener('mousemove', this.onPointerMove, true);
-        this.interactionDOMElement.addEventListener('mousedown', this.onPointerDown, true);
-        this.interactionDOMElement.addEventListener('mouseout', this.onPointerOut, true);
-        this.interactionDOMElement.addEventListener('mouseover', this.onPointerOver, true);
-        window.addEventListener('mouseup', this.onPointerUp, true);
-      }
+        yp = w;
 
-      // always look directly for touch events so that we can provide original data
-      // In a future version we should change this to being just a fallback and rely solely on
-      // PointerEvents whenever available
-      if (this.supportsTouchEvents) {
-        this.interactionDOMElement.addEventListener('touchstart', this.onPointerDown, true);
-        this.interactionDOMElement.addEventListener('touchcancel', this.onPointerCancel, true);
-        this.interactionDOMElement.addEventListener('touchend', this.onPointerUp, true);
-        this.interactionDOMElement.addEventListener('touchmove', this.onPointerMove, true);
-      }
+        for (i = 1; i <= radiusY; i++) {
+          yi = yp + x << 2;
+          r += sy.r = px[yi];
+          g += sy.g = px[yi + 1];
+          b += sy.b = px[yi + 2];
+          a += sy.a = px[yi + 3];
+          sy = sy.n;
 
-      this.eventsAdded = true;
-    }
+          if (i < h1) {
+            yp += w;
+          }
+        }
 
-    /**
-     * Removes all the DOM events that were previously registered
-     *
-     * @private
-     */
+        yi = x;
+        si = ssy;
 
-  }, {
-    key: 'removeEvents',
-    value: function removeEvents() {
-      if (!this.interactionDOMElement) {
-        return;
-      }
+        if (iterations > 0) {
+          for (y = 0; y < h; y++) {
+            p = yi << 2;
+            px[p + 3] = pa = a * ms >>> ss;
 
-      this.emit('removeevents');
+            if (pa > 0) {
+              px[p] = r * ms >>> ss;
+              px[p + 1] = g * ms >>> ss;
+              px[p + 2] = b * ms >>> ss;
+            } else {
+              px[p] = px[p + 1] = px[p + 2] = 0;
+            }
 
-      this.interactionDOMElement.removeEventListener('click', this.onClick, true);
+            p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
+            r -= si.r - (si.r = px[p]);
+            g -= si.g - (si.g = px[p + 1]);
+            b -= si.b - (si.b = px[p + 2]);
+            a -= si.a - (si.a = px[p + 3]);
+            si = si.n;
+            yi += w;
+          }
+        } else {
+          for (y = 0; y < h; y++) {
+            p = yi << 2;
+            px[p + 3] = pa = a * ms >>> ss;
 
-      if (window.navigator.msPointerEnabled) {
-        this.interactionDOMElement.style['-ms-content-zooming'] = '';
-        this.interactionDOMElement.style['-ms-touch-action'] = '';
-      } else if (this.supportsPointerEvents) {
-        this.interactionDOMElement.style['touch-action'] = '';
-      }
+            if (pa > 0) {
+              pa = 255 / pa;
+              px[p] = (r * ms >>> ss) * pa;
+              px[p + 1] = (g * ms >>> ss) * pa;
+              px[p + 2] = (b * ms >>> ss) * pa;
+            } else {
+              px[p] = px[p + 1] = px[p + 2] = 0;
+            }
 
-      if (this.supportsPointerEvents) {
-        window.document.removeEventListener('pointermove', this.onPointerMove, true);
-        this.interactionDOMElement.removeEventListener('pointerdown', this.onPointerDown, true);
-        this.interactionDOMElement.removeEventListener('pointerleave', this.onPointerOut, true);
-        this.interactionDOMElement.removeEventListener('pointerover', this.onPointerOver, true);
-        window.removeEventListener('pointercancel', this.onPointerCancel, true);
-        window.removeEventListener('pointerup', this.onPointerUp, true);
-      } else {
-        window.document.removeEventListener('mousemove', this.onPointerMove, true);
-        this.interactionDOMElement.removeEventListener('mousedown', this.onPointerDown, true);
-        this.interactionDOMElement.removeEventListener('mouseout', this.onPointerOut, true);
-        this.interactionDOMElement.removeEventListener('mouseover', this.onPointerOver, true);
-        window.removeEventListener('mouseup', this.onPointerUp, true);
-      }
-
-      if (this.supportsTouchEvents) {
-        this.interactionDOMElement.removeEventListener('touchstart', this.onPointerDown, true);
-        this.interactionDOMElement.removeEventListener('touchcancel', this.onPointerCancel, true);
-        this.interactionDOMElement.removeEventListener('touchend', this.onPointerUp, true);
-        this.interactionDOMElement.removeEventListener('touchmove', this.onPointerMove, true);
-      }
-
-      this.interactionDOMElement = null;
-
-      this.eventsAdded = false;
-    }
-
-    /**
-     * Updates the state of interactive objects.
-     * Invoked by a throttled ticker.
-     *
-     * @param {number} deltaTime - time delta since last tick
-     */
-
-  }, {
-    key: 'update',
-    value: function update(_ref) {
-      var snippet = _ref.snippet;
-
-      this._deltaTime += snippet;
-
-      if (this._deltaTime < this.interactionFrequency) {
-        return;
-      }
-
-      this._deltaTime = 0;
-
-      if (!this.interactionDOMElement) {
-        return;
-      }
-
-      // if the user move the mouse this check has already been done using the mouse move!
-      if (this.didMove) {
-        this.didMove = false;
-
-        return;
-      }
-
-      this.cursor = null;
-
-      // Resets the flag as set by a stopPropagation call. This flag is usually reset by a user interaction of any kind,
-      // but there was a scenario of a display object moving under a static mouse cursor.
-      // In this case, mouseover and mouseevents would not pass the flag test in triggerEvent function
-      for (var k in this.activeInteractionData) {
-        // eslint-disable-next-line no-prototype-builtins
-        if (this.activeInteractionData.hasOwnProperty(k)) {
-          var interactionData = this.activeInteractionData[k];
-
-          if (interactionData.originalEvent && interactionData.pointerType !== 'touch') {
-            var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, interactionData.originalEvent, interactionData);
-
-            this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, true);
+            p = x + ((p = y + ryp1) < h1 ? p : h1) * w << 2;
+            r -= si.r - (si.r = px[p]);
+            g -= si.g - (si.g = px[p + 1]);
+            b -= si.b - (si.b = px[p + 2]);
+            a -= si.a - (si.a = px[p + 3]);
+            si = si.n;
+            yi += w;
           }
         }
       }
-
-      this.setCursorMode(this.cursor);
-
-      // TODO
     }
 
+    return true;
+  };
+
+  /**
+   * 舞台对象，继承至 Container
+   * @class
+   * @extends JC.Container
+   * @memberof JC
+   */
+
+  function Scene() {
+    Container.call(this);
+  }
+
+  Scene.prototype = Object.create(Container.prototype);
+  /**
+   * 更新自身的透明度可矩阵姿态更新，并触发后代同步更新。
+   * Scene 的 updatePosture 会接收一个来自 Renderer 的 rootMatrix。
+   *
+   * @private
+   * @param {Matrix} [rootMatrix] 初始矩阵，由 Renderer 直接传入。
+   */
+
+  Scene.prototype.updatePosture = function (rootMatrix) {
+    this.emit('preposture');
+    if (this.souldSort) this._sortList();
+    this.updateTransform(rootMatrix);
+    var i = 0;
+    var l = this.childs.length;
+
+    while (i < l) {
+      this.childs[i].updatePosture();
+      i++;
+    }
+
+    this.emit('postposture');
+  };
+
+  /**
+   * Holds all information related to an Interaction event
+   *
+   * @class
+   */
+
+  var InteractionData = /*#__PURE__*/function () {
     /**
-     * Sets the current cursor mode, handling any callbacks or CSS style changes.
-     *
-     * @param {string} mode - cursor mode, a key from the cursorStyles dictionary
+     * InteractionData constructor
+     */
+    function InteractionData() {
+      _classCallCheck(this, InteractionData);
+
+      /**
+       * This point stores the global coords of where the touch/mouse event happened
+       *
+       * @member {Point}
+       */
+      this.global = new Point(-100000, -100000);
+      /**
+       * This resolution
+       *
+       * @member {Point}
+       */
+
+      this.resolution = new Point(1, 1);
+      /**
+       * The target DisplayObject that was interacted with
+       *
+       * @member {Object3D}
+       */
+
+      this.target = null;
+      /**
+       * When passed to an event handler, this will be the original DOM Event that was captured
+       *
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent
+       * @member {MouseEvent|TouchEvent|PointerEvent}
+       */
+
+      this.originalEvent = null;
+      /**
+       * Unique identifier for this interaction
+       *
+       * @member {number}
+       */
+
+      this.identifier = null;
+      /**
+       * Indicates whether or not the pointer device that created the event is the primary pointer.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/isPrimary
+       * @type {Boolean}
+       */
+
+      this.isPrimary = false;
+      /**
+       * Indicates which button was pressed on the mouse or pointer device to trigger the event.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+       * @type {number}
+       */
+
+      this.button = 0;
+      /**
+       * Indicates which buttons are pressed on the mouse or pointer device when the event is triggered.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/buttons
+       * @type {number}
+       */
+
+      this.buttons = 0;
+      /**
+       * The width of the pointer's contact along the x-axis, measured in CSS pixels.
+       * radiusX of TouchEvents will be represented by this value.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/width
+       * @type {number}
+       */
+
+      this.width = 0;
+      /**
+       * The height of the pointer's contact along the y-axis, measured in CSS pixels.
+       * radiusY of TouchEvents will be represented by this value.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/height
+       * @type {number}
+       */
+
+      this.height = 0;
+      /**
+       * The angle, in degrees, between the pointer device and the screen.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/tiltX
+       * @type {number}
+       */
+
+      this.tiltX = 0;
+      /**
+       * The angle, in degrees, between the pointer device and the screen.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/tiltY
+       * @type {number}
+       */
+
+      this.tiltY = 0;
+      /**
+       * The type of pointer that triggered the event.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerType
+       * @type {string}
+       */
+
+      this.pointerType = null;
+      /**
+       * Pressure applied by the pointing device during the event. A Touch's force property
+       * will be represented by this value.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pressure
+       * @type {number}
+       */
+
+      this.pressure = 0;
+      /**
+       * From TouchEvents (not PointerEvents triggered by touches), the rotationAngle of the Touch.
+       * @see https://developer.mozilla.org/en-US/docs/Web/API/Touch/rotationAngle
+       * @type {number}
+       */
+
+      this.rotationAngle = 0;
+      /**
+       * Twist of a stylus pointer.
+       * @see https://w3c.github.io/pointerevents/#pointerevent-interface
+       * @type {number}
+       */
+
+      this.twist = 0;
+      /**
+       * Barrel pressure on a stylus pointer.
+       * @see https://w3c.github.io/pointerevents/#pointerevent-interface
+       * @type {number}
+       */
+
+      this.tangentialPressure = 0;
+    }
+    /**
+     * The unique identifier of the pointer. It will be the same as `identifier`.
+     * @readonly
+     * @member {number}
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/pointerId
      */
 
-  }, {
-    key: 'setCursorMode',
-    value: function setCursorMode(mode) {
-      mode = mode || 'default';
-      // if the mode didn't actually change, bail early
-      if (this.currentCursorMode === mode) {
-        return;
-      }
-      this.currentCursorMode = mode;
-      var style = this.cursorStyles[mode];
 
-      // only do things if there is a cursor style for it
-      if (style) {
-        switch (typeof style === 'undefined' ? 'undefined' : _typeof(style)) {
-          case 'string':
-            // string styles are handled as cursor CSS
-            this.interactionDOMElement.style.cursor = style;
-            break;
-          case 'function':
-            // functions are just called, and passed the cursor mode
-            style(mode);
-            break;
-          case 'object':
-            // if it is an object, assume that it is a dictionary of CSS styles,
-            // apply it to the interactionDOMElement
-            Object.assign(this.interactionDOMElement.style, style);
-            break;
-          default:
-            break;
+    _createClass(InteractionData, [{
+      key: "_copyEvent",
+
+      /**
+       * Copies properties from normalized event data.
+       *
+       * @param {Touch|MouseEvent|PointerEvent} event The normalized event data
+       * @private
+       */
+      value: function _copyEvent(event) {
+        // isPrimary should only change on touchstart/pointerdown, so we don't want to overwrite
+        // it with "false" on later events when our shim for it on touch events might not be
+        // accurate
+        if (event.isPrimary) {
+          this.isPrimary = true;
         }
-      } else if (typeof mode === 'string' && !Object.prototype.hasOwnProperty.call(this.cursorStyles, mode)) {
-        // if it mode is a string (not a Symbol) and cursorStyles doesn't have any entry
-        // for the mode, then assume that the dev wants it to be CSS for the cursor.
-        this.interactionDOMElement.style.cursor = mode;
-      }
-    }
 
+        this.button = event.button;
+        this.buttons = event.buttons;
+        this.width = event.width;
+        this.height = event.height;
+        this.tiltX = event.tiltX;
+        this.tiltY = event.tiltY;
+        this.pointerType = event.pointerType;
+        this.pressure = event.pressure;
+        this.rotationAngle = event.rotationAngle;
+        this.twist = event.twist || 0;
+        this.tangentialPressure = event.tangentialPressure || 0;
+      }
+      /**
+       * Resets the data for pooling.
+       *
+       * @private
+       */
+
+    }, {
+      key: "_reset",
+      value: function _reset() {
+        // isPrimary is the only property that we really need to reset - everything else is
+        // guaranteed to be overwritten
+        this.isPrimary = false;
+      }
+    }, {
+      key: "pointerId",
+      get: function get() {
+        return this.identifier;
+      }
+    }]);
+
+    return InteractionData;
+  }();
+
+  /**
+   * Event class that mimics native DOM events.
+   *
+   * @class
+   */
+  var InteractionEvent = /*#__PURE__*/function () {
     /**
-     * Dispatches an event on the display object that was interacted with
+     * InteractionEvent constructor
+     */
+    function InteractionEvent() {
+      _classCallCheck(this, InteractionEvent);
+
+      /**
+       * Whether this event will continue propagating in the tree
+       *
+       * @member {boolean}
+       */
+      this.stopped = false;
+      /**
+       * The object which caused this event to be dispatched.
+       *
+       * @member {Object3D}
+       */
+
+      this.target = null;
+      /**
+       * The object whose event listener’s callback is currently being invoked.
+       *
+       * @member {Object3D}
+       */
+
+      this.currentTarget = null;
+      /**
+       * Type of the event
+       *
+       * @member {string}
+       */
+
+      this.type = null;
+      /**
+       * InteractionData related to this event
+       *
+       * @member {InteractionData}
+       */
+
+      this.data = null;
+    }
+    /**
+     * Prevents event from reaching any objects other than the current object.
      *
-     * @param {Object3D} displayObject - the display object in question
-     * @param {string} eventString - the name of the event (e.g, mousedown)
-     * @param {object} eventData - the event data object
-     * @private
      */
 
-  }, {
-    key: 'triggerEvent',
-    value: function triggerEvent(displayObject, eventString, eventData) {
-      if (!eventData.stopped) {
-        eventData.currentTarget = displayObject;
-        eventData.type = eventString;
 
-        displayObject.emit(eventString, eventData);
+    _createClass(InteractionEvent, [{
+      key: "stopPropagation",
+      value: function stopPropagation() {
+        this.stopped = true;
+      }
+      /**
+       * Resets the event.
+       *
+       * @private
+       */
 
-        if (displayObject[eventString]) {
-          displayObject[eventString](eventData);
+    }, {
+      key: "_reset",
+      value: function _reset() {
+        this.stopped = false;
+        this.currentTarget = null;
+        this.target = null;
+      }
+    }]);
+
+    return InteractionEvent;
+  }();
+
+  /**
+   * DisplayObjects with the `trackedPointers` property use this class to track interactions
+   *
+   * @class
+   * @private
+   */
+  var InteractionTrackingData = /*#__PURE__*/function () {
+    /**
+     * @param {number} pointerId - Unique pointer id of the event
+     */
+    function InteractionTrackingData(pointerId) {
+      _classCallCheck(this, InteractionTrackingData);
+
+      this._pointerId = pointerId;
+      this._flags = InteractionTrackingData.FLAGS.NONE;
+    }
+    /**
+     *
+     * @private
+     * @param {number} flag - The interaction flag to set
+     * @param {boolean} yn - Should the flag be set or unset
+     */
+
+
+    _createClass(InteractionTrackingData, [{
+      key: "_doSet",
+      value: function _doSet(flag, yn) {
+        if (yn) {
+          this._flags = this._flags | flag;
+        } else {
+          this._flags = this._flags & ~flag;
         }
       }
+      /**
+       * Unique pointer id of the event
+       *
+       * @readonly
+       * @member {number}
+       */
+
+    }, {
+      key: "pointerId",
+      get: function get() {
+        return this._pointerId;
+      }
+      /**
+       * State of the tracking data, expressed as bit flags
+       *
+       * @member {number}
+       */
+
+    }, {
+      key: "flags",
+      get: function get() {
+        return this._flags;
+      }
+      /**
+       * Set the flags for the tracking data
+       *
+       * @param {number} flags - Flags to set
+       */
+      ,
+      set: function set(flags) {
+        this._flags = flags;
+      }
+      /**
+       * Is the tracked event inactive (not over or down)?
+       *
+       * @member {number}
+       */
+
+    }, {
+      key: "none",
+      get: function get() {
+        return this._flags === this.constructor.FLAGS.NONE;
+      }
+      /**
+       * Is the tracked event over the DisplayObject?
+       *
+       * @member {boolean}
+       */
+
+    }, {
+      key: "over",
+      get: function get() {
+        return (this._flags & this.constructor.FLAGS.OVER) !== 0;
+      }
+      /**
+       * Set the over flag
+       *
+       * @param {boolean} yn - Is the event over?
+       */
+      ,
+      set: function set(yn) {
+        this._doSet(this.constructor.FLAGS.OVER, yn);
+      }
+      /**
+       * Did the right mouse button come down in the DisplayObject?
+       *
+       * @member {boolean}
+       */
+
+    }, {
+      key: "rightDown",
+      get: function get() {
+        return (this._flags & this.constructor.FLAGS.RIGHT_DOWN) !== 0;
+      }
+      /**
+       * Set the right down flag
+       *
+       * @param {boolean} yn - Is the right mouse button down?
+       */
+      ,
+      set: function set(yn) {
+        this._doSet(this.constructor.FLAGS.RIGHT_DOWN, yn);
+      }
+      /**
+       * Did the left mouse button come down in the DisplayObject?
+       *
+       * @member {boolean}
+       */
+
+    }, {
+      key: "leftDown",
+      get: function get() {
+        return (this._flags & this.constructor.FLAGS.LEFT_DOWN) !== 0;
+      }
+      /**
+       * Set the left down flag
+       *
+       * @param {boolean} yn - Is the left mouse button down?
+       */
+      ,
+      set: function set(yn) {
+        this._doSet(this.constructor.FLAGS.LEFT_DOWN, yn);
+      }
+    }]);
+
+    return InteractionTrackingData;
+  }();
+  InteractionTrackingData.FLAGS = Object.freeze({
+    NONE: 0,
+    OVER: 1 << 0,
+    LEFT_DOWN: 1 << 1,
+    RIGHT_DOWN: 1 << 2
+  });
+
+  var MOUSE_POINTER_ID = 'MOUSE';
+  /* eslint max-len: 0 */
+  // helpers for hitTest() - only used inside hitTest()
+
+  var hitTestEvent = {
+    target: null,
+    data: {
+      global: null
     }
+  };
+  /**
+   * The interaction manager deals with mouse, touch and pointer events. Any DisplayObject can be interactive
+   * if its interactive parameter is set to true
+   * This manager also supports multitouch.
+   *
+   * reference to [pixi.js](http://www.pixijs.com/) impl
+   *
+   * @private
+   * @class
+   * @extends Eventer
+   */
+
+  var InteractionManager = /*#__PURE__*/function (_Eventer) {
+    _inherits(InteractionManager, _Eventer);
+
+    var _super = _createSuper(InteractionManager);
 
     /**
-     * Maps x and y coords from a DOM object and maps them correctly to the three.js view. The
-     * resulting value is stored in the point. This takes into account the fact that the DOM
-     * element could be scaled and positioned anywhere on the screen.
-     *
-     * @param  {InteractionData} interactionData - the point that the result will be stored in
-     * @param  {number} x - the x coord of the position to map
-     * @param  {number} y - the y coord of the position to map
+     * @param {Renderer} renderer - A reference to the current renderer
+     * @param {Object} [options] - The options for the manager.
+     * @param {Boolean} [options.autoPreventDefault=false] - Should the manager automatically prevent default browser actions.
+     * @param {Boolean} [options.autoAttach=true] - Should the manager automatically attach target element.
+     * @param {Number} [options.interactionFrequency=10] - Frequency increases the interaction events will be checked.
      */
+    function InteractionManager(renderer, options) {
+      var _this;
 
-  }, {
-    key: 'mapPositionToPoint',
-    value: function mapPositionToPoint(interactionData, x, y) {
-      var resolution = interactionData.resolution,
-          global = interactionData.global;
+      _classCallCheck(this, InteractionManager);
 
-      var rect = void 0;
+      _this = _super.call(this);
+      options = options || {};
+      /**
+       * The renderer this interaction manager works for.
+       *
+       * @member {Renderer}
+       */
 
-      // IE 11 fix
-      if (!this.interactionDOMElement.parentElement) {
-        rect = {
-          x: 0,
-          y: 0,
-          left: 0,
-          top: 0,
-          width: 0,
-          height: 0
-        };
-      } else {
-        rect = this.interactionDOMElement.getBoundingClientRect();
-      }
+      _this.renderer = renderer;
+      /**
+       * Should default browser actions automatically be prevented.
+       * Does not apply to pointer events for backwards compatibility
+       * preventDefault on pointer events stops mouse events from firing
+       * Thus, for every pointer event, there will always be either a mouse of touch event alongside it.
+       *
+       * @member {boolean}
+       * @default false
+       */
 
-      resolution.x = this.interactionDOMElement.width / rect.width;
-      resolution.y = this.interactionDOMElement.height / rect.height;
+      _this.autoPreventDefault = options.autoPreventDefault || false;
+      /**
+       * Frequency in milliseconds that the mousemove, moveover & mouseout interaction events will be checked.
+       *
+       * @member {number}
+       * @default 10
+       */
 
-      global.x = (x - rect.left) * resolution.x;
-      global.y = (y - rect.top) * resolution.y;
+      _this.interactionFrequency = options.interactionFrequency || 10;
+      /**
+       * The mouse data
+       *
+       * @member {InteractionData}
+       */
+
+      _this.mouse = new InteractionData();
+      _this.mouse.identifier = MOUSE_POINTER_ID; // setting the mouse to start off far off screen will mean that mouse over does
+      //  not get called before we even move the mouse.
+
+      _this.mouse.global.set(-999999);
+      /**
+       * Actively tracked InteractionData
+       *
+       * @private
+       * @member {Object.<number,InteractionData>}
+       */
+
+
+      _this.activeInteractionData = {};
+      _this.activeInteractionData[MOUSE_POINTER_ID] = _this.mouse;
+      /**
+       * Pool of unused InteractionData
+       *
+       * @private
+       * @member {InteractionData[]}
+       */
+
+      _this.interactionDataPool = [];
+      /**
+       * An event data object to handle all the event tracking/dispatching
+       *
+       * @member {object}
+       */
+
+      _this.eventData = new InteractionEvent();
+      /**
+       * The DOM element to bind to.
+       *
+       * @private
+       * @member {HTMLElement}
+       */
+
+      _this.interactionDOMElement = null;
+      /**
+       * This property determines if mousemove and touchmove events are fired only when the cursor
+       * is over the object.
+       * Setting to true will make things work more in line with how the DOM verison works.
+       * Setting to false can make things easier for things like dragging
+       * It is currently set to false as this is how three.js used to work.
+       *
+       * @member {boolean}
+       * @default true
+       */
+
+      _this.moveWhenInside = true;
+      /**
+       * Have events been attached to the dom element?
+       *
+       * @private
+       * @member {boolean}
+       */
+
+      _this.eventsAdded = false;
+      /**
+       * Is the mouse hovering over the renderer?
+       *
+       * @private
+       * @member {boolean}
+       */
+
+      _this.mouseOverRenderer = false;
+      /**
+       * Does the device support touch events
+       * https://www.w3.org/TR/touch-events/
+       *
+       * @readonly
+       * @member {boolean}
+       */
+
+      _this.supportsTouchEvents = 'ontouchstart' in window;
+      /**
+       * Does the device support pointer events
+       * https://www.w3.org/Submission/pointer-events/
+       *
+       * @readonly
+       * @member {boolean}
+       */
+
+      _this.supportsPointerEvents = !!window.PointerEvent; // this will make it so that you don't have to call bind all the time
+
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onClick = _this.onClick.bind(_assertThisInitialized(_this));
+      _this.processClick = _this.processClick.bind(_assertThisInitialized(_this));
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onPointerUp = _this.onPointerUp.bind(_assertThisInitialized(_this));
+      _this.processPointerUp = _this.processPointerUp.bind(_assertThisInitialized(_this));
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onPointerCancel = _this.onPointerCancel.bind(_assertThisInitialized(_this));
+      _this.processPointerCancel = _this.processPointerCancel.bind(_assertThisInitialized(_this));
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onPointerDown = _this.onPointerDown.bind(_assertThisInitialized(_this));
+      _this.processPointerDown = _this.processPointerDown.bind(_assertThisInitialized(_this));
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onPointerMove = _this.onPointerMove.bind(_assertThisInitialized(_this));
+      _this.processPointerMove = _this.processPointerMove.bind(_assertThisInitialized(_this));
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onPointerOut = _this.onPointerOut.bind(_assertThisInitialized(_this));
+      _this.processPointerOverOut = _this.processPointerOverOut.bind(_assertThisInitialized(_this));
+      /**
+       * @private
+       * @member {Function}
+       */
+
+      _this.onPointerOver = _this.onPointerOver.bind(_assertThisInitialized(_this));
+      /**
+       * Dictionary of how different cursor modes are handled. Strings are handled as CSS cursor
+       * values, objects are handled as dictionaries of CSS values for interactionDOMElement,
+       * and functions are called instead of changing the CSS.
+       * Default CSS cursor values are provided for 'default' and 'pointer' modes.
+       * @member {Object.<string, (string|Function|Object.<string, string>)>}
+       */
+
+      _this.cursorStyles = {
+        "default": 'inherit',
+        pointer: 'pointer'
+      };
+      /**
+       * The mode of the cursor that is being used.
+       * The value of this is a key from the cursorStyles dictionary.
+       *
+       * @member {string}
+       */
+
+      _this.currentCursorMode = null;
+      /**
+       * Internal cached let.
+       *
+       * @private
+       * @member {string}
+       */
+
+      _this.cursor = null;
+      /**
+       * ray caster, for survey intersects from 3d-scene
+       *
+       * @private
+       * @member {Raycaster}
+       */
+      // this.raycaster = new Raycaster();
+
+      /**
+       * snippet time
+       *
+       * @private
+       * @member {Number}
+       */
+
+      _this._deltaTime = 0;
+
+      _this.setTargetElement(_this.renderer.canvas);
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is pressed on the display
+       * object.
+       *
+       * @event InteractionManager#mousedown
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
+       * on the display object.
+       *
+       * @event InteractionManager#rightdown
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is released over the display
+       * object.
+       *
+       * @event InteractionManager#mouseup
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is released
+       * over the display object.
+       *
+       * @event InteractionManager#rightup
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
+       * the display object.
+       *
+       * @event InteractionManager#click
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
+       * and released on the display object.
+       *
+       * @event InteractionManager#rightclick
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is released outside the
+       * display object that initially registered a
+       * [mousedown]{@link InteractionManager#event:mousedown}.
+       *
+       * @event InteractionManager#mouseupoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is released
+       * outside the display object that initially registered a
+       * [rightdown]{@link InteractionManager#event:rightdown}.
+       *
+       * @event InteractionManager#rightupoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device (usually a mouse) is moved while over the display object
+       *
+       * @event InteractionManager#mousemove
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device (usually a mouse) is moved onto the display object
+       *
+       * @event InteractionManager#mouseover
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device (usually a mouse) is moved off the display object
+       *
+       * @event InteractionManager#mouseout
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is pressed on the display object.
+       *
+       * @event InteractionManager#pointerdown
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is released over the display object.
+       *
+       * @event InteractionManager#pointerup
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when the operating system cancels a pointer event
+       *
+       * @event InteractionManager#pointercancel
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is pressed and released on the display object.
+       *
+       * @event InteractionManager#pointertap
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is released outside the display object that initially
+       * registered a [pointerdown]{@link InteractionManager#event:pointerdown}.
+       *
+       * @event InteractionManager#pointerupoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device is moved while over the display object
+       *
+       * @event InteractionManager#pointermove
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device is moved onto the display object
+       *
+       * @event InteractionManager#pointerover
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device is moved off the display object
+       *
+       * @event InteractionManager#pointerout
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is placed on the display object.
+       *
+       * @event InteractionManager#touchstart
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is removed from the display object.
+       *
+       * @event InteractionManager#touchend
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when the operating system cancels a touch
+       *
+       * @event InteractionManager#touchcancel
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is placed and removed from the display object.
+       *
+       * @event InteractionManager#tap
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is removed outside of the display object that initially
+       * registered a [touchstart]{@link InteractionManager#event:touchstart}.
+       *
+       * @event InteractionManager#touchendoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is moved along the display object.
+       *
+       * @event InteractionManager#touchmove
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is pressed on the display.
+       * object. DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#mousedown
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
+       * on the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#rightdown
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is released over the display
+       * object. DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#mouseup
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is released
+       * over the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#rightup
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is pressed and released on
+       * the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#click
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is pressed
+       * and released on the display object. DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#rightclick
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button (usually a mouse left-button) is released outside the
+       * display object that initially registered a
+       * [mousedown]{@link Object3D#event:mousedown}.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#mouseupoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device secondary button (usually a mouse right-button) is released
+       * outside the display object that initially registered a
+       * [rightdown]{@link Object3D#event:rightdown}.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#rightupoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device (usually a mouse) is moved while over the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#mousemove
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device (usually a mouse) is moved onto the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#mouseover
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device (usually a mouse) is moved off the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#mouseout
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is pressed on the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointerdown
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is released over the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointerup
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when the operating system cancels a pointer event.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointercancel
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is pressed and released on the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointertap
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device button is released outside the display object that initially
+       * registered a [pointerdown]{@link Object3D#event:pointerdown}.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointerupoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device is moved while over the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointermove
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device is moved onto the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointerover
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a pointer device is moved off the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#pointerout
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is placed on the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#touchstart
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is removed from the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#touchend
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when the operating system cancels a touch.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#touchcancel
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is placed and removed from the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#tap
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is removed outside of the display object that initially
+       * registered a [touchstart]{@link Object3D#event:touchstart}.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#touchendoutside
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+      /**
+       * Fired when a touch point is moved along the display object.
+       * DisplayObject's `interactive` property must be set to `true` to fire event.
+       *
+       * @event Object3D#touchmove
+       * @param {InteractionEvent} event - Interaction event
+       */
+
+
+      return _this;
     }
-
     /**
-     * This function is provides a neat way of crawling through the scene graph and running a
-     * specified function on all interactive objects it finds. It will also take care of hit
-     * testing the interactive objects and passes the hit across in the function.
+     * Hit tests a point against the display tree, returning the first interactive object that is hit.
      *
-     * @private
-     * @param {InteractionEvent} interactionEvent - event containing the point that
-     *  is tested for collision
-     * @param {Object3D} displayObject - the displayObject
-     *  that will be hit test (recursively crawls its children)
-     * @param {Function} [func] - the function that will be called on each interactive object. The
-     *  interactionEvent, displayObject and hit will be passed to the function
-     * @param {boolean} [hitTest] - this indicates if the objects inside should be hit test against the point
-     * @param {boolean} [interactive] - Whether the displayObject is interactive
-     * @return {boolean} returns true if the displayObject hit the point
+     * @param {Point} globalPoint - A point to hit test with, in global space.
+     * @param {Object3D} [root] - The root display object to start from. If omitted, defaults
+     * to the last rendered root of the associated renderer.
+     * @return {Object3D} The hit display object, if any.
      */
 
-  }, {
-    key: 'processInteractive',
-    value: function processInteractive(interactionEvent, displayObject, func, hitTest, interactive) {
-      if (!displayObject || !displayObject.visible) {
-        return false;
+
+    _createClass(InteractionManager, [{
+      key: "hitTest",
+      value: function hitTest(globalPoint, root) {
+        // clear the target for our hit test
+        hitTestEvent.target = null; // assign the global point
+
+        hitTestEvent.data.global = globalPoint; // ensure safety of the root
+
+        if (!root) {
+          root = this.renderer;
+        } // run the hit test
+
+
+        this.processInteractive(hitTestEvent, root, null, true); // return our found object - it'll be null if we didn't hit anything
+
+        return hitTestEvent.target;
       }
+      /**
+       * Sets the DOM element which will receive mouse/touch events. This is useful for when you have
+       * other DOM elements on top of the renderers Canvas element. With this you'll be bale to deletegate
+       * another DOM element to receive those events.
+       *
+       * @param {HTMLCanvasElement} element - the DOM element which will receive mouse and touch events.
+       */
 
-      var point = interactionEvent.data.global;
+    }, {
+      key: "setTargetElement",
+      value: function setTargetElement(element) {
+        this.removeEvents();
+        this.interactionDOMElement = element;
+        this.addEvents();
+      }
+      /**
+       * Registers all the DOM events
+       *
+       * @private
+       */
 
-      // Took a little while to rework this function correctly! But now it is done and nice and optimised. ^_^
-      //
-      // This function will now loop through all objects and then only hit test the objects it HAS
-      // to, not all of them. MUCH faster..
-      // An object will be hit test if the following is true:
-      //
-      // 1: It is interactive.
-      // 2: It belongs to a parent that is interactive AND one of the parents children have not already been hit.
-      //
-      // As another little optimisation once an interactive object has been hit we can carry on
-      // through the scenegraph, but we know that there will be no more hits! So we can avoid extra hit tests
-      // A final optimisation is that an object is not hit test directly if a child has already been hit.
+    }, {
+      key: "addEvents",
+      value: function addEvents() {
+        if (!this.interactionDOMElement || this.eventsAdded) {
+          return;
+        }
 
-      interactive = displayObject.interactive || interactive;
+        this.emit('addevents');
+        this.interactionDOMElement.addEventListener('click', this.onClick, true);
 
-      var hit = false;
-      var interactiveParent = interactive;
+        if (window.navigator.msPointerEnabled) {
+          this.interactionDOMElement.style['-ms-content-zooming'] = 'none';
+          this.interactionDOMElement.style['-ms-touch-action'] = 'none';
+        } else if (this.supportsPointerEvents) {
+          this.interactionDOMElement.style['touch-action'] = 'none';
+        }
+        /**
+         * These events are added first, so that if pointer events are normalised, they are fired
+         * in the same order as non-normalised events. ie. pointer event 1st, mouse / touch 2nd
+         */
 
-      if (displayObject.interactiveChildren && displayObject.childs) {
-        var children = displayObject.childs;
 
-        for (var i = children.length - 1; i >= 0; i--) {
-          var child = children[i];
+        if (this.supportsPointerEvents) {
+          window.document.addEventListener('pointermove', this.onPointerMove, true);
+          this.interactionDOMElement.addEventListener('pointerdown', this.onPointerDown, true); // pointerout is fired in addition to pointerup (for touch events) and pointercancel
+          // we already handle those, so for the purposes of what we do in onPointerOut, we only
+          // care about the pointerleave event
 
-          // time to get recursive.. if this function will return if something is hit..
-          var childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent);
+          this.interactionDOMElement.addEventListener('pointerleave', this.onPointerOut, true);
+          this.interactionDOMElement.addEventListener('pointerover', this.onPointerOver, true);
+          window.addEventListener('pointercancel', this.onPointerCancel, true);
+          window.addEventListener('pointerup', this.onPointerUp, true);
+        } else {
+          window.document.addEventListener('mousemove', this.onPointerMove, true);
+          this.interactionDOMElement.addEventListener('mousedown', this.onPointerDown, true);
+          this.interactionDOMElement.addEventListener('mouseout', this.onPointerOut, true);
+          this.interactionDOMElement.addEventListener('mouseover', this.onPointerOver, true);
+          window.addEventListener('mouseup', this.onPointerUp, true);
+        } // always look directly for touch events so that we can provide original data
+        // In a future version we should change this to being just a fallback and rely solely on
+        // PointerEvents whenever available
 
-          if (childHit) {
-            // its a good idea to check if a child has lost its parent.
-            // this means it has been removed whilst looping so its best
-            if (!child.parent) {
-              continue;
+
+        if (this.supportsTouchEvents) {
+          this.interactionDOMElement.addEventListener('touchstart', this.onPointerDown, true);
+          this.interactionDOMElement.addEventListener('touchcancel', this.onPointerCancel, true);
+          this.interactionDOMElement.addEventListener('touchend', this.onPointerUp, true);
+          this.interactionDOMElement.addEventListener('touchmove', this.onPointerMove, true);
+        }
+
+        this.eventsAdded = true;
+      }
+      /**
+       * Removes all the DOM events that were previously registered
+       *
+       * @private
+       */
+
+    }, {
+      key: "removeEvents",
+      value: function removeEvents() {
+        if (!this.interactionDOMElement) {
+          return;
+        }
+
+        this.emit('removeevents');
+        this.interactionDOMElement.removeEventListener('click', this.onClick, true);
+
+        if (window.navigator.msPointerEnabled) {
+          this.interactionDOMElement.style['-ms-content-zooming'] = '';
+          this.interactionDOMElement.style['-ms-touch-action'] = '';
+        } else if (this.supportsPointerEvents) {
+          this.interactionDOMElement.style['touch-action'] = '';
+        }
+
+        if (this.supportsPointerEvents) {
+          window.document.removeEventListener('pointermove', this.onPointerMove, true);
+          this.interactionDOMElement.removeEventListener('pointerdown', this.onPointerDown, true);
+          this.interactionDOMElement.removeEventListener('pointerleave', this.onPointerOut, true);
+          this.interactionDOMElement.removeEventListener('pointerover', this.onPointerOver, true);
+          window.removeEventListener('pointercancel', this.onPointerCancel, true);
+          window.removeEventListener('pointerup', this.onPointerUp, true);
+        } else {
+          window.document.removeEventListener('mousemove', this.onPointerMove, true);
+          this.interactionDOMElement.removeEventListener('mousedown', this.onPointerDown, true);
+          this.interactionDOMElement.removeEventListener('mouseout', this.onPointerOut, true);
+          this.interactionDOMElement.removeEventListener('mouseover', this.onPointerOver, true);
+          window.removeEventListener('mouseup', this.onPointerUp, true);
+        }
+
+        if (this.supportsTouchEvents) {
+          this.interactionDOMElement.removeEventListener('touchstart', this.onPointerDown, true);
+          this.interactionDOMElement.removeEventListener('touchcancel', this.onPointerCancel, true);
+          this.interactionDOMElement.removeEventListener('touchend', this.onPointerUp, true);
+          this.interactionDOMElement.removeEventListener('touchmove', this.onPointerMove, true);
+        }
+
+        this.interactionDOMElement = null;
+        this.eventsAdded = false;
+      }
+      /**
+       * Updates the state of interactive objects.
+       * Invoked by a throttled ticker.
+       *
+       * @param {number} deltaTime - time delta since last tick
+       */
+
+    }, {
+      key: "update",
+      value: function update(_ref) {
+        var snippet = _ref.snippet;
+        this._deltaTime += snippet;
+
+        if (this._deltaTime < this.interactionFrequency) {
+          return;
+        }
+
+        this._deltaTime = 0;
+
+        if (!this.interactionDOMElement) {
+          return;
+        } // if the user move the mouse this check has already been done using the mouse move!
+
+
+        if (this.didMove) {
+          this.didMove = false;
+          return;
+        }
+
+        this.cursor = null; // Resets the flag as set by a stopPropagation call. This flag is usually reset by a user interaction of any kind,
+        // but there was a scenario of a display object moving under a static mouse cursor.
+        // In this case, mouseover and mouseevents would not pass the flag test in triggerEvent function
+
+        for (var k in this.activeInteractionData) {
+          // eslint-disable-next-line no-prototype-builtins
+          if (this.activeInteractionData.hasOwnProperty(k)) {
+            var interactionData = this.activeInteractionData[k];
+
+            if (interactionData.originalEvent && interactionData.pointerType !== 'touch') {
+              var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, interactionData.originalEvent, interactionData);
+              this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, true);
             }
+          }
+        }
 
-            // we no longer need to hit test any more objects in this container as we we
-            // now know the parent has been hit
-            interactiveParent = false;
+        this.setCursorMode(this.cursor); // TODO
+      }
+      /**
+       * Sets the current cursor mode, handling any callbacks or CSS style changes.
+       *
+       * @param {string} mode - cursor mode, a key from the cursorStyles dictionary
+       */
 
-            // If the child is interactive , that means that the object hit was actually
-            // interactive and not just the child of an interactive object.
-            // This means we no longer need to hit test anything else. We still need to run
-            // through all objects, but we don't need to perform any hit tests.
+    }, {
+      key: "setCursorMode",
+      value: function setCursorMode(mode) {
+        mode = mode || 'default'; // if the mode didn't actually change, bail early
+
+        if (this.currentCursorMode === mode) {
+          return;
+        }
+
+        this.currentCursorMode = mode;
+        var style = this.cursorStyles[mode]; // only do things if there is a cursor style for it
+
+        if (style) {
+          switch (_typeof(style)) {
+            case 'string':
+              // string styles are handled as cursor CSS
+              this.interactionDOMElement.style.cursor = style;
+              break;
+
+            case 'function':
+              // functions are just called, and passed the cursor mode
+              style(mode);
+              break;
+
+            case 'object':
+              // if it is an object, assume that it is a dictionary of CSS styles,
+              // apply it to the interactionDOMElement
+              Object.assign(this.interactionDOMElement.style, style);
+              break;
+          }
+        } else if (typeof mode === 'string' && !Object.prototype.hasOwnProperty.call(this.cursorStyles, mode)) {
+          // if it mode is a string (not a Symbol) and cursorStyles doesn't have any entry
+          // for the mode, then assume that the dev wants it to be CSS for the cursor.
+          this.interactionDOMElement.style.cursor = mode;
+        }
+      }
+      /**
+       * Dispatches an event on the display object that was interacted with
+       *
+       * @param {Object3D} displayObject - the display object in question
+       * @param {string} eventString - the name of the event (e.g, mousedown)
+       * @param {object} eventData - the event data object
+       * @private
+       */
+
+    }, {
+      key: "triggerEvent",
+      value: function triggerEvent(displayObject, eventString, eventData) {
+        if (!eventData.stopped) {
+          eventData.currentTarget = displayObject;
+          eventData.type = eventString;
+          displayObject.emit(eventString, eventData);
+
+          if (displayObject[eventString]) {
+            displayObject[eventString](eventData);
+          }
+        }
+      }
+      /**
+       * Maps x and y coords from a DOM object and maps them correctly to the three.js view. The
+       * resulting value is stored in the point. This takes into account the fact that the DOM
+       * element could be scaled and positioned anywhere on the screen.
+       *
+       * @param  {InteractionData} interactionData - the point that the result will be stored in
+       * @param  {number} x - the x coord of the position to map
+       * @param  {number} y - the y coord of the position to map
+       */
+
+    }, {
+      key: "mapPositionToPoint",
+      value: function mapPositionToPoint(interactionData, x, y) {
+        var resolution = interactionData.resolution,
+            global = interactionData.global;
+        var rect; // IE 11 fix
+
+        if (!this.interactionDOMElement.parentElement) {
+          rect = {
+            x: 0,
+            y: 0,
+            left: 0,
+            top: 0,
+            width: 0,
+            height: 0
+          };
+        } else {
+          rect = this.interactionDOMElement.getBoundingClientRect();
+        }
+
+        resolution.x = this.interactionDOMElement.width / rect.width;
+        resolution.y = this.interactionDOMElement.height / rect.height;
+        global.x = (x - rect.left) * resolution.x;
+        global.y = (y - rect.top) * resolution.y;
+      }
+      /**
+       * This function is provides a neat way of crawling through the scene graph and running a
+       * specified function on all interactive objects it finds. It will also take care of hit
+       * testing the interactive objects and passes the hit across in the function.
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - event containing the point that
+       *  is tested for collision
+       * @param {Object3D} displayObject - the displayObject
+       *  that will be hit test (recursively crawls its children)
+       * @param {Function} [func] - the function that will be called on each interactive object. The
+       *  interactionEvent, displayObject and hit will be passed to the function
+       * @param {boolean} [hitTest] - this indicates if the objects inside should be hit test against the point
+       * @param {boolean} [interactive] - Whether the displayObject is interactive
+       * @return {boolean} returns true if the displayObject hit the point
+       */
+
+    }, {
+      key: "processInteractive",
+      value: function processInteractive(interactionEvent, displayObject, func, hitTest, interactive) {
+        if (!displayObject || !displayObject.visible) {
+          return false;
+        }
+
+        var point = interactionEvent.data.global; // Took a little while to rework this function correctly! But now it is done and nice and optimised. ^_^
+        //
+        // This function will now loop through all objects and then only hit test the objects it HAS
+        // to, not all of them. MUCH faster..
+        // An object will be hit test if the following is true:
+        //
+        // 1: It is interactive.
+        // 2: It belongs to a parent that is interactive AND one of the parents children have not already been hit.
+        //
+        // As another little optimisation once an interactive object has been hit we can carry on
+        // through the scenegraph, but we know that there will be no more hits! So we can avoid extra hit tests
+        // A final optimisation is that an object is not hit test directly if a child has already been hit.
+
+        interactive = displayObject.interactive || interactive;
+        var hit = false;
+        var interactiveParent = interactive;
+
+        if (displayObject.interactiveChildren && displayObject.childs) {
+          var children = displayObject.childs;
+
+          for (var i = children.length - 1; i >= 0; i--) {
+            var child = children[i]; // time to get recursive.. if this function will return if something is hit..
+
+            var childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent);
 
             if (childHit) {
-              if (interactionEvent.target) {
-                hitTest = false;
+              // its a good idea to check if a child has lost its parent.
+              // this means it has been removed whilst looping so its best
+              if (!child.parent) {
+                continue;
+              } // we no longer need to hit test any more objects in this container as we we
+              // now know the parent has been hit
+
+
+              interactiveParent = false; // If the child is interactive , that means that the object hit was actually
+              // interactive and not just the child of an interactive object.
+              // This means we no longer need to hit test anything else. We still need to run
+              // through all objects, but we don't need to perform any hit tests.
+
+              if (childHit) {
+                if (interactionEvent.target) {
+                  hitTest = false;
+                }
+
+                hit = true;
               }
+            }
+          }
+        } // no point running this if the item is not interactive or does not have an interactive parent.
+
+
+        if (interactive) {
+          // if we are hit testing (as in we have no hit any objects yet)
+          // We also don't need to worry about hit testing if once of the displayObjects children
+          // has already been hit - but only if it was interactive, otherwise we need to keep
+          // looking for an interactive child, just in case we hit one
+          if (hitTest && !interactionEvent.target) {
+            if (displayObject.contains(point)) {
               hit = true;
             }
           }
-        }
-      }
 
-      // no point running this if the item is not interactive or does not have an interactive parent.
-      if (interactive) {
-        // if we are hit testing (as in we have no hit any objects yet)
-        // We also don't need to worry about hit testing if once of the displayObjects children
-        // has already been hit - but only if it was interactive, otherwise we need to keep
-        // looking for an interactive child, just in case we hit one
-        if (hitTest && !interactionEvent.target) {
-          if (displayObject.contains(point)) {
-            hit = true;
+          if (displayObject.interactive) {
+            if (hit && !interactionEvent.target) {
+              interactionEvent.data.target = interactionEvent.target = displayObject;
+            }
+
+            if (func) {
+              func(interactionEvent, displayObject, !!hit);
+            }
           }
         }
 
-        if (displayObject.interactive) {
-          if (hit && !interactionEvent.target) {
-            interactionEvent.data.target = interactionEvent.target = displayObject;
-          }
-
-          if (func) {
-            func(interactionEvent, displayObject, !!hit);
-          }
-        }
+        return hit;
       }
-
-      return hit;
-    }
-
-    /**
-     * Is called when the click is pressed down on the renderer element
-     *
-     * @private
-     * @param {MouseEvent} originalEvent - The DOM event of a click being pressed down
-     */
-
-  }, {
-    key: 'onClick',
-    value: function onClick(originalEvent) {
-      if (originalEvent.type !== 'click') return;
-
-      var events = this.normalizeToPointerData(originalEvent);
-
-      if (this.autoPreventDefault && events[0].isNormalized) {
-        originalEvent.preventDefault();
-      }
-
-      var interactionData = this.getInteractionDataForPointerId(events[0]);
-
-      var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
-
-      interactionEvent.data.originalEvent = originalEvent;
-
-      this.processInteractive(interactionEvent, this.renderer.currentScene, this.processClick, true);
-
-      this.emit('click', interactionEvent);
-    }
-
-    /**
-     * Processes the result of the click check and dispatches the event if need be
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Object3D} displayObject - The display object that was tested
-     * @param {boolean} hit - the result of the hit test on the display object
-     */
-
-  }, {
-    key: 'processClick',
-    value: function processClick(interactionEvent, displayObject, hit) {
-      if (hit) {
-        this.triggerEvent(displayObject, 'click', interactionEvent);
-      }
-    }
-
-    /**
-     * Is called when the pointer button is pressed down on the renderer element
-     *
-     * @private
-     * @param {PointerEvent} originalEvent - The DOM event of a pointer button being pressed down
-     */
-
-  }, {
-    key: 'onPointerDown',
-    value: function onPointerDown(originalEvent) {
-      // if we support touch events, then only use those for touch events, not pointer events
-      if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') return;
-
-      var events = this.normalizeToPointerData(originalEvent);
-
       /**
-       * No need to prevent default on natural pointer events, as there are no side effects
-       * Normalized events, however, may have the double mousedown/touchstart issue on the native android browser,
-       * so still need to be prevented.
+       * Is called when the click is pressed down on the renderer element
+       *
+       * @private
+       * @param {MouseEvent} originalEvent - The DOM event of a click being pressed down
        */
 
-      // Guaranteed that there will be at least one event in events, and all events must have the same pointer type
+    }, {
+      key: "onClick",
+      value: function onClick(originalEvent) {
+        if (originalEvent.type !== 'click') return;
+        var events = this.normalizeToPointerData(originalEvent);
 
-      if (this.autoPreventDefault && events[0].isNormalized) {
-        originalEvent.preventDefault();
-      }
+        if (this.autoPreventDefault && events[0].isNormalized) {
+          originalEvent.preventDefault();
+        }
 
-      var eventLen = events.length;
-
-      for (var i = 0; i < eventLen; i++) {
-        var _event = events[i];
-
-        var interactionData = this.getInteractionDataForPointerId(_event);
-
-        var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event, interactionData);
-
+        var interactionData = this.getInteractionDataForPointerId(events[0]);
+        var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
         interactionEvent.data.originalEvent = originalEvent;
+        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processClick, true);
+        this.emit('click', interactionEvent);
+      }
+      /**
+       * Processes the result of the click check and dispatches the event if need be
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+       * @param {Object3D} displayObject - The display object that was tested
+       * @param {boolean} hit - the result of the hit test on the display object
+       */
 
-        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerDown, true);
-
-        this.emit('pointerdown', interactionEvent);
-        if (_event.pointerType === 'touch') {
-          this.emit('touchstart', interactionEvent);
-        } else if (_event.pointerType === 'mouse' || _event.pointerType === 'pen') {
-          var isRightButton = _event.button === 2;
-
-          this.emit(isRightButton ? 'rightdown' : 'mousedown', this.eventData);
+    }, {
+      key: "processClick",
+      value: function processClick(interactionEvent, displayObject, hit) {
+        if (hit) {
+          this.triggerEvent(displayObject, 'click', interactionEvent);
         }
       }
-    }
+      /**
+       * Is called when the pointer button is pressed down on the renderer element
+       *
+       * @private
+       * @param {PointerEvent} originalEvent - The DOM event of a pointer button being pressed down
+       */
 
-    /**
-     * Processes the result of the pointer down check and dispatches the event if need be
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Object3D} displayObject - The display object that was tested
-     * @param {boolean} hit - the result of the hit test on the display object
-     */
+    }, {
+      key: "onPointerDown",
+      value: function onPointerDown(originalEvent) {
+        // if we support touch events, then only use those for touch events, not pointer events
+        if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') return;
+        var events = this.normalizeToPointerData(originalEvent);
+        /**
+         * No need to prevent default on natural pointer events, as there are no side effects
+         * Normalized events, however, may have the double mousedown/touchstart issue on the native android browser,
+         * so still need to be prevented.
+         */
+        // Guaranteed that there will be at least one event in events, and all events must have the same pointer type
 
-  }, {
-    key: 'processPointerDown',
-    value: function processPointerDown(interactionEvent, displayObject, hit) {
-      var data = interactionEvent.data;
-      var id = interactionEvent.data.identifier;
-
-      if (hit) {
-        if (!displayObject.trackedPointers[id]) {
-          displayObject.trackedPointers[id] = new InteractionTrackingData(id);
+        if (this.autoPreventDefault && events[0].isNormalized) {
+          originalEvent.preventDefault();
         }
-        this.triggerEvent(displayObject, 'pointerdown', interactionEvent);
 
-        if (data.pointerType === 'touch') {
-          displayObject.started = true;
-          this.triggerEvent(displayObject, 'touchstart', interactionEvent);
-        } else if (data.pointerType === 'mouse' || data.pointerType === 'pen') {
-          var isRightButton = data.button === 2;
+        var eventLen = events.length;
 
-          if (isRightButton) {
-            displayObject.trackedPointers[id].rightDown = true;
-          } else {
-            displayObject.trackedPointers[id].leftDown = true;
+        for (var i = 0; i < eventLen; i++) {
+          var _event = events[i];
+          var interactionData = this.getInteractionDataForPointerId(_event);
+          var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event, interactionData);
+          interactionEvent.data.originalEvent = originalEvent;
+          this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerDown, true);
+          this.emit('pointerdown', interactionEvent);
+
+          if (_event.pointerType === 'touch') {
+            this.emit('touchstart', interactionEvent);
+          } else if (_event.pointerType === 'mouse' || _event.pointerType === 'pen') {
+            var isRightButton = _event.button === 2;
+            this.emit(isRightButton ? 'rightdown' : 'mousedown', this.eventData);
           }
-
-          this.triggerEvent(displayObject, isRightButton ? 'rightdown' : 'mousedown', interactionEvent);
         }
       }
-    }
+      /**
+       * Processes the result of the pointer down check and dispatches the event if need be
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+       * @param {Object3D} displayObject - The display object that was tested
+       * @param {boolean} hit - the result of the hit test on the display object
+       */
 
-    /**
-     * Is called when the pointer button is released on the renderer element
-     *
-     * @private
-     * @param {PointerEvent} originalEvent - The DOM event of a pointer button being released
-     * @param {boolean} cancelled - true if the pointer is cancelled
-     * @param {Function} func - Function passed to {@link processInteractive}
-     */
-
-  }, {
-    key: 'onPointerComplete',
-    value: function onPointerComplete(originalEvent, cancelled, func) {
-      var events = this.normalizeToPointerData(originalEvent);
-
-      var eventLen = events.length;
-
-      // if the event wasn't targeting our canvas, then consider it to be pointerupoutside
-      // in all cases (unless it was a pointercancel)
-      var eventAppend = originalEvent.target !== this.interactionDOMElement ? 'outside' : '';
-
-      for (var i = 0; i < eventLen; i++) {
-        var _event2 = events[i];
-
-        var interactionData = this.getInteractionDataForPointerId(_event2);
-
-        var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event2, interactionData);
-
-        interactionEvent.data.originalEvent = originalEvent;
-
-        // perform hit testing for events targeting our canvas or cancel events
-        this.processInteractive(interactionEvent, this.renderer.currentScene, func, cancelled || !eventAppend);
-
-        this.emit(cancelled ? 'pointercancel' : 'pointerup' + eventAppend, interactionEvent);
-
-        if (_event2.pointerType === 'mouse' || _event2.pointerType === 'pen') {
-          var isRightButton = _event2.button === 2;
-
-          this.emit(isRightButton ? 'rightup' + eventAppend : 'mouseup' + eventAppend, interactionEvent);
-        } else if (_event2.pointerType === 'touch') {
-          this.emit(cancelled ? 'touchcancel' : 'touchend' + eventAppend, interactionEvent);
-          this.releaseInteractionDataForPointerId(_event2.pointerId, interactionData);
-        }
-      }
-    }
-
-    /**
-     * Is called when the pointer button is cancelled
-     *
-     * @private
-     * @param {PointerEvent} event - The DOM event of a pointer button being released
-     */
-
-  }, {
-    key: 'onPointerCancel',
-    value: function onPointerCancel(event) {
-      // if we support touch events, then only use those for touch events, not pointer events
-      if (this.supportsTouchEvents && event.pointerType === 'touch') return;
-
-      this.onPointerComplete(event, true, this.processPointerCancel);
-    }
-
-    /**
-     * Processes the result of the pointer cancel check and dispatches the event if need be
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Object3D} displayObject - The display object that was tested
-     */
-
-  }, {
-    key: 'processPointerCancel',
-    value: function processPointerCancel(interactionEvent, displayObject) {
-      var data = interactionEvent.data;
-
-      var id = interactionEvent.data.identifier;
-
-      if (displayObject.trackedPointers[id] !== undefined) {
-        delete displayObject.trackedPointers[id];
-        this.triggerEvent(displayObject, 'pointercancel', interactionEvent);
-
-        if (data.pointerType === 'touch') {
-          this.triggerEvent(displayObject, 'touchcancel', interactionEvent);
-        }
-      }
-    }
-
-    /**
-     * Is called when the pointer button is released on the renderer element
-     *
-     * @private
-     * @param {PointerEvent} event - The DOM event of a pointer button being released
-     */
-
-  }, {
-    key: 'onPointerUp',
-    value: function onPointerUp(event) {
-      // if we support touch events, then only use those for touch events, not pointer events
-      if (this.supportsTouchEvents && event.pointerType === 'touch') return;
-
-      this.onPointerComplete(event, false, this.processPointerUp);
-    }
-
-    /**
-     * Processes the result of the pointer up check and dispatches the event if need be
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Object3D} displayObject - The display object that was tested
-     * @param {boolean} hit - the result of the hit test on the display object
-     */
-
-  }, {
-    key: 'processPointerUp',
-    value: function processPointerUp(interactionEvent, displayObject, hit) {
-      var data = interactionEvent.data;
-
-      var id = interactionEvent.data.identifier;
-
-      var trackingData = displayObject.trackedPointers[id];
-
-      var isTouch = data.pointerType === 'touch';
-
-      var isMouse = data.pointerType === 'mouse' || data.pointerType === 'pen';
-
-      // Mouse only
-      if (isMouse) {
-        var isRightButton = data.button === 2;
-
-        var flags = InteractionTrackingData.FLAGS;
-
-        var test = isRightButton ? flags.RIGHT_DOWN : flags.LEFT_DOWN;
-
-        var isDown = trackingData !== undefined && trackingData.flags & test;
+    }, {
+      key: "processPointerDown",
+      value: function processPointerDown(interactionEvent, displayObject, hit) {
+        var data = interactionEvent.data;
+        var id = interactionEvent.data.identifier;
 
         if (hit) {
-          this.triggerEvent(displayObject, isRightButton ? 'rightup' : 'mouseup', interactionEvent);
-
-          if (isDown) {
-            this.triggerEvent(displayObject, isRightButton ? 'rightclick' : 'leftclick', interactionEvent);
+          if (!displayObject.trackedPointers[id]) {
+            displayObject.trackedPointers[id] = new InteractionTrackingData(id);
           }
-        } else if (isDown) {
-          this.triggerEvent(displayObject, isRightButton ? 'rightupoutside' : 'mouseupoutside', interactionEvent);
-        }
-        // update the down state of the tracking data
-        if (trackingData) {
-          if (isRightButton) {
-            trackingData.rightDown = false;
-          } else {
-            trackingData.leftDown = false;
-          }
-        }
-      }
 
-      // Pointers and Touches, and Mouse
-      if (isTouch && displayObject.started) {
-        displayObject.started = false;
-        this.triggerEvent(displayObject, 'touchend', interactionEvent);
-      }
-      if (hit) {
-        this.triggerEvent(displayObject, 'pointerup', interactionEvent);
+          this.triggerEvent(displayObject, 'pointerdown', interactionEvent);
 
-        if (trackingData) {
-          this.triggerEvent(displayObject, 'pointertap', interactionEvent);
-          if (isTouch) {
-            this.triggerEvent(displayObject, 'tap', interactionEvent);
-            // touches are no longer over (if they ever were) when we get the touchend
-            // so we should ensure that we don't keep pretending that they are
-            trackingData.over = false;
+          if (data.pointerType === 'touch') {
+            displayObject.started = true;
+            this.triggerEvent(displayObject, 'touchstart', interactionEvent);
+          } else if (data.pointerType === 'mouse' || data.pointerType === 'pen') {
+            var isRightButton = data.button === 2;
+
+            if (isRightButton) {
+              displayObject.trackedPointers[id].rightDown = true;
+            } else {
+              displayObject.trackedPointers[id].leftDown = true;
+            }
+
+            this.triggerEvent(displayObject, isRightButton ? 'rightdown' : 'mousedown', interactionEvent);
           }
         }
-      } else if (trackingData) {
-        this.triggerEvent(displayObject, 'pointerupoutside', interactionEvent);
-        if (isTouch) this.triggerEvent(displayObject, 'touchendoutside', interactionEvent);
       }
-      // Only remove the tracking data if there is no over/down state still associated with it
-      if (trackingData && trackingData.none) {
-        delete displayObject.trackedPointers[id];
-      }
-    }
+      /**
+       * Is called when the pointer button is released on the renderer element
+       *
+       * @private
+       * @param {PointerEvent} originalEvent - The DOM event of a pointer button being released
+       * @param {boolean} cancelled - true if the pointer is cancelled
+       * @param {Function} func - Function passed to {@link processInteractive}
+       */
 
-    /**
-     * Is called when the pointer moves across the renderer element
-     *
-     * @private
-     * @param {PointerEvent} originalEvent - The DOM event of a pointer moving
-     */
+    }, {
+      key: "onPointerComplete",
+      value: function onPointerComplete(originalEvent, cancelled, func) {
+        var events = this.normalizeToPointerData(originalEvent);
+        var eventLen = events.length; // if the event wasn't targeting our canvas, then consider it to be pointerupoutside
+        // in all cases (unless it was a pointercancel)
 
-  }, {
-    key: 'onPointerMove',
-    value: function onPointerMove(originalEvent) {
-      // if we support touch events, then only use those for touch events, not pointer events
-      if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') return;
+        var eventAppend = originalEvent.target !== this.interactionDOMElement ? 'outside' : '';
 
-      var events = this.normalizeToPointerData(originalEvent);
+        for (var i = 0; i < eventLen; i++) {
+          var _event2 = events[i];
+          var interactionData = this.getInteractionDataForPointerId(_event2);
+          var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event2, interactionData);
+          interactionEvent.data.originalEvent = originalEvent; // perform hit testing for events targeting our canvas or cancel events
 
-      if (events[0].pointerType === 'mouse') {
-        this.didMove = true;
+          this.processInteractive(interactionEvent, this.renderer.currentScene, func, cancelled || !eventAppend);
+          this.emit(cancelled ? 'pointercancel' : "pointerup".concat(eventAppend), interactionEvent);
 
-        this.cursor = null;
-      }
-
-      var timeId = Date.now();
-      var eventLen = events.length;
-
-      for (var i = 0; i < eventLen; i++) {
-        var _event3 = events[i];
-
-        var interactionData = this.getInteractionDataForPointerId(_event3);
-
-        var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event3, interactionData);
-
-        interactionEvent.timeId = timeId;
-        interactionEvent.data.originalEvent = originalEvent;
-
-        var interactive = _event3.pointerType === 'touch' ? this.moveWhenInside : true;
-
-        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerMove, interactive);
-        this.emit('pointermove', interactionEvent);
-        if (_event3.pointerType === 'touch') this.emit('touchmove', interactionEvent);
-        if (_event3.pointerType === 'mouse' || _event3.pointerType === 'pen') this.emit('mousemove', interactionEvent);
-      }
-
-      if (events[0].pointerType === 'mouse') {
-        this.setCursorMode(this.cursor);
-
-        // TODO BUG for parents interactive object (border order issue)
-      }
-    }
-
-    /**
-     * Processes the result of the pointer move check and dispatches the event if need be
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Object3D} displayObject - The display object that was tested
-     * @param {boolean} hit - the result of the hit test on the display object
-     */
-
-  }, {
-    key: 'processPointerMove',
-    value: function processPointerMove(interactionEvent, displayObject, hit) {
-      var data = interactionEvent.data;
-
-      var isTouch = data.pointerType === 'touch';
-
-      var isMouse = data.pointerType === 'mouse' || data.pointerType === 'pen';
-
-      if (isMouse) {
-        this.processPointerOverOut(interactionEvent, displayObject, hit);
-      }
-
-      if (isTouch && displayObject.started) this.triggerEvent(displayObject, 'touchmove', interactionEvent);
-      if (!this.moveWhenInside || hit) {
-        this.triggerEvent(displayObject, 'pointermove', interactionEvent);
-        if (isMouse) this.triggerEvent(displayObject, 'mousemove', interactionEvent);
-      }
-    }
-
-    /**
-     * Is called when the pointer is moved out of the renderer element
-     *
-     * @private
-     * @param {PointerEvent} originalEvent - The DOM event of a pointer being moved out
-     */
-
-  }, {
-    key: 'onPointerOut',
-    value: function onPointerOut(originalEvent) {
-      // if we support touch events, then only use those for touch events, not pointer events
-      if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') return;
-
-      var events = this.normalizeToPointerData(originalEvent);
-
-      // Only mouse and pointer can call onPointerOut, so events will always be length 1
-      var event = events[0];
-
-      if (event.pointerType === 'mouse') {
-        this.mouseOverRenderer = false;
-        this.setCursorMode(null);
-      }
-
-      var interactionData = this.getInteractionDataForPointerId(event);
-
-      var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
-
-      interactionEvent.data.originalEvent = event;
-
-      this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, false);
-
-      this.emit('pointerout', interactionEvent);
-      if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
-        this.emit('mouseout', interactionEvent);
-      } else {
-        // we can get touchleave events after touchend, so we want to make sure we don't
-        // introduce memory leaks
-        this.releaseInteractionDataForPointerId(interactionData.identifier);
-      }
-    }
-
-    /**
-     * Processes the result of the pointer over/out check and dispatches the event if need be
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
-     * @param {Object3D} displayObject - The display object that was tested
-     * @param {boolean} hit - the result of the hit test on the display object
-     */
-
-  }, {
-    key: 'processPointerOverOut',
-    value: function processPointerOverOut(interactionEvent, displayObject, hit) {
-      var data = interactionEvent.data;
-
-      var id = interactionEvent.data.identifier;
-
-      var isMouse = data.pointerType === 'mouse' || data.pointerType === 'pen';
-
-      var trackingData = displayObject.trackedPointers[id];
-
-      // if we just moused over the display object, then we need to track that state
-      if (hit && !trackingData) {
-        trackingData = displayObject.trackedPointers[id] = new InteractionTrackingData(id);
-      }
-
-      if (trackingData === undefined) return;
-
-      if (hit && this.mouseOverRenderer) {
-        if (!trackingData.over) {
-          trackingData.over = true;
-          this.triggerEvent(displayObject, 'pointerover', interactionEvent);
-          if (isMouse) {
-            this.triggerEvent(displayObject, 'mouseover', interactionEvent);
+          if (_event2.pointerType === 'mouse' || _event2.pointerType === 'pen') {
+            var isRightButton = _event2.button === 2;
+            this.emit(isRightButton ? "rightup".concat(eventAppend) : "mouseup".concat(eventAppend), interactionEvent);
+          } else if (_event2.pointerType === 'touch') {
+            this.emit(cancelled ? 'touchcancel' : "touchend".concat(eventAppend), interactionEvent);
+            this.releaseInteractionDataForPointerId(_event2.pointerId, interactionData);
           }
         }
+      }
+      /**
+       * Is called when the pointer button is cancelled
+       *
+       * @private
+       * @param {PointerEvent} event - The DOM event of a pointer button being released
+       */
 
-        // only change the cursor if it has not already been changed (by something deeper in the
-        // display tree)
-        if (isMouse && this.cursor === null) {
-          this.cursor = displayObject.cursor;
+    }, {
+      key: "onPointerCancel",
+      value: function onPointerCancel(event) {
+        // if we support touch events, then only use those for touch events, not pointer events
+        if (this.supportsTouchEvents && event.pointerType === 'touch') return;
+        this.onPointerComplete(event, true, this.processPointerCancel);
+      }
+      /**
+       * Processes the result of the pointer cancel check and dispatches the event if need be
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+       * @param {Object3D} displayObject - The display object that was tested
+       */
+
+    }, {
+      key: "processPointerCancel",
+      value: function processPointerCancel(interactionEvent, displayObject) {
+        var data = interactionEvent.data;
+        var id = interactionEvent.data.identifier;
+
+        if (displayObject.trackedPointers[id] !== undefined) {
+          delete displayObject.trackedPointers[id];
+          this.triggerEvent(displayObject, 'pointercancel', interactionEvent);
+
+          if (data.pointerType === 'touch') {
+            this.triggerEvent(displayObject, 'touchcancel', interactionEvent);
+          }
         }
-      } else if (trackingData.over) {
-        trackingData.over = false;
-        this.triggerEvent(displayObject, 'pointerout', this.eventData);
+      }
+      /**
+       * Is called when the pointer button is released on the renderer element
+       *
+       * @private
+       * @param {PointerEvent} event - The DOM event of a pointer button being released
+       */
+
+    }, {
+      key: "onPointerUp",
+      value: function onPointerUp(event) {
+        // if we support touch events, then only use those for touch events, not pointer events
+        if (this.supportsTouchEvents && event.pointerType === 'touch') return;
+        this.onPointerComplete(event, false, this.processPointerUp);
+      }
+      /**
+       * Processes the result of the pointer up check and dispatches the event if need be
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+       * @param {Object3D} displayObject - The display object that was tested
+       * @param {boolean} hit - the result of the hit test on the display object
+       */
+
+    }, {
+      key: "processPointerUp",
+      value: function processPointerUp(interactionEvent, displayObject, hit) {
+        var data = interactionEvent.data;
+        var id = interactionEvent.data.identifier;
+        var trackingData = displayObject.trackedPointers[id];
+        var isTouch = data.pointerType === 'touch';
+        var isMouse = data.pointerType === 'mouse' || data.pointerType === 'pen'; // Mouse only
+
         if (isMouse) {
-          this.triggerEvent(displayObject, 'mouseout', interactionEvent);
+          var isRightButton = data.button === 2;
+          var flags = InteractionTrackingData.FLAGS;
+          var test = isRightButton ? flags.RIGHT_DOWN : flags.LEFT_DOWN;
+          var isDown = trackingData !== undefined && trackingData.flags & test;
+
+          if (hit) {
+            this.triggerEvent(displayObject, isRightButton ? 'rightup' : 'mouseup', interactionEvent);
+
+            if (isDown) {
+              this.triggerEvent(displayObject, isRightButton ? 'rightclick' : 'leftclick', interactionEvent);
+            }
+          } else if (isDown) {
+            this.triggerEvent(displayObject, isRightButton ? 'rightupoutside' : 'mouseupoutside', interactionEvent);
+          } // update the down state of the tracking data
+
+
+          if (trackingData) {
+            if (isRightButton) {
+              trackingData.rightDown = false;
+            } else {
+              trackingData.leftDown = false;
+            }
+          }
+        } // Pointers and Touches, and Mouse
+
+
+        if (isTouch && displayObject.started) {
+          displayObject.started = false;
+          this.triggerEvent(displayObject, 'touchend', interactionEvent);
         }
-        // if there is no mouse down information for the pointer, then it is safe to delete
-        if (trackingData.none) {
+
+        if (hit) {
+          this.triggerEvent(displayObject, 'pointerup', interactionEvent);
+
+          if (trackingData) {
+            this.triggerEvent(displayObject, 'pointertap', interactionEvent);
+
+            if (isTouch) {
+              this.triggerEvent(displayObject, 'tap', interactionEvent); // touches are no longer over (if they ever were) when we get the touchend
+              // so we should ensure that we don't keep pretending that they are
+
+              trackingData.over = false;
+            }
+          }
+        } else if (trackingData) {
+          this.triggerEvent(displayObject, 'pointerupoutside', interactionEvent);
+          if (isTouch) this.triggerEvent(displayObject, 'touchendoutside', interactionEvent);
+        } // Only remove the tracking data if there is no over/down state still associated with it
+
+
+        if (trackingData && trackingData.none) {
           delete displayObject.trackedPointers[id];
         }
       }
-    }
+      /**
+       * Is called when the pointer moves across the renderer element
+       *
+       * @private
+       * @param {PointerEvent} originalEvent - The DOM event of a pointer moving
+       */
 
-    /**
-     * Is called when the pointer is moved into the renderer element
-     *
-     * @private
-     * @param {PointerEvent} originalEvent - The DOM event of a pointer button being moved into the renderer view
-     */
+    }, {
+      key: "onPointerMove",
+      value: function onPointerMove(originalEvent) {
+        // if we support touch events, then only use those for touch events, not pointer events
+        if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') return;
+        var events = this.normalizeToPointerData(originalEvent);
 
-  }, {
-    key: 'onPointerOver',
-    value: function onPointerOver(originalEvent) {
-      var events = this.normalizeToPointerData(originalEvent);
-
-      // Only mouse and pointer can call onPointerOver, so events will always be length 1
-      var event = events[0];
-
-      var interactionData = this.getInteractionDataForPointerId(event);
-
-      var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
-
-      interactionEvent.data.originalEvent = event;
-
-      if (event.pointerType === 'mouse') {
-        this.mouseOverRenderer = true;
-      }
-
-      this.emit('pointerover', interactionEvent);
-      if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
-        this.emit('mouseover', interactionEvent);
-      }
-    }
-
-    /**
-     * Get InteractionData for a given pointerId. Store that data as well
-     *
-     * @private
-     * @param {PointerEvent} event - Normalized pointer event, output from normalizeToPointerData
-     * @return {InteractionData} - Interaction data for the given pointer identifier
-     */
-
-  }, {
-    key: 'getInteractionDataForPointerId',
-    value: function getInteractionDataForPointerId(event) {
-      var pointerId = event.pointerId;
-
-      var interactionData = void 0;
-
-      if (pointerId === MOUSE_POINTER_ID || event.pointerType === 'mouse') {
-        interactionData = this.mouse;
-      } else if (this.activeInteractionData[pointerId]) {
-        interactionData = this.activeInteractionData[pointerId];
-      } else {
-        interactionData = this.interactionDataPool.pop() || new InteractionData();
-        interactionData.identifier = pointerId;
-        this.activeInteractionData[pointerId] = interactionData;
-      }
-      // copy properties from the event, so that we can make sure that touch/pointer specific
-      // data is available
-      interactionData._copyEvent(event);
-
-      return interactionData;
-    }
-
-    /**
-     * Return unused InteractionData to the pool, for a given pointerId
-     *
-     * @private
-     * @param {number} pointerId - Identifier from a pointer event
-     */
-
-  }, {
-    key: 'releaseInteractionDataForPointerId',
-    value: function releaseInteractionDataForPointerId(pointerId) {
-      var interactionData = this.activeInteractionData[pointerId];
-
-      if (interactionData) {
-        delete this.activeInteractionData[pointerId];
-        interactionData._reset();
-        this.interactionDataPool.push(interactionData);
-      }
-    }
-
-    /**
-     * Configure an InteractionEvent to wrap a DOM PointerEvent and InteractionData
-     *
-     * @private
-     * @param {InteractionEvent} interactionEvent - The event to be configured
-     * @param {PointerEvent} pointerEvent - The DOM event that will be paired with the InteractionEvent
-     * @param {InteractionData} interactionData - The InteractionData that will be paired
-     *        with the InteractionEvent
-     * @return {InteractionEvent} the interaction event that was passed in
-     */
-
-  }, {
-    key: 'configureInteractionEventForDOMEvent',
-    value: function configureInteractionEventForDOMEvent(interactionEvent, pointerEvent, interactionData) {
-      interactionEvent.data = interactionData;
-
-      this.mapPositionToPoint(interactionData, pointerEvent.clientX, pointerEvent.clientY);
-
-      // this.raycaster.setFromCamera(interactionData.global, this.camera);
-
-      // Not really sure why this is happening, but it's how a previous version handled things TODO: there should be remove
-      if (pointerEvent.pointerType === 'touch') {
-        pointerEvent.globalX = interactionData.global.x;
-        pointerEvent.globalY = interactionData.global.y;
-      }
-
-      interactionData.originalEvent = pointerEvent;
-      interactionEvent._reset();
-
-      return interactionEvent;
-    }
-
-    /**
-     * Ensures that the original event object contains all data that a regular pointer event would have
-     *
-     * @private
-     * @param {TouchEvent|MouseEvent|PointerEvent} event - The original event data from a touch or mouse event
-     * @return {PointerEvent[]} An array containing a single normalized pointer event, in the case of a pointer
-     *  or mouse event, or a multiple normalized pointer events if there are multiple changed touches
-     */
-
-  }, {
-    key: 'normalizeToPointerData',
-    value: function normalizeToPointerData(event) {
-      var normalizedEvents = [];
-
-      if (this.supportsTouchEvents && event instanceof TouchEvent) {
-        for (var i = 0, li = event.changedTouches.length; i < li; i++) {
-          var touch = event.changedTouches[i];
-
-          if (typeof touch.button === 'undefined') touch.button = event.touches.length ? 1 : 0;
-          if (typeof touch.buttons === 'undefined') touch.buttons = event.touches.length ? 1 : 0;
-          if (typeof touch.isPrimary === 'undefined') {
-            touch.isPrimary = event.touches.length === 1 && event.type === 'touchstart';
-          }
-          if (typeof touch.width === 'undefined') touch.width = touch.radiusX || 1;
-          if (typeof touch.height === 'undefined') touch.height = touch.radiusY || 1;
-          if (typeof touch.tiltX === 'undefined') touch.tiltX = 0;
-          if (typeof touch.tiltY === 'undefined') touch.tiltY = 0;
-          if (typeof touch.pointerType === 'undefined') touch.pointerType = 'touch';
-          if (typeof touch.pointerId === 'undefined') touch.pointerId = touch.identifier || 0;
-          if (typeof touch.pressure === 'undefined') touch.pressure = touch.force || 0.5;
-          touch.twist = 0;
-          touch.tangentialPressure = 0;
-          // TODO: Remove these, as layerX/Y is not a standard, is deprecated, has uneven
-          // support, and the fill ins are not quite the same
-          // offsetX/Y might be okay, but is not the same as clientX/Y when the canvas's top
-          // left is not 0,0 on the page
-          if (typeof touch.layerX === 'undefined') touch.layerX = touch.offsetX = touch.clientX;
-          if (typeof touch.layerY === 'undefined') touch.layerY = touch.offsetY = touch.clientY;
-
-          // mark the touch as normalized, just so that we know we did it
-          touch.isNormalized = true;
-
-          normalizedEvents.push(touch);
+        if (events[0].pointerType === 'mouse') {
+          this.didMove = true;
+          this.cursor = null;
         }
-      } else if (event instanceof MouseEvent && (!this.supportsPointerEvents || !(event instanceof window.PointerEvent))) {
-        if (typeof event.isPrimary === 'undefined') event.isPrimary = true;
-        if (typeof event.width === 'undefined') event.width = 1;
-        if (typeof event.height === 'undefined') event.height = 1;
-        if (typeof event.tiltX === 'undefined') event.tiltX = 0;
-        if (typeof event.tiltY === 'undefined') event.tiltY = 0;
-        if (typeof event.pointerType === 'undefined') event.pointerType = 'mouse';
-        if (typeof event.pointerId === 'undefined') event.pointerId = MOUSE_POINTER_ID;
-        if (typeof event.pressure === 'undefined') event.pressure = 0.5;
-        event.twist = 0;
-        event.tangentialPressure = 0;
 
-        // mark the mouse event as normalized, just so that we know we did it
-        event.isNormalized = true;
+        var timeId = Date.now();
+        var eventLen = events.length;
 
-        normalizedEvents.push(event);
-      } else {
-        normalizedEvents.push(event);
+        for (var i = 0; i < eventLen; i++) {
+          var _event3 = events[i];
+          var interactionData = this.getInteractionDataForPointerId(_event3);
+          var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, _event3, interactionData);
+          interactionEvent.timeId = timeId;
+          interactionEvent.data.originalEvent = originalEvent;
+          var interactive = _event3.pointerType === 'touch' ? this.moveWhenInside : true;
+          this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerMove, interactive);
+          this.emit('pointermove', interactionEvent);
+          if (_event3.pointerType === 'touch') this.emit('touchmove', interactionEvent);
+          if (_event3.pointerType === 'mouse' || _event3.pointerType === 'pen') this.emit('mousemove', interactionEvent);
+        }
+
+        if (events[0].pointerType === 'mouse') {
+          this.setCursorMode(this.cursor); // TODO BUG for parents interactive object (border order issue)
+        }
       }
+      /**
+       * Processes the result of the pointer move check and dispatches the event if need be
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+       * @param {Object3D} displayObject - The display object that was tested
+       * @param {boolean} hit - the result of the hit test on the display object
+       */
 
-      return normalizedEvents;
-    }
+    }, {
+      key: "processPointerMove",
+      value: function processPointerMove(interactionEvent, displayObject, hit) {
+        var data = interactionEvent.data;
+        var isTouch = data.pointerType === 'touch';
+        var isMouse = data.pointerType === 'mouse' || data.pointerType === 'pen';
+
+        if (isMouse) {
+          this.processPointerOverOut(interactionEvent, displayObject, hit);
+        }
+
+        if (isTouch && displayObject.started) this.triggerEvent(displayObject, 'touchmove', interactionEvent);
+
+        if (!this.moveWhenInside || hit) {
+          this.triggerEvent(displayObject, 'pointermove', interactionEvent);
+          if (isMouse) this.triggerEvent(displayObject, 'mousemove', interactionEvent);
+        }
+      }
+      /**
+       * Is called when the pointer is moved out of the renderer element
+       *
+       * @private
+       * @param {PointerEvent} originalEvent - The DOM event of a pointer being moved out
+       */
+
+    }, {
+      key: "onPointerOut",
+      value: function onPointerOut(originalEvent) {
+        // if we support touch events, then only use those for touch events, not pointer events
+        if (this.supportsTouchEvents && originalEvent.pointerType === 'touch') return;
+        var events = this.normalizeToPointerData(originalEvent); // Only mouse and pointer can call onPointerOut, so events will always be length 1
+
+        var event = events[0];
+
+        if (event.pointerType === 'mouse') {
+          this.mouseOverRenderer = false;
+          this.setCursorMode(null);
+        }
+
+        var interactionData = this.getInteractionDataForPointerId(event);
+        var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
+        interactionEvent.data.originalEvent = event;
+        this.processInteractive(interactionEvent, this.renderer.currentScene, this.processPointerOverOut, false);
+        this.emit('pointerout', interactionEvent);
+
+        if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+          this.emit('mouseout', interactionEvent);
+        } else {
+          // we can get touchleave events after touchend, so we want to make sure we don't
+          // introduce memory leaks
+          this.releaseInteractionDataForPointerId(interactionData.identifier);
+        }
+      }
+      /**
+       * Processes the result of the pointer over/out check and dispatches the event if need be
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The interaction event wrapping the DOM event
+       * @param {Object3D} displayObject - The display object that was tested
+       * @param {boolean} hit - the result of the hit test on the display object
+       */
+
+    }, {
+      key: "processPointerOverOut",
+      value: function processPointerOverOut(interactionEvent, displayObject, hit) {
+        var data = interactionEvent.data;
+        var id = interactionEvent.data.identifier;
+        var isMouse = data.pointerType === 'mouse' || data.pointerType === 'pen';
+        var trackingData = displayObject.trackedPointers[id]; // if we just moused over the display object, then we need to track that state
+
+        if (hit && !trackingData) {
+          trackingData = displayObject.trackedPointers[id] = new InteractionTrackingData(id);
+        }
+
+        if (trackingData === undefined) return;
+
+        if (hit && this.mouseOverRenderer) {
+          if (!trackingData.over) {
+            trackingData.over = true;
+            this.triggerEvent(displayObject, 'pointerover', interactionEvent);
+
+            if (isMouse) {
+              this.triggerEvent(displayObject, 'mouseover', interactionEvent);
+            }
+          } // only change the cursor if it has not already been changed (by something deeper in the
+          // display tree)
+
+
+          if (isMouse && this.cursor === null) {
+            this.cursor = displayObject.cursor;
+          }
+        } else if (trackingData.over) {
+          trackingData.over = false;
+          this.triggerEvent(displayObject, 'pointerout', this.eventData);
+
+          if (isMouse) {
+            this.triggerEvent(displayObject, 'mouseout', interactionEvent);
+          } // if there is no mouse down information for the pointer, then it is safe to delete
+
+
+          if (trackingData.none) {
+            delete displayObject.trackedPointers[id];
+          }
+        }
+      }
+      /**
+       * Is called when the pointer is moved into the renderer element
+       *
+       * @private
+       * @param {PointerEvent} originalEvent - The DOM event of a pointer button being moved into the renderer view
+       */
+
+    }, {
+      key: "onPointerOver",
+      value: function onPointerOver(originalEvent) {
+        var events = this.normalizeToPointerData(originalEvent); // Only mouse and pointer can call onPointerOver, so events will always be length 1
+
+        var event = events[0];
+        var interactionData = this.getInteractionDataForPointerId(event);
+        var interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
+        interactionEvent.data.originalEvent = event;
+
+        if (event.pointerType === 'mouse') {
+          this.mouseOverRenderer = true;
+        }
+
+        this.emit('pointerover', interactionEvent);
+
+        if (event.pointerType === 'mouse' || event.pointerType === 'pen') {
+          this.emit('mouseover', interactionEvent);
+        }
+      }
+      /**
+       * Get InteractionData for a given pointerId. Store that data as well
+       *
+       * @private
+       * @param {PointerEvent} event - Normalized pointer event, output from normalizeToPointerData
+       * @return {InteractionData} - Interaction data for the given pointer identifier
+       */
+
+    }, {
+      key: "getInteractionDataForPointerId",
+      value: function getInteractionDataForPointerId(event) {
+        var pointerId = event.pointerId;
+        var interactionData;
+
+        if (pointerId === MOUSE_POINTER_ID || event.pointerType === 'mouse') {
+          interactionData = this.mouse;
+        } else if (this.activeInteractionData[pointerId]) {
+          interactionData = this.activeInteractionData[pointerId];
+        } else {
+          interactionData = this.interactionDataPool.pop() || new InteractionData();
+          interactionData.identifier = pointerId;
+          this.activeInteractionData[pointerId] = interactionData;
+        } // copy properties from the event, so that we can make sure that touch/pointer specific
+        // data is available
+
+
+        interactionData._copyEvent(event);
+
+        return interactionData;
+      }
+      /**
+       * Return unused InteractionData to the pool, for a given pointerId
+       *
+       * @private
+       * @param {number} pointerId - Identifier from a pointer event
+       */
+
+    }, {
+      key: "releaseInteractionDataForPointerId",
+      value: function releaseInteractionDataForPointerId(pointerId) {
+        var interactionData = this.activeInteractionData[pointerId];
+
+        if (interactionData) {
+          delete this.activeInteractionData[pointerId];
+
+          interactionData._reset();
+
+          this.interactionDataPool.push(interactionData);
+        }
+      }
+      /**
+       * Configure an InteractionEvent to wrap a DOM PointerEvent and InteractionData
+       *
+       * @private
+       * @param {InteractionEvent} interactionEvent - The event to be configured
+       * @param {PointerEvent} pointerEvent - The DOM event that will be paired with the InteractionEvent
+       * @param {InteractionData} interactionData - The InteractionData that will be paired
+       *        with the InteractionEvent
+       * @return {InteractionEvent} the interaction event that was passed in
+       */
+
+    }, {
+      key: "configureInteractionEventForDOMEvent",
+      value: function configureInteractionEventForDOMEvent(interactionEvent, pointerEvent, interactionData) {
+        interactionEvent.data = interactionData;
+        this.mapPositionToPoint(interactionData, pointerEvent.clientX, pointerEvent.clientY); // this.raycaster.setFromCamera(interactionData.global, this.camera);
+        // Not really sure why this is happening, but it's how a previous version handled things TODO: there should be remove
+
+        if (pointerEvent.pointerType === 'touch') {
+          pointerEvent.globalX = interactionData.global.x;
+          pointerEvent.globalY = interactionData.global.y;
+        }
+
+        interactionData.originalEvent = pointerEvent;
+
+        interactionEvent._reset();
+
+        return interactionEvent;
+      }
+      /**
+       * Ensures that the original event object contains all data that a regular pointer event would have
+       *
+       * @private
+       * @param {TouchEvent|MouseEvent|PointerEvent} event - The original event data from a touch or mouse event
+       * @return {PointerEvent[]} An array containing a single normalized pointer event, in the case of a pointer
+       *  or mouse event, or a multiple normalized pointer events if there are multiple changed touches
+       */
+
+    }, {
+      key: "normalizeToPointerData",
+      value: function normalizeToPointerData(event) {
+        var normalizedEvents = [];
+
+        if (this.supportsTouchEvents && event instanceof TouchEvent) {
+          for (var i = 0, li = event.changedTouches.length; i < li; i++) {
+            var touch = event.changedTouches[i];
+            if (typeof touch.button === 'undefined') touch.button = event.touches.length ? 1 : 0;
+            if (typeof touch.buttons === 'undefined') touch.buttons = event.touches.length ? 1 : 0;
+
+            if (typeof touch.isPrimary === 'undefined') {
+              touch.isPrimary = event.touches.length === 1 && event.type === 'touchstart';
+            }
+
+            if (typeof touch.width === 'undefined') touch.width = touch.radiusX || 1;
+            if (typeof touch.height === 'undefined') touch.height = touch.radiusY || 1;
+            if (typeof touch.tiltX === 'undefined') touch.tiltX = 0;
+            if (typeof touch.tiltY === 'undefined') touch.tiltY = 0;
+            if (typeof touch.pointerType === 'undefined') touch.pointerType = 'touch';
+            if (typeof touch.pointerId === 'undefined') touch.pointerId = touch.identifier || 0;
+            if (typeof touch.pressure === 'undefined') touch.pressure = touch.force || 0.5;
+            touch.twist = 0;
+            touch.tangentialPressure = 0; // TODO: Remove these, as layerX/Y is not a standard, is deprecated, has uneven
+            // support, and the fill ins are not quite the same
+            // offsetX/Y might be okay, but is not the same as clientX/Y when the canvas's top
+            // left is not 0,0 on the page
+
+            if (typeof touch.layerX === 'undefined') touch.layerX = touch.offsetX = touch.clientX;
+            if (typeof touch.layerY === 'undefined') touch.layerY = touch.offsetY = touch.clientY; // mark the touch as normalized, just so that we know we did it
+
+            touch.isNormalized = true;
+            normalizedEvents.push(touch);
+          }
+        } else if (event instanceof MouseEvent && (!this.supportsPointerEvents || !(event instanceof window.PointerEvent))) {
+          if (typeof event.isPrimary === 'undefined') event.isPrimary = true;
+          if (typeof event.width === 'undefined') event.width = 1;
+          if (typeof event.height === 'undefined') event.height = 1;
+          if (typeof event.tiltX === 'undefined') event.tiltX = 0;
+          if (typeof event.tiltY === 'undefined') event.tiltY = 0;
+          if (typeof event.pointerType === 'undefined') event.pointerType = 'mouse';
+          if (typeof event.pointerId === 'undefined') event.pointerId = MOUSE_POINTER_ID;
+          if (typeof event.pressure === 'undefined') event.pressure = 0.5;
+          event.twist = 0;
+          event.tangentialPressure = 0; // mark the mouse event as normalized, just so that we know we did it
+
+          event.isNormalized = true;
+          normalizedEvents.push(event);
+        } else {
+          normalizedEvents.push(event);
+        }
+
+        return normalizedEvents;
+      }
+      /**
+       * Destroys the interaction manager
+       *
+       */
+
+    }, {
+      key: "destroy",
+      value: function destroy() {
+        this.removeEvents();
+        this.removeAllListeners();
+        this.renderer = null;
+        this.mouse = null;
+        this.eventData = null;
+        this.interactionDOMElement = null;
+        this.onPointerDown = null;
+        this.processPointerDown = null;
+        this.onPointerUp = null;
+        this.processPointerUp = null;
+        this.onPointerCancel = null;
+        this.processPointerCancel = null;
+        this.onPointerMove = null;
+        this.processPointerMove = null;
+        this.onPointerOut = null;
+        this.processPointerOverOut = null;
+        this.onPointerOver = null;
+        this._tempPoint = null;
+      }
+    }]);
+
+    return InteractionManager;
+  }(Eventer);
+
+  /**
+   * @param {object} options 舞台的配置项
+   * @param {string} options.dom 舞台要附着的`canvas`元素
+   * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
+   * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
+   * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
+   * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
+   * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
+   */
+
+  function Renderer(options) {
+    var _this = this;
 
     /**
-     * Destroys the interaction manager
+     * 场景的canvas的dom
      *
+     * @member {CANVAS}
+     */
+    this.canvas = Utils.isString(options.dom) ? document.getElementById(options.dom) || document.querySelector(options.dom) : options.dom;
+    this.realWidth = options.width || this.canvas.width;
+    this.realHeight = options.height || this.canvas.height;
+    /**
+     * 场景的canvas的绘图环境
+     *
+     * @member {context2d}
      */
 
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      this.removeEvents();
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.style.backgroundColor = options.backgroundColor || 'transparent';
+    /**
+     * 场景是否自动清除上一帧的像素内容
+     *
+     * @member {Boolean}
+     */
 
-      this.removeAllListeners();
+    this.autoClear = true;
+    /**
+     * 场景是否应用style控制宽高
+     *
+     * @member {Boolean}
+     */
 
-      this.renderer = null;
+    this.autoStyle = false;
+    /**
+     * 整个场景的初始矩阵
+     */
 
-      this.mouse = null;
+    this.rootMatrix = new Matrix$1();
+    /**
+     * 场景分辨率
+     *
+     * @member {Number}
+     * @private
+     */
 
-      this.eventData = null;
+    this._resolution = 0;
+    /**
+     * 场景分辨率
+     *
+     * @member {Number}
+     */
 
-      this.interactionDOMElement = null;
+    this.resolution = options.resolution || 1;
+    /**
+     * canvas的宽度
+     *
+     * @member {Number}
+     */
 
-      this.onPointerDown = null;
-      this.processPointerDown = null;
+    this.width = this.canvas.width = this.realWidth * this.resolution;
+    /**
+     * canvas的高度
+     *
+     * @member {Number}
+     */
 
-      this.onPointerUp = null;
-      this.processPointerUp = null;
+    this.height = this.canvas.height = this.realHeight * this.resolution;
+    this.interactionManager = new InteractionManager(this);
+    /**
+     * 舞台是否可交互
+     *
+     * @member {Boolean}
+     * @private
+     */
 
-      this.onPointerCancel = null;
-      this.processPointerCancel = null;
+    this._enableinteractive = null; // update interaction in every tick
 
-      this.onPointerMove = null;
-      this.processPointerMove = null;
+    var interactionUpdate = function interactionUpdate(snippet) {
+      _this.interactionManager.update(snippet);
+    };
 
-      this.onPointerOut = null;
-      this.processPointerOverOut = null;
+    this.interactiveOnChange = function () {
+      if (this.enableinteractive) {
+        this.on('prerender', interactionUpdate);
+        this.interactionManager.addEvents();
+      } else {
+        this.off('prerender', interactionUpdate);
+        this.interactionManager.removeEvents();
+      }
+    };
 
-      this.onPointerOver = null;
+    this.enableinteractive = Utils.isBoolean(options.interactive) ? options.interactive : true;
+    this.currentScene = null;
+  }
 
-      this._tempPoint = null;
-    }
-  }]);
-  return InteractionManager;
-}(Eventer);
-
-/**
- * @param {object} options 舞台的配置项
- * @param {string} options.dom 舞台要附着的`canvas`元素
- * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
- * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
- * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
- * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
- * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
- */
-function Renderer(options) {
-  var _this = this;
-
-  /**
-   * 场景的canvas的dom
-   *
-   * @member {CANVAS}
-   */
-  this.canvas = Utils.isString(options.dom) ? document.getElementById(options.dom) || document.querySelector(options.dom) : options.dom;
-
-  this.realWidth = options.width || this.canvas.width;
-  this.realHeight = options.height || this.canvas.height;
-
-  /**
-   * 场景的canvas的绘图环境
-   *
-   * @member {context2d}
-   */
-  this.ctx = this.canvas.getContext('2d');
-  this.canvas.style.backgroundColor = options.backgroundColor || 'transparent';
-
-  /**
-   * 场景是否自动清除上一帧的像素内容
-   *
-   * @member {Boolean}
-   */
-  this.autoClear = true;
-
-  /**
-   * 场景是否应用style控制宽高
-   *
-   * @member {Boolean}
-   */
-  this.autoStyle = false;
-
-  /**
-   * 整个场景的初始矩阵
-   */
-  this.rootMatrix = new Matrix$2();
-
-  /**
-   * 场景分辨率
-   *
-   * @member {Number}
-   * @private
-   */
-  this._resolution = 0;
-
-  /**
-   * 场景分辨率
-   *
-   * @member {Number}
-   */
-  this.resolution = options.resolution || 1;
-
-  /**
-   * canvas的宽度
-   *
-   * @member {Number}
-   */
-  this.width = this.canvas.width = this.realWidth * this.resolution;
-
-  /**
-   * canvas的高度
-   *
-   * @member {Number}
-   */
-  this.height = this.canvas.height = this.realHeight * this.resolution;
-
-  this.interactionManager = new InteractionManager(this);
-
-  /**
-   * 舞台是否可交互
-   *
-   * @member {Boolean}
-   * @private
-   */
-  this._enableinteractive = null;
-
-  // update interaction in every tick
-  var interactionUpdate = function interactionUpdate(snippet) {
-    _this.interactionManager.update(snippet);
+  Renderer.prototype.clear = function () {
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.clearRect(0, 0, this.width, this.height);
   };
 
-  this.interactiveOnChange = function () {
-    if (this.enableinteractive) {
-      this.on('prerender', interactionUpdate);
-      this.interactionManager.addEvents();
+  Renderer.prototype.render = function (scene, snippet) {
+    this.currentScene = scene;
+    this.emit('preupdate', snippet);
+    this.currentScene.updateTimeline(snippet);
+    this.currentScene.updatePosture(this.rootMatrix);
+    this.emit('postupdate', snippet);
+    this.emit('prerender', snippet);
+    if (this.autoClear) this.clear();
+    this.currentScene.render(this.ctx);
+    this.emit('postrender', snippet);
+  };
+  /**
+   * 舞台尺寸设置
+   *
+   * @param {number} w canvas的width值
+   * @param {number} h canvas的height值
+   */
+
+
+  Renderer.prototype.resize = function (w, h) {
+    if (Utils.isNumber(w) && Utils.isNumber(h)) {
+      this.realWidth = w;
+      this.realHeight = h;
     } else {
-      this.off('prerender', interactionUpdate);
-      this.interactionManager.removeEvents();
+      w = this.realWidth;
+      h = this.realHeight;
     }
+
+    this.width = this.canvas.width = w * this.resolution;
+    this.height = this.canvas.height = h * this.resolution;
   };
+  /**
+   * proxy this.interactionManager event-emit
+   * Emit an event to all registered event listeners.
+   *
+   * @param {String} event The name of the event.
+   */
 
-  this.enableinteractive = Utils.isBoolean(options.interactive) ? options.interactive : true;
 
-  this.currentScene = null;
-}
+  Renderer.prototype.emit = function () {
+    var _this$interactionMana;
 
-Renderer.prototype.clear = function () {
-  this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-  this.ctx.clearRect(0, 0, this.width, this.height);
-};
+    (_this$interactionMana = this.interactionManager).emit.apply(_this$interactionMana, arguments);
+  };
+  /**
+   * proxy this.interactionManager event-on
+   * Register a new EventListener for the given event.
+   *
+   * @param {String} event Name of the event.
+   * @param {Function} fn Callback function.
+   * @param {Mixed} [context=this] The context of the function.
+   */
 
-Renderer.prototype.render = function (scene, snippet) {
-  this.currentScene = scene;
 
-  this.emit('preupdate', snippet);
-  this.currentScene.updateTimeline(snippet);
-  this.currentScene.updatePosture(this.rootMatrix);
-  this.emit('postupdate', snippet);
+  Renderer.prototype.on = function () {
+    var _this$interactionMana2;
 
-  this.emit('prerender', snippet);
-  if (this.autoClear) this.clear();
-  this.currentScene.render(this.ctx);
-  this.emit('postrender', snippet);
-};
+    (_this$interactionMana2 = this.interactionManager).on.apply(_this$interactionMana2, arguments);
+  };
+  /**
+   * proxy this.interactionManager event-once
+   * Add an EventListener that's only called once.
+   *
+   * @param {String} event Name of the event.
+   * @param {Function} fn Callback function.
+   * @param {Mixed} [context=this] The context of the function.
+   */
 
-/**
- * 舞台尺寸设置
- *
- * @param {number} w canvas的width值
- * @param {number} h canvas的height值
- */
-Renderer.prototype.resize = function (w, h) {
-  if (Utils.isNumber(w) && Utils.isNumber(h)) {
-    this.realWidth = w;
-    this.realHeight = h;
-  } else {
-    w = this.realWidth;
-    h = this.realHeight;
-  }
-  this.width = this.canvas.width = w * this.resolution;
-  this.height = this.canvas.height = h * this.resolution;
-};
 
-/**
- * proxy this.interactionManager event-emit
- * Emit an event to all registered event listeners.
- *
- * @param {String} event The name of the event.
- */
-Renderer.prototype.emit = function () {
-  var _interactionManager;
+  Renderer.prototype.once = function () {
+    var _this$interactionMana3;
 
-  (_interactionManager = this.interactionManager).emit.apply(_interactionManager, arguments);
-};
+    (_this$interactionMana3 = this.interactionManager).once.apply(_this$interactionMana3, arguments);
+  };
+  /**
+   * proxy this.interactionManager event-off
+   * @param {String} event The event we want to remove.
+   * @param {Function} fn The listener that we need to find.
+   * @param {Mixed} context Only remove listeners matching this context.
+   * @param {Boolean} once Only remove once listeners.
+   */
 
-/**
- * proxy this.interactionManager event-on
- * Register a new EventListener for the given event.
- *
- * @param {String} event Name of the event.
- * @param {Function} fn Callback function.
- * @param {Mixed} [context=this] The context of the function.
- */
-Renderer.prototype.on = function () {
-  var _interactionManager2;
 
-  (_interactionManager2 = this.interactionManager).on.apply(_interactionManager2, arguments);
-};
+  Renderer.prototype.off = function () {
+    var _this$interactionMana4;
 
-/**
- * proxy this.interactionManager event-once
- * Add an EventListener that's only called once.
- *
- * @param {String} event Name of the event.
- * @param {Function} fn Callback function.
- * @param {Mixed} [context=this] The context of the function.
- */
-Renderer.prototype.once = function () {
-  var _interactionManager3;
+    (_this$interactionMana4 = this.interactionManager).off.apply(_this$interactionMana4, arguments);
+  };
+  /**
+   * 场景设置分辨率
+   *
+   * @member {Number}
+   * @name resolution
+   * @memberof JC.Renderer#
+   */
 
-  (_interactionManager3 = this.interactionManager).once.apply(_interactionManager3, arguments);
-};
 
-/**
- * proxy this.interactionManager event-off
- * @param {String} event The event we want to remove.
- * @param {Function} fn The listener that we need to find.
- * @param {Mixed} context Only remove listeners matching this context.
- * @param {Boolean} once Only remove once listeners.
- */
-Renderer.prototype.off = function () {
-  var _interactionManager4;
-
-  (_interactionManager4 = this.interactionManager).off.apply(_interactionManager4, arguments);
-};
-
-/**
- * 场景设置分辨率
- *
- * @member {Number}
- * @name resolution
- * @memberof JC.Renderer#
- */
-Object.defineProperty(Renderer.prototype, 'resolution', {
-  get: function get() {
-    return this._resolution;
-  },
-  set: function set(value) {
-    if (this._resolution !== value) {
-      this._resolution = value;
-      this.rootMatrix.identity().scale(value, value);
-      this.resize();
+  Object.defineProperty(Renderer.prototype, 'resolution', {
+    get: function get() {
+      return this._resolution;
+    },
+    set: function set(value) {
+      if (this._resolution !== value) {
+        this._resolution = value;
+        this.rootMatrix.identity().scale(value, value);
+        this.resize();
+      }
     }
-  }
-});
+  });
+  /**
+   * 标记场景是否可交互，涉及到是否进行事件检测
+   *
+   * @member {Boolean}
+   * @name enableinteractive
+   * @memberof JC.Renderer#
+   */
 
-/**
- * 标记场景是否可交互，涉及到是否进行事件检测
- *
- * @member {Boolean}
- * @name enableinteractive
- * @memberof JC.Renderer#
- */
-Object.defineProperty(Renderer.prototype, 'enableinteractive', {
-  get: function get() {
-    return this._enableinteractive;
-  },
-  set: function set(value) {
-    if (this._enableinteractive !== value) {
-      this._enableinteractive = value;
-      this.interactiveOnChange();
+  Object.defineProperty(Renderer.prototype, 'enableinteractive', {
+    get: function get() {
+      return this._enableinteractive;
+    },
+    set: function set(value) {
+      if (this._enableinteractive !== value) {
+        this._enableinteractive = value;
+        this.interactiveOnChange();
+      }
     }
-  }
-});
-
-/**
- * @memberof JC
- * @param {object} options 舞台的配置项
- * @param {string} options.dom 舞台要附着的`canvas`元素
- * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
- * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
- * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
- * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
- * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
- * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
- */
-function Application(options) {
-  var _this = this;
-
-  this.renderer = new Renderer(options);
-  this.scene = new Scene();
-
-  this.ticker = new Ticker(options.enableFPS);
-
-  this.ticker.on('tick', function (snippet) {
-    _this.update(snippet);
   });
 
-  this.ticker.start();
-}
-
-Application.prototype.update = function (snippet) {
-  this.renderer.render(this.scene, snippet);
-};
-
-/**
- * GraphicsMask class
- * @class
- * @private
- */
-var GraphicsMask = function () {
   /**
-   * GraphicsMask constructor
-   * @param {object} elem elem
-   * @param {object} config layer data information
+   * @memberof JC
+   * @param {object} options 舞台的配置项
+   * @param {string} options.dom 舞台要附着的`canvas`元素
+   * @param {number} [options.resolution] 设置舞台的分辨率，`默认为` 1
+   * @param {boolean} [options.interactive] 设置舞台是否可交互，`默认为` true
+   * @param {number} [options.width] 设置舞台的宽, `默认为` 附着的canvas.width
+   * @param {number} [options.height] 设置舞台的高, `默认为` 附着的canvas.height
+   * @param {string} [options.backgroundColor] 设置舞台的背景颜色，`默认为` ‘transparent’
+   * @param {boolean} [options.enableFPS] 设置舞台是否记录帧率，`默认为` true
    */
-  function GraphicsMask(elem, config) {
-    classCallCheck(this, GraphicsMask);
 
-    this.elem = elem;
-    this.config = config;
+  function Application(options) {
+    var _this = this;
 
-    this.masks = [];
+    this.renderer = new Renderer(options);
+    this.scene = new Scene();
+    this.ticker = new Ticker(options.enableFPS);
+    this.ticker.on('tick', function (snippet) {
+      _this.update(snippet);
+    });
+    this.ticker.start();
   }
 
-  /**
-   * a
-   * @param {*} masks a
-   */
-
-
-  createClass(GraphicsMask, [{
-    key: "updateLottieMasks",
-    value: function updateLottieMasks(masks) {
-      this.masks = masks;
-    }
-
-    /**
-     * render content
-     * @param {object} ctx
-     */
-
-  }, {
-    key: "render",
-    value: function render(ctx) {
-      if (this.masks.length <= 0) return;
-      ctx.beginPath();
-      var masks = this.masks;
-      for (var i = 0; i < masks.viewData.length; i++) {
-        if (masks.viewData[i].inv) {
-          var size = this.config.session.local;
-          ctx.moveTo(0, 0);
-          ctx.lineTo(size.w, 0);
-          ctx.lineTo(size.w, size.h);
-          ctx.lineTo(0, size.h);
-          ctx.lineTo(0, 0);
-        }
-        var data = masks.viewData[i].v;
-        var start = data.v[0];
-        ctx.moveTo(start[0], start[1]);
-        var jLen = data._length;
-        var j = 1;
-        for (; j < jLen; j++) {
-          var _oj = data.o[j - 1];
-          var _ij = data.i[j];
-          var _vj = data.v[j];
-          ctx.bezierCurveTo(_oj[0], _oj[1], _ij[0], _ij[1], _vj[0], _vj[1]);
-        }
-        var oj = data.o[j - 1];
-        var ij = data.i[0];
-        var vj = data.v[0];
-        ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
-      }
-      ctx.clip();
-    }
-  }]);
-  return GraphicsMask;
-}();
-
-// import {
-//   Container,
-//   Graphics,
-//   // Sprite,
-//   // Rectangle,
-//   // Matrix,
-// } from 'pixi.js';
-/**
- * NullElement class
- * @class
- * @private
- */
-
-var CompElement$2 = function (_Container) {
-  inherits(CompElement, _Container);
+  Application.prototype.update = function (snippet) {
+    this.renderer.render(this.scene, snippet);
+  };
 
   /**
-   * NullElement constructor
-   * @param {object} elem layer data information
-   * @param {object} config layer data information
+   * GraphicsMask class
+   * @class
+   * @private
    */
-  function CompElement(elem, config) {
-    classCallCheck(this, CompElement);
-
-    var _this = possibleConstructorReturn(this, (CompElement.__proto__ || Object.getPrototypeOf(CompElement)).call(this));
-
-    _this.elem = elem;
-    _this.config = config;
-    _this.graphicsMasks = new GraphicsMask(elem, config);
-    _this.addChild = _this.adds;
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {*} parent a
-   */
-
-
-  createClass(CompElement, [{
-    key: 'setHierarchy',
-    value: function setHierarchy(parent) {
-      this.hierarchy = parent;
-    }
-
+  var GraphicsMask = /*#__PURE__*/function () {
     /**
-     * a
+     * GraphicsMask constructor
+     * @param {object} elem elem
+     * @param {object} config layer data information
      */
+    function GraphicsMask(elem, config) {
+      _classCallCheck(this, GraphicsMask);
 
-  }, {
-    key: 'show',
-    value: function show() {
-      this.visible = true;
+      this.elem = elem;
+      this.config = config;
+      this.masks = [];
     }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'hide',
-    value: function hide() {
-      this.visible = false;
-    }
-
-    /**
-     * a
-     * @param {*} transform
-     */
-
-  }, {
-    key: 'updateLottieTransform',
-    value: function updateLottieTransform(transform) {
-      this.x = transform.x;
-      this.y = transform.y;
-      this.pivotX = transform.anchorX;
-      this.pivotY = transform.anchorY;
-      this.scaleX = transform.scaleX;
-      this.scaleY = transform.scaleY;
-      this.rotation = transform.rotation;
-      this.alpha = transform.alpha;
-    }
-
     /**
      * a
      * @param {*} masks a
      */
 
-  }, {
-    key: 'updateLottieMasks',
-    value: function updateLottieMasks(masks) {
-      if (!this.mask) {
-        this.mask = this.graphicsMasks;
+
+    _createClass(GraphicsMask, [{
+      key: "updateLottieMasks",
+      value: function updateLottieMasks(masks) {
+        this.masks = masks;
       }
-      this.mask.updateLottieMasks(masks);
-    }
-  }]);
-  return CompElement;
-}(Container);
+      /**
+       * render content
+       * @param {object} ctx
+       */
 
-/**
- * a
- * @param {*} v a
- * @return {string}
- */
-function rgbaToColor(v) {
-  return 'rgba(' + v.join(',') + ')';
-}
-
-/**
- * a
- */
-
-var DrawShape = function () {
-  /**
-   * a
-   */
-  function DrawShape() {
-    classCallCheck(this, DrawShape);
-
-    this.primitive = null;
-    this.dashResetter = [];
-  }
-
-  /**
-   * a
-   * @param {*} ctx a
-   */
-
-
-  createClass(DrawShape, [{
-    key: 'render',
-    value: function render(ctx) {
-      if (!this.primitive) return;
-      var primitive = this.primitive;
-      var type = primitive.type;
-
-      // Skipping style when
-      // Stroke width equals 0
-      // style should not be rendered (extra unused repeaters)
-      // current opacity equals 0
-      // global opacity equals 0
-      if ((type === 'st' || type === 'gs') && primitive.wi === 0 || !primitive.data._shouldRender || primitive.coOp === 0) {
-        return;
-      }
-      ctx.save();
-      var elems = primitive.elements;
-      if (type === 'st' || type === 'gs') {
-        ctx.strokeStyle = type === 'st' ? rgbaToColor(primitive.co) : primitive.grd;
-        ctx.lineWidth = primitive.wi;
-        ctx.lineCap = primitive.lc;
-        ctx.lineJoin = primitive.lj;
-        ctx.miterLimit = primitive.ml || 0;
-      } else {
-        ctx.fillStyle = type === 'fl' ? rgbaToColor(primitive.co) : primitive.grd;
-      }
-      // ctx.globalAlpha = primitive.coOp * this.finalTransform.mProp.o.v;
-      if (type !== 'st' && type !== 'gs') {
+    }, {
+      key: "render",
+      value: function render(ctx) {
+        if (this.masks.length <= 0) return;
         ctx.beginPath();
+        var masks = this.masks;
+
+        for (var i = 0; i < masks.viewData.length; i++) {
+          if (masks.viewData[i].inv) {
+            var size = this.config.session.local;
+            ctx.moveTo(0, 0);
+            ctx.lineTo(size.w, 0);
+            ctx.lineTo(size.w, size.h);
+            ctx.lineTo(0, size.h);
+            ctx.lineTo(0, 0);
+          }
+
+          var data = masks.viewData[i].v;
+          var start = data.v[0];
+          ctx.moveTo(start[0], start[1]);
+          var jLen = data._length;
+          var j = 1;
+
+          for (; j < jLen; j++) {
+            var _oj = data.o[j - 1];
+            var _ij = data.i[j];
+            var _vj = data.v[j];
+            ctx.bezierCurveTo(_oj[0], _oj[1], _ij[0], _ij[1], _vj[0], _vj[1]);
+          }
+
+          var oj = data.o[j - 1];
+          var ij = data.i[0];
+          var vj = data.v[0];
+          ctx.bezierCurveTo(oj[0], oj[1], ij[0], ij[1], vj[0], vj[1]);
+        }
+
+        ctx.clip();
       }
-      // const trProps = primitive.preTransforms.finalTransform.props;
-      // ctx.transform(trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]);
-      var jLen = elems.length;
-      for (var j = 0; j < jLen; j += 1) {
+    }]);
+
+    return GraphicsMask;
+  }();
+
+  /**
+   * NullElement class
+   * @class
+   * @private
+   */
+
+  var CompElement$1 = /*#__PURE__*/function (_Container) {
+    _inherits(CompElement, _Container);
+
+    var _super = _createSuper(CompElement);
+
+    /**
+     * NullElement constructor
+     * @param {object} elem layer data information
+     * @param {object} config layer data information
+     */
+    function CompElement(elem, config) {
+      var _this;
+
+      _classCallCheck(this, CompElement);
+
+      _this = _super.call(this);
+      _this.elem = elem;
+      _this.config = config;
+      _this.graphicsMasks = new GraphicsMask(elem, config);
+      _this.addChild = _this.adds;
+      return _this;
+    }
+    /**
+     * a
+     * @param {*} parent a
+     */
+
+
+    _createClass(CompElement, [{
+      key: "setHierarchy",
+      value: function setHierarchy(parent) {
+        this.hierarchy = parent;
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "show",
+      value: function show() {
+        this.visible = true;
+      }
+      /**
+       * a
+       */
+
+    }, {
+      key: "hide",
+      value: function hide() {
+        this.visible = false;
+      }
+      /**
+       * a
+       * @param {*} transform
+       */
+
+    }, {
+      key: "updateLottieTransform",
+      value: function updateLottieTransform(transform) {
+        this.x = transform.x;
+        this.y = transform.y;
+        this.pivotX = transform.anchorX;
+        this.pivotY = transform.anchorY;
+        this.scaleX = transform.scaleX;
+        this.scaleY = transform.scaleY;
+        this.rotation = transform.rotation;
+        this.alpha = transform.alpha;
+      }
+      /**
+       * a
+       * @param {*} masks a
+       */
+
+    }, {
+      key: "updateLottieMasks",
+      value: function updateLottieMasks(masks) {
+        if (!this.mask) {
+          this.mask = this.graphicsMasks;
+        }
+
+        this.mask.updateLottieMasks(masks);
+      }
+    }]);
+
+    return CompElement;
+  }(Container);
+
+  /**
+   * a
+   * @param {*} v a
+   * @return {string}
+   */
+
+  function rgbaToColor(v) {
+    return 'rgba(' + v.join(',') + ')';
+  }
+  /**
+   * a
+   */
+
+
+  var DrawShape = /*#__PURE__*/function () {
+    /**
+     * a
+     */
+    function DrawShape() {
+      _classCallCheck(this, DrawShape);
+
+      this.primitive = null;
+      this.dashResetter = [];
+    }
+    /**
+     * a
+     * @param {*} ctx a
+     */
+
+
+    _createClass(DrawShape, [{
+      key: "render",
+      value: function render(ctx) {
+        if (!this.primitive) return;
+        var primitive = this.primitive;
+        var type = primitive.type; // Skipping style when
+        // Stroke width equals 0
+        // style should not be rendered (extra unused repeaters)
+        // current opacity equals 0
+        // global opacity equals 0
+
+        if ((type === 'st' || type === 'gs') && primitive.wi === 0 || !primitive.data._shouldRender || primitive.coOp === 0) {
+          return;
+        }
+
+        ctx.save();
+        var elems = primitive.elements;
+
         if (type === 'st' || type === 'gs') {
+          ctx.strokeStyle = type === 'st' ? rgbaToColor(primitive.co) : primitive.grd;
+          ctx.lineWidth = primitive.wi;
+          ctx.lineCap = primitive.lc;
+          ctx.lineJoin = primitive.lj;
+          ctx.miterLimit = primitive.ml || 0;
+        } else {
+          ctx.fillStyle = type === 'fl' ? rgbaToColor(primitive.co) : primitive.grd;
+        } // ctx.globalAlpha = primitive.coOp * this.finalTransform.mProp.o.v;
+
+
+        if (type !== 'st' && type !== 'gs') {
           ctx.beginPath();
-          if (primitive.da) {
-            ctx.setLineDash(primitive.da);
-            ctx.lineDashOffset = primitive.do;
+        } // const trProps = primitive.preTransforms.finalTransform.props;
+        // ctx.transform(trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]);
+
+
+        var jLen = elems.length;
+
+        for (var j = 0; j < jLen; j += 1) {
+          if (type === 'st' || type === 'gs') {
+            ctx.beginPath();
+
+            if (primitive.da) {
+              ctx.setLineDash(primitive.da);
+              ctx.lineDashOffset = primitive["do"];
+            }
+          }
+
+          var nodes = elems[j].trNodes;
+          var kLen = nodes.length;
+
+          for (var k = 0; k < kLen; k++) {
+            if (nodes[k].t == 'm') {
+              ctx.moveTo(nodes[k].p[0], nodes[k].p[1]);
+            } else if (nodes[k].t == 'c') {
+              ctx.bezierCurveTo(nodes[k].pts[0], nodes[k].pts[1], nodes[k].pts[2], nodes[k].pts[3], nodes[k].pts[4], nodes[k].pts[5]);
+            } else {
+              ctx.closePath();
+            }
+          }
+
+          if (type === 'st' || type === 'gs') {
+            ctx.stroke();
+
+            if (primitive.da) {
+              ctx.setLineDash(this.dashResetter);
+            }
           }
         }
-        var nodes = elems[j].trNodes;
-        var kLen = nodes.length;
 
-        for (var k = 0; k < kLen; k++) {
-          if (nodes[k].t == 'm') {
-            ctx.moveTo(nodes[k].p[0], nodes[k].p[1]);
-          } else if (nodes[k].t == 'c') {
-            ctx.bezierCurveTo(nodes[k].pts[0], nodes[k].pts[1], nodes[k].pts[2], nodes[k].pts[3], nodes[k].pts[4], nodes[k].pts[5]);
-          } else {
-            ctx.closePath();
-          }
+        if (type !== 'st' && type !== 'gs') {
+          ctx.fill(primitive.r);
         }
-        if (type === 'st' || type === 'gs') {
-          ctx.stroke();
-          if (primitive.da) {
-            ctx.setLineDash(this.dashResetter);
-          }
+
+        ctx.restore();
+      }
+    }]);
+
+    return DrawShape;
+  }();
+  /**
+   * NullElement class
+   * @class
+   * @private
+   */
+
+
+  var PathPrimitive = /*#__PURE__*/function (_Graphics) {
+    _inherits(PathPrimitive, _Graphics);
+
+    var _super = _createSuper(PathPrimitive);
+
+    /**
+     * NullElement constructor
+     * @param {object} elem layer data information
+     * @param {object} config layer data information
+     */
+    function PathPrimitive(elem, config) {
+      var _this;
+
+      _classCallCheck(this, PathPrimitive);
+
+      var drawShape = new DrawShape();
+      _this = _super.call(this, drawShape);
+      _this.elem = elem;
+      _this.config = config;
+      _this.passMatrix = new Matrix$1();
+      _this.drawShape = drawShape;
+      return _this;
+    }
+    /**
+     * a
+     */
+
+
+    _createClass(PathPrimitive, [{
+      key: "setSelfTransform",
+      value: function setSelfTransform() {
+        var trProps = this.elem.preTransforms.finalTransform.props;
+
+        if (window.acid > 0) {
+          window.acid--;
+          console.log(trProps);
+          console.log([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
         }
+
+        this.passMatrix.fromArray([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]); // this.transform.setFromMatrix(this.passMatrix);
       }
-      if (type !== 'st' && type !== 'gs') {
-        ctx.fill(primitive.r);
+      /**
+       * 更新对象本身的矩阵姿态以及透明度
+       *
+       * @private
+       * @param {Matrix} rootMatrix
+       */
+
+    }, {
+      key: "updateTransform",
+      value: function updateTransform(rootMatrix) {
+        this.setSelfTransform();
+        var pt = rootMatrix || this.hierarchy && this.hierarchy.worldTransform || this.parent && this.parent.worldTransform || IDENTITY;
+        var worldAlpha = this.parent && this.parent.worldAlpha || 1;
+        var st = this.passMatrix;
+        var wt = this.worldTransform;
+        wt.a = st.a * pt.a + st.b * pt.c;
+        wt.b = st.a * pt.b + st.b * pt.d;
+        wt.c = st.c * pt.a + st.d * pt.c;
+        wt.d = st.c * pt.b + st.d * pt.d;
+        wt.tx = st.tx * pt.a + st.ty * pt.c + pt.tx;
+        wt.ty = st.tx * pt.b + st.ty * pt.d + pt.ty; // multiply the alphas..
+
+        this.worldAlpha = this.alpha * worldAlpha;
       }
-      ctx.restore();
-    }
-  }]);
-  return DrawShape;
-}();
+      /**
+       * a
+       * @param {*} grahpics a
+       */
 
-/**
- * NullElement class
- * @class
- * @private
- */
+    }, {
+      key: "updateLottieGrahpics",
+      value: function updateLottieGrahpics(grahpics) {
+        this.drawShape.primitive = grahpics;
+        this.alpha = grahpics.coOp;
+      }
+    }]);
 
-
-var PathPrimitive = function (_Graphics) {
-  inherits(PathPrimitive, _Graphics);
-
-  /**
-   * NullElement constructor
-   * @param {object} elem layer data information
-   * @param {object} config layer data information
-   */
-  function PathPrimitive(elem, config) {
-    classCallCheck(this, PathPrimitive);
-
-    var drawShape = new DrawShape();
-
-    var _this = possibleConstructorReturn(this, (PathPrimitive.__proto__ || Object.getPrototypeOf(PathPrimitive)).call(this, drawShape));
-
-    _this.elem = elem;
-    _this.config = config;
-
-    _this.passMatrix = new Matrix$2();
-    _this.drawShape = drawShape;
-    return _this;
-  }
+    return PathPrimitive;
+  }(Graphics);
 
   /**
    * a
    */
 
+  var SolidRect = /*#__PURE__*/function () {
+    /**
+     * a
+     * @param {*} fillColor a
+     * @param {*} width a
+     * @param {*} height a
+     */
+    function SolidRect(fillColor, width, height) {
+      _classCallCheck(this, SolidRect);
 
-  createClass(PathPrimitive, [{
-    key: 'setSelfTransform',
-    value: function setSelfTransform() {
-      var trProps = this.elem.preTransforms.finalTransform.props;
+      this.fillColor = fillColor;
+      this.width = width;
+      this.height = height;
+    }
+    /**
+     * a
+     * @param {*} ctx a
+     */
 
-      if (window.acid > 0) {
-        window.acid--;
-        console.log(trProps);
-        console.log([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
+
+    _createClass(SolidRect, [{
+      key: "render",
+      value: function render(ctx) {
+        ctx.beginPath();
+        ctx.fillStyle = this.fillColor;
+        ctx.fillRect(0, 0, this.width, this.height);
       }
-      this.passMatrix.fromArray([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
-      // this.transform.setFromMatrix(this.passMatrix);
-    }
+    }]);
 
-    /**
-     * 更新对象本身的矩阵姿态以及透明度
-     *
-     * @private
-     * @param {Matrix} rootMatrix
-     */
-
-  }, {
-    key: 'updateTransform',
-    value: function updateTransform(rootMatrix) {
-      this.setSelfTransform();
-
-      var pt = rootMatrix || this.hierarchy && this.hierarchy.worldTransform || this.parent && this.parent.worldTransform || IDENTITY;
-      var worldAlpha = this.parent && this.parent.worldAlpha || 1;
-
-      var st = this.passMatrix;
-      var wt = this.worldTransform;
-      wt.a = st.a * pt.a + st.b * pt.c;
-      wt.b = st.a * pt.b + st.b * pt.d;
-      wt.c = st.c * pt.a + st.d * pt.c;
-      wt.d = st.c * pt.b + st.d * pt.d;
-      wt.tx = st.tx * pt.a + st.ty * pt.c + pt.tx;
-      wt.ty = st.tx * pt.b + st.ty * pt.d + pt.ty;
-
-      // multiply the alphas..
-      this.worldAlpha = this.alpha * worldAlpha;
-    }
-
-    /**
-     * a
-     * @param {*} grahpics a
-     */
-
-  }, {
-    key: 'updateLottieGrahpics',
-    value: function updateLottieGrahpics(grahpics) {
-      this.drawShape.primitive = grahpics;
-      this.alpha = grahpics.coOp;
-    }
-  }]);
-  return PathPrimitive;
-}(Graphics);
-
-// import {
-//   // Container,
-//   Graphics,
-//   // Sprite,
-//   // Rectangle,
-//   // Matrix,
-// } from 'pixi.js';
-/**
- * a
- */
-
-var SolidRect = function () {
+    return SolidRect;
+  }();
   /**
-   * a
-   * @param {*} fillColor a
-   * @param {*} width a
-   * @param {*} height a
-   */
-  function SolidRect(fillColor, width, height) {
-    classCallCheck(this, SolidRect);
-
-    this.fillColor = fillColor;
-    this.width = width;
-    this.height = height;
-  }
-
-  /**
-   * a
-   * @param {*} ctx a
+   * NullElement class
+   * @class
+   * @private
    */
 
 
-  createClass(SolidRect, [{
-    key: 'render',
-    value: function render(ctx) {
-      ctx.beginPath();
-      ctx.fillStyle = this.fillColor;
-      ctx.fillRect(0, 0, this.width, this.height);
-    }
-  }]);
-  return SolidRect;
-}();
+  var SolidElement$1 = /*#__PURE__*/function (_Graphics) {
+    _inherits(SolidElement, _Graphics);
 
-/**
- * NullElement class
- * @class
- * @private
- */
-
-
-var SolidElement$2 = function (_Graphics) {
-  inherits(SolidElement, _Graphics);
-
-  /**
-   * NullElement constructor
-   * @param {object} elem layer data information
-   * @param {object} config layer data information
-   */
-  function SolidElement(elem, config) {
-    classCallCheck(this, SolidElement);
-    var color = config.color,
-        rect = config.rect;
-
-    var _this = possibleConstructorReturn(this, (SolidElement.__proto__ || Object.getPrototypeOf(SolidElement)).call(this, new SolidRect(color, rect.width, rect.height)));
-
-    _this.elem = elem;
-    _this.config = config;
-    _this.mask = new GraphicsMask(elem, config);
-    _this.addChild = _this.adds;
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {*} parent a
-   */
-
-
-  createClass(SolidElement, [{
-    key: 'setHierarchy',
-    value: function setHierarchy(parent) {
-      this.hierarchy = parent;
-    }
+    var _super = _createSuper(SolidElement);
 
     /**
-     * a
+     * NullElement constructor
+     * @param {object} elem layer data information
+     * @param {object} config layer data information
      */
+    function SolidElement(elem, config) {
+      var _this;
 
-  }, {
-    key: 'show',
-    value: function show() {
-      this.visible = true;
+      _classCallCheck(this, SolidElement);
+
+      var color = config.color,
+          rect = config.rect;
+      _this = _super.call(this, new SolidRect(color, rect.width, rect.height));
+      _this.elem = elem;
+      _this.config = config;
+      _this.mask = new GraphicsMask(elem, config);
+      _this.addChild = _this.adds;
+      return _this;
     }
-
     /**
      * a
+     * @param {*} parent a
      */
 
-  }, {
-    key: 'hide',
-    value: function hide() {
-      this.visible = false;
-    }
 
-    /**
-     * a
-     * @param {*} transform
-     */
-
-  }, {
-    key: 'updateLottieTransform',
-    value: function updateLottieTransform(transform) {
-      this.x = transform.x;
-      this.y = transform.y;
-      this.pivotX = transform.anchorX;
-      this.pivotY = transform.anchorY;
-      this.scaleX = transform.scaleX;
-      this.scaleY = transform.scaleY;
-      this.rotation = transform.rotation;
-      this.alpha = transform.alpha;
-    }
-
-    /**
-     * a
-     * @param {*} masks a
-     */
-
-  }, {
-    key: 'updateLottieMasks',
-    value: function updateLottieMasks(masks) {
-      if (!this.mask) {
-        this.mask = this.graphicsMasks;
+    _createClass(SolidElement, [{
+      key: "setHierarchy",
+      value: function setHierarchy(parent) {
+        this.hierarchy = parent;
       }
-      this.mask.updateLottieMasks(masks);
-    }
-  }]);
-  return SolidElement;
-}(Graphics);
+      /**
+       * a
+       */
 
-// import {
-//   // Container,
-//   Graphics,
-//   Sprite,
-//   Rectangle,
-//   // Matrix,
-// } from 'pixi.js';
-/**
- * SpriteElement class
- * @class
- * @private
- */
-
-var SpriteElement$2 = function (_Sprite) {
-  inherits(SpriteElement, _Sprite);
-
-  /**
-   * NullElement constructor
-   * @param {object} elem layer data information
-   * @param {object} config layer data information
-   */
-  function SpriteElement(elem, config) {
-    classCallCheck(this, SpriteElement);
-    var texture = config.texture;
-
-    var _this = possibleConstructorReturn(this, (SpriteElement.__proto__ || Object.getPrototypeOf(SpriteElement)).call(this, { texture: texture }));
-
-    _this.elem = elem;
-    _this.config = config;
-    _this.graphicsMasks = new GraphicsMask(elem, config);
-    _this.addChild = _this.adds;
-    return _this;
-  }
-
-  /**
-   * a
-   * @param {*} parent a
-   */
-
-
-  createClass(SpriteElement, [{
-    key: 'setHierarchy',
-    value: function setHierarchy(parent) {
-      this.hierarchy = parent;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'show',
-    value: function show() {
-      this.visible = true;
-    }
-
-    /**
-     * a
-     */
-
-  }, {
-    key: 'hide',
-    value: function hide() {
-      this.visible = false;
-    }
-
-    /**
-     * a
-     * @param {*} transform
-     */
-
-  }, {
-    key: 'updateLottieTransform',
-    value: function updateLottieTransform(transform) {
-      this.x = transform.x;
-      this.y = transform.y;
-      this.pivotX = transform.anchorX;
-      this.pivotY = transform.anchorY;
-      this.scaleX = transform.scaleX;
-      this.scaleY = transform.scaleY;
-      this.rotation = transform.rotation;
-      this.alpha = transform.alpha;
-    }
-
-    /**
-     * a
-     * @param {*} masks a
-     */
-
-  }, {
-    key: 'updateLottieMasks',
-    value: function updateLottieMasks(masks) {
-      if (!this.mask) {
-        this.mask = this.graphicsMasks;
+    }, {
+      key: "show",
+      value: function show() {
+        this.visible = true;
       }
-      this.mask.updateLottieMasks(masks);
+      /**
+       * a
+       */
+
+    }, {
+      key: "hide",
+      value: function hide() {
+        this.visible = false;
+      }
+      /**
+       * a
+       * @param {*} transform
+       */
+
+    }, {
+      key: "updateLottieTransform",
+      value: function updateLottieTransform(transform) {
+        this.x = transform.x;
+        this.y = transform.y;
+        this.pivotX = transform.anchorX;
+        this.pivotY = transform.anchorY;
+        this.scaleX = transform.scaleX;
+        this.scaleY = transform.scaleY;
+        this.rotation = transform.rotation;
+        this.alpha = transform.alpha;
+      }
+      /**
+       * a
+       * @param {*} masks a
+       */
+
+    }, {
+      key: "updateLottieMasks",
+      value: function updateLottieMasks(masks) {
+        if (!this.mask) {
+          this.mask = this.graphicsMasks;
+        }
+
+        this.mask.updateLottieMasks(masks);
+      }
+    }]);
+
+    return SolidElement;
+  }(Graphics);
+
+  /**
+   * SpriteElement class
+   * @class
+   * @private
+   */
+
+  var SpriteElement$1 = /*#__PURE__*/function (_Sprite) {
+    _inherits(SpriteElement, _Sprite);
+
+    var _super = _createSuper(SpriteElement);
+
+    /**
+     * NullElement constructor
+     * @param {object} elem layer data information
+     * @param {object} config layer data information
+     */
+    function SpriteElement(elem, config) {
+      var _this;
+
+      _classCallCheck(this, SpriteElement);
+
+      var texture = config.texture;
+      _this = _super.call(this, {
+        texture: texture
+      });
+      _this.elem = elem;
+      _this.config = config;
+      _this.graphicsMasks = new GraphicsMask(elem, config);
+      _this.addChild = _this.adds;
+      return _this;
     }
-  }]);
-  return SpriteElement;
-}(Sprite);
+    /**
+     * a
+     * @param {*} parent a
+     */
 
-LoaderRegister.registerLoader(LottieLoader);
 
-// import PathLottie from './core/PathLottie';
-DisplayRegister.setDisplayByType(DisplayRegister.Type.Null, CompElement$2);
-DisplayRegister.setDisplayByType(DisplayRegister.Type.Path, PathPrimitive);
-// DisplayRegister.setDisplayByType(DisplayRegister.Type.Path, PathLottie);
-DisplayRegister.setDisplayByType(DisplayRegister.Type.Shape, CompElement$2);
-DisplayRegister.setDisplayByType(DisplayRegister.Type.Solid, SolidElement$2);
-DisplayRegister.setDisplayByType(DisplayRegister.Type.Sprite, SpriteElement$2);
-DisplayRegister.setDisplayByType(DisplayRegister.Type.Container, CompElement$2);
+    _createClass(SpriteElement, [{
+      key: "setHierarchy",
+      value: function setHierarchy(parent) {
+        this.hierarchy = parent;
+      }
+      /**
+       * a
+       */
 
-// export {AnimationManager} from './aftereffect/index';
+    }, {
+      key: "show",
+      value: function show() {
+        this.visible = true;
+      }
+      /**
+       * a
+       */
 
-exports.Eventer = Eventer;
-exports.Animation = Animation;
-exports.Tween = Tween;
-exports.Utils = Utils;
-exports.Texture = Texture;
-exports.Loader = Loader;
-exports.loaderUtil = loaderUtil;
-exports.Ticker = Ticker;
-exports.Bounds = Bounds;
-exports.Point = Point;
-exports.Rectangle = Rectangle;
-exports.Polygon = Polygon;
-exports.Circle = Circle;
-exports.Ellipse = Ellipse;
-exports.Matrix = Matrix$2;
-exports.IDENTITY = IDENTITY;
-exports.TEMP_MATRIX = TEMP_MATRIX;
-exports.CatmullRom = CatmullRom;
-exports.BezierCurve = BezierCurve;
-exports.SvgCurve = SvgCurve;
-exports.NURBSCurve = NURBSCurve;
-exports.DisplayObject = DisplayObject;
-exports.Container = Container;
-exports.Sprite = Sprite;
-exports.Graphics = Graphics;
-exports.TextFace = TextFace;
-exports.FilterGroup = FilterGroup;
-exports.BlurFilter = BlurFilter;
-exports.FrameBuffer = FrameBuffer;
-exports.Scene = Scene;
-exports.Renderer = Renderer;
-exports.Application = Application;
-exports.AnimationGroup = AnimationGroup;
-exports.AnimationManager = AnimationManager;
-exports.TransformFrames = TransformFrames;
-exports.Tools = Tools;
-exports.TransformProperty = TransformProperty;
-exports.PropertyFactory = PropertyFactory;
-exports.BezierEasing = BezierEasing$1;
-exports.DisplayRegister = DisplayRegister;
-exports.LoaderRegister = LoaderRegister;
+    }, {
+      key: "hide",
+      value: function hide() {
+        this.visible = false;
+      }
+      /**
+       * a
+       * @param {*} transform
+       */
 
-Object.defineProperty(exports, '__esModule', { value: true });
+    }, {
+      key: "updateLottieTransform",
+      value: function updateLottieTransform(transform) {
+        this.x = transform.x;
+        this.y = transform.y;
+        this.pivotX = transform.anchorX;
+        this.pivotY = transform.anchorY;
+        this.scaleX = transform.scaleX;
+        this.scaleY = transform.scaleY;
+        this.rotation = transform.rotation;
+        this.alpha = transform.alpha;
+      }
+      /**
+       * a
+       * @param {*} masks a
+       */
+
+    }, {
+      key: "updateLottieMasks",
+      value: function updateLottieMasks(masks) {
+        if (!this.mask) {
+          this.mask = this.graphicsMasks;
+        }
+
+        this.mask.updateLottieMasks(masks);
+      }
+    }]);
+
+    return SpriteElement;
+  }(Sprite);
+
+  LoaderRegister.registerLoader(LottieLoader);
+  DisplayRegister.setDisplayByType(DisplayRegister.Type.Null, CompElement$1);
+  DisplayRegister.setDisplayByType(DisplayRegister.Type.Path, PathPrimitive); // DisplayRegister.setDisplayByType(DisplayRegister.Type.Path, PathLottie);
+
+  DisplayRegister.setDisplayByType(DisplayRegister.Type.Shape, CompElement$1);
+  DisplayRegister.setDisplayByType(DisplayRegister.Type.Solid, SolidElement$1);
+  DisplayRegister.setDisplayByType(DisplayRegister.Type.Sprite, SpriteElement$1);
+  DisplayRegister.setDisplayByType(DisplayRegister.Type.Container, CompElement$1);
+
+  exports.Animation = Animation;
+  exports.AnimationGroup = AnimationGroup;
+  exports.AnimationManager = AnimationManager;
+  exports.Application = Application;
+  exports.BezierCurve = BezierCurve;
+  exports.BezierEasing = BezierEasing$1;
+  exports.BlurFilter = BlurFilter;
+  exports.Bounds = Bounds;
+  exports.CatmullRom = CatmullRom;
+  exports.Circle = Circle;
+  exports.Container = Container;
+  exports.DisplayObject = DisplayObject;
+  exports.DisplayRegister = DisplayRegister;
+  exports.Ellipse = Ellipse;
+  exports.Eventer = Eventer;
+  exports.FilterGroup = FilterGroup;
+  exports.FrameBuffer = FrameBuffer;
+  exports.Graphics = Graphics;
+  exports.IDENTITY = IDENTITY;
+  exports.Loader = Loader;
+  exports.LoaderRegister = LoaderRegister;
+  exports.Matrix = Matrix$1;
+  exports.NURBSCurve = NURBSCurve;
+  exports.Point = Point;
+  exports.Polygon = Polygon;
+  exports.PropertyFactory = PropertyFactory;
+  exports.Rectangle = Rectangle;
+  exports.Renderer = Renderer;
+  exports.Scene = Scene;
+  exports.Sprite = Sprite;
+  exports.SvgCurve = SvgCurve;
+  exports.TEMP_MATRIX = TEMP_MATRIX;
+  exports.TextFace = TextFace;
+  exports.Texture = Texture;
+  exports.Ticker = Ticker;
+  exports.Tools = Tools;
+  exports.TransformFrames = TransformFrames;
+  exports.TransformProperty = TransformProperty;
+  exports.Tween = Tween;
+  exports.Utils = Utils;
+  exports.loaderUtil = loaderUtil;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 //# sourceMappingURL=jcc2d.js.map
