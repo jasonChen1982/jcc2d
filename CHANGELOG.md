@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.6"></a>
+## [1.8.6](https://github.com/jasonChen1982/jcc2d/compare/v1.8.6-beta.1...v1.8.6) (2020-07-24)
+
+
+
 <a name="1.8.6-beta.1"></a>
 ## [1.8.6-beta.1](https://github.com/jasonChen1982/jcc2d/compare/v1.8.6-beta.0...v1.8.6-beta.1) (2020-07-24)
 
