@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.6-beta.1"></a>
+## [1.8.6-beta.1](https://github.com/jasonChen1982/jcc2d/compare/v1.8.6-beta.0...v1.8.6-beta.1) (2020-07-24)
+
+
+### Features
+
+* **build:** upgrade build script ([5b81ea6](https://github.com/jasonChen1982/jcc2d/commit/5b81ea6))
+* **demo:** add demo ([2609cc2](https://github.com/jasonChen1982/jcc2d/commit/2609cc2))
+
+
+
 <a name="1.8.6-beta.0"></a>
 ## [1.8.6-beta.0](https://github.com/jasonChen1982/jcc2d/compare/v1.8.5...v1.8.6-beta.0) (2020-07-23)
 
