@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">
+  <title>pixi</title>
+  <style type="text/css">
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      background-color: #41b882;
+    }
+
+    canvas {
+      width: 100%;
+    }
+
+    p {
+      position: relative;
+      width: 200px;
+      line-height: 30px;
+      margin: 10px auto;
+      background: #35485d;
+      border-radius: 15px;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="demo_canvas" width="720" height="1280"></canvas>
+  <p>Render by lottie-pixi</p>
+  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <script type="text/javascript" src="../../build/jcc2d.js"></script>
+  <script type="text/javascript" src="./js/data.js"></script>
+  <script type="text/javascript">
+    var app = new JC.Application({
+      dom: 'demo_canvas',
+      width: data.w,
+      height: data.h,
+    });
+    var DOC = new JC.Container();
+
+    var manager = new JC.AnimationManager(app.ticker);
+    var ani = manager.parseAnimation({
+      keyframes: data,
+      infinite: true,
+      // alternate: true,
+      mask: true,
+    });
+    DOC.adds(ani.group);
+    app.scene.adds(DOC);
+
+    /**
+     * 帧率监控工具
+     */
+    var stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    document.body.appendChild(stats.domElement);
+    app.renderer.on('postrender', function () {
+      stats.update();
+    })
+  </script>
+</body>
+
+</html>
