@@ -88,7 +88,9 @@ class Pingpong {
 const FN_MAPS = {
   loopIn(datak, mode, offset) {
     const begin = datak[0].t;
-    const end = datak[offset].t;
+    const last = datak.length - 1;
+    const endIdx = Math.min(last, offset);
+    const end = datak[endIdx].t;
     switch (mode) {
     case 'cycle':
       return new Cycle('in', begin, end);
@@ -101,7 +103,8 @@ const FN_MAPS = {
   },
   loopOut(datak, mode, offset) {
     const last = datak.length - 1;
-    const begin = datak[last - offset].t;
+    const beginIdx = Math.max(0, last - offset);
+    const begin = datak[beginIdx].t;
     const end = datak[last].t;
     switch (mode) {
     case 'cycle':
@@ -162,7 +165,7 @@ function hasSupportExpression(ksp) {
  * @return {object}
  */
 function getExpression(ksp) {
-  const {name, mode, offset} = parseEx(ksp.x);
+  const {name, mode, offset = 0} = parseEx(ksp.x);
   const _offset = offset === 0 ? ksp.k.length - 1 : offset;
   return FN_MAPS[name] && FN_MAPS[name](ksp.k, mode, _offset);
 }

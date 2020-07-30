@@ -536,35 +536,36 @@ export default class ShapesFrames extends DynamicPropertyContainer {
    */
   updateGradientFill(styleData, itemData, groupTransform) {
     let styleElem = itemData.style;
-    if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || (styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf))) {
-      let ctx = this.globalData.canvasContext;
-      let grd;
-      let pt1 = itemData.s.v; let pt2 = itemData.e.v;
-      if (styleData.t === 1) {
-        grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
-      } else {
-        let rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
-        let ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
+    // if (!styleElem.grd || itemData.g._mdf || itemData.s._mdf || itemData.e._mdf || (styleData.t !== 1 && (itemData.h._mdf || itemData.a._mdf))) {
+    //   let ctx = this.globalData.canvasContext;
+    //   let grd;
+    //   let pt1 = itemData.s.v; let pt2 = itemData.e.v;
+    //   if (styleData.t === 1) {
+    //     grd = ctx.createLinearGradient(pt1[0], pt1[1], pt2[0], pt2[1]);
+    //   } else {
+    //     let rad = Math.sqrt(Math.pow(pt1[0] - pt2[0], 2) + Math.pow(pt1[1] - pt2[1], 2));
+    //     let ang = Math.atan2(pt2[1] - pt1[1], pt2[0] - pt1[0]);
 
-        let percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99: itemData.h.v;
-        let dist = rad * percent;
-        let x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
-        let y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
-        grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
-      }
+    //     let percent = itemData.h.v >= 1 ? 0.99 : itemData.h.v <= -1 ? -0.99: itemData.h.v;
+    //     let dist = rad * percent;
+    //     let x = Math.cos(ang + itemData.a.v) * dist + pt1[0];
+    //     let y = Math.sin(ang + itemData.a.v) * dist + pt1[1];
+    //     grd = ctx.createRadialGradient(x, y, 0, pt1[0], pt1[1], rad);
+    //   }
 
-      let i; let len = styleData.g.p;
-      let cValues = itemData.g.c;
-      let opacity = 1;
+    //   let i; let len = styleData.g.p;
+    //   let cValues = itemData.g.c;
+    //   let opacity = 1;
 
-      for (i = 0; i < len; i += 1) {
-        if (itemData.g._hasOpacity && itemData.g._collapsable) {
-          opacity = itemData.g.o[i*2 + 1];
-        }
-        grd.addColorStop(cValues[i * 4] / 100, 'rgba('+ cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ','+cValues[i * 4 + 3] + ',' + opacity + ')');
-      }
-      styleElem.grd = grd;
-    }
+    //   for (i = 0; i < len; i += 1) {
+    //     if (itemData.g._hasOpacity && itemData.g._collapsable) {
+    //       opacity = itemData.g.o[i*2 + 1];
+    //     }
+    //     grd.addColorStop(cValues[i * 4] / 100, 'rgba('+ cValues[i * 4 + 1] + ',' + cValues[i * 4 + 2] + ','+cValues[i * 4 + 3] + ',' + opacity + ')');
+    //   }
+    //   styleElem.grd = grd;
+    // }
+    styleElem.grd = itemData.g.c[0];
     styleElem.coOp = itemData.o.v*groupTransform.opacity;
   }
 

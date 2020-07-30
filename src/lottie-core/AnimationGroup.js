@@ -219,7 +219,7 @@ class AnimationGroup extends Eventer {
 
     let loader = null;
     const images = assets.filter((it) => {
-      return it.u && it.p;
+      return it.u || it.p;
     });
     if (images.length > 0) {
       const LoaderClass = LoaderRegister.getLoader();
@@ -229,6 +229,7 @@ class AnimationGroup extends Eventer {
       };
       this._cancelImageLoadHandle = () => {
         loader.off('complete', this._imageLoadHandle);
+        this._cancelImageLoadHandle = null;
       };
       loader.once('complete', this._imageLoadHandle);
     } else {
@@ -295,7 +296,7 @@ class AnimationGroup extends Eventer {
       const layer = layers[i];
       const item = elementsMap[layer.ind];
       if (!item) continue;
-      if (layer.parent) {
+      if (!Tools.isUndefined(layer.parent)) {
         const parent = elementsMap[layer.parent];
         parent._isParent = true;
         item.setHierarchy(parent);
@@ -365,11 +366,25 @@ class AnimationGroup extends Eventer {
   /**
    * bind other animation-group or display-object to this animation-group with name path
    * @param {*} name
-   * @param {*} slot
+   * @param {*} child
+   * @return {this}
    */
-  bindSlot(name, slot) {
+  bindSlot(name, child) {
     const slotDisplay = this.getDisplayByName(name);
-    slotDisplay.addChild(slot);
+    slotDisplay.addChild(child);
+    return this;
+  }
+
+  /**
+   * unbind other animation-group or display-object to this animation-group with name path
+   * @param {*} name
+   * @param {*} child
+   * @return {this}
+   */
+  unbindSlot(name, child) {
+    const slotDisplay = this.getDisplayByName(name);
+    slotDisplay.removeChild(child);
+    return this;
   }
 
   /**
@@ -491,6 +506,8 @@ class AnimationGroup extends Eventer {
    */
   playSegment(name, options = {}) {
     if (!name) return;
+
+    if (this._cancelImageLoadHandle) this._cancelImageLoadHandle();
 
     let segment = null;
     if (Tools.isArray(name)) {

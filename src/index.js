@@ -1,6 +1,6 @@
 
 import './utils/Raf';
-export {Eventer} from './eventer/Eventer';
+// export {Eventer} from './lottie-core/index';
 export {Animation} from './animation/Animation';
 
 export {Tween} from './utils/Tween';
@@ -34,8 +34,6 @@ export {Scene} from './core/Scene';
 export {Renderer} from './core/Renderer';
 export {Application} from './core/Application';
 
-// export {AnimationManager} from './aftereffect/index';
-
 import './lottie-displays/index';
 
 export {
@@ -44,7 +42,7 @@ export {
 
   TransformFrames,
 
-  // Eventer,
+  Eventer,
   Tools,
   TransformProperty,
   PropertyFactory,

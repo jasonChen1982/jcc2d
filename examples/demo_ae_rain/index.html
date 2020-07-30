@@ -45,7 +45,11 @@
     var manager = new JC.AnimationManager(app.ticker);
     var ani = manager.parseAnimation({
       keyframes: data,
-      infinite: true,
+      // infinite: true,
+      overlapMode: true
+    });
+    ani.on('complete', function() {
+      console.log('complete');
     });
     DOC.adds(ani.group);
     app.scene.adds(DOC);

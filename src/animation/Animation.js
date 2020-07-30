@@ -1,6 +1,6 @@
 import {Transition} from './Transition';
 import {PathMotion} from './PathMotion';
-import {KeyFrames} from './KeyFrames';
+// import {KeyFrames} from './KeyFrames';
 import {Bodymovin} from './Bodymovin';
 import {Queues} from './Queues';
 /**
@@ -92,17 +92,17 @@ Animation.prototype.queues = function(runner, options, clear) {
   return this._addMove(new Queues(runner, options), clear);
 };
 
-/**
- * 创建一个`keyFrames`动画
- * @private
- * @param {object} options 动画配置
- * @param {boolean} clear 是否清除之前的动画
- * @return {JC.KeyFrames}
- */
-Animation.prototype.keyFrames = function(options, clear) {
-  options.element = this.element;
-  return this._addMove(new KeyFrames(options), clear);
-};
+// /**
+//  * 创建一个`keyFrames`动画
+//  * @private
+//  * @param {object} options 动画配置
+//  * @param {boolean} clear 是否清除之前的动画
+//  * @return {JC.KeyFrames}
+//  */
+// Animation.prototype.keyFrames = function(options, clear) {
+//   options.element = this.element;
+//   return this._addMove(new KeyFrames(options), clear);
+// };
 
 /**
  * 创建一个`keyFrames`动画
@@ -121,7 +121,7 @@ Animation.prototype.bodymovin = function(options, clear) {
  * @private
  * @param {object} animate 创建出来的动画对象
  * @param {boolean} clear 是否清除之前的动画
- * @return {JC.KeyFrames|JC.AnimateRunner|JC.PathMotion|JC.Transition}
+ * @return {JC.Bodymovin|JC.AnimateRunner|JC.PathMotion|JC.Transition}
  */
 Animation.prototype._addMove = function(animate, clear) {
   if (clear) this.clear();

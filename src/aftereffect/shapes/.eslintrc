@@ -1,7 +1,0 @@
-{
-  "rules": {
-    "camelcase": 0,
-    "object-curly-spacing": 0,
-    "valid-jsdoc": 0
-  }
-}
