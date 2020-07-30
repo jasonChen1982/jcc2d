@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.7"></a>
+## [1.8.7](https://github.com/jasonChen1982/jcc2d/compare/v1.8.6...v1.8.7) (2020-07-30)
+
+
+### Bug Fixes
+
+* **lottie-core:** update lottie-core ([c81e9e9](https://github.com/jasonChen1982/jcc2d/commit/c81e9e9))
+
+
+
 <a name="1.8.6"></a>
 ## [1.8.6](https://github.com/jasonChen1982/jcc2d/compare/v1.8.6-beta.1...v1.8.6) (2020-07-24)
 
