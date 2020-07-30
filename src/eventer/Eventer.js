@@ -15,3 +15,5 @@ Eventer.prototype.on = function(type, fn) {
   this.interactive = true;
   return this;
 };
+
+export {Eventer};
