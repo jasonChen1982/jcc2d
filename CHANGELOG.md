@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.8"></a>
+## [1.8.8](https://github.com/jasonChen1982/jcc2d/compare/v1.8.7...v1.8.8) (2020-07-30)
+
+
+### Bug Fixes
+
+* **export:** export Eventer ([a93fc69](https://github.com/jasonChen1982/jcc2d/commit/a93fc69))
+* **interactive:** jcc2d interactive should true ([aa61baa](https://github.com/jasonChen1982/jcc2d/commit/aa61baa))
+
+
+
 <a name="1.8.7"></a>
 ## [1.8.7](https://github.com/jasonChen1982/jcc2d/compare/v1.8.6...v1.8.7) (2020-07-30)
 
