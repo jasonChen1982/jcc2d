@@ -402,7 +402,7 @@ class AnimationGroup extends Eventer {
    * @param {number} snippetCache snippet
    */
   update(snippetCache) {
-    if (!this.living) return;
+    if (!this.living || this._paused) return;
 
     const isEnd = this.updateTime(snippetCache);
 
