@@ -36,6 +36,22 @@ function Animation(element) {
 }
 
 /**
+ * 清理需要移除的动画
+ * @param {Array} needClearIdx 需要清理的对象索引
+ * @private
+ */
+Animation.prototype.clearUP = function(needClearIdx) {
+  if (this.paused) return;
+  const animates = this.animates;
+  for (let i = 0; i < needClearIdx.length; i++) {
+    const idx = needClearIdx[i];
+    if (!animates[idx].living && !animates[idx].resident) {
+      this.animates.splice(idx, 1);
+    }
+  }
+};
+
+/**
  * 更新动画数据
  * @private
  * @param {number} snippet 时间片段
@@ -43,13 +59,15 @@ function Animation(element) {
 Animation.prototype.update = function(snippet) {
   if (this.paused) return;
   snippet = this.timeScale * snippet;
-  const cache = this.animates.slice(0);
-  for (let i = 0; i < cache.length; i++) {
-    if (!cache[i].living && !cache[i].resident) {
-      this.animates.splice(i, 1);
+  const needClearIdx = [];
+  for (let i = 0; i < this.animates.length; i++) {
+    if (!this.animates[i].living && !this.animates[i].resident) {
+      needClearIdx.push(i);
+      continue;
     }
-    cache[i].update(snippet);
+    this.animates[i].update(snippet);
   }
+  if (needClearIdx.length > 0) this.clearUP(needClearIdx);
 };
 
 /**

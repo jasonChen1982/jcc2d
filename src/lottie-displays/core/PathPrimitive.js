@@ -109,6 +109,8 @@ export default class PathPrimitive extends Graphics {
     this.elem = elem;
     this.config = config;
 
+    this.__sftp = this.elem.preTransforms.finalTransform.props;
+
     this.passMatrix = new Matrix();
     this.drawShape = drawShape;
   }
@@ -117,14 +119,20 @@ export default class PathPrimitive extends Graphics {
    * a
    */
   setSelfTransform() {
-    const trProps = this.elem.preTransforms.finalTransform.props;
-
-    if (window.acid > 0) {
-      window.acid--;
-      console.log(trProps);
-      console.log([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
-    }
-    this.passMatrix.fromArray([trProps[0], trProps[1], trProps[4], trProps[5], trProps[12], trProps[13]]);
+    const trProps = this.__sftp;
+    // __CacheArray[0] = trProps[0];
+    // __CacheArray[1] = trProps[1];
+    // __CacheArray[2] = trProps[4];
+    // __CacheArray[3] = trProps[5];
+    // __CacheArray[4] = trProps[12];
+    // __CacheArray[5] = trProps[13];
+    this.passMatrix.a = trProps[0];
+    this.passMatrix.b = trProps[1];
+    this.passMatrix.c = trProps[4];
+    this.passMatrix.d = trProps[5];
+    this.passMatrix.tx = trProps[12];
+    this.passMatrix.ty = trProps[13];
+    // this.passMatrix.fromArray(__CacheArray);
     // this.transform.setFromMatrix(this.passMatrix);
   }
 

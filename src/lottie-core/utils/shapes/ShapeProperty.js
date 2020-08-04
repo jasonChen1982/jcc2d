@@ -183,7 +183,6 @@ class BaseShapeProperty {
    * @param {*} effectFunction effect funstion
    */
   addEffect(effectFunction) {
-    console.log('addEffect', effectFunction);
     this.effectsSequence.push(effectFunction);
     this.container.addDynamicProperty(this);
   }

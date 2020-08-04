@@ -69,8 +69,7 @@ export default class Eventer {
       fn(ev);
       this.off(type, cb);
     };
-    this.on(type, cb);
-    return this;
+    return this.on(type, cb);
   }
 
   /**
