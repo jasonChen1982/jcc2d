@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.10"></a>
+## [1.8.10](https://github.com/jasonChen1982/jcc2d/compare/v1.8.9...v1.8.10) (2020-08-04)
+
+
+### Performance Improvements
+
+* **performance:** adjust some code for performance ([dc867db](https://github.com/jasonChen1982/jcc2d/commit/dc867db))
+
+
+
 <a name="1.8.9"></a>
 ## [1.8.9](https://github.com/jasonChen1982/jcc2d/compare/v1.8.8...v1.8.9) (2020-08-03)
 
