@@ -269,6 +269,8 @@ class AnimationGroup extends Eventer {
     this.root = this.extraCompositions(this.keyframes, session);
     this.root._isRoot = true;
     this.group = this.rootDisplay = this.root.display;
+
+    this.update(0, true);
   }
 
   /**
@@ -400,9 +402,10 @@ class AnimationGroup extends Eventer {
    * update with time snippet
    * @private
    * @param {number} snippetCache snippet
+   * @param {number} firstFrame snippet
    */
-  update(snippetCache) {
-    if (!this.living || this._paused) return;
+  update(snippetCache, firstFrame = false) {
+    if (!this.living || (this._paused && !firstFrame)) return;
 
     const isEnd = this.updateTime(snippetCache);
 
