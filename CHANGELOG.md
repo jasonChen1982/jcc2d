@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.11"></a>
+## [1.8.11](https://github.com/jasonChen1982/jcc2d/compare/v1.8.10...v1.8.11) (2020-08-04)
+
+
+### Features
+
+* **lottie:** force update when init ([e1c3d5f](https://github.com/jasonChen1982/jcc2d/commit/e1c3d5f))
+
+
+
 <a name="1.8.10"></a>
 ## [1.8.10](https://github.com/jasonChen1982/jcc2d/compare/v1.8.9...v1.8.10) (2020-08-04)
 
