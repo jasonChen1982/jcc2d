@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.8.12"></a>
+## [1.8.12](https://github.com/jasonChen1982/jcc2d/compare/v1.8.11...v1.8.12) (2020-08-05)
+
+
+### Features
+
+* **lottie:** adjust picture size ([2b7254d](https://github.com/jasonChen1982/jcc2d/commit/2b7254d))
+
+
+
 <a name="1.8.11"></a>
 ## [1.8.11](https://github.com/jasonChen1982/jcc2d/compare/v1.8.10...v1.8.11) (2020-08-04)
 
