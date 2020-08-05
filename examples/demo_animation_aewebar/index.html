@@ -13,52 +13,38 @@
     }
 
     body {
-      overflow: hidden;
     }
 
-    #demo_canvas {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 320px;
-      height: 568px;
-      margin: -284px 0 0 -160px;
+    canvas {
+      width: 100%;
     }
 
   </style>
 </head>
 
 <body>
-  <canvas id="demo_canvas" width="750" height="1334"></canvas>
-
+  <canvas id="demo_canvas" width="680" height="360"></canvas>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/stats.min.js"></script>
   <script type="text/javascript" src="./js/data.js"></script>
   <script type="text/javascript">
     var app = new JC.Application({
-      dom: 'demo_canvas'
+      dom: 'demo_canvas',
+      width: data.w,
+      height: data.h,
     });
     var DOC = new JC.Container();
+    // DOC.x = 180;
+    // DOC.y = 100;
 
     var manager = new JC.AnimationManager(app.ticker);
     var ani = manager.parseAnimation({
       keyframes: data,
       infinite: true,
+      // overlapMode: true
     });
     DOC.adds(ani.group);
     app.scene.adds(DOC);
-
-
-    /**
-     * 帧率监控工具
-     */
-    var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
-    app.renderer.on('postrender', function () {
-      stats.update();
-    })
 
   </script>
 </body>
