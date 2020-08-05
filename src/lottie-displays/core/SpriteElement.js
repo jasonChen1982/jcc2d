@@ -20,8 +20,8 @@ export default class SpriteElement extends Sprite {
    * @param {object} config layer data information
    */
   constructor(elem, config) {
-    const {texture} = config;
-    super({texture});
+    const {texture, asset} = config;
+    super({texture, width: asset.w, height: asset.h});
 
     this.elem = elem;
     this.config = config;
