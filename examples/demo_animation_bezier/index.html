@@ -37,7 +37,7 @@
       font-size: 12px;
       color: #0ab;
       font-weight: bold;
-      user-select: text;
+      user-select: all;
     }
     .red {
       color: #ff7593;
@@ -54,7 +54,7 @@
   <div class="output-bezier" id="output-bezier"></div>
   <script type="text/javascript" src="../../build/jcc2d.js"></script>
   <script type="text/javascript" src="../libs/derivedClass/coordinate.js"></script>
-  <script type="text/javascript" src="../libs/stats.min.js"></script>
+  <!-- <script type="text/javascript" src="../libs/stats.min.js"></script> -->
   <script type="text/javascript">
     function Rect(color) {
       this.color = color || '#c243ff';
@@ -256,13 +256,13 @@
     /**
      * 帧率监控工具
      */
-    var stats = new Stats();
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.top = '0px';
-    document.body.appendChild(stats.domElement);
-    app.renderer.on('postrender', function () {
-      stats.update();
-    })
+    // var stats = new Stats();
+    // stats.domElement.style.position = 'absolute';
+    // stats.domElement.style.top = '0px';
+    // document.body.appendChild(stats.domElement);
+    // app.renderer.on('postrender', function () {
+    //   stats.update();
+    // })
 
   </script>
 </body>
