@@ -69,7 +69,7 @@
     "rollup-plugin-babel": "^4.0.3",
     "rollup-plugin-buble": "^0.19.4",
     "rollup-plugin-uglify": "^6.0.2",
-    "standard-version": "^4.2.0",
+    "standard-version": "^8.0.1",
     "uglify-js": "^3.1.10",
     "validate-commit-msg": "^2.14.0",
     "yargs": "^7.1.0"
